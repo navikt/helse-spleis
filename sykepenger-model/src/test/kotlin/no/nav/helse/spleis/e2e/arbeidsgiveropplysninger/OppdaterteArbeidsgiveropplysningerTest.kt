@@ -44,28 +44,30 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(2.januar til 31.januar, orgnummer = a1)
         nyPeriode(januar, orgnummer = a2)
 
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.size)
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }.size)
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }.size)
 
         val expectedForespørsel = EventSubscription.TrengerArbeidsgiveropplysningerEvent(
-            personidentifikator = UNG_PERSON_FNR_2018,
-            yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-            vedtaksperiodeId = 1.vedtaksperiode.id(a1),
-            skjæringstidspunkt = 1.januar,
-            sykmeldingsperioder = listOf(2.januar til 31.januar),
-            egenmeldingsperioder = emptyList(),
-            førsteFraværsdager = listOf(
-                EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 1.januar),
-                EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 2.januar)
-            ),
-            forespurteOpplysninger = setOf(
-                EventSubscription.Inntekt,
-                EventSubscription.Refusjon,
-                EventSubscription.Arbeidsgiverperiode
+            EventSubscription.TrengerArbeidsgiveropplysninger(
+                personidentifikator = UNG_PERSON_FNR_2018,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                vedtaksperiodeId = 1.vedtaksperiode.id(a1),
+                skjæringstidspunkt = 1.januar,
+                sykmeldingsperioder = listOf(2.januar til 31.januar),
+                egenmeldingsperioder = emptyList(),
+                førsteFraværsdager = listOf(
+                    EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 1.januar),
+                    EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 2.januar)
+                ),
+                forespurteOpplysninger = setOf(
+                    EventSubscription.Inntekt,
+                    EventSubscription.Refusjon,
+                    EventSubscription.Arbeidsgiverperiode
+                )
             )
         )
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last {
-            it.vedtaksperiodeId == 1.vedtaksperiode.id(a1)
+            it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode.id(a1)
         }
         assertEquals(expectedForespørsel, actualForespørsel)
     }
@@ -75,8 +77,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyttVedtak(2.januar til 31.januar, orgnummer = a1)
         nyPeriode(januar, orgnummer = a2)
 
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.size)
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }.size)
     }
 
     @Test
@@ -97,27 +99,29 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(mars, orgnummer = a1)
         nyPeriode(februar, orgnummer = a2)
         assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.size)
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }.size)
         val arbeidsgiveropplysningerEventer = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter {
-            it.vedtaksperiodeId == 2.vedtaksperiode.id(a1)
+            it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode.id(a1)
         }
         assertEquals(2, arbeidsgiveropplysningerEventer.size)
         arbeidsgiveropplysningerEventer.last().also { trengerArbeidsgiveropplysningerEvent ->
             val expectedForespørsel = EventSubscription.TrengerArbeidsgiveropplysningerEvent(
-                personidentifikator = UNG_PERSON_FNR_2018,
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 2.vedtaksperiode.id(a1),
-                skjæringstidspunkt = 1.januar,
-                sykmeldingsperioder = listOf(mars),
-                egenmeldingsperioder = emptyList(),
-                førsteFraværsdager = listOf(
-                    EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 1.februar),
-                    EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 1.mars)
-                ),
-                forespurteOpplysninger = setOf(
-                    EventSubscription.Refusjon,
-                    EventSubscription.Arbeidsgiverperiode
+                EventSubscription.TrengerArbeidsgiveropplysninger(
+                    personidentifikator = UNG_PERSON_FNR_2018,
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                    vedtaksperiodeId = 2.vedtaksperiode.id(a1),
+                    skjæringstidspunkt = 1.januar,
+                    sykmeldingsperioder = listOf(mars),
+                    egenmeldingsperioder = emptyList(),
+                    førsteFraværsdager = listOf(
+                        EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 1.februar),
+                        EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 1.mars)
+                    ),
+                    forespurteOpplysninger = setOf(
+                        EventSubscription.Refusjon,
+                        EventSubscription.Arbeidsgiverperiode
+                    )
                 )
             )
             assertEquals(expectedForespørsel, trengerArbeidsgiveropplysningerEvent)
@@ -132,8 +136,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(20.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }.size)
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }.size)
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.size)
     }
 
     @Test
@@ -146,19 +150,20 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val expectedForespørsel = EventSubscription.TrengerArbeidsgiveropplysningerEvent(
-            personidentifikator = UNG_PERSON_FNR_2018,
-            yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-            vedtaksperiodeId = 2.vedtaksperiode.id(a1),
-            skjæringstidspunkt = 10.februar,
-            sykmeldingsperioder = listOf(10.februar til 10.mars),
-            egenmeldingsperioder = emptyList(),
-            førsteFraværsdager = listOf(EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 10.februar)),
-            forespurteOpplysninger = setOf(
-                EventSubscription.Inntekt,
-                EventSubscription.Refusjon
+            EventSubscription.TrengerArbeidsgiveropplysninger(
+                personidentifikator = UNG_PERSON_FNR_2018,
+                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                vedtaksperiodeId = 2.vedtaksperiode.id(a1),
+                skjæringstidspunkt = 10.februar,
+                sykmeldingsperioder = listOf(10.februar til 10.mars),
+                egenmeldingsperioder = emptyList(),
+                førsteFraværsdager = listOf(EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 10.februar)),
+                forespurteOpplysninger = setOf(
+                    EventSubscription.Inntekt,
+                    EventSubscription.Refusjon
+                )
             )
         )
-
         assertEquals(expectedForespørsel, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last())
     }
 
@@ -174,7 +179,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
             EventSubscription.Inntekt,
-            forespørsel.forespurteOpplysninger.first { it is EventSubscription.Inntekt }
+            forespørsel.opplysninger.forespurteOpplysninger.first { it is EventSubscription.Inntekt }
         )
     }
 
@@ -190,7 +195,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
             EventSubscription.Inntekt,
-            forespørsel.forespurteOpplysninger.first { it is EventSubscription.Inntekt }
+            forespørsel.opplysninger.forespurteOpplysninger.first { it is EventSubscription.Inntekt }
         )
     }
 
@@ -210,7 +215,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(
             EventSubscription.Inntekt,
-            forespørsel.forespurteOpplysninger.first { it is EventSubscription.Inntekt }
+            forespørsel.opplysninger.forespurteOpplysninger.first { it is EventSubscription.Inntekt }
         )
     }
 

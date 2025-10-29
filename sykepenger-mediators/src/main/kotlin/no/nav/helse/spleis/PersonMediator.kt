@@ -8,6 +8,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.Arbeidsgiverperiode
 import no.nav.helse.person.EventSubscription.Inntekt
@@ -19,9 +20,7 @@ import org.slf4j.LoggerFactory
 
 internal class PersonMediator(
     private val message: HendelseMessage
-) : EventSubscription {
-    private val meldinger = mutableListOf<Pakke>()
-
+) {
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         private val objectMapper = jacksonObjectMapper()
@@ -29,14 +28,61 @@ internal class PersonMediator(
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    fun ferdigstill(context: MessageContext) {
-        sendUtgåendeMeldinger(context)
+    fun ferdigstill(context: MessageContext, eventBus: EventBus) {
+        eventBus
+            .events
+            .map { event ->
+                when (event) {
+                    is EventSubscription.AnalytiskDatapakkeEvent -> mapAnalytiskDatapakke(event)
+                    is EventSubscription.AvsluttetMedVedtakEvent -> mapAvsluttetMedVedtak(event)
+                    is EventSubscription.AvsluttetUtenVedtakEvent -> mapAvsluttetUtenVedtak(event)
+                    is EventSubscription.BehandlingForkastetEvent -> mapBehandlingForkastet(event)
+                    is EventSubscription.BehandlingLukketEvent -> mapBehandlingLukket(event)
+                    is EventSubscription.BehandlingOpprettetEvent -> mapBehandlingOpprettet(event)
+                    is EventSubscription.FeriepengerUtbetaltEvent -> mapFeriepengerUtbetalt(event)
+                    is EventSubscription.InntektsmeldingFørSøknadEvent -> mapInntektsmeldingFørSøknad(event)
+                    is EventSubscription.InntektsmeldingHåndtertEvent -> mapInntektsmeldingHåndtert(event)
+                    is EventSubscription.InntektsmeldingIkkeHåndtertEvent -> mapInntektsmeldingIkkeHåndtert(event)
+                    is EventSubscription.OverlappendeInfotrygdperioder -> mapOverlappendeInfotrygdperioder(event)
+                    is EventSubscription.OverstyringIgangsatt -> mapOverstyringIgangsatt(event)
+                    is EventSubscription.PlanlagtAnnulleringEvent -> mapPlanlagtAnnullering(event)
+                    is EventSubscription.SkatteinntekterLagtTilGrunnEvent -> mapSkatteinntekterLagtTilGrunn(event)
+                    is EventSubscription.SykefraværstilfelleIkkeFunnet -> mapSykefraværstilfelleIkkeFunnet(event)
+                    is EventSubscription.SøknadHåndtertEvent -> mapSøknadHåndtert(event)
+                    is EventSubscription.TrengerArbeidsgiveropplysningerEvent -> mapTrengerArbeidsgiveropplysninger(event)
+                    is EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent -> mapTrengerIkkeArbeidsgiveropplysninger(event)
+                    is EventSubscription.TrengerInntektsmeldingReplayEvent -> mapTrengerInntektsmeldingReplay(event)
+                    is EventSubscription.UtbetalingAnnullertEvent -> mapUtbetalingAnnullert(event)
+                    is EventSubscription.UtbetalingEndretEvent -> mapUtbetalingEndret(event)
+                    is EventSubscription.UtbetalingUtbetaltEvent -> mapUtbetalingUtbetalt(event)
+                    is EventSubscription.UtbetalingUtenUtbetalingEvent -> mapUtbetalingUtenUtbetaling(event)
+                    is EventSubscription.UtkastTilVedtakEvent -> mapUtkastTilVedtak(event)
+                    is EventSubscription.VedtaksperiodeAnnullertEvent -> mapVedtaksperiodeAnnullert(event)
+                    is EventSubscription.VedtaksperiodeEndretEvent -> mapVedtaksperiodeEndret(event)
+                    is EventSubscription.VedtaksperiodeForkastetEvent -> mapVedtaksperiodeForkastet(event)
+                    is EventSubscription.VedtaksperiodeIkkePåminnetEvent -> mapVedtaksperiodeIkkePåminnet(event)
+                    is EventSubscription.VedtaksperiodeNyUtbetalingEvent -> mapVedtaksperiodeNyUtbetaling(event)
+                    is EventSubscription.VedtaksperiodeOpprettet -> mapVedtaksperiodeOpprettet(event)
+                    is EventSubscription.VedtaksperiodePåminnetEvent -> mapVedtaksperiodePåminnet(event)
+                    is EventSubscription.VedtaksperioderVenterEvent -> mapVedtaksperioderVenter(event)
+                }
+            }
+            .map { jsonMessage -> mapTilPakke(jsonMessage) }
+            .sendUtgåendeMeldinger(context)
     }
 
-    private fun sendUtgåendeMeldinger(context: MessageContext) {
-        if (meldinger.isEmpty()) return
-        message.logOutgoingMessages(sikkerLogg, meldinger.size)
-        val outgoingMessages = meldinger.map { it.tilUtgåendeMelding() }
+    private fun mapTilPakke(jsonMessage: JsonMessage): Pakke {
+        val outgoingMessage = jsonMessage.apply {
+            this["fødselsnummer"] = message.meldingsporing.fødselsnummer
+        }.toJson()
+        val eventName = objectMapper.readTree(outgoingMessage).path("@event_name").asText()
+        return Pakke(message.meldingsporing.fødselsnummer, eventName, outgoingMessage)
+    }
+
+    private fun List<Pakke>.sendUtgåendeMeldinger(context: MessageContext) {
+        if (this.isEmpty()) return
+        message.logOutgoingMessages(sikkerLogg, this.size)
+        val outgoingMessages = this.map { it.tilUtgåendeMelding() }
         val (ok, failed) = context.publish(outgoingMessages)
 
         if (failed.isEmpty()) return
@@ -45,11 +91,6 @@ internal class PersonMediator(
             "Disse meldingene feilet:\n" +
             failed.joinToString(separator = "\n") { "#${it.index}: ${it.error.message}\n\t${it.message}" }
         throw RuntimeException(feilmelding, førsteFeil)
-    }
-
-    private fun queueMessage(fødselsnummer: String, message: String) {
-        val eventName = objectMapper.readTree(message).path("@event_name").asText()
-        meldinger.add(Pakke(fødselsnummer, eventName, message))
     }
 
     private val Behandlingsporing.Yrkesaktivitet.somOrganisasjonsnummer
@@ -68,188 +109,166 @@ internal class PersonMediator(
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
         }
 
-    override fun inntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "inntektsmelding_før_søknad",
-                mapOf(
-                    "inntektsmeldingId" to event.inntektsmeldingId,
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype
-                )
+    private fun mapInntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "inntektsmelding_før_søknad",
+            mapOf(
+                "inntektsmeldingId" to event.inntektsmeldingId,
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype
             )
         )
     }
 
-    override fun inntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "inntektsmelding_ikke_håndtert",
-                mapOf(
-                    "inntektsmeldingId" to event.meldingsreferanseId,
-                    "organisasjonsnummer" to event.organisasjonsnummer,
-                    "speilrelatert" to event.speilrelatert
-                )
-            )
-        )
-    }
-
-    override fun inntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "inntektsmelding_håndtert", mapOf(
+    private fun mapInntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "inntektsmelding_ikke_håndtert",
+            mapOf(
                 "inntektsmeldingId" to event.meldingsreferanseId,
                 "organisasjonsnummer" to event.organisasjonsnummer,
-                "vedtaksperiodeId" to event.vedtaksperiodeId
-            )
-            )
-        )
-    }
-
-    override fun søknadHåndtert(event: EventSubscription.SøknadHåndtertEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "søknad_håndtert", mapOf(
-                "søknadId" to event.meldingsreferanseId,
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "vedtaksperiodeId" to event.vedtaksperiodeId
-            )
+                "speilrelatert" to event.speilrelatert
             )
         )
     }
 
-    override fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "vedtaksperiode_annullert",
-                mapOf(
-                    "fom" to vedtaksperiodeAnnullertEvent.fom,
-                    "tom" to vedtaksperiodeAnnullertEvent.tom,
-                    "vedtaksperiodeId" to vedtaksperiodeAnnullertEvent.vedtaksperiodeId,
-                    "behandlingId" to vedtaksperiodeAnnullertEvent.behandlingId,
-                    "organisasjonsnummer" to vedtaksperiodeAnnullertEvent.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to vedtaksperiodeAnnullertEvent.yrkesaktivitetssporing.somYrkesaktivitetstype
-                )
+    private fun mapInntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "inntektsmelding_håndtert", mapOf(
+            "inntektsmeldingId" to event.meldingsreferanseId,
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.vedtaksperiodeId
+        )
+        )
+    }
+
+    private fun mapSøknadHåndtert(event: EventSubscription.SøknadHåndtertEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "søknad_håndtert", mapOf(
+            "søknadId" to event.meldingsreferanseId,
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.vedtaksperiodeId
+        )
+        )
+    }
+
+    private fun mapVedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "vedtaksperiode_annullert",
+            mapOf(
+                "fom" to vedtaksperiodeAnnullertEvent.fom,
+                "tom" to vedtaksperiodeAnnullertEvent.tom,
+                "vedtaksperiodeId" to vedtaksperiodeAnnullertEvent.vedtaksperiodeId,
+                "behandlingId" to vedtaksperiodeAnnullertEvent.behandlingId,
+                "organisasjonsnummer" to vedtaksperiodeAnnullertEvent.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to vedtaksperiodeAnnullertEvent.yrkesaktivitetssporing.somYrkesaktivitetstype
             )
         )
     }
 
-    override fun overlappendeInfotrygdperioder(event: EventSubscription.OverlappendeInfotrygdperioder) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "overlappende_infotrygdperioder",
-                mutableMapOf(
-                    "infotrygdhistorikkHendelseId" to event.infotrygdhistorikkHendelseId,
-                    "vedtaksperioder" to event.overlappendeInfotrygdperioder.map {
-                        mapOf(
-                            "organisasjonsnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                            "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                            "vedtaksperiodeId" to it.vedtaksperiodeId,
-                            "vedtaksperiodeFom" to it.vedtaksperiodeFom,
-                            "vedtaksperiodeTom" to it.vedtaksperiodeTom,
-                            "vedtaksperiodetilstand" to it.vedtaksperiodetilstand,
-                            "kanForkastes" to it.kanForkastes,
-                            "infotrygdperioder" to it.infotrygdperioder.map { infotrygdperiode ->
-                                mapOf(
-                                    "fom" to infotrygdperiode.fom,
-                                    "tom" to infotrygdperiode.tom,
-                                    "type" to infotrygdperiode.type,
-                                    "organisasjonsnummer" to infotrygdperiode.orgnummer
-                                )
-                            }
-                        )
-                    },
-                )
+    private fun mapOverlappendeInfotrygdperioder(event: EventSubscription.OverlappendeInfotrygdperioder): JsonMessage {
+        return JsonMessage.newMessage(
+            "overlappende_infotrygdperioder",
+            mutableMapOf(
+                "infotrygdhistorikkHendelseId" to event.infotrygdhistorikkHendelseId,
+                "vedtaksperioder" to event.overlappendeInfotrygdperioder.map {
+                    mapOf(
+                        "organisasjonsnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                        "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                        "vedtaksperiodeId" to it.vedtaksperiodeId,
+                        "vedtaksperiodeFom" to it.vedtaksperiodeFom,
+                        "vedtaksperiodeTom" to it.vedtaksperiodeTom,
+                        "vedtaksperiodetilstand" to it.vedtaksperiodetilstand,
+                        "kanForkastes" to it.kanForkastes,
+                        "infotrygdperioder" to it.infotrygdperioder.map { infotrygdperiode ->
+                            mapOf(
+                                "fom" to infotrygdperiode.fom,
+                                "tom" to infotrygdperiode.tom,
+                                "type" to infotrygdperiode.type,
+                                "organisasjonsnummer" to infotrygdperiode.orgnummer
+                            )
+                        }
+                    )
+                },
             )
         )
     }
 
-    override fun vedtaksperiodePåminnet(event: EventSubscription.VedtaksperiodePåminnetEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "vedtaksperiode_påminnet",
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "tilstand" to event.tilstand,
-                    "antallGangerPåminnet" to event.antallGangerPåminnet,
-                    "tilstandsendringstidspunkt" to event.tilstandsendringstidspunkt,
-                    "påminnelsestidspunkt" to event.påminnelsestidspunkt,
-                    "nestePåminnelsestidspunkt" to event.nestePåminnelsestidspunkt
-                )
-            )
-        )
-    }
-
-    override fun vedtaksperiodeIkkePåminnet(event: EventSubscription.VedtaksperiodeIkkePåminnetEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "vedtaksperiode_ikke_påminnet", mapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
+    private fun mapVedtaksperiodePåminnet(event: EventSubscription.VedtaksperiodePåminnetEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "vedtaksperiode_påminnet",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
                 "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "tilstand" to event.nåværendeTilstand
-            )
-            )
-        )
-    }
-
-    override fun annullering(event: EventSubscription.UtbetalingAnnullertEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "utbetaling_annullert",
-                mutableMapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "utbetalingId" to event.utbetalingId,
-                    "korrelasjonsId" to event.korrelasjonsId,
-                    "fom" to event.fom,
-                    "tom" to event.tom,
-                    "tidspunkt" to event.annullertAvSaksbehandler,
-                    "epost" to event.saksbehandlerEpost,
-                    "ident" to event.saksbehandlerIdent,
-                    "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
-                    "personFagsystemId" to event.personFagsystemId
-                )
+                "tilstand" to event.tilstand,
+                "antallGangerPåminnet" to event.antallGangerPåminnet,
+                "tilstandsendringstidspunkt" to event.tilstandsendringstidspunkt,
+                "påminnelsestidspunkt" to event.påminnelsestidspunkt,
+                "nestePåminnelsestidspunkt" to event.nestePåminnelsestidspunkt
             )
         )
     }
 
-    override fun planlagtAnnullering(event: EventSubscription.PlanlagtAnnulleringEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "planlagt_annullering",
-                buildMap {
-                    put("yrkesaktivitetstype", event.yrkesaktivitetssporing.somYrkesaktivitetstype)
-                    compute("organisasjonsnummer") { _, _ ->
-                        (event.yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer
-                    }
-                    put("vedtaksperioder", event.vedtaksperioder)
-                    put("fom", event.fom)
-                    put("tom", event.tom)
-                    put("ident", event.saksbehandlerIdent)
-                    put("årsaker", event.årsaker)
-                    put("begrunnelse", event.begrunnelse)
+    private fun mapVedtaksperiodeIkkePåminnet(event: EventSubscription.VedtaksperiodeIkkePåminnetEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "vedtaksperiode_ikke_påminnet", mapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "tilstand" to event.nåværendeTilstand
+        )
+        )
+    }
+
+    private fun mapUtbetalingAnnullert(event: EventSubscription.UtbetalingAnnullertEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "utbetaling_annullert",
+            mutableMapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "utbetalingId" to event.utbetalingId,
+                "korrelasjonsId" to event.korrelasjonsId,
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "tidspunkt" to event.annullertAvSaksbehandler,
+                "epost" to event.saksbehandlerEpost,
+                "ident" to event.saksbehandlerIdent,
+                "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
+                "personFagsystemId" to event.personFagsystemId
+            )
+        )
+    }
+
+    private fun mapPlanlagtAnnullering(event: EventSubscription.PlanlagtAnnulleringEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "planlagt_annullering",
+            buildMap {
+                put("yrkesaktivitetstype", event.yrkesaktivitetssporing.somYrkesaktivitetstype)
+                compute("organisasjonsnummer") { _, _ ->
+                    (event.yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer
                 }
-            )
+                put("vedtaksperioder", event.vedtaksperioder)
+                put("fom", event.fom)
+                put("tom", event.tom)
+                put("ident", event.saksbehandlerIdent)
+                put("årsaker", event.årsaker)
+                put("begrunnelse", event.begrunnelse)
+            }
         )
     }
 
-    override fun utbetalingEndret(event: EventSubscription.UtbetalingEndretEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "utbetaling_endret",
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "utbetalingId" to event.utbetalingId,
-                    "type" to event.type,
-                    "forrigeStatus" to event.forrigeStatus,
-                    "gjeldendeStatus" to event.gjeldendeStatus,
-                    "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
-                    "personOppdrag" to event.personOppdrag.tilJsonMap(),
-                    "korrelasjonsId" to event.korrelasjonsId
-                )
+    private fun mapUtbetalingEndret(event: EventSubscription.UtbetalingEndretEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "utbetaling_endret",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "utbetalingId" to event.utbetalingId,
+                "type" to event.type,
+                "forrigeStatus" to event.forrigeStatus,
+                "gjeldendeStatus" to event.gjeldendeStatus,
+                "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
+                "personOppdrag" to event.personOppdrag.tilJsonMap(),
+                "korrelasjonsId" to event.korrelasjonsId
             )
         )
     }
@@ -271,54 +290,43 @@ internal class PersonMediator(
             "totalbeløp" to this.totalbeløp
         )
 
-    override fun nyVedtaksperiodeUtbetaling(event: EventSubscription.VedtaksperiodeNyUtbetalingEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "vedtaksperiode_ny_utbetaling", mapOf(
-                "organisasjonsnummer" to event.organisasjonsnummer,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "utbetalingId" to event.utbetalingId
-            )
-            )
+    private fun mapVedtaksperiodeNyUtbetaling(event: EventSubscription.VedtaksperiodeNyUtbetalingEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "vedtaksperiode_ny_utbetaling", mapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "utbetalingId" to event.utbetalingId
+        )
         )
     }
 
-    override fun overstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "overstyring_igangsatt", mapOf(
-                "revurderingId" to UUID.randomUUID(),
-                "kilde" to message.meldingsporing.id,
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "periodeForEndringFom" to event.periodeForEndring.start,
-                "periodeForEndringTom" to event.periodeForEndring.endInclusive,
-                "årsak" to event.årsak,
-                "typeEndring" to event.typeEndring,
-                "berørtePerioder" to event.berørtePerioder.map {
-                    mapOf(
-                        "vedtaksperiodeId" to it.vedtaksperiodeId,
-                        "skjæringstidspunkt" to it.skjæringstidspunkt,
-                        "periodeFom" to it.periode.start,
-                        "periodeTom" to it.periode.endInclusive,
-                        "orgnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                        "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                        "typeEndring" to it.typeEndring,
-                    )
-                }
-            )))
+    private fun mapOverstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt): JsonMessage {
+        return JsonMessage.newMessage(
+            "overstyring_igangsatt", mapOf(
+            "revurderingId" to UUID.randomUUID(),
+            "kilde" to message.meldingsporing.id,
+            "skjæringstidspunkt" to event.skjæringstidspunkt,
+            "periodeForEndringFom" to event.periodeForEndring.start,
+            "periodeForEndringTom" to event.periodeForEndring.endInclusive,
+            "årsak" to event.årsak,
+            "typeEndring" to event.typeEndring,
+            "berørtePerioder" to event.berørtePerioder.map {
+                mapOf(
+                    "vedtaksperiodeId" to it.vedtaksperiodeId,
+                    "skjæringstidspunkt" to it.skjæringstidspunkt,
+                    "periodeFom" to it.periode.start,
+                    "periodeTom" to it.periode.endInclusive,
+                    "orgnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "typeEndring" to it.typeEndring,
+                )
+            }
+        ))
     }
 
-    override fun utbetalingUtbetalt(event: EventSubscription.UtbetalingUtbetaltEvent) {
-        queueMessage(utbetalingAvsluttet("utbetaling_utbetalt", event))
-    }
-
-    override fun utbetalingUtenUtbetaling(event: EventSubscription.UtbetalingUtbetaltEvent) {
-        queueMessage(utbetalingAvsluttet("utbetaling_uten_utbetaling", event))
-    }
-
-    private fun utbetalingAvsluttet(eventName: String, event: EventSubscription.UtbetalingUtbetaltEvent) =
-        JsonMessage.newMessage(
-            eventName,
+    private fun mapUtbetalingUtbetalt(event: EventSubscription.UtbetalingUtbetaltEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "utbetaling_utbetalt",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
                 "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
@@ -342,8 +350,47 @@ internal class PersonMediator(
                 }
             )
         )
+    }
 
-    private fun EventSubscription.UtbetalingUtbetaltEvent.OppdragEventDetaljer.tilJsonMap() =
+    private fun mapUtbetalingUtenUtbetaling(event: EventSubscription.UtbetalingUtenUtbetalingEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "utbetaling_uten_utbetaling",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "utbetalingId" to event.utbetalingId,
+                "korrelasjonsId" to event.korrelasjonsId,
+                "type" to event.type,
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "maksdato" to event.maksdato,
+                "forbrukteSykedager" to event.forbrukteSykedager,
+                "gjenståendeSykedager" to event.gjenståendeSykedager,
+                "stønadsdager" to event.stønadsdager,
+                "ident" to event.ident,
+                "epost" to event.epost,
+                "tidspunkt" to event.tidspunkt,
+                "automatiskBehandling" to event.automatiskBehandling,
+                "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
+                "personOppdrag" to event.personOppdrag.tilJsonMap(),
+                "utbetalingsdager" to event.utbetalingsdager.map {
+                    it.tilJsonMap()
+                }
+            )
+        )
+    }
+
+    private fun EventSubscription.OppdragEventDetaljer.OppdragEventLinjeDetaljer.tilJsonMap() =
+        mapOf(
+            "fom" to this.fom,
+            "tom" to this.tom,
+            "sats" to this.sats,
+            "grad" to this.grad,
+            "stønadsdager" to this.stønadsdager,
+            "totalbeløp" to this.totalbeløp,
+            "statuskode" to this.statuskode,
+        )
+    private fun EventSubscription.OppdragEventDetaljer.tilJsonMap() =
         mapOf(
             "fagsystemId" to this.fagsystemId,
             "fagområde" to this.fagområde,
@@ -355,17 +402,6 @@ internal class PersonMediator(
             "linjer" to this.linjer.map {
                 it.tilJsonMap()
             }
-        )
-
-    private fun EventSubscription.UtbetalingUtbetaltEvent.OppdragEventDetaljer.OppdragEventLinjeDetaljer.tilJsonMap() =
-        mapOf(
-            "fom" to this.fom,
-            "tom" to this.tom,
-            "sats" to this.sats,
-            "grad" to this.grad,
-            "stønadsdager" to this.stønadsdager,
-            "totalbeløp" to this.totalbeløp,
-            "statuskode" to this.statuskode,
         )
 
     private fun EventSubscription.Utbetalingsdag.tilJsonMap() =
@@ -412,18 +448,16 @@ internal class PersonMediator(
             }
         )
 
-    override fun feriepengerUtbetalt(event: EventSubscription.FeriepengerUtbetaltEvent) =
-        queueMessage(
-            JsonMessage.newMessage(
-                "feriepenger_utbetalt",
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "fom" to event.fom,
-                    "tom" to event.tom,
-                    "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
-                    "personOppdrag" to event.personOppdrag.tilJsonMap()
-                )
+    private fun mapFeriepengerUtbetalt(event: EventSubscription.FeriepengerUtbetaltEvent): JsonMessage =
+        JsonMessage.newMessage(
+            "feriepenger_utbetalt",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
+                "personOppdrag" to event.personOppdrag.tilJsonMap()
             )
         )
 
@@ -434,358 +468,333 @@ internal class PersonMediator(
             "totalbeløp" to this.totalbeløp
         )
 
-    override fun vedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "vedtaksperiode_endret",
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId,
-                    "gjeldendeTilstand" to event.gjeldendeTilstand,
-                    "forrigeTilstand" to event.forrigeTilstand,
-                    "hendelser" to event.hendelser,
-                    "makstid" to event.makstid,
-                    "fom" to event.fom,
-                    "tom" to event.tom,
-                    "skjæringstidspunkt" to event.skjæringstidspunkt
-                )
-            )
-        )
-    }
-
-    override fun vedtaksperioderVenter(event: EventSubscription.VedtaksperioderVenterEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "vedtaksperioder_venter", mapOf(
-                "vedtaksperioder" to event.vedtaksperioder.map { event ->
-                    mapOf(
-                        "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                        "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                        "vedtaksperiodeId" to event.vedtaksperiodeId,
-                        "behandlingId" to event.behandlingId,
-                        "skjæringstidspunkt" to event.skjæringstidspunkt,
-                        "hendelser" to event.hendelser,
-                        "ventetSiden" to event.ventetSiden,
-                        "venterTil" to event.venterTil,
-                        "venterPå" to mapOf(
-                            "vedtaksperiodeId" to event.venterPå.vedtaksperiodeId,
-                            "skjæringstidspunkt" to event.venterPå.skjæringstidspunkt,
-                            "organisasjonsnummer" to event.venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                            "yrkesaktivitetstype" to event.venterPå.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                            "venteårsak" to mapOf(
-                                "hva" to event.venterPå.venteårsak.hva,
-                                "hvorfor" to event.venterPå.venteårsak.hvorfor
-                            )
-                        )
-                    )
-                }
-            )))
-    }
-
-    override fun vedtaksperiodeOpprettet(event: EventSubscription.VedtaksperiodeOpprettet) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "vedtaksperiode_opprettet",
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "skjæringstidspunkt" to event.skjæringstidspunkt,
-                    "fom" to event.periode.start,
-                    "tom" to event.periode.endInclusive
-                )
-            )
-        )
-    }
-
-    override fun vedtaksperiodeForkastet(event: EventSubscription.VedtaksperiodeForkastetEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "vedtaksperiode_forkastet",
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "tilstand" to event.gjeldendeTilstand,
-                    "hendelser" to event.hendelser,
-                    "fom" to event.fom,
-                    "tom" to event.tom,
-                    "trengerArbeidsgiveropplysninger" to event.trengerArbeidsgiveropplysninger,
-                    "speilrelatert" to event.speilrelatert,
-                    "sykmeldingsperioder" to event.sykmeldingsperioder.map {
-                        mapOf(
-                            "fom" to it.start,
-                            "tom" to it.endInclusive
-                        )
-                    }
-                )))
-    }
-
-    override fun nyBehandling(event: EventSubscription.BehandlingOpprettetEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "behandling_opprettet",
-                mutableMapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId,
-                    "søknadIder" to event.søknadIder,
-                    "type" to event.type,
-                    "fom" to event.fom,
-                    "tom" to event.tom,
-                    "kilde" to mapOf(
-                        "meldingsreferanseId" to event.kilde.meldingsreferanseId,
-                        "innsendt" to event.kilde.innsendt,
-                        "registrert" to event.kilde.registert,
-                        "avsender" to event.kilde.avsender
-                    )
-                )
-            )
-        )
-    }
-
-    override fun behandlingForkastet(event: EventSubscription.BehandlingForkastetEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "behandling_forkastet",
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId,
-                    "automatiskBehandling" to event.automatiskBehandling
-                )
-            )
-        )
-    }
-
-    override fun behandlingLukket(event: EventSubscription.BehandlingLukketEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "behandling_lukket",
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId
-                )
-            )
-        )
-    }
-
-    override fun avsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "avsluttet_uten_vedtak",
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId,
-                    "fom" to event.periode.start,
-                    "tom" to event.periode.endInclusive,
-                    "skjæringstidspunkt" to event.skjæringstidspunkt,
-                    "hendelser" to event.hendelseIder,
-                    "avsluttetTidspunkt" to event.avsluttetTidspunkt
-                )
-            )
-        )
-    }
-
-    override fun avsluttetMedVedtak(event: EventSubscription.AvsluttetMedVedtakEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "avsluttet_med_vedtak",
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId,
-                    "fom" to event.periode.start,
-                    "tom" to event.periode.endInclusive,
-                    "hendelser" to event.hendelseIder,
-                    "skjæringstidspunkt" to event.skjæringstidspunkt,
-                    "sykepengegrunnlag" to event.sykepengegrunnlag,
-                    "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt,
-                    "utbetalingId" to event.utbetalingId,
-                    "sykepengegrunnlagsfakta" to when (val fakta = event.sykepengegrunnlagsfakta) {
-                        is EventSubscription.UtkastTilVedtakEvent.FastsattEtterHovedregel -> mapOf(
-                            "fastsatt" to fakta.fastsatt,
-                            "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
-                            "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt,
-                            "sykepengegrunnlag" to fakta.sykepengegrunnlag,
-                            "6G" to fakta.`6G`,
-                            "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
-                                mapOf(
-                                    "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
-                                    "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
-                                    "inntektskilde" to arbeidsgiver.inntektskilde
-                                )
-                            }
-                        )
-
-                        is EventSubscription.UtkastTilVedtakEvent.FastsattEtterSkjønn -> mutableMapOf(
-                            "fastsatt" to fakta.fastsatt,
-                            "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
-                            "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt,
-                            "skjønnsfastsatt" to fakta.skjønnsfastsatt,
-                            "sykepengegrunnlag" to fakta.sykepengegrunnlag,
-                            "6G" to fakta.`6G`,
-                            "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
-                                mapOf(
-                                    "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
-                                    "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
-                                    "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt,
-                                    "inntektskilde" to arbeidsgiver.inntektskilde
-                                )
-                            }
-                        )
-
-                        is EventSubscription.UtkastTilVedtakEvent.FastsattIInfotrygd -> mapOf(
-                            "fastsatt" to fakta.fastsatt,
-                            "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
-                            "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt
-                        )
-                    }
-                )
-            )
-        )
-    }
-
-    override fun analytiskDatapakke(event: EventSubscription.AnalytiskDatapakkeEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "analytisk_datapakke",
-                mapOf(
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId,
-                    "skjæringstidspunkt" to event.skjæringstidspunkt,
-                    "beløpTilBruker" to mapOf(
-                        "totalBeløp" to event.beløpTilBruker.totalBeløp,
-                        "nettoBeløp" to event.beløpTilBruker.nettoBeløp
-                    ),
-                    "beløpTilArbeidsgiver" to event.beløpTilArbeidsgiver,
-                    "fom" to event.fom,
-                    "tom" to event.tom,
-                    "antallForbrukteSykedagerEtterPeriode" to mapOf(
-                        "antallDager" to event.antallForbrukteSykedagerEtterPeriode.antallDager,
-                        "nettoDager" to event.antallForbrukteSykedagerEtterPeriode.nettoDager
-                    ),
-                    "antallGjenståendeSykedagerEtterPeriode" to mapOf(
-                        "antallDager" to event.antallGjenståendeSykedagerEtterPeriode.antallDager,
-                        "nettoDager" to event.antallGjenståendeSykedagerEtterPeriode.nettoDager
-                    ),
-                    "harAndreInntekterIBeregning" to event.harAndreInntekterIBeregning
-                )
-            )
-        )
-    }
-
-    override fun sykefraværstilfelleIkkeFunnet(event: EventSubscription.SykefraværstilfelleIkkeFunnet) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "sykefraværstilfelle_ikke_funnet", mapOf(
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-            )
-            )
-        )
-    }
-
-    override fun skatteinntekterLagtTilGrunn(event: EventSubscription.SkatteinntekterLagtTilGrunnEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "skatteinntekter_lagt_til_grunn",
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId,
-                    "skjæringstidspunkt" to event.skjæringstidspunkt,
-                    "omregnetÅrsinntekt" to event.omregnetÅrsinntekt,
-                    "skatteinntekter" to event.skatteinntekter.map {
-                        mapOf<String, Any>(
-                            "måned" to it.måned,
-                            "beløp" to it.beløp
-                        )
-                    }
-                )))
-    }
-
-    override fun inntektsmeldingReplay(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
-        queueMessage(event.tilJsonMessage("trenger_inntektsmelding_replay"))
-    }
-
-    override fun trengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
-        queueMessage(event.tilJsonMessage("trenger_opplysninger_fra_arbeidsgiver"))
-    }
-
-    private fun EventSubscription.TrengerArbeidsgiveropplysningerEvent.tilJsonMessage(eventName: String) =
-        JsonMessage.newMessage(
-            eventName,
+    private fun mapVedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "vedtaksperiode_endret",
             mapOf(
-                "organisasjonsnummer" to this.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to this.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "sykmeldingsperioder" to sykmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                },
-                "egenmeldingsperioder" to egenmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                },
-                "førsteFraværsdager" to førsteFraværsdager.map {
-                    mapOf<String, Any>(
-                        "organisasjonsnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                        "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                        "førsteFraværsdag" to it.førsteFraværsdag
-                    )
-                },
-                "forespurteOpplysninger" to forespurteOpplysninger.map { forespurtOpplysning ->
-                    when (forespurtOpplysning) {
-                        is Arbeidsgiverperiode -> mapOf(
-                            "opplysningstype" to "Arbeidsgiverperiode"
-                        )
-
-                        is Inntekt -> mapOf(
-                            "opplysningstype" to "Inntekt",
-                            "forslag" to mapOf(
-                                "forrigeInntekt" to null
-                            )
-                        )
-
-                        is Refusjon -> mapOf(
-                            "opplysningstype" to "Refusjon",
-                            "forslag" to emptyList<Nothing>()
-                        )
-                    }
-                }
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "gjeldendeTilstand" to event.gjeldendeTilstand,
+                "forrigeTilstand" to event.forrigeTilstand,
+                "hendelser" to event.hendelser,
+                "makstid" to event.makstid,
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "skjæringstidspunkt" to event.skjæringstidspunkt
             )
         )
+    }
 
-    override fun trengerIkkeArbeidsgiveropplysninger(event: EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent) {
-        queueMessage(
-            JsonMessage.newMessage(
-                "trenger_ikke_opplysninger_fra_arbeidsgiver",
-                mapOf<String, Any>(
+    private fun mapVedtaksperioderVenter(event: EventSubscription.VedtaksperioderVenterEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "vedtaksperioder_venter", mapOf(
+            "vedtaksperioder" to event.vedtaksperioder.map { event ->
+                mapOf(
                     "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
                     "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                    "skjæringstidspunkt" to event.skjæringstidspunkt,
+                    "hendelser" to event.hendelser,
+                    "ventetSiden" to event.ventetSiden,
+                    "venterTil" to event.venterTil,
+                    "venterPå" to mapOf(
+                        "vedtaksperiodeId" to event.venterPå.vedtaksperiodeId,
+                        "skjæringstidspunkt" to event.venterPå.skjæringstidspunkt,
+                        "organisasjonsnummer" to event.venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                        "yrkesaktivitetstype" to event.venterPå.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                        "venteårsak" to mapOf(
+                            "hva" to event.venterPå.venteårsak.hva,
+                            "hvorfor" to event.venterPå.venteårsak.hvorfor
+                        )
+                    )
+                )
+            }
+        ))
+    }
+
+    private fun mapVedtaksperiodeOpprettet(event: EventSubscription.VedtaksperiodeOpprettet): JsonMessage {
+        return JsonMessage.newMessage(
+            "vedtaksperiode_opprettet",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "fom" to event.periode.start,
+                "tom" to event.periode.endInclusive
+            )
+        )
+    }
+
+    private fun mapVedtaksperiodeForkastet(event: EventSubscription.VedtaksperiodeForkastetEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "vedtaksperiode_forkastet",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "tilstand" to event.gjeldendeTilstand,
+                "hendelser" to event.hendelser,
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "trengerArbeidsgiveropplysninger" to event.trengerArbeidsgiveropplysninger,
+                "speilrelatert" to event.speilrelatert,
+                "sykmeldingsperioder" to event.sykmeldingsperioder.map {
+                    mapOf(
+                        "fom" to it.start,
+                        "tom" to it.endInclusive
+                    )
+                }
+            ))
+    }
+
+    private fun mapBehandlingOpprettet(event: EventSubscription.BehandlingOpprettetEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "behandling_opprettet",
+            mutableMapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "søknadIder" to event.søknadIder,
+                "type" to event.type,
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "kilde" to mapOf(
+                    "meldingsreferanseId" to event.kilde.meldingsreferanseId,
+                    "innsendt" to event.kilde.innsendt,
+                    "registrert" to event.kilde.registert,
+                    "avsender" to event.kilde.avsender
                 )
             )
         )
     }
 
-    override fun utkastTilVedtak(event: EventSubscription.UtkastTilVedtakEvent) {
+    private fun mapBehandlingForkastet(event: EventSubscription.BehandlingForkastetEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "behandling_forkastet",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "automatiskBehandling" to event.automatiskBehandling
+            )
+        )
+    }
+
+    private fun mapBehandlingLukket(event: EventSubscription.BehandlingLukketEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "behandling_lukket",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId
+            )
+        )
+    }
+
+    private fun mapAvsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "avsluttet_uten_vedtak",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "fom" to event.periode.start,
+                "tom" to event.periode.endInclusive,
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "hendelser" to event.hendelseIder,
+                "avsluttetTidspunkt" to event.avsluttetTidspunkt
+            )
+        )
+    }
+
+    private fun mapAvsluttetMedVedtak(event: EventSubscription.AvsluttetMedVedtakEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "avsluttet_med_vedtak",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "fom" to event.periode.start,
+                "tom" to event.periode.endInclusive,
+                "hendelser" to event.hendelseIder,
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "sykepengegrunnlag" to event.sykepengegrunnlag,
+                "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt,
+                "utbetalingId" to event.utbetalingId,
+                "sykepengegrunnlagsfakta" to when (val fakta = event.sykepengegrunnlagsfakta) {
+                    is EventSubscription.UtkastTilVedtakEvent.FastsattEtterHovedregel -> mapOf(
+                        "fastsatt" to fakta.fastsatt,
+                        "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
+                        "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt,
+                        "sykepengegrunnlag" to fakta.sykepengegrunnlag,
+                        "6G" to fakta.`6G`,
+                        "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
+                            mapOf(
+                                "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
+                                "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
+                                "inntektskilde" to arbeidsgiver.inntektskilde
+                            )
+                        }
+                    )
+
+                    is EventSubscription.UtkastTilVedtakEvent.FastsattEtterSkjønn -> mutableMapOf(
+                        "fastsatt" to fakta.fastsatt,
+                        "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
+                        "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt,
+                        "skjønnsfastsatt" to fakta.skjønnsfastsatt,
+                        "sykepengegrunnlag" to fakta.sykepengegrunnlag,
+                        "6G" to fakta.`6G`,
+                        "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
+                            mapOf(
+                                "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
+                                "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
+                                "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt,
+                                "inntektskilde" to arbeidsgiver.inntektskilde
+                            )
+                        }
+                    )
+
+                    is EventSubscription.UtkastTilVedtakEvent.FastsattIInfotrygd -> mapOf(
+                        "fastsatt" to fakta.fastsatt,
+                        "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
+                        "omregnetÅrsinntektTotalt" to fakta.omregnetÅrsinntekt
+                    )
+                }
+            )
+        )
+    }
+
+    private fun mapAnalytiskDatapakke(event: EventSubscription.AnalytiskDatapakkeEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "analytisk_datapakke",
+            mapOf(
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "beløpTilBruker" to mapOf(
+                    "totalBeløp" to event.beløpTilBruker.totalBeløp,
+                    "nettoBeløp" to event.beløpTilBruker.nettoBeløp
+                ),
+                "beløpTilArbeidsgiver" to event.beløpTilArbeidsgiver,
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "antallForbrukteSykedagerEtterPeriode" to mapOf(
+                    "antallDager" to event.antallForbrukteSykedagerEtterPeriode.antallDager,
+                    "nettoDager" to event.antallForbrukteSykedagerEtterPeriode.nettoDager
+                ),
+                "antallGjenståendeSykedagerEtterPeriode" to mapOf(
+                    "antallDager" to event.antallGjenståendeSykedagerEtterPeriode.antallDager,
+                    "nettoDager" to event.antallGjenståendeSykedagerEtterPeriode.nettoDager
+                ),
+                "harAndreInntekterIBeregning" to event.harAndreInntekterIBeregning
+            )
+        )
+    }
+
+    private fun mapSykefraværstilfelleIkkeFunnet(event: EventSubscription.SykefraværstilfelleIkkeFunnet): JsonMessage {
+        return JsonMessage.newMessage(
+            "sykefraværstilfelle_ikke_funnet", mapOf(
+            "skjæringstidspunkt" to event.skjæringstidspunkt,
+        )
+        )
+    }
+
+    private fun mapSkatteinntekterLagtTilGrunn(event: EventSubscription.SkatteinntekterLagtTilGrunnEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "skatteinntekter_lagt_til_grunn",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "omregnetÅrsinntekt" to event.omregnetÅrsinntekt,
+                "skatteinntekter" to event.skatteinntekter.map {
+                    mapOf<String, Any>(
+                        "måned" to it.måned,
+                        "beløp" to it.beløp
+                    )
+                }
+            ))
+    }
+
+    private fun mapTrengerInntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent): JsonMessage {
+        return JsonMessage.newMessage("trenger_inntektsmelding_replay", event.opplysninger.tilJsonMap())
+    }
+
+    private fun mapTrengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent): JsonMessage {
+        return JsonMessage.newMessage("trenger_opplysninger_fra_arbeidsgiver", event.opplysninger.tilJsonMap())
+    }
+
+    private fun EventSubscription.TrengerArbeidsgiveropplysninger.tilJsonMap(): Map<String, Any> {
+        return mapOf(
+            "organisasjonsnummer" to this.yrkesaktivitetssporing.somOrganisasjonsnummer,
+            "yrkesaktivitetstype" to this.yrkesaktivitetssporing.somYrkesaktivitetstype,
+            "vedtaksperiodeId" to this.vedtaksperiodeId,
+            "skjæringstidspunkt" to this.skjæringstidspunkt,
+            "sykmeldingsperioder" to this.sykmeldingsperioder.map {
+                mapOf(
+                    "fom" to it.start,
+                    "tom" to it.endInclusive
+                )
+            },
+            "egenmeldingsperioder" to this.egenmeldingsperioder.map {
+                mapOf(
+                    "fom" to it.start,
+                    "tom" to it.endInclusive
+                )
+            },
+            "førsteFraværsdager" to this.førsteFraværsdager.map {
+                mapOf<String, Any>(
+                    "organisasjonsnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "førsteFraværsdag" to it.førsteFraværsdag
+                )
+            },
+            "forespurteOpplysninger" to this.forespurteOpplysninger.map { forespurtOpplysning ->
+                when (forespurtOpplysning) {
+                    is Arbeidsgiverperiode -> mapOf(
+                        "opplysningstype" to "Arbeidsgiverperiode"
+                    )
+
+                    is Inntekt -> mapOf(
+                        "opplysningstype" to "Inntekt",
+                        "forslag" to mapOf(
+                            "forrigeInntekt" to null
+                        )
+                    )
+
+                    is Refusjon -> mapOf(
+                        "opplysningstype" to "Refusjon",
+                        "forslag" to emptyList<Nothing>()
+                    )
+                }
+            }
+        )
+    }
+
+    private fun mapTrengerIkkeArbeidsgiveropplysninger(event: EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "trenger_ikke_opplysninger_fra_arbeidsgiver",
+            mapOf<String, Any>(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId
+            )
+        )
+    }
+
+    private fun mapUtkastTilVedtak(event: EventSubscription.UtkastTilVedtakEvent): JsonMessage {
         val utkastTilVedtak = mutableMapOf(
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "behandlingId" to event.behandlingId,
@@ -794,15 +803,7 @@ internal class PersonMediator(
             "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
         )
         if (event.`6G` != null) utkastTilVedtak["sykepengegrunnlagsfakta"] = mapOf("6G" to event.`6G`)
-        queueMessage(JsonMessage.newMessage("utkast_til_vedtak", utkastTilVedtak.toMap()))
-    }
-
-    private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {
-        this["fødselsnummer"] = message.meldingsporing.fødselsnummer
-    }
-
-    private fun queueMessage(outgoingMessage: JsonMessage) {
-        queueMessage(message.meldingsporing.fødselsnummer, leggPåStandardfelter(outgoingMessage).toJson())
+        return JsonMessage.newMessage("utkast_til_vedtak", utkastTilVedtak.toMap())
     }
 
     private data class Pakke(

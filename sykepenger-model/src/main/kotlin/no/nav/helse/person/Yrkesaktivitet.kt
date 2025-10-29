@@ -1129,10 +1129,10 @@ private class Utbetalingseventformidler(
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = EventSubscription.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(
+                arbeidsgiverOppdrag = EventSubscription.OppdragEventDetaljer.mapOppdrag(
                     arbeidsgiverOppdrag
                 ),
-                personOppdrag = EventSubscription.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
+                personOppdrag = EventSubscription.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = builder.result(utbetalingstidslinje),
                 ident = ident
             )
@@ -1157,7 +1157,7 @@ private class Utbetalingseventformidler(
         epost: String,
     ) {
         eventBus.utbetalingUtenUtbetaling(
-            EventSubscription.UtbetalingUtbetaltEvent(
+            EventSubscription.UtbetalingUtenUtbetalingEvent(
                 yrkesaktivitetssporing = yrkesaktivitetstype,
                 utbetalingId = id,
                 type = type.name,
@@ -1170,10 +1170,10 @@ private class Utbetalingseventformidler(
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = EventSubscription.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(
+                arbeidsgiverOppdrag = EventSubscription.OppdragEventDetaljer.mapOppdrag(
                     arbeidsgiverOppdrag
                 ),
-                personOppdrag = EventSubscription.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
+                personOppdrag = EventSubscription.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = builder.result(utbetalingstidslinje),
                 ident = ident,
                 korrelasjonsId = korrelasjonsId

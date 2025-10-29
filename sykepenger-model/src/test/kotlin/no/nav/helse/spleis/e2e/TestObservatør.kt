@@ -20,7 +20,7 @@ internal class TestObservatør(person: Person? = null) : EventSubscription {
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
     val trengerArbeidsgiveropplysningerVedtaksperioder = mutableListOf<EventSubscription.TrengerArbeidsgiveropplysningerEvent>()
     val trengerIkkeArbeidsgiveropplysningerVedtaksperioder = mutableListOf<EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent>()
-    val utbetalingUtenUtbetalingEventer = mutableListOf<EventSubscription.UtbetalingUtbetaltEvent>()
+    val utbetalingUtenUtbetalingEventer = mutableListOf<EventSubscription.UtbetalingUtenUtbetalingEvent>()
     val utbetalingMedUtbetalingEventer = mutableListOf<EventSubscription.UtbetalingUtbetaltEvent>()
     val feriepengerUtbetaltEventer = mutableListOf<EventSubscription.FeriepengerUtbetaltEvent>()
     val utbetaltEndretEventer = mutableListOf<EventSubscription.UtbetalingEndretEvent>()
@@ -85,7 +85,7 @@ internal class TestObservatør(person: Person? = null) : EventSubscription {
     fun forkastedePerioder() = forkastedeEventer.size
     fun forkastet(vedtaksperiodeId: UUID) = forkastedeEventer.getValue(vedtaksperiodeId)
 
-    override fun utbetalingUtenUtbetaling(event: EventSubscription.UtbetalingUtbetaltEvent) {
+    override fun utbetalingUtenUtbetaling(event: EventSubscription.UtbetalingUtenUtbetalingEvent) {
         utbetalingUtenUtbetalingEventer.add(event)
     }
 
@@ -167,7 +167,7 @@ internal class TestObservatør(person: Person? = null) : EventSubscription {
 
     override fun trengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
         trengerArbeidsgiveropplysningerVedtaksperioder.add(event)
-        trengerArbeidsgiveroppysninger[event.vedtaksperiodeId] = event.forespurteOpplysninger
+        trengerArbeidsgiveroppysninger[event.opplysninger.vedtaksperiodeId] = event.opplysninger.forespurteOpplysninger
     }
 
     override fun trengerIkkeArbeidsgiveropplysninger(event: EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent) {
@@ -175,17 +175,17 @@ internal class TestObservatør(person: Person? = null) : EventSubscription {
         trengerArbeidsgiveroppysninger.remove(event.vedtaksperiodeId)
     }
 
-    override fun inntektsmeldingReplay(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
+    override fun inntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent) {
         inntektsmeldingReplayEventer.add(
             Forespørsel(
-                fnr = event.personidentifikator.toString(),
-                orgnr = event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                vedtaksperiodeId = event.vedtaksperiodeId,
-                skjæringstidspunkt = event.skjæringstidspunkt,
-                førsteFraværsdager = event.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.yrkesaktivitetssporing.somOrganisasjonsnummer, it.førsteFraværsdag) },
-                sykmeldingsperioder = event.sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-                egenmeldinger = event.egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-                harForespurtArbeidsgiverperiode = EventSubscription.Arbeidsgiverperiode in event.forespurteOpplysninger
+                fnr = event.opplysninger.personidentifikator.toString(),
+                orgnr = event.opplysninger.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                vedtaksperiodeId = event.opplysninger.vedtaksperiodeId,
+                skjæringstidspunkt = event.opplysninger.skjæringstidspunkt,
+                førsteFraværsdager = event.opplysninger.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.yrkesaktivitetssporing.somOrganisasjonsnummer, it.førsteFraværsdag) },
+                sykmeldingsperioder = event.opplysninger.sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+                egenmeldinger = event.opplysninger.egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+                harForespurtArbeidsgiverperiode = EventSubscription.Arbeidsgiverperiode in event.opplysninger.forespurteOpplysninger
             )
         )
     }

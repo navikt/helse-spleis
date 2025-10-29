@@ -16,6 +16,8 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
 interface EventSubscription {
 
+    sealed interface Event
+
     data class PlanlagtAnnulleringEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperioder: List<UUID>,
@@ -24,11 +26,11 @@ interface EventSubscription {
         val saksbehandlerIdent: String,
         val årsaker: List<String>,
         val begrunnelse: String
-    )
+    ) : Event
 
     data class SykefraværstilfelleIkkeFunnet(
         val skjæringstidspunkt: LocalDate
-    )
+    ) : Event
 
     data class VedtaksperiodePåminnetEvent(
         val vedtaksperiodeId: UUID,
@@ -38,13 +40,13 @@ interface EventSubscription {
         val tilstandsendringstidspunkt: LocalDateTime,
         val påminnelsestidspunkt: LocalDateTime,
         val nestePåminnelsestidspunkt: LocalDateTime
-    )
+    ) : Event
 
     data class VedtaksperiodeIkkePåminnetEvent(
         val vedtaksperiodeId: UUID,
         val organisasjonsnummer: String,
         val nåværendeTilstand: TilstandType
-    )
+    ) : Event
 
     data class VedtaksperiodeEndretEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -57,7 +59,7 @@ interface EventSubscription {
         val fom: LocalDate,
         val tom: LocalDate,
         val skjæringstidspunkt: LocalDate
-    )
+    ) : Event
 
     data class AnalytiskDatapakkeEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -71,7 +73,7 @@ interface EventSubscription {
         val antallForbrukteSykedagerEtterPeriode: Daginformasjon,
         val antallGjenståendeSykedagerEtterPeriode: Daginformasjon,
         val harAndreInntekterIBeregning: Boolean
-    ) {
+    ) : Event {
         data class Pengeinformasjon (
             val totalBeløp: Double,
             val nettoBeløp: Double
@@ -82,7 +84,7 @@ interface EventSubscription {
         )
     }
 
-    data class VedtaksperioderVenterEvent(val vedtaksperioder: List<VedtaksperiodeVenterEvent>)
+    data class VedtaksperioderVenterEvent(val vedtaksperioder: List<VedtaksperiodeVenterEvent>) : Event
 
     data class VedtaksperiodeVenterEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -116,32 +118,32 @@ interface EventSubscription {
         val tom: LocalDate,
         val sykmeldingsperioder: List<Periode>,
         val speilrelatert: Boolean
-    ) {
+    ) : Event {
         val trengerArbeidsgiveropplysninger = sykmeldingsperioder.isNotEmpty()
     }
 
     data class InntektsmeldingFørSøknadEvent(
         val inntektsmeldingId: UUID,
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
-    )
+    ) : Event
 
     data class InntektsmeldingIkkeHåndtertEvent(
         val meldingsreferanseId: UUID,
         val organisasjonsnummer: String,
         val speilrelatert: Boolean
-    )
+    ) : Event
 
     data class InntektsmeldingHåndtertEvent(
         val meldingsreferanseId: UUID,
         val vedtaksperiodeId: UUID,
         val organisasjonsnummer: String
-    )
+    ) : Event
 
     data class SøknadHåndtertEvent(
         val meldingsreferanseId: UUID,
         val vedtaksperiodeId: UUID,
         val organisasjonsnummer: String
-    )
+    ) : Event
 
     data class SkatteinntekterLagtTilGrunnEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -150,14 +152,18 @@ interface EventSubscription {
         val skjæringstidspunkt: LocalDate,
         val skatteinntekter: List<Skatteinntekt>,
         val omregnetÅrsinntekt: Double
-    ) {
+    ) : Event {
         data class Skatteinntekt(
             val måned: YearMonth,
             val beløp: Double
         )
     }
 
-    data class TrengerArbeidsgiveropplysningerEvent(
+    data class TrengerInntektsmeldingReplayEvent(val opplysninger: TrengerArbeidsgiveropplysninger) : Event
+
+    data class TrengerArbeidsgiveropplysningerEvent(val opplysninger: TrengerArbeidsgiveropplysninger) : Event
+
+    data class TrengerArbeidsgiveropplysninger(
         val personidentifikator: Personidentifikator,
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
@@ -171,7 +177,7 @@ interface EventSubscription {
     class TrengerIkkeArbeidsgiveropplysningerEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID
-    )
+    ) : Event
 
     data class FørsteFraværsdag(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -195,7 +201,7 @@ interface EventSubscription {
         val annullertAvSaksbehandler: LocalDateTime,
         val saksbehandlerEpost: String,
         val saksbehandlerIdent: String
-    )
+    ) : Event
 
     data class UtbetalingEndretEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -206,7 +212,7 @@ interface EventSubscription {
         val arbeidsgiverOppdrag: OppdragEventDetaljer,
         val personOppdrag: OppdragEventDetaljer,
         val korrelasjonsId: UUID
-    ) {
+    ) : Event {
         data class OppdragEventDetaljer(
             val fagsystemId: String,
             val mottaker: String,
@@ -253,51 +259,71 @@ interface EventSubscription {
         val personOppdrag: OppdragEventDetaljer,
         val utbetalingsdager: List<Utbetalingsdag>,
         val ident: String
+    ) : Event
+
+    data class UtbetalingUtenUtbetalingEvent(
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val utbetalingId: UUID,
+        val korrelasjonsId: UUID,
+        val type: String,
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val maksdato: LocalDate,
+        val forbrukteSykedager: Int,
+        val gjenståendeSykedager: Int,
+        val stønadsdager: Int,
+        val epost: String,
+        val tidspunkt: LocalDateTime,
+        val automatiskBehandling: Boolean,
+        val arbeidsgiverOppdrag: OppdragEventDetaljer,
+        val personOppdrag: OppdragEventDetaljer,
+        val utbetalingsdager: List<Utbetalingsdag>,
+        val ident: String
+    ) : Event
+
+    data class OppdragEventDetaljer(
+        val fagsystemId: String,
+        val fagområde: String,
+        val mottaker: String,
+        val nettoBeløp: Int,
+        val stønadsdager: Int,
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val linjer: List<OppdragEventLinjeDetaljer>
     ) {
-        data class OppdragEventDetaljer(
-            val fagsystemId: String,
-            val fagområde: String,
-            val mottaker: String,
-            val nettoBeløp: Int,
-            val stønadsdager: Int,
+        data class OppdragEventLinjeDetaljer(
             val fom: LocalDate,
             val tom: LocalDate,
-            val linjer: List<OppdragEventLinjeDetaljer>
-        ) {
-            data class OppdragEventLinjeDetaljer(
-                val fom: LocalDate,
-                val tom: LocalDate,
-                val sats: Int,
-                val grad: Double,
-                val stønadsdager: Int,
-                val totalbeløp: Int,
-                val statuskode: String?
-            )
+            val sats: Int,
+            val grad: Double,
+            val stønadsdager: Int,
+            val totalbeløp: Int,
+            val statuskode: String?
+        )
 
-            companion object {
-                fun mapOppdrag(oppdrag: Oppdrag) = mapOppdragdetaljer(oppdrag.detaljer())
-                private fun mapOppdragdetaljer(detaljer: OppdragDetaljer) =
-                    OppdragEventDetaljer(
-                        fagsystemId = detaljer.fagsystemId,
-                        fagområde = detaljer.fagområde,
-                        mottaker = detaljer.mottaker,
-                        nettoBeløp = detaljer.nettoBeløp,
-                        stønadsdager = detaljer.stønadsdager,
-                        fom = detaljer.fom,
-                        tom = detaljer.tom,
-                        linjer = detaljer.linjer.map {
-                            OppdragEventLinjeDetaljer(
-                                fom = it.fom,
-                                tom = it.tom,
-                                sats = it.sats,
-                                grad = it.grad,
-                                stønadsdager = it.stønadsdager,
-                                totalbeløp = it.totalbeløp,
-                                statuskode = it.statuskode
-                            )
-                        }
-                    )
-            }
+        companion object {
+            fun mapOppdrag(oppdrag: Oppdrag) = mapOppdragdetaljer(oppdrag.detaljer())
+            private fun mapOppdragdetaljer(detaljer: OppdragDetaljer) =
+                OppdragEventDetaljer(
+                    fagsystemId = detaljer.fagsystemId,
+                    fagområde = detaljer.fagområde,
+                    mottaker = detaljer.mottaker,
+                    nettoBeløp = detaljer.nettoBeløp,
+                    stønadsdager = detaljer.stønadsdager,
+                    fom = detaljer.fom,
+                    tom = detaljer.tom,
+                    linjer = detaljer.linjer.map {
+                        OppdragEventLinjeDetaljer(
+                            fom = it.fom,
+                            tom = it.tom,
+                            sats = it.sats,
+                            grad = it.grad,
+                            stønadsdager = it.stønadsdager,
+                            totalbeløp = it.totalbeløp,
+                            statuskode = it.statuskode
+                        )
+                    }
+                )
         }
     }
 
@@ -377,7 +403,7 @@ interface EventSubscription {
         val tom: LocalDate,
         val arbeidsgiverOppdrag: FeriepengeoppdragEventDetaljer,
         val personOppdrag: FeriepengeoppdragEventDetaljer
-    ) {
+    ) : Event {
         data class FeriepengeoppdragEventDetaljer(
             val fagsystemId: String,
             val mottaker: String,
@@ -397,7 +423,7 @@ interface EventSubscription {
     data class OverlappendeInfotrygdperioder(
         val overlappendeInfotrygdperioder: List<OverlappendeInfotrygdperiodeEtterInfotrygdendring>,
         val infotrygdhistorikkHendelseId: UUID
-    )
+    ) : Event
 
     data class OverlappendeInfotrygdperiodeEtterInfotrygdendring(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -424,26 +450,26 @@ interface EventSubscription {
         val hendelseIder: Set<UUID>,
         val skjæringstidspunkt: LocalDate,
         val avsluttetTidspunkt: LocalDateTime
-    )
+    ) : Event
 
     data class VedtaksperiodeNyUtbetalingEvent(
         val organisasjonsnummer: String,
         val utbetalingId: UUID,
         val vedtaksperiodeId: UUID
-    )
+    ) : Event
 
     data class BehandlingLukketEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID
-    )
+    ) : Event
 
     data class BehandlingForkastetEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
         val automatiskBehandling: Boolean
-    )
+    ) : Event
 
     data class BehandlingOpprettetEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -454,7 +480,7 @@ interface EventSubscription {
         val tom: LocalDate,
         val type: Type,
         val kilde: Kilde
-    ) {
+    ) : Event {
         enum class Type {
             Søknad,
             Omgjøring,
@@ -476,7 +502,7 @@ interface EventSubscription {
         val tags: Set<String>,
         val `6G`: Double?,
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
-    ) {
+    ) : Event {
         sealed interface Sykepengegrunnlagsfakta {
             val fastsatt: String
             val omregnetÅrsinntekt: Double
@@ -518,7 +544,7 @@ interface EventSubscription {
         val utbetalingId: UUID,
         val vedtakFattetTidspunkt: LocalDateTime,
         val sykepengegrunnlagsfakta: UtkastTilVedtakEvent.Sykepengegrunnlagsfakta
-    )
+    ) : Event
 
     data class OverstyringIgangsatt(
         val årsak: String,
@@ -526,7 +552,7 @@ interface EventSubscription {
         val periodeForEndring: Periode,
         val berørtePerioder: List<VedtaksperiodeData>,
         val meldingsreferanseId: UUID
-    ) {
+    ) : Event {
         val typeEndring get() = if (berørtePerioder.any { it.typeEndring == "REVURDERING" }) "REVURDERING" else "OVERSTYRING"
 
         data class VedtaksperiodeData(
@@ -544,7 +570,7 @@ interface EventSubscription {
         val periode: Periode,
         val skjæringstidspunkt: LocalDate,
         val opprettet: LocalDateTime
-    )
+    ) : Event
 
     data class VedtaksperiodeAnnullertEvent(
         val fom: LocalDate,
@@ -552,9 +578,9 @@ interface EventSubscription {
         val vedtaksperiodeId: UUID,
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val behandlingId: UUID
-    )
+    ) : Event
 
-    fun inntektsmeldingReplay(event: TrengerArbeidsgiveropplysningerEvent) {}
+    fun inntektsmeldingReplay(event: TrengerInntektsmeldingReplayEvent) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(event: VedtaksperiodePåminnetEvent) {}
     fun vedtaksperiodeIkkePåminnet(event: VedtaksperiodeIkkePåminnetEvent) {}
@@ -566,7 +592,7 @@ interface EventSubscription {
     fun trengerIkkeArbeidsgiveropplysninger(event: TrengerIkkeArbeidsgiveropplysningerEvent) {}
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}
-    fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}
+    fun utbetalingUtenUtbetaling(event: UtbetalingUtenUtbetalingEvent) {}
     fun feriepengerUtbetalt(event: FeriepengerUtbetaltEvent) {}
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun planlagtAnnullering(event: PlanlagtAnnulleringEvent) {}

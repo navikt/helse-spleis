@@ -225,7 +225,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 16.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "Neitakk")
         assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter(a1))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-        assertEquals(1.vedtaksperiode.id(a1), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().vedtaksperiodeId)
+        assertEquals(1.vedtaksperiode.id(a1), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().opplysninger.vedtaksperiodeId)
     }
 
     @Test
@@ -354,16 +354,16 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, a2)
         // Først trenger vi jo alt
-        val forespørselA2Januar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }
-        assertEquals(1, forespørselA2Januar.forespurteOpplysninger.filterIsInstance<EventSubscription.Inntekt>().size)
-        assertEquals(1, forespørselA2Januar.forespurteOpplysninger.filterIsInstance<EventSubscription.Arbeidsgiverperiode>().size)
-        assertEquals(1, forespørselA2Januar.forespurteOpplysninger.filterIsInstance<EventSubscription.Refusjon>().size)
+        val forespørselA2Januar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }
+        assertEquals(1, forespørselA2Januar.opplysninger.forespurteOpplysninger.filterIsInstance<EventSubscription.Inntekt>().size)
+        assertEquals(1, forespørselA2Januar.opplysninger.forespurteOpplysninger.filterIsInstance<EventSubscription.Arbeidsgiverperiode>().size)
+        assertEquals(1, forespørselA2Januar.opplysninger.forespurteOpplysninger.filterIsInstance<EventSubscription.Refusjon>().size)
 
         // Så trenger vi bare refusjon
-        val forespørselA2Februar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.vedtaksperiodeId == 2.vedtaksperiode.id(a2) }
-        assertEquals(0, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<EventSubscription.Inntekt>().size)
-        assertEquals(0, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<EventSubscription.Arbeidsgiverperiode>().size)
-        assertEquals(1, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<EventSubscription.Refusjon>().size)
+        val forespørselA2Februar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode.id(a2) }
+        assertEquals(0, forespørselA2Februar.opplysninger.forespurteOpplysninger.filterIsInstance<EventSubscription.Inntekt>().size)
+        assertEquals(0, forespørselA2Februar.opplysninger.forespurteOpplysninger.filterIsInstance<EventSubscription.Arbeidsgiverperiode>().size)
+        assertEquals(1, forespørselA2Februar.opplysninger.forespurteOpplysninger.filterIsInstance<EventSubscription.Refusjon>().size)
 
         val inntektFør = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.faktaavklartInntekt.inntektsdata.beløp
         assertEquals(INNTEKT, inntektFør)
@@ -658,7 +658,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.januar(2016) til 31.januar(2016), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true, orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { event -> event.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 }.size)
+        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { event -> event.opplysninger.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 }.size)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }

@@ -29,10 +29,8 @@ internal class TestObservatør : EventSubscription {
         sisteVedtaksperiode = event.vedtaksperiodeId
     }
 
-    override fun inntektsmeldingReplay(
-        event: EventSubscription.TrengerArbeidsgiveropplysningerEvent
-    ) {
-        ventendeReplays.add(event.yrkesaktivitetssporing.somOrganisasjonsnummer to event.vedtaksperiodeId)
+    override fun inntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent) {
+        ventendeReplays.add(event.opplysninger.yrkesaktivitetssporing.somOrganisasjonsnummer to event.opplysninger.vedtaksperiodeId)
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {

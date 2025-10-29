@@ -127,17 +127,19 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSøknad(Sykdom(17.februar, 28.februar, 100.prosent), egenmeldinger = listOf(10.februar.somPeriode()))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             val forventet = EventSubscription.TrengerArbeidsgiveropplysningerEvent(
-                personidentifikator = UNG_PERSON_FNR_2018,
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 2.vedtaksperiode,
-                skjæringstidspunkt = 17.februar,
-                sykmeldingsperioder = listOf(17.februar til 28.februar),
-                egenmeldingsperioder = listOf(10.februar.somPeriode()),
-                førsteFraværsdager = listOf(EventSubscription.FørsteFraværsdag(
+                EventSubscription.TrengerArbeidsgiveropplysninger(
+                    personidentifikator = UNG_PERSON_FNR_2018,
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                    førsteFraværsdag = 17.februar
-                )),
-                forespurteOpplysninger = setOf(Inntekt, Refusjon)
+                    vedtaksperiodeId = 2.vedtaksperiode,
+                    skjæringstidspunkt = 17.februar,
+                    sykmeldingsperioder = listOf(17.februar til 28.februar),
+                    egenmeldingsperioder = listOf(10.februar.somPeriode()),
+                    førsteFraværsdager = listOf(EventSubscription.FørsteFraværsdag(
+                        yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                        førsteFraværsdag = 17.februar
+                    )),
+                    forespurteOpplysninger = setOf(Inntekt, Refusjon)
+                )
             )
             assertEquals(forventet, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.singleOrNull())
         }
@@ -152,9 +154,9 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(2.vedtaksperiode))
             assertEquals(listOf(5.februar.somPeriode()), inspektør.egenmeldingsdager(2.vedtaksperiode))
 
-            val forespørselPgaEgenmeldingsdager = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode }
+            val forespørselPgaEgenmeldingsdager = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode }
             assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsdager)
-            assertEquals(setOf(Inntekt, Refusjon), forespørselPgaEgenmeldingsdager.forespurteOpplysninger)
+            assertEquals(setOf(Inntekt, Refusjon), forespørselPgaEgenmeldingsdager.opplysninger.forespurteOpplysninger)
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.clear()
 
             håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)))
@@ -183,7 +185,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
             assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            assertNotNull(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 3.vedtaksperiode })
+            assertNotNull(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.opplysninger.vedtaksperiodeId == 3.vedtaksperiode })
         }
     }
 
@@ -200,7 +202,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
 
             // Litt tøysete forespørsler
             assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            assertNotNull(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.vedtaksperiodeId == 2.vedtaksperiode })
+            assertNotNull(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode })
         }
     }
 
@@ -530,10 +532,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
             assertInfo("Håndterer ikke arbeidsgiverperiode i AVSLUTTET", 1.vedtaksperiode.filter())
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
-            val forespørselFebruar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.vedtaksperiodeId == 2.vedtaksperiode }
-            assertEquals(0, forespørselFebruar.forespurteOpplysninger.filterIsInstance<Arbeidsgiverperiode>().size)
-            assertEquals(0, forespørselFebruar.forespurteOpplysninger.filterIsInstance<Inntekt>().size)
-            assertEquals(1, forespørselFebruar.forespurteOpplysninger.filterIsInstance<Refusjon>().size)
+            val forespørselFebruar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode }
+            assertEquals(0, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Arbeidsgiverperiode>().size)
+            assertEquals(0, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Inntekt>().size)
+            assertEquals(1, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Refusjon>().size)
         }
         a1 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)

@@ -645,13 +645,12 @@ internal class HendelseMediator(
         val datadelingMediator = DatadelingMediator(aktivitetslogg, message)
 
         val eventBus = EventBus()
-        eventBus.register(personMediator)
         eventBus.register(VedtaksperiodeProbe)
 
         person(personidentifikator, message, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person ->
             handler(eventBus, person, aktivitetslogg)
         }
-        ferdigstill(context, personMediator, subsumsjonMediator, datadelingMediator, message, aktivitetslogg)
+        ferdigstill(context, eventBus, personMediator, subsumsjonMediator, datadelingMediator, message, aktivitetslogg)
     }
 
     private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, historiskeFolkeregisteridenter: Set<Personidentifikator>, regelverkslogg: Regelverkslogg, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
@@ -668,13 +667,14 @@ internal class HendelseMediator(
 
     private fun ferdigstill(
         context: MessageContext,
+        eventBus: EventBus,
         personMediator: PersonMediator,
         subsumsjonMediator: SubsumsjonMediator,
         datadelingMediator: DatadelingMediator,
         message: HendelseMessage,
         aktivitetslogg: Aktivitetslogg
     ) {
-        personMediator.ferdigstill(context)
+        personMediator.ferdigstill(context, eventBus)
         subsumsjonMediator.ferdigstill(subsumsjonsproducer)
         datadelingMediator.ferdigstill(context)
         if (aktivitetslogg.aktiviteter.isEmpty()) return

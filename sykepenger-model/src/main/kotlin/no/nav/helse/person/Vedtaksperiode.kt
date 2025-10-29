@@ -2061,14 +2061,14 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerArbeidsgiveropplysninger(
         forespurteOpplysninger: Set<EventSubscription.ForespurtOpplysning>
-    ): EventSubscription.TrengerArbeidsgiveropplysningerEvent {
+    ): EventSubscription.TrengerArbeidsgiveropplysninger {
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
             EventSubscription.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
             // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
             else -> listOf(this)
         }
-        return EventSubscription.TrengerArbeidsgiveropplysningerEvent(
+        return EventSubscription.TrengerArbeidsgiveropplysninger(
             personidentifikator = person.personidentifikator,
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
             vedtaksperiodeId = id,
