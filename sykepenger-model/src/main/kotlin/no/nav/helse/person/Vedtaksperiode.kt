@@ -1721,7 +1721,7 @@ internal class Vedtaksperiode private constructor(
         validering: () -> Unit
     ) {
         val haddeFlereSkjæringstidspunkt = behandlinger.harFlereSkjæringstidspunkt()
-        behandlinger.håndterEndring(
+        behandlinger.håndterSykdomstidslinje(
             person = person,
             yrkesaktivitet = yrkesaktivitet,
             behandlingkilde = behandlingkilde,
