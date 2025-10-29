@@ -38,12 +38,12 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingTest {
 
+    private lateinit var eventBus: UtbetalingEventBus
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     private companion object {
@@ -53,6 +53,7 @@ internal class UtbetalingTest {
 
     @BeforeEach
     internal fun initEach() {
+        eventBus = UtbetalingEventBus()
         aktivitetslogg = Aktivitetslogg()
     }
 
@@ -69,7 +70,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
         val utbetaling2 = annuller(opprettUtbetaling(tidslinje))
-        assertTrue(listOf(utbetaling).tillaterOpprettelseAvUtbetaling(utbetaling2!!))
+        assertTrue(listOf(utbetaling).tillaterOpprettelseAvUtbetaling(utbetaling2))
     }
 
     @Test
@@ -132,7 +133,7 @@ internal class UtbetalingTest {
             gjenståendeSykedager = 148
         )
         assertEquals(Utbetalingstatus.NY, utbetaling.inspektør.tilstand)
-        utbetaling.opprett(aktivitetslogg)
+        utbetaling.opprett(eventBus, aktivitetslogg)
         assertEquals(IKKE_UTBETALT, utbetaling.inspektør.tilstand)
     }
 
@@ -140,7 +141,7 @@ internal class UtbetalingTest {
     fun `forlenger seg ikke på en annullering`() {
         val tidslinje = tidslinjeOf(16.AP, 10.NAV).betale()
         val første = opprettUtbetaling(tidslinje)
-        val annullering = annuller(første) ?: fail { "forventet utbetaling" }
+        val annullering = annuller(første)
         val andre = opprettUtbetaling(tidslinje, annullering)
         assertNotEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertNotEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
@@ -242,7 +243,7 @@ internal class UtbetalingTest {
     fun `kan forkaste forkastet utbetaling`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
-        utbetaling.forkast(Aktivitetslogg())
+        utbetaling.forkast(eventBus, Aktivitetslogg())
         assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
     }
 
@@ -268,7 +269,7 @@ internal class UtbetalingTest {
     fun `kan forkaste annullert utbetaling`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
-        val annullering = annuller(utbetaling) ?: fail { "Kunne ikke annullere" }
+        val annullering = annuller(utbetaling)
         assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(annullering)))
     }
 
@@ -276,7 +277,7 @@ internal class UtbetalingTest {
     fun `kan forkaste utbetalt utbetaling dersom den er annullert`() {
         val tidslinje = tidslinjeOf(16.AP, 32.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje.fremTilOgMed(31.januar))
-        val annullert = annuller(opprettUtbetaling(tidslinje.fremTilOgMed(17.februar), tidligere = utbetaling)) ?: fail { "Kunne ikke annullere" }
+        val annullert = annuller(opprettUtbetaling(tidslinje.fremTilOgMed(17.februar), tidligere = utbetaling))
         assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(annullert)))
     }
 
@@ -336,7 +337,7 @@ internal class UtbetalingTest {
     fun annullering() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
-        val annullering = annuller(utbetaling) ?: fail { "forventet utbetaling" }
+        val annullering = annuller(utbetaling)
         assertEquals(listOf(utbetaling.inspektør.utbetalingId.toString()), aktivitetslogg.aktiviteter.map { it.alleKontekster["utbetalingId"] })
         assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
         assertTrue(annullering.inspektør.personOppdrag.isEmpty())
@@ -346,7 +347,7 @@ internal class UtbetalingTest {
     fun `annullere delvis refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1200, refusjonsbeløp = 600)).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
-        val annullering = annuller(utbetaling) ?: fail { "forventet utbetaling" }
+        val annullering = annuller(utbetaling)
         assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
         assertTrue(annullering.inspektør.personOppdrag.last().erOpphør())
     }
@@ -356,7 +357,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 5.NAV, 10.NAV(dekningsgrunnlag = 1200, refusjonsbeløp = 600)).betale()
         val første = opprettUtbetaling(tidslinje.fremTilOgMed(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
-        val annullering = annuller(andre) ?: fail { "forventet utbetaling" }
+        val annullering = annuller(andre)
         assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
         assertTrue(annullering.inspektør.personOppdrag.last().erOpphør())
     }
@@ -476,7 +477,7 @@ internal class UtbetalingTest {
             maksdato = LocalDate.MAX,
             forbrukteSykedager = 100,
             gjenståendeSykedager = 148
-        ).also { it.opprett(aktivitetslogg) }
+        ).also { it.opprett(eventBus, aktivitetslogg) }
     }
 
     private fun opprettUtbetaling(
@@ -504,7 +505,7 @@ internal class UtbetalingTest {
             status = status
         )
         val aktivitetslogg = Aktivitetslogg()
-        utbetalingmottaker.håndterUtbetalingmodulHendelse(hendelsen, aktivitetslogg)
+        utbetalingmottaker.håndterUtbetalingmodulHendelse(eventBus, hendelsen, aktivitetslogg)
         return aktivitetslogg
     }
 
@@ -513,13 +514,13 @@ internal class UtbetalingTest {
             utbetalingId = utbetaling.inspektør.utbetalingId,
             godkjent = utbetalingGodkjent
         ).also {
-            utbetaling.håndterUtbetalingsavgjørelseHendelse(it, aktivitetslogg)
+            utbetaling.håndterUtbetalingsavgjørelseHendelse(eventBus, it, aktivitetslogg)
         }
     }
 
     private fun annuller(utbetaling: Utbetaling) =
-        utbetaling.lagAnnulleringsutbetaling(aktivitetslogg, Utbetaling.Vurdering(true, "Z999999", "tbd@nav.no", LocalDateTime.now(), true))?.also {
-            it.opprett(aktivitetslogg)
+        utbetaling.lagAnnulleringsutbetaling(aktivitetslogg, Utbetaling.Vurdering(true, "Z999999", "tbd@nav.no", LocalDateTime.now(), true)).also {
+            it.opprett(eventBus, aktivitetslogg)
         }
 
     private class Utbetalingsgodkjenning(

@@ -42,7 +42,7 @@ internal class UtbetalingsdagerBuilderTest {
     @Test
     fun `bygger utbetalingsdager`() {
         val utbetalingstidslinje = tidslinjeOf(1.AP, 1.NAV, 1.HELG, 1.ARB, 1.FRI, 1.FOR, 1.AVV)
-        val builder = UtbetalingsdagerBuilder(Sykdomstidslinje(), utbetalingstidslinje)
+        val builder = UtbetalingsdagerBuilder(Sykdomstidslinje())
         assertEquals(
             listOf(
                 Utbetalingsdag(1.januar, ArbeidsgiverperiodeDag),
@@ -52,14 +52,14 @@ internal class UtbetalingsdagerBuilderTest {
                 Utbetalingsdag(5.januar, Fridag),
                 Utbetalingsdag(6.januar, ForeldetDag),
                 Utbetalingsdag(7.januar, AvvistDag, 0, 0, 0, listOf(Utbetalingsdag.EksternBegrunnelseDTO.SykepengedagerOppbrukt))
-            ), builder.result()
+            ), builder.result(utbetalingstidslinje)
         )
     }
 
     @Test
     fun `tidslinje med fridager`() {
         val utbetalingstidslinje = tidslinjeOf(6.FRI)
-        val builder = UtbetalingsdagerBuilder(1.P + 3.F + 1.AIG + 1.UK, utbetalingstidslinje)
+        val builder = UtbetalingsdagerBuilder(1.P + 3.F + 1.AIG + 1.UK)
         assertEquals(
             listOf(
                 Utbetalingsdag(1.januar, Permisjonsdag),
@@ -68,14 +68,14 @@ internal class UtbetalingsdagerBuilderTest {
                 Utbetalingsdag(4.januar, Feriedag),
                 Utbetalingsdag(5.januar, ArbeidIkkeGjenopptattDag),
                 Utbetalingsdag(6.januar, Fridag)
-            ), builder.result()
+            ), builder.result(utbetalingstidslinje)
         )
     }
 
     @Test
     fun `tidslinje med ArbeidsgiverperiodeDagerNav`() {
         val utbetalingstidslinje = tidslinjeOf(6.NAP)
-        val builder = UtbetalingsdagerBuilder(6.S, utbetalingstidslinje)
+        val builder = UtbetalingsdagerBuilder(6.S)
         assertEquals(
             listOf(
                 Utbetalingsdag(1.januar, ArbeidsgiverperiodeDag, 0, 0, 100, null),
@@ -84,7 +84,7 @@ internal class UtbetalingsdagerBuilderTest {
                 Utbetalingsdag(4.januar, ArbeidsgiverperiodeDag, 0, 0, 100, null),
                 Utbetalingsdag(5.januar, ArbeidsgiverperiodeDag, 0, 0, 100, null),
                 Utbetalingsdag(6.januar, ArbeidsgiverperiodeDag, 0, 0, 100, null)
-            ), builder.result()
+            ), builder.result(utbetalingstidslinje)
         )
     }
 }

@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VenterPå
 import no.nav.helse.person.Venteårsak
@@ -13,7 +14,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 
 internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-    override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         check(!vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
             "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}."
         }
@@ -31,15 +32,18 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
 
     override fun håndterKorrigerendeInntektsmelding(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg
     ) {
         if (vedtaksperiode.skalBehandlesISpeil()) return vedtaksperiode.håndterKorrigerendeInntektsmelding(
+            eventBus,
             dager,
             aktivitetslogg
         )
-        vedtaksperiode.håndterDager(dager, aktivitetslogg)
+        vedtaksperiode.håndterDager(eventBus, dager, aktivitetslogg)
         if (aktivitetslogg.harFunksjonelleFeil()) return vedtaksperiode.forkast(
+            eventBus,
             dager.hendelse,
             aktivitetslogg
         )
@@ -47,23 +51,26 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
 
     override fun gjenopptaBehandling(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) =
-        tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, hendelse, aktivitetslogg)
+        tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         tilstand(vedtaksperiode).håndterPåminnelse(vedtaksperiode, påminnelse, aktivitetslogg)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.behandlinger.forkastBeregning(aktivitetslogg)
+        vedtaksperiode.behandlinger.forkastBeregning(eventBus, with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
         if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) vedtaksperiode.tilstand(
+            eventBus,
             aktivitetslogg,
             AvventerInntektsmelding
         )
@@ -87,12 +94,12 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     }
 
     private sealed interface Tilstand {
-        fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg)
+        fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg)
         fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
     }
 
     private data object AvventerTidligereEllerOverlappendeSøknad : Tilstand {
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
         }
 
@@ -111,21 +118,23 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     private data object ForventerIkkeInntekt : Tilstand {
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
+            eventBus: EventBus,
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(aktivitetslogg, AvsluttetUtenUtbetaling)
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvsluttetUtenUtbetaling)
         }
     }
 
     private data class TrengerInntektsmelding(val segSelv: Vedtaksperiode) : Tilstand {
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
+            eventBus: EventBus,
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg
         ) {
             aktivitetslogg.info("Går tilbake til Avventer inntektsmelding fordi perioden mangler inntekt og/eller refusjonsopplysninger")
-            vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerInntektsmelding)
         }
     }
 
@@ -133,6 +142,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         Tilstand {
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
+            eventBus: EventBus,
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg
         ) {
@@ -143,20 +153,22 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     private data object KlarForVilkårsprøving : Tilstand {
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
+            eventBus: EventBus,
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(aktivitetslogg, AvventerVilkårsprøving)
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøving)
         }
     }
 
     private data object KlarForBeregning : Tilstand {
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
+            eventBus: EventBus,
             hendelse: Hendelse,
             aktivitetslogg: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(aktivitetslogg, AvventerHistorikk)
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
         }
     }
 }

@@ -3,6 +3,7 @@ package no.nav.helse.person.tilstandsmaskin
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.behandlingkilde
@@ -13,12 +14,12 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     override val type = TilstandType.AVSLUTTET_UTEN_UTBETALING
     override val erFerdigBehandlet = true
 
-    override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        avsluttUtenVedtak(vedtaksperiode, aktivitetslogg)
+    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+        avsluttUtenVedtak(vedtaksperiode, eventBus, aktivitetslogg)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+    private fun avsluttUtenVedtak(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         val utbetalingstidslinje = lagArbeidsgiverberegning(listOf(vedtaksperiode))
             .single {
                 val vedtaksperiodeYrkesaktivitet = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype
@@ -32,7 +33,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
             .vedtaksperioder
             .single()
 
-        vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje.utbetalingstidslinje, emptyMap())
+        vedtaksperiode.behandlinger.avsluttUtenVedtak(eventBus, vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje.utbetalingstidslinje, emptyMap())
     }
 
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
@@ -41,10 +42,12 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
 
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
         vedtaksperiode.behandlinger.sikreNyBehandling(
+            eventBus,
             vedtaksperiode.yrkesaktivitet,
             revurdering.hendelse.metadata.behandlingkilde,
             vedtaksperiode.person.skjæringstidspunkter,
@@ -57,6 +60,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
                 "Startet omgjøring grunnet korrigerende søknad"
             )
             vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(
+                eventBus = eventBus,
                 behandlingkilde = revurdering.hendelse.metadata.behandlingkilde,
                 dokumentsporing = null,
                 aktivitetslogg = aktivitetslogg
@@ -64,21 +68,22 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
             aktivitetslogg.info("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden")
             if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
                 aktivitetslogg.info("mangler nødvendige opplysninger fra arbeidsgiver")
-                return vedtaksperiode.tilstand(aktivitetslogg, AvventerInntektsmelding)
+                return vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerInntektsmelding)
             }
         }
-        vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
+        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerBlokkerendePeriode)
     }
 
     override fun håndterKorrigerendeInntektsmelding(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.håndterDager(dager, aktivitetslogg)
+        vedtaksperiode.håndterDager(eventBus, dager, aktivitetslogg)
 
         if (!aktivitetslogg.harFunksjonelleFeil()) return
         if (!vedtaksperiode.kanForkastes()) return
-        vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
+        vedtaksperiode.forkast(eventBus, dager.hendelse, aktivitetslogg)
     }
 }

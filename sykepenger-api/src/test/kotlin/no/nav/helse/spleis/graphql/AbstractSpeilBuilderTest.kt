@@ -28,6 +28,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -71,6 +72,7 @@ internal abstract class AbstractSpeilBuilderTest {
         )
     }
 
+    private lateinit var eventBus: EventBus
     private lateinit var person: Person
     private lateinit var observatør: TestObservatør
     private lateinit var spekemat: Spekemat
@@ -81,8 +83,10 @@ internal abstract class AbstractSpeilBuilderTest {
         observatør = TestObservatør()
         spekemat = Spekemat()
         person = creator(EmptyLog)
-        person.addObserver(observatør)
-        person.addObserver(spekemat)
+        eventBus = EventBus().apply {
+            register(observatør)
+            register(spekemat)
+        }
     }
 
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist ->
@@ -105,14 +109,14 @@ internal abstract class AbstractSpeilBuilderTest {
     protected fun dto() = person.dto()
     protected fun speilApi() = serializePersonForSpeil(person, spekemat.resultat())
 
-    protected fun <T : Hendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit) = apply {
+    protected fun <T : Hendelse> T.håndter(håndter: Person.(EventBus, T, IAktivitetslogg) -> Unit) = apply {
         hendelselogg = Aktivitetslogg()
-        person.håndter(this, hendelselogg)
+        person.håndter(eventBus, this, hendelselogg)
         ubesvarteBehov.addAll(hendelselogg.behov)
 
         observatør.ventendeReplays().forEach { (orgnr, vedtaksperiodeId) ->
             hendelselogg = Aktivitetslogg()
-            person.håndterInntektsmeldingerReplay(fabrikker.getValue(orgnr).lagInntektsmeldingReplayUtført(vedtaksperiodeId), hendelselogg)
+            person.håndterInntektsmeldingerReplay(eventBus, fabrikker.getValue(orgnr).lagInntektsmeldingReplayUtført(vedtaksperiodeId), hendelselogg)
             ubesvarteBehov.addAll(hendelselogg.behov)
         }
     }

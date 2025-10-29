@@ -42,10 +42,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
     private val behandlingLukketEventer = mutableListOf<PersonObserver.BehandlingLukketEvent>()
     private val behandlingForkastetEventer = mutableListOf<PersonObserver.BehandlingForkastetEvent>()
 
-    init {
-        person.addObserver(this)
-    }
-
     private fun loggBehandlingstatus(vedtaksperiodeId: UUID, status: Behandlingstatus) {
         gjeldendeBehandlingstatus.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(0, LocalDateTime.now() to status)
     }

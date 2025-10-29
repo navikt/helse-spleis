@@ -13,7 +13,7 @@ import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.NyPeriode
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Reberegning
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.SkjønssmessigFastsettelse
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Sykdomstidslinje
-import no.nav.helse.person.Person
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.Vedtaksperiode
@@ -75,9 +75,9 @@ class Revurderingseventyr private constructor(
         return periodeForEndring.starterEtter(vedtaksperiode)
     }
 
-    internal fun sendOverstyringIgangsattEvent(person: Person) {
+    internal fun sendOverstyringIgangsattEvent(eventBus: EventBus) {
         if (vedtaksperioder.isEmpty()) return
-        hvorfor.emitOverstyringIgangsattEvent(person, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring, hendelse.metadata.meldingsreferanseId)
+        hvorfor.emitOverstyringIgangsattEvent(eventBus, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring, hendelse.metadata.meldingsreferanseId)
     }
 
     internal fun loggDersomKorrigerendeSøknad(aktivitetslogg: IAktivitetslogg, loggMelding: String) {
@@ -95,8 +95,8 @@ class Revurderingseventyr private constructor(
 
         fun dersomInngått(aktivitetslogg: IAktivitetslogg) {}
 
-        fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode, meldingsreferanseId: MeldingsreferanseId) {
-            person.emitOverstyringIgangsattEvent(
+        fun emitOverstyringIgangsattEvent(eventBus: EventBus, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode, meldingsreferanseId: MeldingsreferanseId) {
+            eventBus.emitOverstyringIgangsattEvent(
                 PersonObserver.OverstyringIgangsatt(
                     årsak = navn(),
                     berørtePerioder = vedtaksperioder,
@@ -154,7 +154,7 @@ class Revurderingseventyr private constructor(
 
         data object Reberegning : RevurderingÅrsak {
             override fun emitOverstyringIgangsattEvent(
-                person: Person,
+                eventBus: EventBus,
                 vedtaksperioder: List<VedtaksperiodeData>,
                 skjæringstidspunkt: LocalDate,
                 periodeForEndring: Periode,

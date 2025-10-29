@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -16,18 +17,19 @@ internal sealed interface Vedtaksperiodetilstand {
     val type: TilstandType
     val erFerdigBehandlet: Boolean get() = false
 
-    fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
+    fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {}
     fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
         LocalDateTime.MAX
 
-    fun håndterMakstid(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    fun håndterMakstid(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.funksjonellFeil(Varselkode.RV_VT_1)
-        vedtaksperiode.forkast(påminnelse, aktivitetslogg)
+        vedtaksperiode.forkast(eventBus, påminnelse, aktivitetslogg)
     }
 
-    fun replayUtført(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {}
+    fun replayUtført(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {}
     fun inntektsmeldingFerdigbehandlet(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
@@ -40,13 +42,13 @@ internal sealed interface Vedtaksperiodetilstand {
     ) =
         dager.skalHåndteresAv(vedtaksperiode.periode)
 
-    fun håndterKorrigerendeInntektsmelding(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, aktivitetslogg)
+    fun håndterKorrigerendeInntektsmelding(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
+        vedtaksperiode.håndterKorrigerendeInntektsmelding(eventBus, dager, aktivitetslogg)
     }
 
-    fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
+    fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
 
-    fun håndterUtbetalingHendelse(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+    fun håndterUtbetalingHendelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Forventet ikke utbetaling i %s".format(type.name))
     }
 
@@ -57,9 +59,10 @@ internal sealed interface Vedtaksperiodetilstand {
     ) {
     }
 
-    fun nyAnnullering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
+    fun nyAnnullering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {}
     fun gjenopptaBehandling(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
@@ -68,6 +71,7 @@ internal sealed interface Vedtaksperiodetilstand {
 
     fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     )

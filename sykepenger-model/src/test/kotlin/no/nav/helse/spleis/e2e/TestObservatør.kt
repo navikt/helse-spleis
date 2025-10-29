@@ -15,9 +15,6 @@ internal typealias InntektsmeldingId = UUID
 internal typealias VedtaksperiodeId = UUID
 
 internal class TestObservatør(person: Person? = null) : PersonObserver {
-    init {
-        person?.addObserver(this)
-    }
 
     internal val tilstandsendringer = person?.inspektør?.sisteVedtaksperiodeTilstander()?.mapValues { mutableListOf(it.value) }?.toMutableMap() ?: mutableMapOf()
     val utbetalteVedtaksperioder = mutableListOf<UUID>()

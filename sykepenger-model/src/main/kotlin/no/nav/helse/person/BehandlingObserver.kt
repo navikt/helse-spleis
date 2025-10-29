@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
@@ -10,6 +10,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 internal interface BehandlingObserver {
 
     fun avsluttetUtenVedtak(
+        eventBus: EventBus,
         aktivitetslogg: IAktivitetslogg,
         behandlingId: UUID,
         tidsstempel: LocalDateTime,
@@ -19,16 +20,18 @@ internal interface BehandlingObserver {
     )
 
     fun vedtakIverksatt(
+        eventBus: EventBus,
         aktivitetslogg: IAktivitetslogg,
         vedtakFattetTidspunkt: LocalDateTime,
         behandling: Behandlinger.Behandling
     )
 
-    fun vedtakAnnullert(aktivitetslogg: IAktivitetslogg, behandlingId: UUID)
-    fun behandlingLukket(behandlingId: UUID)
-    fun behandlingForkastet(behandlingId: UUID, automatiskBehandling: Boolean)
+    fun vedtakAnnullert(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, behandlingId: UUID)
+    fun behandlingLukket(eventBus: EventBus, behandlingId: UUID)
+    fun behandlingForkastet(eventBus: EventBus, behandlingId: UUID, automatiskBehandling: Boolean)
 
     fun nyBehandling(
+        eventBus: EventBus,
         id: UUID,
         periode: Periode,
         meldingsreferanseId: MeldingsreferanseId,
@@ -40,6 +43,7 @@ internal interface BehandlingObserver {
     )
 
     fun utkastTilVedtak(
+        eventBus: EventBus,
         utkastTilVedtak: PersonObserver.UtkastTilVedtakEvent
     )
 }

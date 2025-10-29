@@ -12,7 +12,7 @@ import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
-import no.nav.helse.person.Person
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -73,7 +73,7 @@ internal class Feriepengeutbetaling private constructor(
         personoppdrag = personoppdrag
     )
 
-    fun håndter(utbetalingHendelse: FeriepengeutbetalingHendelse, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, person: Person) {
+    fun håndter(eventBus: EventBus, utbetalingHendelse: FeriepengeutbetalingHendelse, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) {
         if (utbetalingHendelse.utbetalingId != this.utbetalingId || utbetalingHendelse.fagsystemId !in setOf(oppdrag.fagsystemId, personoppdrag.fagsystemId)) return
 
         aktivitetslogg.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger")
@@ -92,7 +92,7 @@ internal class Feriepengeutbetaling private constructor(
             return aktivitetslogg.info("Utbetaling av feriepenger med utbetalingId $utbetalingId og fagsystemIder ${oppdrag.fagsystemId} og ${personoppdrag.fagsystemId} feilet.")
         }
 
-        person.feriepengerUtbetalt(
+        eventBus.feriepengerUtbetalt(
             PersonObserver.FeriepengerUtbetaltEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
                 fom = fom,

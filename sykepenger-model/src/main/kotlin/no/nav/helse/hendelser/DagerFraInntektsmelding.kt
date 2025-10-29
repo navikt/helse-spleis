@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
@@ -267,8 +268,8 @@ internal class DagerFraInntektsmelding(
         return vedtaksperioder.firstOrNull { it.periode.overlapperMed(arbeidsgiverperiode ?: førsteFraværsdag!!.somPeriode()) }
     }
 
-    internal fun inntektsmeldingIkkeHåndtert(aktivitetslogg: IAktivitetslogg, person: Person, forkastede: List<Periode>, sykmeldingsperioder: Sykmeldingsperioder) =
-        InntektsmeldingIkkeHåndtert().emit(aktivitetslogg, person, forkastede, sykmeldingsperioder)
+    internal fun inntektsmeldingIkkeHåndtert(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, person: Person, forkastede: List<Periode>, sykmeldingsperioder: Sykmeldingsperioder) =
+        InntektsmeldingIkkeHåndtert().emit(eventBus, aktivitetslogg, person, forkastede, sykmeldingsperioder)
 
     private inner class InntektsmeldingIkkeHåndtert {
         private val meldingsreferanseId = hendelse.metadata.meldingsreferanseId
@@ -299,15 +300,15 @@ internal class DagerFraInntektsmelding(
 
         private fun speilrelatert(person: Person) = person.speilrelatert(*perioderViTrorInntektsmeldingenPrøverÅSiNoeOm.toTypedArray())
 
-        fun emit(aktivitetslogg: IAktivitetslogg, person: Person, forkastede: List<Periode>, sykmeldingsperioder: Sykmeldingsperioder) {
+        fun emit(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, person: Person, forkastede: List<Periode>, sykmeldingsperioder: Sykmeldingsperioder) {
             val relevanteSykmeldingsperioder = relevanteSykmeldingsperioder(sykmeldingsperioder.perioder())
             val overlapperMedForkastet = overlapperMed(forkastede)
             if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
-                person.emitInntektsmeldingFørSøknadEvent(meldingsreferanseId.id, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer))
+                eventBus.emitInntektsmeldingFørSøknadEvent(meldingsreferanseId.id, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer))
                 return aktivitetslogg.info("Inntektsmelding før søknad - er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
             }
             aktivitetslogg.info("Inntektsmelding ikke håndtert")
-            person.emitInntektsmeldingIkkeHåndtert(meldingsreferanseId, organisasjonsnummer, speilrelatert = speilrelatert(person))
+            eventBus.emitInntektsmeldingIkkeHåndtert(meldingsreferanseId, organisasjonsnummer, speilrelatert = speilrelatert(person))
         }
     }
 

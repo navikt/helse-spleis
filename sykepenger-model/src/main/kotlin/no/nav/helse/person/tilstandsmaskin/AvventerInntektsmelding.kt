@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.behandlingkilde
@@ -16,9 +17,9 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
         tilstandsendringstidspunkt.plusDays(180)
 
-    override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         check(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) { "Forventer kun arbeidstakere her" }
-        vedtaksperiode.trengerInntektsmeldingReplay()
+        vedtaksperiode.trengerInntektsmeldingReplay(eventBus)
     }
 
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
@@ -37,30 +38,32 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
 
     override fun håndterKorrigerendeInntektsmelding(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.håndterDager(dager, aktivitetslogg)
-        if (aktivitetslogg.harFunksjonelleFeil()) return vedtaksperiode.forkast(dager.hendelse, aktivitetslogg)
+        vedtaksperiode.håndterDager(eventBus, dager, aktivitetslogg)
+        if (aktivitetslogg.harFunksjonelleFeil()) return vedtaksperiode.forkast(eventBus, dager.hendelse, aktivitetslogg)
     }
 
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        if (vurderOmKanGåVidere(vedtaksperiode, revurdering.hendelse, aktivitetslogg)) return
-        vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
+        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, revurdering.hendelse, aktivitetslogg)) return
+        vedtaksperiode.sendTrengerArbeidsgiveropplysninger(eventBus)
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        if (vurderOmKanGåVidere(vedtaksperiode, påminnelse, aktivitetslogg)) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)) {
             aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
         }
 
-        if (påminnelse.når(Påminnelse.Predikat.Flagg("trengerReplay"))) return vedtaksperiode.trengerInntektsmeldingReplay()
-        if (vurderOmInntektsmeldingAldriKommer(påminnelse)) return vedtaksperiode.tilstand(aktivitetslogg, AvventerAOrdningen)
-        vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
+        if (påminnelse.når(Påminnelse.Predikat.Flagg("trengerReplay"))) return vedtaksperiode.trengerInntektsmeldingReplay(eventBus)
+        if (vurderOmInntektsmeldingAldriKommer(påminnelse)) return vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAOrdningen)
+        vedtaksperiode.sendTrengerArbeidsgiveropplysninger(eventBus)
     }
 
     private fun vurderOmInntektsmeldingAldriKommer(påminnelse: Påminnelse): Boolean {
@@ -71,40 +74,43 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
 
     override fun gjenopptaBehandling(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vurderOmKanGåVidere(vedtaksperiode, hendelse, aktivitetslogg)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
     }
 
-    override fun replayUtført(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
-        vurderOmKanGåVidere(vedtaksperiode, hendelse, aktivitetslogg)
+    override fun replayUtført(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+        vedtaksperiode.sendTrengerArbeidsgiveropplysninger(eventBus)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
     }
 
     override fun inntektsmeldingFerdigbehandlet(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vurderOmKanGåVidere(vedtaksperiode, hendelse, aktivitetslogg)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
     }
 
     private fun vurderOmKanGåVidere(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ): Boolean {
-        vedtaksperiode.videreførEksisterendeOpplysninger(hendelse.metadata.behandlingkilde, aktivitetslogg)
+        vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, hendelse.metadata.behandlingkilde, aktivitetslogg)
 
         if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
             if (vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte()) {
-                vedtaksperiode.tilstand(aktivitetslogg, AvventerAOrdningen)
+                vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAOrdningen)
                 return true
             }
             return false
         }
-        vedtaksperiode.tilstand(aktivitetslogg, AvventerBlokkerendePeriode)
+        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerBlokkerendePeriode)
         return true
     }
 }

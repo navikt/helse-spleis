@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.serde.tilPersonData
@@ -93,6 +94,7 @@ internal class RestApiTest {
     }
 
     private fun opprettTestdata(testDataSource: TestDataSource) {
+        val eventBus = EventBus()
         val fom = LocalDate.of(2018, 9, 10)
         val tom = fom.plusDays(16)
         val sykeperioder = listOf(Sykmeldingsperiode(fom, tom))
@@ -119,8 +121,8 @@ internal class RestApiTest {
             mottatt = LocalDateTime.now()
         )
         val person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
-        person.håndterSykmelding(sykmelding, Aktivitetslogg())
-        person.håndterInntektsmelding(inntektsmelding, Aktivitetslogg())
+        person.håndterSykmelding(eventBus, sykmelding, Aktivitetslogg())
+        person.håndterInntektsmelding(eventBus, inntektsmelding, Aktivitetslogg())
         testDataSource.ds.lagrePerson(UNG_PERSON_FNR, person)
         testDataSource.ds.lagreHendelse(MELDINGSREFERANSE)
     }

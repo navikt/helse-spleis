@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -51,6 +52,7 @@ internal abstract class AbstractEndToEndTest {
         private fun toVedtakMedSammeFagsystemId(regelverkslogg: Regelverkslogg) = gjenopprettFraJSON("/personer/to_vedtak_samme_fagsystem_id.json", 334, regelverkslogg)
     }
 
+    private lateinit var eventBus: EventBus
     internal val assertetVarsler = Varslersamler.AssertetVarsler()
     lateinit var personlogg: Aktivitetslogg
         private set
@@ -141,13 +143,19 @@ internal abstract class AbstractEndToEndTest {
         observatør = TestObservatør(person)
         personlogg = Aktivitetslogg()
         ugyldigeSituasjoner = UgyldigeSituasjonerObservatør(person)
+
+        eventBus = EventBus().apply {
+            register(observatør)
+            register(ugyldigeSituasjoner)
+        }
+
         return person
     }
 
-    internal fun <T : Hendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
+    internal fun <T : Hendelse> T.håndter(håndter: Person.(EventBus, T, IAktivitetslogg) -> Unit): T {
         hendelselogg = Aktivitetslogg(personlogg)
         forrigeHendelse = this
-        person.håndter(this, hendelselogg)
+        person.håndter(eventBus, this, hendelselogg)
         ikkeBesvarteBehov += EtterspurtBehov.finnEtterspurteBehov(hendelselogg.behov)
         return this
     }

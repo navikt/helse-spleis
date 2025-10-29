@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.mapWithNext
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -174,13 +175,14 @@ class Inntektsmelding(
     }
 
     internal fun ferdigstill(
+        eventBus: EventBus,
         aktivitetslogg: IAktivitetslogg,
         person: Person,
         forkastede: List<Periode>,
         sykmeldingsperioder: Sykmeldingsperioder
     ) {
         if (håndtertInntekt) return // Definisjonen av om en inntektsmelding er håndtert eller ikke er at vi har håndtert inntekten i den... 🤡
-        dager.inntektsmeldingIkkeHåndtert(aktivitetslogg, person, forkastede, sykmeldingsperioder)
+        dager.inntektsmeldingIkkeHåndtert(eventBus, aktivitetslogg, person, forkastede, sykmeldingsperioder)
     }
 
 }

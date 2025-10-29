@@ -29,6 +29,7 @@ import javax.sql.DataSource
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -91,11 +92,15 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     @Test
     fun `Det Spesialist faktisk henter`() {
         val spekemat = Spekemat()
+        observatør = TestObservatør()
+        val eventBus = EventBus().apply {
+            register(spekemat)
+            register(observatør)
+        }
         person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
-        person.addObserver(spekemat)
 
         val spekematClient = mockk<SpekematClient>()
-        spleisApiTestApplication(spekematClient = spekematClient, testdata = opprettTestdata(person)) {
+        spleisApiTestApplication(spekematClient = spekematClient, testdata = opprettTestdata(eventBus)) {
             every { spekematClient.hentSpekemat(UNG_PERSON_FNR, any()) } returns spekemat.resultat()
             val query =
                 URI("https://raw.githubusercontent.com/navikt/helse-spesialist/main/spesialist-client-spleis/src/main/resources/graphql/hentSnapshot.graphql").toURL()
@@ -834,25 +839,24 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             .also(assertBlock)
     }
 
-    private fun opprettTestdata(person: Person): (TestDataSource) -> Unit {
+    private fun opprettTestdata(eventBus: EventBus): (TestDataSource) -> Unit {
         return fun(testDataSource: TestDataSource) {
-            observatør = TestObservatør().also { person.addObserver(it) }
-            person.håndterSykmelding(sykmelding(), Aktivitetslogg())
-            person.håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinghistorikk(), Aktivitetslogg())
-            person.håndterSøknad(søknad(), Aktivitetslogg())
-            person.håndterInntektsmelding(inntektsmelding(), Aktivitetslogg())
-            person.håndterYtelser(ytelser(), Aktivitetslogg())
-            person.håndterVilkårsgrunnlag(vilkårsgrunnlag(), Aktivitetslogg())
+            person.håndterSykmelding(eventBus, sykmelding(), Aktivitetslogg())
+            person.håndterUtbetalingshistorikkEtterInfotrygdendring(eventBus, utbetalinghistorikk(), Aktivitetslogg())
+            person.håndterSøknad(eventBus, søknad(), Aktivitetslogg())
+            person.håndterInntektsmelding(eventBus, inntektsmelding(), Aktivitetslogg())
+            person.håndterYtelser(eventBus, ytelser(), Aktivitetslogg())
+            person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag(), Aktivitetslogg())
             val ytelser = ytelser()
             val aktivitetslogg = Aktivitetslogg()
-            person.håndterYtelser(ytelser, aktivitetslogg)
+            person.håndterYtelser(eventBus, ytelser, aktivitetslogg)
             val simuleringsbehov = aktivitetslogg.behov.last { it.type == Simulering }
             val utbetalingId = UUID.fromString(simuleringsbehov.alleKontekster.getValue("utbetalingId"))
             val fagsystemId = simuleringsbehov.detaljer().getValue("fagsystemId") as String
             val fagområde = simuleringsbehov.detaljer().getValue("fagområde") as String
-            person.håndterSimulering(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde), Aktivitetslogg())
-            person.håndterUtbetalingsgodkjenning(utbetalingsgodkjenning(utbetalingId = utbetalingId), Aktivitetslogg())
-            person.håndterUtbetalingHendelse(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId), Aktivitetslogg())
+            person.håndterSimulering(eventBus, simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde), Aktivitetslogg())
+            person.håndterUtbetalingsgodkjenning(eventBus, utbetalingsgodkjenning(utbetalingId = utbetalingId), Aktivitetslogg())
+            person.håndterUtbetalingHendelse(eventBus,  utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId), Aktivitetslogg())
 
             lagrePerson(testDataSource.ds, UNG_PERSON_FNR, person)
             lagreSykmelding(

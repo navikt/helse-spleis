@@ -134,8 +134,8 @@ internal class UtkastTilVedtakBuilder(
         this.refusjonstidslinje(refusjonstidslinje)
 
         tags.add(utbetalingstidslinje.behandlingsresultat)
-        this.utbetalingsdager = UtbetalingsdagerBuilder(sykdomstidslinje, utbetalingstidslinje)
-            .result()
+        this.utbetalingsdager = UtbetalingsdagerBuilder(sykdomstidslinje)
+            .result(utbetalingstidslinje)
             .map { dag -> dag.tilBehovMap() }
     }
 

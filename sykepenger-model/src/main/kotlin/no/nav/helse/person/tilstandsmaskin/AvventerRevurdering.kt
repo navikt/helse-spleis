@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VenterPå
 import no.nav.helse.person.Venteårsak
@@ -13,18 +14,19 @@ import no.nav.helse.person.behandlingkilde
 
 internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     override val type = TilstandType.AVVENTER_REVURDERING
-    override fun entering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.behandlinger.forkastBeregning(aktivitetslogg)
+    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+        vedtaksperiode.behandlinger.forkastBeregning(eventBus, with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
     override fun igangsettOverstyring(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.håndterOverstyringIgangsattRevurderingArbeidstaker(revurdering, aktivitetslogg)
-        vedtaksperiode.behandlinger.forkastBeregning(aktivitetslogg)
+        vedtaksperiode.håndterOverstyringIgangsattRevurderingArbeidstaker(eventBus, revurdering, aktivitetslogg)
+        vedtaksperiode.behandlinger.forkastBeregning(eventBus, with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
     }
 
     fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
@@ -39,24 +41,26 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
 
     override fun gjenopptaBehandling(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, aktivitetslogg)
+        tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
     override fun håndterUtbetalingHendelse(
         vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
         hendelse: UtbetalingHendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
         vedtaksperiode.håndterUtbetalingHendelse(aktivitetslogg)
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.sikreRefusjonsopplysningerHvisTomt(påminnelse, aktivitetslogg)
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+        vedtaksperiode.sikreRefusjonsopplysningerHvisTomt(eventBus, påminnelse, aktivitetslogg)
         if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
-            vedtaksperiode.videreførEksisterendeOpplysninger(påminnelse.metadata.behandlingkilde, aktivitetslogg)
+            vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, påminnelse.metadata.behandlingkilde, aktivitetslogg)
             if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) return
             aktivitetslogg.info("Ordnet opp i manglende inntekt/refusjon i AvventerRevurdering ved videreføring av eksisterende opplysninger.")
         }
@@ -83,39 +87,39 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     }
 
     private sealed interface Tilstand {
-        fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg)
+        fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg)
     }
 
     private data class TrengerInnteksopplysninger(private val vedtaksperiode: Vedtaksperiode) : Tilstand {
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Trenger inntektsopplysninger etter igangsatt revurdering. Etterspør inntekt fra skatt")
             vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
         }
     }
 
     private data object HarPågåendeUtbetaling : Tilstand {
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
         }
     }
 
     private data class TrengerInntektsopplysningerAnnenArbeidsgiver(val trengerInntektsmelding: Vedtaksperiode) : Tilstand {
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Trenger inntektsopplysninger etter igangsatt revurdering på annen arbeidsgiver.")
         }
     }
 
     private data object KlarForVilkårsprøving : Tilstand {
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.tilstand(aktivitetslogg, AvventerVilkårsprøvingRevurdering) {
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøvingRevurdering) {
                 aktivitetslogg.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
             }
         }
     }
 
     private data object KlarForBeregning : Tilstand {
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.tilstand(aktivitetslogg, AvventerHistorikkRevurdering)
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikkRevurdering)
         }
     }
 }

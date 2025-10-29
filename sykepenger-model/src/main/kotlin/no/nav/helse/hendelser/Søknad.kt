@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerE
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
 import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
@@ -219,7 +220,7 @@ class Søknad(
     private fun avskjæringsdato(): LocalDate =
         (opprinneligSendt ?: metadata.innsendt).toLocalDate().minusMonths(3).withDayOfMonth(1)
 
-    internal fun lagVedtaksperiode(person: Person, yrkesaktivitet: Yrkesaktivitet, regelverkslogg: Regelverkslogg): Vedtaksperiode {
+    internal fun lagVedtaksperiode(eventBus: EventBus, person: Person, yrkesaktivitet: Yrkesaktivitet, regelverkslogg: Regelverkslogg): Vedtaksperiode {
         requireNotNull(sykdomstidslinje.periode()) { "ugyldig søknad: tidslinjen er tom" }
         val faktaavklartInntekt = when (behandlingsporing) {
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
@@ -268,6 +269,7 @@ class Søknad(
         }
 
         return Vedtaksperiode(
+            eventBus = eventBus,
             egenmeldingsperioder = egenmeldinger,
             metadata = metadata,
             person = person,

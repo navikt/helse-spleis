@@ -35,6 +35,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
@@ -71,7 +72,7 @@ import org.junit.jupiter.api.fail
 
 internal class TestPerson(
     private val observatør: TestObservatør,
-    person: Person,
+    internal val person: Person,
     deferredLog: DeferredLog = DeferredLog()
 ) {
 
@@ -95,12 +96,13 @@ internal class TestPerson(
     private val varslersamler = Varslersamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk()
     private val vedtaksperiodesamler = Vedtaksperiodesamler(person)
-    internal val person = person.also {
-        it.addObserver(vedtaksperiodesamler)
-        it.addObserver(behovsamler)
-        it.addObserver(observatør)
-    }
     private val ugyldigeSituasjoner = UgyldigeSituasjonerObservatør(person)
+    private val eventBus = EventBus().apply {
+        register(ugyldigeSituasjoner)
+        register(vedtaksperiodesamler)
+        register(behovsamler)
+        register(observatør)
+    }
 
     private val arbeidsgivere = mutableMapOf<String, TestArbeidsgiver>()
 
@@ -123,10 +125,10 @@ internal class TestPerson(
         else -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(this)
     }
 
-    private fun <T : Hendelse> T.håndter(håndter: Person.(T, IAktivitetslogg) -> Unit): T {
+    private fun <T : Hendelse> T.håndter(håndter: Person.(EventBus, T, IAktivitetslogg) -> Unit): T {
         forrigeAktivitetslogg = Aktivitetslogg(personlogg)
         try {
-            person.håndter(this, forrigeAktivitetslogg)
+            person.håndter(eventBus, this, forrigeAktivitetslogg)
         } finally {
             varslersamler.registrerVarsler(forrigeAktivitetslogg.varsel)
             behovsamler.registrerBehov(forrigeAktivitetslogg)
@@ -643,8 +645,8 @@ internal class TestPerson(
         }
 
         internal fun håndterIdentOpphørt(nyttFnr: Personidentifikator) {
-            arbeidsgiverHendelsefabrikk.lagIdentOpphørt().håndter { it, aktivitetslogg ->
-                håndterIdentOpphørt(it, aktivitetslogg, nyttFnr)
+            arbeidsgiverHendelsefabrikk.lagIdentOpphørt().håndter { bus, it, aktivitetslogg ->
+                håndterIdentOpphørt(bus, it, aktivitetslogg, nyttFnr)
             }
         }
 
