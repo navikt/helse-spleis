@@ -86,7 +86,6 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
-import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.refusjon.Refusjonsservitør
@@ -113,7 +112,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Ventetidberegner
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.HundreProsent
 
 internal class Yrkesaktivitet private constructor(
@@ -650,18 +648,11 @@ internal class Yrkesaktivitet private constructor(
     }
 
     internal fun lagreInntektFraAOrdningen(
-        meldingsreferanseId: MeldingsreferanseId,
-        skjæringstidspunkt: LocalDate,
-        omregnetÅrsinntekt: Inntekt
+        faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
     ) {
         val im = Inntektsmeldinginntekt(
-            id = UUID.randomUUID(),
-            inntektsdata = Inntektsdata(
-                hendelseId = meldingsreferanseId,
-                dato = skjæringstidspunkt,
-                beløp = omregnetÅrsinntekt,
-                tidsstempel = LocalDateTime.now()
-            ),
+            id = faktaavklartInntekt.id,
+            inntektsdata = faktaavklartInntekt.inntektsdata,
             kilde = Inntektsmeldinginntekt.Kilde.AOrdningen
         )
 

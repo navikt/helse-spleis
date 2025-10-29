@@ -745,10 +745,12 @@ internal class Vedtaksperiode private constructor(
         )
 
         val faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(id = UUID.randomUUID(), inntektsdata = inntektsdata, inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver)
+
         behandlinger.håndterFaktaavklartInntekt(faktaavklartInntekt, yrkesaktivitet, hendelse.metadata.behandlingkilde, aktivitetslogg)
+
         inntektshistorikk.leggTil(
             Inntektsmeldinginntekt(
-                id = UUID.randomUUID(),
+                id = faktaavklartInntekt.id,
                 inntektsdata = inntektsdata,
                 kilde = Inntektsmeldinginntekt.Kilde.Arbeidsgiver
             )
@@ -1371,12 +1373,6 @@ internal class Vedtaksperiode private constructor(
         val skatteopplysninger = sykepengegrunnlagForArbeidsgiver.inntekter()
         val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteopplysninger)
 
-        yrkesaktivitet.lagreInntektFraAOrdningen(
-            meldingsreferanseId = sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            omregnetÅrsinntekt = omregnetÅrsinntekt
-        )
-
         val faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(
             id = UUID.randomUUID(),
             inntektsdata = Inntektsdata(
@@ -1389,6 +1385,8 @@ internal class Vedtaksperiode private constructor(
         )
 
         behandlinger.håndterFaktaavklartInntekt(faktaavklartInntekt, yrkesaktivitet, sykepengegrunnlagForArbeidsgiver.metadata.behandlingkilde, aktivitetslogg)
+
+        yrkesaktivitet.lagreInntektFraAOrdningen(faktaavklartInntekt)
 
         videreførEllerIngenRefusjon(sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
 
