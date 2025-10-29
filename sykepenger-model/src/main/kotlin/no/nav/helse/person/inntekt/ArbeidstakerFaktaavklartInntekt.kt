@@ -26,18 +26,22 @@ internal data class ArbeidstakerFaktaavklartInntekt(
         inntektshistorikk: Inntektshistorikk
     ) {
         if (inntektsopplysningskilde !is Arbeidstakerinntektskilde.Arbeidsgiver) return
-        if (nyDato == this.inntektsdata.dato) return
-        val dagerMellom = ChronoUnit.DAYS.between(this.inntektsdata.dato, nyDato)
-        if (dagerMellom >= 60) {
-            aktivitetslogg.info("Det er $dagerMellom dager mellom forrige inntektdato (${this.inntektsdata.dato}) og ny inntektdato ($nyDato), dette utløser varsel om gjenbruk.")
-            aktivitetslogg.varsel(RV_IV_7)
-        } else if (nyArbeidsgiverperiode) {
-            aktivitetslogg.info("Det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk. Forrige inntektdato var ${this.inntektsdata.dato} og ny inntektdato er $nyDato")
-            aktivitetslogg.varsel(RV_IV_7)
-        }
+        vurderVarselForGjenbrukAvInntekt(this.inntektsdata.dato, nyDato, nyArbeidsgiverperiode, aktivitetslogg)
 
         inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), this.inntektsdata.copy(dato = nyDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
         aktivitetslogg.info("Kopierte inntekt som lå lagret på ${this.inntektsdata.dato} til $nyDato")
+    }
+
+    internal fun vurderVarselForGjenbrukAvInntekt(forrigeDato: LocalDate, nyDato: LocalDate, harNyArbeidsgiverperiode: Boolean, aktivitetslogg: IAktivitetslogg) {
+        if (nyDato == forrigeDato) return
+        val dagerMellom = ChronoUnit.DAYS.between(forrigeDato, nyDato)
+        if (dagerMellom >= 60) {
+            aktivitetslogg.info("Det er $dagerMellom dager mellom forrige inntektdato ($forrigeDato) og ny inntektdato ($nyDato), dette utløser varsel om gjenbruk.")
+            aktivitetslogg.varsel(RV_IV_7)
+        } else if (harNyArbeidsgiverperiode) {
+            aktivitetslogg.info("Det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk. Forrige inntektdato var $forrigeDato og ny inntektdato er $nyDato")
+            aktivitetslogg.varsel(RV_IV_7)
+        }
     }
 
     internal fun dto() = ArbeidstakerFaktaavklartInntektUtDto(

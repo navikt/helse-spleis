@@ -369,6 +369,11 @@ internal class Yrkesaktivitet private constructor(
         return avklarInntekt(skjæringstidspunkt, vedtaksperioder) != null
     }
 
+    private fun avklarInntektFraBehandling(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg?): ArbeidstakerFaktaavklartInntekt? {
+        val vedtaksperiode = vedtaksperioder.firstOrNull { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null } ?: return null
+        return vedtaksperiode.behandlinger.arbeidstakerFaktaavklartInntekt(aktivitetslogg)
+    }
+
     // TODO: denne avklaringen må bo på behandlingen; dvs. at inntekt må ligge lagret på vedtaksperiodene
     internal fun avklarInntekt(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): ArbeidstakerFaktaavklartInntekt? {
         // finner inntektsmelding for en av første fraværsdagene.

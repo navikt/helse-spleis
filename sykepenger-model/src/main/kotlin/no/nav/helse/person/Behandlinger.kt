@@ -26,6 +26,7 @@ import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
 import no.nav.helse.hendelser.avvist
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Behandlinger.Behandling.Companion.arbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
@@ -184,6 +185,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         return behandlinger.last().analytiskDatapakke(forrigeBehandling, yrkesaktivitetssporing, vedtaksperiodeId)
     }
 
+    internal fun arbeidstakerFaktaavklartInntekt(aktivitetslogg: IAktivitetslogg? = null) = behandlinger.arbeidstakerFaktaavklartInntekt(aktivitetslogg)
     internal fun utbetalingstidslinjeFraForrigeVedtak() = behandlinger.lastOrNull { it.erFattetVedtak() }?.utbetalingstidslinje()
     internal fun utbetalingstidslinje() = behandlinger.last().utbetalingstidslinje()
     internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
@@ -1458,6 +1460,22 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     avsluttet = null,
                     kilde = behandlingkilde
                 )
+
+            internal fun List<Behandling>.arbeidstakerFaktaavklartInntekt(aktivitetslogg: IAktivitetslogg?): ArbeidstakerFaktaavklartInntekt? {
+                val gjeldendeEndring = gjeldendeEndring()
+                val gjeldendeFaktaavklarteInntekt = (gjeldendeEndring.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) ?: return null // Har ingen faktaavklart inntekt
+
+                if (aktivitetslogg == null) return gjeldendeFaktaavklarteInntekt // Når vi faktisk avklarer sykepengegrunnlaget sendes det med en aktivitetslogg, men når vi kun skal sjekke om vi er i stand til å avklare sykepengegrunnlag trenger vi ikke vurdere varsler
+
+                val forrigeVilkårsprøvdeEndring = forrigeEndringMed { it.grunnlagsdata != null } ?: return gjeldendeFaktaavklarteInntekt // Hvis vi ikke har blitt vilkårsprøvd før trenger vi ikke gjøre noe med varsler
+
+                val forrigeVilkårsprøvdeSkjæringstidspunkt = forrigeVilkårsprøvdeEndring.skjæringstidspunkt
+                val harNyArbeidsgiverperiode = forrigeVilkårsprøvdeEndring.arbeidsgiverperiodeEndret(gjeldendeEndring)
+
+                gjeldendeFaktaavklarteInntekt.vurderVarselForGjenbrukAvInntekt(forrigeVilkårsprøvdeSkjæringstidspunkt, gjeldendeEndring.skjæringstidspunkt, harNyArbeidsgiverperiode, aktivitetslogg)
+
+                return gjeldendeFaktaavklarteInntekt
+            }
 
             internal fun List<Behandling>.harGjenbrukbarInntekt(organisasjonsnummer: String) = forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer) != null
             internal fun List<Behandling>.lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) {
