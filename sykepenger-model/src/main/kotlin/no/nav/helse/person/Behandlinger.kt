@@ -28,7 +28,6 @@ import no.nav.helse.hendelser.avvist
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
-import no.nav.helse.person.Behandlinger.Behandling.Companion.forrigeDokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
 import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInntekt
@@ -370,7 +369,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         refusjonstidslinje: Beløpstidslinje
     ): Boolean {
         val refusjonstidslinjeFør = behandlinger.last().refusjonstidslinje
-        behandlinger.last().håndterRefusjonsopplysninger(yrkesaktivitet, behandlingkilde, dokumentsporing ?: behandlinger.forrigeDokumentsporing, aktivitetslogg, beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar, refusjonstidslinje)?.also {
+        behandlinger.last().håndterRefusjonsopplysninger(yrkesaktivitet, behandlingkilde, dokumentsporing, aktivitetslogg, beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar, refusjonstidslinje)?.also {
             leggTilNyBehandling(it)
         }
         val refusjonstidslinjeEtter = behandlinger.last().refusjonstidslinje
@@ -681,7 +680,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal fun håndterRefusjonsopplysninger(
             yrkesaktivitet: Yrkesaktivitet,
             behandlingkilde: Behandlingkilde,
-            dokumentsporing: Dokumentsporing,
+            dokumentsporing: Dokumentsporing?,
             aktivitetslogg: IAktivitetslogg,
             beregnetSkjæringstidspunkter: Skjæringstidspunkter,
             beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
@@ -699,7 +698,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             beregnetPerioderUtenNavAnsvar = beregnetPerioderUtenNavAnsvar
                         )
                         .copy(
-                            dokumentsporing = dokumentsporing,
+                            dokumentsporing = dokumentsporing ?: forrigeEndring.dokumentsporing,
                             refusjonstidslinje = benyttetRefusjonsopplysninger
                         )
                 },
@@ -1399,7 +1398,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal companion object {
             val List<Behandling>.sykmeldingsperiode get() = first().periode
             val List<Behandling>.dokumentsporing get() = map { it.dokumentsporing }.takeUnless { it.isEmpty() }?.reduce(Set<Dokumentsporing>::plus) ?: emptySet()
-            val List<Behandling>.forrigeDokumentsporing get() = last().gjeldende.dokumentsporing
             fun nyBehandling(
                 observatører: List<BehandlingObserver>,
                 sykdomstidslinje: Sykdomstidslinje,
