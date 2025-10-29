@@ -26,6 +26,7 @@ import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
 import no.nav.helse.hendelser.avvist
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Behandlinger.Behandling
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
@@ -731,60 +732,40 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             )
         }
 
-        private fun håndterNyFakta(eventBus: EventBus, endringMedNyFakta: (forrigeEndring: Endring) -> Endring, behandlingkilde: Behandlingkilde, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg): Behandling? {
-            // Forsikrer oss at ny endring er Uberegnet og får ny ID og tidsstempel
-            // Denne er lazy ettersom det ved endring på sykdomstidslinjen er viktig at perioden låses opp på arbeidsgiver _før_ endringen evalueres
-            val endringMedNyFakta by lazy { endringMedNyFakta(endringer.last()).kopierUtenBeregning() }
-
-            val uberegnetBehandling by lazy  {
-                nyEndring(endringMedNyFakta)
-                null
-            }
-
-            val beregnetBehandling: (uberegnetTilstand: Tilstand) -> Nothing? = { uberegnetTilstand ->
-                gjeldende.forkastUtbetaling(with (yrkesaktivitet) {  eventBus.utbetalingEventBus }, aktivitetslogg)
-                nyEndring(endringMedNyFakta)
-                tilstand(eventBus, uberegnetTilstand, aktivitetslogg)
-                null
-            }
-
-            val avsluttetBehandling: (starttilstand: Tilstand) -> Behandling = { starttilstand ->
-                yrkesaktivitet.låsOpp(periode)
-                Behandling(
-                    eventBus = eventBus,
-                    observatører = this.observatører,
-                    tilstand = starttilstand,
-                    endringer = listOf(endringMedNyFakta),
-                    avsluttet = null,
-                    kilde = behandlingkilde
-                )
-            }
-
+        private fun faktahåndtering(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Faktahåndtering? {
             return when (this.tilstand) {
-                Tilstand.Uberegnet,
-                Tilstand.UberegnetOmgjøring,
-                Tilstand.UberegnetRevurdering -> uberegnetBehandling
-
-                Tilstand.Beregnet -> beregnetBehandling(Tilstand.Uberegnet)
-                Tilstand.BeregnetRevurdering -> beregnetBehandling(Tilstand.UberegnetRevurdering)
-                Tilstand.BeregnetOmgjøring -> beregnetBehandling(Tilstand.UberegnetOmgjøring)
-
-                Tilstand.AvsluttetUtenVedtak -> avsluttetBehandling(Tilstand.UberegnetOmgjøring)
-
+                Tilstand.AvsluttetUtenVedtak -> Faktahåndtering.LukketBehandling(eventBus, yrkesaktivitet, Tilstand.UberegnetOmgjøring, behandlingkilde)
+                Tilstand.RevurdertVedtakAvvist,
                 Tilstand.VedtakFattet,
-                Tilstand.VedtakIverksatt -> avsluttetBehandling(Tilstand.UberegnetRevurdering)
+                Tilstand.VedtakIverksatt -> Faktahåndtering.LukketBehandling(eventBus, yrkesaktivitet, Tilstand.UberegnetRevurdering, behandlingkilde)
 
-                Tilstand.UberegnetAnnullering,
                 Tilstand.BeregnetAnnullering,
-                Tilstand.OverførtAnnullering -> {
+                Tilstand.OverførtAnnullering,
+                Tilstand.UberegnetAnnullering -> {
                     aktivitetslogg.info("Ignorerer ny fakta i tilstand ${tilstand::class.simpleName}")
                     null
                 }
 
-                Tilstand.RevurdertVedtakAvvist,
+                Tilstand.BeregnetOmgjøring,
+                Tilstand.UberegnetOmgjøring -> Faktahåndtering.ÅpnetBehandling(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, Tilstand.UberegnetOmgjøring, aktivitetslogg)
+
+                Tilstand.Beregnet,
+                Tilstand.Uberegnet -> Faktahåndtering.ÅpnetBehandling(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, Tilstand.Uberegnet, aktivitetslogg)
+
+                Tilstand.UberegnetRevurdering,
+                Tilstand.BeregnetRevurdering -> Faktahåndtering.ÅpnetBehandling(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, Tilstand.UberegnetRevurdering, aktivitetslogg)
+
                 Tilstand.AnnullertPeriode,
-                Tilstand.TilInfotrygd -> error("Forventet ikke å håndtere ny fakta i tilstand ${tilstand::class.simpleName}")
+                Tilstand.TilInfotrygd -> error("Håndterer ikke endring i $tilstand")
             }
+        }
+
+        private fun håndterNyFakta(eventBus: EventBus, endringMedNyFakta: (forrigeEndring: Endring) -> Endring, behandlingkilde: Behandlingkilde, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg): Behandling? {
+            val faktahåndtering = faktahåndtering(eventBus, yrkesaktivitet, behandlingkilde, aktivitetslogg) ?: return null
+
+            faktahåndtering.førEndring(this)
+            val nyEndring = endringMedNyFakta(gjeldende).kopierUtenBeregning()
+            return faktahåndtering.håndterEndring(this, nyEndring)
         }
 
         data class Endring(
@@ -1997,6 +1978,45 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             avsluttet = this.avsluttet,
             kilde = this.kilde.dto(),
         )
+
+        private interface Faktahåndtering {
+            fun førEndring(eksisterendeBehandling: Behandling)
+            fun håndterEndring(eksisterendeBehandling: Behandling, nyEndring: Endring): Behandling?
+
+            class ÅpnetBehandling(val eventBus: EventBus, val utbetalingEventBus: UtbetalingEventBus, val nyTilstand: Tilstand, val aktivitetslogg: IAktivitetslogg) : Faktahåndtering {
+                override fun førEndring(eksisterendeBehandling: Behandling) {
+                    eksisterendeBehandling.gjeldende.forkastUtbetaling(utbetalingEventBus, aktivitetslogg)
+                }
+
+                override fun håndterEndring(eksisterendeBehandling: Behandling, nyEndring: Endring): Behandling? {
+                    eksisterendeBehandling.nyEndring(nyEndring)
+                    eksisterendeBehandling.tilstand(eventBus, nyTilstand, aktivitetslogg)
+                    return null
+                }
+            }
+            class LukketBehandling(
+                val eventBus: EventBus,
+                val yrkesaktivitet: Yrkesaktivitet,
+                val starttilstand: Tilstand,
+                val behandlingkilde: Behandlingkilde
+            ) : Faktahåndtering {
+                override fun førEndring(eksisterendeBehandling: Behandling) {
+                    yrkesaktivitet.låsOpp(eksisterendeBehandling.periode)
+                }
+
+                override fun håndterEndring(eksisterendeBehandling: Behandling, nyEndring: Endring): Behandling {
+                    return Behandling(
+                        eventBus = eventBus,
+                        observatører = eksisterendeBehandling.observatører,
+                        tilstand = starttilstand,
+                        endringer = listOf(nyEndring),
+                        avsluttet = null,
+                        kilde = behandlingkilde
+                    )
+                }
+            }
+        }
+
     }
 
     internal fun dto() = BehandlingerUtDto(behandlinger = this.behandlinger.map { it.dto() })

@@ -425,7 +425,7 @@ internal class Yrkesaktivitet private constructor(
     }
 
     internal val EventBus.utbetalingEventBus get() =
-        utbetalingEventBus(yrkesaktivitetstype, UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje()))
+        utbetalingEventBus(yrkesaktivitetstype, UtbetalingsdagerBuilder(sykdomstidslinje()))
 
     internal fun leggTilNyUtbetaling(
         eventBus: EventBus,
