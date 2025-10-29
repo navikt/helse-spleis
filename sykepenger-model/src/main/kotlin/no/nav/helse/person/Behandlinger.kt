@@ -657,7 +657,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     val sykdomstidslinje = nySykdomstidslinje.subset(oppdatertPeriode)
 
                     forrigeEndring
-                        .kopierUtenBeregning(
+                        .copyMed(
                             beregnSkjæringstidspunkt = nyeSkjæringstidspunkter,
                             beregnetPerioderUtenNavAnsvar = nyePerioderUtenNavAnsvar,
                             sykdomstidslinje = sykdomstidslinje,
@@ -694,8 +694,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return håndterNyFakta(
                 endringMedNyFakta = { forrigeEndring ->
                     forrigeEndring
-                        .kopierUtenBeregning(beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar)
-                        .copy(dokumentsporing = dokumentsporing, refusjonstidslinje = benyttetRefusjonsopplysninger)
+                        .copyMed(
+                            beregnSkjæringstidspunkt = beregnetSkjæringstidspunkter,
+                            beregnetPerioderUtenNavAnsvar = beregnetPerioderUtenNavAnsvar
+                        )
+                        .copy(
+                            dokumentsporing = dokumentsporing,
+                            refusjonstidslinje = benyttetRefusjonsopplysninger
+                        )
                 },
                 behandlingkilde = behandlingkilde,
                 yrkesaktivitet = yrkesaktivitet,
@@ -703,12 +709,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             )
         }
 
-        fun håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg) = håndterNyFakta(
-            endringMedNyFakta = { forrigeEndring -> forrigeEndring.copy(faktaavklartInntekt = arbeidstakerFaktaavklartInntekt) },
-            behandlingkilde = behandlingkilde,
-            yrkesaktivitet = yrkesaktivitet,
-            aktivitetslogg = aktivitetslogg
-        )
+        fun håndterFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
+            return håndterNyFakta(
+                endringMedNyFakta = { forrigeEndring ->
+                    forrigeEndring.copy(
+                        faktaavklartInntekt = arbeidstakerFaktaavklartInntekt
+                    )
+                },
+                behandlingkilde = behandlingkilde,
+                yrkesaktivitet = yrkesaktivitet,
+                aktivitetslogg = aktivitetslogg
+            )
+        }
 
         private fun håndterNyFakta(endringMedNyFakta: (forrigeEndring: Endring) -> Endring, behandlingkilde: Behandlingkilde, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg): Behandling? {
             // Forsikrer oss at ny endring er Uberegnet og får ny ID og tidsstempel
@@ -950,9 +962,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             internal fun kopierUtenBeregning(
                 beregnSkjæringstidspunkt: Skjæringstidspunkter? = null,
-                beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>? = null,
-                periode: Periode = this.periode,
-                sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje
+                beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>? = null
             ): Endring {
                 val beregnetSkjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode) }
                 val dagerUtenNavAnsvar = beregnetPerioderUtenNavAnsvar?.let { dagerUtenNavAnsvar(it) }
@@ -965,6 +975,21 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     skjæringstidspunkter = beregnetSkjæringstidspunkt?.second ?: this.skjæringstidspunkter,
                     dagerUtenNavAnsvar = dagerUtenNavAnsvar ?: this.dagerUtenNavAnsvar,
                     inntektjusteringer = emptyMap()
+                )
+            }
+
+            internal fun copyMed(
+                beregnSkjæringstidspunkt: Skjæringstidspunkter,
+                beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
+                periode: Periode = this.periode,
+                sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje
+            ): Endring {
+                val (skjæringstidspunkt, skjæringstidspunkter) = skjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode)
+                val dagerUtenNavAnsvar = dagerUtenNavAnsvar(beregnetPerioderUtenNavAnsvar)
+                return copy(
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    skjæringstidspunkter = skjæringstidspunkter,
+                    dagerUtenNavAnsvar = dagerUtenNavAnsvar
                 )
             }
 
