@@ -80,9 +80,13 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription {
         behov.filter { filter(it) && it.type == behovtype }.map { it.detaljer() to it.alleKontekster }
 
     private fun kvitterVedtaksperiode(vedtaksperiodeId: UUID) {
-        val vedtaksperiodebehov = behov.filter(vedtaksperiodebehov(vedtaksperiodeId)).takeUnless { it.isEmpty() } ?: return
+        val vedtaksperiodebehov = behov
+            // kvitterer ikke ut utbetalingsbehov som følge av at vedtaksperioden endrer tilstand
+            .filter { it.utbetalingId == null }
+            .filter(vedtaksperiodebehov(vedtaksperiodeId))
+            .takeUnless { it.isEmpty() } ?: return
         log.log("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.type.toString() }})")
-        behov.removeAll { behov -> vedtaksperiodeId == behov.vedtaksperiodeId }
+        behov.removeAll(vedtaksperiodebehov)
         log.log(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
         if (replays.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }) {
             log.log("-> Vedtaksperioden ba om replay, men det ble ikke utført")
@@ -94,6 +98,12 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription {
     ) {
         assertTrue(behov.removeAll { it.utbetalingId == event.utbetalingId }) {
             "Utbetaling ble utbetalt, men ingen behov om utbetaling er registrert"
+        }
+    }
+
+    override fun annullering(event: EventSubscription.UtbetalingAnnullertEvent) {
+        assertTrue(behov.removeAll { it.utbetalingId == event.utbetalingId }) {
+            "Utbetaling ble annullert, men ingen behov om utbetaling er registrert"
         }
     }
 
