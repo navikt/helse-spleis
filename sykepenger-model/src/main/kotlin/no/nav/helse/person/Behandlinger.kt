@@ -414,6 +414,29 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         person: Person,
         yrkesaktivitet: Yrkesaktivitet,
         behandlingkilde: Behandlingkilde,
+        dokumentsporing: Dokumentsporing,
+        hendelseSykdomstidslinje: Sykdomstidslinje,
+        egenmeldingsdagerAndrePerioder: List<Periode>,
+        dagerNavOvertarAnsvar: List<Periode>?,
+        aktivitetslogg: IAktivitetslogg,
+        validering: () -> Unit
+    ) = håndterSykdomstidslinje(
+        person = person,
+        yrkesaktivitet = yrkesaktivitet,
+        behandlingkilde = behandlingkilde,
+        dokumentsporing = dokumentsporing,
+        hendelseSykdomstidslinje = hendelseSykdomstidslinje,
+        egenmeldingsdagerAndrePerioder = egenmeldingsdagerAndrePerioder,
+        dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+        egenmeldingsdager = null,
+        aktivitetslogg = aktivitetslogg,
+        validering = validering
+    )
+
+    private fun håndterSykdomstidslinje(
+        person: Person,
+        yrkesaktivitet: Yrkesaktivitet,
+        behandlingkilde: Behandlingkilde,
         dokumentsporing: Dokumentsporing?,
         hendelseSykdomstidslinje: Sykdomstidslinje,
         egenmeldingsdagerAndrePerioder: List<Periode>,

@@ -1717,7 +1717,6 @@ internal class Vedtaksperiode private constructor(
         hendelseSykdomstidslinje: Sykdomstidslinje,
         aktivitetslogg: IAktivitetslogg,
         dagerNavOvertarAnsvar: List<Periode>? = null,
-        egenmeldingsdager: List<Periode>? = null,
         validering: () -> Unit
     ) {
         val haddeFlereSkjæringstidspunkt = behandlinger.harFlereSkjæringstidspunkt()
@@ -1729,7 +1728,6 @@ internal class Vedtaksperiode private constructor(
             hendelseSykdomstidslinje = hendelseSykdomstidslinje,
             egenmeldingsdagerAndrePerioder = yrkesaktivitet.egenmeldingsperioderUnntatt(this),
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
-            egenmeldingsdager = egenmeldingsdager,
             aktivitetslogg = aktivitetslogg,
             validering = validering
         )
