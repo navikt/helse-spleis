@@ -22,6 +22,7 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class UtdatertGodkjenningBugE2ETest : AbstractEndToEndTest() {
 
@@ -47,9 +48,11 @@ internal class UtdatertGodkjenningBugE2ETest : AbstractEndToEndTest() {
     fun `Ignorerer løsning på godkjenningsbehov dersom utbetalingid på løsningen ikke samsvarer med periodens gjeldende utbetaling`() {
         tilGodkjenning(januar, 100.prosent)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent)) // reberegner vedtaksperioden
-        this@UtdatertGodkjenningBugE2ETest.håndterYtelser()
+        håndterYtelser()
         håndterSimulering()
-        this@UtdatertGodkjenningBugE2ETest.håndterUtbetalingsgodkjenning(utbetalingId = UUID.randomUUID())
+        assertThrows<IllegalStateException> {
+            håndterUtbetalingsgodkjenning(utbetalingId = UUID.randomUUID())
+        }
         assertTilstander(
             1.vedtaksperiode,
             START,

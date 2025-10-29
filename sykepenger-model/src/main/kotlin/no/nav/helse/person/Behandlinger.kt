@@ -17,15 +17,15 @@ import no.nav.helse.dto.serialisering.BehandlingerUtDto
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
-import no.nav.helse.hendelser.avvist
 import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.vurdering
 import no.nav.helse.person.Behandlinger.Behandling.Companion.arbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
@@ -44,6 +44,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Com
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
@@ -209,7 +210,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
     internal fun validerIkkeFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerIkkeFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
-    internal fun gjelderIkkeFor(hendelse: UtbetalingsavgjørelseHendelse) = siste?.gjelderFor(hendelse) != true
 
     internal fun overlapperMed(other: Behandlinger): Boolean {
         if (!this.harUtbetalinger() || !other.harUtbetalinger()) return false
@@ -281,8 +281,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun harIkkeUtbetaling() = behandlinger.last().harIkkeUtbetaling()
 
-    fun vedtakFattet(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
+    fun vedtakFattet(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
         this.behandlinger.last().vedtakFattet(eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
+    }
+
+    fun vedtakAvvist(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg): Boolean {
+        return this.behandlinger.last().vedtakAvvist(eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
     }
 
     fun bekreftAvsluttetBehandlingMedVedtak(yrkesaktivitet: Yrkesaktivitet) {
@@ -1142,9 +1146,55 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal fun erAvsluttet() = avsluttet != null
         internal fun harÅpenBehandling() = this.tilstand in setOf(Tilstand.UberegnetRevurdering, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)
         internal fun harIkkeUtbetaling() = this.tilstand in setOf(Tilstand.Uberegnet, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)
-        internal fun vedtakFattet(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
-            if (utbetalingsavgjørelse.avvist) return tilstand.vedtakAvvist(this, eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
-            tilstand.vedtakFattet(this, eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
+
+        internal fun vedtakFattet(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
+            when (tilstand) {
+                Tilstand.Beregnet,
+                Tilstand.BeregnetAnnullering,
+                Tilstand.BeregnetOmgjøring,
+                Tilstand.BeregnetRevurdering -> tilstand.vedtakFattet(this@Behandling, eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
+
+                Tilstand.AnnullertPeriode,
+                Tilstand.AvsluttetUtenVedtak,
+                Tilstand.OverførtAnnullering,
+                Tilstand.RevurdertVedtakAvvist,
+                Tilstand.TilInfotrygd,
+                Tilstand.Uberegnet,
+                Tilstand.UberegnetAnnullering,
+                Tilstand.UberegnetOmgjøring,
+                Tilstand.UberegnetRevurdering,
+                Tilstand.VedtakFattet,
+                Tilstand.VedtakIverksatt -> error("Forventer ikke å få utbetalingsavgjørelse i tilstand $tilstand")
+            }
+        }
+
+        internal fun vedtakAvvist(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg): Boolean {
+            gjeldende.utbetaling?.ikkeGodkjent(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg, utbetalingsavgjørelse.vurdering)
+            when (tilstand) {
+                Tilstand.Beregnet,
+                Tilstand.BeregnetOmgjøring -> {
+                    tilstand.vedtakAvvist(this@Behandling, eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
+                    return true
+                }
+                Tilstand.BeregnetRevurdering -> {
+                    aktivitetslogg.varsel(RV_UT_24)
+                    tilstand.vedtakAvvist(this@Behandling, eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
+                    return false
+                }
+
+                Tilstand.BeregnetAnnullering,
+                Tilstand.AnnullertPeriode,
+                Tilstand.AvsluttetUtenVedtak,
+                Tilstand.OverførtAnnullering,
+                Tilstand.RevurdertVedtakAvvist,
+                Tilstand.TilInfotrygd,
+                Tilstand.Uberegnet,
+                Tilstand.UberegnetAnnullering,
+                Tilstand.UberegnetOmgjøring,
+                Tilstand.UberegnetRevurdering,
+                Tilstand.VedtakFattet,
+                Tilstand.VedtakIverksatt -> error("Forventer ikke å få utbetalingsavgjørelse i tilstand $tilstand")
+            }
         }
 
         internal fun avsluttUtenVedtak(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
@@ -1557,13 +1607,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 behandling: Behandling,
                 eventBus: EventBus,
                 yrkesaktivitet: Yrkesaktivitet,
-                utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse,
+                utbetalingsavgjørelse: Behandlingsavgjørelse,
                 aktivitetslogg: IAktivitetslogg
             ) {
                 error("Kan ikke avvise vedtak for behandling i $this")
             }
 
-            fun vedtakFattet(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
+            fun vedtakFattet(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
                 error("Kan ikke fatte vedtak for behandling i $this")
             }
 
@@ -1705,14 +1755,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.tilstand(eventBus, Uberegnet, aktivitetslogg)
                 }
 
-                override fun vedtakAvvist(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
-                    // perioden kommer til å bli kastet til infotrygd
+                override fun vedtakAvvist(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
+                    // perioden kommer til å bli kastet til infotrygd, gjør ikke tilstandsendring her
                 }
 
-                override fun vedtakFattet(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
+                override fun vedtakFattet(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
+                    behandling.gjeldende.utbetaling!!.godkjent(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg, utbetalingsavgjørelse.vurdering)
                     behandling.vedtakFattet = utbetalingsavgjørelse.avgjørelsestidspunkt
                     behandling.behandlingLukket(eventBus, yrkesaktivitet)
-                    behandling.tilstand(eventBus, if (behandling.gjeldende.utbetaling?.erAvsluttet() == true) VedtakIverksatt else VedtakFattet, aktivitetslogg)
+                    behandling.tilstand(eventBus, if (behandling.gjeldende.utbetaling?.harOppdragMedUtbetalinger() == true) VedtakFattet else VedtakIverksatt, aktivitetslogg)
                 }
             }
 
@@ -1739,7 +1790,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.tilstand(eventBus, UberegnetRevurdering, aktivitetslogg)
                 }
 
-                override fun vedtakAvvist(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
+                override fun vedtakAvvist(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
                     behandling.behandlingLukket(eventBus, yrkesaktivitet)
                     behandling.tilstand(eventBus, RevurdertVedtakAvvist, aktivitetslogg)
                 }

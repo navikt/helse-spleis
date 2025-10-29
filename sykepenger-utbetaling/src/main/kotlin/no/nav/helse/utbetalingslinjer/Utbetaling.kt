@@ -16,10 +16,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringHendelse
 import no.nav.helse.hendelser.UtbetalingmodulHendelse
 import no.nav.helse.hendelser.UtbetalingpåminnelseHendelse
-import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
 import no.nav.helse.hendelser.til
-import no.nav.helse.hendelser.valider
-import no.nav.helse.hendelser.vurdering
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -135,13 +132,6 @@ class Utbetaling private constructor(
         tilstand.opprett(this, eventBus, aktivitetsloggMedUtbetalingkontekst)
     }
 
-    fun håndterUtbetalingsavgjørelseHendelse(eventBus: UtbetalingEventBus, hendelse: UtbetalingsavgjørelseHendelse, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        if (hendelse.utbetalingId != this.id) return
-        hendelse.valider(aktivitetsloggMedUtbetalingkontekst)
-        godkjenn(eventBus, aktivitetsloggMedUtbetalingkontekst, hendelse.vurdering)
-    }
-
     fun håndterUtbetalingmodulHendelse(eventBus: UtbetalingEventBus, utbetaling: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (!relevantFor(utbetaling)) return
@@ -171,8 +161,6 @@ class Utbetaling private constructor(
     }
 
     fun gjelderFor(hendelse: UtbetalingmodulHendelse) = relevantFor(hendelse)
-
-    fun gjelderFor(hendelse: UtbetalingsavgjørelseHendelse) = hendelse.utbetalingId == this.id
 
     fun valider(simulering: SimuleringHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
@@ -248,9 +236,14 @@ class Utbetaling private constructor(
     override fun toSpesifikkKontekst() =
         SpesifikkKontekst("Utbetaling", mapOf("utbetalingId" to "$id"))
 
-    private fun godkjenn(eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
+    fun ikkeGodkjent(eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        tilstand.godkjenn(this, eventBus, aktivitetsloggMedUtbetalingkontekst, vurdering)
+        tilstand.ikkeGodkjent(this, eventBus, aktivitetsloggMedUtbetalingkontekst, vurdering)
+    }
+
+    fun godkjent(eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        tilstand.godkjent(this, eventBus, aktivitetsloggMedUtbetalingkontekst, vurdering)
     }
 
     fun overfør(eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
@@ -545,7 +538,16 @@ class Utbetaling private constructor(
             error("Forventet ikke å opprette utbetaling i tilstand=${this::class.simpleName}")
         }
 
-        fun godkjenn(
+        fun ikkeGodkjent(
+            utbetaling: Utbetaling,
+            eventBus: UtbetalingEventBus,
+            aktivitetslogg: IAktivitetslogg,
+            vurdering: Vurdering
+        ) {
+            error("Forventet ikke godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+        }
+
+        fun godkjent(
             utbetaling: Utbetaling,
             eventBus: UtbetalingEventBus,
             aktivitetslogg: IAktivitetslogg,
@@ -591,9 +593,18 @@ class Utbetaling private constructor(
             utbetaling.tilstand(eventBus, Forkastet, aktivitetslogg)
         }
 
-        override fun godkjenn(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
+        override fun ikkeGodkjent(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
             utbetaling.vurdering = vurdering
-            utbetaling.tilstand(eventBus, vurdering.avgjør(utbetaling), aktivitetslogg)
+            utbetaling.tilstand(eventBus, IkkeGodkjent, aktivitetslogg)
+        }
+
+        override fun godkjent(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
+            utbetaling.vurdering = vurdering
+            utbetaling.tilstand(eventBus, when {
+                utbetaling.harOppdragMedUtbetalinger() -> Overført
+                utbetaling.type == ANNULLERING -> Annullert
+                else -> GodkjentUtenUtbetaling
+            }, aktivitetslogg)
         }
 
         override fun overfør(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
@@ -720,14 +731,6 @@ class Utbetaling private constructor(
         fun overfør(aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag, maksdato: LocalDate?) {
             oppdrag.overfør(aktivitetslogg, maksdato, ident)
         }
-
-        internal fun avgjør(utbetaling: Utbetaling) =
-            when {
-                !godkjent -> IkkeGodkjent
-                utbetaling.harOppdragMedUtbetalinger() -> Overført
-                utbetaling.type == ANNULLERING -> Annullert
-                else -> GodkjentUtenUtbetaling
-            }
 
         fun dto() = UtbetalingVurderingDto(
             godkjent = godkjent,

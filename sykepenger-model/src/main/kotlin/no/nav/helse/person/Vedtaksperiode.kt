@@ -114,7 +114,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_17
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
@@ -1258,44 +1257,43 @@ internal class Vedtaksperiode private constructor(
     internal fun håndterUtbetalingsavgjørelse(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (!utbetalingsavgjørelse.relevantVedtaksperiode(id)) return
-        if (behandlinger.gjelderIkkeFor(utbetalingsavgjørelse)) return aktivitetsloggMedVedtaksperiodekontekst.info("Ignorerer løsning på utbetalingsavgjørelse, utbetalingid på løsningen matcher ikke vedtaksperiodens nåværende utbetaling")
-
-        if (tilstand !in setOf(AvventerGodkjenning, AvventerGodkjenningRevurdering, SelvstendigAvventerGodkjenning)) return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke utbetalingsavgjørelse i %s".format(tilstand.type.name))
-
-        val erAvvist = behandlinger.erAvvist()
-        if (erAvvist) {
-            if (tilstand in setOf(AvventerGodkjenning, SelvstendigAvventerGodkjenning)) return forkast(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, tvingForkasting = true)
-            if (utbetalingsavgjørelse.automatisert) aktivitetsloggMedVedtaksperiodekontekst.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
-            aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_UT_24)
+        check(utbetalingsavgjørelse.utbetalingId == behandlinger.utbetaling?.id) {
+            // todo: burde bruke behandlingId istedenfor
+            "Utbetalingsavgjørelse gjelder en annen utbetaling"
+        }
+        check (tilstand in setOf(AvventerGodkjenning, AvventerGodkjenningRevurdering, SelvstendigAvventerGodkjenning)) {
+            "Forventet ikke utbetalingsavgjørelse i ${tilstand.type.name}"
         }
 
-        behandlinger.vedtakFattet(eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst)
+        with(utbetalingsavgjørelse) {
+            when (godkjent) {
+                true -> {
+                    if (automatisert) aktivitetsloggMedVedtaksperiodekontekst.info("Utbetaling markert som godkjent automatisk $avgjørelsestidspunkt")
+                    else aktivitetsloggMedVedtaksperiodekontekst.info("Utbetaling markert som godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
+                    behandlinger.vedtakFattet(eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst)
+                    val nesteTilstand = when (yrkesaktivitet.yrkesaktivitetstype) {
+                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                        is Arbeidstaker -> if (behandlinger.harUtbetalinger()) TilUtbetaling else Avsluttet
 
-        if (erAvvist) return // er i limbo
-        tilstand(
-            eventBus,
-            aktivitetsloggMedVedtaksperiodekontekst,
+                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> if (behandlinger.harUtbetalinger()) SelvstendigTilUtbetaling else SelvstendigAvsluttet
 
-            if (behandlinger.harUtbetalinger()) {
-                when (yrkesaktivitet.yrkesaktivitetstype) {
-                    Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                    is Arbeidstaker -> TilUtbetaling
-
-                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigTilUtbetaling
-
-                    Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("Ikke implementert hva som skjer med frilans som har utbetaling")
+                        Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("Ikke implementert hva som skjer med frilans som har utbetaling")
+                    }
+                    tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, nesteTilstand)
                 }
-            } else {
-                when (yrkesaktivitet.yrkesaktivitetstype) {
-                    Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                    is Arbeidstaker -> Avsluttet
 
-                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> SelvstendigAvsluttet
+                false -> {
+                    if (automatisert) aktivitetsloggMedVedtaksperiodekontekst.info("Utbetaling markert som ikke godkjent automatisk $avgjørelsestidspunkt")
+                    else aktivitetsloggMedVedtaksperiodekontekst.info("Utbetaling markert som ikke godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
 
-                    Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("Ikke implementert hva som skjer med frilans som har utbetaling")
+                    if (behandlinger.vedtakAvvist(eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst)) {
+                        return forkast(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, tvingForkasting = true)
+                    } else {
+                        aktivitetsloggMedVedtaksperiodekontekst.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
+                    }
                 }
             }
-        )
+        }
     }
 
     internal fun håndter(eventBus: EventBus, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg): Boolean {

@@ -666,7 +666,6 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun håndterBehandlingsavgjørelse(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        utbetalinger.forEach { it.håndterUtbetalingsavgjørelseHendelse(eventBus.utbetalingEventBus, utbetalingsavgjørelse, aktivitetsloggMedArbeidsgiverkontekst) }
         håndter {
             it.håndterUtbetalingsavgjørelse(eventBus, utbetalingsavgjørelse, aktivitetsloggMedArbeidsgiverkontekst)
         }

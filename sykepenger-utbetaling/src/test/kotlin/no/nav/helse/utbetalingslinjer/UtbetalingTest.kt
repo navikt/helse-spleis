@@ -6,10 +6,8 @@ import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Saksbehandler
 import no.nav.helse.hendelser.SimuleringHendelse
 import no.nav.helse.hendelser.UtbetalingmodulHendelse
-import no.nav.helse.hendelser.UtbetalingsavgjørelseHendelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -510,28 +508,14 @@ internal class UtbetalingTest {
     }
 
     private fun godkjenn(utbetaling: Utbetaling, utbetalingGodkjent: Boolean = true) = Aktivitetslogg().also { aktivitetslogg ->
-        Utbetalingsgodkjenning(
-            utbetalingId = utbetaling.inspektør.utbetalingId,
-            godkjent = utbetalingGodkjent
-        ).also {
-            utbetaling.håndterUtbetalingsavgjørelseHendelse(eventBus, it, aktivitetslogg)
-        }
+        if (utbetalingGodkjent) utbetaling.godkjent(eventBus, aktivitetslogg, Utbetaling.Vurdering(true, "Z999999", "tbd@nav.no",  LocalDateTime.now(), true))
+        else utbetaling.ikkeGodkjent(eventBus, aktivitetslogg, Utbetaling.Vurdering(false, "Z999999", "tbd@nav.no",  LocalDateTime.now(), true))
     }
 
     private fun annuller(utbetaling: Utbetaling) =
         utbetaling.lagAnnulleringsutbetaling(aktivitetslogg, Utbetaling.Vurdering(true, "Z999999", "tbd@nav.no", LocalDateTime.now(), true)).also {
             it.opprett(eventBus, aktivitetslogg)
         }
-
-    private class Utbetalingsgodkjenning(
-        override val utbetalingId: UUID,
-        override val godkjent: Boolean
-    ) : UtbetalingsavgjørelseHendelse {
-        override fun saksbehandler(): Saksbehandler = Saksbehandler("Z999999", "mille.mellomleder@nav.no")
-
-        override val avgjørelsestidspunkt: LocalDateTime = LocalDateTime.now()
-        override val automatisert: Boolean = false
-    }
 
     private class Kvittering(
         override val fagsystemId: String,
