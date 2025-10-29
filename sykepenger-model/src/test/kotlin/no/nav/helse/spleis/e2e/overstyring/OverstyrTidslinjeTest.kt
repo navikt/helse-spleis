@@ -24,11 +24,11 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.AndreYtelser
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavDag
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.AndreYtelser
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.NavDag
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.NavHelgDag
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -604,5 +604,5 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertTrue(dagen.kommerFra(kommerFra))
     }
 
-    private val PersonObserver.UtbetalingUtbetaltEvent.dager get() = utbetalingsdager.associateBy { it.dato }.mapValues { it.value.type }
+    private val EventSubscription.UtbetalingUtbetaltEvent.dager get() = utbetalingsdager.associateBy { it.dato }.mapValues { it.value.type }
 }

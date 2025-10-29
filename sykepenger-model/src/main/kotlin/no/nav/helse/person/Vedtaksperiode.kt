@@ -1402,13 +1402,13 @@ internal class Vedtaksperiode private constructor(
 
         videreførEllerIngenRefusjon(eventBus, sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
 
-        val event = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
+        val event = EventSubscription.SkatteinntekterLagtTilGrunnEvent(
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
             vedtaksperiodeId = id,
             behandlingId = behandlinger.sisteBehandlingId,
             skjæringstidspunkt = skjæringstidspunkt,
             skatteinntekter = skatteopplysninger.map {
-                PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.måned, it.beløp.månedlig)
+                EventSubscription.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.måned, it.beløp.månedlig)
             },
             omregnetÅrsinntekt = omregnetÅrsinntekt.årlig
         )
@@ -1689,7 +1689,7 @@ internal class Vedtaksperiode private constructor(
 
         internal fun buildAndEmit(eventBus: EventBus) {
             eventBus.vedtaksperiodeForkastet(
-                PersonObserver.VedtaksperiodeForkastetEvent(
+                EventSubscription.VedtaksperiodeForkastetEvent(
                     yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
                     vedtaksperiodeId = id,
                     gjeldendeTilstand = gjeldendeTilstand,
@@ -2029,14 +2029,14 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun opplysningerViTrenger(): Set<PersonObserver.ForespurtOpplysning> {
+    private fun opplysningerViTrenger(): Set<EventSubscription.ForespurtOpplysning> {
         if (!skalBehandlesISpeil()) return emptySet() // perioden er AUU ✋
 
         if (yrkesaktivitet.finnVedtaksperiodeRettFør(this)?.skalBehandlesISpeil() == true) return emptySet() // Da har perioden foran oss spurt for oss/ vi har det vi trenger ✋
 
-        val opplysninger = mutableSetOf<PersonObserver.ForespurtOpplysning>().apply {
-            if (!harEksisterendeInntekt()) addAll(setOf(PersonObserver.Inntekt, PersonObserver.Refusjon)) // HAG støtter ikke skjema uten refusjon, så når vi først spør om inntekt _må_ vi også spørre om refusjon
-            if (refusjonstidslinje.isEmpty()) add(PersonObserver.Refusjon) // For de tilfellene vi faktiske trenger refusjon
+        val opplysninger = mutableSetOf<EventSubscription.ForespurtOpplysning>().apply {
+            if (!harEksisterendeInntekt()) addAll(setOf(EventSubscription.Inntekt, EventSubscription.Refusjon)) // HAG støtter ikke skjema uten refusjon, så når vi først spør om inntekt _må_ vi også spørre om refusjon
+            if (refusjonstidslinje.isEmpty()) add(EventSubscription.Refusjon) // For de tilfellene vi faktiske trenger refusjon
         }
         if (opplysninger.isEmpty()) return emptySet() // Om vi har inntekt og refusjon så er saken biff 🥩
 
@@ -2046,7 +2046,7 @@ internal class Vedtaksperiode private constructor(
             val sisteDelAvAgp = behandlinger.ventedager().dagerUtenNavAnsvar.dager.lastOrNull()
             // Vi "trenger" jo aldri AGP, men spør om vi perioden overlapper/er rett etter beregnet AGP
             if (sisteDelAvAgp?.overlapperMed(periode) == true || sisteDelAvAgp?.erRettFør(periode) == true) {
-                add(PersonObserver.Arbeidsgiverperiode)
+                add(EventSubscription.Arbeidsgiverperiode)
             }
         }
     }
@@ -2060,15 +2060,15 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerArbeidsgiveropplysninger(
-        forespurteOpplysninger: Set<PersonObserver.ForespurtOpplysning>
-    ): PersonObserver.TrengerArbeidsgiveropplysningerEvent {
+        forespurteOpplysninger: Set<EventSubscription.ForespurtOpplysning>
+    ): EventSubscription.TrengerArbeidsgiveropplysningerEvent {
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
-            PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
+            EventSubscription.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
             // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
             else -> listOf(this)
         }
-        return PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+        return EventSubscription.TrengerArbeidsgiveropplysningerEvent(
             personidentifikator = person.personidentifikator,
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
             vedtaksperiodeId = id,
@@ -2080,7 +2080,7 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun førsteFraværsdagerForForespørsel(): List<PersonObserver.FørsteFraværsdag> {
+    private fun førsteFraværsdagerForForespørsel(): List<EventSubscription.FørsteFraværsdag> {
         val deAndre = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(this.skjæringstidspunkt))
             .filterNot { it.yrkesaktivitet === this.yrkesaktivitet }
             .groupBy { it.yrkesaktivitet }
@@ -2089,11 +2089,11 @@ internal class Vedtaksperiode private constructor(
                     .asReversed()
                     .firstNotNullOfOrNull { it.førsteFraværsdag }
                 førsteFraværsdagForArbeidsgiver?.let {
-                    PersonObserver.FørsteFraværsdag(arbeidsgiver.yrkesaktivitetstype, it)
+                    EventSubscription.FørsteFraværsdag(arbeidsgiver.yrkesaktivitetstype, it)
                 }
             }
         val minEgen = førsteFraværsdag?.let {
-            PersonObserver.FørsteFraværsdag(yrkesaktivitet.yrkesaktivitetstype, it)
+            EventSubscription.FørsteFraværsdag(yrkesaktivitet.yrkesaktivitetstype, it)
         } ?: return deAndre
         return deAndre.plusElement(minEgen)
     }
@@ -2105,7 +2105,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerIkkeArbeidsgiveropplysninger(eventBus: EventBus) {
         eventBus.trengerIkkeArbeidsgiveropplysninger(
-            PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent(
+            EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent(
                 yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
                 vedtaksperiodeId = id
             )
@@ -2114,13 +2114,13 @@ internal class Vedtaksperiode private constructor(
 
     internal fun trengerInntektsmeldingReplay(eventBus: EventBus) {
         val erKortPeriode = !skalBehandlesISpeil()
-        val opplysningerViTrenger = if (erKortPeriode) opplysningerViTrenger() + PersonObserver.Arbeidsgiverperiode else opplysningerViTrenger()
+        val opplysningerViTrenger = if (erKortPeriode) opplysningerViTrenger() + EventSubscription.Arbeidsgiverperiode else opplysningerViTrenger()
 
         eventBus.inntektsmeldingReplay(trengerArbeidsgiveropplysninger(opplysningerViTrenger))
     }
 
     private fun emitVedtaksperiodeEndret(eventBus: EventBus, previousState: Vedtaksperiodetilstand) {
-        val event = PersonObserver.VedtaksperiodeEndretEvent(
+        val event = EventSubscription.VedtaksperiodeEndretEvent(
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
             vedtaksperiodeId = id,
             behandlingId = behandlinger.sisteBehandlingId,
@@ -2149,7 +2149,7 @@ internal class Vedtaksperiode private constructor(
             subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(periode, sykdomstidslinje.subsumsjonsformat()))
         }
         eventBus.avsluttetUtenVedtak(
-            PersonObserver.AvsluttetUtenVedtakEvent(
+            EventSubscription.AvsluttetUtenVedtakEvent(
                 yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
                 vedtaksperiodeId = id,
                 behandlingId = behandlingId,
@@ -2178,7 +2178,7 @@ internal class Vedtaksperiode private constructor(
 
     override fun vedtakAnnullert(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, behandlingId: UUID) {
         eventBus.vedtaksperiodeAnnullert(
-            PersonObserver.VedtaksperiodeAnnullertEvent(
+            EventSubscription.VedtaksperiodeAnnullertEvent(
                 fom = periode.start,
                 tom = periode.endInclusive,
                 vedtaksperiodeId = id,
@@ -2190,7 +2190,7 @@ internal class Vedtaksperiode private constructor(
 
     override fun behandlingLukket(eventBus: EventBus, behandlingId: UUID) {
         eventBus.behandlingLukket(
-            PersonObserver.BehandlingLukketEvent(
+            EventSubscription.BehandlingLukketEvent(
                 yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
                 vedtaksperiodeId = id,
                 behandlingId = behandlingId
@@ -2200,7 +2200,7 @@ internal class Vedtaksperiode private constructor(
 
     override fun behandlingForkastet(eventBus: EventBus, behandlingId: UUID, automatiskBehandling: Boolean) {
         eventBus.behandlingForkastet(
-            PersonObserver.BehandlingForkastetEvent(
+            EventSubscription.BehandlingForkastetEvent(
                 yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
                 vedtaksperiodeId = id,
                 behandlingId = behandlingId,
@@ -2217,10 +2217,10 @@ internal class Vedtaksperiode private constructor(
         innsendt: LocalDateTime,
         registert: LocalDateTime,
         avsender: Avsender,
-        type: PersonObserver.BehandlingOpprettetEvent.Type,
+        type: EventSubscription.BehandlingOpprettetEvent.Type,
         søknadIder: Set<MeldingsreferanseId>
     ) {
-        val event = PersonObserver.BehandlingOpprettetEvent(
+        val event = EventSubscription.BehandlingOpprettetEvent(
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
             vedtaksperiodeId = this.id,
             søknadIder = (behandlinger.søknadIder() + søknadIder).map { it.id }.toSet(),
@@ -2228,12 +2228,12 @@ internal class Vedtaksperiode private constructor(
             fom = periode.start,
             tom = periode.endInclusive,
             type = type,
-            kilde = PersonObserver.BehandlingOpprettetEvent.Kilde(meldingsreferanseId.id, innsendt, registert, avsender)
+            kilde = EventSubscription.BehandlingOpprettetEvent.Kilde(meldingsreferanseId.id, innsendt, registert, avsender)
         )
         eventBus.nyBehandling(event)
     }
 
-    override fun utkastTilVedtak(eventBus: EventBus, utkastTilVedtak: PersonObserver.UtkastTilVedtakEvent) {
+    override fun utkastTilVedtak(eventBus: EventBus, utkastTilVedtak: EventSubscription.UtkastTilVedtakEvent) {
         eventBus.utkastTilVedtak(utkastTilVedtak)
     }
 
@@ -2325,11 +2325,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun inngåIRevurderingseventyret(
-        vedtaksperioder: MutableList<PersonObserver.OverstyringIgangsatt.VedtaksperiodeData>,
+        vedtaksperioder: MutableList<EventSubscription.OverstyringIgangsatt.VedtaksperiodeData>,
         typeEndring: String
     ) {
         vedtaksperioder.add(
-            PersonObserver.OverstyringIgangsatt.VedtaksperiodeData(
+            EventSubscription.OverstyringIgangsatt.VedtaksperiodeData(
                 yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
                 vedtaksperiodeId = id,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -2817,14 +2817,14 @@ internal class Vedtaksperiode private constructor(
     }
 
     fun overlappendeInfotrygdperioder(
-        result: PersonObserver.OverlappendeInfotrygdperioder,
+        result: EventSubscription.OverlappendeInfotrygdperioder,
         perioder: List<Infotrygdperiode>
-    ): PersonObserver.OverlappendeInfotrygdperioder {
+    ): EventSubscription.OverlappendeInfotrygdperioder {
         val overlappende = perioder.filter { it.overlapperMed(this.periode) }
         if (overlappende.isEmpty()) return result
         return result.copy(
             overlappendeInfotrygdperioder = result.overlappendeInfotrygdperioder.plusElement(
-                PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
+                EventSubscription.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
                     yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
                     vedtaksperiodeId = this.id,
                     kanForkastes = kanForkastes(),
@@ -2833,21 +2833,21 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiodetilstand = tilstand.type.name,
                     infotrygdperioder = overlappende.map {
                         when (it) {
-                            is Friperiode -> PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
+                            is Friperiode -> EventSubscription.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
                                 fom = it.periode.start,
                                 tom = it.periode.endInclusive,
                                 type = "FRIPERIODE",
                                 orgnummer = null
                             )
 
-                            is ArbeidsgiverUtbetalingsperiode -> PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
+                            is ArbeidsgiverUtbetalingsperiode -> EventSubscription.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
                                 fom = it.periode.start,
                                 tom = it.periode.endInclusive,
                                 type = "ARBEIDSGIVERUTBETALING",
                                 orgnummer = it.orgnr
                             )
 
-                            is PersonUtbetalingsperiode -> PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
+                            is PersonUtbetalingsperiode -> EventSubscription.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
                                 fom = it.periode.start,
                                 tom = it.periode.endInclusive,
                                 type = "PERSONUTBETALING",

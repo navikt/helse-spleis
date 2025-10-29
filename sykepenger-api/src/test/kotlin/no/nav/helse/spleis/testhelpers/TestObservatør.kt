@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.testhelpers
 
 import java.util.UUID
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.VedtaksperiodeEndretEvent
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.IdInnhenter
 import org.junit.jupiter.api.fail
 
-internal class TestObservatør : PersonObserver {
+internal class TestObservatør : EventSubscription {
     lateinit var sisteVedtaksperiode: UUID
 
     private val tilstandsendringer = mutableMapOf<UUID, MutableList<TilstandType>>()
@@ -25,12 +25,12 @@ internal class TestObservatør : PersonObserver {
         ventendeReplays.clear()
     }
 
-    override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
+    override fun nyBehandling(event: EventSubscription.BehandlingOpprettetEvent) {
         sisteVedtaksperiode = event.vedtaksperiodeId
     }
 
     override fun inntektsmeldingReplay(
-        event: PersonObserver.TrengerArbeidsgiveropplysningerEvent
+        event: EventSubscription.TrengerArbeidsgiveropplysningerEvent
     ) {
         ventendeReplays.add(event.yrkesaktivitetssporing.somOrganisasjonsnummer to event.vedtaksperiodeId)
     }

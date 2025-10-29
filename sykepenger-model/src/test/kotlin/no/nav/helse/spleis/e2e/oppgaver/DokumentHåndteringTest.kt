@@ -16,7 +16,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
@@ -351,7 +351,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         nyttVedtak(januar, orgnummer = a2)
         val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent), utenlandskSykmelding = true)
         assertEquals(
-            PersonObserver.VedtaksperiodeForkastetEvent(
+            EventSubscription.VedtaksperiodeForkastetEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode.id(a1),
                 gjeldendeTilstand = START,
@@ -378,7 +378,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
         assertEquals(
-            PersonObserver.VedtaksperiodeForkastetEvent(
+            EventSubscription.VedtaksperiodeForkastetEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 gjeldendeTilstand = AVVENTER_INNTEKTSMELDING,
@@ -397,7 +397,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         nyttVedtak(januar, orgnummer = a2)
         val søknad2 = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), utenlandskSykmelding = true)
         assertEquals(
-            PersonObserver.VedtaksperiodeForkastetEvent(
+            EventSubscription.VedtaksperiodeForkastetEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode.id(a1),
                 gjeldendeTilstand = START,
@@ -418,7 +418,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
         val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent))
         assertEquals(
-            PersonObserver.VedtaksperiodeForkastetEvent(
+            EventSubscription.VedtaksperiodeForkastetEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 gjeldendeTilstand = START,
@@ -440,7 +440,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
 
         assertEquals(
-            PersonObserver.VedtaksperiodeForkastetEvent(
+            EventSubscription.VedtaksperiodeForkastetEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 gjeldendeTilstand = AVVENTER_INNTEKTSMELDING,
@@ -462,7 +462,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
         val søknad2 = håndterSøknad(Sykdom(15.februar, 28.februar, 100.prosent))
         assertEquals(
-            PersonObserver.VedtaksperiodeForkastetEvent(
+            EventSubscription.VedtaksperiodeForkastetEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 gjeldendeTilstand = START,
@@ -491,7 +491,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(10.januar til 16.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(
-            PersonObserver.VedtaksperiodeForkastetEvent(
+            EventSubscription.VedtaksperiodeForkastetEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 gjeldendeTilstand = START,

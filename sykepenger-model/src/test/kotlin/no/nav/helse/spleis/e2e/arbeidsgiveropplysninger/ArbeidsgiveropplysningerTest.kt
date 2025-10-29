@@ -37,10 +37,10 @@ import no.nav.helse.januar
 import no.nav.helse.mandag
 import no.nav.helse.person.DokumentType
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.Arbeidsgiverperiode
-import no.nav.helse.person.PersonObserver.Inntekt
-import no.nav.helse.person.PersonObserver.Refusjon
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.Arbeidsgiverperiode
+import no.nav.helse.person.EventSubscription.Inntekt
+import no.nav.helse.person.EventSubscription.Refusjon
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
@@ -126,14 +126,14 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.clear()
             håndterSøknad(Sykdom(17.februar, 28.februar, 100.prosent), egenmeldinger = listOf(10.februar.somPeriode()))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            val forventet = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+            val forventet = EventSubscription.TrengerArbeidsgiveropplysningerEvent(
                 personidentifikator = UNG_PERSON_FNR_2018,
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode,
                 skjæringstidspunkt = 17.februar,
                 sykmeldingsperioder = listOf(17.februar til 28.februar),
                 egenmeldingsperioder = listOf(10.februar.somPeriode()),
-                førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(
+                førsteFraværsdager = listOf(EventSubscription.FørsteFraværsdag(
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                     førsteFraværsdag = 17.februar
                 )),

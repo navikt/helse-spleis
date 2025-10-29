@@ -13,7 +13,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.person.EventBus
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -93,12 +93,12 @@ internal class Feriepengeutbetaling private constructor(
         }
 
         eventBus.feriepengerUtbetalt(
-            PersonObserver.FeriepengerUtbetaltEvent(
+            EventSubscription.FeriepengerUtbetaltEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
                 fom = fom,
                 tom = tom,
-                arbeidsgiverOppdrag = PersonObserver.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(oppdrag),
-                personOppdrag = PersonObserver.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(personoppdrag)
+                arbeidsgiverOppdrag = EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(oppdrag),
+                personOppdrag = EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(personoppdrag)
             )
         )
     }
@@ -227,8 +227,8 @@ internal class Feriepengeutbetaling private constructor(
                 """.trimIndent()
             )
 
-            val arbeidsgiveroppdragdetaljer = PersonObserver.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(arbeidsgiveroppdrag).toString()
-            val personoppdragdetaljer = PersonObserver.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(personoppdrag).toString()
+            val arbeidsgiveroppdragdetaljer = EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(arbeidsgiveroppdrag).toString()
+            val personoppdragdetaljer = EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(personoppdrag).toString()
             // Logging
             aktivitetslogg.info(
                 """

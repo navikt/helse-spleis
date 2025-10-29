@@ -8,7 +8,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mars
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
@@ -39,10 +39,10 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-            val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
-            val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
-            val navDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.NavDag }
-            val navHelgedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag }
+            val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+            val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
+            val navDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.NavDag }
+            val navHelgedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.NavHelgDag }
 
             assertEquals(11, avvisteDager.size)
             assertEquals(16, arbeidsgiverperiodedager.size)
@@ -88,12 +88,12 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-            val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
-            val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
+            val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+            val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
 
             assertEquals(3, avvisteDager.size)
             assertEquals(16, arbeidsgiverperiodedager.size)
-            assertTrue(avvisteDager.all { it.begrunnelser == listOf(PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.Over70) })
+            assertTrue(avvisteDager.all { it.begrunnelser == listOf(EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.Over70) })
             assertTrue(arbeidsgiverperiodedager.all { it.begrunnelser == null })
         }
     }

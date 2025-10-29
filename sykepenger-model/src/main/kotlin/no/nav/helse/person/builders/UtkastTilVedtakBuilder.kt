@@ -8,14 +8,14 @@ import kotlin.properties.Delegates
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterHovedregel
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterSkjønn
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattIInfotrygd
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.sykdomstidslinje.Dag
@@ -322,7 +322,7 @@ internal class UtkastTilVedtakBuilder(
         //  Burde det hete noe annet? Ikke gitt at det skal bli et vedtak. `behandling_beregnet` ? 🤔
         //  Skal Spleis lytte på noe àla `behandling_utført` / `behandling_ferdig_behandlet` / `behandling_vurdert` som tommel opp/ned på godkjenningsbehov ?
         //  Sende med en liste med dager & beløp ?
-        val utkastTilVedtak = PersonObserver.UtkastTilVedtakEvent(
+        val utkastTilVedtak = EventSubscription.UtkastTilVedtakEvent(
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
             behandlingId = behandlingId,
@@ -335,7 +335,7 @@ internal class UtkastTilVedtakBuilder(
             yrkesaktivitetssporing = yrkesaktivitetssporing
         )
 
-        fun avsluttetMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<MeldingsreferanseId>) = PersonObserver.AvsluttetMedVedtakEvent(
+        fun avsluttetMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<MeldingsreferanseId>) = EventSubscription.AvsluttetMedVedtakEvent(
             yrkesaktivitetssporing = yrkesaktivitetssporing,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
@@ -403,7 +403,7 @@ internal class UtkastTilVedtakBuilder(
     }
 }
 
-private fun PersonObserver.Utbetalingsdag.tilBehovMap() =
+private fun EventSubscription.Utbetalingsdag.tilBehovMap() =
     mapOf(
         "dato" to "${this.dato}",
         "type" to when (this.type) {

@@ -10,7 +10,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.lørdag
 import no.nav.helse.mandag
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
@@ -25,7 +25,7 @@ internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest: AbstractDslTest() 
             emptyList<Periode>(),
             arbeidsgiverperiodeVed(vedtaksperiode = januar, infotrygdutbetaling = 1.januar)
         )
-        observatør.assertEtterspurt(1.vedtaksperiode, PersonObserver.Inntekt::class, PersonObserver.Refusjon::class)
+        observatør.assertEtterspurt(1.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class)
     }
 
     @Test

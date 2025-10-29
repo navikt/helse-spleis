@@ -4,8 +4,8 @@ import java.util.UUID
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.VedtaksperiodeEndretEvent
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spill_av_im.Forespørsel
@@ -14,35 +14,35 @@ import org.junit.jupiter.api.fail
 internal typealias InntektsmeldingId = UUID
 internal typealias VedtaksperiodeId = UUID
 
-internal class TestObservatør(person: Person? = null) : PersonObserver {
+internal class TestObservatør(person: Person? = null) : EventSubscription {
 
     internal val tilstandsendringer = person?.inspektør?.sisteVedtaksperiodeTilstander()?.mapValues { mutableListOf(it.value) }?.toMutableMap() ?: mutableMapOf()
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
-    val trengerArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerArbeidsgiveropplysningerEvent>()
-    val trengerIkkeArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent>()
-    val utbetalingUtenUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
-    val utbetalingMedUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
-    val feriepengerUtbetaltEventer = mutableListOf<PersonObserver.FeriepengerUtbetaltEvent>()
-    val utbetaltEndretEventer = mutableListOf<PersonObserver.UtbetalingEndretEvent>()
-    val avsluttetMedVedtakEvent = mutableMapOf<UUID, PersonObserver.AvsluttetMedVedtakEvent>()
-    val avsluttetMedVedtakEventer = mutableMapOf<UUID, MutableList<PersonObserver.AvsluttetMedVedtakEvent>>()
-    val behandlingOpprettetEventer = mutableListOf<PersonObserver.BehandlingOpprettetEvent>()
-    val behandlingLukketEventer = mutableListOf<PersonObserver.BehandlingLukketEvent>()
-    val behandlingForkastetEventer = mutableListOf<PersonObserver.BehandlingForkastetEvent>()
-    val avsluttetUtenVedtakEventer = mutableMapOf<UUID, MutableList<PersonObserver.AvsluttetUtenVedtakEvent>>()
-    val overstyringIgangsatt = mutableListOf<PersonObserver.OverstyringIgangsatt>()
-    val vedtaksperiodeVenter = mutableListOf<PersonObserver.VedtaksperiodeVenterEvent>()
-    val inntektsmeldingFørSøknad = mutableListOf<PersonObserver.InntektsmeldingFørSøknadEvent>()
+    val trengerArbeidsgiveropplysningerVedtaksperioder = mutableListOf<EventSubscription.TrengerArbeidsgiveropplysningerEvent>()
+    val trengerIkkeArbeidsgiveropplysningerVedtaksperioder = mutableListOf<EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent>()
+    val utbetalingUtenUtbetalingEventer = mutableListOf<EventSubscription.UtbetalingUtbetaltEvent>()
+    val utbetalingMedUtbetalingEventer = mutableListOf<EventSubscription.UtbetalingUtbetaltEvent>()
+    val feriepengerUtbetaltEventer = mutableListOf<EventSubscription.FeriepengerUtbetaltEvent>()
+    val utbetaltEndretEventer = mutableListOf<EventSubscription.UtbetalingEndretEvent>()
+    val avsluttetMedVedtakEvent = mutableMapOf<UUID, EventSubscription.AvsluttetMedVedtakEvent>()
+    val avsluttetMedVedtakEventer = mutableMapOf<UUID, MutableList<EventSubscription.AvsluttetMedVedtakEvent>>()
+    val behandlingOpprettetEventer = mutableListOf<EventSubscription.BehandlingOpprettetEvent>()
+    val behandlingLukketEventer = mutableListOf<EventSubscription.BehandlingLukketEvent>()
+    val behandlingForkastetEventer = mutableListOf<EventSubscription.BehandlingForkastetEvent>()
+    val avsluttetUtenVedtakEventer = mutableMapOf<UUID, MutableList<EventSubscription.AvsluttetUtenVedtakEvent>>()
+    val overstyringIgangsatt = mutableListOf<EventSubscription.OverstyringIgangsatt>()
+    val vedtaksperiodeVenter = mutableListOf<EventSubscription.VedtaksperiodeVenterEvent>()
+    val inntektsmeldingFørSøknad = mutableListOf<EventSubscription.InntektsmeldingFørSøknadEvent>()
     val inntektsmeldingIkkeHåndtert = mutableListOf<InntektsmeldingId>()
     val inntektsmeldingHåndtert = mutableListOf<Pair<InntektsmeldingId, VedtaksperiodeId>>()
-    val skatteinntekterLagtTilGrunnEventer = mutableListOf<PersonObserver.SkatteinntekterLagtTilGrunnEvent>()
+    val skatteinntekterLagtTilGrunnEventer = mutableListOf<EventSubscription.SkatteinntekterLagtTilGrunnEvent>()
     val søknadHåndtert = mutableListOf<Pair<UUID, UUID>>()
-    val vedtaksperiodeAnnullertEventer = mutableListOf<PersonObserver.VedtaksperiodeAnnullertEvent>()
-    val vedtaksperiodeOpprettetEventer = mutableListOf<PersonObserver.VedtaksperiodeOpprettet>()
-    val overlappendeInfotrygdperioder = mutableListOf<PersonObserver.OverlappendeInfotrygdperioder>()
-    val utkastTilVedtakEventer = mutableListOf<PersonObserver.UtkastTilVedtakEvent>()
-    val sykefraværstilfelleIkkeFunnet = mutableListOf<PersonObserver.SykefraværstilfelleIkkeFunnet>()
-    val analytiskDatapakkeEventer = mutableListOf<PersonObserver.AnalytiskDatapakkeEvent>()
+    val vedtaksperiodeAnnullertEventer = mutableListOf<EventSubscription.VedtaksperiodeAnnullertEvent>()
+    val vedtaksperiodeOpprettetEventer = mutableListOf<EventSubscription.VedtaksperiodeOpprettet>()
+    val overlappendeInfotrygdperioder = mutableListOf<EventSubscription.OverlappendeInfotrygdperioder>()
+    val utkastTilVedtakEventer = mutableListOf<EventSubscription.UtkastTilVedtakEvent>()
+    val sykefraværstilfelleIkkeFunnet = mutableListOf<EventSubscription.SykefraværstilfelleIkkeFunnet>()
+    val analytiskDatapakkeEventer = mutableListOf<EventSubscription.AnalytiskDatapakkeEvent>()
 
     val vedtaksperiodeUtbetalinger = mutableMapOf<String, MutableMap<UUID, List<UUID>>>()
 
@@ -53,8 +53,8 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
 
-    private val forkastedeEventer = mutableMapOf<UUID, PersonObserver.VedtaksperiodeForkastetEvent>()
-    val annulleringer = mutableListOf<PersonObserver.UtbetalingAnnullertEvent>()
+    private val forkastedeEventer = mutableMapOf<UUID, EventSubscription.VedtaksperiodeForkastetEvent>()
+    val annulleringer = mutableListOf<EventSubscription.UtbetalingAnnullertEvent>()
     val inntektsmeldingReplayEventer = mutableListOf<Forespørsel>()
 
     internal fun replayInntektsmeldinger(block: () -> Unit): Set<Forespørsel> {
@@ -74,55 +74,55 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         inntektsmeldingReplayEventer.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }
     }
 
-    override fun analytiskDatapakke(event: PersonObserver.AnalytiskDatapakkeEvent) {
+    override fun analytiskDatapakke(event: EventSubscription.AnalytiskDatapakkeEvent) {
         this.analytiskDatapakkeEventer.add(event)
     }
 
-    override fun vedtaksperioderVenter(eventer: List<PersonObserver.VedtaksperiodeVenterEvent>) {
+    override fun vedtaksperioderVenter(eventer: List<EventSubscription.VedtaksperiodeVenterEvent>) {
         vedtaksperiodeVenter.addAll(eventer)
     }
 
     fun forkastedePerioder() = forkastedeEventer.size
     fun forkastet(vedtaksperiodeId: UUID) = forkastedeEventer.getValue(vedtaksperiodeId)
 
-    override fun utbetalingUtenUtbetaling(event: PersonObserver.UtbetalingUtbetaltEvent) {
+    override fun utbetalingUtenUtbetaling(event: EventSubscription.UtbetalingUtbetaltEvent) {
         utbetalingUtenUtbetalingEventer.add(event)
     }
 
-    override fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
+    override fun utbetalingUtbetalt(event: EventSubscription.UtbetalingUtbetaltEvent) {
         utbetalingMedUtbetalingEventer.add(event)
     }
 
-    override fun feriepengerUtbetalt(event: PersonObserver.FeriepengerUtbetaltEvent) {
+    override fun feriepengerUtbetalt(event: EventSubscription.FeriepengerUtbetaltEvent) {
         feriepengerUtbetaltEventer.add(event)
     }
 
-    override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
+    override fun utbetalingEndret(event: EventSubscription.UtbetalingEndretEvent) {
         utbetaltEndretEventer.add(event)
     }
 
-    override fun avsluttetMedVedtak(event: PersonObserver.AvsluttetMedVedtakEvent) {
+    override fun avsluttetMedVedtak(event: EventSubscription.AvsluttetMedVedtakEvent) {
         avsluttetMedVedtakEvent[event.vedtaksperiodeId] = event
         avsluttetMedVedtakEventer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
     }
 
-    override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
+    override fun nyBehandling(event: EventSubscription.BehandlingOpprettetEvent) {
         behandlingOpprettetEventer.add(event)
     }
 
-    override fun behandlingLukket(event: PersonObserver.BehandlingLukketEvent) {
+    override fun behandlingLukket(event: EventSubscription.BehandlingLukketEvent) {
         behandlingLukketEventer.add(event)
     }
 
-    override fun behandlingForkastet(event: PersonObserver.BehandlingForkastetEvent) {
+    override fun behandlingForkastet(event: EventSubscription.BehandlingForkastetEvent) {
         behandlingForkastetEventer.add(event)
     }
 
-    override fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {
+    override fun avsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent) {
         avsluttetUtenVedtakEventer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
     }
 
-    override fun vedtaksperiodeOpprettet(event: PersonObserver.VedtaksperiodeOpprettet) {
+    override fun vedtaksperiodeOpprettet(event: EventSubscription.VedtaksperiodeOpprettet) {
         vedtaksperiodeOpprettetEventer.add(event)
     }
 
@@ -142,7 +142,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         tilstandsendringer.replaceAll { _, value -> mutableListOf(value.last()) }
     }
 
-    private val trengerArbeidsgiveroppysninger = mutableMapOf<UUID, Set<PersonObserver.ForespurtOpplysning>>()
+    private val trengerArbeidsgiveroppysninger = mutableMapOf<UUID, Set<EventSubscription.ForespurtOpplysning>>()
     internal fun forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg oppgitt: Arbeidsgiveropplysning) {
         val forespurt = trengerArbeidsgiveroppysninger[vedtaksperiodeId] ?: error("Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId")
         if (oppgitt.isEmpty()) return
@@ -158,24 +158,24 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         println("Spurte ikke om ${ikkeForespurt.joinToString { it.simpleName!! }}, men fikk det læll")
     }
 
-    private val PersonObserver.ForespurtOpplysning.somArbeidsgiveropplysning
+    private val EventSubscription.ForespurtOpplysning.somArbeidsgiveropplysning
         get() = when (this) {
-            PersonObserver.Arbeidsgiverperiode -> Arbeidsgiveropplysning.OppgittArbeidgiverperiode::class
-            is PersonObserver.Inntekt -> Arbeidsgiveropplysning.OppgittInntekt::class
-            PersonObserver.Refusjon -> Arbeidsgiveropplysning.OppgittRefusjon::class
+            EventSubscription.Arbeidsgiverperiode -> Arbeidsgiveropplysning.OppgittArbeidgiverperiode::class
+            is EventSubscription.Inntekt -> Arbeidsgiveropplysning.OppgittInntekt::class
+            EventSubscription.Refusjon -> Arbeidsgiveropplysning.OppgittRefusjon::class
         }
 
-    override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
+    override fun trengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
         trengerArbeidsgiveropplysningerVedtaksperioder.add(event)
         trengerArbeidsgiveroppysninger[event.vedtaksperiodeId] = event.forespurteOpplysninger
     }
 
-    override fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {
+    override fun trengerIkkeArbeidsgiveropplysninger(event: EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent) {
         trengerIkkeArbeidsgiveropplysningerVedtaksperioder.add(event)
         trengerArbeidsgiveroppysninger.remove(event.vedtaksperiodeId)
     }
 
-    override fun inntektsmeldingReplay(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
+    override fun inntektsmeldingReplay(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
         inntektsmeldingReplayEventer.add(
             Forespørsel(
                 fnr = event.personidentifikator.toString(),
@@ -185,30 +185,30 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
                 førsteFraværsdager = event.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.yrkesaktivitetssporing.somOrganisasjonsnummer, it.førsteFraværsdag) },
                 sykmeldingsperioder = event.sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
                 egenmeldinger = event.egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-                harForespurtArbeidsgiverperiode = PersonObserver.Arbeidsgiverperiode in event.forespurteOpplysninger
+                harForespurtArbeidsgiverperiode = EventSubscription.Arbeidsgiverperiode in event.forespurteOpplysninger
             )
         )
     }
 
-    override fun annullering(event: PersonObserver.UtbetalingAnnullertEvent) {
+    override fun annullering(event: EventSubscription.UtbetalingAnnullertEvent) {
         annulleringer.add(event)
     }
 
-    override fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
+    override fun vedtaksperiodeForkastet(event: EventSubscription.VedtaksperiodeForkastetEvent) {
         forkastedeEventer[event.vedtaksperiodeId] = event
     }
 
     override fun overstyringIgangsatt(
-        event: PersonObserver.OverstyringIgangsatt
+        event: EventSubscription.OverstyringIgangsatt
     ) {
         overstyringIgangsatt.add(event)
     }
 
-    override fun overlappendeInfotrygdperioder(event: PersonObserver.OverlappendeInfotrygdperioder) {
+    override fun overlappendeInfotrygdperioder(event: EventSubscription.OverlappendeInfotrygdperioder) {
         overlappendeInfotrygdperioder.add(event)
     }
 
-    override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) {
+    override fun inntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent) {
         inntektsmeldingFørSøknad.add(event)
     }
 
@@ -221,7 +221,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         trengerArbeidsgiveroppysninger.remove(vedtaksperiodeId)
     }
 
-    override fun skatteinntekterLagtTilGrunn(event: PersonObserver.SkatteinntekterLagtTilGrunnEvent) {
+    override fun skatteinntekterLagtTilGrunn(event: EventSubscription.SkatteinntekterLagtTilGrunnEvent) {
         skatteinntekterLagtTilGrunnEventer.add(event)
     }
 
@@ -229,15 +229,15 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         søknadHåndtert.add(søknadId to vedtaksperiodeId)
     }
 
-    override fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
+    override fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent) {
         vedtaksperiodeAnnullertEventer.add(vedtaksperiodeAnnullertEvent)
     }
 
-    override fun utkastTilVedtak(event: PersonObserver.UtkastTilVedtakEvent) {
+    override fun utkastTilVedtak(event: EventSubscription.UtkastTilVedtakEvent) {
         utkastTilVedtakEventer.add(event)
     }
 
-    override fun sykefraværstilfelleIkkeFunnet(event: PersonObserver.SykefraværstilfelleIkkeFunnet) {
+    override fun sykefraværstilfelleIkkeFunnet(event: EventSubscription.SykefraværstilfelleIkkeFunnet) {
         sykefraværstilfelleIkkeFunnet.add(event)
     }
 

@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.graphql
 
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.spekemat.fabrikk.Pølse
 import no.nav.helse.spekemat.fabrikk.Pølsefabrikk
 import no.nav.helse.spekemat.fabrikk.PølseradDto
@@ -8,7 +8,7 @@ import no.nav.helse.spekemat.fabrikk.Pølsestatus
 import no.nav.helse.spleis.speil.SpekematDTO
 import no.nav.helse.spleis.testhelpers.somOrganisasjonsnummer
 
-class Spekemat : PersonObserver {
+class Spekemat : EventSubscription {
     private val hendelser = mutableListOf<Any>()
     private val arbeidsgivere = mutableMapOf<String, Pølsefabrikk>()
 
@@ -40,7 +40,7 @@ class Spekemat : PersonObserver {
             }
         )
 
-    override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
+    override fun nyBehandling(event: EventSubscription.BehandlingOpprettetEvent) {
         hendelser.add(event)
         arbeidsgivere.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { Pølsefabrikk() }
             .nyPølse(
@@ -53,13 +53,13 @@ class Spekemat : PersonObserver {
             )
     }
 
-    override fun behandlingLukket(event: PersonObserver.BehandlingLukketEvent) {
+    override fun behandlingLukket(event: EventSubscription.BehandlingLukketEvent) {
         hendelser.add(event)
         arbeidsgivere.getValue(event.yrkesaktivitetssporing.somOrganisasjonsnummer)
             .oppdaterPølse(event.vedtaksperiodeId, event.behandlingId, Pølsestatus.LUKKET)
     }
 
-    override fun behandlingForkastet(event: PersonObserver.BehandlingForkastetEvent) {
+    override fun behandlingForkastet(event: EventSubscription.BehandlingForkastetEvent) {
         hendelser.add(event)
         arbeidsgivere.getValue(event.yrkesaktivitetssporing.somOrganisasjonsnummer)
             .oppdaterPølse(event.vedtaksperiodeId, event.behandlingId, Pølsestatus.FORKASTET)

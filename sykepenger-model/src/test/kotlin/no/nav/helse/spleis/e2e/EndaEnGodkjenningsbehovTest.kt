@@ -32,7 +32,7 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode

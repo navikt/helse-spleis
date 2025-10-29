@@ -7,7 +7,7 @@ import no.nav.helse.dto.VedtaksperiodeVenterDto
 import no.nav.helse.dto.VenterPåDto
 import no.nav.helse.dto.VenteårsakDto
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.person.PersonObserver.VedtaksperiodeVenterEvent
+import no.nav.helse.person.EventSubscription.VedtaksperiodeVenterEvent
 
 internal data class VedtaksperiodeVenterdata(
     val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,

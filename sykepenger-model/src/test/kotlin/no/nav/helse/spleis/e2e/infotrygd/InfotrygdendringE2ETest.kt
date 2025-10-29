@@ -9,8 +9,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -84,9 +84,9 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         assertEquals(2, observatør.overlappendeInfotrygdperioder.size)
         val event = observatør.overlappendeInfotrygdperioder.last()
         val vedtaksperiodeId = inspektør.vedtaksperiodeId(1.vedtaksperiode)
-        val forventet = PersonObserver.OverlappendeInfotrygdperioder(
+        val forventet = EventSubscription.OverlappendeInfotrygdperioder(
             listOf(
-                PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
+                EventSubscription.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                     vedtaksperiodeId = vedtaksperiodeId,
                     vedtaksperiodeFom = 1.januar,
@@ -103,7 +103,7 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
                     )
                 ),
 
-                PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
+                EventSubscription.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                     vedtaksperiodeId = inspektør.vedtaksperiodeId(2.vedtaksperiode),
                     vedtaksperiodeFom = 21.januar,

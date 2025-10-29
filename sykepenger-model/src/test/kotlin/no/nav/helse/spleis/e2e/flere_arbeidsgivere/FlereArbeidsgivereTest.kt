@@ -37,7 +37,7 @@ import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
 import no.nav.helse.person.GrunnlagsdataView
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
@@ -914,7 +914,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 beregnetInntekt = INNTEKT
             )
             håndterSøknad(25.januar til 10.februar)
-            observatør.assertEtterspurt(2.vedtaksperiode, PersonObserver.Refusjon::class)
+            observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class)
         }
         a2 {
             håndterInntektsmelding(
@@ -1562,7 +1562,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSøknad(januar) }
         a2 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            observatør.assertEtterspurt(2.vedtaksperiode, PersonObserver.Refusjon::class)
+            observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class)
         }
         a1 { assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
         a2 {

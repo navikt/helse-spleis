@@ -7,14 +7,14 @@ import no.nav.helse.dto.SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Melding
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserAap
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserDagpenger
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserForeldrepenger
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserOmsorgspenger
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserOpplaringspenger
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserPleiepenger
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserSvangerskapspenger
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserAap
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserDagpenger
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserForeldrepenger
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserOmsorgspenger
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserOpplaringspenger
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserPleiepenger
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserSvangerskapspenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.AAP
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Dagpenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
@@ -337,7 +337,7 @@ sealed class Dag(
             }
         }
 
-        internal fun tilEksternBegrunnelse(): PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO {
+        internal fun tilEksternBegrunnelse(): EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO {
             return when (ytelse) {
                 Foreldrepenger -> AndreYtelserForeldrepenger
                 AAP -> AndreYtelserAap

@@ -10,24 +10,24 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class EventBus {
-    private val observers = mutableListOf<PersonObserver>()
+    private val observers = mutableListOf<EventSubscription>()
 
-    fun register(observer: PersonObserver) {
+    fun register(observer: EventSubscription) {
         observers.add(observer)
     }
 
-    internal fun overlappendeInfotrygdperioder(event: PersonObserver.OverlappendeInfotrygdperioder) {
+    internal fun overlappendeInfotrygdperioder(event: EventSubscription.OverlappendeInfotrygdperioder) {
         observers.forEach { it.overlappendeInfotrygdperioder(event) }
     }
 
     internal fun sykefraværstilfelleIkkeFunnet(skjæringstidspunkt: LocalDate) {
-        val event = PersonObserver.SykefraværstilfelleIkkeFunnet(
+        val event = EventSubscription.SykefraværstilfelleIkkeFunnet(
             skjæringstidspunkt = skjæringstidspunkt
         )
         observers.forEach { it.sykefraværstilfelleIkkeFunnet(event) }
     }
 
-    internal fun annullert(event: PersonObserver.UtbetalingAnnullertEvent) {
+    internal fun annullert(event: EventSubscription.UtbetalingAnnullertEvent) {
         observers.forEach { it.annullering(event) }
     }
 
@@ -39,75 +39,75 @@ class EventBus {
         observers.forEach { it.vedtaksperiodeIkkePåminnet(vedtaksperiodeId, organisasjonsnummer, tilstandType) }
     }
 
-    internal fun vedtaksperiodeForkastet(event: PersonObserver.VedtaksperiodeForkastetEvent) {
+    internal fun vedtaksperiodeForkastet(event: EventSubscription.VedtaksperiodeForkastetEvent) {
         observers.forEach { it.vedtaksperiodeForkastet(event) }
     }
 
-    internal fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {
+    internal fun vedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent) {
         observers.forEach { it.vedtaksperiodeEndret(event) }
     }
 
-    internal fun inntektsmeldingReplay(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
+    internal fun inntektsmeldingReplay(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
         observers.forEach { it.inntektsmeldingReplay(event) }
     }
 
-    internal fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
+    internal fun trengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
         observers.forEach { it.trengerArbeidsgiveropplysninger(event) }
     }
 
-    internal fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {
+    internal fun trengerIkkeArbeidsgiveropplysninger(event: EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent) {
         observers.forEach { it.trengerIkkeArbeidsgiveropplysninger(event) }
     }
 
-    internal fun utbetalingUtbetalt(event: PersonObserver.UtbetalingUtbetaltEvent) {
+    internal fun utbetalingUtbetalt(event: EventSubscription.UtbetalingUtbetaltEvent) {
         observers.forEach { it.utbetalingUtbetalt(event) }
     }
 
-    internal fun utbetalingUtenUtbetaling(event: PersonObserver.UtbetalingUtbetaltEvent) {
+    internal fun utbetalingUtenUtbetaling(event: EventSubscription.UtbetalingUtbetaltEvent) {
         observers.forEach { it.utbetalingUtenUtbetaling(event) }
     }
 
-    internal fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
+    internal fun utbetalingEndret(event: EventSubscription.UtbetalingEndretEvent) {
         observers.forEach { it.utbetalingEndret(event) }
     }
 
-    internal fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {
+    internal fun avsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent) {
         observers.forEach { it.avsluttetUtenVedtak(event) }
     }
 
-    internal fun avsluttetMedVedtak(avsluttetMedVedtakEvent: PersonObserver.AvsluttetMedVedtakEvent) {
+    internal fun avsluttetMedVedtak(avsluttetMedVedtakEvent: EventSubscription.AvsluttetMedVedtakEvent) {
         observers.forEach { it.avsluttetMedVedtak(avsluttetMedVedtakEvent) }
     }
 
-    internal fun analytiskDatapakke(analytiskDatapakkeEvent: PersonObserver.AnalytiskDatapakkeEvent) {
+    internal fun analytiskDatapakke(analytiskDatapakkeEvent: EventSubscription.AnalytiskDatapakkeEvent) {
         observers.forEach { it.analytiskDatapakke(analytiskDatapakkeEvent) }
     }
 
-    internal fun behandlingLukket(behandlingLukketEvent: PersonObserver.BehandlingLukketEvent) {
+    internal fun behandlingLukket(behandlingLukketEvent: EventSubscription.BehandlingLukketEvent) {
         observers.forEach { it.behandlingLukket(behandlingLukketEvent) }
     }
 
-    internal fun behandlingForkastet(behandlingForkastetEvent: PersonObserver.BehandlingForkastetEvent) {
+    internal fun behandlingForkastet(behandlingForkastetEvent: EventSubscription.BehandlingForkastetEvent) {
         observers.forEach { it.behandlingForkastet(behandlingForkastetEvent) }
     }
 
-    internal fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
+    internal fun nyBehandling(event: EventSubscription.BehandlingOpprettetEvent) {
         observers.forEach { it.nyBehandling(event) }
     }
 
-    internal fun utkastTilVedtak(event: PersonObserver.UtkastTilVedtakEvent) {
+    internal fun utkastTilVedtak(event: EventSubscription.UtkastTilVedtakEvent) {
         observers.forEach { it.utkastTilVedtak(event) }
     }
 
-    fun planlagtAnnullering(planlagtAnnullering: PersonObserver.PlanlagtAnnulleringEvent) {
+    fun planlagtAnnullering(planlagtAnnullering: EventSubscription.PlanlagtAnnulleringEvent) {
         observers.forEach { it.planlagtAnnullering(planlagtAnnullering) }
     }
 
-    internal fun emitOverstyringIgangsattEvent(event: PersonObserver.OverstyringIgangsatt) {
+    internal fun emitOverstyringIgangsattEvent(event: EventSubscription.OverstyringIgangsatt) {
         observers.forEach { it.overstyringIgangsatt(event) }
     }
 
-    internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
+    internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: EventSubscription.FeriepengerUtbetaltEvent) {
         observers.forEach { it.feriepengerUtbetalt(feriepengerUtbetaltEvent) }
     }
 
@@ -116,7 +116,7 @@ class EventBus {
         yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
     ) {
         observers.forEach {
-            it.inntektsmeldingFørSøknad(PersonObserver.InntektsmeldingFørSøknadEvent(meldingsreferanseId, yrkesaktivitetssporing))
+            it.inntektsmeldingFørSøknad(EventSubscription.InntektsmeldingFørSøknadEvent(meldingsreferanseId, yrkesaktivitetssporing))
         }
     }
 
@@ -135,7 +135,7 @@ class EventBus {
         }
     }
 
-    internal fun sendSkatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent: PersonObserver.SkatteinntekterLagtTilGrunnEvent) {
+    internal fun sendSkatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent: EventSubscription.SkatteinntekterLagtTilGrunnEvent) {
         observers.forEach {
             it.skatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent)
         }
@@ -147,7 +147,7 @@ class EventBus {
         }
     }
 
-    internal fun vedtaksperiodeVenter(eventer: List<PersonObserver.VedtaksperiodeVenterEvent>) {
+    internal fun vedtaksperiodeVenter(eventer: List<EventSubscription.VedtaksperiodeVenterEvent>) {
         observers.forEach { it.vedtaksperioderVenter(eventer) }
     }
 
@@ -160,11 +160,11 @@ class EventBus {
     }
 
     internal fun vedtaksperiodeOpprettet(vedtaksperiodeId: UUID, yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, periode: Periode, skjæringstidspunkt: LocalDate, opprettet: LocalDateTime) {
-        val event = PersonObserver.VedtaksperiodeOpprettet(vedtaksperiodeId, yrkesaktivitetssporing, periode, skjæringstidspunkt, opprettet)
+        val event = EventSubscription.VedtaksperiodeOpprettet(vedtaksperiodeId, yrkesaktivitetssporing, periode, skjæringstidspunkt, opprettet)
         observers.forEach { it.vedtaksperiodeOpprettet(event) }
     }
 
-    internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
+    internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent) {
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
     }
 }

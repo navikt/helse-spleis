@@ -15,7 +15,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
-interface PersonObserver {
+interface EventSubscription {
 
     data class PlanlagtAnnulleringEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,

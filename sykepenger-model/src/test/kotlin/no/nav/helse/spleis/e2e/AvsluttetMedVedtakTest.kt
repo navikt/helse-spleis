@@ -6,7 +6,6 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -15,17 +14,15 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterHovedregel
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterSkjønn
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -310,5 +307,5 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
     }
 
     private val UUID.avsluttetUtenVedtakEventer get() = observatør.avsluttetUtenVedtakEventer.getValue(this)
-    private fun UUID.assertIngenVedtakFattet() = assertEquals(emptyList<PersonObserver.AvsluttetMedVedtakEvent>(), observatør.avsluttetMedVedtakEventer[this] ?: emptyList<PersonObserver.AvsluttetMedVedtakEvent>())
+    private fun UUID.assertIngenVedtakFattet() = assertEquals(emptyList<EventSubscription.AvsluttetMedVedtakEvent>(), observatør.avsluttetMedVedtakEventer[this] ?: emptyList<EventSubscription.AvsluttetMedVedtakEvent>())
 }

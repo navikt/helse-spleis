@@ -37,7 +37,7 @@ import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentspo
 import no.nav.helse.person.Dokumentsporing.Companion.eksterneIder
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
-import no.nav.helse.person.PersonObserver.AnalytiskDatapakkeEvent
+import no.nav.helse.person.EventSubscription.AnalytiskDatapakkeEvent
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -1371,7 +1371,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             observatører.forEach { it.avsluttetUtenVedtak(eventBus, aktivitetslogg, id, avsluttet!!, periode, dekkesAvArbeidsgiverperioden, dokumentsporing.ider()) }
         }
 
-        private fun emitNyBehandlingOpprettet(eventBus: EventBus, type: PersonObserver.BehandlingOpprettetEvent.Type) {
+        private fun emitNyBehandlingOpprettet(eventBus: EventBus, type: EventSubscription.BehandlingOpprettetEvent.Type) {
             check(observatører.isNotEmpty()) { "behandlingen har ingen registrert observatør" }
             observatører.forEach { it.nyBehandling(eventBus, id, periode, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type, endringer.dokumentsporing.søknadIder()) }
         }
@@ -1608,7 +1608,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object Uberegnet : Tilstand {
-                override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, PersonObserver.BehandlingOpprettetEvent.Type.Søknad)
+                override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Søknad)
                 override fun entering(behandling: Behandling, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
                     check(behandling.utbetaling() == null) { "skal ikke ha utbetaling og være uberegnet samtidig" }
                 }
@@ -1643,7 +1643,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object UberegnetOmgjøring : Tilstand by (Uberegnet) {
-                override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, PersonObserver.BehandlingOpprettetEvent.Type.Omgjøring)
+                override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Omgjøring)
                 override fun beregning(
                     behandling: Behandling,
                     eventBus: EventBus,
@@ -1656,7 +1656,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object UberegnetRevurdering : Tilstand by (Uberegnet) {
-                override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, PersonObserver.BehandlingOpprettetEvent.Type.Revurdering)
+                override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Revurdering)
 
                 override fun beregning(
                     behandling: Behandling,
@@ -1916,7 +1916,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.avsluttet = LocalDateTime.now()
                 }
 
-                override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, PersonObserver.BehandlingOpprettetEvent.Type.Revurdering)
+                override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Revurdering)
                 override fun forkastVedtaksperiode(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
                     behandling.vedtakAnnullert(eventBus, aktivitetslogg)
                     return null
@@ -1926,7 +1926,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object UberegnetAnnullering : Tilstand {
-                override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, PersonObserver.BehandlingOpprettetEvent.Type.Revurdering)
+                override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Revurdering)
 
                 override fun leggTilAnnullering(behandling: Behandling, eventBus: EventBus, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
                     behandling.nyEndring(behandling.gjeldende.kopierMedAnnullering(grunnlagsdata, annullering))
@@ -1961,7 +1961,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object TilInfotrygd : Tilstand {
-                override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, PersonObserver.BehandlingOpprettetEvent.Type.Omgjøring)
+                override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Omgjøring)
                 override fun entering(behandling: Behandling, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
                     behandling.avsluttet = LocalDateTime.now()
                 }

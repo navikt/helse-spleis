@@ -14,8 +14,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
@@ -91,7 +91,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
         overstyringerIgangsatt[0].also { event ->
             assertEquals(
-                PersonObserver.OverstyringIgangsatt(
+                EventSubscription.OverstyringIgangsatt(
                     årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
                     skjæringstidspunkt = 1.januar,
                     periodeForEndring = 1.januar til 1.januar,
@@ -108,7 +108,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
         overstyringerIgangsatt[1].also { event ->
             assertEquals(
-                PersonObserver.OverstyringIgangsatt(
+                EventSubscription.OverstyringIgangsatt(
                     årsak = "NY_PERIODE",
                     skjæringstidspunkt = 1.januar,
                     periodeForEndring = 1.mars til 20.mars,
@@ -122,7 +122,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
         overstyringerIgangsatt[2].also { event ->
             assertEquals(
-                PersonObserver.OverstyringIgangsatt(
+                EventSubscription.OverstyringIgangsatt(
                     årsak = "ARBEIDSGIVERPERIODE",
                     skjæringstidspunkt = 1.mars,
                     periodeForEndring = 1.mars til 20.mars,

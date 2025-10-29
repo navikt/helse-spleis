@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt
@@ -26,26 +26,26 @@ internal class AnalytiskDatapakkeTest : AbstractDslTest() {
             nyttVedtak(januar)
 
             val event = observatør.analytiskDatapakkeEventer.last()
-            val expected = PersonObserver.AnalytiskDatapakkeEvent(
+            val expected = EventSubscription.AnalytiskDatapakkeEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = 1.vedtaksperiode.sisteBehandlingId(a1),
                 skjæringstidspunkt = 1.januar,
-                beløpTilBruker = PersonObserver.AnalytiskDatapakkeEvent.Pengeinformasjon(
+                beløpTilBruker = EventSubscription.AnalytiskDatapakkeEvent.Pengeinformasjon(
                     totalBeløp = 0.0,
                     nettoBeløp = 0.0
                 ),
-                beløpTilArbeidsgiver = PersonObserver.AnalytiskDatapakkeEvent.Pengeinformasjon(
+                beløpTilArbeidsgiver = EventSubscription.AnalytiskDatapakkeEvent.Pengeinformasjon(
                     totalBeløp = 15741.0,
                     nettoBeløp = 15741.0
                 ),
                 fom = 1.januar,
                 tom = 31.januar,
-                antallForbrukteSykedagerEtterPeriode = PersonObserver.AnalytiskDatapakkeEvent.Daginformasjon(
+                antallForbrukteSykedagerEtterPeriode = EventSubscription.AnalytiskDatapakkeEvent.Daginformasjon(
                     antallDager = 11,
                     nettoDager = 11
                 ),
-                antallGjenståendeSykedagerEtterPeriode = PersonObserver.AnalytiskDatapakkeEvent.Daginformasjon(
+                antallGjenståendeSykedagerEtterPeriode = EventSubscription.AnalytiskDatapakkeEvent.Daginformasjon(
                     antallDager = 237,
                     nettoDager = 237
                 ),
@@ -80,26 +80,26 @@ internal class AnalytiskDatapakkeTest : AbstractDslTest() {
             håndterUtbetalt()
 
             val event = observatør.analytiskDatapakkeEventer.last()
-            val expected = PersonObserver.AnalytiskDatapakkeEvent(
+            val expected = EventSubscription.AnalytiskDatapakkeEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = 1.vedtaksperiode.sisteBehandlingId(a1),
                 skjæringstidspunkt = 1.januar,
-                beløpTilBruker = PersonObserver.AnalytiskDatapakkeEvent.Pengeinformasjon(
+                beløpTilBruker = EventSubscription.AnalytiskDatapakkeEvent.Pengeinformasjon(
                     totalBeløp = 4616.0,
                     nettoBeløp = 4616.0
                 ),
-                beløpTilArbeidsgiver = PersonObserver.AnalytiskDatapakkeEvent.Pengeinformasjon(
+                beløpTilArbeidsgiver = EventSubscription.AnalytiskDatapakkeEvent.Pengeinformasjon(
                     totalBeløp = 6924.0,
                     nettoBeløp = -8817.0
                 ),
                 fom = 1.januar,
                 tom = 31.januar,
-                antallForbrukteSykedagerEtterPeriode = PersonObserver.AnalytiskDatapakkeEvent.Daginformasjon(
+                antallForbrukteSykedagerEtterPeriode = EventSubscription.AnalytiskDatapakkeEvent.Daginformasjon(
                     antallDager = 10,
                     nettoDager = -1
                 ),
-                antallGjenståendeSykedagerEtterPeriode = PersonObserver.AnalytiskDatapakkeEvent.Daginformasjon(
+                antallGjenståendeSykedagerEtterPeriode = EventSubscription.AnalytiskDatapakkeEvent.Daginformasjon(
                     antallDager = 238,
                     nettoDager = 1
                 ),

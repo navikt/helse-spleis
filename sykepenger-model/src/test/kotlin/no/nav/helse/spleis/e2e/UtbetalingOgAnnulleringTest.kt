@@ -15,7 +15,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
@@ -453,13 +453,13 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
 
-        val avvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
-        val ikkeAvvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type != PersonObserver.Utbetalingsdag.Dagtype.AvvistDag }
+        val avvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+        val ikkeAvvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type != EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
 
         assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
         assertEquals(7, avvisteDager.size)
         assertEquals(23, ikkeAvvisteDager.size)
-        assertTrue(avvisteDager.all { it.begrunnelser == listOf(PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.MinimumSykdomsgrad) })
+        assertTrue(avvisteDager.all { it.begrunnelser == listOf(EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumSykdomsgrad) })
         assertTrue(ikkeAvvisteDager.all { it.begrunnelser == null })
     }
 }

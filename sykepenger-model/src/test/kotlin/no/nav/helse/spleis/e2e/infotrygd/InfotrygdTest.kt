@@ -20,7 +20,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.PersonObserver.VedtaksperiodeVenterEvent
+import no.nav.helse.person.EventSubscription.VedtaksperiodeVenterEvent
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3

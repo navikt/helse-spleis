@@ -15,7 +15,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8

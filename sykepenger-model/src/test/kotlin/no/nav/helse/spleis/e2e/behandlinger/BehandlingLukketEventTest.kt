@@ -18,7 +18,7 @@ import no.nav.helse.person.BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST
 import no.nav.helse.person.BehandlingView.TilstandView.TIL_INFOTRYGD
 import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_FATTET
 import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_IVERKSATT
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -37,7 +37,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.single()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
+            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -93,7 +93,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.single()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
+            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -111,7 +111,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.single()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
+            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -135,7 +135,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
+            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -161,7 +161,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
+            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -185,7 +185,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
+            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -210,7 +210,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
+            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId
@@ -238,7 +238,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = PersonObserver.BehandlingLukketEvent(
+            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = forventetBehandlingId

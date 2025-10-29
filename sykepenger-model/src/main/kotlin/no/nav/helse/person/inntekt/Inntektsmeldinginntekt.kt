@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.*
 import no.nav.helse.dto.deserialisering.InntektsmeldingInnDto
 import no.nav.helse.dto.serialisering.InntektsmeldingUtDto
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 
 internal data class Inntektsmeldinginntekt(
     val id: UUID,

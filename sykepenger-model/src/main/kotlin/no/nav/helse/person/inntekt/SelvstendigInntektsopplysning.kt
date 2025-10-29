@@ -5,7 +5,7 @@ import no.nav.helse.dto.deserialisering.SelvstendigInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.SelvstendigInntektsopplysningUtDto
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.Inntektskilde
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 

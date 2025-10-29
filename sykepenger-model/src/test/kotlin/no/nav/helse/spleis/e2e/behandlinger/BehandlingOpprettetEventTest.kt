@@ -13,7 +13,7 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
@@ -35,15 +35,15 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             val behandlingOpprettetEvent = observatør.behandlingOpprettetEventer.last()
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 val behandlingId = behandlinger.single().id
-                val forventetBehandlingEvent = PersonObserver.BehandlingOpprettetEvent(
+                val forventetBehandlingEvent = EventSubscription.BehandlingOpprettetEvent(
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                     vedtaksperiodeId = 1.vedtaksperiode,
                     søknadIder = setOf(søknadId),
                     behandlingId = behandlingId,
-                    type = PersonObserver.BehandlingOpprettetEvent.Type.Søknad,
+                    type = EventSubscription.BehandlingOpprettetEvent.Type.Søknad,
                     fom = 1.januar,
                     tom = 20.januar,
-                    kilde = PersonObserver.BehandlingOpprettetEvent.Kilde(
+                    kilde = EventSubscription.BehandlingOpprettetEvent.Kilde(
                         meldingsreferanseId = søknadId,
                         innsendt = innsendt,
                         registert = registrert,
@@ -64,8 +64,8 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             assertEquals(2, behandlingOpprettetEventer.size)
             val førsteEvent = behandlingOpprettetEventer.first()
             val andreEvent = behandlingOpprettetEventer.last()
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, førsteEvent.type)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Revurdering, andreEvent.type)
+            assertEquals(EventSubscription.BehandlingOpprettetEvent.Type.Søknad, førsteEvent.type)
+            assertEquals(EventSubscription.BehandlingOpprettetEvent.Type.Revurdering, andreEvent.type)
         }
     }
 
@@ -78,8 +78,8 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             assertEquals(2, behandlingOpprettetEventer.size)
             val førsteEvent = behandlingOpprettetEventer.first()
             val andreEvent = behandlingOpprettetEventer.last()
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, førsteEvent.type)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Omgjøring, andreEvent.type)
+            assertEquals(EventSubscription.BehandlingOpprettetEvent.Type.Søknad, førsteEvent.type)
+            assertEquals(EventSubscription.BehandlingOpprettetEvent.Type.Omgjøring, andreEvent.type)
         }
     }
 
@@ -92,10 +92,10 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             håndterUtbetalt()
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer
             assertEquals(4, behandlingOpprettetEventer.size)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettetEventer[0].type)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettetEventer[1].type)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Revurdering, behandlingOpprettetEventer[2].type)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Revurdering, behandlingOpprettetEventer[3].type)
+            assertEquals(EventSubscription.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettetEventer[0].type)
+            assertEquals(EventSubscription.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettetEventer[1].type)
+            assertEquals(EventSubscription.BehandlingOpprettetEvent.Type.Revurdering, behandlingOpprettetEventer[2].type)
+            assertEquals(EventSubscription.BehandlingOpprettetEvent.Type.Revurdering, behandlingOpprettetEventer[3].type)
 
             val vedtaksperiodeForkastetEventer = observatør.behandlingForkastetEventer
             assertEquals(1, vedtaksperiodeForkastetEventer.size)
@@ -110,7 +110,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), utenlandskSykmelding = true)
             val behandlingOpprettet = observatør.behandlingOpprettetEventer.single()
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettet.type)
+            assertEquals(EventSubscription.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettet.type)
         }
     }
 
@@ -121,8 +121,8 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             val behandlingOpprettet = observatør.behandlingOpprettetEventer
             assertEquals(2, behandlingOpprettet.size)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettet[0].type)
-            assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Omgjøring, behandlingOpprettet[1].type)
+            assertEquals(EventSubscription.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettet[0].type)
+            assertEquals(EventSubscription.BehandlingOpprettetEvent.Type.Omgjøring, behandlingOpprettet[1].type)
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             assertEquals(1.vedtaksperiode, behandlingForkastetEvent.vedtaksperiodeId)
         }

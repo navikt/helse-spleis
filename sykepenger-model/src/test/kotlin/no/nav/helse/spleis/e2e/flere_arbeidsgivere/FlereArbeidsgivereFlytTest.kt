@@ -14,7 +14,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -451,7 +451,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        observatør.assertEtterspurt(2.vedtaksperiode.id(a2), PersonObserver.Refusjon::class)
+        observatør.assertEtterspurt(2.vedtaksperiode.id(a2), EventSubscription.Refusjon::class)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -505,7 +505,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        observatør.assertEtterspurt(2.vedtaksperiode.id(a2), PersonObserver.Refusjon::class)
+        observatør.assertEtterspurt(2.vedtaksperiode.id(a2), EventSubscription.Refusjon::class)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)

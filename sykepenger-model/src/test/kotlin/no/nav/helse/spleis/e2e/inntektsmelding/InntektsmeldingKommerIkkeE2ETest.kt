@@ -15,8 +15,8 @@ import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -111,7 +111,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             val event = observatør.skatteinntekterLagtTilGrunnEventer.single()
-            val forventet = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
+            val forventet = EventSubscription.SkatteinntekterLagtTilGrunnEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().id,
@@ -152,7 +152,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_IV_10, Varselkode.RV_VV_4), 1.vedtaksperiode.filter())
 
             val event = observatør.skatteinntekterLagtTilGrunnEventer.single()
-            val forventet = PersonObserver.SkatteinntekterLagtTilGrunnEvent(
+            val forventet = EventSubscription.SkatteinntekterLagtTilGrunnEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().id,

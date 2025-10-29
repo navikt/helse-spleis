@@ -12,7 +12,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Venteårsak
 import no.nav.helse.person.Venteårsak.Companion.INNTEKTSMELDING
 import no.nav.helse.person.Venteårsak.Companion.SØKNAD
@@ -167,7 +167,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             val venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(180)
-            val forventetVedtaksperiode1 = PersonObserver.VedtaksperiodeVenterEvent(
+            val forventetVedtaksperiode1 = EventSubscription.VedtaksperiodeVenterEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør(1.vedtaksperiode).behandlinger.last().id,
@@ -175,17 +175,17 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                 hendelser = setOf(søknadIdJanuar),
                 ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
                 venterTil = venterTil,
-                venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
+                venterPå = EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                    venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
+                    venteårsak = EventSubscription.VedtaksperiodeVenterEvent.Venteårsak(
                         hva = "INNTEKTSMELDING",
                         hvorfor = null
                     )
                 )
             )
-            val forventetVedtaksperiode2 = PersonObserver.VedtaksperiodeVenterEvent(
+            val forventetVedtaksperiode2 = EventSubscription.VedtaksperiodeVenterEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode,
                 behandlingId = inspektør(2.vedtaksperiode).behandlinger.last().id,
@@ -193,11 +193,11 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                 hendelser = setOf(søknadIdMars, inntektsmeldingIdMars),
                 ventetSiden = inspektør(2.vedtaksperiode).oppdatert,
                 venterTil = venterTil,
-                venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
+                venterPå = EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                    venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
+                    venteårsak = EventSubscription.VedtaksperiodeVenterEvent.Venteårsak(
                         hva = "INNTEKTSMELDING",
                         hvorfor = null
                     )
@@ -237,7 +237,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                 )
             )
 
-            val forventet = PersonObserver.VedtaksperiodeVenterEvent(
+            val forventet = EventSubscription.VedtaksperiodeVenterEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør(1.vedtaksperiode).behandlinger.last().id,
@@ -245,11 +245,11 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                 hendelser = setOf(søknadId, inntektsmeldingId),
                 ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
                 venterTil = LocalDateTime.MAX,
-                venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
+                venterPå = EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2),
-                    venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
+                    venteårsak = EventSubscription.VedtaksperiodeVenterEvent.Venteårsak(
                         hva = "SØKNAD",
                         hvorfor = null
                     )
@@ -265,7 +265,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             nyPeriode(januar, søknadId = søknadId)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            val forventet = PersonObserver.VedtaksperiodeVenterEvent(
+            val forventet = EventSubscription.VedtaksperiodeVenterEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør(1.vedtaksperiode).behandlinger.last().id,
@@ -273,11 +273,11 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                 hendelser = setOf(søknadId),
                 ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
                 venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(180),
-                venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
+                venterPå = EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                    venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
+                    venteårsak = EventSubscription.VedtaksperiodeVenterEvent.Venteårsak(
                         hva = "INNTEKTSMELDING",
                         hvorfor = null
                     )
@@ -331,7 +331,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             vedtaksperiodeVenter.last { it.vedtaksperiodeId == venterPåVedtaksperiodeId }.venterPå.assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva)
         }
 
-        private fun PersonObserver.VedtaksperiodeVenterEvent.VenterPå.assertVenterPå(venterPåVedtaksperiodeId: UUID, venterPåOrgnr: String?, venterPåHva: Venteårsak) {
+        private fun EventSubscription.VedtaksperiodeVenterEvent.VenterPå.assertVenterPå(venterPåVedtaksperiodeId: UUID, venterPåOrgnr: String?, venterPåHva: Venteårsak) {
             venterPåOrgnr?.let { assertEquals(it, this.yrkesaktivitetssporing.somOrganisasjonsnummer) }
             assertEquals(venterPåVedtaksperiodeId, this.vedtaksperiodeId)
             assertEquals(venterPåHva.event(), this.venteårsak)

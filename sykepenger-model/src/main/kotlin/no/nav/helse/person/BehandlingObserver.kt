@@ -38,12 +38,12 @@ internal interface BehandlingObserver {
         innsendt: LocalDateTime,
         registert: LocalDateTime,
         avsender: Avsender,
-        type: PersonObserver.BehandlingOpprettetEvent.Type,
+        type: EventSubscription.BehandlingOpprettetEvent.Type,
         søknadIder: Set<MeldingsreferanseId>
     )
 
     fun utkastTilVedtak(
         eventBus: EventBus,
-        utkastTilVedtak: PersonObserver.UtkastTilVedtakEvent
+        utkastTilVedtak: EventSubscription.UtkastTilVedtakEvent
     )
 }

@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -45,7 +45,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
             *historie1,
             besvart = LocalDate.EPOCH.atStartOfDay()
         )
-        observatør.assertEtterspurt(1.vedtaksperiode.id(a1), PersonObserver.Inntekt::class, PersonObserver.Refusjon::class)
+        observatør.assertEtterspurt(1.vedtaksperiode.id(a1), EventSubscription.Inntekt::class, EventSubscription.Refusjon::class)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
     }
 

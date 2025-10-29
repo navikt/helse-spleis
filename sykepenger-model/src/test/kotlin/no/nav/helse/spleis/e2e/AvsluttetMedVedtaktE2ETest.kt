@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.februar
-import no.nav.helse.person.PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattIInfotrygd
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

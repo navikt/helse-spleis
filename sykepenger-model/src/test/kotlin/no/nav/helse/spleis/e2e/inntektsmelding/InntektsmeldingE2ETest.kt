@@ -40,7 +40,7 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
@@ -355,15 +355,15 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, a2)
         // Først trenger vi jo alt
         val forespørselA2Januar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }
-        assertEquals(1, forespørselA2Januar.forespurteOpplysninger.filterIsInstance<PersonObserver.Inntekt>().size)
-        assertEquals(1, forespørselA2Januar.forespurteOpplysninger.filterIsInstance<PersonObserver.Arbeidsgiverperiode>().size)
-        assertEquals(1, forespørselA2Januar.forespurteOpplysninger.filterIsInstance<PersonObserver.Refusjon>().size)
+        assertEquals(1, forespørselA2Januar.forespurteOpplysninger.filterIsInstance<EventSubscription.Inntekt>().size)
+        assertEquals(1, forespørselA2Januar.forespurteOpplysninger.filterIsInstance<EventSubscription.Arbeidsgiverperiode>().size)
+        assertEquals(1, forespørselA2Januar.forespurteOpplysninger.filterIsInstance<EventSubscription.Refusjon>().size)
 
         // Så trenger vi bare refusjon
         val forespørselA2Februar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.vedtaksperiodeId == 2.vedtaksperiode.id(a2) }
-        assertEquals(0, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<PersonObserver.Inntekt>().size)
-        assertEquals(0, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<PersonObserver.Arbeidsgiverperiode>().size)
-        assertEquals(1, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<PersonObserver.Refusjon>().size)
+        assertEquals(0, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<EventSubscription.Inntekt>().size)
+        assertEquals(0, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<EventSubscription.Arbeidsgiverperiode>().size)
+        assertEquals(1, forespørselA2Februar.forespurteOpplysninger.filterIsInstance<EventSubscription.Refusjon>().size)
 
         val inntektFør = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }.inspektør.faktaavklartInntekt.inntektsdata.beløp
         assertEquals(INNTEKT, inntektFør)

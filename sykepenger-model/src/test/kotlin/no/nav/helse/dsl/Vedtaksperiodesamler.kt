@@ -3,10 +3,10 @@ package no.nav.helse.dsl
 import java.util.UUID
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.somOrganisasjonsnummer
 
-internal class Vedtaksperiodesamler(person: Person? = null) : PersonObserver {
+internal class Vedtaksperiodesamler(person: Person? = null) : EventSubscription {
     private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { (_, perioder) ->
         perioder.map { it.inspektør.id }.toMutableSet()
     }?.toMutableMap() ?: mutableMapOf()
@@ -25,7 +25,7 @@ internal class Vedtaksperiodesamler(person: Person? = null) : PersonObserver {
     }
 
     override fun vedtaksperiodeEndret(
-        event: PersonObserver.VedtaksperiodeEndretEvent
+        event: EventSubscription.VedtaksperiodeEndretEvent
     ) {
         vedtaksperioder.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { mutableSetOf() }.add(event.vedtaksperiodeId)
     }

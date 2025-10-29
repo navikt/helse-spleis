@@ -14,8 +14,8 @@ import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Reberegning
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.SkjønssmessigFastsettelse
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Sykdomstidslinje
 import no.nav.helse.person.EventBus
-import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
@@ -97,7 +97,7 @@ class Revurderingseventyr private constructor(
 
         fun emitOverstyringIgangsattEvent(eventBus: EventBus, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode, meldingsreferanseId: MeldingsreferanseId) {
             eventBus.emitOverstyringIgangsattEvent(
-                PersonObserver.OverstyringIgangsatt(
+                EventSubscription.OverstyringIgangsatt(
                     årsak = navn(),
                     berørtePerioder = vedtaksperioder,
                     skjæringstidspunkt = skjæringstidspunkt,

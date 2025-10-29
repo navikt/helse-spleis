@@ -7,7 +7,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.VedtaksperiodeView
 import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
 
-internal class UgyldigeSituasjonerObservatør(private val person: Person) : PersonObserver {
+internal class UgyldigeSituasjonerObservatør(private val person: Person) : EventSubscription {
 
     private val arbeidsgivereMap = mutableMapOf<String, Yrkesaktivitet>()
     private val gjeldendeTilstander = mutableMapOf<UUID, TilstandType>()
@@ -38,15 +38,15 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
     private val IM = Inntektsmeldinger()
     private val søknader = mutableMapOf<UUID, UUID?>() // SøknadId -> VedtaksperiodeId
 
-    private val behandlingOpprettetEventer = mutableListOf<PersonObserver.BehandlingOpprettetEvent>()
-    private val behandlingLukketEventer = mutableListOf<PersonObserver.BehandlingLukketEvent>()
-    private val behandlingForkastetEventer = mutableListOf<PersonObserver.BehandlingForkastetEvent>()
+    private val behandlingOpprettetEventer = mutableListOf<EventSubscription.BehandlingOpprettetEvent>()
+    private val behandlingLukketEventer = mutableListOf<EventSubscription.BehandlingLukketEvent>()
+    private val behandlingForkastetEventer = mutableListOf<EventSubscription.BehandlingForkastetEvent>()
 
     private fun loggBehandlingstatus(vedtaksperiodeId: UUID, status: Behandlingstatus) {
         gjeldendeBehandlingstatus.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(0, LocalDateTime.now() to status)
     }
 
-    override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
+    override fun nyBehandling(event: EventSubscription.BehandlingOpprettetEvent) {
         check(behandlingOpprettetEventer.none { it.behandlingId == event.behandlingId }) {
             "behandling ${event.behandlingId} har allerede sendt ut opprettet event"
         }
@@ -54,7 +54,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
         loggBehandlingstatus(event.vedtaksperiodeId, Behandlingstatus.ÅPEN)
     }
 
-    override fun behandlingLukket(event: PersonObserver.BehandlingLukketEvent) {
+    override fun behandlingLukket(event: EventSubscription.BehandlingLukketEvent) {
         bekreftAtBehandlingFinnes(event.behandlingId)
         check(behandlingLukketEventer.none { it.behandlingId == event.behandlingId }) {
             "behandling ${event.behandlingId} har allerede sendt ut lukket event"
@@ -62,19 +62,19 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
         loggBehandlingstatus(event.vedtaksperiodeId, Behandlingstatus.LUKKET)
     }
 
-    override fun avsluttetMedVedtak(event: PersonObserver.AvsluttetMedVedtakEvent) {
+    override fun avsluttetMedVedtak(event: EventSubscription.AvsluttetMedVedtakEvent) {
         loggBehandlingstatus(event.vedtaksperiodeId, Behandlingstatus.AVSLUTTET)
     }
 
-    override fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {
+    override fun avsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent) {
         loggBehandlingstatus(event.vedtaksperiodeId, Behandlingstatus.AVSLUTTET)
     }
 
-    override fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
+    override fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent) {
         loggBehandlingstatus(vedtaksperiodeAnnullertEvent.vedtaksperiodeId, Behandlingstatus.ANNULLERT)
     }
 
-    override fun behandlingForkastet(event: PersonObserver.BehandlingForkastetEvent) {
+    override fun behandlingForkastet(event: EventSubscription.BehandlingForkastetEvent) {
         bekreftAtBehandlingFinnes(event.behandlingId)
         check(behandlingForkastetEventer.none { it.behandlingId == event.behandlingId }) {
             "behandling ${event.behandlingId} har allerede sendt ut forkastet event"
@@ -102,7 +102,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
     }
 
     override fun vedtaksperiodeEndret(
-        event: PersonObserver.VedtaksperiodeEndretEvent
+        event: EventSubscription.VedtaksperiodeEndretEvent
     ) {
         arbeidsgivereMap.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { person.arbeidsgiver(event.yrkesaktivitetssporing.somOrganisasjonsnummer) }
         gjeldendeTilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
@@ -112,14 +112,14 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
         søknader[søknadId] = null
     }
 
-    override fun vedtaksperioderVenter(eventer: List<PersonObserver.VedtaksperiodeVenterEvent>) = sjekk {
+    override fun vedtaksperioderVenter(eventer: List<EventSubscription.VedtaksperiodeVenterEvent>) = sjekk {
         eventer.forEach { event ->
             sjekkUgyldigeVentesituasjoner(event)
             sjekkSøknadIdEierskap(event.vedtaksperiodeId, event.hendelser)
         }
     }
 
-    private fun sjekkUgyldigeVentesituasjoner(event: PersonObserver.VedtaksperiodeVenterEvent) {
+    private fun sjekkUgyldigeVentesituasjoner(event: EventSubscription.VedtaksperiodeVenterEvent) {
         if (event.venterPå.venteårsak.hva != "HJELP") return // Om vi venter på noe annet enn hjelp er det OK 👍
         """
         Har du endret/opprettet en vedtaksperiodetilstand uten å vurdere konsekvensene av 'venteårsak'? 
@@ -140,13 +140,13 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Pers
 
     override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) = IM.håndtert(inntektsmeldingId)
     override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, speilrelatert: Boolean) = IM.ikkeHåndtert(inntektsmeldingId)
-    override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) = IM.førSøknad(event.inntektsmeldingId)
-    override fun overstyringIgangsatt(event: PersonObserver.OverstyringIgangsatt) {
+    override fun inntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent) = IM.førSøknad(event.inntektsmeldingId)
+    override fun overstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt) {
         check(event.berørtePerioder.isNotEmpty()) { "Forventet ikke en igangsatt overstyring uten berørte perioder." }
         if (event.årsak == "KORRIGERT_INNTEKTSMELDING") IM.korrigertInntekt(event.meldingsreferanseId)
     }
 
-    private fun PersonObserver.VedtaksperiodeVenterEvent.tilstander() = when (vedtaksperiodeId == venterPå.vedtaksperiodeId) {
+    private fun EventSubscription.VedtaksperiodeVenterEvent.tilstander() = when (vedtaksperiodeId == venterPå.vedtaksperiodeId) {
         true -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} trenger hjelp${venterPå.venteårsak.hvorfor?.let { " fordi $it" } ?: ""}! 😱"
         false -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} venter på en annen vedtaksperiode i ${gjeldendeTilstander[venterPå.vedtaksperiodeId]} som trenger${venterPå.venteårsak.hvorfor?.let { " fordi $it" } ?: ""}! 😱"
     }

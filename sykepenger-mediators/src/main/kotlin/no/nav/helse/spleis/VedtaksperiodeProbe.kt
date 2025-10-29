@@ -3,14 +3,14 @@ package no.nav.helse.spleis
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import org.slf4j.LoggerFactory
 
-object VedtaksperiodeProbe : PersonObserver {
+object VedtaksperiodeProbe : EventSubscription {
 
     private val log = LoggerFactory.getLogger(VedtaksperiodeProbe::class.java)
 
-    override fun vedtaksperiodeEndret(event: PersonObserver.VedtaksperiodeEndretEvent) {
+    override fun vedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent) {
         log.info(
             "vedtaksperiode endret {}, {}, {}",
             keyValue("vedtaksperiodeId", event.vedtaksperiodeId),
@@ -19,7 +19,7 @@ object VedtaksperiodeProbe : PersonObserver {
         )
     }
 
-    override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
+    override fun utbetalingEndret(event: EventSubscription.UtbetalingEndretEvent) {
         log.info(
             "utbetaling endret {}, {}, {}, {}",
             keyValue("utbetalingId", event.utbetalingId),

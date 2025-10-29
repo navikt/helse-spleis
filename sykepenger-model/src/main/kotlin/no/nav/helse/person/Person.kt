@@ -325,7 +325,7 @@ class Person private constructor(
         if (!infotrygdhistorikk.harHistorikk()) return
         val hendelseId = infotrygdhistorikk.siste.hendelseId
         val perioder = infotrygdhistorikk.siste.perioder
-        val event = vedtaksperioder { true }.fold(PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId.id)) { result, vedtaksperiode ->
+        val event = vedtaksperioder { true }.fold(EventSubscription.OverlappendeInfotrygdperioder(emptyList(), hendelseId.id)) { result, vedtaksperiode ->
             vedtaksperiode.overlappendeInfotrygdperioder(result, perioder)
         }
         eventBus.overlappendeInfotrygdperioder(event)

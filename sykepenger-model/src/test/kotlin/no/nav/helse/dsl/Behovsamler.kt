@@ -1,7 +1,7 @@
 package no.nav.helse.dsl
 
 import java.util.UUID
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -10,7 +10,7 @@ import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spill_av_im.Forespørsel
 import org.junit.jupiter.api.Assertions.assertTrue
 
-internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
+internal class Behovsamler(private val log: DeferredLog) : EventSubscription {
     private val behov = mutableListOf<Behov>()
     private val tilstander = mutableMapOf<UUID, TilstandType>()
     private val replays = mutableSetOf<Forespørsel>()
@@ -90,7 +90,7 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     }
 
     override fun utbetalingUtbetalt(
-        event: PersonObserver.UtbetalingUtbetaltEvent
+        event: EventSubscription.UtbetalingUtbetaltEvent
     ) {
         assertTrue(behov.removeAll { it.utbetalingId == event.utbetalingId }) {
             "Utbetaling ble utbetalt, men ingen behov om utbetaling er registrert"
@@ -98,7 +98,7 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     }
 
     override fun inntektsmeldingReplay(
-        event: PersonObserver.TrengerArbeidsgiveropplysningerEvent
+        event: EventSubscription.TrengerArbeidsgiveropplysningerEvent
     ) {
         replays.add(
             Forespørsel(
@@ -109,7 +109,7 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
                 førsteFraværsdager = event.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.yrkesaktivitetssporing.somOrganisasjonsnummer, it.førsteFraværsdag) },
                 sykmeldingsperioder = event.sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
                 egenmeldinger = event.egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-                harForespurtArbeidsgiverperiode = PersonObserver.Arbeidsgiverperiode in event.forespurteOpplysninger
+                harForespurtArbeidsgiverperiode = EventSubscription.Arbeidsgiverperiode in event.forespurteOpplysninger
             )
         )
     }
@@ -119,7 +119,7 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     }
 
     override fun vedtaksperiodeEndret(
-        event: PersonObserver.VedtaksperiodeEndretEvent
+        event: EventSubscription.VedtaksperiodeEndretEvent
     ) {
         tilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
         kvitterVedtaksperiode(event.vedtaksperiodeId)

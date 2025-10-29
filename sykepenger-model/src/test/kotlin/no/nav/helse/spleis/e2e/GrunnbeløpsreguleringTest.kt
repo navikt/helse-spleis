@@ -6,7 +6,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
@@ -48,7 +48,7 @@ internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
     fun `sier ifra om det blir forsøkt grunnbeløpsregulert på sykefraværstilfelle som ikke finnes`() {
         a1 {
             håndterGrunnbeløpsregulering(1.januar)
-            assertEquals(PersonObserver.SykefraværstilfelleIkkeFunnet(1.januar), observatør.sykefraværstilfelleIkkeFunnet.single())
+            assertEquals(EventSubscription.SykefraværstilfelleIkkeFunnet(1.januar), observatør.sykefraværstilfelleIkkeFunnet.single())
         }
     }
 

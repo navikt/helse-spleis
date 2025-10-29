@@ -59,7 +59,7 @@ import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsgiveropplysn
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.blokkererBehandlingAv
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.perioder
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.trengerArbeidsgiveropplysninger
-import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
+import no.nav.helse.person.EventSubscription.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SAMME_ARBEIDSGIVERPERIODE
@@ -760,7 +760,7 @@ internal class Yrkesaktivitet private constructor(
         val annulleringskandidater = finnAnnulleringskandidater(hendelse.vedtaksperiodeId)
 
         if (annulleringskandidater.isEmpty()) return null
-        val planlagtAnnullering = PersonObserver.PlanlagtAnnulleringEvent(
+        val planlagtAnnullering = EventSubscription.PlanlagtAnnulleringEvent(
             yrkesaktivitetssporing = hendelse.behandlingsporing,
             vedtaksperioder = annulleringskandidater.map { it.id },
             fom = annulleringskandidater.minOf { it.periode.start },
@@ -1110,7 +1110,7 @@ private class Utbetalingseventformidler(
         ident: String,
     ) {
         eventBus.utbetalingUtbetalt(
-            PersonObserver.UtbetalingUtbetaltEvent(
+            EventSubscription.UtbetalingUtbetaltEvent(
                 yrkesaktivitetssporing = yrkesaktivitetstype,
                 utbetalingId = id,
                 type = type.name,
@@ -1124,10 +1124,10 @@ private class Utbetalingseventformidler(
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(
+                arbeidsgiverOppdrag = EventSubscription.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(
                     arbeidsgiverOppdrag
                 ),
-                personOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
+                personOppdrag = EventSubscription.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = builder.result(utbetalingstidslinje),
                 ident = ident
             )
@@ -1152,7 +1152,7 @@ private class Utbetalingseventformidler(
         epost: String,
     ) {
         eventBus.utbetalingUtenUtbetaling(
-            PersonObserver.UtbetalingUtbetaltEvent(
+            EventSubscription.UtbetalingUtbetaltEvent(
                 yrkesaktivitetssporing = yrkesaktivitetstype,
                 utbetalingId = id,
                 type = type.name,
@@ -1165,10 +1165,10 @@ private class Utbetalingseventformidler(
                 epost = epost,
                 tidspunkt = tidspunkt,
                 automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(
+                arbeidsgiverOppdrag = EventSubscription.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(
                     arbeidsgiverOppdrag
                 ),
-                personOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
+                personOppdrag = EventSubscription.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = builder.result(utbetalingstidslinje),
                 ident = ident,
                 korrelasjonsId = korrelasjonsId
@@ -1186,7 +1186,7 @@ private class Utbetalingseventformidler(
         korrelasjonsId: UUID
     ) {
         eventBus.utbetalingEndret(
-            PersonObserver.UtbetalingEndretEvent(
+            EventSubscription.UtbetalingEndretEvent(
                 yrkesaktivitetssporing = yrkesaktivitetstype,
                 utbetalingId = id,
                 type = type.name,
@@ -1210,7 +1210,7 @@ private class Utbetalingseventformidler(
         arbeidsgiverFagsystemId: String
     ) {
         eventBus.annullert(
-            PersonObserver.UtbetalingAnnullertEvent(
+            EventSubscription.UtbetalingAnnullertEvent(
                 yrkesaktivitetssporing = yrkesaktivitetstype,
                 korrelasjonsId = korrelasjonsId,
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,

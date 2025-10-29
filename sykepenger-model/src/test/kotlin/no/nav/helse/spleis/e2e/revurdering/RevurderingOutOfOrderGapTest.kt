@@ -18,7 +18,7 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Overlapper med foreldrepenger`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
@@ -1040,7 +1040,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         // 5.mars (påfølgende mandag)-20.mars er akkurat 16 dager
 
         nyPeriode(10.februar til 2.mars, a2)
-        observatør.assertEtterspurt(2.vedtaksperiode.id(a2), PersonObserver.Refusjon::class, PersonObserver.Arbeidsgiverperiode::class)
+        observatør.assertEtterspurt(2.vedtaksperiode.id(a2), EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
 
 
         assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter(orgnummer = a2))
