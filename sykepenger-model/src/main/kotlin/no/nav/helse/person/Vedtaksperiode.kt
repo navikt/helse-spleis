@@ -1807,22 +1807,16 @@ internal class Vedtaksperiode private constructor(
                 }
             }
 
-        val (inntektsdata, opplysning) = if (inntektForArbeidsgiver != null)
-            inntektForArbeidsgiver.inntektsdata to when (inntektForArbeidsgiver.kilde) {
-                Inntektsmeldinginntekt.Kilde.Arbeidsgiver -> Arbeidstakerinntektskilde.Arbeidsgiver
-                Inntektsmeldinginntekt.Kilde.AOrdningen -> Arbeidstakerinntektskilde.AOrdningen.fraSkatt()
-            }
-        else
-            (skatteopplysning?.inntektsdata ?: Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt)) to Arbeidstakerinntektskilde.AOrdningen.fraSkatt(skatteopplysning?.treMånederFørSkjæringstidspunkt)
+        val benyttetFaktaavklartInntekt = when {
+            inntektForArbeidsgiver != null -> inntektForArbeidsgiver
+            skatteopplysning != null -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), skatteopplysning.inntektsdata, Arbeidstakerinntektskilde.AOrdningen(skatteopplysning.treMånederFørSkjæringstidspunkt))
+            else -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt), Arbeidstakerinntektskilde.AOrdningen(emptyList()))
+        }
 
-        if (opplysning is Arbeidstakerinntektskilde.AOrdningen)
-            subsummerBrukAvSkatteopplysninger(yrkesaktivitet.organisasjonsnummer, inntektsdata, skatteopplysning?.treMånederFørSkjæringstidspunkt ?: emptyList())
+        if (benyttetFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.AOrdningen)
+            subsummerBrukAvSkatteopplysninger(yrkesaktivitet.organisasjonsnummer, benyttetFaktaavklartInntekt.inntektsdata, skatteopplysning?.treMånederFørSkjæringstidspunkt ?: emptyList())
 
-        return ArbeidstakerFaktaavklartInntekt(
-            id = UUID.randomUUID(),
-            inntektsdata = inntektsdata,
-            inntektsopplysningskilde = opplysning
-        )
+        return benyttetFaktaavklartInntekt
     }
 
     private fun avklarSykepengegrunnlagArbeidstaker(

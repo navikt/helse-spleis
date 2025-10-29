@@ -86,6 +86,7 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
+import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.refusjon.Refusjonsservitør
@@ -369,14 +370,23 @@ internal class Yrkesaktivitet private constructor(
     }
 
     // TODO: denne avklaringen må bo på behandlingen; dvs. at inntekt må ligge lagret på vedtaksperiodene
-    internal fun avklarInntekt(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Inntektsmeldinginntekt? {
+    internal fun avklarInntekt(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): ArbeidstakerFaktaavklartInntekt? {
         // finner inntektsmelding for en av første fraværsdagene.
         // håndterer det som en liste i tilfelle arbeidsgiveren har auu'er i forkant, og at inntekt kan ha blitt malplassert
         // (og at det er vrient å avgjøre én riktig første fraværsdag i forkant)
-        return vedtaksperioder.firstNotNullOfOrNull {
+        val inntektsmeldinginntekt = vedtaksperioder.firstNotNullOfOrNull {
             val førsteFraværsdag = it.førsteFraværsdag
             inntektshistorikk.avklarInntektsgrunnlag(skjæringstidspunkt = skjæringstidspunkt, førsteFraværsdag = førsteFraværsdag)
-        }
+        } ?: return null
+
+        return ArbeidstakerFaktaavklartInntekt(
+            id = inntektsmeldinginntekt.id,
+            inntektsdata = inntektsmeldinginntekt.inntektsdata,
+            inntektsopplysningskilde = when (inntektsmeldinginntekt.kilde) {
+                Inntektsmeldinginntekt.Kilde.Arbeidsgiver -> Arbeidstakerinntektskilde.Arbeidsgiver
+                Inntektsmeldinginntekt.Kilde.AOrdningen -> Arbeidstakerinntektskilde.AOrdningen(emptyList())
+            }
+        )
     }
 
     internal fun organisasjonsnummer() = organisasjonsnummer
