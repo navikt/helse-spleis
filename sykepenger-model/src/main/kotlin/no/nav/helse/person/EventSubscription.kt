@@ -9,7 +9,6 @@ import no.nav.helse.feriepenger.Feriepengeoppdrag
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
@@ -29,6 +28,22 @@ interface EventSubscription {
 
     data class SykefraværstilfelleIkkeFunnet(
         val skjæringstidspunkt: LocalDate
+    )
+
+    data class VedtaksperiodePåminnetEvent(
+        val vedtaksperiodeId: UUID,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val tilstand: TilstandType,
+        val antallGangerPåminnet: Int,
+        val tilstandsendringstidspunkt: LocalDateTime,
+        val påminnelsestidspunkt: LocalDateTime,
+        val nestePåminnelsestidspunkt: LocalDateTime
+    )
+
+    data class VedtaksperiodeIkkePåminnetEvent(
+        val vedtaksperiodeId: UUID,
+        val organisasjonsnummer: String,
+        val nåværendeTilstand: TilstandType
     )
 
     data class VedtaksperiodeEndretEvent(
@@ -67,6 +82,7 @@ interface EventSubscription {
         )
     }
 
+    data class VedtaksperioderVenterEvent(val vedtaksperioder: List<VedtaksperiodeVenterEvent>)
 
     data class VedtaksperiodeVenterEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -109,6 +125,24 @@ interface EventSubscription {
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
     )
 
+    data class InntektsmeldingIkkeHåndtertEvent(
+        val meldingsreferanseId: UUID,
+        val organisasjonsnummer: String,
+        val speilrelatert: Boolean
+    )
+
+    data class InntektsmeldingHåndtertEvent(
+        val meldingsreferanseId: UUID,
+        val vedtaksperiodeId: UUID,
+        val organisasjonsnummer: String
+    )
+
+    data class SøknadHåndtertEvent(
+        val meldingsreferanseId: UUID,
+        val vedtaksperiodeId: UUID,
+        val organisasjonsnummer: String
+    )
+
     data class SkatteinntekterLagtTilGrunnEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
@@ -137,8 +171,7 @@ interface EventSubscription {
     class TrengerIkkeArbeidsgiveropplysningerEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID
-    ) {
-    }
+    )
 
     data class FørsteFraværsdag(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -393,6 +426,12 @@ interface EventSubscription {
         val avsluttetTidspunkt: LocalDateTime
     )
 
+    data class VedtaksperiodeNyUtbetalingEvent(
+        val organisasjonsnummer: String,
+        val utbetalingId: UUID,
+        val vedtaksperiodeId: UUID
+    )
+
     data class BehandlingLukketEvent(
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val vedtaksperiodeId: UUID,
@@ -517,10 +556,10 @@ interface EventSubscription {
 
     fun inntektsmeldingReplay(event: TrengerArbeidsgiveropplysningerEvent) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
-    fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {}
-    fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, nåværendeTilstand: TilstandType) {}
+    fun vedtaksperiodePåminnet(event: VedtaksperiodePåminnetEvent) {}
+    fun vedtaksperiodeIkkePåminnet(event: VedtaksperiodeIkkePåminnetEvent) {}
     fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {}
-    fun vedtaksperioderVenter(eventer: List<VedtaksperiodeVenterEvent>) {}
+    fun vedtaksperioderVenter(event: VedtaksperioderVenterEvent) {}
     fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
     fun sykefraværstilfelleIkkeFunnet(event: SykefraværstilfelleIkkeFunnet) {}
     fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
@@ -538,20 +577,15 @@ interface EventSubscription {
     fun behandlingForkastet(event: BehandlingForkastetEvent) {}
     fun nyBehandling(event: BehandlingOpprettetEvent) {}
     fun avsluttetUtenVedtak(event: AvsluttetUtenVedtakEvent) {}
-    fun nyVedtaksperiodeUtbetaling(
-        organisasjonsnummer: String,
-        utbetalingId: UUID,
-        vedtaksperiodeId: UUID
-    ) {
-    }
+    fun nyVedtaksperiodeUtbetaling(event: VedtaksperiodeNyUtbetalingEvent) {}
 
     fun overstyringIgangsatt(event: OverstyringIgangsatt) {}
     fun overlappendeInfotrygdperioder(event: OverlappendeInfotrygdperioder) {}
     fun inntektsmeldingFørSøknad(event: InntektsmeldingFørSøknadEvent) {}
-    fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, speilrelatert: Boolean) {}
-    fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
+    fun inntektsmeldingIkkeHåndtert(event: InntektsmeldingIkkeHåndtertEvent) {}
+    fun inntektsmeldingHåndtert(event: InntektsmeldingHåndtertEvent) {}
     fun skatteinntekterLagtTilGrunn(event: SkatteinntekterLagtTilGrunnEvent) {}
-    fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
+    fun søknadHåndtert(event: SøknadHåndtertEvent) {}
     fun behandlingUtført() {}
     fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: VedtaksperiodeAnnullertEvent) {}
     fun utkastTilVedtak(event: UtkastTilVedtakEvent) {}

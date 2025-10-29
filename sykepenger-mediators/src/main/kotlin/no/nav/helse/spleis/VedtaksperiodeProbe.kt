@@ -1,8 +1,6 @@
 package no.nav.helse.spleis
 
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.EventSubscription
 import org.slf4j.LoggerFactory
 
@@ -29,15 +27,15 @@ object VedtaksperiodeProbe : EventSubscription {
         )
     }
 
-    override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
+    override fun vedtaksperiodePåminnet(event: EventSubscription.VedtaksperiodePåminnetEvent) {
         log.debug(
-            "mottok påminnelse for vedtaksperiode: $vedtaksperiodeId",
-            keyValue("påminnelsenr", "${påminnelse.antallGangerPåminnet()}"),
-            keyValue("påminnelsestidspunkt", påminnelse.påminnelsestidspunkt().toString()),
-            keyValue("vedtaksperiodeId", vedtaksperiodeId),
-            keyValue("tilstand", påminnelse.tilstand().name),
-            keyValue("tilstandsendringstidspunkt", påminnelse.tilstandsendringstidspunkt().toString()),
-            keyValue("nestePåminnelsestidspunkt", påminnelse.nestePåminnelsestidspunkt().toString())
+            "mottok påminnelse for vedtaksperiode: $event.vedtaksperiodeId",
+            keyValue("påminnelsenr", "${event.antallGangerPåminnet}"),
+            keyValue("påminnelsestidspunkt", event.påminnelsestidspunkt.toString()),
+            keyValue("event.vedtaksperiodeId", event.vedtaksperiodeId),
+            keyValue("tilstand", event.tilstand.name),
+            keyValue("tilstandsendringstidspunkt", event.tilstandsendringstidspunkt.toString()),
+            keyValue("nestePåminnelsestidspunkt", event.nestePåminnelsestidspunkt.toString())
         )
     }
 }

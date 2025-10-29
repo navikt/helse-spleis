@@ -8,14 +8,12 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.Arbeidsgiverperiode
 import no.nav.helse.person.EventSubscription.Inntekt
 import no.nav.helse.person.EventSubscription.Refusjon
 import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype
 import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
@@ -83,38 +81,38 @@ internal class PersonMediator(
         )
     }
 
-    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, speilrelatert: Boolean) {
+    override fun inntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent) {
         queueMessage(
             JsonMessage.newMessage(
                 "inntektsmelding_ikke_håndtert",
                 mapOf(
-                    "inntektsmeldingId" to inntektsmeldingId,
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "speilrelatert" to speilrelatert
+                    "inntektsmeldingId" to event.meldingsreferanseId,
+                    "organisasjonsnummer" to event.organisasjonsnummer,
+                    "speilrelatert" to event.speilrelatert
                 )
             )
         )
     }
 
-    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+    override fun inntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent) {
         queueMessage(
             JsonMessage.newMessage(
                 "inntektsmelding_håndtert", mapOf(
-                "inntektsmeldingId" to inntektsmeldingId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId
+                "inntektsmeldingId" to event.meldingsreferanseId,
+                "organisasjonsnummer" to event.organisasjonsnummer,
+                "vedtaksperiodeId" to event.vedtaksperiodeId
             )
             )
         )
     }
 
-    override fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+    override fun søknadHåndtert(event: EventSubscription.SøknadHåndtertEvent) {
         queueMessage(
             JsonMessage.newMessage(
                 "søknad_håndtert", mapOf(
-                "søknadId" to søknadId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId
+                "søknadId" to event.meldingsreferanseId,
+                "organisasjonsnummer" to event.organisasjonsnummer,
+                "vedtaksperiodeId" to event.vedtaksperiodeId
             )
             )
         )
@@ -166,31 +164,31 @@ internal class PersonMediator(
         )
     }
 
-    override fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
+    override fun vedtaksperiodePåminnet(event: EventSubscription.VedtaksperiodePåminnetEvent) {
         queueMessage(
             JsonMessage.newMessage(
                 "vedtaksperiode_påminnet",
                 mapOf(
-                    "organisasjonsnummer" to påminnelse.behandlingsporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to påminnelse.behandlingsporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to påminnelse.vedtaksperiodeId,
-                    "tilstand" to påminnelse.tilstand,
-                    "antallGangerPåminnet" to påminnelse.antallGangerPåminnet,
-                    "tilstandsendringstidspunkt" to påminnelse.tilstandsendringstidspunkt,
-                    "påminnelsestidspunkt" to påminnelse.påminnelsestidspunkt,
-                    "nestePåminnelsestidspunkt" to påminnelse.nestePåminnelsestidspunkt
+                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "tilstand" to event.tilstand,
+                    "antallGangerPåminnet" to event.antallGangerPåminnet,
+                    "tilstandsendringstidspunkt" to event.tilstandsendringstidspunkt,
+                    "påminnelsestidspunkt" to event.påminnelsestidspunkt,
+                    "nestePåminnelsestidspunkt" to event.nestePåminnelsestidspunkt
                 )
             )
         )
     }
 
-    override fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, nåværendeTilstand: TilstandType) {
+    override fun vedtaksperiodeIkkePåminnet(event: EventSubscription.VedtaksperiodeIkkePåminnetEvent) {
         queueMessage(
             JsonMessage.newMessage(
                 "vedtaksperiode_ikke_påminnet", mapOf(
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "tilstand" to nåværendeTilstand
+                "organisasjonsnummer" to event.organisasjonsnummer,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "tilstand" to event.nåværendeTilstand
             )
             )
         )
@@ -273,17 +271,13 @@ internal class PersonMediator(
             "totalbeløp" to this.totalbeløp
         )
 
-    override fun nyVedtaksperiodeUtbetaling(
-        organisasjonsnummer: String,
-        utbetalingId: UUID,
-        vedtaksperiodeId: UUID
-    ) {
+    override fun nyVedtaksperiodeUtbetaling(event: EventSubscription.VedtaksperiodeNyUtbetalingEvent) {
         queueMessage(
             JsonMessage.newMessage(
                 "vedtaksperiode_ny_utbetaling", mapOf(
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "utbetalingId" to utbetalingId
+                "organisasjonsnummer" to event.organisasjonsnummer,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "utbetalingId" to event.utbetalingId
             )
             )
         )
@@ -461,11 +455,11 @@ internal class PersonMediator(
         )
     }
 
-    override fun vedtaksperioderVenter(eventer: List<EventSubscription.VedtaksperiodeVenterEvent>) {
+    override fun vedtaksperioderVenter(event: EventSubscription.VedtaksperioderVenterEvent) {
         queueMessage(
             JsonMessage.newMessage(
                 "vedtaksperioder_venter", mapOf(
-                "vedtaksperioder" to eventer.map { event ->
+                "vedtaksperioder" to event.vedtaksperioder.map { event ->
                     mapOf(
                         "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
                         "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,

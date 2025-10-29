@@ -114,8 +114,8 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription {
         )
     }
 
-    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        hånderteInntektsmeldinger.add(inntektsmeldingId)
+    override fun inntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent) {
+        hånderteInntektsmeldinger.add(event.meldingsreferanseId)
     }
 
     override fun vedtaksperiodeEndret(

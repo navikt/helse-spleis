@@ -78,8 +78,8 @@ internal class TestObservatør(person: Person? = null) : EventSubscription {
         this.analytiskDatapakkeEventer.add(event)
     }
 
-    override fun vedtaksperioderVenter(eventer: List<EventSubscription.VedtaksperiodeVenterEvent>) {
-        vedtaksperiodeVenter.addAll(eventer)
+    override fun vedtaksperioderVenter(event: EventSubscription.VedtaksperioderVenterEvent) {
+        vedtaksperiodeVenter.addAll(event.vedtaksperioder)
     }
 
     fun forkastedePerioder() = forkastedeEventer.size
@@ -212,21 +212,21 @@ internal class TestObservatør(person: Person? = null) : EventSubscription {
         inntektsmeldingFørSøknad.add(event)
     }
 
-    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, speilrelatert: Boolean) {
-        inntektsmeldingIkkeHåndtert.add(inntektsmeldingId)
+    override fun inntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent) {
+        inntektsmeldingIkkeHåndtert.add(event.meldingsreferanseId)
     }
 
-    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        inntektsmeldingHåndtert.add(inntektsmeldingId to vedtaksperiodeId)
-        trengerArbeidsgiveroppysninger.remove(vedtaksperiodeId)
+    override fun inntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent) {
+        inntektsmeldingHåndtert.add(event.meldingsreferanseId to event.vedtaksperiodeId)
+        trengerArbeidsgiveroppysninger.remove(event.vedtaksperiodeId)
     }
 
     override fun skatteinntekterLagtTilGrunn(event: EventSubscription.SkatteinntekterLagtTilGrunnEvent) {
         skatteinntekterLagtTilGrunnEventer.add(event)
     }
 
-    override fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        søknadHåndtert.add(søknadId to vedtaksperiodeId)
+    override fun søknadHåndtert(event: EventSubscription.SøknadHåndtertEvent) {
+        søknadHåndtert.add(event.meldingsreferanseId to event.vedtaksperiodeId)
     }
 
     override fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent) {
@@ -241,15 +241,11 @@ internal class TestObservatør(person: Person? = null) : EventSubscription {
         sykefraværstilfelleIkkeFunnet.add(event)
     }
 
-    override fun nyVedtaksperiodeUtbetaling(
-        organisasjonsnummer: String,
-        utbetalingId: UUID,
-        vedtaksperiodeId: UUID
-    ) {
+    override fun nyVedtaksperiodeUtbetaling(event: EventSubscription.VedtaksperiodeNyUtbetalingEvent) {
         vedtaksperiodeUtbetalinger
-            .getOrPut(organisasjonsnummer) { mutableMapOf() }
-            .compute(vedtaksperiodeId) { _, eksisterende ->
-                (eksisterende ?: emptyList()).plusElement(utbetalingId)
+            .getOrPut(event.organisasjonsnummer) { mutableMapOf() }
+            .compute(event.vedtaksperiodeId) { _, eksisterende ->
+                (eksisterende ?: emptyList()).plusElement(event.utbetalingId)
             }
     }
 

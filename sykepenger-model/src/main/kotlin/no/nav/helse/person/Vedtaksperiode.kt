@@ -2262,7 +2262,15 @@ internal class Vedtaksperiode private constructor(
             eventBus.vedtaksperiodeIkkePåminnet(id, yrkesaktivitet.organisasjonsnummer, type)
             return null
         }
-        eventBus.vedtaksperiodePåminnet(id, yrkesaktivitet.organisasjonsnummer, påminnelse)
+        eventBus.vedtaksperiodePåminnet(
+            vedtaksperiodeId = id,
+            behandlingsporing = påminnelse.behandlingsporing,
+            tilstand = påminnelse.tilstand,
+            antallGangerPåminnet = påminnelse.antallGangerPåminnet,
+            tilstandsendringstidspunkt = påminnelse.tilstandsendringstidspunkt,
+            påminnelsestidspunkt = påminnelse.påminnelsestidspunkt,
+            nestePåminnelsestidspunkt = påminnelse.nestePåminnelsestidspunkt
+        )
         val beregnetMakstid = { tilstandsendringstidspunkt: LocalDateTime -> makstid(tilstandsendringstidspunkt) }
         if (påminnelse.nåddMakstid(beregnetMakstid)) {
             håndterMakstid(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)

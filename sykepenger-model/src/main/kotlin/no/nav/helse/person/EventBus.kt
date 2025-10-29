@@ -3,7 +3,6 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -31,12 +30,30 @@ class EventBus {
         observers.forEach { it.annullering(event) }
     }
 
-    internal fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {
-        observers.forEach { it.vedtaksperiodePåminnet(vedtaksperiodeId, organisasjonsnummer, påminnelse) }
+    internal fun vedtaksperiodePåminnet(
+        vedtaksperiodeId: UUID,
+        behandlingsporing: Behandlingsporing.Yrkesaktivitet,
+        tilstand: TilstandType,
+        antallGangerPåminnet: Int,
+        tilstandsendringstidspunkt: LocalDateTime,
+        påminnelsestidspunkt: LocalDateTime,
+        nestePåminnelsestidspunkt: LocalDateTime
+    ) {
+        val event = EventSubscription.VedtaksperiodePåminnetEvent(
+            vedtaksperiodeId = vedtaksperiodeId,
+            yrkesaktivitetssporing = behandlingsporing,
+            tilstand = tilstand,
+            antallGangerPåminnet = antallGangerPåminnet,
+            tilstandsendringstidspunkt = tilstandsendringstidspunkt,
+            påminnelsestidspunkt = påminnelsestidspunkt,
+            nestePåminnelsestidspunkt = nestePåminnelsestidspunkt
+        )
+        observers.forEach { it.vedtaksperiodePåminnet(event) }
     }
 
     internal fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, tilstandType: TilstandType) {
-        observers.forEach { it.vedtaksperiodeIkkePåminnet(vedtaksperiodeId, organisasjonsnummer, tilstandType) }
+        val event = EventSubscription.VedtaksperiodeIkkePåminnetEvent(vedtaksperiodeId, organisasjonsnummer, tilstandType)
+        observers.forEach { it.vedtaksperiodeIkkePåminnet(event) }
     }
 
     internal fun vedtaksperiodeForkastet(event: EventSubscription.VedtaksperiodeForkastetEvent) {
@@ -115,40 +132,35 @@ class EventBus {
         meldingsreferanseId: UUID,
         yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
     ) {
-        observers.forEach {
-            it.inntektsmeldingFørSøknad(EventSubscription.InntektsmeldingFørSøknadEvent(meldingsreferanseId, yrkesaktivitetssporing))
-        }
+        val event = EventSubscription.InntektsmeldingFørSøknadEvent(meldingsreferanseId, yrkesaktivitetssporing)
+        observers.forEach { it.inntektsmeldingFørSøknad(event) }
     }
 
     internal fun emitInntektsmeldingIkkeHåndtert(meldingsreferanseId: MeldingsreferanseId, organisasjonsnummer: String, speilrelatert: Boolean) {
-        observers.forEach {
-            it.inntektsmeldingIkkeHåndtert(meldingsreferanseId.id, organisasjonsnummer, speilrelatert)
-        }
+        val event = EventSubscription.InntektsmeldingIkkeHåndtertEvent(meldingsreferanseId.id, organisasjonsnummer, speilrelatert)
+        observers.forEach { it.inntektsmeldingIkkeHåndtert(event) }
     }
 
     internal fun emitArbeidsgiveropplysningerIkkeHåndtert(meldingsreferanseId: MeldingsreferanseId, organisasjonsnummer: String) =
         emitInntektsmeldingIkkeHåndtert(meldingsreferanseId, organisasjonsnummer, true)
 
     internal fun emitInntektsmeldingHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        observers.forEach {
-            it.inntektsmeldingHåndtert(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
-        }
+        val event = EventSubscription.InntektsmeldingHåndtertEvent(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
+        observers.forEach { it.inntektsmeldingHåndtert(event) }
     }
 
     internal fun sendSkatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent: EventSubscription.SkatteinntekterLagtTilGrunnEvent) {
-        observers.forEach {
-            it.skatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent)
-        }
+        observers.forEach { it.skatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent) }
     }
 
     internal fun emitSøknadHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        observers.forEach {
-            it.søknadHåndtert(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
-        }
+        val event = EventSubscription.SøknadHåndtertEvent(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
+        observers.forEach { it.søknadHåndtert(event) }
     }
 
     internal fun vedtaksperiodeVenter(eventer: List<EventSubscription.VedtaksperiodeVenterEvent>) {
-        observers.forEach { it.vedtaksperioderVenter(eventer) }
+        val event = EventSubscription.VedtaksperioderVenterEvent(eventer)
+        observers.forEach { it.vedtaksperioderVenter(event) }
     }
 
     internal fun behandlingUtført() {
@@ -156,7 +168,8 @@ class EventBus {
     }
 
     internal fun nyVedtaksperiodeUtbetaling(organisasjonsnummer: String, utbetalingId: UUID, vedtaksperiodeId: UUID) {
-        observers.forEach { it.nyVedtaksperiodeUtbetaling(organisasjonsnummer, utbetalingId, vedtaksperiodeId) }
+        val event = EventSubscription.VedtaksperiodeNyUtbetalingEvent(organisasjonsnummer, utbetalingId, vedtaksperiodeId)
+        observers.forEach { it.nyVedtaksperiodeUtbetaling(event) }
     }
 
     internal fun vedtaksperiodeOpprettet(vedtaksperiodeId: UUID, yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, periode: Periode, skjæringstidspunkt: LocalDate, opprettet: LocalDateTime) {

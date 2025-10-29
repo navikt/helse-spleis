@@ -108,12 +108,12 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         gjeldendeTilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
     }
 
-    override fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        søknader[søknadId] = null
+    override fun søknadHåndtert(event: EventSubscription.SøknadHåndtertEvent) {
+        søknader[event.meldingsreferanseId] = null
     }
 
-    override fun vedtaksperioderVenter(eventer: List<EventSubscription.VedtaksperiodeVenterEvent>) = sjekk {
-        eventer.forEach { event ->
+    override fun vedtaksperioderVenter(event: EventSubscription.VedtaksperioderVenterEvent) = sjekk {
+        event.vedtaksperioder.forEach { event ->
             sjekkUgyldigeVentesituasjoner(event)
             sjekkSøknadIdEierskap(event.vedtaksperiodeId, event.hendelser)
         }
@@ -138,8 +138,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         }
     }
 
-    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) = IM.håndtert(inntektsmeldingId)
-    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, speilrelatert: Boolean) = IM.ikkeHåndtert(inntektsmeldingId)
+    override fun inntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent) = IM.håndtert(event.meldingsreferanseId)
+    override fun inntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent) = IM.ikkeHåndtert(event.meldingsreferanseId)
     override fun inntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent) = IM.førSøknad(event.inntektsmeldingId)
     override fun overstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt) {
         check(event.berørtePerioder.isNotEmpty()) { "Forventet ikke en igangsatt overstyring uten berørte perioder." }
