@@ -41,9 +41,4 @@ internal interface BehandlingObserver {
         type: EventSubscription.BehandlingOpprettetEvent.Type,
         søknadIder: Set<MeldingsreferanseId>
     )
-
-    fun utkastTilVedtak(
-        eventBus: EventBus,
-        utkastTilVedtak: EventSubscription.UtkastTilVedtakEvent
-    )
 }

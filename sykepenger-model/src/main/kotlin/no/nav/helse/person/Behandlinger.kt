@@ -41,7 +41,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.EventSubscription.AnalytiskDatapakkeEvent
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.harUlikeGrunnbeløp
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -179,6 +178,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal val dagerNavOvertarAnsvar get() = behandlinger.last().dagerNavOvertarAnsvar
     internal val faktaavklartInntekt get() = behandlinger.last().faktaavklartInntekt
     internal val arbeidssituasjon get() = behandlinger.last().arbeidssituasjon
+    internal val utbetaling get() = behandlinger.last().utbetaling()
 
     internal fun analytiskDatapakke(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, vedtaksperiodeId: UUID): AnalytiskDatapakkeEvent {
         val forrigeBehandling = behandlinger.dropLast(1).lastOrNull()
@@ -226,9 +226,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun erKlarForGodkjenning() = siste?.erKlarForGodkjenning() ?: false
     internal fun simuler(aktivitetslogg: IAktivitetslogg) = siste!!.simuler(aktivitetslogg)
-    internal fun godkjenning(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, builder: UtkastTilVedtakBuilder) {
+    internal fun byggUtkastTilVedtak(builder: UtkastTilVedtakBuilder): UtkastTilVedtakBuilder {
         if (behandlinger.grunnbeløpsregulert()) builder.grunnbeløpsregulert()
-        behandlinger.last().godkjenning(eventBus, aktivitetslogg, builder)
+        behandlinger.last().byggUtkastTilVedtak(builder)
+        return builder
     }
 
     internal fun håndterAnnullering(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg) {
@@ -1032,15 +1033,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetaling?.forkast(utbetalingEventBus, aktivitetslogg)
             }
 
-            fun godkjenning(
-                eventBus: EventBus,
-                aktivitetslogg: IAktivitetslogg,
-                behandling: Behandling,
-                utkastTilVedtakBuilder: UtkastTilVedtakBuilder
-            ) {
+            fun byggUtkastTilVedtak(utkastTilVedtakBuilder: UtkastTilVedtakBuilder) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjenningsbehov" }
-                val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(utbetaling)
                 utkastTilVedtakBuilder
                     .utbetalingsinformasjon(utbetaling, utbetalingstidslinje, sykdomstidslinje, refusjonstidslinje)
                     .sykepengerettighet(maksdatoresultat.antallForbrukteDager, maksdatoresultat.gjenståendeDager, maksdatoresultat.maksdato)
@@ -1048,17 +1043,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     utkastTilVedtakBuilder.pensjonsgivendeInntekter(it.pensjonsgivendeInntekter)
                 }
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
-                behandling.observatører.forEach { it.utkastTilVedtak(eventBus, utkastTilVedtakBuilder.buildUtkastTilVedtak()) }
-                Aktivitet.Behov.godkjenning(aktivitetsloggMedUtbetalingkontekst, utkastTilVedtakBuilder.buildGodkjenningsbehov())
-            }
-
-            internal fun berik(builder: UtkastTilVedtakBuilder) {
-                checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved utkast til vedtak" }
-                checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved utkast til vedtak" }
-                builder
-                    .utbetalingsinformasjon(utbetaling, utbetalingstidslinje, sykdomstidslinje, refusjonstidslinje)
-                    .sykepengerettighet(maksdatoresultat.antallForbrukteDager, maksdatoresultat.gjenståendeDager, maksdatoresultat.maksdato)
-                grunnlagsdata.berik(builder)
             }
 
             internal fun dto(): BehandlingendringUtDto {
@@ -1390,14 +1374,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             observatører.forEach { it.vedtakAnnullert(eventBus, aktivitetslogg, id) }
         }
 
-        internal fun godkjenning(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, builder: UtkastTilVedtakBuilder) {
+        internal fun byggUtkastTilVedtak(builder: UtkastTilVedtakBuilder): UtkastTilVedtakBuilder {
             builder.behandlingId(id).periode(dagerUtenNavAnsvar.dager, dagerUtenNavAnsvar.ferdigAvklart, periode).hendelseIder(dokumentsporing.ider()).skjæringstidspunkt(skjæringstidspunkt)
-            gjeldende.godkjenning(eventBus, aktivitetslogg, this, builder)
-        }
-
-        internal fun berik(builder: UtkastTilVedtakBuilder) {
-            builder.behandlingId(id).periode(dagerUtenNavAnsvar.dager, dagerUtenNavAnsvar.ferdigAvklart, periode).hendelseIder(dokumentsporing.ider()).skjæringstidspunkt(skjæringstidspunkt)
-            gjeldende.berik(builder)
+            gjeldende.byggUtkastTilVedtak(builder)
+            return builder
         }
 
         /* hvorvidt en AUU- (eller har vært-auu)-periode kan forkastes */

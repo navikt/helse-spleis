@@ -84,6 +84,7 @@ import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.Venteårsak.Companion.fordi
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -2168,9 +2169,7 @@ internal class Vedtaksperiode private constructor(
         vedtakFattetTidspunkt: LocalDateTime,
         behandling: Behandlinger.Behandling
     ) {
-        val utkastTilVedtakBuilder = utkastTilVedtakBuilder()
-        // Til ettertanke: Her er vi aldri innom "behandlinger"-nivå, så får ikke "Grunnbeløpsregulering"-tag, men AvsluttetMedVedtak har jo ikke tags nå uansett.
-        behandling.berik(utkastTilVedtakBuilder)
+        val utkastTilVedtakBuilder = utkastTilVedtakBuilder(behandling)
         eventBus.avsluttetMedVedtak(utkastTilVedtakBuilder.buildAvsluttedMedVedtak(vedtakFattetTidspunkt, eksterneIder))
         eventBus.analytiskDatapakke(behandlinger.analytiskDatapakke(this.yrkesaktivitet.yrkesaktivitetstype, this.id))
         person.gjenopptaBehandling(aktivitetslogg)
@@ -2233,10 +2232,6 @@ internal class Vedtaksperiode private constructor(
         eventBus.nyBehandling(event)
     }
 
-    override fun utkastTilVedtak(eventBus: EventBus, utkastTilVedtak: EventSubscription.UtkastTilVedtakEvent) {
-        eventBus.utkastTilVedtak(utkastTilVedtak)
-    }
-
     private fun høstingsresultater(
         eventBus: EventBus,
         aktivitetslogg: IAktivitetslogg,
@@ -2294,10 +2289,15 @@ internal class Vedtaksperiode private constructor(
         "${this.periode.start} - ${this.periode.endInclusive} (${this.tilstand::class.simpleName})"
 
     internal fun trengerGodkjenning(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        behandlinger.godkjenning(eventBus, aktivitetslogg, utkastTilVedtakBuilder())
+        val utkastTilVedtakBuilder = utkastTilVedtakBuilder()
+        eventBus.utkastTilVedtak(utkastTilVedtakBuilder.buildUtkastTilVedtak())
+
+        val utbetaling = checkNotNull(behandlinger.utbetaling) { "Forventer å ha en utbetaling når vi skal sende godkjenningsbehov" }
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(utbetaling)
+        Aktivitet.Behov.godkjenning(aktivitetsloggMedUtbetalingkontekst, utkastTilVedtakBuilder.buildGodkjenningsbehov())
     }
 
-    private fun utkastTilVedtakBuilder(): UtkastTilVedtakBuilder {
+    private fun utkastTilVedtakBuilder(behandling: Behandlinger.Behandling? = null): UtkastTilVedtakBuilder {
         val builder = UtkastTilVedtakBuilder(
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
             vedtaksperiodeId = id,
@@ -2311,7 +2311,7 @@ internal class Vedtaksperiode private constructor(
             .associate { it.id to it.behandlinger }
             .berik(builder)
 
-        return builder
+        return behandling?.byggUtkastTilVedtak(builder) ?: behandlinger.byggUtkastTilVedtak(builder)
     }
 
     internal fun gjenopptaBehandling(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
