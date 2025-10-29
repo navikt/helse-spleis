@@ -1736,15 +1736,12 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun nullstillEgenmeldingsdager(hendelse: Hendelse, dokumentsporing: Dokumentsporing?, aktivitetslogg: IAktivitetslogg) = behandlinger.håndterEgenmeldingsdager(
+    private fun nullstillEgenmeldingsdager(hendelse: Hendelse, dokumentsporing: Dokumentsporing?, aktivitetslogg: IAktivitetslogg) = behandlinger.nullstillEgenmeldingsdager(
         person = person,
         yrkesaktivitet = yrkesaktivitet,
         behandlingkilde = hendelse.metadata.behandlingkilde,
         dokumentsporing = dokumentsporing,
         aktivitetslogg = aktivitetslogg,
-        // skal ikke hensynta egenmeldingsdager fordi vi skal nullstille dem
-        egenmeldingsdager = emptyList(),
-        egenmeldingsdagerAndrePerioder = emptyList()
     )
 
     internal fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?): List<Revurderingseventyr> {
