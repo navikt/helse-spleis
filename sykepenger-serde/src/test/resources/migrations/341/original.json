@@ -1,0 +1,38 @@
+{
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "deaktiverteArbeidsforhold": [
+              {
+                "inntektsopplysning": {
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                  "type": "ARBEIDSTAKER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": null,
+                  "type": "ARBEIDSTAKER_ARBEIDSGIVER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": null,
+                  "type": "ARBEIDSTAKER_AORDNINGEN"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
