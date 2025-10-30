@@ -1,0 +1,186 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": null,
+                    "type": "SELVSTENDIG"
+                  }
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": null,
+                    "type": "SELVSTENDIG"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": null,
+                    "type": "SELVSTENDIG"
+                  }
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": null,
+                    "type": "SELVSTENDIG"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": "INNTEKTSMELDING",
+                    "type": "ARBEIDSTAKER"
+                  }
+                }
+              ]
+            },
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": {
+                    "type": "ARBEIDSTAKER",
+                    "kilde": "INNTEKTSMELDING"
+                  }
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "type": "ARBEIDSTAKER",
+                    "kilde": "AORDNINGEN"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": "AORDNINGEN",
+                    "type": "ARBEIDSTAKER"
+                  }
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": "AORDNINGEN",
+                    "type": "ARBEIDSTAKER"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [],
+            "selvstendigInntektsopplysninger": {
+              "inntektsopplysning": {
+                "kilde": null,
+                "type": "SELVSTENDIG"
+              }
+            }
+          }
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "inntektsopplysning": {
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "AORDNINGEN",
+                  "type": "ARBEIDSTAKER"
+                }
+              }
+            ],
+            "selvstendigInntektsopplysninger": null
+          }
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [],
+            "selvstendigInntektsopplysninger": {
+              "inntektsopplysning": {
+                "kilde": null,
+                "type": "SELVSTENDIG"
+              }
+            }
+          }
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "inntektsopplysning": {
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "AORDNINGEN",
+                  "type": "ARBEIDSTAKER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "INFOTRYGD",
+                  "type": "ARBEIDSTAKER"
+                }
+              }
+
+            ],
+            "selvstendigInntektsopplysninger": null
+          }
+        }
+      ]
+    }
+  ]
+}

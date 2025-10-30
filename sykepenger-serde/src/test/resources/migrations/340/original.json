@@ -1,0 +1,183 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": null,
+                    "type": "SELVSTENDIG_NÆRINGSDRIVENDE"
+                  }
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": null,
+                    "type": "SELVSTENDIG"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": null,
+                    "type": null
+                  }
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": null,
+                    "type": "SELVSTENDIG"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": "INNTEKTSMELDING",
+                    "type": "ARBEIDSTAKER"
+                  }
+                }
+              ]
+            },
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": {
+                    "type": "ARBEIDSTAKER_ARBEIDSGIVER"
+                  }
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "type": "ARBEIDSTAKER_AORDNINGEN"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                    "type": "ARBEIDSTAKER"
+                  }
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                    "type": "ARBEIDSTAKER"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [],
+            "selvstendigInntektsopplysninger": {
+              "inntektsopplysning": {
+                "kilde": null
+              }
+            }
+          }
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "inntektsopplysning": {
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                  "type": "ARBEIDSTAKER"
+                }
+              }
+            ],
+            "selvstendigInntektsopplysninger": null
+          }
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [],
+            "selvstendigInntektsopplysninger": {
+              "inntektsopplysning": {
+                "kilde": null,
+                "type": "SELVSTENDIG"
+              }
+            }
+          }
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "inntektsopplysning": {
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "SKATT_SYKEPENGEGRUNNLAG",
+                  "type": "ARBEIDSTAKER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "INFOTRYGD",
+                  "type": "ARBEIDSTAKER"
+                }
+              }
+
+            ],
+            "selvstendigInntektsopplysninger": null
+          }
+        }
+      ]
+    }
+  ]
+}
