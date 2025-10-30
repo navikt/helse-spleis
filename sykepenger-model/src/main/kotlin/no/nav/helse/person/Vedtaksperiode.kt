@@ -1879,7 +1879,8 @@ internal class Vedtaksperiode private constructor(
         hendelse: Hendelse,
         aktivitetsloggTilDenSomVilkårsprøver: IAktivitetslogg,
         skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
-        alleForSammeArbeidsgiver: List<Vedtaksperiode>
+        alleForSammeArbeidsgiver: List<Vedtaksperiode>,
+        flereArbeidsgivere: Boolean
     ): ArbeidstakerFaktaavklartInntekt {
         val inntektForArbeidsgiver = (alleForSammeArbeidsgiver
             .firstOrNull { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
@@ -1887,8 +1888,10 @@ internal class Vedtaksperiode private constructor(
             ?: yrkesaktivitet.avklarInntektFraInntektshistorikk(skjæringstidspunkt, alleForSammeArbeidsgiver))
             ?.takeUnless {
                 // velger bort inntekten hvis situasjonen er "fom ulik skjæringstidspunktet"
-                (skjæringstidspunkt.yearMonth < it.inntektsdata.dato.yearMonth).also { harUlikFom ->
-                    if (harUlikFom) aktivitetsloggTilDenSomVilkårsprøver.varsel(Varselkode.RV_VV_2)
+                val ulikFom = skjæringstidspunkt.yearMonth < it.inntektsdata.dato.yearMonth
+                (flereArbeidsgivere && ulikFom).also { harUlikFomOgFlereArbeidsgivere ->
+                    if (harUlikFomOgFlereArbeidsgivere) aktivitetsloggTilDenSomVilkårsprøver.varsel(Varselkode.RV_VV_2)
+                    else if (ulikFom) aktivitetsloggTilDenSomVilkårsprøver.info("Skjæringstidspunktet ($skjæringstidspunkt) er i annen måned enn inntektsdatoen (${it.inntektsdata.dato}) med bare én arbeidsgiver")
                 }
             }
 
@@ -1908,7 +1911,8 @@ internal class Vedtaksperiode private constructor(
         hendelse: Hendelse,
         aktivitetsloggTilDenSomVilkårsprøver: IAktivitetslogg,
         skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
-        vedtaksperioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>
+        vedtaksperioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>,
+        flereArbeidsgivere: Boolean
     ): ArbeidsgiverInntektsopplysning {
         check(yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker) {
             "Skal kun avklare sykepengegrunnlag for arbeidstakere"
@@ -1918,7 +1922,7 @@ internal class Vedtaksperiode private constructor(
 
         return ArbeidsgiverInntektsopplysning(
             orgnummer = yrkesaktivitet.organisasjonsnummer,
-            faktaavklartInntekt = inntektForArbeidsgiver(hendelse, aktivitetsloggTilDenSomVilkårsprøver, skatteopplysning, alleForSammeArbeidsgiver),
+            faktaavklartInntekt = inntektForArbeidsgiver(hendelse, aktivitetsloggTilDenSomVilkårsprøver, skatteopplysning, alleForSammeArbeidsgiver, flereArbeidsgivere),
             korrigertInntekt = null,
             skjønnsmessigFastsatt = null
         )
@@ -1976,11 +1980,19 @@ internal class Vedtaksperiode private constructor(
             .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
 
         // en inntekt per arbeidsgiver med søknad
-        return perioderMedSammeSkjæringstidspunkt
+        val førsteVedtaksperiodePerArbeidsgiver = perioderMedSammeSkjæringstidspunkt
             .distinctBy { it.yrkesaktivitet }
+
+        return førsteVedtaksperiodePerArbeidsgiver
             .map { vedtaksperiode ->
                 val skatteopplysningForArbeidsgiver = skatteopplysninger.firstOrNull { it.arbeidsgiver == vedtaksperiode.yrkesaktivitet.organisasjonsnummer }
-                vedtaksperiode.avklarSykepengegrunnlagArbeidstaker(hendelse, aktivitetslogg, skatteopplysningForArbeidsgiver, perioderMedSammeSkjæringstidspunkt)
+                vedtaksperiode.avklarSykepengegrunnlagArbeidstaker(
+                    hendelse = hendelse,
+                    aktivitetsloggTilDenSomVilkårsprøver = aktivitetslogg,
+                    skatteopplysning = skatteopplysningForArbeidsgiver,
+                    vedtaksperioderMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt,
+                    flereArbeidsgivere = førsteVedtaksperiodePerArbeidsgiver.size > 1
+                )
             }
     }
 

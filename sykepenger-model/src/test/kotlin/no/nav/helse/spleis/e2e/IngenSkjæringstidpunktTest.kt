@@ -139,12 +139,12 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             håndterInntektsmelding(
                 listOf(12.februar til 27.februar)
             )
+            håndterVilkårsgrunnlag(3.vedtaksperiode)
             assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_IV_7, 3.vedtaksperiode.filter())
             assertVarsel(RV_IM_24, 3.vedtaksperiode.filter())
             assertEquals(12.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
 
-            håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)

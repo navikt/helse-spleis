@@ -309,8 +309,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             tilGodkjenning(2.januar til 31.januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
-            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
 
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
