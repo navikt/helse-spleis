@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
-import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -47,10 +46,6 @@ internal sealed interface Vedtaksperiodetilstand {
     }
 
     fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
-
-    fun håndterUtbetalingHendelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.info("Forventet ikke utbetaling i %s".format(type.name))
-    }
 
     fun håndterOverstyrArbeidsgiveropplysninger(
         vedtaksperiode: Vedtaksperiode,

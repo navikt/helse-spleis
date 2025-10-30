@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
-import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VenterPå
@@ -46,15 +45,6 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         aktivitetslogg: IAktivitetslogg
     ) {
         tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, eventBus, aktivitetslogg)
-    }
-
-    override fun håndterUtbetalingHendelse(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        hendelse: UtbetalingHendelse,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.håndterUtbetalingHendelse(aktivitetslogg)
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {

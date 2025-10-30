@@ -206,7 +206,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun harFlereSkjæringstidspunkt() = behandlinger.last().harFlereSkjæringstidspunkt()
     internal fun børBrukeSkatteinntekterDirekte() = behandlinger.last().skjæringstidspunkter.isEmpty()
 
-    internal fun håndterUtbetalinghendelse(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) = behandlinger.any { it.håndterUtbetalinghendelse(eventBus, hendelse, aktivitetslogg) }
+    internal fun håndterUtbetalinghendelseSisteInFlight(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) =
+        behandlinger
+            .lastOrNull { it.erInFlight() }
+            ?.håndterUtbetalinghendelse(eventBus, utbetalingEventBus, hendelse, aktivitetslogg)
+
+    internal fun håndterUtbetalinghendelseSisteBehandling(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) =
+        behandlinger
+            .last()
+            .håndterUtbetalinghendelse(eventBus, utbetalingEventBus, hendelse, aktivitetslogg)
 
     internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
     internal fun validerIkkeFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerIkkeFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
@@ -1324,8 +1332,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return tilstand.tillaterNyBehandling(this, other)
         }
 
-        fun håndterUtbetalinghendelse(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg): Boolean {
-            return tilstand.håndterUtbetalinghendelse(this, eventBus, hendelse, aktivitetslogg)
+        fun håndterUtbetalinghendelse(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+            tilstand.håndterUtbetalinghendelse(this, eventBus, utbetalingEventBus, hendelse, aktivitetslogg)
         }
 
         fun kanForkastes(andreBehandlinger: List<Behandling>): Boolean {
@@ -1645,7 +1653,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             fun tillaterNyBehandling(behandling: Behandling, other: Behandling): Boolean = false
-            fun håndterUtbetalinghendelse(behandling: Behandling, eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) = false
+            fun håndterUtbetalinghendelse(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {}
             fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {
                 behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} burde vært ferdig behandlet, men står i tilstand ${behandling.tilstand::class.simpleName}")
             }
@@ -1855,11 +1863,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return behandling.sikreNyBehandling(eventBus, yrkesaktivitet, UberegnetRevurdering, behandlingkilde, beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar)
                 }
 
-                override fun håndterUtbetalinghendelse(behandling: Behandling, eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg): Boolean {
+                override fun håndterUtbetalinghendelse(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
                     val utbetaling = checkNotNull(behandling.gjeldende.utbetaling) { "forventer utbetaling" }
-                    if (!utbetaling.gjelderFor(hendelse)) return false
-                    if (utbetaling.erAvsluttet()) avsluttMedVedtak(behandling, eventBus, aktivitetslogg)
-                    return true
+                    if (!utbetaling.gjelderFor(hendelse)) return
+                    utbetaling.håndterUtbetalingmodulHendelse(utbetalingEventBus, hendelse, aktivitetslogg)
+                    if (!utbetaling.erAvsluttet()) return
+                    avsluttMedVedtak(behandling, eventBus, aktivitetslogg)
                 }
 
                 override fun utenBeregning(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {}
@@ -2001,11 +2010,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object OverførtAnnullering : Tilstand {
-                override fun håndterUtbetalinghendelse(behandling: Behandling, eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg): Boolean {
+                override fun håndterUtbetalinghendelse(behandling: Behandling, eventBus: EventBus,  utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
                     val utbetaling = checkNotNull(behandling.gjeldende.utbetaling) { "forventer utbetaling" }
-                    if (!utbetaling.gjelderFor(hendelse)) return false
-                    if (utbetaling.erAvsluttet()) behandling.tilstand(eventBus, AnnullertPeriode, aktivitetslogg)
-                    return true
+                    if (!utbetaling.gjelderFor(hendelse)) return
+                    utbetaling.håndterUtbetalingmodulHendelse(utbetalingEventBus, hendelse, aktivitetslogg)
+                    if (!utbetaling.erAvsluttet()) return
+                    behandling.tilstand(eventBus, AnnullertPeriode, aktivitetslogg)
                 }
             }
 

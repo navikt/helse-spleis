@@ -233,7 +233,7 @@ enum class Varselkode(
     RV_UT_2("Utbetalingen ble gjennomført, men med advarsel", avviklet = true),
     RV_UT_3("Feil ved utbetalingstidslinjebygging", avviklet = true),
     RV_UT_4("Finner ingen utbetaling å annullere", avviklet = true),
-    RV_UT_5("Utbetaling ble ikke gjennomført"),
+    RV_UT_5("Utbetaling ble ikke gjennomført", avviklet = true),
     RV_UT_6("Forventet ikke å opprette utbetaling", avviklet = true),
     RV_UT_7("Forventet ikke godkjenning på utbetaling", avviklet = true),
     RV_UT_8("Forventet ikke å etterutbetale på utbetaling", avviklet = true),

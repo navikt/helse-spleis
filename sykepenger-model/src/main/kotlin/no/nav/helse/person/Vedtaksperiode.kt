@@ -114,7 +114,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_17
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_9
@@ -175,6 +174,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.UtbetalingEventBus
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverberegningBuilder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
@@ -1445,8 +1445,58 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndterUtbetalingHendelse(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (!behandlinger.håndterUtbetalinghendelse(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)) return
-        tilstand.håndterUtbetalingHendelse(this, eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
+
+        when (tilstand) {
+            TilAnnullering -> håndterAnnulleringUtbetalinghendelse(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
+            AvventerRevurdering -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
+            SelvstendigTilUtbetaling -> vedtakIverksatt(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvsluttet)
+            TilUtbetaling -> vedtakIverksatt(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, Avsluttet)
+
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            Start,
+            TilInfotrygd -> {}
+        }
+    }
+
+    private fun håndterAnnulleringUtbetalinghendelse(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+        behandlinger.håndterUtbetalinghendelseSisteBehandling(eventBus, utbetalingEventBus, hendelse, aktivitetslogg)
+        if (!behandlinger.erAvsluttet()) return
+        aktivitetslogg.info("Annulleringen fikk OK fra Oppdragssystemet")
+        forkast(eventBus, hendelse, aktivitetslogg)
+    }
+
+    private fun vedtakIverksattMensTilRevurdering(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+        behandlinger.håndterUtbetalinghendelseSisteInFlight(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
+    }
+
+    private fun vedtakIverksatt(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
+        behandlinger.håndterUtbetalinghendelseSisteBehandling(eventBus,  with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
+        if (!behandlinger.erAvsluttet()) return
+        tilstand(eventBus, aktivitetslogg, nesteTilstand) {
+            aktivitetslogg.info("OK fra Oppdragssystemet")
+        }
     }
 
     internal fun håndterAnnullerUtbetaling(
@@ -1990,11 +2040,6 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg.info("Vilkårsgrunnlag vurdert")
         if (aktivitetslogg.harFunksjonelleFeil()) return forkast(eventBus, vilkårsgrunnlag, aktivitetslogg)
         tilstand(eventBus, aktivitetslogg, nesteTilstand)
-    }
-
-    internal fun håndterUtbetalingHendelse(aktivitetslogg: IAktivitetslogg) {
-        if (!aktivitetslogg.harFunksjonelleFeil()) return
-        aktivitetslogg.funksjonellFeil(RV_UT_5)
     }
 
     internal fun trengerYtelser(aktivitetslogg: IAktivitetslogg) {
