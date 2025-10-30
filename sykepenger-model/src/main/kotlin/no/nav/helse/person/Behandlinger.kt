@@ -186,7 +186,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         return behandlinger.last().analytiskDatapakke(forrigeBehandling, yrkesaktivitetssporing, vedtaksperiodeId)
     }
 
-    internal fun arbeidstakerFaktaavklartInntekt(aktivitetslogg: IAktivitetslogg? = null) = behandlinger.arbeidstakerFaktaavklartInntekt(aktivitetslogg)
+    internal fun arbeidstakerFaktaavklartInntekt(aktivitetslogg: IAktivitetslogg) = behandlinger.arbeidstakerFaktaavklartInntekt(aktivitetslogg)
     internal fun utbetalingstidslinjeFraForrigeVedtak() = behandlinger.lastOrNull { it.erFattetVedtak() }?.utbetalingstidslinje()
     internal fun utbetalingstidslinje() = behandlinger.last().utbetalingstidslinje()
     internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
@@ -1470,20 +1470,27 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     kilde = behandlingkilde
                 )
 
-            internal fun List<Behandling>.arbeidstakerFaktaavklartInntekt(aktivitetslogg: IAktivitetslogg?): ArbeidstakerFaktaavklartInntekt? {
+            internal fun List<Behandling>.arbeidstakerFaktaavklartInntekt(aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt? {
                 val gjeldendeEndring = gjeldendeEndring()
                 val gjeldendeFaktaavklarteInntekt = (gjeldendeEndring.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) ?: return null // Har ingen faktaavklart inntekt
 
-                if (aktivitetslogg == null) return gjeldendeFaktaavklarteInntekt // Når vi faktisk avklarer sykepengegrunnlaget sendes det med en aktivitetslogg, men når vi kun skal sjekke om vi er i stand til å avklare sykepengegrunnlag trenger vi ikke vurdere varsler
+                // Hvis vi ikke har blitt vilkårsprøvd før trenger vi ikke gjøre noe med varsler
+                // .. og vi beholder den originale inntektsdatoen for å gjøre ulik-fom sjekk
+                val forrigeVilkårsprøvdeEndring = forrigeEndringMed { it.grunnlagsdata != null } ?: return gjeldendeFaktaavklarteInntekt
 
-                val forrigeVilkårsprøvdeEndring = forrigeEndringMed { it.grunnlagsdata != null } ?: return gjeldendeFaktaavklarteInntekt // Hvis vi ikke har blitt vilkårsprøvd før trenger vi ikke gjøre noe med varsler
 
+                // Om vi har vilkårsprøvd før setter vi alltid inntektsdato == skjæringstidspunkt for å hoppe bukk over ny ulik-fom sjekk
+                // .. og tvinge frem at vi bruker denne inntekten
+                val gjenbruktFaktaavklartInntekt = gjeldendeFaktaavklarteInntekt.copy(
+                    inntektsdata = gjeldendeFaktaavklarteInntekt.inntektsdata.copy(dato = gjeldendeEndring.skjæringstidspunkt)
+                )
+
+                // Vurderer om den gjenbrukte inntekten skal få varsler på seg
                 val forrigeVilkårsprøvdeSkjæringstidspunkt = forrigeVilkårsprøvdeEndring.skjæringstidspunkt
                 val harNyArbeidsgiverperiode = forrigeVilkårsprøvdeEndring.arbeidsgiverperiodeEndret(gjeldendeEndring)
+                gjenbruktFaktaavklartInntekt.vurderVarselForGjenbrukAvInntekt(forrigeVilkårsprøvdeSkjæringstidspunkt, gjeldendeEndring.skjæringstidspunkt, harNyArbeidsgiverperiode, aktivitetslogg)
 
-                gjeldendeFaktaavklarteInntekt.vurderVarselForGjenbrukAvInntekt(forrigeVilkårsprøvdeSkjæringstidspunkt, gjeldendeEndring.skjæringstidspunkt, harNyArbeidsgiverperiode, aktivitetslogg)
-
-                return gjeldendeFaktaavklarteInntekt
+                return gjenbruktFaktaavklartInntekt
             }
 
             internal fun List<Behandling>.harGjenbrukbarInntekt(organisasjonsnummer: String) = forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer) != null

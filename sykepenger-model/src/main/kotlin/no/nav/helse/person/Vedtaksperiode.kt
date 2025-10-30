@@ -1870,7 +1870,7 @@ internal class Vedtaksperiode private constructor(
         alleForSammeArbeidsgiver: List<Vedtaksperiode>
     ): ArbeidstakerFaktaavklartInntekt {
         val inntektForArbeidsgiver = yrkesaktivitet
-            .avklarInntekt(skjæringstidspunkt, alleForSammeArbeidsgiver)
+            .avklarInntekt(skjæringstidspunkt, alleForSammeArbeidsgiver, aktivitetsloggTilDenSomVilkårsprøver)
             // velger bort inntekten hvis situasjonen er "fom ulik skjæringstidspunktet"
             ?.takeUnless {
                 (skjæringstidspunkt.yearMonth < it.inntektsdata.dato.yearMonth).also { harUlikFom ->

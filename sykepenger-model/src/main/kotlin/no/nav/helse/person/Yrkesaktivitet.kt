@@ -364,16 +364,26 @@ internal class Yrkesaktivitet private constructor(
     }
 
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Boolean {
-        return avklarInntekt(skjæringstidspunkt, vedtaksperioder) != null
+        return kanAvklareInntektFraVedtaksperidoe(vedtaksperioder) || kanAvklareInntektFraInntektshistorikk(skjæringstidspunkt, vedtaksperioder)
     }
 
-    private fun avklarInntektFraBehandling(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg?): ArbeidstakerFaktaavklartInntekt? {
+    internal fun avklarInntekt(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg) =
+        avklarInntektFraVedtaksperiode(vedtaksperioder, aktivitetslogg) ?: avklarInntektFraInntektshistorikk(skjæringstidspunkt, vedtaksperioder)
+
+    private fun kanAvklareInntektFraVedtaksperidoe(vedtaksperioder: List<Vedtaksperiode>): Boolean {
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return false
+        return vedtaksperioder.any { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
+    }
+
+    private fun avklarInntektFraVedtaksperiode(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt? {
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return null
         val vedtaksperiode = vedtaksperioder.firstOrNull { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null } ?: return null
         return vedtaksperiode.behandlinger.arbeidstakerFaktaavklartInntekt(aktivitetslogg)
     }
 
-    // TODO: denne avklaringen må bo på behandlingen; dvs. at inntekt må ligge lagret på vedtaksperiodene
-    internal fun avklarInntekt(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): ArbeidstakerFaktaavklartInntekt? {
+    private fun kanAvklareInntektFraInntektshistorikk(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>) = avklarInntektFraInntektshistorikk(skjæringstidspunkt, vedtaksperioder) != null
+
+    private fun avklarInntektFraInntektshistorikk(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): ArbeidstakerFaktaavklartInntekt? {
         // finner inntektsmelding for en av første fraværsdagene.
         // håndterer det som en liste i tilfelle arbeidsgiveren har auu'er i forkant, og at inntekt kan ha blitt malplassert
         // (og at det er vrient å avgjøre én riktig første fraværsdag i forkant)
