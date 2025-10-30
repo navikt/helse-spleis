@@ -42,6 +42,30 @@
             }
           ]
         }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "behandlinger": [
+              {
+                "endringer": [
+                  {
+                    "faktaavklartInntekt": {
+                      "kilde": null,
+                      "type": "SELVSTENDIG"
+                    }
+                  },
+                  {
+                    "faktaavklartInntekt": {
+                      "kilde": "AORDNINGEN",
+                      "type": "ARBEIDSTAKER"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
       ]
     },
     {
