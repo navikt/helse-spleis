@@ -1,6 +1,5 @@
 package no.nav.helse.person.tilstandsmaskin
 
-import no.nav.helse.hendelser.AnnullerTomUtbetaling
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
@@ -12,15 +11,6 @@ import org.slf4j.LoggerFactory
 internal data object TilAnnullering : Vedtaksperiodetilstand {
     override val type = TilstandType.TIL_ANNULLERING
     val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        if (vedtaksperiode.behandlinger.sisteUtbetalingSkalOverføres()) {
-            vedtaksperiode.behandlinger.overførSisteUtbetaling(eventBus, with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
-        } else {
-            vedtaksperiode.behandlinger.avsluttTomAnnullering(eventBus, with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
-            if (!vedtaksperiode.behandlinger.erAvsluttet()) return
-            vedtaksperiode.forkast(eventBus, AnnullerTomUtbetaling(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype), aktivitetslogg)
-        }
-    }
 
     override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {}
 

@@ -1,5 +1,6 @@
 package no.nav.helse.person.tilstandsmaskin
 
+import no.nav.helse.hendelser.AnnullerTomUtbetaling
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
@@ -24,16 +25,28 @@ internal data object AvventerAnnullering : Vedtaksperiodetilstand {
         val sisteUtbetalteUtbetaling = vedtaksperiode.behandlinger.sisteUtbetalteUtbetaling()
         checkNotNull(sisteUtbetalteUtbetaling) { "Fant ikke en utbetalt utbetaling for vedtaksperiode ${vedtaksperiode.id}" }
 
-        val sisteAktiveUtbetalingMedSammeKorrelasjonsId = vedtaksperiode.yrkesaktivitet.sisteAktiveUtbetalingMedSammeKorrelasjonsId(sisteUtbetalteUtbetaling)
-
-        if (sisteAktiveUtbetalingMedSammeKorrelasjonsId != null && sisteAktiveUtbetalingMedSammeKorrelasjonsId.overlapperMed(vedtaksperiode.periode)) {
-            val annullering = vedtaksperiode.yrkesaktivitet.lagAnnulleringsutbetaling(eventBus, hendelse, aktivitetslogg, sisteAktiveUtbetalingMedSammeKorrelasjonsId)
-            vedtaksperiode.behandlinger.leggTilAnnullering(eventBus, annullering, aktivitetslogg)
-        } else {
-            val tomAnnullering = vedtaksperiode.yrkesaktivitet.lagTomUtbetaling(vedtaksperiode.periode, Utbetalingtype.ANNULLERING)
+        // for nye ting så er det tilstrekkelig å annullere forrige utbetaling på behandlingen,
+        // men vi må støtte at oppdrag ble delt mellom flere vedtaksperioder på eldre ting
+        val annullering = vedtaksperiode
+            .yrkesaktivitet
+            .aktiveUtbetalingerForPeriode(sisteUtbetalteUtbetaling, vedtaksperiode.periode)
+            .let {
+                when {
+                    it.size <= 1 -> it.firstOrNull()
+                    else -> error("Finner flere aktive utbetalinger som overlapper med vedtaksperioden")
+                }
+            }
+            ?.let { utbetalingSomSkalAnnulleres ->
+                vedtaksperiode.yrkesaktivitet.lagAnnulleringsutbetaling(eventBus, hendelse, aktivitetslogg, utbetalingSomSkalAnnulleres)
+            } ?: vedtaksperiode.yrkesaktivitet.lagTomUtbetaling(vedtaksperiode.periode, Utbetalingtype.ANNULLERING)
                 .also { it.opprett(with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg) }
-            vedtaksperiode.behandlinger.leggTilAnnullering(eventBus, tomAnnullering, aktivitetslogg)
+
+        vedtaksperiode.behandlinger.leggTilAnnullering(eventBus, with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, annullering, aktivitetslogg)
+
+        if (!vedtaksperiode.behandlinger.erAvsluttet()) {
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, TilAnnullering)
+        } else {
+            vedtaksperiode.forkast(eventBus, AnnullerTomUtbetaling(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype), aktivitetslogg)
         }
-        vedtaksperiode.tilstand(eventBus, aktivitetslogg, TilAnnullering)
     }
 }

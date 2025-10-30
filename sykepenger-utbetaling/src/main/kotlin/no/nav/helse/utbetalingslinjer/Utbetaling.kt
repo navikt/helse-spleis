@@ -177,13 +177,6 @@ class Utbetaling private constructor(
         if (harNegativtTotalbeløp) aktivitetslogg.varsel(Varselkode.RV_SI_3)
     }
 
-    fun sisteAktiveMedSammeKorrelasjonsId(utbetalinger: List<Utbetaling>): Utbetaling? {
-        val aktiveUtbetalinger = utbetalinger.aktive()
-
-        val sisteUtbetalteForUtbetaling = aktiveUtbetalinger.singleOrNull { it.hørerSammen(this) }
-        return sisteUtbetalteForUtbetaling
-    }
-
     fun lagAnnulleringsutbetaling(aktivitetslogg: IAktivitetslogg, vurdering: Vurdering): Utbetaling {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         return lagAnnullering(aktivitetsloggMedUtbetalingkontekst, vurdering)

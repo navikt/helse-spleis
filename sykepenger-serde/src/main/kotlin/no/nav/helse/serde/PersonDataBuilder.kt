@@ -426,7 +426,6 @@ private fun BehandlingUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Vedtak
         BehandlingtilstandDto.VEDTAK_FATTET -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.VEDTAK_FATTET
         BehandlingtilstandDto.VEDTAK_IVERKSATT -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.VEDTAK_IVERKSATT
         BehandlingtilstandDto.UBEREGNET_ANNULLERING -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.UBEREGNET_ANNULLERING
-        BehandlingtilstandDto.BEREGNET_ANNULLERING -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET_ANNULLERING
         BehandlingtilstandDto.OVERFØRT_ANNULLERING -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.OVERFØRT_ANNULLERING
     },
     vedtakFattet = this.vedtakFattet,

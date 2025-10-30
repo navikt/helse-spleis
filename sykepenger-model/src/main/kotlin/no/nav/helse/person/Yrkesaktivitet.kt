@@ -731,7 +731,8 @@ internal class Yrkesaktivitet private constructor(
         return annullering
     }
 
-    internal fun sisteAktiveUtbetalingMedSammeKorrelasjonsId(utbetaling: Utbetaling) = utbetaling.sisteAktiveMedSammeKorrelasjonsId(utbetalinger)
+    internal fun aktiveUtbetalingerForPeriode(utbetaling: Utbetaling, vedtaksperiode: Periode) =
+        utbetalinger.aktive(vedtaksperiode)
 
     internal fun finnAnnulleringskandidater(vedtaksperiodeIdSomForsøkesAnnullert: UUID): Set<Vedtaksperiode> {
         val vedtaksperiodeSomForsøkesAnnullert = vedtaksperioder.firstOrNull { it.id == vedtaksperiodeIdSomForsøkesAnnullert } ?: return emptySet()

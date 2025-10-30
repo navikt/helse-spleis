@@ -118,7 +118,6 @@ sealed class BehandlingtilstandDto {
     data object ANNULLERT_PERIODE : BehandlingtilstandDto()
     data object TIL_INFOTRYGD : BehandlingtilstandDto()
     data object UBEREGNET_ANNULLERING : BehandlingtilstandDto()
-    data object BEREGNET_ANNULLERING : BehandlingtilstandDto()
     data object OVERFØRT_ANNULLERING : BehandlingtilstandDto()
 }
 

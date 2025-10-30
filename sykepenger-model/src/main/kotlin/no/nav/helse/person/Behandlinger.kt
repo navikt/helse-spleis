@@ -244,23 +244,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         leggTilNyBehandling(behandlinger.last().håndterAnnullering(eventBus, yrkesaktivitet, behandlingkilde, aktivitetslogg))
     }
 
-    internal fun leggTilAnnullering(eventBus: EventBus, annullering: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+    internal fun leggTilAnnullering(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, aktivitetslogg: IAktivitetslogg) {
         val forrigeVedtak = behandlinger.last { it.erFattetVedtak() }
-        behandlinger.last().leggTilAnnullering(eventBus, annullering, forrigeVedtak, aktivitetslogg)
-    }
-
-    internal fun sisteUtbetalingSkalOverføres(): Boolean {
-        val sisteUtbetaling = siste
-        checkNotNull(sisteUtbetaling) { "Finner ikke utbetaling i TIL_ANNULLERING, og det er ganske rart. BehandlingId ${behandlinger.last().id}" }
-        return sisteUtbetaling.harOppdragMedUtbetalinger()
-    }
-
-    internal fun overførSisteUtbetaling(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-        behandlinger.last().overførAnnullering(eventBus, utbetalingEventBus, aktivitetslogg)
-    }
-
-    internal fun avsluttTomAnnullering(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-        behandlinger.last().avsluttTomAnnullering(eventBus, utbetalingEventBus, aktivitetslogg)
+        behandlinger.last().leggTilAnnullering(eventBus, utbetalingEventBus, annullering, forrigeVedtak, aktivitetslogg)
     }
 
     internal fun beregnetBehandling(
@@ -568,7 +554,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.VedtakFattet -> BehandlingView.TilstandView.VEDTAK_FATTET
                 Tilstand.VedtakIverksatt -> BehandlingView.TilstandView.VEDTAK_IVERKSATT
                 Tilstand.UberegnetAnnullering -> BehandlingView.TilstandView.UBEREGNET_ANNULLERING
-                Tilstand.BeregnetAnnullering -> BehandlingView.TilstandView.BEREGNET_ANNULLERING
                 Tilstand.OverførtAnnullering -> BehandlingView.TilstandView.OVERFØRT_ANNULLERING
             },
             endringer = endringer.map { it.view() },
@@ -638,7 +623,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             Tilstand.AnnullertPeriode,
             Tilstand.AvsluttetUtenVedtak,
-            Tilstand.BeregnetAnnullering,
             Tilstand.OverførtAnnullering,
             Tilstand.RevurdertVedtakAvvist,
             Tilstand.TilInfotrygd,
@@ -790,7 +774,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.VedtakIverksatt -> avsluttetBehandling(Tilstand.UberegnetRevurdering)
 
                 Tilstand.UberegnetAnnullering,
-                Tilstand.BeregnetAnnullering,
                 Tilstand.OverførtAnnullering -> {
                     aktivitetslogg.info("Ignorerer ny fakta i tilstand ${tilstand::class.simpleName}")
                     null
@@ -1139,7 +1122,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.Beregnet,
                 Tilstand.BeregnetOmgjøring,
                 Tilstand.BeregnetRevurdering,
-                Tilstand.BeregnetAnnullering,
                 Tilstand.OverførtAnnullering,
                 Tilstand.RevurdertVedtakAvvist,
                 Tilstand.TilInfotrygd,
@@ -1158,7 +1140,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal fun vedtakFattet(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
             when (tilstand) {
                 Tilstand.Beregnet,
-                Tilstand.BeregnetAnnullering,
                 Tilstand.BeregnetOmgjøring,
                 Tilstand.BeregnetRevurdering -> tilstand.vedtakFattet(this@Behandling, eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
 
@@ -1190,7 +1171,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return false
                 }
 
-                Tilstand.BeregnetAnnullering,
                 Tilstand.AnnullertPeriode,
                 Tilstand.AvsluttetUtenVedtak,
                 Tilstand.OverførtAnnullering,
@@ -1234,16 +1214,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.tilstand.håndterAnnullering(this, eventBus, yrkesaktivitet, behandlingskilde, aktivitetslogg)
         }
 
-        internal fun leggTilAnnullering(eventBus: EventBus, annullering: Utbetaling, forrigeVedtak: Behandling, aktivitetslogg: IAktivitetslogg) {
-            tilstand.leggTilAnnullering(this, eventBus, annullering, forrigeVedtak.gjeldende.grunnlagsdata!!, aktivitetslogg)
-        }
-
-        internal fun overførAnnullering(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-            tilstand.overførAnnullering(this, eventBus, utbetalingEventBus, aktivitetslogg)
-        }
-
-        internal fun avsluttTomAnnullering(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-            tilstand.avsluttTomAnnullering(this, eventBus, utbetalingEventBus, aktivitetslogg)
+        internal fun leggTilAnnullering(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, forrigeVedtak: Behandling, aktivitetslogg: IAktivitetslogg) {
+            tilstand.leggTilAnnullering(this, eventBus, utbetalingEventBus, annullering, forrigeVedtak.gjeldende.grunnlagsdata!!, aktivitetslogg)
         }
 
         fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
@@ -1354,7 +1326,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.VedtakFattet,
                 Tilstand.VedtakIverksatt,
                 Tilstand.UberegnetRevurdering,
-                Tilstand.BeregnetAnnullering,
                 Tilstand.OverførtAnnullering,
                 Tilstand.UberegnetAnnullering -> false
 
@@ -1562,7 +1533,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         BehandlingtilstandDto.VEDTAK_FATTET -> Tilstand.VedtakFattet
                         BehandlingtilstandDto.VEDTAK_IVERKSATT -> Tilstand.VedtakIverksatt
                         BehandlingtilstandDto.UBEREGNET_ANNULLERING -> Tilstand.UberegnetAnnullering
-                        BehandlingtilstandDto.BEREGNET_ANNULLERING -> Tilstand.BeregnetAnnullering
                         BehandlingtilstandDto.OVERFØRT_ANNULLERING -> Tilstand.OverførtAnnullering
                     },
                     endringer = dto.endringer.map { Endring.gjenopprett(it, grunnlagsdata, utbetalinger) }.toMutableList(),
@@ -1599,16 +1569,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Har ikke implementert håndtering av annullering i $this")
             }
 
-            fun leggTilAnnullering(behandling: Behandling, eventBus: EventBus, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
+            fun leggTilAnnullering(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
                 error("Kan ikke legge til annullering i $this")
-            }
-
-            fun overførAnnullering(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-                error("Kan ikke overføre annullering i $this")
-            }
-
-            fun avsluttTomAnnullering(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-                error("Kan ikke avslutte tom annullering i $this")
             }
 
             fun vedtakAvvist(
@@ -1986,26 +1948,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             data object UberegnetAnnullering : Tilstand {
                 override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Revurdering)
 
-                override fun leggTilAnnullering(behandling: Behandling, eventBus: EventBus, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
+                override fun leggTilAnnullering(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
                     behandling.nyEndring(behandling.gjeldende.kopierMedAnnullering(grunnlagsdata, annullering))
-                    behandling.tilstand(eventBus,BeregnetAnnullering, aktivitetslogg)
-                }
-            }
 
-            data object BeregnetAnnullering : Tilstand {
-                override fun overførAnnullering(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-                    val annullering = behandling.gjeldende.utbetaling
-                    checkNotNull(annullering) { "Finner ikke utbetaling i BEREGNET_ANNULLERING, og det er ganske rart. BehandlingId ${behandling.id}" }
-                    annullering.overfør(utbetalingEventBus, aktivitetslogg)
-                    behandling.tilstand(eventBus, OverførtAnnullering, aktivitetslogg)
-                }
-
-                override fun avsluttTomAnnullering(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-                    val annullering = behandling.gjeldende.utbetaling
-                    checkNotNull(annullering) { "Finner ikke utbetaling i BEREGNET_ANNULLERING, og det er ganske rart. BehandlingId ${behandling.id}" }
-                    check(!annullering.harOppdragMedUtbetalinger()) { "Forventet tom annullering for behandlingId ${behandling.id}" }
-                    annullering.avsluttTomAnnullering(utbetalingEventBus, aktivitetslogg)
-                    behandling.tilstand(eventBus, AnnullertPeriode, aktivitetslogg)
+                    if (annullering.harOppdragMedUtbetalinger()) {
+                        annullering.overfør(utbetalingEventBus, aktivitetslogg)
+                        behandling.tilstand(eventBus, OverførtAnnullering, aktivitetslogg)
+                    } else {
+                        annullering.avsluttTomAnnullering(utbetalingEventBus, aktivitetslogg)
+                        behandling.tilstand(eventBus, AnnullertPeriode, aktivitetslogg)
+                    }
                 }
             }
 
@@ -2048,7 +2000,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.VedtakFattet -> BehandlingtilstandDto.VEDTAK_FATTET
                 Tilstand.VedtakIverksatt -> BehandlingtilstandDto.VEDTAK_IVERKSATT
                 Tilstand.UberegnetAnnullering -> BehandlingtilstandDto.UBEREGNET_ANNULLERING
-                Tilstand.BeregnetAnnullering -> BehandlingtilstandDto.BEREGNET_ANNULLERING
                 Tilstand.OverførtAnnullering -> BehandlingtilstandDto.OVERFØRT_ANNULLERING
             },
             endringer = this.endringer.map { it.dto() },
@@ -2148,7 +2099,7 @@ internal data class BehandlingView(
         BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
         REVURDERT_VEDTAK_AVVIST,
         TIL_INFOTRYGD, UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING,
-        VEDTAK_FATTET, VEDTAK_IVERKSATT, UBEREGNET_ANNULLERING, BEREGNET_ANNULLERING, OVERFØRT_ANNULLERING
+        VEDTAK_FATTET, VEDTAK_IVERKSATT, UBEREGNET_ANNULLERING, OVERFØRT_ANNULLERING
     }
 }
 

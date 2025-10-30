@@ -261,7 +261,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
                         when (behandling.tilstand) {
                             BehandlingView.TilstandView.BEREGNET,
                             BehandlingView.TilstandView.BEREGNET_OMGJØRING,
-                            BehandlingView.TilstandView.BEREGNET_ANNULLERING,
                             BehandlingView.TilstandView.BEREGNET_REVURDERING -> {
                                 assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}" }
                                 assertNotNull(endring.grunnlagsdata) { "forventer vilkårsgrunnlag i ${behandling.tilstand}" }

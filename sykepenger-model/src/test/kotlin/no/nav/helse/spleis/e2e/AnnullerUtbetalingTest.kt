@@ -764,7 +764,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
 
             assertEquals(
                 BehandlingView.TilstandView.ANNULLERT_PERIODE,
@@ -835,7 +835,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
 
             val annullering = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling
 
@@ -895,8 +895,8 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
 
             val annullering = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling
 
@@ -940,7 +940,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
 
             assertEquals(6, inspektør.utbetalinger.size)
             val annulleringsutbetaling = inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling
@@ -993,7 +993,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertEquals(inspektør.vedtaksperioder(1.vedtaksperiode).tilstand, AVSLUTTET_UTEN_UTBETALING)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, TIL_ANNULLERING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
         }
 
     }

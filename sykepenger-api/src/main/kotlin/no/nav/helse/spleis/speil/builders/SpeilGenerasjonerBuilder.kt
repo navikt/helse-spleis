@@ -93,7 +93,6 @@ internal class SpeilGenerasjonerBuilder(
                 BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK -> mapUberegnetPeriode(vedtaksperiode, generasjon)
 
                 BehandlingtilstandDto.TIL_INFOTRYGD -> mapTilInfotrygdperiode(vedtaksperiode, forrigeGenerasjon, generasjon)
-                BehandlingtilstandDto.BEREGNET_ANNULLERING,
                 BehandlingtilstandDto.OVERFØRT_ANNULLERING,
                 BehandlingtilstandDto.ANNULLERT_PERIODE -> mapAnnullertPeriode(vedtaksperiode, generasjon)
             }.also {

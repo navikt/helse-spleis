@@ -499,7 +499,7 @@ data class SpannerPersonDto(
                 enum class TilstandData {
                     UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
                     VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, ANNULLERT_PERIODE, TIL_INFOTRYGD,
-                    UBEREGNET_ANNULLERING, BEREGNET_ANNULLERING, OVERFØRT_ANNULLERING
+                    UBEREGNET_ANNULLERING, OVERFØRT_ANNULLERING
                 }
 
                 enum class AvsenderData {
@@ -1203,7 +1203,6 @@ private fun BehandlingUtDto.tilPersonData() =
             BehandlingtilstandDto.VEDTAK_FATTET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.VEDTAK_FATTET
             BehandlingtilstandDto.VEDTAK_IVERKSATT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.VEDTAK_IVERKSATT
             BehandlingtilstandDto.UBEREGNET_ANNULLERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.UBEREGNET_ANNULLERING
-            BehandlingtilstandDto.BEREGNET_ANNULLERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET_ANNULLERING
             BehandlingtilstandDto.OVERFØRT_ANNULLERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.OVERFØRT_ANNULLERING
         },
         vedtakFattet = this.vedtakFattet,

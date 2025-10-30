@@ -30,6 +30,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -121,13 +122,16 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 20.januar, grad = 19.prosent)
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@UtbetalingOgAnnulleringTest.håndterYtelser(1.vedtaksperiode)
-        this@UtbetalingOgAnnulleringTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
 
+        nullstillTilstandsendringer()
+
         håndterAnnullerUtbetaling()
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
         assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetaling(1).tilstand)
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 
     @Test
