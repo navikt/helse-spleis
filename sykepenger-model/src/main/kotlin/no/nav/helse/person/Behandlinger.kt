@@ -26,12 +26,12 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.vurdering
-import no.nav.helse.person.Behandlinger.Behandling.Companion.arbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
 import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInntekt
+import no.nav.helse.person.Behandlinger.Behandling.Companion.tidligereVilkårsprøving
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
@@ -186,7 +186,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         return behandlinger.last().analytiskDatapakke(forrigeBehandling, yrkesaktivitetssporing, vedtaksperiodeId)
     }
 
-    internal fun arbeidstakerFaktaavklartInntekt(aktivitetslogg: IAktivitetslogg) = behandlinger.arbeidstakerFaktaavklartInntekt(aktivitetslogg)
     internal fun utbetalingstidslinjeFraForrigeVedtak() = behandlinger.lastOrNull { it.erFattetVedtak() }?.utbetalingstidslinje()
     internal fun utbetalingstidslinje() = behandlinger.last().utbetalingstidslinje()
     internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
@@ -352,6 +351,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
         behandlinger.any { it.dokumentHåndtert(dokumentsporing) }
+
+    internal fun tidligereVilkårsprøving() = behandlinger.tidligereVilkårsprøving()
 
     internal fun harGjenbrukbarInntekt(organisasjonsnummer: String) =
         behandlinger.harGjenbrukbarInntekt(organisasjonsnummer)
@@ -1470,28 +1471,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     kilde = behandlingkilde
                 )
 
-            internal fun List<Behandling>.arbeidstakerFaktaavklartInntekt(aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt? {
-                val gjeldendeEndring = gjeldendeEndring()
-                val gjeldendeFaktaavklarteInntekt = (gjeldendeEndring.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) ?: return null // Har ingen faktaavklart inntekt
 
-                // Hvis vi ikke har blitt vilkårsprøvd før trenger vi ikke gjøre noe med varsler
-                // .. og vi beholder den originale inntektsdatoen for å gjøre ulik-fom sjekk
-                val forrigeVilkårsprøvdeEndring = forrigeEndringMed { it.grunnlagsdata != null } ?: return gjeldendeFaktaavklarteInntekt
-
-
-                // Om vi har vilkårsprøvd før setter vi alltid inntektsdato == skjæringstidspunkt for å hoppe bukk over ny ulik-fom sjekk
-                // .. og tvinge frem at vi bruker denne inntekten
-                val gjenbruktFaktaavklartInntekt = gjeldendeFaktaavklarteInntekt.copy(
-                    inntektsdata = gjeldendeFaktaavklarteInntekt.inntektsdata.copy(dato = gjeldendeEndring.skjæringstidspunkt)
-                )
-
-                // Vurderer om den gjenbrukte inntekten skal få varsler på seg
-                val forrigeVilkårsprøvdeSkjæringstidspunkt = forrigeVilkårsprøvdeEndring.skjæringstidspunkt
-                val harNyArbeidsgiverperiode = forrigeVilkårsprøvdeEndring.arbeidsgiverperiodeEndret(gjeldendeEndring)
-                gjenbruktFaktaavklartInntekt.vurderVarselForGjenbrukAvInntekt(forrigeVilkårsprøvdeSkjæringstidspunkt, gjeldendeEndring.skjæringstidspunkt, harNyArbeidsgiverperiode, aktivitetslogg)
-
-                return gjenbruktFaktaavklartInntekt
-            }
+            internal fun List<Behandling>.tidligereVilkårsprøving() = forrigeEndringMed { it.grunnlagsdata != null }?.let { it.skjæringstidspunkt to it.dagerUtenNavAnsvar }
 
             internal fun List<Behandling>.harGjenbrukbarInntekt(organisasjonsnummer: String) = forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer) != null
             internal fun List<Behandling>.lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) {

@@ -367,23 +367,14 @@ internal class Yrkesaktivitet private constructor(
         return kanAvklareInntektFraVedtaksperidoe(vedtaksperioder) || kanAvklareInntektFraInntektshistorikk(skjæringstidspunkt, vedtaksperioder)
     }
 
-    internal fun avklarInntekt(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg) =
-        avklarInntektFraVedtaksperiode(vedtaksperioder, aktivitetslogg) ?: avklarInntektFraInntektshistorikk(skjæringstidspunkt, vedtaksperioder)
-
     private fun kanAvklareInntektFraVedtaksperidoe(vedtaksperioder: List<Vedtaksperiode>): Boolean {
         if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return false
         return vedtaksperioder.any { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
     }
 
-    private fun avklarInntektFraVedtaksperiode(vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt? {
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return null
-        val vedtaksperiode = vedtaksperioder.firstOrNull { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null } ?: return null
-        return vedtaksperiode.behandlinger.arbeidstakerFaktaavklartInntekt(aktivitetslogg)
-    }
-
     private fun kanAvklareInntektFraInntektshistorikk(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>) = avklarInntektFraInntektshistorikk(skjæringstidspunkt, vedtaksperioder) != null
 
-    private fun avklarInntektFraInntektshistorikk(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): ArbeidstakerFaktaavklartInntekt? {
+    internal fun avklarInntektFraInntektshistorikk(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): ArbeidstakerFaktaavklartInntekt? {
         // finner inntektsmelding for en av første fraværsdagene.
         // håndterer det som en liste i tilfelle arbeidsgiveren har auu'er i forkant, og at inntekt kan ha blitt malplassert
         // (og at det er vrient å avgjøre én riktig første fraværsdag i forkant)

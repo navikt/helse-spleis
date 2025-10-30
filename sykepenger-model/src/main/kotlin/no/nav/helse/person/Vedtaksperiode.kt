@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
+import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
@@ -1863,16 +1864,29 @@ internal class Vedtaksperiode private constructor(
         if (aktivitetslogg.harFunksjonelleFeil()) return forkast(eventBus, dager.hendelse, aktivitetslogg)
     }
 
+    private fun arbeidstakerFaktaavklartInntekt(aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt? {
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return null
+        val faktaavklartInntekt = checkNotNull(behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) { "Her skal vi ha en inntekt!" }
+        val (tidligereVilkårsprøvdSkjæringstidspunkt, tidligereVilkårsprøvdArbeidsgiverperiode) = behandlinger.tidligereVilkårsprøving() ?: return faktaavklartInntekt
+        return faktaavklartInntekt.medInnteksdato(skjæringstidspunkt).also { it.vurderVarselForGjenbrukAvInntekt(
+            forrigeDato = tidligereVilkårsprøvdSkjæringstidspunkt,
+            harNyArbeidsgiverperiode = tidligereVilkårsprøvdArbeidsgiverperiode != behandlinger.ventedager().dagerUtenNavAnsvar,
+            aktivitetslogg = aktivitetslogg
+        )}
+    }
+
     private fun inntektForArbeidsgiver(
         hendelse: Hendelse,
         aktivitetsloggTilDenSomVilkårsprøver: IAktivitetslogg,
         skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
         alleForSammeArbeidsgiver: List<Vedtaksperiode>
     ): ArbeidstakerFaktaavklartInntekt {
-        val inntektForArbeidsgiver = yrkesaktivitet
-            .avklarInntekt(skjæringstidspunkt, alleForSammeArbeidsgiver, aktivitetsloggTilDenSomVilkårsprøver)
-            // velger bort inntekten hvis situasjonen er "fom ulik skjæringstidspunktet"
+        val inntektForArbeidsgiver = (alleForSammeArbeidsgiver
+            .firstOrNull { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
+            ?.arbeidstakerFaktaavklartInntekt(aktivitetsloggTilDenSomVilkårsprøver)
+            ?: yrkesaktivitet.avklarInntektFraInntektshistorikk(skjæringstidspunkt, alleForSammeArbeidsgiver))
             ?.takeUnless {
+                // velger bort inntekten hvis situasjonen er "fom ulik skjæringstidspunktet"
                 (skjæringstidspunkt.yearMonth < it.inntektsdata.dato.yearMonth).also { harUlikFom ->
                     if (harUlikFom) aktivitetsloggTilDenSomVilkårsprøver.varsel(Varselkode.RV_VV_2)
                 }

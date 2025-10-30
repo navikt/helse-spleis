@@ -19,6 +19,17 @@ internal data class ArbeidstakerFaktaavklartInntekt(
         return this.inntektsopplysningskilde::class == other.inntektsopplysningskilde::class
     }
 
+    private fun lagreTidsnærOpplysning(
+        forrigeDato: LocalDate,
+        aktivitetslogg: IAktivitetslogg,
+        nyArbeidsgiverperiode: Boolean,
+        inntektshistorikk: Inntektshistorikk
+    ) {
+        vurderVarselForGjenbrukAvInntekt(forrigeDato, nyArbeidsgiverperiode, aktivitetslogg)
+        inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), this.inntektsdata, Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
+        aktivitetslogg.info("Kopierte inntekt som lå lagret på $forrigeDato til ${this.inntektsdata.dato}")
+    }
+
     internal fun kopierTidsnærOpplysning(
         nyDato: LocalDate,
         aktivitetslogg: IAktivitetslogg,
@@ -26,20 +37,19 @@ internal data class ArbeidstakerFaktaavklartInntekt(
         inntektshistorikk: Inntektshistorikk
     ) {
         if (inntektsopplysningskilde !is Arbeidstakerinntektskilde.Arbeidsgiver) return
-        vurderVarselForGjenbrukAvInntekt(this.inntektsdata.dato, nyDato, nyArbeidsgiverperiode, aktivitetslogg)
-
-        inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), this.inntektsdata.copy(dato = nyDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
-        aktivitetslogg.info("Kopierte inntekt som lå lagret på ${this.inntektsdata.dato} til $nyDato")
+        return medInnteksdato(nyDato).lagreTidsnærOpplysning(inntektsdata.dato, aktivitetslogg, nyArbeidsgiverperiode, inntektshistorikk)
     }
 
-    internal fun vurderVarselForGjenbrukAvInntekt(forrigeDato: LocalDate, nyDato: LocalDate, harNyArbeidsgiverperiode: Boolean, aktivitetslogg: IAktivitetslogg) {
-        if (nyDato == forrigeDato) return
-        val dagerMellom = ChronoUnit.DAYS.between(forrigeDato, nyDato)
+    internal fun medInnteksdato(dato: LocalDate) = copy(inntektsdata = inntektsdata.copy(dato = dato))
+
+    internal fun vurderVarselForGjenbrukAvInntekt(forrigeDato: LocalDate, harNyArbeidsgiverperiode: Boolean, aktivitetslogg: IAktivitetslogg) {
+        if (inntektsdata.dato == forrigeDato) return
+        val dagerMellom = ChronoUnit.DAYS.between(forrigeDato, inntektsdata.dato)
         if (dagerMellom >= 60) {
-            aktivitetslogg.info("Det er $dagerMellom dager mellom forrige inntektdato ($forrigeDato) og ny inntektdato ($nyDato), dette utløser varsel om gjenbruk.")
+            aktivitetslogg.info("Det er $dagerMellom dager mellom forrige inntektdato ($forrigeDato) og ny inntektdato (${inntektsdata.dato}), dette utløser varsel om gjenbruk.")
             aktivitetslogg.varsel(RV_IV_7)
         } else if (harNyArbeidsgiverperiode) {
-            aktivitetslogg.info("Det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk. Forrige inntektdato var $forrigeDato og ny inntektdato er $nyDato")
+            aktivitetslogg.info("Det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk. Forrige inntektdato var $forrigeDato og ny inntektdato er ${inntektsdata.dato}")
             aktivitetslogg.varsel(RV_IV_7)
         }
     }
