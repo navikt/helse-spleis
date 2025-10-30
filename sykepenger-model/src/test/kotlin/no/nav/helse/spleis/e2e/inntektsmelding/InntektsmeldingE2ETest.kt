@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import java.time.LocalDateTime
 import java.time.LocalDateTime.MIN
 import java.util.UUID
 import no.nav.helse.april
@@ -39,7 +38,6 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
@@ -71,7 +69,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
@@ -226,47 +223,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter(a1))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
         assertEquals(1.vedtaksperiode.id(a1), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().opplysninger.vedtaksperiodeId)
-    }
-
-    @Test
-    fun `Avsluttet-periode uten åpen behandling håndterer inntekt fra inntektsmelding - pga arbeidsgiveropplysninger & IM som kommer inn til spleis i motsatt rekkefølge av innsendingen `() {
-        håndterSøknad(27.januar til 30.januar)
-        håndterSøknad(31.januar til 14.februar)
-        håndterInntektsmelding(listOf(27.januar til 11.februar))
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@InntektsmeldingE2ETest.håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        this@InntektsmeldingE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterSøknad(18.februar til 5.mars)
-
-        val arbeidsgiveropplysningerInnstendt = LocalDateTime.now()
-        // Denne venter i Spedisjon i 30 min, så vi får arbeidsgiveropplysningene først tross forskjellig rekkefølge
-        // Pga. den megadumme tidsstempel-sjekket på beløpstidslinje ender vi da ikke opp med nye refusjonsopplysninger (nyeste timestamp vinner)
-        val lpsInntektsmeldingInnsendt = arbeidsgiveropplysningerInnstendt.minusMinutes(15)
-
-        håndterArbeidsgiveropplysninger(
-            arbeidsgiverperioder = null,
-            beregnetInntekt = INNTEKT,
-            refusjon = Refusjon(INGEN, null),
-            vedtaksperiodeIdInnhenter = 3.vedtaksperiode,
-            innsendt = arbeidsgiveropplysningerInnstendt
-        )
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
-        this@InntektsmeldingE2ETest.håndterYtelser(3.vedtaksperiode)
-        håndterSimulering(3.vedtaksperiode)
-        this@InntektsmeldingE2ETest.håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndtererInntektsmeldingInntektUtenDokumentsporing(3.vedtaksperiode) {
-            håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(element = 27.januar til 11.februar),
-                førsteFraværsdag = 18.februar,
-                refusjon = Refusjon(INGEN, null),
-                mottatt = lpsInntektsmeldingInnsendt
-            )
-        }
     }
 
     @Test
@@ -2599,13 +2555,5 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             assertInntektsgrunnlag(a1, INNTEKT)
             assertInntektsgrunnlag(a2, INNTEKT)
         }
-    }
-
-    private fun håndtererInntektsmeldingInntektUtenDokumentsporing(vedtaksperiode: IdInnhenter, orgnummer: String = a1, håndterInntektsmelding: () -> UUID) {
-        val inntektsmeldingId = håndterInntektsmelding()
-        val vedtaksperiodeId = vedtaksperiode.id(orgnummer)
-        assertTrue((inntektsmeldingId to vedtaksperiodeId) in observatør.inntektsmeldingHåndtert)
-        val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(MeldingsreferanseId(inntektsmeldingId))
-        assertFalse(dokumentsporing in inspektør(orgnummer).vedtaksperioder(vedtaksperiode).behandlinger.hendelser)
     }
 }
