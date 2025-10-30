@@ -31,7 +31,6 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
 import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInntekt
-import no.nav.helse.person.Behandlinger.Behandling.Companion.tidligereVilkårsprøving
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
@@ -352,7 +351,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
         behandlinger.any { it.dokumentHåndtert(dokumentsporing) }
 
-    internal fun tidligereVilkårsprøving() = behandlinger.tidligereVilkårsprøving()
+    internal fun tidligereFattetVedtak() = behandlinger.lastOrNull { it.erFattetVedtak() }?.let { it.skjæringstidspunkt to it.dagerUtenNavAnsvar }
 
     internal fun harGjenbrukbarInntekt(organisasjonsnummer: String) =
         behandlinger.harGjenbrukbarInntekt(organisasjonsnummer)
@@ -1470,9 +1469,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     avsluttet = null,
                     kilde = behandlingkilde
                 )
-
-
-            internal fun List<Behandling>.tidligereVilkårsprøving() = forrigeEndringMed { it.grunnlagsdata != null }?.let { it.skjæringstidspunkt to it.dagerUtenNavAnsvar }
 
             internal fun List<Behandling>.harGjenbrukbarInntekt(organisasjonsnummer: String) = forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer) != null
             internal fun List<Behandling>.lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) {
