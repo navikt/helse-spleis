@@ -481,23 +481,15 @@ internal class Vedtaksperiode private constructor(
 
         val faktaavklartInntekt = inntektsmelding.faktaavklartInntekt()
 
+        // lagrer ALLTID inntekt på behandling
+        behandlinger.håndterFaktaavklartInntekt(eventBus, faktaavklartInntekt, yrkesaktivitet, inntektsmelding.metadata.behandlingkilde, aktivitetsloggMedVedtaksperiodekontekst)
+
         inntektsmeldingHåndtert(eventBus, inntektsmelding)
 
-        // 2.1 når vi ikke har vilkårsprøvd ennå lagrer vi inntekt på behandlingen
-        val grunnlag = vilkårsgrunnlag
-        if (grunnlag == null) {
-            behandlinger.håndterFaktaavklartInntekt(eventBus, faktaavklartInntekt, yrkesaktivitet, inntektsmelding.metadata.behandlingkilde, aktivitetsloggMedVedtaksperiodekontekst)
-            return null
-        }
-
-        // 2.2 lager nytt vilkårsgrunnlag hvis beløpet har endret seg
-        if (!oppdaterVilkårsgrunnlagMedInntekt(faktaavklartInntekt, grunnlag)) {
+        if (!oppdaterVilkårsgrunnlagMedInntekt(faktaavklartInntekt)) {
             // har ikke laget nytt vilkårsgrunnlag for beløpet var det samme som det var. Legger heller ikke til inntekten på behandlingen
             return null
         }
-
-        // 2.3 lagrer inntekt på behandling
-        behandlinger.håndterFaktaavklartInntekt(eventBus, faktaavklartInntekt, yrkesaktivitet, inntektsmelding.metadata.behandlingkilde, aktivitetsloggMedVedtaksperiodekontekst)
 
         check(!behandlinger.erAvsluttet()) {
             "forventer ikke at vedtaksperioden har en lukket behandling når inntekt håndteres"
@@ -517,7 +509,8 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun oppdaterVilkårsgrunnlagMedInntekt(korrigertInntekt: ArbeidstakerFaktaavklartInntekt, grunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Boolean {
+    private fun oppdaterVilkårsgrunnlagMedInntekt(korrigertInntekt: ArbeidstakerFaktaavklartInntekt): Boolean {
+        val grunnlag = vilkårsgrunnlag ?: return false
         /* fest setebeltet. nå skal vi prøve å endre vilkårsgrunnlaget */
         val resultat = grunnlag.nyeArbeidsgiverInntektsopplysninger(
             organisasjonsnummer = yrkesaktivitet.organisasjonsnummer,

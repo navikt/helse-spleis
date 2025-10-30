@@ -179,11 +179,11 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
             }
 
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            val korrigertInntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
             (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView).also { faktaavklartInntekt ->
                 assertNotNull(faktaavklartInntekt)
                 assertEquals(INNTEKT, faktaavklartInntekt.beløp)
-                assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
+                assertEquals(korrigertInntektsmeldingId, faktaavklartInntekt.hendelseId)
             }
         }
     }

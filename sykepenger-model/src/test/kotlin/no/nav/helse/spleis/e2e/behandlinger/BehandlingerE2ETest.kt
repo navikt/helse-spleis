@@ -345,7 +345,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                     assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer[1].dokumentsporing)
                     assertEquals(Dokumentsporing.inntektsmeldingDager(im), behandling.endringer[2].dokumentsporing)
                     assertEquals(Dokumentsporing.inntektsmeldingRefusjon(im), behandling.endringer[3].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[4].dokumentsporing)
+                    assertEquals(Dokumentsporing.inntektsmeldingRefusjon(im), behandling.endringer[4].dokumentsporing)
                     assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[5].dokumentsporing)
                     assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[6].dokumentsporing)
                     assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[7].dokumentsporing)
