@@ -951,7 +951,7 @@ fun FaktaavklartInntektUtDto.tilPersonData(): FaktaavklartInntektData {
             when (val kilde = this.inntektsopplysningskilde) {
                 is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> lagPersonData(
                     type = FaktaavklartInntektData.InntektsopplysningstypeData.ARBEIDSTAKER,
-                    kilde = FaktaavklartInntektData.InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG,
+                    kilde = FaktaavklartInntektData.InntektsopplysningskildeData.AORDNINGEN,
                     skatteopplysninger = kilde.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
                 )
 

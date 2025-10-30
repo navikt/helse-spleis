@@ -1416,7 +1416,7 @@ data class PersonData(
         val beløp: Double,
         val tidsstempel: LocalDateTime,
         val kilde: InntektsopplysningskildeData?,
-        val type: InntektsopplysningstypeData?, // TODO selvstendiginntekter på vilkårsgrunnlaget hadde ingen type, men vi vil at det skal ha en type
+        val type: InntektsopplysningstypeData,
         val pensjonsgivendeInntekter: List<PensjonsgivendeInntektData>?,
         val anvendtÅrligGrunnbeløp: Double?,
         val skatteopplysninger: List<SkatteopplysningData>?
@@ -1427,16 +1427,6 @@ data class PersonData(
         fun tilSelvstendigDto() = checkNotNull(tilDto() as? SelvstendigFaktaavklartInntektInnDto) { "Forventet at den faktaavklarte inntekten var av type selvstendig" }
 
         fun tilDto(): FaktaavklartInntektInnDto {
-            val (faktiskType, faktiskKilde) = when (type) {
-                InntektsopplysningstypeData.ARBEIDSTAKER -> InntektsopplysningstypeData.ARBEIDSTAKER to checkNotNull(kilde) { "Arbeidstakerinntekter skal alltid ha kilde" }
-                InntektsopplysningstypeData.SELVSTENDIG,
-                InntektsopplysningstypeData.SELVSTENDIG_NÆRINGSDRIVENDE,
-                null -> InntektsopplysningstypeData.SELVSTENDIG to null
-
-                InntektsopplysningstypeData.ARBEIDSTAKER_ARBEIDSGIVER -> InntektsopplysningstypeData.ARBEIDSTAKER to InntektsopplysningskildeData.INNTEKTSMELDING
-                InntektsopplysningstypeData.ARBEIDSTAKER_AORDNINGEN -> InntektsopplysningstypeData.ARBEIDSTAKER to InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG
-            }
-
             val inntektsdata = InntektsdataInnDto(
                 hendelseId = MeldingsreferanseDto(this.hendelseId),
                 dato = this.dato,
@@ -1444,12 +1434,12 @@ data class PersonData(
                 tidsstempel = this.tidsstempel
             )
 
-            return when (faktiskType) {
+            return when (type) {
                 InntektsopplysningstypeData.ARBEIDSTAKER -> ArbeidstakerFaktaavklartInntektInnDto(
                     id = id,
                     inntektsdata = inntektsdata,
-                    inntektsopplysningskilde = when (checkNotNull(faktiskKilde) { "For arbeidstaker har vi alltid kilde" }) {
-                        InntektsopplysningskildeData.SKATT_SYKEPENGEGRUNNLAG -> AOrdningenDto(skatteopplysninger?.map { it.tilDto() } ?: emptyList())
+                    inntektsopplysningskilde = when (checkNotNull(kilde) { "For arbeidstaker har vi alltid kilde" }) {
+                        InntektsopplysningskildeData.AORDNINGEN -> AOrdningenDto(skatteopplysninger?.map { it.tilDto() } ?: emptyList())
                         InntektsopplysningskildeData.INFOTRYGD -> ArbeidstakerinntektskildeInnDto.InfotrygdDto
                         InntektsopplysningskildeData.INNTEKTSMELDING -> ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
                     }
@@ -1461,26 +1451,16 @@ data class PersonData(
                     pensjonsgivendeInntekter = checkNotNull(pensjonsgivendeInntekter) { "Selvstendiginntekt skal ha pensjonsgivende inntekter" }.map { it.tilDto() },
                     anvendtGrunnbeløp = InntektbeløpDto.Årlig(checkNotNull(anvendtÅrligGrunnbeløp) { "Selvstendiginntekt skal ha anvendt grunnbeløp" })
                 )
-
-                InntektsopplysningstypeData.SELVSTENDIG_NÆRINGSDRIVENDE,
-                InntektsopplysningstypeData.ARBEIDSTAKER_ARBEIDSGIVER,
-                InntektsopplysningstypeData.ARBEIDSTAKER_AORDNINGEN -> error("Dette skal vel ikke skje?")
             }
         }
 
         enum class InntektsopplysningstypeData {
-            // I inntektsgrunnlaget har vi disse kildene
             ARBEIDSTAKER,
-            SELVSTENDIG,
-
-            // TODO Vi har laget disse verdiene på faktaavklart inntekt på behandling. De er egentlig en sammenslått type og kilde.
-            SELVSTENDIG_NÆRINGSDRIVENDE,
-            ARBEIDSTAKER_ARBEIDSGIVER,
-            ARBEIDSTAKER_AORDNINGEN
+            SELVSTENDIG
         }
 
         enum class InntektsopplysningskildeData {
-            SKATT_SYKEPENGEGRUNNLAG, // TODO Sprøtt navn, eller? Hva med AOrdningen?
+            AORDNINGEN,
             INFOTRYGD,
             INNTEKTSMELDING
         }
