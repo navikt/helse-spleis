@@ -244,9 +244,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         leggTilNyBehandling(behandlinger.last().håndterAnnullering(eventBus, yrkesaktivitet, behandlingkilde, aktivitetslogg))
     }
 
-    internal fun leggTilAnnullering(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+    internal fun leggTilAnnullering(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, aktivitetslogg: IAktivitetslogg) {
         val forrigeVedtak = behandlinger.last { it.erFattetVedtak() }
-        behandlinger.last().leggTilAnnullering(eventBus, utbetalingEventBus, annullering, forrigeVedtak, aktivitetslogg)
+        behandlinger.last().leggTilAnnullering(eventBus, utbetalingEventBus, annullering, vurdering,  forrigeVedtak, aktivitetslogg)
     }
 
     internal fun beregnetBehandling(
@@ -1214,8 +1214,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.tilstand.håndterAnnullering(this, eventBus, yrkesaktivitet, behandlingskilde, aktivitetslogg)
         }
 
-        internal fun leggTilAnnullering(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, forrigeVedtak: Behandling, aktivitetslogg: IAktivitetslogg) {
-            tilstand.leggTilAnnullering(this, eventBus, utbetalingEventBus, annullering, forrigeVedtak.gjeldende.grunnlagsdata!!, aktivitetslogg)
+        internal fun leggTilAnnullering(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, forrigeVedtak: Behandling, aktivitetslogg: IAktivitetslogg) {
+            tilstand.leggTilAnnullering(this, eventBus, utbetalingEventBus, annullering, vurdering, forrigeVedtak.gjeldende.grunnlagsdata!!, aktivitetslogg)
         }
 
         fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
@@ -1569,7 +1569,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Har ikke implementert håndtering av annullering i $this")
             }
 
-            fun leggTilAnnullering(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
+            fun leggTilAnnullering(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
                 error("Kan ikke legge til annullering i $this")
             }
 
@@ -1948,16 +1948,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             data object UberegnetAnnullering : Tilstand {
                 override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Revurdering)
 
-                override fun leggTilAnnullering(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
+                override fun leggTilAnnullering(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
                     behandling.nyEndring(behandling.gjeldende.kopierMedAnnullering(grunnlagsdata, annullering))
 
-                    if (annullering.harOppdragMedUtbetalinger()) {
-                        annullering.overfør(utbetalingEventBus, aktivitetslogg)
-                        behandling.tilstand(eventBus, OverførtAnnullering, aktivitetslogg)
-                    } else {
-                        annullering.avsluttTomAnnullering(utbetalingEventBus, aktivitetslogg)
-                        behandling.tilstand(eventBus, AnnullertPeriode, aktivitetslogg)
-                    }
+                    annullering.godkjent(utbetalingEventBus, aktivitetslogg, vurdering)
+
+                    if (annullering.erAvsluttet()) behandling.tilstand(eventBus, AnnullertPeriode, aktivitetslogg)
+                    else behandling.tilstand(eventBus, OverførtAnnullering, aktivitetslogg)
                 }
             }
 

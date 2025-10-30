@@ -130,7 +130,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
         håndterAnnullerUtbetaling()
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
-        assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetaling(1).tilstand)
+        assertEquals(Utbetalingstatus.ANNULLERT, inspektør.utbetaling(1).tilstand)
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
     }
 

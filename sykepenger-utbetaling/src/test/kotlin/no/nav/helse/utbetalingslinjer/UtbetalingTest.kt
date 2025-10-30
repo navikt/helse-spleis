@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.UtbetalingmodulHendelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.FRI
@@ -336,7 +337,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
         val annullering = annuller(utbetaling)
-        assertEquals(listOf(utbetaling.inspektør.utbetalingId.toString()), aktivitetslogg.aktiviteter.map { it.alleKontekster["utbetalingId"] })
+        assertEquals(listOf(annullering.inspektør.utbetalingId.toString()), aktivitetslogg.aktiviteter.filterIsInstance<Aktivitet.Behov>().map { it.alleKontekster["utbetalingId"] })
         assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
         assertTrue(annullering.inspektør.personOppdrag.isEmpty())
     }
@@ -513,8 +514,9 @@ internal class UtbetalingTest {
     }
 
     private fun annuller(utbetaling: Utbetaling) =
-        utbetaling.lagAnnulleringsutbetaling(aktivitetslogg, Utbetaling.Vurdering(true, "Z999999", "tbd@nav.no", LocalDateTime.now(), true)).also {
+        utbetaling.lagAnnulleringsutbetaling(aktivitetslogg).also {
             it.opprett(eventBus, aktivitetslogg)
+            it.godkjent(eventBus, aktivitetslogg, Utbetaling.Vurdering(true, "Z999999", "tbd@nav.no", LocalDateTime.now(), true))
         }
 
     private class Kvittering(

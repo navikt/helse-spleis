@@ -1311,7 +1311,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
     private fun assertTomAnnulleringsutbetaling(annullering: UtbetalingView) {
         assertEquals(true, annullering.inspektør.erAnnullering)
-        assertEquals(Utbetalingstatus.FORKASTET, annullering.inspektør.tilstand)
+        assertEquals(Utbetalingstatus.ANNULLERT, annullering.inspektør.tilstand)
         assertEquals(0, annullering.inspektør.nettobeløp)
         assertEquals(emptyList<Utbetalingslinje>(), annullering.inspektør.arbeidsgiverOppdrag.linjer)
         assertEquals(emptyList<Utbetalingslinje>(), annullering.inspektør.personOppdrag.linjer)

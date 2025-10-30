@@ -97,7 +97,6 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
-import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
@@ -106,7 +105,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAv
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.validerNyUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingEventBus
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
-import no.nav.helse.utbetalingslinjer.Utbetalingkladd
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
@@ -415,20 +413,6 @@ internal class Yrkesaktivitet private constructor(
             .fold(Feriepengegrunnlagstidslinje(emptyList()), Feriepengegrunnlagstidslinje::plus)
     }
 
-    internal fun lagTomUtbetaling(periode: Periode, type: Utbetalingtype): Utbetaling {
-        val tomUtbetaling = Utbetaling.lagTomUtbetaling(
-            vedtaksperiodekladd = Utbetalingkladd(
-                arbeidsgiveroppdrag = Oppdrag(mottaker = organisasjonsnummer, fagområde = Fagområde.SykepengerRefusjon),
-                personoppdrag = Oppdrag(mottaker = person.fødselsnummer, fagområde = Fagområde.Sykepenger),
-            ),
-            periode = periode,
-            type = type
-        )
-        check(_utbetalinger.tillaterOpprettelseAvUtbetaling(tomUtbetaling)) { "Har laget en overlappende utbetaling" }
-        _utbetalinger.add(tomUtbetaling)
-        return tomUtbetaling
-    }
-
     internal val EventBus.utbetalingEventBus get() =
         utbetalingEventBus(yrkesaktivitetstype, UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje()))
 
@@ -722,16 +706,7 @@ internal class Yrkesaktivitet private constructor(
         person.gjenopptaBehandling(aktivitetsloggMedArbeidsgiverkontekst)
     }
 
-    internal fun lagAnnulleringsutbetaling(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, utbetalingSomSkalAnnulleres: Utbetaling): Utbetaling {
-        val vurdering = (hendelse as? AnnullerUtbetaling)?.vurdering
-            ?: Utbetaling.Vurdering(true, "Automatisk behandlet", "tbd@nav.no", LocalDateTime.now(), true)
-        val annullering = utbetalingSomSkalAnnulleres.lagAnnulleringsutbetaling(aktivitetslogg, vurdering)
-        checkNotNull(annullering) { "Klarte ikke lage annullering for utbetaling ${utbetalingSomSkalAnnulleres.id}. Det er litt rart, eller?" }
-        leggTilNyUtbetaling(eventBus, aktivitetslogg, annullering)
-        return annullering
-    }
-
-    internal fun aktiveUtbetalingerForPeriode(utbetaling: Utbetaling, vedtaksperiode: Periode) =
+    internal fun aktiveUtbetalingerForPeriode(vedtaksperiode: Periode) =
         utbetalinger.aktive(vedtaksperiode)
 
     internal fun finnAnnulleringskandidater(vedtaksperiodeIdSomForsøkesAnnullert: UUID): Set<Vedtaksperiode> {

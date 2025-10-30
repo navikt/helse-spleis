@@ -102,9 +102,7 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription {
     }
 
     override fun annullering(event: EventSubscription.UtbetalingAnnullertEvent) {
-        assertTrue(behov.removeAll { it.utbetalingId == event.utbetalingId }) {
-            "Utbetaling ble annullert, men ingen behov om utbetaling er registrert"
-        }
+        behov.removeAll { it.utbetalingId == event.utbetalingId }
     }
 
     override fun inntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent) {

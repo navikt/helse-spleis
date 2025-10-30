@@ -177,35 +177,26 @@ class Utbetaling private constructor(
         if (harNegativtTotalbeløp) aktivitetslogg.varsel(Varselkode.RV_SI_3)
     }
 
-    fun lagAnnulleringsutbetaling(aktivitetslogg: IAktivitetslogg, vurdering: Vurdering): Utbetaling {
+    fun lagAnnulleringsutbetaling(aktivitetslogg: IAktivitetslogg): Utbetaling {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        return lagAnnullering(aktivitetsloggMedUtbetalingkontekst, vurdering)
+        return lagAnnullering(aktivitetsloggMedUtbetalingkontekst)
     }
 
-    private fun lagAnnullering(aktivitetslogg: IAktivitetslogg, vurdering: Vurdering): Utbetaling {
+    private fun lagAnnullering(aktivitetslogg: IAktivitetslogg): Utbetaling {
         return when (tilstand) {
             Utbetalt,
             GodkjentUtenUtbetaling -> {
                 Utbetaling(
-                    id = UUID.randomUUID(),
-                    korrelasjonsId = korrelasjonsId,
                     periode = periode,
                     utbetalingstidslinje = utbetalingstidslinje,
                     arbeidsgiverOppdrag = arbeidsgiverOppdrag.annuller(aktivitetslogg),
                     personOppdrag = personOppdrag.annuller(aktivitetslogg),
-                    tidsstempel = LocalDateTime.now(),
-                    tilstand = Ny,
                     type = ANNULLERING,
                     maksdato = LocalDate.MAX,
                     forbrukteSykedager = null,
                     gjenståendeSykedager = null,
-                    annulleringer = emptyList(),
-                    vurdering = vurdering,
-                    overføringstidspunkt = null,
-                    avstemmingsnøkkel = null,
-                    avsluttet = null
-                )
-                    .also { aktivitetslogg.info("Oppretter annullering med id ${it.id}") }
+                    korrelasjonsId = korrelasjonsId
+                ).also { aktivitetslogg.info("Oppretter annullering med id ${it.id}") }
             }
 
             Annullert,
@@ -237,16 +228,6 @@ class Utbetaling private constructor(
     fun godkjent(eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         tilstand.godkjent(this, eventBus, aktivitetsloggMedUtbetalingkontekst, vurdering)
-    }
-
-    fun overfør(eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        tilstand.overfør(this, eventBus, aktivitetsloggMedUtbetalingkontekst)
-    }
-
-    fun avsluttTomAnnullering(eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        tilstand.forkast(this, eventBus, aktivitetsloggMedUtbetalingkontekst)
     }
 
     private fun tilstand(eventBus: UtbetalingEventBus, neste: Tilstand, aktivitetslogg: IAktivitetslogg) {
@@ -549,14 +530,6 @@ class Utbetaling private constructor(
             error("Forventet ikke godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun overfør(
-            utbetaling: Utbetaling,
-            eventBus: UtbetalingEventBus,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            error("Forventet ikke å overføre utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-        }
-
         fun kvittér(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
             error("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
@@ -598,10 +571,6 @@ class Utbetaling private constructor(
                 utbetaling.type == ANNULLERING -> Annullert
                 else -> GodkjentUtenUtbetaling
             }, aktivitetslogg)
-        }
-
-        override fun overfør(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-            utbetaling.tilstand(eventBus, Overført, aktivitetslogg)
         }
 
         override fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
