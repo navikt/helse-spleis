@@ -1,9 +1,12 @@
 package no.nav.helse.person.tilstandsmaskin
 
+import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.EventBus
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.behandlingkilde
@@ -33,7 +36,24 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
             .vedtaksperioder
             .single()
 
-        vedtaksperiode.behandlinger.avsluttUtenVedtak(eventBus, vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje.utbetalingstidslinje, emptyMap())
+        val sisteBehandling = vedtaksperiode.behandlinger.avsluttUtenVedtak(eventBus, vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje.utbetalingstidslinje, emptyMap())
+        val dekkesAvArbeidsgiverperioden = vedtaksperiode.behandlinger.ventedager().dagerUtenNavAnsvar.periode?.inneholder(vedtaksperiode.periode) != false
+
+        if (dekkesAvArbeidsgiverperioden) {
+            vedtaksperiode.subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(vedtaksperiode.periode, vedtaksperiode.sykdomstidslinje.subsumsjonsformat()))
+        }
+        eventBus.avsluttetUtenVedtak(
+            EventSubscription.AvsluttetUtenVedtakEvent(
+                yrkesaktivitetssporing = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype,
+                vedtaksperiodeId = vedtaksperiode.id,
+                behandlingId = sisteBehandling.id,
+                periode = vedtaksperiode.periode,
+                hendelseIder = vedtaksperiode.behandlinger.hendelseIder().ider(),
+                skjæringstidspunkt = sisteBehandling.skjæringstidspunkt,
+                avsluttetTidspunkt = sisteBehandling.avsluttet!!
+            )
+        )
+        vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

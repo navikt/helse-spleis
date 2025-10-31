@@ -18,7 +18,6 @@ import no.nav.helse.etterlevelse.`§ 8-12 ledd 1 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-12 ledd 2`
 import no.nav.helse.etterlevelse.`§ 8-13 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-13 ledd 2`
-import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav a`
 import no.nav.helse.etterlevelse.`§ 8-29`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 1 punktum 2`
@@ -2245,32 +2244,6 @@ internal class Vedtaksperiode private constructor(
         )
 
         eventBus.vedtaksperiodeEndret(event)
-    }
-
-    override fun avsluttetUtenVedtak(
-        eventBus: EventBus,
-        aktivitetslogg: IAktivitetslogg,
-        behandlingId: UUID,
-        tidsstempel: LocalDateTime,
-        periode: Periode,
-        dekkesAvArbeidsgiverperioden: Boolean,
-        dokumentsporing: Set<UUID>
-    ) {
-        if (dekkesAvArbeidsgiverperioden) {
-            subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(periode, sykdomstidslinje.subsumsjonsformat()))
-        }
-        eventBus.avsluttetUtenVedtak(
-            EventSubscription.AvsluttetUtenVedtakEvent(
-                yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
-                vedtaksperiodeId = id,
-                behandlingId = behandlingId,
-                periode = periode,
-                hendelseIder = eksterneIderSet,
-                skjæringstidspunkt = skjæringstidspunkt,
-                avsluttetTidspunkt = tidsstempel
-            )
-        )
-        person.gjenopptaBehandling(aktivitetslogg)
     }
 
     override fun vedtakAnnullert(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, behandlingId: UUID) {

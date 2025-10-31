@@ -302,12 +302,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
     }
 
-    fun avsluttUtenVedtak(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
+    fun avsluttUtenVedtak(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>): Behandling {
         check(behandlinger.last().utbetaling() == null) {
             "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. "
         }
-        this.behandlinger.last().avsluttUtenVedtak(eventBus, yrkesaktivitet, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
-        bekreftAvsluttetBehandling(yrkesaktivitet)
+        return this.behandlinger.last().also {
+            it.avsluttUtenVedtak(eventBus, yrkesaktivitet, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
+            bekreftAvsluttetBehandling(yrkesaktivitet)
+        }
     }
 
     internal fun sykmeldingsperiode() = this.behandlinger.first().sykmeldingsperiode()
@@ -497,10 +499,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         private var tilstand: Tilstand,
         private val endringer: MutableList<Endring>,
         private var vedtakFattet: LocalDateTime?,
-        private var avsluttet: LocalDateTime?,
+        avsluttet: LocalDateTime?,
         private val kilde: Behandlingkilde,
         observatører: List<BehandlingObserver>
     ) {
+        var avsluttet: LocalDateTime? = avsluttet
+            private set
         private val observatører = observatører.toMutableList()
         private val gjeldende get() = endringer.last()
         private val periode: Periode get() = gjeldende.periode
@@ -747,7 +751,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val beregnetBehandling: (uberegnetTilstand: Tilstand) -> Nothing? = { uberegnetTilstand ->
                 gjeldende.forkastUtbetaling(with (yrkesaktivitet) {  eventBus.utbetalingEventBus }, aktivitetslogg)
                 nyEndring(endringMedNyFakta)
-                tilstand(eventBus, uberegnetTilstand, aktivitetslogg)
+                tilstand(uberegnetTilstand)
                 null
             }
 
@@ -1197,10 +1201,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return tilstand.forkastVedtaksperiode(this, eventBus, yrkesaktivitet, behandlingkilde, aktivitetslogg)
         }
 
-        private fun tilstand(eventBus: EventBus, nyTilstand: Tilstand, aktivitetslogg: IAktivitetslogg) {
+        private fun tilstand(nyTilstand: Tilstand) {
             tilstand.leaving(this)
             tilstand = nyTilstand
-            tilstand.entering(this, eventBus, aktivitetslogg)
+            tilstand.entering(this)
         }
 
         fun forkastBeregning(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
@@ -1379,12 +1383,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             observatører.forEach { it.behandlingLukket(eventBus, id) }
         }
 
-        private fun avsluttetUtenVedtak(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-            check(observatører.isNotEmpty()) { "behandlingen har ingen registrert observatør" }
-            val dekkesAvArbeidsgiverperioden = dagerUtenNavAnsvar.periode?.inneholder(periode) != false
-            observatører.forEach { it.avsluttetUtenVedtak(eventBus, aktivitetslogg, id, avsluttet!!, periode, dekkesAvArbeidsgiverperioden, dokumentsporing.ider()) }
-        }
-
         private fun emitNyBehandlingOpprettet(eventBus: EventBus, type: EventSubscription.BehandlingOpprettetEvent.Type) {
             check(observatører.isNotEmpty()) { "behandlingen har ingen registrert observatør" }
             observatører.forEach { it.nyBehandling(eventBus, id, periode, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type, endringer.dokumentsporing.søknadIder()) }
@@ -1535,11 +1533,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Forventer ikke å opprette behandling i tilstand ${this.javaClass.simpleName}")
             }
 
-            fun entering(behandling: Behandling, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {}
+            fun entering(behandling: Behandling) {}
             fun leaving(behandling: Behandling) {}
 
             fun forkastVedtaksperiode(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
-                behandling.tilstand(eventBus, TilInfotrygd, aktivitetslogg)
+                behandling.tilstand(TilInfotrygd)
                 return null
             }
 
@@ -1577,10 +1575,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Kan ikke avslutte uten vedtak for behandling i $this")
             }
 
-            fun avsluttMedVedtak(behandling: Behandling, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-                error("Kan ikke avslutte behandling i $this")
-            }
-
             fun utenBeregning(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
                 error("Støtter ikke å forkaste utbetaling utbetaling i $this")
             }
@@ -1613,7 +1607,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             data object Uberegnet : Tilstand {
                 override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Søknad)
-                override fun entering(behandling: Behandling, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+                override fun entering(behandling: Behandling) {
                     check(behandling.utbetaling() == null) { "skal ikke ha utbetaling og være uberegnet samtidig" }
                 }
 
@@ -1636,13 +1630,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregning: BeregnetBehandling
                 ) {
                     behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
-                    behandling.tilstand(eventBus, Beregnet, aktivitetslogg)
+                    behandling.tilstand(Beregnet)
                 }
 
                 override fun avsluttUtenVedtak(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
                     behandling.behandlingLukket(eventBus, yrkesaktivitet)
                     behandling.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning)
-                    behandling.tilstand(eventBus, AvsluttetUtenVedtak, aktivitetslogg)
+                    behandling.tilstand(AvsluttetUtenVedtak)
                 }
             }
 
@@ -1655,7 +1649,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregning: BeregnetBehandling,
                 ) {
                     behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
-                    behandling.tilstand(eventBus, BeregnetOmgjøring, aktivitetslogg)
+                    behandling.tilstand(BeregnetOmgjøring)
                 }
             }
 
@@ -1669,7 +1663,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregning: BeregnetBehandling
                 ) {
                     behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
-                    behandling.tilstand(eventBus, BeregnetRevurdering, aktivitetslogg)
+                    behandling.tilstand(BeregnetRevurdering)
                 }
 
                 override fun håndterAnnullering(
@@ -1680,13 +1674,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     aktivitetslogg: IAktivitetslogg
                 ): Behandling? {
                     behandling.nyEndring(behandling.endringer.last().kopierUtenBeregning())
-                    behandling.tilstand(eventBus, UberegnetAnnullering, aktivitetslogg)
+                    behandling.tilstand(UberegnetAnnullering)
                     return null
                 }
             }
 
             data object Beregnet : Tilstand {
-                override fun entering(behandling: Behandling, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+                override fun entering(behandling: Behandling) {
                     checkNotNull(behandling.gjeldende.grunnlagsdata)
                 }
 
@@ -1708,7 +1702,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 override fun utenBeregning(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
                     behandling.utenBeregning(utbetalingEventBus, aktivitetslogg)
-                    behandling.tilstand(eventBus, Uberegnet, aktivitetslogg)
+                    behandling.tilstand(Uberegnet)
                 }
 
                 override fun vedtakAvvist(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
@@ -1719,14 +1713,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.gjeldende.utbetaling!!.godkjent(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg, utbetalingsavgjørelse.vurdering)
                     behandling.vedtakFattet = utbetalingsavgjørelse.avgjørelsestidspunkt
                     behandling.behandlingLukket(eventBus, yrkesaktivitet)
-                    behandling.tilstand(eventBus, if (behandling.gjeldende.utbetaling?.harOppdragMedUtbetalinger() == true) VedtakFattet else VedtakIverksatt, aktivitetslogg)
+                    behandling.tilstand(if (behandling.gjeldende.utbetaling?.harOppdragMedUtbetalinger() == true) VedtakFattet else VedtakIverksatt)
                 }
             }
 
             data object BeregnetOmgjøring : Tilstand by (Beregnet) {
                 override fun utenBeregning(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
                     behandling.utenBeregning(utbetalingEventBus, aktivitetslogg)
-                    behandling.tilstand(eventBus, UberegnetOmgjøring, aktivitetslogg)
+                    behandling.tilstand(UberegnetOmgjøring)
                 }
 
                 override fun forkastVedtaksperiode(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
@@ -1743,12 +1737,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 override fun utenBeregning(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
                     behandling.utenBeregning(utbetalingEventBus, aktivitetslogg)
-                    behandling.tilstand(eventBus, UberegnetRevurdering, aktivitetslogg)
+                    behandling.tilstand(UberegnetRevurdering)
                 }
 
                 override fun vedtakAvvist(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
                     behandling.behandlingLukket(eventBus, yrkesaktivitet)
-                    behandling.tilstand(eventBus, RevurdertVedtakAvvist, aktivitetslogg)
+                    behandling.tilstand(RevurdertVedtakAvvist)
                 }
 
                 override fun håndterAnnullering(
@@ -1760,7 +1754,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 ): Behandling? {
                     behandling.gjeldende.forkastUtbetaling(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
                     behandling.nyEndring(behandling.endringer.last().kopierUtenBeregning())
-                    behandling.tilstand(eventBus, UberegnetAnnullering, aktivitetslogg)
+                    behandling.tilstand(UberegnetAnnullering)
                     return null
                 }
             }
@@ -1794,7 +1788,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object VedtakFattet : Tilstand {
-                override fun entering(behandling: Behandling, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+                override fun entering(behandling: Behandling) {
                     checkNotNull(behandling.gjeldende.utbetaling)
                     checkNotNull(behandling.gjeldende.grunnlagsdata)
                 }
@@ -1816,7 +1810,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     if (!utbetaling.gjelderFor(hendelse)) return
                     utbetaling.håndterUtbetalingmodulHendelse(utbetalingEventBus, hendelse, aktivitetslogg)
                     if (!utbetaling.erAvsluttet()) return
-                    behandling.tilstand(eventBus, VedtakIverksatt, aktivitetslogg)
+                    behandling.tilstand(VedtakIverksatt)
                 }
 
                 override fun utenBeregning(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {}
@@ -1839,10 +1833,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object AvsluttetUtenVedtak : Tilstand {
-                override fun entering(behandling: Behandling, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+                override fun entering(behandling: Behandling) {
                     behandling.vedtakFattet = null // det fattes ikke vedtak i AUU
                     behandling.avsluttet = LocalDateTime.now()
-                    behandling.avsluttetUtenVedtak(eventBus, aktivitetslogg)
                 }
 
                 override fun forkastVedtaksperiode(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling {
@@ -1874,7 +1867,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object VedtakIverksatt : Tilstand {
-                override fun entering(behandling: Behandling, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+                override fun entering(behandling: Behandling) {
                     behandling.avsluttet = LocalDateTime.now()
                 }
 
@@ -1913,7 +1906,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object AnnullertPeriode : Tilstand {
-                override fun entering(behandling: Behandling, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+                override fun entering(behandling: Behandling) {
                     behandling.avsluttet = LocalDateTime.now()
                 }
 
@@ -1934,8 +1927,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                     annullering.godkjent(utbetalingEventBus, aktivitetslogg, vurdering)
 
-                    if (annullering.erAvsluttet()) behandling.tilstand(eventBus, AnnullertPeriode, aktivitetslogg)
-                    else behandling.tilstand(eventBus, OverførtAnnullering, aktivitetslogg)
+                    if (annullering.erAvsluttet()) behandling.tilstand(AnnullertPeriode)
+                    else behandling.tilstand(OverførtAnnullering)
                 }
             }
 
@@ -1945,13 +1938,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     if (!utbetaling.gjelderFor(hendelse)) return
                     utbetaling.håndterUtbetalingmodulHendelse(utbetalingEventBus, hendelse, aktivitetslogg)
                     if (!utbetaling.erAvsluttet()) return
-                    behandling.tilstand(eventBus, AnnullertPeriode, aktivitetslogg)
+                    behandling.tilstand(AnnullertPeriode)
                 }
             }
 
             data object TilInfotrygd : Tilstand {
                 override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Omgjøring)
-                override fun entering(behandling: Behandling, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+                override fun entering(behandling: Behandling) {
                     behandling.avsluttet = LocalDateTime.now()
                 }
 

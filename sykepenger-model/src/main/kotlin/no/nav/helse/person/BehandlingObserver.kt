@@ -9,16 +9,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal interface BehandlingObserver {
 
-    fun avsluttetUtenVedtak(
-        eventBus: EventBus,
-        aktivitetslogg: IAktivitetslogg,
-        behandlingId: UUID,
-        tidsstempel: LocalDateTime,
-        periode: Periode,
-        dekkesAvArbeidsgiverperioden: Boolean,
-        dokumentsporing: Set<UUID>
-    )
-
     fun vedtakAnnullert(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, behandlingId: UUID)
     fun behandlingLukket(eventBus: EventBus, behandlingId: UUID)
     fun behandlingForkastet(eventBus: EventBus, behandlingId: UUID, automatiskBehandling: Boolean)
