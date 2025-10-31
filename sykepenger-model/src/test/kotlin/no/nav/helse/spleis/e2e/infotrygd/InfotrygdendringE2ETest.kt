@@ -41,13 +41,13 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         håndterSøknad(2.januar(2025) til 15.januar(2025))
         håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(16.desember(2024) til 19.desember(2024), 2.januar(2025) til 13.januar(2025)), beregnetInntekt = INNTEKT, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@InfotrygdendringE2ETest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@InfotrygdendringE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertEquals(2.januar(2025), inspektør.vedtaksperioder(2.vedtaksperiode).skjæringstidspunkt)
-        this@InfotrygdendringE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(
                 a1, 20.november(2024), 30.november(2024)
         ))
@@ -61,7 +61,7 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 16.januar)
         håndterInfotrygdendring()
         assertTrue(personlogg.harBehov(Sykepengehistorikk))
-        this@InfotrygdendringE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(
                 a1, 1.januar(2016), 31.januar(2016)
         ))
@@ -76,7 +76,7 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 20.januar)
         nyPeriode(21.januar til 31.januar)
         håndterInfotrygdendring()
-        val meldingsreferanseId = this@InfotrygdendringE2ETest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+        val meldingsreferanseId = håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(
                 a1, 17.januar, 31.januar
         ))

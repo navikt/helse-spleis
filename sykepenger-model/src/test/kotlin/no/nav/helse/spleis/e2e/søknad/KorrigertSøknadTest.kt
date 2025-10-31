@@ -73,15 +73,15 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         forlengVedtak(mars)
 
         håndterSøknad(10.april til 30.april)
-        this@KorrigertSøknadTest.håndterPåminnelse(
+        håndterPåminnelse(
             4.vedtaksperiode,
             AVVENTER_INNTEKTSMELDING,
             tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
             nå = 10.februar(2025).atStartOfDay()
         )
-        this@KorrigertSøknadTest.håndterSykepengegrunnlagForArbeidsgiver(10.april)
+        håndterSykepengegrunnlagForArbeidsgiver(10.april)
         håndterVilkårsgrunnlag(4.vedtaksperiode)
-        this@KorrigertSøknadTest.håndterYtelser(4.vedtaksperiode)
+        håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
         assertVarsel(Varselkode.RV_IV_10, 4.vedtaksperiode.filter())
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -99,7 +99,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(10.april til 30.april)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.april)
         håndterVilkårsgrunnlag(4.vedtaksperiode)
-        this@KorrigertSøknadTest.håndterYtelser(4.vedtaksperiode)
+        håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
 
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -112,7 +112,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
     fun `korrigerer med arbeid gjenopptatt etter utbetalt`() {
         nyttVedtak(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(1.januar, 31.januar))
-        this@KorrigertSøknadTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
@@ -198,7 +198,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent), korrigerer = søknadId, opprinneligSendt = 1.februar)
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@KorrigertSøknadTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         assertEquals(50, inspektør.sykdomstidslinje.inspektør.grader[17.januar])
         assertEquals(50, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.grad(17.januar))
     }
@@ -233,7 +233,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@KorrigertSøknadTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
@@ -252,11 +252,11 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        this@KorrigertSøknadTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        this@KorrigertSøknadTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@KorrigertSøknadTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -270,7 +270,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@KorrigertSøknadTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
@@ -282,9 +282,9 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_INNTEKTSMELDING)
 
-        this@KorrigertSøknadTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@KorrigertSøknadTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
@@ -471,7 +471,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@KorrigertSøknadTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), korrigerer = søknadId, opprinneligSendt = 1.februar)
 
         inspektør.sykdomstidslinje.inspektør.also {
@@ -498,7 +498,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@KorrigertSøknadTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), korrigerer = søknadId, opprinneligSendt = 1.februar)
 

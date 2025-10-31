@@ -87,9 +87,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
 
         håndterSøknad(februar, orgnummer = a2)
@@ -98,9 +98,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
         val refusjonFør = inspektør(a2).refusjon(1.vedtaksperiode)
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
@@ -111,11 +111,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         observatør.vedtaksperiodeVenter.clear()
         nullstillTilstandsendringer()
 
-        this@FlereArbeidsgivereUlikFomTest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Arbeidsdag)), orgnummer = a2)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Arbeidsdag)), orgnummer = a2)
         assertEquals(emptyList<VedtaksperiodeVenterEvent>(), observatør.vedtaksperiodeVenter)
-        this@FlereArbeidsgivereUlikFomTest.håndterSykepengegrunnlagForArbeidsgiver(skjæringstidspunkt = 2.februar, orgnummer = a2)
+        håndterSykepengegrunnlagForArbeidsgiver(skjæringstidspunkt = 2.februar, orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         assertEquals(refusjonFør, inspektør(a2).refusjon(1.vedtaksperiode))
 
@@ -154,9 +154,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
         assertEquals(1, inspektør(a1).utbetalinger(1.vedtaksperiode).size)
         assertTrue(inspektør(a2).utbetalinger(1.vedtaksperiode).isEmpty())
@@ -181,11 +181,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(orgnummer = a2)
+        håndterYtelser(orgnummer = a2)
         assertEquals(1, inspektør(a1).utbetalinger(1.vedtaksperiode).size)
         val ag2Utbetalinger = inspektør(a2).utbetalinger(1.vedtaksperiode)
         assertEquals(1, ag2Utbetalinger.size)
@@ -211,14 +211,14 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Feriedag)), orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Feriedag)), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(orgnummer = a2)
+        håndterYtelser(orgnummer = a2)
         assertEquals(2, inspektør(a1).utbetalinger(1.vedtaksperiode).size)
         val ag2Utbetalinger = inspektør(a2).utbetalinger(1.vedtaksperiode)
         assertEquals(2, ag2Utbetalinger.size)
@@ -255,12 +255,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         assertInntektsgrunnlag(28.februar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT)
@@ -291,12 +291,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         assertInntektsgrunnlag(1.mars, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, 30000.månedlig)
@@ -331,12 +331,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         assertInntektsgrunnlag(28.februar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT)
@@ -372,9 +372,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.single()
@@ -382,10 +382,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(31.mars, a1Linje.tom)
         assertEquals(462, a1Linje.beløp)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         val a2Linje = inspektør(a2).sisteUtbetaling().arbeidsgiverOppdrag.single()
@@ -422,9 +422,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         val arbeidsgiverOppdrag = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag
@@ -434,10 +434,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(31.mars, a1Linje1.tom)
         assertEquals(997, a1Linje1.beløp)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         val a2Linje = inspektør(a2).sisteUtbetaling().arbeidsgiverOppdrag.single()
@@ -474,15 +474,15 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.single()
@@ -521,24 +521,24 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a1,
             skatteinntekter = listOf(a1 to INNTEKT / 10, a2 to INNTEKT)
         )
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
         assertEquals(2, inspektør(a1).antallUtbetalinger)
         assertEquals(2, inspektør(a2).antallUtbetalinger)
@@ -558,15 +558,15 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         nullstillTilstandsendringer()
 
         håndterSøknad(Sykdom(5.januar, lørdag den 20.januar, 100.prosent), orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         nullstillTilstandsendringer()
@@ -580,7 +580,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         // Om f.eks. saksbehandler overstyrer perioden som står i AvventerGodkjenningRevurdering blir den sittende fast i AvventerRevurdering
         // Ettersom vi nå må ha inntektsmelding fra a2 for refusjonsopplysninger 22.januar
-        this@FlereArbeidsgivereUlikFomTest.håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1)))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1)))
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.venterPå
@@ -617,15 +617,15 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.single()
@@ -680,24 +680,24 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
 
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, a3, a4, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a3)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalt(orgnummer = a3)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a4)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a4)
         håndterSimulering(1.vedtaksperiode, orgnummer = a4)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
         håndterUtbetalt(orgnummer = a4)
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.single()
@@ -762,24 +762,24 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, a3, a4, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a3)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalt(orgnummer = a3)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a4)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a4)
         håndterSimulering(1.vedtaksperiode, orgnummer = a4)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
         håndterUtbetalt(orgnummer = a4)
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.single()
@@ -842,24 +842,24 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, a3, a4, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a3)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalt(orgnummer = a3)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a4)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a4)
         håndterSimulering(1.vedtaksperiode, orgnummer = a4)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
         håndterUtbetalt(orgnummer = a4)
 
         val a1Linjer = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag
@@ -926,24 +926,24 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, a3, a4, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a3)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalt(orgnummer = a3)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a4)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a4)
         håndterSimulering(1.vedtaksperiode, orgnummer = a4)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
         håndterUtbetalt(orgnummer = a4)
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.single()
@@ -989,7 +989,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertInntektsgrunnlag(1.mars, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, 10000.månedlig)
             assertInntektsgrunnlag(a2, 19000.månedlig)
@@ -1050,9 +1050,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.last()
@@ -1060,10 +1060,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(31.mars, a1Linje.tom)
         assertEquals(997, a1Linje.beløp)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         val a2Linje = inspektør(a2).sisteUtbetaling().arbeidsgiverOppdrag.last()
@@ -1099,9 +1099,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).sisteUtbetaling().arbeidsgiverOppdrag.last()
@@ -1109,10 +1109,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(31.mars, a1Linje.tom)
         assertEquals(499, a1Linje.beløp)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         val a2Linje = inspektør(a2).sisteUtbetaling().arbeidsgiverOppdrag.last()
@@ -1198,14 +1198,14 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar), orgnummer = a1)
@@ -1225,12 +1225,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2, orgnummer = a1)
@@ -1269,9 +1269,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
 
         forlengVedtak(februar, orgnummer = a1)
@@ -1295,14 +1295,14 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
 
         nullstillTilstandsendringer()
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET, orgnummer = a1)
@@ -1337,9 +1337,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
 
         forlengVedtak(februar, orgnummer = a1)
@@ -1363,16 +1363,16 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
 
         nullstillTilstandsendringer()
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
@@ -1404,7 +1404,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertInntektsgrunnlag(20.januar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
@@ -1438,7 +1438,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertInntektsgrunnlag(31.januar, forventetAntallArbeidsgivere = 3) {
             assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
@@ -1473,7 +1473,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
 
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        this@FlereArbeidsgivereUlikFomTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         val utbetalingstidslinje = inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode)
 

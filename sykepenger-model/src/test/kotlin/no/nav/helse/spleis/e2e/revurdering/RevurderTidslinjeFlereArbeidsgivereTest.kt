@@ -69,7 +69,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             orgnummer = a2
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, a1, a2, orgnummer = a2)
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(10.januar, 16.januar), orgnummer = a1)
@@ -78,7 +78,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar), orgnummer = a1)
         håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), orgnummer = a1)
 
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
 
         håndterInntektsmelding(
@@ -103,21 +103,21 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         forlengVedtak(februar, a2, a1)
         nullstillTilstandsendringer()
 
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = a2)
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a2))
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterYtelser(2.vedtaksperiode, orgnummer = a2)
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
 
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         inspektør(a2) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
@@ -139,14 +139,14 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
     @Test
     fun `revurdere en AG når en annen AG er til godkjenning`() {
         tilGodkjenning(januar, a1, a2)
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         nullstillTilstandsendringer()
 
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a1)
+        håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a1)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -158,8 +158,8 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         forlengVedtak(februar, a2, a1)
         nullstillTilstandsendringer()
 
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = a1)
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a1))
         inspektør(a2) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
@@ -188,16 +188,16 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         assertPeriode(17.januar til 31.januar, a1, 1080.daglig)
         assertPeriode(17.januar til 31.januar, a2, 1080.daglig)
 
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterOverstyrTidslinje((17.januar til 21.januar).map { ManuellOverskrivingDag(it, Feriedag) }, orgnummer = a1)
+        håndterOverstyrTidslinje((17.januar til 21.januar).map { ManuellOverskrivingDag(it, Feriedag) }, orgnummer = a1)
 
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        this@RevurderTidslinjeFlereArbeidsgivereTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
 
         assertPeriode(17.januar til 21.januar, a1, INGEN)
         assertPeriode(22.januar til 31.januar, a1, 1080.daglig)

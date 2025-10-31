@@ -30,7 +30,7 @@ internal class InfotrygdhistorikkEndretTest : AbstractEndToEndTest() {
     @Test
     fun `infotrygdhistorikken var tom`() {
         periodeTilGodkjenning()
-        this@InfotrygdhistorikkEndretTest.håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
@@ -39,32 +39,32 @@ internal class InfotrygdhistorikkEndretTest : AbstractEndToEndTest() {
         periodeTilGodkjenning()
         håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai))
         håndterSøknad(Sykdom(fom = 1.mai, tom = 31.mai, 100.prosent))
-        this@InfotrygdhistorikkEndretTest.håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     @Test
     fun `infotrygdhistorikken blir tom`() {
         periodeTilGodkjenning(utbetalinger)
-        this@InfotrygdhistorikkEndretTest.håndterUtbetalingshistorikkEtterInfotrygdendring()
+        håndterUtbetalingshistorikkEtterInfotrygdendring()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     @Test
     fun `infotrygdhistorikken er uendret`() {
         periodeTilGodkjenning(utbetalinger)
-        this@InfotrygdhistorikkEndretTest.håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 
     private fun periodeTilGodkjenning(perioder: List<Infotrygdperiode> = emptyList()) {
-        this@InfotrygdhistorikkEndretTest.håndterUtbetalingshistorikkEtterInfotrygdendring(*perioder.toTypedArray())
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*perioder.toTypedArray())
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(mars)
         håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@InfotrygdhistorikkEndretTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@InfotrygdhistorikkEndretTest.håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 }

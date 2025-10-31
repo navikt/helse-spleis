@@ -68,7 +68,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         nyPeriode(1.januar til 2.januar, a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@OutOfOrderSøknadTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         assertIngenFunksjonellFeil(Varselkode.RV_SV_3)
@@ -84,17 +84,17 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@OutOfOrderSøknadTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@OutOfOrderSøknadTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-        this@OutOfOrderSøknadTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@OutOfOrderSøknadTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertUtbetalingsbeløp(
             1.vedtaksperiode,

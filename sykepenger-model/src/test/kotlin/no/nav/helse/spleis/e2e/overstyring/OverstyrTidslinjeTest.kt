@@ -82,7 +82,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `Overstyring av hele perioden til andre ytelser`() {
         tilGodkjenning(januar, a1)
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(januar.map { ManuellOverskrivingDag(it, Dagtype.Pleiepengerdag) })
+        håndterOverstyrTidslinje(januar.map { ManuellOverskrivingDag(it, Dagtype.Pleiepengerdag) })
         // Vet ikke om det er ønskelig, men er sånn det er da
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
     }
@@ -98,7 +98,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `Senere perioder inngår ikke i overstyring igangsatt selv om det er en endring fra saksbehandler`() {
         tilGodkjenning(januar, a1)
         håndterSøknad(mars)
-        this@OverstyrTidslinjeTest.håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)))
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)))
         val overstyringIgangsatt = observatør.overstyringIgangsatt.single()
         assertEquals(listOf(1.vedtaksperiode.id(a1)), overstyringIgangsatt.berørtePerioder.map { it.vedtaksperiodeId })
     }
@@ -112,7 +112,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             listOf(6.mars til 21.mars)
         )
         håndterVilkårsgrunnlag(3.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterInntektsmelding(
@@ -123,14 +123,14 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
 
         nullstillTilstandsendringer()
 
         assertEquals("UGG UUUUUGG UUUUUGR AAAAARR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje((20.februar til 24.februar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+        håndterOverstyrTidslinje((20.februar til 24.februar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
         assertEquals("UGG UUUUUGG UUUUUGR ASSSSHR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje((18.februar til 19.februar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+        håndterOverstyrTidslinje((18.februar til 19.februar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
         assertEquals("UGG UUUUUGG UUUUUGH SSSSSHR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -152,17 +152,17 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         nyPeriode(21.januar til 10.mars)
         assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(3.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(
+        håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag),
                 ManuellOverskrivingDag(2.januar, Dagtype.Arbeidsdag)
             )
         )
-        this@OverstyrTidslinjeTest.håndterYtelser(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -181,19 +181,19 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        this@OverstyrTidslinjeTest.håndterYtelser(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
 
-        this@OverstyrTidslinjeTest.håndterYtelser(4.vedtaksperiode)
+        håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterUtbetalingsgodkjenning(4.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(4.vedtaksperiode)
         håndterUtbetalt()
 
         assertVarsler(listOf(RV_IM_3), 3.vedtaksperiode.filter())
@@ -214,14 +214,14 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertVarsel(Varselkode.RV_IV_11, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
 
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(
+        håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(5.februar, Dagtype.Sykedag, 100),
                 ManuellOverskrivingDag(6.februar, Dagtype.Sykedag, 100),
             )
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[5.februar]::class)
@@ -233,11 +233,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `overstyre ferie til sykdom`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(
+        håndterOverstyrTidslinje(
             (17.januar til 31.januar).map { dagen -> ManuellOverskrivingDag(dagen, Dagtype.Sykedag, 100) }
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
@@ -248,9 +248,9 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `saksbehandler endrer dager nav overtar ansvar for`() {
         nyttVedtak(januar)
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje((1.januar til 16.januar).map { ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100) })
+        håndterOverstyrTidslinje((1.januar til 16.januar).map { ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100) })
         assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
     }
 
@@ -266,13 +266,13 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         )
         assertVarsler(listOf(RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
         nullstillTilstandsendringer()
 
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje((juli).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
-        this@OverstyrTidslinjeTest.håndterYtelser(2.vedtaksperiode)
+        håndterOverstyrTidslinje((juli).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
         assertEquals(listOf(1.august.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
@@ -300,7 +300,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     fun `vedtaksperiode strekker seg tilbake og endrer ikke skjæringstidspunktet`() {
         tilGodkjenning(10.januar til 31.januar, a1)
         nullstillTilstandsendringer()
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(
+        håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(9.januar, Dagtype.Arbeidsdag)
             ), orgnummer = a1
@@ -310,7 +310,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(Dag.Arbeidsdag::class, dagen::class)
         assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
 
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertEquals(9.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
@@ -323,7 +323,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel
         assertEquals(4, inspektør.sykdomshistorikk.elementer())
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(
+        håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(9.januar, Dagtype.Arbeidsdag)
             ), orgnummer = a1
@@ -333,7 +333,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(Dag.Arbeidsdag::class, dagen::class)
         assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
 
-        this@OverstyrTidslinjeTest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
@@ -348,15 +348,15 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         nyPeriode(10.januar til 31.januar, a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         nullstillTilstandsendringer()
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(
+        håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)
             ), orgnummer = a1
         )
-        this@OverstyrTidslinjeTest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         val dagen = inspektør.sykdomstidslinje[9.januar]
         assertEquals(Dag.Sykedag::class, dagen::class)
@@ -375,18 +375,18 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         nyPeriode(10.januar til 31.januar, a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         nullstillTilstandsendringer()
         assertEquals(4, inspektør.sykdomshistorikk.elementer())
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(
+        håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100),
                 ManuellOverskrivingDag(10.januar, Dagtype.Feriedag)
             ), orgnummer = a1
         )
         assertEquals(6, inspektør.sykdomshistorikk.elementer())
-        this@OverstyrTidslinjeTest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         assertSykdomstidslinjedag(9.januar, Dag.Sykedag::class, OverstyrTidslinje::class)
         assertSykdomstidslinjedag(10.januar, Dag.Feriedag::class, OverstyrTidslinje::class)
@@ -407,11 +407,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
+        håndterOverstyrTidslinje(listOf(manuellSykedag(2.januar), manuellArbeidsgiverdag(24.januar), manuellFeriedag(25.januar)))
         assertThrows<IllegalStateException> {
-            this@OverstyrTidslinjeTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         }
         assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
     }
@@ -425,13 +425,13 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(listOf(manuellSykedag(22.januar, 30)))
+        håndterOverstyrTidslinje(listOf(manuellSykedag(22.januar, 30)))
 
         assertNotEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(3, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.size)
@@ -449,13 +449,13 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(listOf(manuellSykedag(22.januar, 0)))
+        håndterOverstyrTidslinje(listOf(manuellSykedag(22.januar, 0)))
 
         assertNotEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
@@ -473,13 +473,13 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje(listOf(manuellFeriedag(22.januar), manuellPermisjonsdag(23.januar)))
+        håndterOverstyrTidslinje(listOf(manuellFeriedag(22.januar), manuellPermisjonsdag(23.januar)))
 
         assertNotEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(2, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.size)
@@ -495,10 +495,10 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(20.januar, 21.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyringSykedag(20.januar til 21.januar)
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
@@ -513,7 +513,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
@@ -521,12 +521,12 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         val førsteUtbetalingsdag = inspektør.utbetaling(0).arbeidsgiverOppdrag[0].fom
         assertEquals(1.januar, førsteUtbetalingsdag)
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje((1.januar til 16.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+        håndterOverstyrTidslinje((1.januar til 16.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
 
         assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
 
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         val førsteUtbetalingsdagEtterOverstyring = inspektør.utbetaling(1).arbeidsgiverOppdrag[0].fom
         assertEquals(17.januar, førsteUtbetalingsdagEtterOverstyring)
         assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
@@ -535,9 +535,9 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `overstyring av andre ytelser i halen`() {
         nyttVedtak(januar)
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje((20.januar til 31.januar).map { manuellForeldrepengedag(it) })
+        håndterOverstyrTidslinje((20.januar til 31.januar).map { manuellForeldrepengedag(it) })
         assertEquals("SSSSSHH SSSSSHH SSSSSYY YYYYYYY YYY", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør
@@ -553,26 +553,26 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertEquals("HH SSSSSHH SUUUUGG UAA", inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).toShortString())
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje((20..26).map { ManuellOverskrivingDag(it.februar, Dagtype.Arbeidsdag) })
-        this@OverstyrTidslinjeTest.håndterYtelser(2.vedtaksperiode)
+        håndterOverstyrTidslinje((20..26).map { ManuellOverskrivingDag(it.februar, Dagtype.Arbeidsdag) })
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertEquals("HH SSSSSHH SAAAARR AAA", inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).toShortString())
-        this@OverstyrTidslinjeTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
     }
 
     @Test
     fun `overstyring av andre ytelser i snuten`() {
         nyttVedtak(januar)
-        this@OverstyrTidslinjeTest.håndterOverstyrTidslinje((1.januar til 10.januar).map { manuellForeldrepengedag(it) })
+        håndterOverstyrTidslinje((1.januar til 10.januar).map { manuellForeldrepengedag(it) })
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_IV_7, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
-        this@OverstyrTidslinjeTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         val forventetUtbetaling =

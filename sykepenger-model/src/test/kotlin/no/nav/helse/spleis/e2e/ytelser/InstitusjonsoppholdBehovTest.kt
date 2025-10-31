@@ -39,9 +39,9 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@InstitusjonsoppholdBehovTest.håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = emptyList())
+        håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = emptyList())
         håndterSimulering(1.vedtaksperiode)
-        this@InstitusjonsoppholdBehovTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertTilstander(
@@ -65,7 +65,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@InstitusjonsoppholdBehovTest.håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(1.januar til 31.januar))
+        håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(1.januar til 31.januar))
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -85,7 +85,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@InstitusjonsoppholdBehovTest.håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(1.desember(2017) til 1.januar))
+        håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(1.desember(2017) til 1.januar))
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -105,7 +105,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@InstitusjonsoppholdBehovTest.håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(31.januar til 14.februar))
+        håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(31.januar til 14.februar))
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -125,7 +125,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@InstitusjonsoppholdBehovTest.håndterYtelser(
+        håndterYtelser(
             1.vedtaksperiode,
             institusjonsoppholdsperioder = listOf(
                 1.desember(2017) til 31.desember(2017),
@@ -133,7 +133,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
             )
         )
         håndterSimulering(1.vedtaksperiode)
-        this@InstitusjonsoppholdBehovTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertTilstander(
@@ -157,9 +157,9 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@InstitusjonsoppholdBehovTest.håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(1.februar til null))
+        håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(1.februar til null))
         håndterSimulering(1.vedtaksperiode)
-        this@InstitusjonsoppholdBehovTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertTilstander(
@@ -183,7 +183,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@InstitusjonsoppholdBehovTest.håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(31.januar til null))
+        håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(31.januar til null))
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -203,7 +203,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@InstitusjonsoppholdBehovTest.håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(31.desember(2017) til null))
+        håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(31.desember(2017) til null))
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,

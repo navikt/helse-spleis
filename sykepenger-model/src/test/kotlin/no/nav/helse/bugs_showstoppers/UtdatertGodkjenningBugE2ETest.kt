@@ -29,7 +29,7 @@ internal class UtdatertGodkjenningBugE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Håndterer løsning på godkjenningsbehov der utbetalingid på løsningen matcher med periodens gjeldende utbetaling`() {
         tilGodkjenning(januar, 100.prosent)
-        this@UtdatertGodkjenningBugE2ETest.håndterUtbetalingsgodkjenning()
+        håndterUtbetalingsgodkjenning()
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -73,8 +73,8 @@ internal class UtdatertGodkjenningBugE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Blir stående i TIL_UTBETALING ved påminnelse, dersom utbetalingen er in transit (ikke ubetalt)`() {
         tilGodkjenning(januar, 100.prosent)
-        this@UtdatertGodkjenningBugE2ETest.håndterUtbetalingsgodkjenning()
-        this@UtdatertGodkjenningBugE2ETest.håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
+        håndterUtbetalingsgodkjenning()
+        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
         assertTilstander(
             1.vedtaksperiode,
             START,

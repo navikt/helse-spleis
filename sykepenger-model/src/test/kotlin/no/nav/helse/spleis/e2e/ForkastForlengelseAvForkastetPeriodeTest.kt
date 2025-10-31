@@ -147,7 +147,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster også overlappende perioder som er uferdig`() {
         nyPeriode(januar)
-        this@ForkastForlengelseAvForkastetPeriodeTest.håndterAnmodningOmForkasting(1.vedtaksperiode)
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
 
         nyPeriode(mars)
         nyPeriode(1.februar til 31.mars)
@@ -159,7 +159,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster etterfølgende perioder som er uferdig`() {
         nyPeriode(januar)
-        this@ForkastForlengelseAvForkastetPeriodeTest.håndterAnmodningOmForkasting(1.vedtaksperiode)
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
 
         nyPeriode(mars)
         nyPeriode(april)
@@ -175,7 +175,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster ikke etterfølgende perioder som er avsluttet`() {
         nyPeriode(januar)
-        this@ForkastForlengelseAvForkastetPeriodeTest.håndterAnmodningOmForkasting(1.vedtaksperiode)
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
 
         nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         forlengVedtak(april)
@@ -192,7 +192,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster alle forlengelser`() {
         nyPeriode(januar)
-        this@ForkastForlengelseAvForkastetPeriodeTest.håndterAnmodningOmForkasting(1.vedtaksperiode)
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
 
         nyPeriode(juni)
         nyPeriode(april)
@@ -212,7 +212,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster forlengede vedtak på tvers av arbeidsgivere - a2 overlapper med alle perioder til a1`() {
         nyPeriode(januar, a1)
-        this@ForkastForlengelseAvForkastetPeriodeTest.håndterAnmodningOmForkasting(1.vedtaksperiode)
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
 
         nyPeriode(15.januar til 15.mars, a2)
         nyPeriode(mars, a1)
@@ -227,7 +227,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster forlengede og overlappende vedtak på tvers av arbeidsgivere - a2 overlapper med en periode til a1`() {
         nyPeriode(januar, a1)
-        this@ForkastForlengelseAvForkastetPeriodeTest.håndterAnmodningOmForkasting(1.vedtaksperiode)
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
 
         nyPeriode(mars, a1)
         nyPeriode(10.februar til 20.februar, a2)
@@ -296,7 +296,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `søknad som har mindre enn 20 dagers gap til en forkastet periode og overlapper med en annen forkastet periode skal kun få én funksjonell feil`() {
         nyPeriode(18.januar til 31.januar)
-        this@ForkastForlengelseAvForkastetPeriodeTest.håndterAnmodningOmForkasting(1.vedtaksperiode)
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
         nyPeriode(1.januar til 7.januar)
 
         nyPeriode(22.januar til 31.januar)
@@ -320,6 +320,6 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
     private fun Periode.forkast() {
         håndterSøknad(this)
-        this@ForkastForlengelseAvForkastetPeriodeTest.håndterAnmodningOmForkasting(1.vedtaksperiode)
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
     }
 }

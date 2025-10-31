@@ -67,7 +67,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a1))
-        this@FlereUkjenteArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter(orgnummer = a2))
@@ -152,7 +152,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
-        this@FlereUkjenteArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
 
@@ -168,7 +168,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter(a2))
 
-        this@FlereUkjenteArbeidsgivereTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter(a2))
@@ -196,9 +196,9 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
-        this@FlereUkjenteArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereUkjenteArbeidsgivereTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
         nullstillTilstandsendringer()
 
@@ -227,8 +227,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             ), inspektør(a2).hendelser(1.vedtaksperiode)
         )
 
-        this@FlereUkjenteArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        this@FlereUkjenteArbeidsgivereTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
         assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter(a2))
         assertTilstander(
@@ -263,9 +263,9 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
-        this@FlereUkjenteArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereUkjenteArbeidsgivereTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
         nullstillTilstandsendringer()
 
@@ -289,8 +289,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             ), inspektør(a2).hendelser(1.vedtaksperiode)
         )
         assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter(a2))
-        this@FlereUkjenteArbeidsgivereTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        this@FlereUkjenteArbeidsgivereTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,

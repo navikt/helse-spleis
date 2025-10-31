@@ -78,7 +78,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         assertDag<Sykedag, NavDag>(19.januar, 1431.daglig, INGEN, INNTEKT)
         håndterOverstyrInntekt(overstyrtInntekt, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         assertDag<Sykedag, NavDag>(
             dato = 17.januar,
             arbeidsgiverbeløp = 1431.daglig,
@@ -87,7 +87,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         )
         assertDiff(2200)
         håndterSimulering(1.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
     }
@@ -98,7 +98,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
@@ -109,7 +109,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             assertEquals(2, utbetalinger.size)
             assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.last().inspektør.tilstand)
         }
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertDiff(-3047)
@@ -138,14 +138,14 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertDiff(-5588)
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertDiff(-3047)
@@ -164,7 +164,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
@@ -190,9 +190,9 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
@@ -223,13 +223,13 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         håndterOverstyrInntekt(46000.årlig, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertVarsler(listOf(RV_SV_1, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
@@ -248,7 +248,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         val korrelasjonsIdPåUtbetaling1 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
 
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
 
         assertTilstander(
             1.vedtaksperiode,
@@ -273,11 +273,11 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertDiff(506)
 
         håndterSimulering(1.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         nullstillTilstandsendringer()
 
-        this@RevurderingInntektV2E2ETest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
 
@@ -299,9 +299,9 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
@@ -335,7 +335,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             }
         }
 
-        this@RevurderingInntektV2E2ETest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertEquals(4, inspektør.antallUtbetalinger)
 
@@ -356,7 +356,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar, 100.prosent)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
@@ -381,8 +381,8 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar, 100.prosent, beregnetInntekt = 5000.månedlig)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 3000.månedlig)))
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 3000.månedlig)))
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
@@ -402,11 +402,11 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertVarsel(RV_SV_1, AktivitetsloggFilter.person())
         assertFalse(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.harUtbetalingsdager())
-        this@RevurderingInntektV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         håndterOverstyrInntekt(5000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
 
         var opprinneligFagsystemId: String?
         inspektør.utbetaling(0).arbeidsgiverOppdrag.apply {
@@ -456,17 +456,17 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             listOf(Periode(1.januar, 16.januar))
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, inntekt = 30000.månedlig)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         håndterSimulering(2.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
@@ -492,23 +492,23 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        this@RevurderingInntektV2E2ETest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         nullstillTilstandsendringer()
 
         håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, inntekt = 30000.månedlig)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        this@RevurderingInntektV2E2ETest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@RevurderingInntektV2E2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
@@ -545,7 +545,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             )
         )
         håndterOverstyrInntekt(inntekt = INNTEKT, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertDiff(0)
         assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())
@@ -569,7 +569,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             )
         )
         håndterOverstyrInntekt(inntekt = INNTEKT, skjæringstidspunkt = 1.januar)
-        this@RevurderingInntektV2E2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertDiff(0)
         assertTrue(inspektør.utbetaling(1).personOppdrag.harUtbetalinger())

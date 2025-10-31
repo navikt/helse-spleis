@@ -27,9 +27,9 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar)
         forlengVedtak(mars)
         forlengPeriode(april)
-        this@VedtaksperiodeForkastetE2ETest.håndterYtelser(4.vedtaksperiode)
+        håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
-        this@VedtaksperiodeForkastetE2ETest.håndterUtbetalingsgodkjenning(4.vedtaksperiode, false) // <- TIL_INFOTRYGD
+        håndterUtbetalingsgodkjenning(4.vedtaksperiode, false) // <- TIL_INFOTRYGD
         assertEquals(1, observatør.forkastedePerioder())
         assertEquals(AVVENTER_GODKJENNING, observatør.forkastet(4.vedtaksperiode.id(a1)).gjeldendeTilstand)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -45,9 +45,9 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         håndterSøknad(16.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(3.vedtaksperiode)
-        this@VedtaksperiodeForkastetE2ETest.håndterYtelser(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
-        this@VedtaksperiodeForkastetE2ETest.håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
@@ -90,7 +90,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse forkastet periode`() {
         tilGodkjenning(januar, a1)
-        this@VedtaksperiodeForkastetE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
@@ -103,7 +103,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse forkastet periode over helg`() {
         tilGodkjenning(1.januar til 26.januar, a1)
-        this@VedtaksperiodeForkastetE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 28.februar))
@@ -126,7 +126,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer arbeidsgiveropplysninger ved kort gap til forkastet periode`() {
         tilGodkjenning(januar, a1)
-        this@VedtaksperiodeForkastetE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
@@ -256,7 +256,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar)
         )
         nyPeriode(januar)
-        this@VedtaksperiodeForkastetE2ETest.håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
+        håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         assertFalse(observatør.forkastet(1.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
         assertEquals(emptyList<Periode>(), observatør.forkastet(1.vedtaksperiode.id(a1)).sykmeldingsperioder)
@@ -265,7 +265,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger fra periode med utbetaling som mottar overlappende søknad`() {
         nyPeriode(januar)
-        this@VedtaksperiodeForkastetE2ETest.håndterAnmodningOmForkasting(1.vedtaksperiode)
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         nyPeriode(31.januar til 31.januar)
@@ -277,7 +277,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     fun `Sender ikke med senere sykmeldingsperioder enn vedtaksperioden som forkastes`() {
         håndterSøknad(januar, sendTilGosys = true)
         nyPeriode(februar)
-        this@VedtaksperiodeForkastetE2ETest.håndterAnmodningOmForkasting(1.vedtaksperiode)
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
         assertEquals(listOf(januar), observatør.forkastet(1.vedtaksperiode.id(a1)).sykmeldingsperioder)
         assertTrue(observatør.forkastet(1.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(a1)).trengerArbeidsgiveropplysninger)

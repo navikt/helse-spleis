@@ -50,7 +50,7 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 3.vedtaksperiode
         )
         håndterVilkårsgrunnlag(3.vedtaksperiode)
-        this@ManglendeVilkårsgrunnlagTest.håndterYtelser(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)

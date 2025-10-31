@@ -121,9 +121,9 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT * 1.1
         )
-        this@DokumentHåndteringTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@DokumentHåndteringTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         nullstillTilstandsendringer()
 
@@ -230,9 +230,9 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@DokumentHåndteringTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@DokumentHåndteringTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         val hendelserHåndtertFør = inspektør.hendelser(1.vedtaksperiode)
         assertEquals(
@@ -413,7 +413,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `har ikke overlappende vedtaksperioder`() {
         tilGodkjenning(januar, a1)
-        this@DokumentHåndteringTest.håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
 
         val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent))
@@ -435,7 +435,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     fun `har vedtaksperiode som påvirker arbeidsgiverperioden`() {
         tilGodkjenning(januar, a1)
         val søknad2 = håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
-        this@DokumentHåndteringTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
 
@@ -457,7 +457,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `har ikke overlappende vedtaksperiode`() {
         tilGodkjenning(januar, a1)
-        this@DokumentHåndteringTest.håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
 
         val søknad2 = håndterSøknad(Sykdom(15.februar, 28.februar, 100.prosent))
@@ -508,7 +508,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     fun `sender ut søknad håndtert for forlengelse av forkastet periode`() {
         håndterSykmelding(januar)
         val søknadId1 = håndterSøknad(januar)
-        this@DokumentHåndteringTest.håndterAnmodningOmForkasting(1.vedtaksperiode)
+        håndterAnmodningOmForkasting(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         val søknadId2 = håndterSøknad(februar)
@@ -581,18 +581,18 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val im1 = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar)))
         nyPeriode(11.januar til 31.januar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@DokumentHåndteringTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@DokumentHåndteringTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         val im2 = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1))
 
         assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
 
-        this@DokumentHåndteringTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@DokumentHåndteringTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)

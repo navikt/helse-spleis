@@ -100,8 +100,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `Vi går videre med skatt, så forespørsel bli aldri kvittert ut`() {
         håndterSøknad(1.januar til 31.januar)
         assertEtterspurt(1.vedtaksperiode.id(a1), EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
-        this@TrengerArbeidsgiveropplysningerTest.håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
-        this@TrengerArbeidsgiveropplysningerTest.håndterSykepengegrunnlagForArbeidsgiver(1.januar)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+        håndterSykepengegrunnlagForArbeidsgiver(1.januar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertTrue(observatør.inntektsmeldingHåndtert.isEmpty())
 
@@ -119,9 +119,9 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSøknad(28.januar til 28.februar)
         håndterArbeidsgiveropplysninger(listOf(28.januar til 12.februar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, a1, a2, orgnummer = a1)
-        this@TrengerArbeidsgiveropplysningerTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@TrengerArbeidsgiveropplysningerTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter())
 
@@ -134,9 +134,9 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSøknad(28.januar til 28.februar)
         håndterArbeidsgiveropplysninger(listOf(28.januar til 12.februar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, a1, a2, orgnummer = a1)
-        this@TrengerArbeidsgiveropplysningerTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@TrengerArbeidsgiveropplysningerTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter())
 
@@ -750,10 +750,10 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `Skal ikke sende med skjønnsfastsatt sykpengegrunnlag som inntektForrigeSkjæringstidspunkt`() {
         val inntektsmeldingId = UUID.randomUUID()
         nyttVedtak(januar, inntektsmeldingId = inntektsmeldingId)
-        this@TrengerArbeidsgiveropplysningerTest.håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 2)))
-        this@TrengerArbeidsgiveropplysningerTest.håndterYtelser(1.vedtaksperiode)
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 2)))
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@TrengerArbeidsgiveropplysningerTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         nyPeriode(16.februar til 15.mars)
@@ -773,13 +773,13 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `Skal sende med saksbehandlerinntekt som inntektForrigeSkjæringstidspunkt`() {
         nyttVedtak(januar)
-        this@TrengerArbeidsgiveropplysningerTest.håndterOverstyrArbeidsgiveropplysninger(
+        håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(
                 OverstyrtArbeidsgiveropplysning(a1, 32000.månedlig, listOf(Triple(1.januar, null, 32000.månedlig)))
             )
         )
-        this@TrengerArbeidsgiveropplysningerTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
 
         nyPeriode(16.februar til 15.mars)
 
@@ -941,7 +941,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `Sender ikke med sykmeldingsperioder som er etter skjæringstidspunktet`() {
         nyPeriode(januar)
         nyPeriode(februar)
-        this@TrengerArbeidsgiveropplysningerTest.håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         val actualJanuarForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder[1].opplysninger
         assertEquals(listOf(januar), actualJanuarForespørsel.sykmeldingsperioder)
@@ -968,7 +968,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         håndterArbeidsgiveropplysninger(emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@TrengerArbeidsgiveropplysningerTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
 
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder[1].opplysninger
         assertForventetFeil(
@@ -1027,14 +1027,14 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     private fun fraVilkårsprøvingTilGodkjent() {
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        this@TrengerArbeidsgiveropplysningerTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@TrengerArbeidsgiveropplysningerTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        this@TrengerArbeidsgiveropplysningerTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@TrengerArbeidsgiveropplysningerTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
     }
 

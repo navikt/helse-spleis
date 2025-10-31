@@ -69,9 +69,9 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -94,8 +94,8 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(1.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -114,9 +114,9 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -147,8 +147,8 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(3.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
 
         assertVarsler(listOf(RV_IM_24), 3.vedtaksperiode.filter())
@@ -165,17 +165,17 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
         assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
 
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
@@ -232,22 +232,22 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertVarsel(RV_IM_24, 3.vedtaksperiode.filter())
         assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
 
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
 
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
@@ -296,9 +296,9 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
             beregnetInntekt = INNTEKT * 1.1
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
@@ -315,9 +315,9 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT * 1.1
         )
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
@@ -341,9 +341,9 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@KorrigerendeInntektsmeldingTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
         assertVarsler(listOf(RV_IM_3, RV_UT_23, RV_IM_24), 2.vedtaksperiode.filter())
     }
@@ -386,7 +386,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `forlengelse til godkjenning - korrigerende agp mindre enn ti dager fra forrige`() {
         nyttVedtak(10.januar til 31.januar)
         nyPeriode(februar)
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))
@@ -401,7 +401,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `forlengelse til godkjenning - korrigerende agp mer enn ti dager fra forrige`() {
         nyttVedtak(januar)
         nyPeriode(februar)
-        this@KorrigerendeInntektsmeldingTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertVarsler(2.vedtaksperiode.filter(), etter = listOf(RV_IM_24)) {
             håndterInntektsmelding(

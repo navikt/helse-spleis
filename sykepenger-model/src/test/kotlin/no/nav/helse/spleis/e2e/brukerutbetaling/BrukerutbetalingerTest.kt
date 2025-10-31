@@ -33,9 +33,9 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@BrukerutbetalingerTest.håndterYtelser()
+        håndterYtelser()
         håndterSimulering()
-        this@BrukerutbetalingerTest.håndterUtbetalingsgodkjenning()
+        håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
@@ -51,7 +51,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@BrukerutbetalingerTest.håndterYtelser()
+        håndterYtelser()
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
     }
@@ -72,7 +72,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@BrukerutbetalingerTest.håndterYtelser()
+        håndterYtelser()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
     }
 }

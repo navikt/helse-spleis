@@ -69,9 +69,9 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             beregnetInntekt = 32000.månedlig,
             refusjon = Refusjon(32000.månedlig, null, emptyList())
         )
-        this@RevurderInntektTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@RevurderInntektTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
         assertVarsler(listOf(Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
@@ -114,9 +114,9 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             refusjon = Refusjon(32000.månedlig, null, emptyList())
         )
 
-        this@RevurderInntektTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@RevurderInntektTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
         håndterInntektsmelding(
@@ -124,10 +124,10 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             beregnetInntekt = 31000.månedlig,
             refusjon = Refusjon(31000.månedlig, null, emptyList())
         )
-        this@RevurderInntektTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
-        this@RevurderInntektTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
         assertEquals(15741, inspektør.utbetaling(0).arbeidsgiverOppdrag.nettoBeløp())
@@ -184,7 +184,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurder inntekt ny inntekt under en halv G`() {
         nyttVedtak(januar, 100.prosent)
         håndterOverstyrInntekt(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderInntektTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         assertTilstander(
@@ -222,13 +222,13 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@RevurderInntektTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@RevurderInntektTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         håndterOverstyrInntekt(46000.årlig, skjæringstidspunkt = 1.januar) // da havner vi under greia
-        this@RevurderInntektTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
 
         assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
@@ -248,20 +248,20 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@RevurderInntektTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@RevurderInntektTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         håndterOverstyrInntekt(UnderMinstegrense, skjæringstidspunkt = 1.januar)
-        this@RevurderInntektTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
-        this@RevurderInntektTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         håndterOverstyrInntekt(OverMinstegrense, skjæringstidspunkt = 1.januar)
-        this@RevurderInntektTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
 
         var opprinneligFagsystemId: String?
         inspektør.utbetaling(0).arbeidsgiverOppdrag.apply {
@@ -288,9 +288,9 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurdere inntekt slik at det blir brukerutbetaling`() {
         nyttVedtak(januar)
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderInntektTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@RevurderInntektTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
     }
 
@@ -298,7 +298,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurdere inntekt slik at det blir brukerutbetaling `() {
         nyttVedtak(januar)
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderInntektTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
     }
 
@@ -310,7 +310,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             refusjon = Refusjon(25000.månedlig, null, emptyList())
         )
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
-        this@RevurderInntektTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
     }
 

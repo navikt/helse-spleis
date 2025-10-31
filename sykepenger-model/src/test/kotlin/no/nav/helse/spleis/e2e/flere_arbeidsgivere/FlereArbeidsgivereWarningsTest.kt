@@ -55,9 +55,9 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereWarningsTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereWarningsTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
         assertVarsler(emptyList(), Alle)
     }
@@ -73,7 +73,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        this@FlereArbeidsgivereWarningsTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         assertVarsel(RV_VV_2, AktivitetsloggFilter.person())

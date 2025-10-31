@@ -41,11 +41,11 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         forlengVedtak(februar)
         nullstillTilstandsendringer()
 
-        this@UtbetalingFeiletE2ETest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-        this@UtbetalingFeiletE2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
         assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
-        this@UtbetalingFeiletE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(Oppdragstatus.AVVIST)
 
         håndterUtbetalingpåminnelse(2, OVERFØRT)
@@ -121,9 +121,9 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@UtbetalingFeiletE2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@UtbetalingFeiletE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,
             fagsystemId = inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId()
@@ -157,9 +157,9 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@UtbetalingFeiletE2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@UtbetalingFeiletE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(
             status = Oppdragstatus.AVVIST,
             fagsystemId = inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId()

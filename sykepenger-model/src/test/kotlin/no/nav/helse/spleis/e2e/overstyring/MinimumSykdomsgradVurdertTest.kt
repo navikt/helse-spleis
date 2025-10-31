@@ -42,7 +42,7 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
 
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar))
-        this@MinimumSykdomsgradVurdertTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(1.vedtaksperiode)
 
@@ -57,10 +57,10 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         settOppAvslagPåMinimumSykdomsgrad()
 
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar))
-        this@MinimumSykdomsgradVurdertTest.håndterYtelser()
+        håndterYtelser()
         assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering()
-        this@MinimumSykdomsgradVurdertTest.håndterUtbetalingsgodkjenning()
+        håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
 
         assertEquals(10, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].økonomi.inspektør.totalGrad)
@@ -72,15 +72,15 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
             orgnummer = a2,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        this@MinimumSykdomsgradVurdertTest.håndterYtelser(orgnummer = a1)
+        håndterYtelser(orgnummer = a1)
 
         assertEquals(19, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].økonomi.inspektør.totalGrad)
 
-        this@MinimumSykdomsgradVurdertTest.håndterUtbetalingsgodkjenning(orgnummer = a1)
+        håndterUtbetalingsgodkjenning(orgnummer = a1)
 
-        this@MinimumSykdomsgradVurdertTest.håndterYtelser(orgnummer = a2)
+        håndterYtelser(orgnummer = a2)
         håndterSimulering(orgnummer = a2)
-        this@MinimumSykdomsgradVurdertTest.håndterUtbetalingsgodkjenning(orgnummer = a2)
+        håndterUtbetalingsgodkjenning(orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         assertEquals(0, inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
@@ -102,12 +102,12 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         assertEquals(11, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
         assertEquals(0, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.size)
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar))
-        this@MinimumSykdomsgradVurdertTest.håndterYtelser()
+        håndterYtelser()
         assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter(orgnummer = a1))
         assertEquals(0, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
         assertEquals(11, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.size)
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = emptyList(), perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar))
-        this@MinimumSykdomsgradVurdertTest.håndterYtelser()
+        håndterYtelser()
         assertEquals(11, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
         assertEquals(0, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.size)
     }
@@ -118,7 +118,7 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         assertEquals(11, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
         assertEquals(0, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.size)
         håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(1.januar til 20.januar))
-        this@MinimumSykdomsgradVurdertTest.håndterYtelser()
+        håndterYtelser()
         assertEquals(8, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
         assertEquals(3, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.size)
         assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter(orgnummer = a1))
@@ -138,7 +138,7 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
-        this@MinimumSykdomsgradVurdertTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter(orgnummer = a1))
     }
 }

@@ -120,10 +120,10 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
-        this@ReplayInntektsmeldingE2ETest.håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig)))
-        this@ReplayInntektsmeldingE2ETest.håndterYtelser()
+        håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig)))
+        håndterYtelser()
         håndterSimulering()
-        this@ReplayInntektsmeldingE2ETest.håndterUtbetalingsgodkjenning()
+        håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
 
         nullstillTilstandsendringer()
@@ -136,18 +136,18 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar)
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@ReplayInntektsmeldingE2ETest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@ReplayInntektsmeldingE2ETest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         nullstillTilstandsendringer()
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET)
 
-        this@ReplayInntektsmeldingE2ETest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         // ingen simulering fordi det er ingen endring
-        this@ReplayInntektsmeldingE2ETest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)

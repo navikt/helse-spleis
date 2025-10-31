@@ -35,7 +35,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `forkaster ikke førstegangsbehandling selv om det er lagret inntekter i IT`() {
-        this@ForlengelseFraInfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring()
+        håndterUtbetalingshistorikkEtterInfotrygdendring()
         håndterSøknad(januar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
@@ -48,7 +48,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(februar)
         håndterSykmelding(Sykmeldingsperiode(18.mars, 31.mars))
         håndterSøknad(Sykdom(18.mars, 31.mars, 100.prosent))
-        this@ForlengelseFraInfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
         observatør.assertEtterspurt(1.vedtaksperiode.id(a1), EventSubscription.Inntekt::class, EventSubscription.Refusjon::class)
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
@@ -58,7 +58,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `forlenger ferieperiode i Infotrygd på samme arbeidsgiver`() {
-        this@ForlengelseFraInfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.januar, 31.januar))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.januar, 31.januar))
         nyPeriode(februar)
         assertForlengerInfotrygdperiode()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
@@ -67,13 +67,13 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `forlenger ferieperiode i Infotrygd på samme arbeidsgiver - reagerer på endring`() {
         nyPeriode(februar)
-        this@ForlengelseFraInfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.januar, 31.januar))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.januar, 31.januar))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
 
     @Test
     fun `forlenger utbetaling i Infotrygd på samme arbeidsgiver`() {
-        this@ForlengelseFraInfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
         )
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
@@ -84,7 +84,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `forlenger utbetaling i Infotrygd på annen arbeidsgiver`() {
-        this@ForlengelseFraInfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar))
         nyPeriode(februar, a1)
         assertForlengerInfotrygdperiode()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
@@ -92,7 +92,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `bare ferie - etter infotrygdutbetaling`() {
-        this@ForlengelseFraInfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
             ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 31.desember(2017))
         )
         håndterSykmelding(januar)

@@ -41,7 +41,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         val historie1 = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1, 3.januar, 26.januar)
         )
-        this@DobbelbehandlingIInfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
             *historie1,
             besvart = LocalDate.EPOCH.atStartOfDay()
         )
@@ -57,13 +57,13 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
         val historie1 = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 26.januar)
         )
-        this@DobbelbehandlingIInfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
             *historie1,
             besvart = LocalDate.EPOCH.atStartOfDay()
         )
 
-        this@DobbelbehandlingIInfotrygdTest.håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, flagg = setOf("ønskerReberegning"))
-        this@DobbelbehandlingIInfotrygdTest.håndterYtelser(1.vedtaksperiode)
+        håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, flagg = setOf("ønskerReberegning"))
+        håndterYtelser(1.vedtaksperiode)
 
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.also { utbetalingInspektør ->

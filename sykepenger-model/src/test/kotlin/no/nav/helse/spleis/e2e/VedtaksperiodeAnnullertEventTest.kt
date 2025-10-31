@@ -73,20 +73,20 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
         )
         assertVarsler(listOf(RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@VedtaksperiodeAnnullertEventTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
         nullstillTilstandsendringer()
 
-        this@VedtaksperiodeAnnullertEventTest.håndterOverstyrTidslinje((februar).map {
+        håndterOverstyrTidslinje((februar).map {
             ManuellOverskrivingDag(
                 it,
                 Dagtype.ArbeidIkkeGjenopptattDag
             )
         })
-        this@VedtaksperiodeAnnullertEventTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        this@VedtaksperiodeAnnullertEventTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
         assertEquals(0, observatør.vedtaksperiodeAnnullertEventer.size)
@@ -97,8 +97,8 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        this@VedtaksperiodeAnnullertEventTest.håndterYtelser(1.vedtaksperiode)
-        this@VedtaksperiodeAnnullertEventTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         håndterUtbetalt()
         håndterAnnullerUtbetaling()
@@ -110,7 +110,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     @Test
     fun `Pågående revurdering uten endring som siden annulleres skal sende melding om annullert`() {
         nyttVedtak(januar)
-        this@VedtaksperiodeAnnullertEventTest.håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
         håndterAnnullerUtbetaling()
         håndterUtbetalt()

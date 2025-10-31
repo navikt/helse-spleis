@@ -89,16 +89,16 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         val eksisterendeUtbetaling = ArbeidsgiverUtbetalingsperiode("a1", 1.januar, 31.januar)
         val nyUtbetaling = ArbeidsgiverUtbetalingsperiode("a1", 20.desember(2017), 31.desember(2017))
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(eksisterendeUtbetaling, nyUtbetaling)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(eksisterendeUtbetaling, nyUtbetaling)
 
         assertEquals(20.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(emptyList<VedtaksperiodeVenterEvent>(), observatør.vedtaksperiodeVenter)
         nullstillTilstandsendringer()
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
 
-        this@InfotrygdTest.håndterSykepengegrunnlagForArbeidsgiver(skjæringstidspunkt = 20.desember(2017))
+        håndterSykepengegrunnlagForArbeidsgiver(skjæringstidspunkt = 20.desember(2017))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        this@InfotrygdTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
         assertVarsler(listOf(RV_IV_10, RV_IT_14), 1.vedtaksperiode.filter(a1))
@@ -109,8 +109,8 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     fun `Legger på en tag når perioden til godkjenning overlapper med en periode i Infotrygd`() {
         nyttVedtak(januar)
         assertEquals(1, observatør.utkastTilVedtakEventer.size)
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
-        this@InfotrygdTest.håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertVarsler(listOf(RV_IT_3), 1.vedtaksperiode.filter())
@@ -120,8 +120,8 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
             forventetTag = "OverlapperMedInfotrygd"
         )
 
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring()
-        this@InfotrygdTest.håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingshistorikkEtterInfotrygdendring()
+        håndterYtelser(1.vedtaksperiode)
 
         hendelselogg.assertHarIkkeTag(
             vedtaksperiode = 1.vedtaksperiode,
@@ -135,12 +135,12 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         val februarKorrelasjonsId = gjeldendeKorrelasjonsId(1.vedtaksperiode)
         assertEquals(listOf(10.februar til 25.februar), inspektør.venteperiode(1.vedtaksperiode))
 
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
         assertEquals(emptyList<Periode>(), inspektør.venteperiode(1.vedtaksperiode))
 
-        this@InfotrygdTest.håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        this@InfotrygdTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(1.vedtaksperiode))
         assertVarsler(listOf(RV_IT_37), 1.vedtaksperiode.filter())
@@ -155,26 +155,26 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         )
         assertEquals(emptyList<Periode>(), inspektør.venteperiode(2.vedtaksperiode))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        this@InfotrygdTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
 
         // Mens Mars står til godkjenning utbetales den i Infotrygd
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar), ArbeidsgiverUtbetalingsperiode(a1, 10.mars, 31.mars))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar), ArbeidsgiverUtbetalingsperiode(a1, 10.mars, 31.mars))
         assertEquals(emptyList<Periode>(), inspektør.venteperiode(2.vedtaksperiode))
-        this@InfotrygdTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         assertNotEquals(februarKorrelasjonsId, gjeldendeKorrelasjonsId(2.vedtaksperiode))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         assertVarsler(listOf(RV_IT_3), 2.vedtaksperiode.filter())
 
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
-        this@InfotrygdTest.håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+        håndterYtelser(2.vedtaksperiode)
     }
 
     @Test
     fun `Når perioden utbetales i Infotrygd kan det medføre at vi feilaktig annullerer tidligere utebetalte perioder`() {
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
         nyttVedtak(mars)
         nyttVedtak(mai, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         val korrelasjonsIdMars = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
@@ -185,15 +185,15 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
 
-        this@InfotrygdTest.håndterYtelser(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar), ArbeidsgiverUtbetalingsperiode(a1, 1.juli, 31.juli))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar), ArbeidsgiverUtbetalingsperiode(a1, 1.juli, 31.juli))
 
         assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
 
-        this@InfotrygdTest.håndterYtelser(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
-        this@InfotrygdTest.håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         val korrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
         håndterUtbetalt()
 
@@ -201,8 +201,8 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetalinger.none { it.erAnnullering })
         assertVarsler(listOf(RV_IT_3), 3.vedtaksperiode.filter())
 
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
-        this@InfotrygdTest.håndterYtelser(3.vedtaksperiode)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+        håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
 
         val nyKorrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
@@ -215,7 +215,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     fun `En uheldig bivirkning av å behandle perioder uten AGP`() {
         nyttVedtak(1.januar(2017) til 31.januar(2017))
 
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.mars(2017), 10.mars(2017)))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.mars(2017), 10.mars(2017)))
 
         nyttVedtak(februar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         inspektør.utbetalinger(2.vedtaksperiode).last().inspektør.korrelasjonsId
@@ -227,9 +227,9 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         assertSisteTilstand(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         håndterInntektsmelding(emptyList(), førsteFraværsdag = 4.juni, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
         håndterVilkårsgrunnlag(4.vedtaksperiode)
-        this@InfotrygdTest.håndterYtelser(4.vedtaksperiode)
+        håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
-        this@InfotrygdTest.håndterOverstyrTidslinje((4.juni til 6.juni).map { ManuellOverskrivingDag(it, Dagtype.Pleiepengerdag) })
+        håndterOverstyrTidslinje((4.juni til 6.juni).map { ManuellOverskrivingDag(it, Dagtype.Pleiepengerdag) })
         // _veldig_ viktig detalj: En periode uten AGP
         // Når vi finner utbetalingen vi skal bygge videre på tolkes tom AGP som Infotrygd, så vi bygger videre på første utbetaling
         // etter siste infotrygdutbetaling, og eventuelle utbetalinger som ligger mellom blir annullert.
@@ -247,7 +247,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     fun `infotrygd flytter skjæringstidspunkt`() {
         nyttVedtak(januar)
         nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = emptyList(), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 9.februar))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 9.februar))
         assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().first().vilkårsgrunnlag.size)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -255,7 +255,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `Infotrygdhistorikk som er nærme`() {
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 30.januar))
         )
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
@@ -265,7 +265,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `Infotrygdhistorikk som ikke medfører utkasting`() {
-        this@InfotrygdTest.håndterUtbetalingshistorikkEtterInfotrygdendring(
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 30.januar))
         )
         håndterSøknad(Sykdom(20.februar, 28.mars, 100.prosent))
@@ -276,7 +276,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     fun `eksisterende infotrygdforlengelse`() {
         createOvergangFraInfotrygdPerson()
         nyPeriode(mars)
-        this@InfotrygdTest.håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
         assertIngenFunksjonelleFeil()
     }
@@ -286,7 +286,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         createOvergangFraInfotrygdPerson()
         val antallInnslagFør = inspektør.vilkårsgrunnlagHistorikkInnslag().size
 
-        this@InfotrygdTest.håndterOverstyrArbeidsgiveropplysninger(
+        håndterOverstyrArbeidsgiveropplysninger(
             1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(
                 a1, 15000.månedlig,
@@ -307,7 +307,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         val antallInnslagFør = inspektør.vilkårsgrunnlagHistorikkInnslag().size
 
         val meldingsreferanse = UUID.randomUUID()
-        this@InfotrygdTest.håndterOverstyrArbeidsgiveropplysninger(
+        håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(
                 OverstyrtArbeidsgiveropplysning(

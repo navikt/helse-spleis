@@ -50,7 +50,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         }
 
         nullstillTilstandsendringer()
-        this@OverstyrGhostInntektTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
@@ -61,15 +61,15 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
     fun `Ved overstyring av inntekt til under krav til minste sykepengegrunnlag skal vi lage en utbetaling uten utbetaling`() {
         tilOverstyring()
         håndterOverstyrInntekt(INGEN, a1, 1.januar)
-        this@OverstyrGhostInntektTest.håndterOverstyrArbeidsgiveropplysninger(
+        håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(
                 OverstyrtArbeidsgiveropplysning(a1, 3750.månedlig),
                 OverstyrtArbeidsgiveropplysning(a2, INGEN)
             )
         )
-        this@OverstyrGhostInntektTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        this@OverstyrGhostInntektTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
 
         assertVarsler(listOf(Varselkode.RV_VV_2, Varselkode.RV_SV_1), 1.vedtaksperiode.filter())
@@ -90,7 +90,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         }
 
         nullstillTilstandsendringer()
-        this@OverstyrGhostInntektTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, orgnummer = a1)
@@ -106,7 +106,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
-        this@OverstyrGhostInntektTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
     }
 }

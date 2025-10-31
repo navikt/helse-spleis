@@ -78,16 +78,16 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.april, 30.april, 100.prosent), orgnummer = a1)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
@@ -113,9 +113,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
         assertVarsler(emptyList(), 1.vedtaksperiode.filter(a1))
     }
@@ -135,9 +135,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
@@ -149,9 +149,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         assertEquals(
@@ -211,9 +211,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(2.februar, 20.februar), orgnummer = a2)
@@ -234,9 +234,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
                 Triple(a2, LocalDate.EPOCH, null)
             )
         )
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a1)
@@ -259,10 +259,10 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_2, 2.vedtaksperiode.filter(orgnummer = a1))
 
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         assertVarsel(Varselkode.RV_VV_8, 2.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         val utbetaling = inspektør(a2).utbetaling(0)
@@ -290,7 +290,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             skatteinntekter = listOf(a1 to INNTEKT, a2 to INNTEKT),
             orgnummer = a1
         )
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(orgnummer = a1))
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
@@ -317,14 +317,14 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             orgnummer = a1
         )
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        this@FlereArbeidsgivereArbeidsforholdTest.håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         assertVarsel(RV_VV_1, 1.vedtaksperiode.filter(a1))
     }
