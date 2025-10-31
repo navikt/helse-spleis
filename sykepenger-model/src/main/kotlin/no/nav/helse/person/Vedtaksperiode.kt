@@ -1250,44 +1250,74 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndterUtbetalingsavgjørelse(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (!utbetalingsavgjørelse.relevantVedtaksperiode(id)) return
+
+        when (tilstand) {
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering -> behandleAvgjørelseForVedtak(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, TilUtbetaling, Avsluttet)
+            SelvstendigAvventerGodkjenning -> behandleAvgjørelseForVedtak(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigTilUtbetaling, SelvstendigAvsluttet)
+
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerBlokkerendePeriode,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            Start,
+            TilAnnullering,
+            TilInfotrygd,
+            TilUtbetaling -> check(!utbetalingsavgjørelse.relevantVedtaksperiode(id)) { "Forventet ikke utbetalingsavgjørelse i ${tilstand.type.name}" }
+        }
+    }
+
+    private fun behandleAvgjørelseForVedtak(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg, nesteTilUtbetalingtilstand: Vedtaksperiodetilstand, nesteAvsluttettilstand: Vedtaksperiodetilstand) {
+        check(utbetalingsavgjørelse.relevantVedtaksperiode(id)) {
+            "Utbetalingsavgjørelse gjelder en annen vedtaksperiode, er det flere perioder til godkjenning samtidig?"
+        }
         check(utbetalingsavgjørelse.utbetalingId == behandlinger.utbetaling?.id) {
             // todo: burde bruke behandlingId istedenfor
             "Utbetalingsavgjørelse gjelder en annen utbetaling"
         }
-        check (tilstand in setOf(AvventerGodkjenning, AvventerGodkjenningRevurdering, SelvstendigAvventerGodkjenning)) {
-            "Forventet ikke utbetalingsavgjørelse i ${tilstand.type.name}"
-        }
 
         with(utbetalingsavgjørelse) {
             when (godkjent) {
-                true -> {
-                    if (automatisert) aktivitetsloggMedVedtaksperiodekontekst.info("Utbetaling markert som godkjent automatisk $avgjørelsestidspunkt")
-                    else aktivitetsloggMedVedtaksperiodekontekst.info("Utbetaling markert som godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
-                    behandlinger.vedtakFattet(eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst)
-                    val nesteTilstand = when (yrkesaktivitet.yrkesaktivitetstype) {
-                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                        is Arbeidstaker -> if (behandlinger.harUtbetalinger()) TilUtbetaling else Avsluttet
-
-                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> if (behandlinger.harUtbetalinger()) SelvstendigTilUtbetaling else SelvstendigAvsluttet
-
-                        Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("Ikke implementert hva som skjer med frilans som har utbetaling")
-                    }
-                    tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, nesteTilstand)
-                }
-
-                false -> {
-                    if (automatisert) aktivitetsloggMedVedtaksperiodekontekst.info("Utbetaling markert som ikke godkjent automatisk $avgjørelsestidspunkt")
-                    else aktivitetsloggMedVedtaksperiodekontekst.info("Utbetaling markert som ikke godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
-
-                    if (behandlinger.vedtakAvvist(eventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst)) {
-                        return forkast(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, tvingForkasting = true)
-                    } else {
-                        aktivitetsloggMedVedtaksperiodekontekst.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
-                    }
-                }
+                true -> vedtakFattet(eventBus, aktivitetslogg, nesteTilUtbetalingtilstand, nesteAvsluttettilstand)
+                false -> vedtakAvvist(eventBus, aktivitetslogg)
             }
         }
+    }
+
+    private fun Behandlingsavgjørelse.vedtakAvvist(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+        if (automatisert) aktivitetslogg.info("Utbetaling markert som ikke godkjent automatisk $avgjørelsestidspunkt")
+        else aktivitetslogg.info("Utbetaling markert som ikke godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
+
+        if (behandlinger.vedtakAvvist(eventBus, yrkesaktivitet, this, aktivitetslogg)) {
+            return forkast(eventBus, this, aktivitetslogg, tvingForkasting = true)
+        }
+
+        aktivitetslogg.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
+    }
+
+    private fun Behandlingsavgjørelse.vedtakFattet(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, nesteTilUtbetalingtilstand: Vedtaksperiodetilstand, nesteAvsluttettilstand: Vedtaksperiodetilstand) {
+        if (automatisert) aktivitetslogg.info("Utbetaling markert som godkjent automatisk $avgjørelsestidspunkt")
+        else aktivitetslogg.info("Utbetaling markert som godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
+        behandlinger.vedtakFattet(eventBus, yrkesaktivitet, this, aktivitetslogg)
+        tilstand(eventBus, aktivitetslogg, if (behandlinger.erAvsluttet()) nesteAvsluttettilstand else nesteTilUtbetalingtilstand)
     }
 
     internal fun håndter(eventBus: EventBus, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg): Boolean {
@@ -1483,11 +1513,13 @@ internal class Vedtaksperiode private constructor(
 
     private fun vedtakIverksattMensTilRevurdering(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         behandlinger.håndterUtbetalinghendelseSisteInFlight(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
+        // todo: send ut avsluttet_med_vedtak
     }
 
     private fun vedtakIverksatt(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
         behandlinger.håndterUtbetalinghendelseSisteBehandling(eventBus,  with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
         if (!behandlinger.erAvsluttet()) return
+        // todo: send ut avsluttet_med_vedtak
         tilstand(eventBus, aktivitetslogg, nesteTilstand) {
             aktivitetslogg.info("OK fra Oppdragssystemet")
         }
