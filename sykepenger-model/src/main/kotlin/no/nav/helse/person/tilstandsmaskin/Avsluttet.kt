@@ -45,7 +45,7 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
         aktivitetslogg: IAktivitetslogg
     ) {
         vedtaksperiode.behandlinger.sikreNyBehandling(
-            eventBus,
+            with (vedtaksperiode) {eventBus.behandlingEventBus },
             vedtaksperiode.yrkesaktivitet,
             revurdering.hendelse.metadata.behandlingkilde,
             vedtaksperiode.person.skjæringstidspunkter,
