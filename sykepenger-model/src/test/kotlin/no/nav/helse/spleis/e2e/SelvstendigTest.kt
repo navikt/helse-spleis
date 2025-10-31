@@ -26,7 +26,6 @@ import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
@@ -604,8 +603,8 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
                 selvstendigForsikring = SelvstendigForsikring(
-                    startdato = 10.oktober(2017),
-                    sluttdato = null,
+                    virkningsdato = 10.oktober(2017),
+                    opphørsdato = null,
                     type = SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn
                 )
             )
@@ -622,6 +621,10 @@ internal class SelvstendigTest : AbstractDslTest() {
                     assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
                 }
             }
+
+            assertEquals(SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().selvstendigForsikring?.type)
+            assertEquals(10.oktober(2017), inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().selvstendigForsikring?.virkningsdato)
+
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
@@ -640,8 +643,8 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
                 selvstendigForsikring = SelvstendigForsikring(
-                    startdato = 10.oktober(2017),
-                    sluttdato = null,
+                    virkningsdato = 10.oktober(2017),
+                    opphørsdato = null,
                     type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagSytten
                 )
             )
@@ -658,6 +661,10 @@ internal class SelvstendigTest : AbstractDslTest() {
                     assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
                 }
             }
+
+            assertEquals(SelvstendigForsikring.Forsikringstype.HundreProsentFraDagSytten, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().selvstendigForsikring?.type)
+            assertEquals(10.oktober(2017), inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().selvstendigForsikring?.virkningsdato)
+
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
@@ -673,8 +680,8 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
                 selvstendigForsikring = SelvstendigForsikring(
-                    startdato = 10.oktober(2017),
-                    sluttdato = null,
+                    virkningsdato = 10.oktober(2017),
+                    opphørsdato = null,
                     type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagEn
                 )
             )
@@ -691,6 +698,10 @@ internal class SelvstendigTest : AbstractDslTest() {
                     assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
                 }
             }
+
+            assertEquals(SelvstendigForsikring.Forsikringstype.HundreProsentFraDagEn, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().selvstendigForsikring?.type)
+            assertEquals(10.oktober(2017), inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().selvstendigForsikring?.virkningsdato)
+
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
