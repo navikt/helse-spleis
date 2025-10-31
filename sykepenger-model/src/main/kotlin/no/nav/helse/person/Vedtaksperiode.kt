@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.collections.last
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
@@ -63,7 +62,6 @@ import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.annullering
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.SelvstendigForsikring
-import no.nav.helse.hendelser.SelvstendigForsikring.Forsikringstype
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
@@ -221,7 +219,6 @@ internal class Vedtaksperiode private constructor(
         sykmeldingsperiode: Periode,
         arbeidssituasjon: Endring.Arbeidssituasjon,
         faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
-        dagerNavOvertarAnsvar: List<Periode>,
         regelverkslogg: Regelverkslogg
     ) : this(
         person = person,
@@ -240,7 +237,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
         eventBus.vedtaksperiodeOpprettet(id, yrkesaktivitet.yrkesaktivitetstype, periode, periode.start, opprettet)
-        behandlinger.initiellBehandling(eventBus, sykmeldingsperiode, sykdomstidslinje, arbeidssituasjon, egenmeldingsperioder, faktaavklartInntekt, dokumentsporing, metadata.behandlingkilde, dagerNavOvertarAnsvar)
+        behandlinger.initiellBehandling(eventBus, sykmeldingsperiode, sykdomstidslinje, arbeidssituasjon, egenmeldingsperioder, faktaavklartInntekt, dokumentsporing, metadata.behandlingkilde)
     }
 
     internal var tilstand: Vedtaksperiodetilstand = tilstand

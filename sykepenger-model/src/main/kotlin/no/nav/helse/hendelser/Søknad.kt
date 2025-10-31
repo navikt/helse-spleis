@@ -4,7 +4,7 @@ import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
@@ -74,7 +74,6 @@ class Søknad(
     private val inntekterFraNyeArbeidsforhold: Boolean,
     private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>?,
     private val fraværFørSykmelding: Boolean?,
-    private val harOppgittÅHaForsikring: Boolean?,
     private val harOppgittNyIArbeidslivet: Boolean?,
     private val harOppgittVarigEndring: Boolean?,
     private val harOppgittAvvikling: Boolean?
@@ -159,12 +158,6 @@ class Søknad(
         if (harOppgittAvvikling == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_47)
         if (harOppgittNyIArbeidslivet == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_48)
         if (harOppgittVarigEndring == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_49)
-
-        if (harOppgittÅHaForsikring == true) {
-            if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_SØ_50)
-            else aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_50)
-        }
-
 
         if (pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true) aktivitetslogg.funksjonellFeil(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
 
@@ -260,14 +253,6 @@ class Søknad(
             Arbeidssituasjon.ANNET -> Behandlinger.Behandling.Endring.Arbeidssituasjon.ANNET
         }
 
-        // Hvis bruker har oppgitt å ha forsikring så sier vi at
-        // nav overtar ansvar for hele søknadsperioden
-        val dagerNavOvertarAnsvar = when (harOppgittÅHaForsikring) {
-            null,
-            false -> emptyList()
-            true -> listOf(sykdomsperiode)
-        }
-
         return Vedtaksperiode(
             eventBus = eventBus,
             egenmeldingsperioder = egenmeldinger,
@@ -279,7 +264,6 @@ class Søknad(
             faktaavklartInntekt = faktaavklartInntekt,
             dokumentsporing = Dokumentsporing.søknad(metadata.meldingsreferanseId),
             sykmeldingsperiode = sykdomsperiode,
-            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             regelverkslogg = regelverkslogg
         )
     }

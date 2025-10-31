@@ -110,8 +110,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         fraværFørSykmelding: Boolean? = null,
         harOppgittAvvikling: Boolean? = null,
         harOppgittVarigEndring: Boolean? = null,
-        harOppgittNyIArbeidslivet: Boolean? = null,
-        harOppgittÅHaForsikring: Boolean? = null
+        harOppgittNyIArbeidslivet: Boolean? = null
     ): Søknad {
         val innsendt = (sendtTilNAVEllerArbeidsgiver ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive).let {
             when (it) {
@@ -143,8 +142,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             fraværFørSykmelding = fraværFørSykmelding,
             harOppgittAvvikling = harOppgittAvvikling,
             harOppgittVarigEndring = harOppgittVarigEndring,
-            harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
-            harOppgittÅHaForsikring = harOppgittÅHaForsikring
+            harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet
         ).apply {
             søknader.add(this)
         }

@@ -242,8 +242,7 @@ internal class TestPerson(
             fraværFørSykmelding: Boolean? = null,
             harOppgittAvvikling: Boolean? = null,
             harOppgittVarigEndring: Boolean? = null,
-            harOppgittNyIArbeidslivet: Boolean? = null,
-            harOppgittÅHaForsikring: Boolean? = null
+            harOppgittNyIArbeidslivet: Boolean? = null
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode(this.orgnummer) {
@@ -266,8 +265,7 @@ internal class TestPerson(
                         fraværFørSykmelding = fraværFørSykmelding,
                         harOppgittAvvikling = harOppgittAvvikling,
                         harOppgittVarigEndring = harOppgittVarigEndring,
-                        harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
-                        harOppgittÅHaForsikring = harOppgittÅHaForsikring
+                        harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet
                     ).håndter(Person::håndterSøknad)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)) {
@@ -294,7 +292,6 @@ internal class TestPerson(
             harOppgittAvvikling: Boolean? = null,
             harOppgittVarigEndring: Boolean? = null,
             harOppgittNyIArbeidslivet: Boolean? = null,
-            harOppgittÅHaForsikring: Boolean? = null,
             søknadId: UUID = UUID.randomUUID()
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, sykdomsgrad),
@@ -305,7 +302,6 @@ internal class TestPerson(
             harOppgittAvvikling = harOppgittAvvikling,
             harOppgittVarigEndring = harOppgittVarigEndring,
             harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
-            harOppgittÅHaForsikring = harOppgittÅHaForsikring,
             søknadId = søknadId
         )
 
@@ -322,8 +318,7 @@ internal class TestPerson(
             fraværFørSykmelding: Boolean? = null,
             harOppgittAvvikling: Boolean? = null,
             harOppgittVarigEndring: Boolean? = null,
-            harOppgittNyIArbeidslivet: Boolean? = null,
-            harOppgittÅHaForsikring: Boolean? = null
+            harOppgittNyIArbeidslivet: Boolean? = null
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, sykdomsgrad),
             arbeidssituasjon = arbeidssituasjon,
@@ -332,8 +327,7 @@ internal class TestPerson(
             fraværFørSykmelding = fraværFørSykmelding,
             harOppgittAvvikling = harOppgittAvvikling,
             harOppgittVarigEndring = harOppgittVarigEndring,
-            harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
-            harOppgittÅHaForsikring = harOppgittÅHaForsikring
+            harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet
         )
 
         internal fun håndterInntektsmelding(

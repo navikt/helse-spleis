@@ -89,7 +89,6 @@ internal class SelvstendigHendelsefabrikk() {
         harOppgittAvvikling: Boolean? = null,
         harOppgittNyIArbeidslivet: Boolean? = null,
         harOppgittVarigEndring: Boolean? = null,
-        harOppgittÅHaForsikring: Boolean? = null,
         arbeidssituasjon: Søknad.Arbeidssituasjon
     ): Søknad {
         return Søknad(
@@ -115,8 +114,7 @@ internal class SelvstendigHendelsefabrikk() {
             fraværFørSykmelding = fraværFørSykmelding,
             harOppgittAvvikling = harOppgittAvvikling,
             harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
-            harOppgittVarigEndring = harOppgittVarigEndring,
-            harOppgittÅHaForsikring = harOppgittÅHaForsikring
+            harOppgittVarigEndring = harOppgittVarigEndring
         ).apply {
             søknader.add(this)
         }
