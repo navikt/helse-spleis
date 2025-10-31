@@ -269,24 +269,6 @@ data class PersonData(
                 skjønnsmessigFastsatt = skjønnsmessigFastsatt?.tilDto()
             )
 
-            data class KorrigertInntektsopplysningData(
-                val id: UUID,
-                val dato: LocalDate,
-                val hendelseId: UUID,
-                val beløp: Double,
-                val tidsstempel: LocalDateTime
-            ) {
-                fun tilDto() = SaksbehandlerInnDto(
-                    id = this.id,
-                    inntektsdata = InntektsdataInnDto(
-                        hendelseId = MeldingsreferanseDto(this.hendelseId),
-                        dato = this.dato,
-                        beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
-                        tidsstempel = this.tidsstempel
-                    )
-                )
-            }
-
             data class SkjønnsmessigFastsattData(
                 val id: UUID,
                 val dato: LocalDate,
@@ -924,7 +906,8 @@ data class PersonData(
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
-                    val faktaavklartInntekt: FaktaavklartInntektData?
+                    val faktaavklartInntekt: FaktaavklartInntektData?,
+                    val korrigertInntekt: KorrigertInntektsopplysningData?
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
                         id = this.id,
@@ -956,7 +939,8 @@ data class PersonData(
                         inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
                             InntektskildeDto(inntektskilde) to beløpstidslinje.tilDto()
                         }.toMap(),
-                        faktaavklartInntekt = faktaavklartInntekt?.tilDto()
+                        faktaavklartInntekt = faktaavklartInntekt?.tilDto(),
+                        korrigertInntekt = korrigertInntekt?.tilDto()
                     )
 
                     data class PeriodeUtenNavAnsvarData(
@@ -1499,6 +1483,24 @@ data class PersonData(
                 tidsstempel = tidsstempel
             )
         }
+    }
+
+    data class KorrigertInntektsopplysningData(
+        val id: UUID,
+        val dato: LocalDate,
+        val hendelseId: UUID,
+        val beløp: Double,
+        val tidsstempel: LocalDateTime
+    ) {
+        fun tilDto() = SaksbehandlerInnDto(
+            id = this.id,
+            inntektsdata = InntektsdataInnDto(
+                hendelseId = MeldingsreferanseDto(this.hendelseId),
+                dato = this.dato,
+                beløp = InntektbeløpDto.MånedligDouble(beløp = beløp),
+                tidsstempel = this.tidsstempel
+            )
+        )
     }
 }
 

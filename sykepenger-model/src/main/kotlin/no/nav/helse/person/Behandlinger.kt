@@ -834,7 +834,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val dagerNavOvertarAnsvar: List<Periode>,
             val maksdatoresultat: Maksdatoresultat,
             val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
-            val faktaavklartInntekt: FaktaavklartInntekt?
+            val faktaavklartInntekt: FaktaavklartInntekt?,
+            val korrigertInntekt: Saksbehandler?
         ) {
 
             fun view() = BehandlingendringView(
@@ -934,7 +935,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                                 is SelvstendigFaktaavklartInntektInnDto -> SelvstendigFaktaavklartInntekt.gjenopprett(it)
                                 is ArbeidstakerFaktaavklartInntektInnDto -> ArbeidstakerFaktaavklartInntekt.gjenopprett(it)
                             }
-                        }
+                        },
+                        korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) }
                     )
                 }
             }
@@ -965,7 +967,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 egenmeldingsdager: List<Periode> = this.egenmeldingsdager,
                 maksdatoresultat: Maksdatoresultat = this.maksdatoresultat,
                 inntektjusteringer: Map<Inntektskilde, Beløpstidslinje> = this.inntektjusteringer,
-                faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt
+                faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt,
+                korrigertInntekt: Saksbehandler? = this.korrigertInntekt
             ) = copy(
                 id = UUID.randomUUID(),
                 tidsstempel = LocalDateTime.now(),
@@ -984,7 +987,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 egenmeldingsdager = egenmeldingsdager,
                 maksdatoresultat = maksdatoresultat,
                 inntektjusteringer = inntektjusteringer,
-                faktaavklartInntekt = faktaavklartInntekt
+                faktaavklartInntekt = faktaavklartInntekt,
+                korrigertInntekt = korrigertInntekt
             )
 
             internal fun kopierMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>): Endring? {
@@ -1108,7 +1112,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is SelvstendigFaktaavklartInntekt -> fi.dto()
                         is ArbeidstakerFaktaavklartInntekt -> fi.dto()
                         null -> null
-                    }
+                    },
+                    korrigertInntekt = korrigertInntekt?.dto()
                 )
             }
 
@@ -1464,7 +1469,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                             inntektjusteringer = emptyMap(),
-                            faktaavklartInntekt = faktaavklartInntekt
+                            faktaavklartInntekt = faktaavklartInntekt,
+                            korrigertInntekt = null
                         )
                     ),
                     avsluttet = null,
