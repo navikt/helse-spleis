@@ -828,7 +828,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val dagerNavOvertarAnsvar: List<Periode>,
             val maksdatoresultat: Maksdatoresultat,
             val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
-            val faktaavklartInntekt: FaktaavklartInntekt?
+            val faktaavklartInntekt: FaktaavklartInntekt?,
+            val selvstendigForsikring: SelvstendigForsikring?
         ) {
 
             fun view() = BehandlingendringView(
@@ -846,7 +847,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerUtenNavAnsvar = dagerUtenNavAnsvar,
                 egenmeldingsdager = egenmeldingsdager,
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
-                maksdatoresultat = maksdatoresultat
+                maksdatoresultat = maksdatoresultat,
+                selvstendigForsikring = selvstendigForsikring,
             )
 
             private fun dagerUtenNavAnsvar(beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>): DagerUtenNavAnsvaravklaring {
@@ -928,7 +930,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                                 is SelvstendigFaktaavklartInntektInnDto -> SelvstendigFaktaavklartInntekt.gjenopprett(it)
                                 is ArbeidstakerFaktaavklartInntektInnDto -> ArbeidstakerFaktaavklartInntekt.gjenopprett(it)
                             }
-                        }
+                        },
+                        selvstendigForsikring = dto.selvstendigForsikring?.let { SelvstendigForsikring.gjenopprett(it) }
                     )
                 }
             }
@@ -1120,7 +1123,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is SelvstendigFaktaavklartInntekt -> fi.dto()
                         is ArbeidstakerFaktaavklartInntekt -> fi.dto()
                         null -> null
-                    }
+                    },
+                    selvstendigForsikring = this.selvstendigForsikring?.dto()
                 )
             }
 
@@ -1476,7 +1480,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                             inntektjusteringer = emptyMap(),
-                            faktaavklartInntekt = faktaavklartInntekt
+                            faktaavklartInntekt = faktaavklartInntekt,
+                            selvstendigForsikring = null
                         )
                     ),
                     avsluttet = null,
@@ -2200,7 +2205,8 @@ internal data class BehandlingendringView(
     val dagerNavOvertarAnsvar: List<Periode>,
     val dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaring,
     val egenmeldingsdager: List<Periode>,
-    val maksdatoresultat: Maksdatoresultat
+    val maksdatoresultat: Maksdatoresultat,
+    val selvstendigForsikring: SelvstendigForsikring?
 )
 
 internal data class BehandlingkildeView(

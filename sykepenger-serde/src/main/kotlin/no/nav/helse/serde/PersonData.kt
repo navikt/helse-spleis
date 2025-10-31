@@ -37,6 +37,8 @@ import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.PeriodeUtenNavAnsvarDto
 import no.nav.helse.dto.ProsentdelDto
 import no.nav.helse.dto.RefusjonsservitørDto
+import no.nav.helse.dto.SelvstendigForsikringDto
+import no.nav.helse.dto.SelvstendigForsikringDto.ForsikringstypeDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SykdomshistorikkDto
@@ -925,7 +927,8 @@ data class PersonData(
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
-                    val faktaavklartInntekt: FaktaavklartInntektData?
+                    val faktaavklartInntekt: FaktaavklartInntektData?,
+                    val selvstendigForsikring: SelvstendigForsikringData?
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
                         id = this.id,
@@ -957,7 +960,8 @@ data class PersonData(
                         inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
                             InntektskildeDto(inntektskilde) to beløpstidslinje.tilDto()
                         }.toMap(),
-                        faktaavklartInntekt = faktaavklartInntekt?.tilDto()
+                        faktaavklartInntekt = faktaavklartInntekt?.tilDto(),
+                        selvstendigForsikring = selvstendigForsikring?.tilDto()
                     )
 
                     data class PeriodeUtenNavAnsvarData(
@@ -967,6 +971,28 @@ data class PersonData(
                         fun tilDto() = DagerUtenNavAnsvaravklaringDto(
                             ferdigAvklart = this.ferdigAvklart,
                             dager = this.dager.map { it.tilDto() }
+                        )
+                    }
+
+                    data class SelvstendigForsikringData(
+                        val virkningsdato: LocalDate,
+                        val opphørsdato: LocalDate?,
+                        val type: ForsikringstypeData
+                    ) {
+                        enum class ForsikringstypeData {
+                            ÅttiProsentFraDagEn,
+                            HundreProsentFraDagEn,
+                            HundreProsentFraDagSytten
+                        }
+
+                        fun tilDto() = SelvstendigForsikringDto(
+                            virkningsdato = this.virkningsdato,
+                            opphørsdato = this.opphørsdato,
+                            type = when (this.type) {
+                                ForsikringstypeData.ÅttiProsentFraDagEn -> ForsikringstypeDto.ÅttiProsentFraDagEn
+                                ForsikringstypeData.HundreProsentFraDagEn -> ForsikringstypeDto.HundreProsentFraDagEn
+                                ForsikringstypeData.HundreProsentFraDagSytten -> ForsikringstypeDto.HundreProsentFraDagSytten
+                            }
                         )
                     }
 

@@ -32,7 +32,6 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as HendelsePeriode
 import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
@@ -1037,8 +1036,8 @@ internal class TestMessageFactory(
             SelvstendigForsikring.name to selvstendigForsikringer.map { forsikring ->
                 mapOf(
                     "forsikringstype" to forsikring.type,
-                    "sluttdato" to forsikring.sluttdato,
-                    "startdato" to forsikring.startdato
+                    "sluttdato" to forsikring.opphørsdato,
+                    "startdato" to forsikring.virkningsdato
                 )
             }
         )

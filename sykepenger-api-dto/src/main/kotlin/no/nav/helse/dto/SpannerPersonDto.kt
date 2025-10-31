@@ -5,11 +5,13 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.dto.SelvstendigForsikringDto.ForsikringstypeDto
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.RefusjonservitørData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.ArbeidssituasjonData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.PeriodeUtenNavAnsvarData
+import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.SelvstendigForsikringData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.InntektsopplysningskildeData.AORDNINGEN
 import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.InntektsopplysningskildeData.ARBEIDSGIVER
 import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.InntektsopplysningskildeData.INFOTRYGD
@@ -346,7 +348,8 @@ data class SpannerPersonDto(
             val maksdato: LocalDate,
             val arbeidsgiverOppdrag: OppdragData?,
             val personOppdrag: OppdragData?,
-            val inntektjusteringer: Map<String, BeløpstidslinjeData>
+            val inntektjusteringer: Map<String, BeløpstidslinjeData>,
+            val selvstendigForsikring: SelvstendigForsikringData?
         )
 
         data class VedtaksperiodeData(
@@ -385,7 +388,8 @@ data class SpannerPersonDto(
                         arbeidsgiverOppdrag = utbetaling?.arbeidsgiverOppdrag?.takeUnless { it.linjer.isEmpty() },
                         dagerNavOvertarAnsvar = gjeldendeEndring.dagerNavOvertarAnsvar,
                         egenmeldingsdager = gjeldendeEndring.egenmeldingsdager,
-                        inntektjusteringer = gjeldendeEndring.inntektjusteringer
+                        inntektjusteringer = gjeldendeEndring.inntektjusteringer,
+                        selvstendigForsikring = gjeldendeEndring.selvstendigForsikring
                     )
                 }
             }
@@ -535,7 +539,8 @@ data class SpannerPersonDto(
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
-                    val faktaavklartInntekt: FaktaavklartInntektData?
+                    val faktaavklartInntekt: FaktaavklartInntektData?,
+                    val selvstendigForsikring: SelvstendigForsikringData?
                 )
 
                 data class PeriodeUtenNavAnsvarData(
@@ -552,6 +557,28 @@ data class SpannerPersonDto(
                     FISKER,
                     ANNET
                 }
+            }
+
+            data class SelvstendigForsikringData(
+                val virkningsdato: LocalDate,
+                val opphørsdato: LocalDate?,
+                val type: ForsikringstypeData
+            ) {
+                enum class ForsikringstypeData {
+                    ÅttiProsentFraDagEn,
+                    HundreProsentFraDagEn,
+                    HundreProsentFraDagSytten
+                }
+
+                fun tilDto() = SelvstendigForsikringDto(
+                    virkningsdato = this.virkningsdato,
+                    opphørsdato = this.opphørsdato,
+                    type = when (this.type) {
+                        ForsikringstypeData.ÅttiProsentFraDagEn -> ForsikringstypeDto.ÅttiProsentFraDagEn
+                        ForsikringstypeData.HundreProsentFraDagEn -> ForsikringstypeDto.HundreProsentFraDagEn
+                        ForsikringstypeData.HundreProsentFraDagSytten -> ForsikringstypeDto.HundreProsentFraDagSytten
+                    }
+                )
             }
 
             data class DataForSimuleringData(
@@ -1271,7 +1298,8 @@ private fun BehandlingendringUtDto.tilPersonData() =
         inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
             inntektskilde.id to beløpstidslinje.tilPersonData()
         }.toMap(),
-        faktaavklartInntekt = this.faktaavklartInntekt?.tilPersonData()
+        faktaavklartInntekt = this.faktaavklartInntekt?.tilPersonData(),
+        selvstendigForsikring = this.selvstendigForsikring?.tilPersonData()
     )
 
 private fun DagerUtenNavAnsvaravklaringDto.tilPersonData() = PeriodeUtenNavAnsvarData(
@@ -1799,3 +1827,13 @@ private fun FaktaavklartInntektUtDto.tilPersonData(): SpannerPersonDto.Faktaavkl
         anvendtGrunnbeløp = this.anvendtGrunnbeløp.tilPersonData()
     )
 }
+
+private fun SelvstendigForsikringDto.tilPersonData() = SelvstendigForsikringData(
+    virkningsdato = this.virkningsdato,
+    opphørsdato = this.opphørsdato,
+    type = when (this.type) {
+        ForsikringstypeDto.ÅttiProsentFraDagEn -> SelvstendigForsikringData.ForsikringstypeData.ÅttiProsentFraDagEn
+        ForsikringstypeDto.HundreProsentFraDagEn -> SelvstendigForsikringData.ForsikringstypeData.HundreProsentFraDagEn
+        ForsikringstypeDto.HundreProsentFraDagSytten -> SelvstendigForsikringData.ForsikringstypeData.HundreProsentFraDagSytten
+    }
+)
