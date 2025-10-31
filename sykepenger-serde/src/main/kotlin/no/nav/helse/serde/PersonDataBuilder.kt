@@ -24,6 +24,7 @@ import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.PeriodeUtenNavAnsvarDto
 import no.nav.helse.dto.RefusjonsservitørDto
+import no.nav.helse.dto.SelvstendigForsikringDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SykdomshistorikkElementDto
@@ -71,6 +72,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingData.Inntek
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.ArbeidssituasjonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.PeriodeUtenNavAnsvarData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.SelvstendigForsikringData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_ANNULLERING
@@ -481,6 +483,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
         inntektskilde.id to beløpstidslinje.tilPersonData()
     }.toMap(),
     faktaavklartInntekt = faktaavklartInntekt?.tilPersonData(),
+    selvstendigForsikring = selvstendigForsikring?.tilPersonData(),
     korrigertInntekt = korrigertInntekt?.tilPersonData()
 )
 
@@ -1012,4 +1015,14 @@ private fun SkatteopplysningDto.tilPersonDataSkattopplysning() = FaktaavklartInn
 private fun SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto.tilPersonData() = FaktaavklartInntektData.PensjonsgivendeInntektData(
     årstall = this.årstall.value,
     årligBeløp = this.beløp.årlig.beløp
+)
+
+private fun SelvstendigForsikringDto.tilPersonData() = SelvstendigForsikringData(
+    virkningsdato = this.virkningsdato,
+    opphørsdato = this.opphørsdato,
+    type = when (this.type) {
+        SelvstendigForsikringDto.ForsikringstypeDto.ÅttiProsentFraDagEn -> SelvstendigForsikringData.ForsikringstypeData.ÅttiProsentFraDagEn
+        SelvstendigForsikringDto.ForsikringstypeDto.HundreProsentFraDagEn -> SelvstendigForsikringData.ForsikringstypeData.HundreProsentFraDagEn
+        SelvstendigForsikringDto.ForsikringstypeDto.HundreProsentFraDagSytten -> SelvstendigForsikringData.ForsikringstypeData.HundreProsentFraDagSytten
+    }
 )

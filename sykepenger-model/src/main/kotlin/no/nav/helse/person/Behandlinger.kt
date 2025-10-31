@@ -854,6 +854,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val maksdatoresultat: Maksdatoresultat,
             val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
             val faktaavklartInntekt: FaktaavklartInntekt?,
+            val selvstendigForsikring: SelvstendigForsikring?,
             val korrigertInntekt: Saksbehandler?
         ) {
 
@@ -872,7 +873,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerUtenNavAnsvar = dagerUtenNavAnsvar,
                 egenmeldingsdager = egenmeldingsdager,
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
-                maksdatoresultat = maksdatoresultat
+                maksdatoresultat = maksdatoresultat,
+                selvstendigForsikring = selvstendigForsikring,
             )
 
             private fun dagerUtenNavAnsvar(beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>): DagerUtenNavAnsvaravklaring {
@@ -955,6 +957,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                                 is ArbeidstakerFaktaavklartInntektInnDto -> ArbeidstakerFaktaavklartInntekt.gjenopprett(it)
                             }
                         },
+                        selvstendigForsikring = dto.selvstendigForsikring?.let { SelvstendigForsikring.gjenopprett(it) },
                         korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) }
                     )
                 }
@@ -1133,6 +1136,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is ArbeidstakerFaktaavklartInntekt -> fi.dto()
                         null -> null
                     },
+                    selvstendigForsikring = this.selvstendigForsikring?.dto(),
                     korrigertInntekt = korrigertInntekt?.dto()
                 )
             }
@@ -1531,6 +1535,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                             inntektjusteringer = emptyMap(),
                             faktaavklartInntekt = faktaavklartInntekt,
+                            selvstendigForsikring = null,
                             korrigertInntekt = null
                         )
                     ),
@@ -2105,7 +2110,8 @@ internal data class BehandlingendringView(
     val dagerNavOvertarAnsvar: List<Periode>,
     val dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaring,
     val egenmeldingsdager: List<Periode>,
-    val maksdatoresultat: Maksdatoresultat
+    val maksdatoresultat: Maksdatoresultat,
+    val selvstendigForsikring: SelvstendigForsikring?
 )
 
 internal data class BehandlingkildeView(
