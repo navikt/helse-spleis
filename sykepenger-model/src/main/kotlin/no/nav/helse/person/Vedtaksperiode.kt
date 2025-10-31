@@ -135,6 +135,7 @@ import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning
@@ -372,6 +373,24 @@ internal class Vedtaksperiode private constructor(
         }
         if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeil()) forkast(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
         return Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
+    }
+
+    internal fun håndterKorrigertInntekt(eventBus: EventBus, hendelse: OverstyrArbeidsgiveropplysninger, inntektsopplysning: OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning, aktivietetslogg: IAktivitetslogg): Revurderingseventyr? {
+        if (skjæringstidspunkt != hendelse.skjæringstidspunkt) return null
+
+        behandlinger.håndterKorrigertInntekt(
+            eventBus = eventBus,
+            behandlingEventBus = eventBus.behandlingEventBus,
+            korrigertInntekt = Saksbehandler(
+                id = UUID.randomUUID(),
+                inntektsdata = inntektsopplysning.inntektsdata
+            ),
+            yrkesaktivitet = yrkesaktivitet,
+            aktivitetslogg = aktivietetslogg,
+            behandlingkilde = hendelse.metadata.behandlingkilde
+        )
+        //return Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, periode.start)// TODO: Eget eventyr?
+        return null
     }
 
     internal fun håndterOverstyrTidslinje(eventBus: EventBus, hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {

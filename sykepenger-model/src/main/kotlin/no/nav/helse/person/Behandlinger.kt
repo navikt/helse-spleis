@@ -50,6 +50,7 @@ import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.FaktaavklartInntektView
+import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
@@ -376,6 +377,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun håndterFaktaavklartInntekt(eventBus: EventBus, behandlingEventBus: BehandlingEventBus, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg) {
         behandlinger.last().håndterFaktaavklartInntekt(eventBus, behandlingEventBus, arbeidstakerFaktaavklartInntekt, yrkesaktivitet, behandlingkilde, aktivitetslogg)?.also {
+            leggTilNyBehandling(it)
+        }
+    }
+
+    internal fun håndterKorrigertInntekt(eventBus: EventBus, behandlingEventBus: BehandlingEventBus, korrigertInntekt: Saksbehandler, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg) {
+        behandlinger.last().håndterKorrigertInntekt(eventBus, behandlingEventBus, korrigertInntekt, yrkesaktivitet, behandlingkilde, aktivitetslogg)?.also {
             leggTilNyBehandling(it)
         }
     }
@@ -748,6 +755,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 yrkesaktivitet = yrkesaktivitet,
                 aktivitetslogg = aktivitetslogg
             )
+        }
+
+        fun håndterKorrigertInntekt(eventBus: EventBus, behandlingEventBus: BehandlingEventBus, korrigertInntekt: Saksbehandler, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
+            return null // TODO
         }
 
         private fun håndterNyFakta(eventBus: EventBus, behandlingEventBus: BehandlingEventBus, endringMedNyFakta: (forrigeEndring: Endring) -> Endring, behandlingkilde: Behandlingkilde, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg): Behandling? {

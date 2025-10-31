@@ -452,7 +452,7 @@ class Person private constructor(
 
     fun håndterOverstyrArbeidsgiveropplysninger(eventBus: EventBus, hendelse: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler Overstyring av arbeidsgiveropplysninger")
-        val inntektseventyr = yrkesaktiviteter.håndterOverstyringAvInntekt(hendelse, aktivitetsloggMedPersonkontekst)
+        val inntektseventyr = yrkesaktiviteter.håndterOverstyringAvInntekt(eventBus, hendelse, aktivitetsloggMedPersonkontekst)
         val refusjonseventyr = yrkesaktiviteter.håndterOverstyringAvRefusjon(eventBus, hendelse, aktivitetsloggMedPersonkontekst)
         val tidligsteEventyr = tidligsteEventyr(inntektseventyr, refusjonseventyr) ?: return aktivitetsloggMedPersonkontekst.info("Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger fordi overstyringen ikke har endret noe.")
         igangsettOverstyring(eventBus, tidligsteEventyr, aktivitetsloggMedPersonkontekst)

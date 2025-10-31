@@ -213,9 +213,18 @@ internal class Yrkesaktivitet private constructor(
             firstNotNullOfOrNull { it.håndterOverstyrInntektsgrunnlag(overstyrInntektsgrunnlag, aktivitetslogg) }
 
         internal fun List<Yrkesaktivitet>.håndterOverstyringAvInntekt(
+            eventBus: EventBus,
             overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger,
             aktivitetslogg: IAktivitetslogg
-        ) = firstNotNullOfOrNull { it.håndterOverstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger, aktivitetslogg) }
+        ): Revurderingseventyr? {
+            val behandlingseventyr = overstyrArbeidsgiveropplysninger.arbeidsgiveropplysninger.mapNotNull { inntektsopplysning ->
+                finn(Arbeidstaker(inntektsopplysning.organisasjonsnummer))?.håndterKorrigertInntekt(eventBus, overstyrArbeidsgiveropplysninger, inntektsopplysning, aktivitetslogg)
+            }.tidligsteEventyr()
+
+            val vilkårsgrunnlageventyr = firstNotNullOfOrNull { it.håndterOverstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger, aktivitetslogg) }
+
+            return listOfNotNull(behandlingseventyr, vilkårsgrunnlageventyr).tidligsteEventyr()
+        }
 
         internal fun List<Yrkesaktivitet>.håndterOverstyringAvRefusjon(
             eventBus: EventBus,
@@ -767,6 +776,13 @@ internal class Yrkesaktivitet private constructor(
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         return håndter {
             it.håndterOverstyrTidslinje(eventBus, hendelse, aktivitetsloggMedArbeidsgiverkontekst)
+        }.tidligsteEventyr()
+    }
+
+    internal fun håndterKorrigertInntekt(eventBus: EventBus, hendelse: OverstyrArbeidsgiveropplysninger, inntektsopplysning: OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
+        return håndter {
+            it.håndterKorrigertInntekt(eventBus, hendelse, inntektsopplysning, aktivitetsloggMedArbeidsgiverkontekst)
         }.tidligsteEventyr()
     }
 
