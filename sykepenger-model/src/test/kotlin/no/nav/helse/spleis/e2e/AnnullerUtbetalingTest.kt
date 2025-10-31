@@ -768,6 +768,8 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
 
+            assertEquals(listOf(1.vedtaksperiode, 2.vedtaksperiode), observatør.vedtaksperiodeAnnullertEventer.map { it.vedtaksperiodeId })
+
             assertEquals(
                 BehandlingView.TilstandView.ANNULLERT_PERIODE,
                 inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
@@ -836,6 +838,8 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterUtbetalt()
 
+            assertEquals(listOf(2.vedtaksperiode), observatør.vedtaksperiodeAnnullertEventer.map { it.vedtaksperiodeId })
+
             assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
 
@@ -900,6 +904,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
 
+            assertEquals(listOf(2.vedtaksperiode, 3.vedtaksperiode), observatør.vedtaksperiodeAnnullertEventer.map { it.vedtaksperiodeId })
             val annullering = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling
 
             assertTomAnnulleringsutbetaling(annullering!!)
@@ -943,6 +948,8 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
+
+            assertEquals(listOf(3.vedtaksperiode), observatør.vedtaksperiodeAnnullertEventer.map { it.vedtaksperiodeId })
 
             assertEquals(6, inspektør.utbetalinger.size)
             val annulleringsutbetaling = inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling
@@ -992,6 +999,8 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
                 BehandlingView.TilstandView.ANNULLERT_PERIODE,
                 inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.last().tilstand
             )
+
+            assertEquals(listOf(2.vedtaksperiode, 3.vedtaksperiode), observatør.vedtaksperiodeAnnullertEventer.map { it.vedtaksperiodeId })
 
             assertEquals(inspektør.vedtaksperioder(1.vedtaksperiode).tilstand, AVSLUTTET_UTEN_UTBETALING)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, TIL_ANNULLERING, TIL_INFOTRYGD)

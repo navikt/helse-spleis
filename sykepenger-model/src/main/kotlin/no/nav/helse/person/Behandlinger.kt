@@ -1385,12 +1385,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             observatører.forEach { it.behandlingForkastet(eventBus, id, automatiskBehandling) }
         }
 
-        internal fun vedtakAnnullert(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-            check(observatører.isNotEmpty()) { "behandlingen har ingen registrert observatør" }
-            check(this.tilstand === Tilstand.AnnullertPeriode)
-            observatører.forEach { it.vedtakAnnullert(eventBus, aktivitetslogg, id) }
-        }
-
         internal fun byggUtkastTilVedtak(builder: UtkastTilVedtakBuilder): UtkastTilVedtakBuilder {
             builder
                 .behandlingId(id)
@@ -1895,7 +1889,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Revurdering)
                 override fun forkastVedtaksperiode(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
-                    behandling.vedtakAnnullert(eventBus, aktivitetslogg)
                     return null
                 }
 

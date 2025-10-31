@@ -1505,7 +1505,21 @@ internal class Vedtaksperiode private constructor(
     private fun håndterAnnulleringUtbetalinghendelse(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         behandlinger.håndterUtbetalinghendelseSisteBehandling(utbetalingEventBus, hendelse, aktivitetslogg)
         if (!behandlinger.erAvsluttet()) return
+
         aktivitetslogg.info("Annulleringen fikk OK fra Oppdragssystemet")
+        vedtakAnnullert(eventBus, hendelse, aktivitetslogg)
+    }
+
+    internal fun vedtakAnnullert(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+        eventBus.vedtaksperiodeAnnullert(
+            EventSubscription.VedtaksperiodeAnnullertEvent(
+                fom = periode.start,
+                tom = periode.endInclusive,
+                vedtaksperiodeId = id,
+                yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
+                behandlingId = behandlinger.sisteBehandlingId
+            )
+        )
         forkast(eventBus, hendelse, aktivitetslogg)
     }
 
@@ -2240,18 +2254,6 @@ internal class Vedtaksperiode private constructor(
         )
 
         eventBus.vedtaksperiodeEndret(event)
-    }
-
-    override fun vedtakAnnullert(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, behandlingId: UUID) {
-        eventBus.vedtaksperiodeAnnullert(
-            EventSubscription.VedtaksperiodeAnnullertEvent(
-                fom = periode.start,
-                tom = periode.endInclusive,
-                vedtaksperiodeId = id,
-                yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
-                behandlingId = behandlingId
-            )
-        )
     }
 
     override fun behandlingLukket(eventBus: EventBus, behandlingId: UUID) {

@@ -1,7 +1,6 @@
 package no.nav.helse.person.tilstandsmaskin
 
 import java.time.LocalDateTime
-import no.nav.helse.hendelser.AnnullerTomUtbetaling
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Revurderingseventyr
@@ -38,11 +37,10 @@ internal data object AvventerAnnullering : Vedtaksperiodetilstand {
 
         vedtaksperiode.behandlinger.leggTilAnnullering(with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, annullering, vurdering, aktivitetslogg)
 
-        if (!vedtaksperiode.behandlinger.erAvsluttet()) {
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, TilAnnullering)
-        } else {
-            vedtaksperiode.forkast(eventBus, AnnullerTomUtbetaling(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype), aktivitetslogg)
-        }
+        if (!vedtaksperiode.behandlinger.erAvsluttet())
+            return vedtaksperiode.tilstand(eventBus, aktivitetslogg, TilAnnullering)
+
+        vedtaksperiode.vedtakAnnullert(eventBus, hendelse, aktivitetslogg)
     }
 
     private fun lagAnnulleringsutbetaling(eventBus: EventBus, vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg): Utbetaling {
