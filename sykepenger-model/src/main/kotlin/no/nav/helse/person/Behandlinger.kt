@@ -114,7 +114,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         dagerNavOvertarAnsvar: List<Periode>
     ) {
         check(behandlinger.isEmpty())
-        val behandling = Behandling.nyBehandling(
+        val behandling = Behandling.initiellBehandling(
             behandlingEventBus = behandlingEventBus,
             sykdomstidslinje = sykdomstidslinje,
             arbeidssituasjon = arbeidssituasjon,
@@ -1435,7 +1435,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal companion object {
             val List<Behandling>.sykmeldingsperiode get() = first().periode
             val List<Behandling>.dokumentsporing get() = map { it.dokumentsporing }.takeUnless { it.isEmpty() }?.reduce(Set<Dokumentsporing>::plus) ?: emptySet()
-            fun nyBehandling(
+            fun initiellBehandling(
                 behandlingEventBus: BehandlingEventBus,
                 sykdomstidslinje: Sykdomstidslinje,
                 arbeidssituasjon: Arbeidssituasjon,
