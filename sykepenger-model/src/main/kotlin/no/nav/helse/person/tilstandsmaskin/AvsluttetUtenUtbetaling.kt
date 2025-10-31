@@ -36,7 +36,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
             .vedtaksperioder
             .single()
 
-        val sisteBehandling = vedtaksperiode.behandlinger.avsluttUtenVedtak(eventBus, vedtaksperiode.yrkesaktivitet, aktivitetslogg, utbetalingstidslinje.utbetalingstidslinje, emptyMap())
+        val sisteBehandling = vedtaksperiode.behandlinger.avsluttUtenVedtak(eventBus, vedtaksperiode.yrkesaktivitet, utbetalingstidslinje.utbetalingstidslinje, emptyMap())
         val dekkesAvArbeidsgiverperioden = vedtaksperiode.behandlinger.ventedager().dagerUtenNavAnsvar.periode?.inneholder(vedtaksperiode.periode) != false
 
         if (dekkesAvArbeidsgiverperioden) {

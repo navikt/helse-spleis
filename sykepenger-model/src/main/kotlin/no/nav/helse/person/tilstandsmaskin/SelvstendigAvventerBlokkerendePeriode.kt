@@ -35,6 +35,6 @@ internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilst
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.behandlinger.forkastBeregning(eventBus, with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
+        vedtaksperiode.behandlinger.forkastBeregning(with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
     }
 }

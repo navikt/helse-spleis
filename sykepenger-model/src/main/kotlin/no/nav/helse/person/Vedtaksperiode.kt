@@ -1096,7 +1096,7 @@ internal class Vedtaksperiode private constructor(
         )
         // steg 4.1: lag beregnede behandlinger
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
-        lagBeregnetBehandlinger(eventBus, aktivitetslogg, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder)
+        lagBeregnetBehandlinger(perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder)
 
         /* steg 4.2 lag utbetalinger */
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
@@ -1114,8 +1114,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun lagBeregnetBehandlinger(
-        eventBus: EventBus,
-        aktivitetslogg: IAktivitetslogg,
         perioderDetSkalBeregnesUtbetalingFor: List<Vedtaksperiode>,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
@@ -1142,8 +1140,6 @@ internal class Vedtaksperiode private constructor(
             .map { other ->
                 val beregningsutfall = beregnetTidslinjePerVedtaksperiode.single { it.vedtaksperiodeId == other.id }
                 other.lagBeregnetBehandling(
-                    eventBus = eventBus,
-                    aktivitetslogg = other.registrerKontekst(aktivitetslogg),
                     beregning = beregningsutfall,
                     grunnlagsdata = grunnlagsdata,
                     alleInntektjusteringer = alleInntektjusteringer
@@ -1507,7 +1503,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterAnnulleringUtbetalinghendelse(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-        behandlinger.håndterUtbetalinghendelseSisteBehandling(eventBus, utbetalingEventBus, hendelse, aktivitetslogg)
+        behandlinger.håndterUtbetalinghendelseSisteBehandling(utbetalingEventBus, hendelse, aktivitetslogg)
         if (!behandlinger.erAvsluttet()) return
         aktivitetslogg.info("Annulleringen fikk OK fra Oppdragssystemet")
         forkast(eventBus, hendelse, aktivitetslogg)
@@ -1515,7 +1511,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun vedtakIverksattMensTilRevurdering(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         val erVedtakIverksatt = behandlinger
-            .håndterUtbetalinghendelseSisteInFlight(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
+            .håndterUtbetalinghendelseSisteInFlight(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
             ?.vedtakIverksatt(eventBus)
             ?: false
         if (!erVedtakIverksatt) return
@@ -1524,7 +1520,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun vedtakIverksatt(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
         val erVedtakIverksatt = behandlinger
-            .håndterUtbetalinghendelseSisteBehandling(eventBus,  with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
+            .håndterUtbetalinghendelseSisteBehandling(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
             .vedtakIverksatt(eventBus)
         if (!erVedtakIverksatt) return
         tilstand(eventBus, aktivitetslogg, nesteTilstand) {
@@ -2499,14 +2495,14 @@ internal class Vedtaksperiode private constructor(
 
     fun slutterEtter(dato: LocalDate) = periode.slutterEtter(dato)
 
-    private fun lagBeregnetBehandling(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, beregning: BeregnetPeriode, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>): BeregnetBehandling {
+    private fun lagBeregnetBehandling(beregning: BeregnetPeriode, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>): BeregnetBehandling {
         val beregnetBehandling = BeregnetBehandling(
             maksdatoresultat = Maksdatoresultat.oversettFra(beregning.maksdatoresultat),
             utbetalingstidslinje = beregning.utbetalingstidslinje,
             grunnlagsdata = grunnlagsdata,
             alleInntektjusteringer = alleInntektjusteringer
         )
-        behandlinger.beregnetBehandling(eventBus, aktivitetslogg, beregnetBehandling)
+        behandlinger.beregnetBehandling(beregnetBehandling)
         return beregnetBehandling
     }
 
@@ -2635,7 +2631,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg
     ) {
         revurdering.inngåSomEndring(this, aktivitetslogg)
-        behandlinger.forkastBeregning(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
+        behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
         if (måInnhenteInntektEllerRefusjon()) return tilstand(eventBus, aktivitetslogg, AvventerInntektsmelding)
         tilstand(eventBus, aktivitetslogg, AvventerBlokkerendePeriode)
     }
@@ -2646,7 +2642,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg
     ) {
         revurdering.inngåSomEndring(this, aktivitetslogg)
-        behandlinger.forkastBeregning(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
+        behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
         tilstand(eventBus, aktivitetslogg, SelvstendigAvventerBlokkerendePeriode)
     }
 

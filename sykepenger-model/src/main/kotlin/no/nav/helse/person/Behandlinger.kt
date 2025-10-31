@@ -204,16 +204,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun harFlereSkjæringstidspunkt() = behandlinger.last().harFlereSkjæringstidspunkt()
     internal fun børBrukeSkatteinntekterDirekte() = behandlinger.last().skjæringstidspunkter.isEmpty()
 
-    internal fun håndterUtbetalinghendelseSisteInFlight(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg): Behandling? {
+    internal fun håndterUtbetalinghendelseSisteInFlight(utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg): Behandling? {
         return behandlinger
             .lastOrNull { it.erInFlight() }
-            ?.also { it.håndterUtbetalinghendelse(eventBus, utbetalingEventBus, hendelse, aktivitetslogg) }
+            ?.also { it.håndterUtbetalinghendelse(utbetalingEventBus, hendelse, aktivitetslogg) }
     }
 
-    internal fun håndterUtbetalinghendelseSisteBehandling(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg): Behandling {
+    internal fun håndterUtbetalinghendelseSisteBehandling(utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg): Behandling {
         return behandlinger
             .last()
-            .also { it.håndterUtbetalinghendelse(eventBus, utbetalingEventBus, hendelse, aktivitetslogg) }
+            .also { it.håndterUtbetalinghendelse(utbetalingEventBus, hendelse, aktivitetslogg) }
     }
 
     internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
@@ -245,17 +245,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         leggTilNyBehandling(behandlinger.last().håndterAnnullering(eventBus, yrkesaktivitet, behandlingkilde, aktivitetslogg))
     }
 
-    internal fun leggTilAnnullering(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, aktivitetslogg: IAktivitetslogg) {
+    internal fun leggTilAnnullering(utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, aktivitetslogg: IAktivitetslogg) {
         val forrigeVedtak = behandlinger.last { it.erFattetVedtak() }
-        behandlinger.last().leggTilAnnullering(eventBus, utbetalingEventBus, annullering, vurdering,  forrigeVedtak, aktivitetslogg)
+        behandlinger.last().leggTilAnnullering(utbetalingEventBus, annullering, vurdering,  forrigeVedtak, aktivitetslogg)
     }
 
-    internal fun beregnetBehandling(
-        eventBus: EventBus,
-        aktivitetslogg: IAktivitetslogg,
-        beregning: BeregnetBehandling
-    ) {
-        behandlinger.last().utbetaling(eventBus, aktivitetslogg, beregning)
+    internal fun beregnetBehandling(beregning: BeregnetBehandling) {
+        behandlinger.last().utbetaling(beregning)
     }
 
     internal fun lagUtbetaling(
@@ -270,8 +266,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.last().forkastetBehandling(eventBus, automatiskBehandling)
     }
 
-    internal fun forkastBeregning(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-        behandlinger.last().forkastBeregning(eventBus, utbetalingEventBus, aktivitetslogg)
+    internal fun forkastBeregning(utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
+        behandlinger.last().forkastBeregning(utbetalingEventBus, aktivitetslogg)
     }
 
     internal fun harIkkeUtbetaling() = behandlinger.last().harIkkeUtbetaling()
@@ -302,12 +298,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
     }
 
-    fun avsluttUtenVedtak(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>): Behandling {
+    fun avsluttUtenVedtak(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>): Behandling {
         check(behandlinger.last().utbetaling() == null) {
             "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. "
         }
         return this.behandlinger.last().also {
-            it.avsluttUtenVedtak(eventBus, yrkesaktivitet, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
+            it.avsluttUtenVedtak(eventBus, yrkesaktivitet, utbetalingstidslinje, inntekterForBeregning)
             bekreftAvsluttetBehandling(yrkesaktivitet)
         }
     }
@@ -508,7 +504,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         private val observatører = observatører.toMutableList()
         private val gjeldende get() = endringer.last()
         private val periode: Periode get() = gjeldende.periode
-        private val tidsstempel = endringer.first().tidsstempel
         private val dokumentsporing get() = endringer.dokumentsporing
         val dagerUtenNavAnsvar get() = gjeldende.dagerUtenNavAnsvar
         val skjæringstidspunkt get() = gjeldende.skjæringstidspunkt
@@ -1193,8 +1188,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
         }
 
-        internal fun avsluttUtenVedtak(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
-            tilstand.avsluttUtenVedtak(this, eventBus, yrkesaktivitet, aktivitetslogg, utbetalingstidslinje, inntekterForBeregning)
+        internal fun avsluttUtenVedtak(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
+            tilstand.avsluttUtenVedtak(this, eventBus, yrkesaktivitet, utbetalingstidslinje, inntekterForBeregning)
         }
 
         internal fun forkastVedtaksperiode(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
@@ -1207,23 +1202,19 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             tilstand.entering(this)
         }
 
-        fun forkastBeregning(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-            tilstand.utenBeregning(this, eventBus, utbetalingEventBus, aktivitetslogg)
+        fun forkastBeregning(utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
+            tilstand.utenBeregning(this, utbetalingEventBus, aktivitetslogg)
         }
 
         fun utbetaling() = gjeldende.utbetaling
-        fun utbetaling(
-            eventBus: EventBus,
-            aktivitetslogg: IAktivitetslogg,
-            beregning: BeregnetBehandling
-        ) = tilstand.beregning(this, eventBus, aktivitetslogg, beregning)
+        fun utbetaling(beregning: BeregnetBehandling) = tilstand.beregning(this, beregning)
 
         internal fun håndterAnnullering(eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, behandlingskilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
             return this.tilstand.håndterAnnullering(this, eventBus, yrkesaktivitet, behandlingskilde, aktivitetslogg)
         }
 
-        internal fun leggTilAnnullering(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, forrigeVedtak: Behandling, aktivitetslogg: IAktivitetslogg) {
-            tilstand.leggTilAnnullering(this, eventBus, utbetalingEventBus, annullering, vurdering, forrigeVedtak.gjeldende.grunnlagsdata!!, aktivitetslogg)
+        internal fun leggTilAnnullering(utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, forrigeVedtak: Behandling, aktivitetslogg: IAktivitetslogg) {
+            tilstand.leggTilAnnullering(this, utbetalingEventBus, annullering, vurdering, forrigeVedtak.gjeldende.grunnlagsdata!!, aktivitetslogg)
         }
 
         fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
@@ -1312,8 +1303,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return tilstand.tillaterNyBehandling(this, other)
         }
 
-        fun håndterUtbetalinghendelse(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-            tilstand.håndterUtbetalinghendelse(this, eventBus, utbetalingEventBus, hendelse, aktivitetslogg)
+        fun håndterUtbetalinghendelse(utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+            tilstand.håndterUtbetalinghendelse(this, utbetalingEventBus, hendelse, aktivitetslogg)
         }
 
         fun kanForkastes(andreBehandlinger: List<Behandling>): Boolean {
@@ -1553,7 +1544,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Har ikke implementert håndtering av annullering i $this")
             }
 
-            fun leggTilAnnullering(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
+            fun leggTilAnnullering(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
                 error("Kan ikke legge til annullering i $this")
             }
 
@@ -1571,18 +1562,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Kan ikke fatte vedtak for behandling i $this")
             }
 
-            fun avsluttUtenVedtak(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
+            fun avsluttUtenVedtak(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
                 error("Kan ikke avslutte uten vedtak for behandling i $this")
             }
 
-            fun utenBeregning(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
+            fun utenBeregning(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
                 error("Støtter ikke å forkaste utbetaling utbetaling i $this")
             }
 
             fun beregning(
                 behandling: Behandling,
-                eventBus: EventBus,
-                aktivitetslogg: IAktivitetslogg,
                 beregning: BeregnetBehandling
             ) {
                 error("Støtter ikke å beregne behandlingen i $this")
@@ -1595,7 +1584,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             fun tillaterNyBehandling(behandling: Behandling, other: Behandling): Boolean = false
-            fun håndterUtbetalinghendelse(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {}
+            fun håndterUtbetalinghendelse(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {}
             fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {
                 behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} burde vært ferdig behandlet, men står i tilstand ${behandling.tilstand::class.simpleName}")
             }
@@ -1622,18 +1611,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing) =
                     behandling.kopierMedDokument(dokument)
 
-                override fun utenBeregning(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {}
+                override fun utenBeregning(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {}
                 override fun beregning(
                     behandling: Behandling,
-                    eventBus: EventBus,
-                    aktivitetslogg: IAktivitetslogg,
                     beregning: BeregnetBehandling
                 ) {
                     behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
                     behandling.tilstand(Beregnet)
                 }
 
-                override fun avsluttUtenVedtak(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
+                override fun avsluttUtenVedtak(behandling: Behandling, eventBus: EventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
                     behandling.behandlingLukket(eventBus, yrkesaktivitet)
                     behandling.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning)
                     behandling.tilstand(AvsluttetUtenVedtak)
@@ -1644,8 +1631,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Omgjøring)
                 override fun beregning(
                     behandling: Behandling,
-                    eventBus: EventBus,
-                    aktivitetslogg: IAktivitetslogg,
                     beregning: BeregnetBehandling,
                 ) {
                     behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
@@ -1658,8 +1643,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 override fun beregning(
                     behandling: Behandling,
-                    eventBus: EventBus,
-                    aktivitetslogg: IAktivitetslogg,
                     beregning: BeregnetBehandling
                 ) {
                     behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning))
@@ -1700,7 +1683,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 override fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing) =
                     behandling.kopierMedDokument(dokument)
 
-                override fun utenBeregning(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
+                override fun utenBeregning(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
                     behandling.utenBeregning(utbetalingEventBus, aktivitetslogg)
                     behandling.tilstand(Uberegnet)
                 }
@@ -1718,7 +1701,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object BeregnetOmgjøring : Tilstand by (Beregnet) {
-                override fun utenBeregning(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
+                override fun utenBeregning(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
                     behandling.utenBeregning(utbetalingEventBus, aktivitetslogg)
                     behandling.tilstand(UberegnetOmgjøring)
                 }
@@ -1735,7 +1718,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return super.forkastVedtaksperiode(behandling, eventBus, yrkesaktivitet, behandlingkilde, aktivitetslogg)
                 }
 
-                override fun utenBeregning(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
+                override fun utenBeregning(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
                     behandling.utenBeregning(utbetalingEventBus, aktivitetslogg)
                     behandling.tilstand(UberegnetRevurdering)
                 }
@@ -1805,7 +1788,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     return behandling.sikreNyBehandling(eventBus, yrkesaktivitet, UberegnetRevurdering, behandlingkilde, beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar)
                 }
 
-                override fun håndterUtbetalinghendelse(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+                override fun håndterUtbetalinghendelse(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
                     val utbetaling = checkNotNull(behandling.gjeldende.utbetaling) { "forventer utbetaling" }
                     if (!utbetaling.gjelderFor(hendelse)) return
                     utbetaling.håndterUtbetalingmodulHendelse(utbetalingEventBus, hendelse, aktivitetslogg)
@@ -1813,7 +1796,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.tilstand(VedtakIverksatt)
                 }
 
-                override fun utenBeregning(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {}
+                override fun utenBeregning(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {}
 
                 override fun validerIkkeFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {}
 
@@ -1922,7 +1905,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             data object UberegnetAnnullering : Tilstand {
                 override fun behandlingOpprettet(behandling: Behandling, eventBus: EventBus) = behandling.emitNyBehandlingOpprettet(eventBus, EventSubscription.BehandlingOpprettetEvent.Type.Revurdering)
 
-                override fun leggTilAnnullering(behandling: Behandling, eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
+                override fun leggTilAnnullering(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
                     behandling.nyEndring(behandling.gjeldende.kopierMedAnnullering(grunnlagsdata, annullering))
 
                     annullering.godkjent(utbetalingEventBus, aktivitetslogg, vurdering)
@@ -1933,7 +1916,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             data object OverførtAnnullering : Tilstand {
-                override fun håndterUtbetalinghendelse(behandling: Behandling, eventBus: EventBus,  utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+                override fun håndterUtbetalinghendelse(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
                     val utbetaling = checkNotNull(behandling.gjeldende.utbetaling) { "forventer utbetaling" }
                     if (!utbetaling.gjelderFor(hendelse)) return
                     utbetaling.håndterUtbetalingmodulHendelse(utbetalingEventBus, hendelse, aktivitetslogg)

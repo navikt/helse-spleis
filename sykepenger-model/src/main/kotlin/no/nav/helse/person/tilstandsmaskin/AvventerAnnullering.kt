@@ -36,7 +36,7 @@ internal data object AvventerAnnullering : Vedtaksperiodetilstand {
         val vurdering = (hendelse as? AnnullerUtbetaling)?.vurdering
             ?: Utbetaling.Vurdering(true, "Automatisk behandlet", "tbd@nav.no", LocalDateTime.now(), true)
 
-        vedtaksperiode.behandlinger.leggTilAnnullering(eventBus, with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, annullering, vurdering, aktivitetslogg)
+        vedtaksperiode.behandlinger.leggTilAnnullering(with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, annullering, vurdering, aktivitetslogg)
 
         if (!vedtaksperiode.behandlinger.erAvsluttet()) {
             vedtaksperiode.tilstand(eventBus, aktivitetslogg, TilAnnullering)
