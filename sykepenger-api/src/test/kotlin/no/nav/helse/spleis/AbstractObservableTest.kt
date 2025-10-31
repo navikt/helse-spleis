@@ -108,8 +108,7 @@ internal abstract class AbstractObservableTest {
         fraværFørSykmelding = null,
         harOppgittAvvikling = null,
         harOppgittNyIArbeidslivet = null,
-        harOppgittVarigEndring = null,
-        harOppgittÅHaForsikring = null
+        harOppgittVarigEndring = null
     )
 
     protected fun utbetalinghistorikk() = UtbetalingshistorikkEtterInfotrygdendring(

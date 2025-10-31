@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
@@ -123,7 +123,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
         dokumentsporing: Dokumentsporing,
         behandlingkilde: Behandlingkilde,
-        dagerNavOvertarAnsvar: List<Periode>
     ) {
         check(behandlinger.isEmpty())
         val behandling = Behandling.initiellBehandling(
@@ -134,7 +133,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             faktaavklartInntekt = faktaavklartInntekt,
             dokumentsporing = dokumentsporing,
             sykmeldingsperiode = sykmeldingsperiode,
-            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             behandlingkilde = behandlingkilde
         )
         leggTilNyBehandling(behandling)
@@ -1511,7 +1509,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
                 dokumentsporing: Dokumentsporing,
                 sykmeldingsperiode: Periode,
-                dagerNavOvertarAnsvar: List<Periode>,
                 behandlingkilde: Behandlingkilde
             ) =
                 Behandling(
@@ -1534,7 +1531,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             skjæringstidspunkter = emptyList(),
                             dagerUtenNavAnsvar = DagerUtenNavAnsvaravklaring(false, emptyList()),
                             egenmeldingsdager = egenmeldingsdager,
-                            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+                            dagerNavOvertarAnsvar = emptyList(),
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                             inntektjusteringer = emptyMap(),
                             faktaavklartInntekt = faktaavklartInntekt,

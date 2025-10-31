@@ -118,8 +118,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             fraværFørSykmelding = null,
             harOppgittAvvikling = null,
             harOppgittNyIArbeidslivet = null,
-            harOppgittVarigEndring = null,
-            harOppgittÅHaForsikring = null
+            harOppgittVarigEndring = null
         ).apply {
             søknader.add(this)
         }

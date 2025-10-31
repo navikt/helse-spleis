@@ -32,10 +32,6 @@ internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val 
         val fraværFørSykmelding = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("FRAVAR_FOR_SYKMELDINGEN_V2").takeUnless { it.isMissingOrNull() }?.asBoolean()
         builder.fraværFørSykmelding(fraværFørSykmelding)
 
-        val harOppgittÅHaForsikringGamleMåten = packet["selvstendigNaringsdrivende"].path("harForsikring").takeUnless { it.isMissingOrNull() }?.asBoolean()
-        val harOppgittÅHaForsikringNyeMåten = packet["selvstendigNaringsdrivende"].path("brukerHarOppgittForsikring").takeUnless { it.isMissingOrNull() }?.asBoolean()
-        builder.harOppgittÅHaForsikring((harOppgittÅHaForsikringGamleMåten == true) || (harOppgittÅHaForsikringNyeMåten == true))
-
         val harOppgittNyIArbedislivetPåGamleMåten = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("INNTEKTSOPPLYSNINGER_NY_I_ARBEIDSLIVET").takeUnless { it.isMissingOrNull() }?.asBoolean()
         val harOppgittNyIArbedislivetPåNyeMåten = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("NARINGSDRIVENDE_NY_I_ARBEIDSLIVET").takeUnless { it.isMissingOrNull() }?.asBoolean()
         builder.harOppgittNyIArbeidslivet((harOppgittNyIArbedislivetPåGamleMåten == true) || (harOppgittNyIArbedislivetPåNyeMåten == true))

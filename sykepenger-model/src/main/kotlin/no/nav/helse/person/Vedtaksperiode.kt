@@ -65,7 +65,6 @@ import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.annullering
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.SelvstendigForsikring
-import no.nav.helse.hendelser.SelvstendigForsikring.Forsikringstype
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
@@ -224,7 +223,6 @@ internal class Vedtaksperiode private constructor(
         sykmeldingsperiode: Periode,
         arbeidssituasjon: Endring.Arbeidssituasjon,
         faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
-        dagerNavOvertarAnsvar: List<Periode>,
         regelverkslogg: Regelverkslogg
     ) : this(
         person = person,
@@ -252,7 +250,7 @@ internal class Vedtaksperiode private constructor(
             faktaavklartInntekt = faktaavklartInntekt,
             dokumentsporing = dokumentsporing,
             behandlingkilde = metadata.behandlingkilde,
-            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
+            dagerNavOvertarAnsvar = emptyList()
         )
     }
 
