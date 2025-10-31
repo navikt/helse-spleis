@@ -62,6 +62,10 @@ internal class UtkastTilVedtakBuilder(
 
     private lateinit var behandlingId: UUID
     internal fun behandlingId(behandlingId: UUID) = apply { this.behandlingId = behandlingId }
+    private var vedtakFattet: LocalDateTime? = null
+    internal fun vedtakFattet(vedtakFattet: LocalDateTime) = apply { this.vedtakFattet = vedtakFattet }
+    private var historiskeHendelseIder: Set<MeldingsreferanseId> = emptySet()
+    internal fun historiskeHendelseIder(historiskeHendelseIder: Set<MeldingsreferanseId>) = apply { this.historiskeHendelseIder = historiskeHendelseIder }
     private lateinit var periode: Periode
     internal fun periode(arbeidsgiverperiode: List<Periode>, arbeidsgiverperiodeFerdigAvklart: Boolean, periode: Periode) = apply {
         this.periode = periode
@@ -185,7 +189,7 @@ internal class UtkastTilVedtakBuilder(
     private val build by lazy { Build() }
     internal fun buildGodkjenningsbehov() = build.godkjenningsbehov
     internal fun buildUtkastTilVedtak() = build.utkastTilVedtak
-    internal fun buildAvsluttedMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<MeldingsreferanseId>) = build.avsluttetMedVedtak(vedtakFattet, historiskeHendelseIder)
+    internal fun buildAvsluttedMedVedtak() = build.avsluttetMedVedtak(vedtakFattet!!, historiskeHendelseIder)
     private inner class Build {
         private val skjønnsfastsatt = arbeidsgiverinntekter.any { it.skjønnsfastsatt != null }.also {
             if (it) check(arbeidsgiverinntekter.all { arbeidsgiver -> arbeidsgiver.skjønnsfastsatt != null }) { "Enten må ingen eller alle arbeidsgivere i sykepengegrunnlaget være skjønnsmessig fastsatt." }

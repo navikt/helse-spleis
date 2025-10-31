@@ -19,13 +19,6 @@ internal interface BehandlingObserver {
         dokumentsporing: Set<UUID>
     )
 
-    fun vedtakIverksatt(
-        eventBus: EventBus,
-        aktivitetslogg: IAktivitetslogg,
-        vedtakFattetTidspunkt: LocalDateTime,
-        behandling: Behandlinger.Behandling
-    )
-
     fun vedtakAnnullert(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, behandlingId: UUID)
     fun behandlingLukket(eventBus: EventBus, behandlingId: UUID)
     fun behandlingForkastet(eventBus: EventBus, behandlingId: UUID, automatiskBehandling: Boolean)

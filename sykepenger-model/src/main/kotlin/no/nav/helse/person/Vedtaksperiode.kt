@@ -257,8 +257,7 @@ internal class Vedtaksperiode private constructor(
             this
         )
     internal val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
-    private val eksterneIder get() = behandlinger.eksterneIder()
-    private val eksterneIderSet get() = eksterneIder.map { it.id }.toSet()
+    private val eksterneIderSet get() = behandlinger.eksterneIderUUID()
     private val refusjonstidslinje get() = behandlinger.refusjonstidslinje()
 
     init {
@@ -1316,8 +1315,12 @@ internal class Vedtaksperiode private constructor(
     private fun Behandlingsavgjørelse.vedtakFattet(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, nesteTilUtbetalingtilstand: Vedtaksperiodetilstand, nesteAvsluttettilstand: Vedtaksperiodetilstand) {
         if (automatisert) aktivitetslogg.info("Utbetaling markert som godkjent automatisk $avgjørelsestidspunkt")
         else aktivitetslogg.info("Utbetaling markert som godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
-        behandlinger.vedtakFattet(eventBus, yrkesaktivitet, this, aktivitetslogg)
-        tilstand(eventBus, aktivitetslogg, if (behandlinger.erAvsluttet()) nesteAvsluttettilstand else nesteTilUtbetalingtilstand)
+
+        val erVedtakIverksatt = behandlinger
+            .vedtakFattet(eventBus, yrkesaktivitet, this, aktivitetslogg)
+            .vedtakIverksatt(eventBus)
+
+        tilstand(eventBus, aktivitetslogg, if (erVedtakIverksatt) nesteAvsluttettilstand else nesteTilUtbetalingtilstand)
     }
 
     internal fun håndter(eventBus: EventBus, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg): Boolean {
@@ -1512,17 +1515,30 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun vedtakIverksattMensTilRevurdering(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-        behandlinger.håndterUtbetalinghendelseSisteInFlight(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
-        // todo: send ut avsluttet_med_vedtak
+        val erVedtakIverksatt = behandlinger
+            .håndterUtbetalinghendelseSisteInFlight(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
+            ?.vedtakIverksatt(eventBus)
+            ?: false
+        if (!erVedtakIverksatt) return
+        person.gjenopptaBehandling(aktivitetslogg)
     }
 
     private fun vedtakIverksatt(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
-        behandlinger.håndterUtbetalinghendelseSisteBehandling(eventBus,  with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
-        if (!behandlinger.erAvsluttet()) return
-        // todo: send ut avsluttet_med_vedtak
+        val erVedtakIverksatt = behandlinger
+            .håndterUtbetalinghendelseSisteBehandling(eventBus,  with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
+            .vedtakIverksatt(eventBus)
+        if (!erVedtakIverksatt) return
         tilstand(eventBus, aktivitetslogg, nesteTilstand) {
             aktivitetslogg.info("OK fra Oppdragssystemet")
         }
+    }
+
+    private fun Behandlinger.Behandling.vedtakIverksatt(eventBus: EventBus): Boolean {
+        if (!erAvsluttet()) return false
+        val utkastTilVedtakBuilder = utkastTilVedtakBuilder(this)
+        eventBus.avsluttetMedVedtak(utkastTilVedtakBuilder.buildAvsluttedMedVedtak())
+        eventBus.analytiskDatapakke(behandlinger.analytiskDatapakke(yrkesaktivitet.yrkesaktivitetstype, this@Vedtaksperiode.id))
+        return true
     }
 
     internal fun håndterAnnullerUtbetaling(
@@ -2257,18 +2273,6 @@ internal class Vedtaksperiode private constructor(
         person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    override fun vedtakIverksatt(
-        eventBus: EventBus,
-        aktivitetslogg: IAktivitetslogg,
-        vedtakFattetTidspunkt: LocalDateTime,
-        behandling: Behandlinger.Behandling
-    ) {
-        val utkastTilVedtakBuilder = utkastTilVedtakBuilder(behandling)
-        eventBus.avsluttetMedVedtak(utkastTilVedtakBuilder.buildAvsluttedMedVedtak(vedtakFattetTidspunkt, eksterneIder))
-        eventBus.analytiskDatapakke(behandlinger.analytiskDatapakke(this.yrkesaktivitet.yrkesaktivitetstype, this.id))
-        person.gjenopptaBehandling(aktivitetslogg)
-    }
-
     override fun vedtakAnnullert(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, behandlingId: UUID) {
         eventBus.vedtaksperiodeAnnullert(
             EventSubscription.VedtaksperiodeAnnullertEvent(
@@ -2405,7 +2409,7 @@ internal class Vedtaksperiode private constructor(
             .associate { it.id to it.behandlinger }
             .berik(builder)
 
-        return behandling?.byggUtkastTilVedtak(builder) ?: behandlinger.byggUtkastTilVedtak(builder)
+        return behandlinger.byggUtkastTilVedtak(builder, behandling)
     }
 
     internal fun gjenopptaBehandling(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
