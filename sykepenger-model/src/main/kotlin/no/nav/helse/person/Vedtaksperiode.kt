@@ -1954,12 +1954,10 @@ internal class Vedtaksperiode private constructor(
     private fun arbeidstakerFaktaavklartInntekt(aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt? {
         if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return null
         val faktaavklartInntekt = checkNotNull(behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) { "Her skal vi ha en inntekt!" }
-        val (tidligereFattetVedtakSkjæringstidspunkt, tidligereFattetVedtakArbeidsgiverperiode) = behandlinger.tidligereFattetVedtak() ?: return faktaavklartInntekt
-        return faktaavklartInntekt.medInnteksdato(skjæringstidspunkt).also { it.vurderVarselForGjenbrukAvInntekt(
-            forrigeDato = tidligereFattetVedtakSkjæringstidspunkt,
-            harNyArbeidsgiverperiode = tidligereFattetVedtakArbeidsgiverperiode != behandlinger.ventedager().dagerUtenNavAnsvar,
-            aktivitetslogg = aktivitetslogg
-        )}
+
+        behandlinger.vurderVarselForGjenbrukAvInntekt(faktaavklartInntekt, aktivitetslogg)
+
+        return faktaavklartInntekt
     }
 
     private fun inntektForArbeidsgiver(

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.reflect.KClass
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -330,6 +331,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+
+            // Her har ko arbeidsgiverperioden flyttet seg
+            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) assertVarsler(2.vedtaksperiode, RV_IV_7)
         }
     }
 
@@ -478,8 +482,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterOverstyrTidslinje((1.januar til 16.januar).map { dag ->
                 ManuellOverskrivingDag(dag, Dagtype.Arbeidsdag, 100)
             })
-            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
@@ -1134,8 +1138,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
             // Flytter skjæringstidspunkt ved å legge til sykdomsdager i snuten
             håndterOverstyrTidslinje((1.januar til 7.januar).map { manuellSykedag(it) })
-            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)

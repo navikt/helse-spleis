@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -24,6 +25,7 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.EventSubscription.VedtaksperiodeVenterEvent
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -120,7 +122,13 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(refusjonFør, inspektør(a2).refusjon(1.vedtaksperiode))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a2)
-        assertVarsler(listOf(RV_IV_10), 1.vedtaksperiode.filter(a2))
+
+        // Nå gjenbruker vi alle type inntekter
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+            assertVarsler(listOf(Varselkode.RV_IV_7), 1.vedtaksperiode.filter(a2))
+        } else {
+            assertVarsler(listOf(RV_IV_10), 1.vedtaksperiode.filter(a2))
+        }
     }
 
     @Test
