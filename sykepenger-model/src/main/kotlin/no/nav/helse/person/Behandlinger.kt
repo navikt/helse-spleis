@@ -520,6 +520,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val arbeidssituasjon get() = endringer.last().arbeidssituasjon
         val utbetalingstidslinje get() = endringer.last().utbetalingstidslinje
         val faktaavklartInntekt get() = endringer.last().faktaavklartInntekt
+        val korrigertInntekt get() = endringer.last().korrigertInntekt
         val inntektsjusteringer get() = endringer.last().inntektjusteringer
 
         constructor(behandlingEventBus: BehandlingEventBus, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde) {
@@ -576,7 +577,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 is SelvstendigFaktaavklartInntekt -> fi.view()
                 is ArbeidstakerFaktaavklartInntekt -> fi.view()
                 null -> null
-            }
+            },
+            korrigertInntekt = korrigertInntekt?.view()
         )
 
         fun sykmeldingsperiode() = endringer.first().sykmeldingsperiode
@@ -758,7 +760,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         fun håndterKorrigertInntekt(eventBus: EventBus, behandlingEventBus: BehandlingEventBus, korrigertInntekt: Saksbehandler, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg): Behandling? {
-            return null // TODO
+            return håndterNyFakta(
+                eventBus = eventBus,
+                behandlingEventBus = behandlingEventBus,
+                endringMedNyFakta = { forrigeEndring ->
+                    forrigeEndring.copy(
+                        korrigertInntekt = korrigertInntekt
+                    )
+                },
+                behandlingkilde = behandlingkilde,
+                yrkesaktivitet = yrkesaktivitet,
+                aktivitetslogg = aktivitetslogg
+            )
         }
 
         private fun håndterNyFakta(eventBus: EventBus, behandlingEventBus: BehandlingEventBus, endringMedNyFakta: (forrigeEndring: Endring) -> Endring, behandlingkilde: Behandlingkilde, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg): Behandling? {
@@ -2064,7 +2077,8 @@ internal data class BehandlingView(
     val kilde: BehandlingkildeView,
     val tilstand: TilstandView,
     val endringer: List<BehandlingendringView>,
-    val faktaavklartInntekt: FaktaavklartInntektView?
+    val faktaavklartInntekt: FaktaavklartInntektView?,
+    val korrigertInntekt: Saksbehandler.SaksbehandlerView?
 ) {
     enum class TilstandView {
         ANNULLERT_PERIODE, AVSLUTTET_UTEN_VEDTAK,

@@ -173,4 +173,5 @@ internal class TestArbeidsgiverInspektør(
     internal fun dagerNavOvertarAnsvar(vedtaksperiodeId: IdInnhenter) = vedtaksperioder.getValue(vedtaksperiodeId.id(orgnummer)).dagerNavOvertarAnsvar
 
     internal fun faktaavklartInntekt(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).inspektør.faktaavklartInntekt
+    internal fun korrigertInntekt(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).inspektør.korrigertInntekt
 }

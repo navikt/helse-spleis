@@ -3,6 +3,7 @@ package no.nav.helse.person.inntekt
 import java.util.*
 import no.nav.helse.dto.deserialisering.SaksbehandlerInnDto
 import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
+import no.nav.helse.økonomi.Inntekt
 
 internal data class Saksbehandler(
     val id: UUID,
@@ -14,6 +15,8 @@ internal data class Saksbehandler(
             inntektsdata = inntektsdata.dto()
         )
 
+    fun view() = SaksbehandlerView(inntektsdata.hendelseId.id, inntektsdata.beløp)
+
     internal companion object {
         fun gjenopprett(dto: SaksbehandlerInnDto): Saksbehandler {
             return Saksbehandler(
@@ -22,4 +25,6 @@ internal data class Saksbehandler(
             )
         }
     }
+
+    internal class SaksbehandlerView(val hendelseId: UUID, val beløp: Inntekt)
 }

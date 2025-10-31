@@ -217,13 +217,15 @@ internal class Yrkesaktivitet private constructor(
             overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger,
             aktivitetslogg: IAktivitetslogg
         ): Revurderingseventyr? {
-            val behandlingseventyr = overstyrArbeidsgiveropplysninger.arbeidsgiveropplysninger.mapNotNull { inntektsopplysning ->
-                finn(Arbeidstaker(inntektsopplysning.organisasjonsnummer))?.håndterKorrigertInntekt(eventBus, overstyrArbeidsgiveropplysninger, inntektsopplysning, aktivitetslogg)
-            }.tidligsteEventyr()
-
             val vilkårsgrunnlageventyr = firstNotNullOfOrNull { it.håndterOverstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger, aktivitetslogg) }
 
-            return listOfNotNull(behandlingseventyr, vilkårsgrunnlageventyr).tidligsteEventyr()
+            if (vilkårsgrunnlageventyr != null) {
+                overstyrArbeidsgiveropplysninger.arbeidsgiveropplysninger.mapNotNull { inntektsopplysning ->
+                    finn(Arbeidstaker(inntektsopplysning.organisasjonsnummer))?.håndterKorrigertInntekt(eventBus, overstyrArbeidsgiveropplysninger, inntektsopplysning, aktivitetslogg)
+                }
+            }
+
+            return vilkårsgrunnlageventyr
         }
 
         internal fun List<Yrkesaktivitet>.håndterOverstyringAvRefusjon(

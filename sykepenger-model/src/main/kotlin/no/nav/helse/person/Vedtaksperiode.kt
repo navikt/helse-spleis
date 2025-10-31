@@ -386,11 +386,10 @@ internal class Vedtaksperiode private constructor(
                 inntektsdata = inntektsopplysning.inntektsdata
             ),
             yrkesaktivitet = yrkesaktivitet,
-            aktivitetslogg = aktivietetslogg,
+            aktivitetslogg = registrerKontekst(aktivietetslogg),
             behandlingkilde = hendelse.metadata.behandlingkilde
         )
-        //return Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, periode.start)// TODO: Eget eventyr?
-        return null
+        return Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, periode.start)// TODO: Eget eventyr?
     }
 
     internal fun håndterOverstyrTidslinje(eventBus: EventBus, hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {

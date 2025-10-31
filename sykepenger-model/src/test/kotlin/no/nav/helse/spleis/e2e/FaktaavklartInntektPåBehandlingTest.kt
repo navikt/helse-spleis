@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -17,6 +18,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt.ArbeistakerFaktaavklartInntektView
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -210,6 +212,45 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             assertEquals(hendelseId, faktaavklartInntekt.hendelseId)
 
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `Lagrer korrigert inntekt fra saksbehandler på behandlingen`() {
+        a1 {
+            nyttVedtak(januar)
+            assertNull(inspektør.korrigertInntekt(1.vedtaksperiode))
+            val overstyringId = håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1))).metadata.meldingsreferanseId.id
+            inspektør.korrigertInntekt(1.vedtaksperiode)!!.apply {
+                assertEquals(INNTEKT * 1.1, beløp)
+                assertEquals(overstyringId, hendelseId)
+            }
+        }
+    }
+
+    @Test
+    fun `Lagrer ikke korigert inntekt når det er den samme som var der fra før`() {
+        a1 {
+            nyttVedtak(januar)
+            assertNull(inspektør.korrigertInntekt(1.vedtaksperiode))
+            val overstyringId1 = håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1))).metadata.meldingsreferanseId.id
+            inspektør.korrigertInntekt(1.vedtaksperiode)!!.apply {
+                assertEquals(INNTEKT * 1.1, beløp)
+                assertEquals(overstyringId1, hendelseId)
+            }
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            nullstillTilstandsendringer()
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1))).metadata.meldingsreferanseId.id
+
+            assertTilstander(1.vedtaksperiode, AVSLUTTET)
+            inspektør.korrigertInntekt(1.vedtaksperiode)!!.apply {
+                assertEquals(INNTEKT * 1.1, beløp)
+                assertEquals(overstyringId1, hendelseId)
+            }
         }
     }
 }
