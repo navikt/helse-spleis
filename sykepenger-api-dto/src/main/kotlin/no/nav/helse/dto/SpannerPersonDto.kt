@@ -128,14 +128,6 @@ data class SpannerPersonDto(
             val korrigertInntekt: KorrigertInntektsopplysningData?,
             val skjønnsmessigFastsatt: SkjønnsmessigFastsattData?
         ) {
-            data class KorrigertInntektsopplysningData(
-                val id: UUID,
-                val dato: LocalDate,
-                val hendelseId: UUID,
-                val beløp: InntektDto?,
-                val tidsstempel: LocalDateTime
-            )
-
             data class SkjønnsmessigFastsattData(
                 val id: UUID,
                 val dato: LocalDate,
@@ -346,7 +338,9 @@ data class SpannerPersonDto(
             val maksdato: LocalDate,
             val arbeidsgiverOppdrag: OppdragData?,
             val personOppdrag: OppdragData?,
-            val inntektjusteringer: Map<String, BeløpstidslinjeData>
+            val inntektjusteringer: Map<String, BeløpstidslinjeData>,
+            val faktaavklartInntekt: FaktaavklartInntektData?,
+            val korrigertInntekt: KorrigertInntektsopplysningData?
         )
 
         data class VedtaksperiodeData(
@@ -385,7 +379,9 @@ data class SpannerPersonDto(
                         arbeidsgiverOppdrag = utbetaling?.arbeidsgiverOppdrag?.takeUnless { it.linjer.isEmpty() },
                         dagerNavOvertarAnsvar = gjeldendeEndring.dagerNavOvertarAnsvar,
                         egenmeldingsdager = gjeldendeEndring.egenmeldingsdager,
-                        inntektjusteringer = gjeldendeEndring.inntektjusteringer
+                        inntektjusteringer = gjeldendeEndring.inntektjusteringer,
+                        faktaavklartInntekt = gjeldendeEndring.faktaavklartInntekt,
+                        korrigertInntekt = gjeldendeEndring.korrigertInntekt
                     )
                 }
             }
@@ -535,7 +531,8 @@ data class SpannerPersonDto(
                     val egenmeldingsdager: List<PeriodeData>,
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
-                    val faktaavklartInntekt: FaktaavklartInntektData?
+                    val faktaavklartInntekt: FaktaavklartInntektData?,
+                    val korrigertInntekt: KorrigertInntektsopplysningData?
                 )
 
                 data class PeriodeUtenNavAnsvarData(
@@ -810,6 +807,14 @@ data class SpannerPersonDto(
             }
         }
     }
+
+    data class KorrigertInntektsopplysningData(
+        val id: UUID,
+        val dato: LocalDate,
+        val hendelseId: UUID,
+        val beløp: InntektDto?,
+        val tidsstempel: LocalDateTime
+    )
 }
 
 fun PersonUtDto.tilSpannerPersonDto(): SpannerPersonDto {
@@ -1270,7 +1275,8 @@ private fun BehandlingendringUtDto.tilPersonData() =
         inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
             inntektskilde.id to beløpstidslinje.tilPersonData()
         }.toMap(),
-        faktaavklartInntekt = this.faktaavklartInntekt?.tilPersonData()
+        faktaavklartInntekt = this.faktaavklartInntekt?.tilPersonData(),
+        korrigertInntekt = this.korrigertInntekt?.tilPersonData()
     )
 
 private fun DagerUtenNavAnsvaravklaringDto.tilPersonData() = PeriodeUtenNavAnsvarData(
@@ -1724,7 +1730,7 @@ private fun ArbeidsgiverInntektsopplysningUtDto.tilPersonData() =
     )
 
 private fun SaksbehandlerUtDto.tilPersonData() =
-    ArbeidsgiverInntektsopplysningData.KorrigertInntektsopplysningData(
+    SpannerPersonDto.KorrigertInntektsopplysningData(
         id = this.id,
         dato = this.inntektsdata.dato,
         hendelseId = this.inntektsdata.hendelseId.id,
