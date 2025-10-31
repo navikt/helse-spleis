@@ -962,7 +962,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 egenmeldingsdager: List<Periode> = this.egenmeldingsdager,
                 maksdatoresultat: Maksdatoresultat = this.maksdatoresultat,
                 inntektjusteringer: Map<Inntektskilde, Beløpstidslinje> = this.inntektjusteringer,
-                faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt
+                faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt,
+                selvstendigForsikring: SelvstendigForsikring? = this.selvstendigForsikring
             ) = copy(
                 id = UUID.randomUUID(),
                 tidsstempel = LocalDateTime.now(),
@@ -981,7 +982,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 egenmeldingsdager = egenmeldingsdager,
                 maksdatoresultat = maksdatoresultat,
                 inntektjusteringer = inntektjusteringer,
-                faktaavklartInntekt = faktaavklartInntekt
+                faktaavklartInntekt = faktaavklartInntekt,
+                selvstendigForsikring = selvstendigForsikring
             )
 
             internal fun kopierMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>): Endring? {
@@ -1028,12 +1030,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
             }
 
-            internal fun kopierMedBeregning(beregning: BeregnetBehandling, dagerNavOvertarAnsvar: List<Periode>) = kopierMed(
+            internal fun kopierMedBeregning(beregning: BeregnetBehandling, dagerNavOvertarAnsvar: List<Periode>, selvstendigForsikring: SelvstendigForsikring?) = kopierMed(
                 grunnlagsdata = beregning.grunnlagsdata,
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = beregning.maksdatoresultat,
                 inntektjusteringer = beregning.alleInntektjusteringer,
-                dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
+                dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+                selvstendigForsikring = selvstendigForsikring
             )
 
             internal fun kopierMedUtbetaling(utbetaling: Utbetaling) = kopierMed(utbetaling = utbetaling)
@@ -1695,7 +1698,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.nyEndring(
                         behandling.gjeldende.kopierMedBeregning(
                             beregning,
-                            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
+                            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+                            selvstendigForsikring = beregning.selvstendigForsikring
                         )
                     )
                     behandling.tilstand(eventBus, Beregnet, aktivitetslogg)
@@ -1731,7 +1735,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         }
                     } ?: behandling.dagerNavOvertarAnsvar
 
-                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar))
+                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar, beregning.selvstendigForsikring))
                     behandling.tilstand(eventBus, BeregnetOmgjøring, aktivitetslogg)
                 }
             }
@@ -1760,7 +1764,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         }
                     } ?: behandling.dagerNavOvertarAnsvar
 
-                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar))
+                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar, beregning.selvstendigForsikring))
                     behandling.tilstand(eventBus, BeregnetRevurdering, aktivitetslogg)
                 }
 
