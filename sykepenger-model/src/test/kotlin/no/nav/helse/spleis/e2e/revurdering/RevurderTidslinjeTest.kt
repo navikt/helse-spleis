@@ -154,25 +154,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `annullering etter revurdering feilet`() {
-        nyttVedtak(3.januar til 26.januar)
-        forlengVedtak(29.januar til 26.februar)
-
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_GODKJENNING_REVURDERING trenger hjelp!") {
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
-        }
-        assertVarsler(listOf(RV_UT_23, Varselkode.RV_UT_24), 1.vedtaksperiode.filter())
-        nullstillTilstandsendringer()
-        håndterAnnullerUtbetaling()
-        håndterUtbetalt()
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
-        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING)
-    }
-
-    @Test
     fun `to perioder - revurder dager i eldste`() {
         nyttVedtak(3.januar til 26.januar)
         forlengVedtak(27.januar til 14.februar)

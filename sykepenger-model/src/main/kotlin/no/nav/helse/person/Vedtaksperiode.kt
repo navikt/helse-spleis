@@ -1616,12 +1616,17 @@ internal class Vedtaksperiode private constructor(
         val sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling = yrkesaktivitet.finnSisteVedtaksperiodeFørMedSammenhengendeUtbetaling(this)
         val periodeForEndring = sisteVedtaksperiodeFørMegSelvMedSammenhengendeUtbetaling?.periode ?: periode
 
-        when (tilstand) {
+        return when (tilstand) {
             Avsluttet,
             TilUtbetaling,
-
             SelvstendigTilUtbetaling,
-            SelvstendigAvsluttet,
+            SelvstendigAvsluttet -> håndterAnnulleringNyBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, periodeForEndring)
+
+            AvventerGodkjenningRevurdering -> when {
+                behandlinger.erAvvist() -> håndterAnnulleringNyBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, periodeForEndring)
+                else -> håndterAnnulleringÅpenBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, periodeForEndring)
+            }
+
             SelvstendigAvventerBlokkerendePeriode,
             SelvstendigAvventerGodkjenning,
             SelvstendigAvventerHistorikk,
@@ -1630,21 +1635,10 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerVilkårsprøving,
 
             AvventerSimuleringRevurdering,
-            AvventerGodkjenningRevurdering,
 
             AvventerVilkårsprøvingRevurdering,
             AvventerHistorikkRevurdering,
-            AvventerRevurdering -> {
-                behandlinger.håndterAnnullering(
-                    eventBus = eventBus,
-                    behandlingEventBus = eventBus.behandlingEventBus,
-                    yrkesaktivitet = yrkesaktivitet,
-                    behandlingkilde = hendelse.metadata.behandlingkilde,
-                    aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst
-                )
-                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
-                return annullering(hendelse, periodeForEndring)
-            }
+            AvventerRevurdering -> håndterAnnulleringÅpenBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, periodeForEndring)
 
             Start,
             SelvstendigStart,
@@ -1658,10 +1652,30 @@ internal class Vedtaksperiode private constructor(
             AvventerInntektsmelding,
             AvventerSimulering,
             AvventerVilkårsprøving,
-            TilAnnullering -> return null
+            TilAnnullering -> null
 
             TilInfotrygd -> error("Forventet ikke annulleringshendelse i tilstand $tilstand for vedtaksperiodeId $id")
         }
+    }
+
+    private fun håndterAnnulleringNyBehandling(eventBus: EventBus, hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg, periodeForEndring: Periode): Revurderingseventyr {
+        behandlinger.nyAnnulleringBehandling(
+            behandlingEventBus = eventBus.behandlingEventBus,
+            yrkesaktivitet = yrkesaktivitet,
+            behandlingkilde = hendelse.metadata.behandlingkilde
+        )
+        tilstand(eventBus, aktivitetslogg, AvventerAnnullering)
+        return annullering(hendelse, periodeForEndring)
+    }
+
+    private fun håndterAnnulleringÅpenBehandling(eventBus: EventBus, hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg, periodeForEndring: Periode): Revurderingseventyr {
+        behandlinger.håndterAnnullering(
+            utbetalingEventBus = with (yrkesaktivitet) { eventBus.utbetalingEventBus },
+            yrkesaktivitet = yrkesaktivitet,
+            aktivitetslogg = aktivitetslogg
+        )
+        tilstand(eventBus, aktivitetslogg, AvventerAnnullering)
+        return annullering(hendelse, periodeForEndring)
     }
 
     internal fun håndterPåminnelse(eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {

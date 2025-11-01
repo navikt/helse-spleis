@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
@@ -25,6 +26,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
@@ -1309,6 +1311,27 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
                 assertEquals(0, it.size)
             }
+        }
+    }
+
+    @Test
+    fun `annullering etter revurdering feilet`() {
+        a1 {
+            nyttVedtak(3.januar til 26.januar)
+            forlengVedtak(29.januar til 26.februar)
+
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertUgyldigSituasjon("En vedtaksperiode i AVVENTER_GODKJENNING_REVURDERING trenger hjelp!") {
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
+            }
+            assertVarsler(listOf(RV_UT_23, Varselkode.RV_UT_24), 1.vedtaksperiode.filter())
+            nullstillTilstandsendringer()
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING)
         }
     }
 
