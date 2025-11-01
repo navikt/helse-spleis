@@ -81,7 +81,6 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
             )
             vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(
                 eventBus = eventBus,
-                behandlingkilde = revurdering.hendelse.metadata.behandlingkilde,
                 dokumentsporing = null,
                 aktivitetslogg = aktivitetslogg
             )
@@ -100,6 +99,8 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg
     ) {
+        vedtaksperiode.nyBehandling(eventBus, dager.hendelse)
+        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerBlokkerendePeriode)
         vedtaksperiode.håndterDager(eventBus, dager, aktivitetslogg)
 
         if (!aktivitetslogg.harFunksjonelleFeil()) return
