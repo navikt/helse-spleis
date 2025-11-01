@@ -806,7 +806,7 @@ internal class Yrkesaktivitet private constructor(
     internal fun håndterRefusjonsopplysninger(eventBus: EventBus, hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         val revurderingseventyr = håndter {
-            it.håndterRefusjon(eventBus, hendelse, dokumentsporing, aktivitetsloggMedArbeidsgiverkontekst, servitør)
+            it.håndterRefusjonLPSEllerOverstyring(eventBus, hendelse, dokumentsporing, aktivitetsloggMedArbeidsgiverkontekst, servitør)
         }.tidligsteEventyr()
         servitør.servér(ubrukteRefusjonsopplysninger, aktivitetsloggMedArbeidsgiverkontekst)
         return revurderingseventyr

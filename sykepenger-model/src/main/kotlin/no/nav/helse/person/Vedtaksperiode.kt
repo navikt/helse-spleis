@@ -293,6 +293,14 @@ internal class Vedtaksperiode private constructor(
         return SpesifikkKontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to id.toString()))
     }
 
+    internal fun nyBehandling(eventBus: EventBus, hendelse: Hendelse) {
+        behandlinger.nyBehandling(
+            behandlingEventBus = eventBus.behandlingEventBus,
+            yrkesaktivitet = yrkesaktivitet,
+            behandlingkilde = hendelse.metadata.behandlingkilde
+        )
+    }
+
     internal fun håndterSykmelding(sykmelding: Sykmelding) {
         sykmelding.trimLeft(periode.endInclusive)
     }
@@ -758,7 +766,13 @@ internal class Vedtaksperiode private constructor(
         val servitør = Refusjonsservitør.fra(refusjonstidslinje)
 
         val eventyr = vedtaksperioder.mapNotNull { vedtaksperiode ->
-            vedtaksperiode.håndterRefusjon(eventBus, hendelse, inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId), aktivitetslogg, servitør)
+            vedtaksperiode.håndterRefusjon(
+                eventBus = eventBus,
+                hendelse = hendelse,
+                dokumentsporing = inntektsmeldingRefusjon(hendelse.metadata.meldingsreferanseId),
+                aktivitetslogg = vedtaksperiode.registrerKontekst(aktivitetslogg),
+                servitør = servitør
+            )
         }
         servitør.servér(ubrukteRefusjonsopplysninger, aktivitetslogg)
         return eventyr
@@ -1434,7 +1448,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg = aktivitetslogg,
             beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
             beregnetPerioderUtenNavAnsvar = yrkesaktivitet.perioderUtenNavAnsvar,
-            refusjonstidslinje = ingenRefusjon
+            benyttetRefusjonsopplysninger = ingenRefusjon
         )
     }
 
@@ -1739,21 +1753,37 @@ internal class Vedtaksperiode private constructor(
         return revurderingseventyr
     }
 
-    internal fun håndterRefusjon(eventBus: EventBus, hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
+    internal fun håndterRefusjonLPSEllerOverstyring(eventBus: EventBus, hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        return håndterRefusjon(eventBus, hendelse, dokumentsporing, aktivitetsloggMedVedtaksperiodekontekst, servitør)
+    }
+
+    private fun håndterRefusjon(eventBus: EventBus, hendelse: Hendelse, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg, servitør: Refusjonsservitør): Revurderingseventyr? {
         val refusjonstidslinje = servitør.servér(startdatoPåSammenhengendeVedtaksperioder, periode)
         if (refusjonstidslinje.isEmpty()) return null
-        if (!behandlinger.håndterRefusjonstidslinje(
-                eventBus,
-                eventBus.behandlingEventBus,
-                yrkesaktivitet,
-                hendelse.metadata.behandlingkilde,
-                dokumentsporing,
-                aktivitetsloggMedVedtaksperiodekontekst,
-                person.skjæringstidspunkter,
-                yrkesaktivitet.perioderUtenNavAnsvar,
-                refusjonstidslinje
-            )) return null
+
+        // refusjonshåndteringen er litt spesiell i og med at vi bare behandler den hvis det er en funksjonell endring
+        val benyttetRefusjonsopplysninger = behandlinger.endretRefusjonstidslinje(refusjonstidslinje) ?: return null
+
+        // vi burde egentlig kunne sjekke tilstanden her, men siden refusjonsendringer kan komme
+        // samtidig som f.eks. dag-håndtering fra inntektsmelding så kan tilstanden fremdeles være "Avsluttet" selv om
+        // det er opprettet en ny behandling allerede.
+        // ideelt sett skulle vi hatt bedre kontroll over flyten her
+        if (!behandlinger.åpenForEndring()) {
+            nyBehandling(eventBus, hendelse)
+        }
+
+        behandlinger.håndterRefusjonstidslinje(
+            eventBus = eventBus,
+            behandlingEventBus = eventBus.behandlingEventBus,
+            yrkesaktivitet = yrkesaktivitet,
+            behandlingkilde = hendelse.metadata.behandlingkilde,
+            dokumentsporing = dokumentsporing,
+            aktivitetslogg = aktivitetslogg,
+            beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
+            beregnetPerioderUtenNavAnsvar = yrkesaktivitet.perioderUtenNavAnsvar,
+            benyttetRefusjonsopplysninger = benyttetRefusjonsopplysninger
+        )
         return Revurderingseventyr.refusjonsopplysninger(hendelse, skjæringstidspunkt, periode)
     }
 
@@ -2670,6 +2700,8 @@ internal class Vedtaksperiode private constructor(
         if (!behandlinger.refusjonstidslinje().isEmpty()) return
         val grunnlag = vilkårsgrunnlag ?: return
         val inntekt = grunnlag.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.firstOrNull { it.orgnummer == yrkesaktivitet.organisasjonsnummer } ?: return
+        val refusjonsopplysninger = Beløpstidslinje.fra(periode, inntekt.fastsattÅrsinntekt, Kilde(inntekt.faktaavklartInntekt.inntektsdata.hendelseId, Avsender.ARBEIDSGIVER, inntekt.faktaavklartInntekt.inntektsdata.tidsstempel))
+        val benyttetRefusjonsopplysninger = behandlinger.endretRefusjonstidslinje(refusjonsopplysninger) ?: return
         behandlinger.håndterRefusjonstidslinje(
             eventBus = eventBus,
             behandlingEventBus = eventBus.behandlingEventBus,
@@ -2679,7 +2711,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg = aktivitetslogg,
             beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
             beregnetPerioderUtenNavAnsvar = yrkesaktivitet.perioderUtenNavAnsvar,
-            refusjonstidslinje = Beløpstidslinje.fra(periode, inntekt.fastsattÅrsinntekt, Kilde(inntekt.faktaavklartInntekt.inntektsdata.hendelseId, Avsender.ARBEIDSGIVER, inntekt.faktaavklartInntekt.inntektsdata.tidsstempel))
+            benyttetRefusjonsopplysninger = benyttetRefusjonsopplysninger
         )
     }
 
@@ -2708,8 +2740,7 @@ internal class Vedtaksperiode private constructor(
                 val unikeKilder = ubrukte.filterIsInstance<Beløpsdag>().map { it.kilde.meldingsreferanseId }.toSet()
                 aktivitetslogg.info("Fant ubrukte refusjonsopplysninger for $periode fra kildene ${unikeKilder.joinToString()}")
             } ?: Beløpstidslinje()
-        val benyttetRefusjonstidslinje =
-            (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
+        val benyttetRefusjonstidslinje = (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
         if (benyttetRefusjonstidslinje.isEmpty()) return
         this.behandlinger.håndterRefusjonstidslinje(
             eventBus,

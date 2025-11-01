@@ -103,6 +103,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     val sisteBehandlingId get() = behandlinger.last().id
 
+    internal fun åpenForEndring() = åpenBehandling != null
+
     internal fun initiellBehandling(
         behandlingEventBus: BehandlingEventBus,
         sykmeldingsperiode: Periode,
@@ -175,6 +177,17 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal val arbeidssituasjon get() = behandlinger.last().arbeidssituasjon
     internal val utbetaling get() = behandlinger.last().utbetaling()
 
+    internal fun nyBehandling(
+        behandlingEventBus: BehandlingEventBus,
+        yrkesaktivitet: Yrkesaktivitet,
+        behandlingkilde: Behandlingkilde,
+    ): Behandling {
+        check(åpenBehandling == null) { "Kan ikke opprette ny behandling når det finnes en åpen behandling" }
+        val nyBehandling = tidligereBehandlinger.last().nyBehandling(behandlingEventBus, yrkesaktivitet, behandlingkilde)
+        leggTilNyBehandling(nyBehandling)
+        return nyBehandling
+    }
+
     internal fun analytiskDatapakke(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, vedtaksperiodeId: UUID): AnalytiskDatapakkeEvent {
         val forrigeBehandling = behandlinger.dropLast(1).lastOrNull()
         return behandlinger.last().analytiskDatapakke(forrigeBehandling, yrkesaktivitetssporing, vedtaksperiodeId)
@@ -233,6 +246,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         yrkesaktivitet: Yrkesaktivitet,
         behandlingkilde: Behandlingkilde,
     ): Behandling {
+        check(åpenBehandling == null) { "Kan ikke opprette ny behandling når det finnes en åpen behandling" }
         val nyBehandling = tidligereBehandlinger.last().nyAnnulleringBehandling(behandlingEventBus, yrkesaktivitet, behandlingkilde)
         leggTilNyBehandling(nyBehandling)
         return nyBehandling
@@ -354,6 +368,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
         behandlinger.lagreGjenbrukbarInntekt(skjæringstidspunkt, organisasjonsnummer, yrkesaktivitet, aktivitetslogg)
 
+    internal fun endretRefusjonstidslinje(refusjonstidslinje: Beløpstidslinje) =
+        behandlinger.last().endretRefusjonstidslinje(refusjonstidslinje)
+
     internal fun håndterRefusjonstidslinje(
         eventBus: EventBus,
         behandlingEventBus: BehandlingEventBus,
@@ -363,15 +380,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         aktivitetslogg: IAktivitetslogg,
         beregnetSkjæringstidspunkter: Skjæringstidspunkter,
         beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
-        refusjonstidslinje: Beløpstidslinje
-    ): Boolean {
-        val refusjonstidslinjeFør = behandlinger.last().refusjonstidslinje
-        behandlinger.last().håndterRefusjonsopplysninger(eventBus, behandlingEventBus, yrkesaktivitet, behandlingkilde, dokumentsporing, aktivitetslogg, beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar, refusjonstidslinje)?.also {
-            leggTilNyBehandling(it)
+        benyttetRefusjonsopplysninger: Beløpstidslinje
+    ) {
+        val resultat = checkNotNull(åpenBehandling).håndterRefusjonsopplysninger(eventBus, behandlingEventBus, yrkesaktivitet, behandlingkilde, dokumentsporing, aktivitetslogg, beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar, benyttetRefusjonsopplysninger)
+        check(resultat == null) {
+            // denne sjekken er midlertidig ettersom håndterNyFakta() i teorien kan opprette en Behandling
+            "forventer ikke å lage ny behandling, vedtaksperioden har glemt å opprette Behandling"
         }
-        val refusjonstidslinjeEtter = behandlinger.last().refusjonstidslinje
-        val endret = refusjonstidslinjeFør != refusjonstidslinjeEtter
-        return endret
     }
 
     internal fun håndterFaktaavklartInntekt(eventBus: EventBus, behandlingEventBus: BehandlingEventBus, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg) {
@@ -701,6 +716,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             )
         }
 
+        internal fun endretRefusjonstidslinje(nyRefusjonstidslinje: Beløpstidslinje): Beløpstidslinje? {
+            val nyeRefusjonsopplysningerForPerioden = nyRefusjonstidslinje.subset(periode)
+            val benyttetRefusjonsopplysninger = (gjeldende.refusjonstidslinje + nyeRefusjonsopplysningerForPerioden).fyll(periode)
+            if (benyttetRefusjonsopplysninger == gjeldende.refusjonstidslinje) return null
+            return benyttetRefusjonsopplysninger
+        }
+
         internal fun håndterRefusjonsopplysninger(
             eventBus: EventBus,
             behandlingEventBus: BehandlingEventBus,
@@ -710,12 +732,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             aktivitetslogg: IAktivitetslogg,
             beregnetSkjæringstidspunkter: Skjæringstidspunkter,
             beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
-            nyRefusjonstidslinje: Beløpstidslinje
+            benyttetRefusjonsopplysninger: Beløpstidslinje
         ): Behandling? {
-            val nyeRefusjonsopplysningerForPerioden = nyRefusjonstidslinje.subset(periode)
-            val benyttetRefusjonsopplysninger = (gjeldende.refusjonstidslinje + nyeRefusjonsopplysningerForPerioden).fyll(periode)
-            if (benyttetRefusjonsopplysninger == gjeldende.refusjonstidslinje) return null // Ingen endring
-
             return håndterNyFakta(
                 eventBus = eventBus,
                 behandlingEventBus = behandlingEventBus,
@@ -1342,10 +1360,44 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             yrkesaktivitet: Yrkesaktivitet,
             behandlingkilde: Behandlingkilde,
         ): Behandling {
+            return nyBehandling(behandlingEventBus, yrkesaktivitet, behandlingkilde, Tilstand.UberegnetAnnullering)
+        }
+
+        internal fun nyBehandling(
+            behandlingEventBus: BehandlingEventBus,
+            yrkesaktivitet: Yrkesaktivitet,
+            behandlingkilde: Behandlingkilde,
+        ): Behandling {
+            val starttilstand = when (tilstand) {
+                Tilstand.AvsluttetUtenVedtak -> Tilstand.UberegnetOmgjøring
+                Tilstand.VedtakFattet,
+                Tilstand.VedtakIverksatt -> Tilstand.UberegnetRevurdering
+
+                Tilstand.RevurdertVedtakAvvist,
+                Tilstand.AnnullertPeriode,
+                Tilstand.Beregnet,
+                Tilstand.BeregnetOmgjøring,
+                Tilstand.BeregnetRevurdering,
+                Tilstand.OverførtAnnullering,
+                Tilstand.TilInfotrygd,
+                Tilstand.Uberegnet,
+                Tilstand.UberegnetAnnullering,
+                Tilstand.UberegnetOmgjøring,
+                Tilstand.UberegnetRevurdering -> error("Forventer ikke ny behandling fra tilstand $tilstand")
+            }
+            return nyBehandling(behandlingEventBus, yrkesaktivitet, behandlingkilde, starttilstand)
+        }
+
+        private fun nyBehandling(
+            behandlingEventBus: BehandlingEventBus,
+            yrkesaktivitet: Yrkesaktivitet,
+            behandlingkilde: Behandlingkilde,
+            starttilstand: Tilstand
+        ): Behandling {
             yrkesaktivitet.låsOpp(periode)
             return Behandling(
                 behandlingEventBus = behandlingEventBus,
-                tilstand = Tilstand.UberegnetAnnullering,
+                tilstand = starttilstand,
                 endringer = listOf(endringer.last().kopierUtenBeregning()),
                 avsluttet = null,
                 kilde = behandlingkilde
