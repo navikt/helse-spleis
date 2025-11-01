@@ -1615,8 +1615,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterAnnulleringUtbetalinghendelse(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-        behandlinger.håndterUtbetalinghendelseSisteBehandling(utbetalingEventBus, hendelse, aktivitetslogg)
-        if (!behandlinger.erAvsluttet()) return
+        if (!behandlinger.håndterUtbetalinghendelseSisteBehandling(eventBus.behandlingEventBus, utbetalingEventBus, hendelse, aktivitetslogg).erAvsluttet()) return
 
         aktivitetslogg.info("Annulleringen fikk OK fra Oppdragssystemet")
         vedtakAnnullert(eventBus, hendelse, aktivitetslogg)
@@ -1637,7 +1636,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun vedtakIverksattMensTilRevurdering(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         val erVedtakIverksatt = behandlinger
-            .håndterUtbetalinghendelseSisteInFlight(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
+            .håndterUtbetalinghendelseSisteInFlight(eventBus.behandlingEventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
             ?.vedtakIverksatt(eventBus)
             ?: false
         if (!erVedtakIverksatt) return
@@ -1646,7 +1645,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun vedtakIverksatt(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
         val erVedtakIverksatt = behandlinger
-            .håndterUtbetalinghendelseSisteBehandling(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
+            .håndterUtbetalinghendelseSisteBehandling(eventBus.behandlingEventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
             .vedtakIverksatt(eventBus)
         if (!erVedtakIverksatt) return
         tilstand(eventBus, aktivitetslogg, nesteTilstand) {
@@ -1879,45 +1878,70 @@ internal class Vedtaksperiode private constructor(
     ): VedtaksperiodeForkastetEventBuilder {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         aktivitetsloggMedVedtaksperiodekontekst.info("Forkaster vedtaksperiode: %s", this.id.toString())
-        this.behandlinger.forkast(eventBus, eventBus.behandlingEventBus, yrkesaktivitet, hendelse.metadata.behandlingkilde, hendelse.metadata.automatiskBehandling, aktivitetsloggMedVedtaksperiodekontekst)
-        val vedtaksperiodeForkastetEventBuilder = when (tilstand) {
-            // Vedtaksperioder i disse tilstandene har rukket å sende ut egne forespørsler før de ble forkastet
-            Avsluttet,
-            AvsluttetUtenUtbetaling,
-            AvventerBlokkerendePeriode,
-            AvventerAOrdningen,
-            AvventerGodkjenning,
-            AvventerGodkjenningRevurdering,
-            AvventerHistorikk,
-            AvventerHistorikkRevurdering,
-            AvventerInntektsmelding,
-            AvventerRevurdering,
-            AvventerSimulering,
-            AvventerSimuleringRevurdering,
-            AvventerVilkårsprøving,
-            AvventerVilkårsprøvingRevurdering,
-            TilInfotrygd,
-            AvventerAnnullering,
-            TilUtbetaling,
-            TilAnnullering,
 
+        val vedtaksperiodeForkastetEventBuilder = VedtaksperiodeForkastetEventBuilder()
+
+
+        if (tilstand in setOf(AvventerInfotrygdHistorikk, Start)) {
+            vedtaksperiodeForkastetEventBuilder.trengerArbeidsgiveropplysninger(yrkesaktivitet.trengerArbeidsgiveropplysninger(periode))
+        }
+
+        when (this.tilstand) {
+            Avsluttet,
             SelvstendigAvsluttet,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikkRevurdering,
+            AvventerRevurdering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøvingRevurdering,
+            SelvstendigTilUtbetaling,
+            TilUtbetaling,
+            TilInfotrygd -> {
+                error("Kan ikke forkaste i $tilstand")
+            }
+
+            AvsluttetUtenUtbetaling -> {
+                if (!behandlinger.åpenForEndring()) {
+                    behandlinger.nyForkastetBehandling(
+                        behandlingEventBus = eventBus.behandlingEventBus,
+                        yrkesaktivitet = yrkesaktivitet,
+                        behandlingkilde = hendelse.metadata.behandlingkilde,
+                        automatiskBehandling = hendelse.metadata.automatiskBehandling
+                    )
+                } else {
+                    this.behandlinger.forkastÅpenBehandling(eventBus, eventBus.behandlingEventBus, yrkesaktivitet, hendelse.metadata.behandlingkilde, hendelse.metadata.automatiskBehandling, aktivitetsloggMedVedtaksperiodekontekst)
+                }
+            }
+
+            AvventerAOrdningen,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerHistorikk,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerSimulering,
+            AvventerVilkårsprøving,
+            Start,
+            SelvstendigStart -> {
+                this.behandlinger.forkastÅpenBehandling(eventBus, eventBus.behandlingEventBus, yrkesaktivitet, hendelse.metadata.behandlingkilde, hendelse.metadata.automatiskBehandling, aktivitetsloggMedVedtaksperiodekontekst)
+            }
+
             SelvstendigAvventerBlokkerendePeriode,
             SelvstendigAvventerGodkjenning,
             SelvstendigAvventerHistorikk,
             SelvstendigAvventerInfotrygdHistorikk,
             SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving,
-            SelvstendigStart,
-            SelvstendigTilUtbetaling -> VedtaksperiodeForkastetEventBuilder()
+            SelvstendigAvventerVilkårsprøving ->  {
+                check(!this.behandlinger.harFattetVedtak()) { "kan ikke forkaste en utbetalt vedtaksperiode uten å annullere først" }
+                this.behandlinger.forkastÅpenBehandling(eventBus, eventBus.behandlingEventBus, yrkesaktivitet, hendelse.metadata.behandlingkilde, hendelse.metadata.automatiskBehandling, aktivitetsloggMedVedtaksperiodekontekst)
+            }
 
-            AvventerInfotrygdHistorikk,
-            Start -> {
-                VedtaksperiodeForkastetEventBuilder().apply {
-                    yrkesaktivitet.trengerArbeidsgiveropplysninger(periode, ::trengerArbeidsgiveropplysninger)
-                }
+            AvventerAnnullering,
+            TilAnnullering -> {
+                check(behandlinger.erAnnullert()) { "må være annullert for å forkastes" }
             }
         }
+
         tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, TilInfotrygd)
         return vedtaksperiodeForkastetEventBuilder
     }

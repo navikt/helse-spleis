@@ -1073,8 +1073,8 @@ internal class Yrkesaktivitet private constructor(
         )
     }
 
-    internal fun trengerArbeidsgiveropplysninger(periode: Periode, trengerArbeidsgiveropplysninger: (historiskeSykmeldingsperioder: List<Periode>) -> Unit) {
-        forkastede.trengerArbeidsgiveropplysninger(periode, vedtaksperioder.map { it.periode }, trengerArbeidsgiveropplysninger)
+    internal fun trengerArbeidsgiveropplysninger(periode: Periode): List<Periode> {
+        return forkastede.trengerArbeidsgiveropplysninger(periode, vedtaksperioder.map { it.periode })
     }
 }
 

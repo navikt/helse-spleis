@@ -85,7 +85,7 @@ internal class ForkastetVedtaksperiode(
         }
 
         /** Setter et flagg i 'vedtaksperiode_forkastet' slik at vi lager HAG-forespørsler for perioder som skal behandles i Inforygd (TRENGER_OPPLYSNINGER_FRA_ARBEIDSGIVER_BEGRENSET via sparkel-arbeidsgiver) */
-        internal fun List<ForkastetVedtaksperiode>.trengerArbeidsgiveropplysninger(periode: Periode, aktive: List<Periode>, trengerArbeidsgiveropplysninger: (historiskeSykmeldingsperioder: List<Periode>) -> Unit) {
+        internal fun List<ForkastetVedtaksperiode>.trengerArbeidsgiveropplysninger(periode: Periode, aktive: List<Periode>): List<Periode> {
             val perioderKnyttetTilSammeArbeidsgiverperiode = (aktive + perioder()) // Slår sammen aktive og forkastede perioder
                 .filter { it.start < periode.start } // Tar kun perioder før den som skal forkastes
                 .sortedByDescending { it.start } // Går motsatt vei slik at vi kan stoppe så fort vi finner et for langt gap
@@ -100,19 +100,19 @@ internal class ForkastetVedtaksperiode(
             // Alle relevante perioder er innenfor AGP
             // toSet() for å håndtere overlappende perioder, så vi ikke teller samme dag flere ganger
             val antallDagerMedPerioden = perioderKnyttetTilSammeArbeidsgiverperiode.flatten().toSet().size
-            if (antallDagerMedPerioden <= 16) return
+            if (antallDagerMedPerioden <= 16) return emptyList()
 
             // Den forkastede vedtaksperioden er den første som strekker seg utover AGP
             val antallDagerUtenPerioden = antallDagerMedPerioden - periode.count()
-            if (antallDagerUtenPerioden <= 16) return trengerArbeidsgiveropplysninger(perioderKnyttetTilSammeArbeidsgiverperiode)
+            if (antallDagerUtenPerioden <= 16) return perioderKnyttetTilSammeArbeidsgiverperiode
 
             // Tidligere perioder har strukket seg forbi AGP, denne perioden trenger kun opplysninger dersom det er gap til forrige periode
             val erForlengelse = perioderKnyttetTilSammeArbeidsgiverperiode
                 .filterNot { it == periode }
                 .any { it.erRettFør(periode) || it.overlapperMed(periode) }
 
-            if (erForlengelse) return
-            trengerArbeidsgiveropplysninger(perioderKnyttetTilSammeArbeidsgiverperiode)
+            if (erForlengelse) return emptyList()
+            return perioderKnyttetTilSammeArbeidsgiverperiode
         }
 
         internal fun gjenopprett(

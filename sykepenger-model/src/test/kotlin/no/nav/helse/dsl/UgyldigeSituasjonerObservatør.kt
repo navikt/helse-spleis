@@ -21,6 +21,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTOR
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.IKKE_VURDERT
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -170,6 +171,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         validerSykdomshistorikk()
         validerSykdomstidslinjePåBehandlinger()
         validerTilstandPåSisteBehandlingForFerdigbehandledePerioder()
+        bekreftTilstandPåSisteBehandlingForForkastedePerioder()
         validerRefusjonsopplysningerPåBehandlinger()
         validerUtbetalingOgVilkårsgrunnlagPåBehandlinger()
         IM.bekreftEntydighåndtering()
@@ -287,7 +289,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
                                 assertTrue(endring.utbetalingstidslinje.isEmpty()) { "forventer tom utbetalingstidslinje i ${behandling.tilstand}" }
                             }
 
-                            BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK -> {
+                            AVSLUTTET_UTEN_VEDTAK -> {
                                 assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}" }
                                 assertNull(endring.grunnlagsdata) { "forventer inget vilkårsgrunnlag i ${behandling.tilstand}" }
                                 assertEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}" }
@@ -335,6 +337,25 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
                         else -> error("Svært snedig at perioder i ${tilstand::class.simpleName} er ferdig behandlet")
                     }
                 }
+        }
+    }
+
+    private fun bekreftTilstandPåSisteBehandlingForForkastedePerioder() {
+        arbeidsgivere.forEach { arbeidsgiver ->
+            arbeidsgiver.view().forkastetVedtaksperioder.forEach { forkastetPeriode ->
+                check(forkastetPeriode.tilstand == TilstandType.TIL_INFOTRYGD) {
+                    "Forventet at forkastet vedtaksperiode ${forkastetPeriode.id} er i tilstand TIL_INFOTRYGD"
+                }
+                forkastetPeriode.behandlinger.behandlinger.last().also { behandling ->
+                    val utbetalingstatus = behandling.endringer.asReversed().firstNotNullOfOrNull { it.utbetaling }?.status
+                    check(utbetalingstatus == null || utbetalingstatus in setOf(Utbetalingstatus.FORKASTET, Utbetalingstatus.IKKE_GODKJENT, Utbetalingstatus.ANNULLERT)) {
+                        "Utbetalingstatus for forkastet behandling er ikke FORKASTET / IKKE_GODKJENT / ANNULLERT, men $utbetalingstatus"
+                    }
+                    check(behandling.tilstand in setOf(BehandlingView.TilstandView.TIL_INFOTRYGD, BehandlingView.TilstandView.ANNULLERT_PERIODE)) {
+                        "Forventet at siste behandling på forkastet vedtaksperiode ${forkastetPeriode.id} er i tilstand TIL_INFOTRYGD eller ANNULLERT_PERIODE"
+                    }
+                }
+            }
         }
     }
 
