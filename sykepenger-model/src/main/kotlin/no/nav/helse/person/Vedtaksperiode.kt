@@ -1511,9 +1511,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         val wrapper = aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig()
-        behandlinger.valider(simulering, wrapper)
-        if (!behandlinger.erKlarForGodkjenning()) return wrapper.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
-        tilstand(eventBus, wrapper, nesteTilstand)
+        with(checkNotNull(behandlinger.utbetaling)) {
+            valider(simulering, wrapper)
+            if (!erKlarForGodkjenning()) return wrapper.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
+            tilstand(eventBus, wrapper, nesteTilstand)
+        }
     }
 
     internal fun håndterUtbetalingHendelse(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
@@ -2432,19 +2434,12 @@ internal class Vedtaksperiode private constructor(
                 false -> null
             }
 
-            AvventerGodkjenning -> when (behandlinger.erAvvist()) {
-                true -> VenterPå.SegSelv(Venteårsak.HJELP)
-                false -> VenterPå.SegSelv(Venteårsak.GODKJENNING)
-            }
+            AvventerGodkjenning,
+            SelvstendigAvventerGodkjenning -> VenterPå.SegSelv(Venteårsak.GODKJENNING)
 
             AvventerGodkjenningRevurdering -> when (behandlinger.erAvvist()) {
                 true -> VenterPå.SegSelv(Venteårsak.HJELP)
                 false -> VenterPå.SegSelv(Venteårsak.GODKJENNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
-            }
-
-            SelvstendigAvventerGodkjenning -> when (behandlinger.erAvvist()) {
-                true -> VenterPå.SegSelv(Venteårsak.HJELP)
-                false -> VenterPå.SegSelv(Venteårsak.GODKJENNING)
             }
 
             // disse to er litt spesielle, fordi tilstanden er både en ventetilstand og en "det er min tur"-tilstand

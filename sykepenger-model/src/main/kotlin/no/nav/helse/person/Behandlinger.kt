@@ -22,7 +22,6 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.vurdering
@@ -94,7 +93,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     private val behandlinger = behandlinger.toMutableList()
-    private val siste get() = behandlinger.lastOrNull()?.utbetaling()
 
     internal fun sisteUtbetalteUtbetaling() = behandlinger.lastOrNull { it.erFattetVedtak() }?.utbetaling()
 
@@ -188,8 +186,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun refusjonstidslinje() = behandlinger.last().refusjonstidslinje
     internal fun utbetales() = behandlinger.any { it.erInFlight() }
     internal fun erAvsluttet() = behandlinger.last().erAvsluttet()
-    internal fun erAvvist() = siste?.erAvvist() == true
-    internal fun harUtbetalinger() = siste?.harUtbetalinger() == true
+    internal fun erAvvist() = behandlinger.last().erAvvist()
+    internal fun harUtbetalinger() = behandlinger.last().harOppdragMedUtbetalinger()
     internal fun kanForkastes(andreBehandlinger: List<Behandlinger>) = behandlinger.last().kanForkastes(andreBehandlinger.map { it.behandlinger.last() })
     internal fun forventerUtbetaling(periodeSomBeregner: Periode, skjæringstidspunkt: LocalDate, skalBehandlesISpeil: Boolean) =
         behandlinger.last().forventerUtbetaling(periodeSomBeregner, skjæringstidspunkt, skalBehandlesISpeil)
@@ -212,21 +210,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
     internal fun validerIkkeFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerIkkeFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
 
-    internal fun overlapperMed(other: Behandlinger): Boolean {
-        if (!this.harUtbetalinger() || !other.harUtbetalinger()) return false
-        return this.siste!!.overlapperMed(other.siste!!)
-    }
-
-    internal fun valider(simulering: Simulering, aktivitetslogg: IAktivitetslogg) {
-        siste!!.valider(simulering, aktivitetslogg)
-    }
-
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Behandling", mapOf("behandlingId" to sisteBehandlingId.toString()))
     }
 
-    internal fun erKlarForGodkjenning() = siste?.erKlarForGodkjenning() ?: false
-    internal fun simuler(aktivitetslogg: IAktivitetslogg) = siste!!.simuler(aktivitetslogg)
     internal fun byggUtkastTilVedtak(builder: UtkastTilVedtakBuilder, behandling: Behandling?): UtkastTilVedtakBuilder {
         if (behandlinger.grunnbeløpsregulert()) builder.grunnbeløpsregulert()
         builder.historiskeHendelseIder(eksterneIder())
@@ -1181,8 +1168,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal fun erFattetVedtak() = vedtakFattet != null
         internal fun erInFlight() = erFattetVedtak() && !erAvsluttet()
         internal fun erAvsluttet() = avsluttet != null
+        internal fun erAvvist() = tilstand == Tilstand.RevurdertVedtakAvvist
         internal fun harÅpenBehandling() = this.tilstand in setOf(Tilstand.UberegnetRevurdering, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)
         internal fun harIkkeUtbetaling() = this.tilstand in setOf(Tilstand.Uberegnet, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)
+
+        internal fun harOppdragMedUtbetalinger() = gjeldende.utbetaling?.harOppdragMedUtbetalinger() == true
 
         internal fun vedtakFattet(behandlingEventBus: BehandlingEventBus, utbetalingEventBus: UtbetalingEventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
             when (tilstand) {
@@ -1997,7 +1987,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode): Boolean {
         val sisteVedtak = behandlinger.lastOrNull { it.erFattetVedtak() } ?: return false
-        return annenVedtaksperiode.behandlinger.siste?.let { sisteVedtak.utbetaling()?.hørerSammen(it) } ?: false
+        return annenVedtaksperiode.behandlinger.utbetaling?.let { sisteVedtak.utbetaling()?.hørerSammen(it) } ?: false
     }
 }
 

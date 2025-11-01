@@ -367,7 +367,7 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje.fremTilOgMed(31.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         assertFalse(første.harDelvisRefusjon())
-        assertTrue(første.harUtbetalinger())
+        assertTrue(første.harOppdragMedUtbetalinger())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
     }
 

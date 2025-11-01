@@ -10,7 +10,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 internal data object AvventerSimuleringRevurdering : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_SIMULERING_REVURDERING
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.behandlinger.simuler(aktivitetslogg)
+        trengerSimulering(vedtaksperiode, aktivitetslogg)
     }
 
     override fun igangsettOverstyring(
@@ -23,7 +23,7 @@ internal data object AvventerSimuleringRevurdering : Vedtaksperiodetilstand {
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.behandlinger.simuler(aktivitetslogg)
+        trengerSimulering(vedtaksperiode, aktivitetslogg)
     }
 
     override fun skalHåndtereDager(

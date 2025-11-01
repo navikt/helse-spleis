@@ -24,8 +24,4 @@ internal data object SelvstendigAvventerSimulering : Vedtaksperiodetilstand {
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         trengerSimulering(vedtaksperiode, aktivitetslogg)
     }
-
-    private fun trengerSimulering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.behandlinger.simuler(aktivitetslogg)
-    }
 }

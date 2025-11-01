@@ -110,15 +110,12 @@ class Utbetaling private constructor(
     fun erInFlight() = tilstand == Overført
     fun erAnnulleringInFlight() = erAnnullering() && erInFlight()
     fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
-    fun erAvvist() = tilstand == IkkeGodkjent
     private fun erAnnullering() = type == ANNULLERING
 
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
     // og at this er lik den siste aktive utbetalingen for fagsystemIden
     fun hørerSammen(other: Utbetaling) =
         this.korrelasjonsId == other.korrelasjonsId
-
-    fun harUtbetalinger() = harOppdragMedUtbetalinger()
 
     fun harOppdragMedUtbetalinger() =
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
