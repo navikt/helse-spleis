@@ -351,30 +351,33 @@ internal class Vedtaksperiode private constructor(
 
             AvsluttetUtenUtbetaling,
             Avsluttet,
+            TilUtbetaling,
+            SelvstendigAvsluttet,
+            SelvstendigTilUtbetaling -> {
+                nyBehandling(eventBus, søknad)
+                håndterOverlappendeSøknadRevurdering(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
+            }
+
             AvventerGodkjenningRevurdering,
             AvventerHistorikkRevurdering,
             AvventerRevurdering,
             AvventerSimuleringRevurdering,
-            AvventerVilkårsprøvingRevurdering,
-            TilUtbetaling -> {
+            AvventerVilkårsprøvingRevurdering -> {
                 håndterOverlappendeSøknadRevurdering(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
             }
 
             Start,
             AvventerAnnullering,
             TilAnnullering,
-            TilInfotrygd -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
-
+            TilInfotrygd,
             SelvstendigStart -> error("Kan ikke håndtere søknad mens perioden er i $tilstand")
 
-            SelvstendigAvsluttet,
             SelvstendigAvventerBlokkerendePeriode,
             SelvstendigAvventerGodkjenning,
             SelvstendigAvventerHistorikk,
             SelvstendigAvventerInfotrygdHistorikk,
             SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving,
-            SelvstendigTilUtbetaling -> when (behandlinger.harFattetVedtak()) {
+            SelvstendigAvventerVilkårsprøving -> when (behandlinger.harFattetVedtak()) {
                 true -> håndterOverlappendeSøknadRevurdering(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
                 false -> håndterOverlappendeSøknad(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
             }
@@ -421,14 +424,12 @@ internal class Vedtaksperiode private constructor(
         }
         behandlinger.håndterKorrigertInntekt(
             eventBus = eventBus,
-            behandlingEventBus = eventBus.behandlingEventBus,
             korrigertInntekt = Saksbehandler(
                 id = UUID.randomUUID(),
                 inntektsdata = inntektsopplysning.inntektsdata
             ),
             yrkesaktivitet = yrkesaktivitet,
-            aktivitetslogg = registrerKontekst(aktivietetslogg),
-            behandlingkilde = hendelse.metadata.behandlingkilde
+            aktivitetslogg = registrerKontekst(aktivietetslogg)
         )
         return Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, periode.start)// TODO: Eget eventyr?
     }
@@ -443,6 +444,9 @@ internal class Vedtaksperiode private constructor(
         val overstyring = when (tilstand) {
             Avsluttet,
             AvsluttetUtenUtbetaling,
+            TilUtbetaling,
+            SelvstendigAvsluttet -> håndterHistorikkNyBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
+
             AvventerBlokkerendePeriode,
             AvventerAOrdningen,
             AvventerGodkjenning,
@@ -456,23 +460,13 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering,
-            TilUtbetaling,
 
             SelvstendigAvventerGodkjenning,
             SelvstendigAvventerBlokkerendePeriode,
             SelvstendigAvventerHistorikk,
             SelvstendigAvventerInfotrygdHistorikk,
             SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving,
-            SelvstendigAvsluttet -> {
-                val dagerNavOvertarAnsvar = behandlinger.dagerNavOvertarAnsvar
-                oppdaterHistorikk(eventBus, hendelse.metadata.behandlingkilde, overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetsloggMedVedtaksperiodekontekst, hendelse.dagerNavOvertarAnsvar(dagerNavOvertarAnsvar)) {
-                    // ingen validering å gjøre :(
-                }
-                aktivitetsloggMedVedtaksperiodekontekst.info("Igangsetter overstyring av tidslinje")
-
-                Revurderingseventyr.sykdomstidslinje(hendelse, this.skjæringstidspunkt, this.periode)
-            }
+            SelvstendigAvventerVilkårsprøving -> håndterHistorikkÅpenBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
 
             Start,
             AvventerAnnullering,
@@ -485,6 +479,21 @@ internal class Vedtaksperiode private constructor(
 
         hendelse.vurdertTilOgMed(periode.endInclusive)
         return overstyring
+    }
+
+    private fun håndterHistorikkNyBehandling(eventBus: EventBus, hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg): Revurderingseventyr {
+        nyBehandling(eventBus, hendelse)
+        return håndterHistorikkÅpenBehandling(eventBus, hendelse, aktivitetslogg)
+    }
+
+    private fun håndterHistorikkÅpenBehandling(eventBus: EventBus, hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg): Revurderingseventyr {
+        val dagerNavOvertarAnsvar = behandlinger.dagerNavOvertarAnsvar
+        oppdaterHistorikk(eventBus, overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetslogg, hendelse.dagerNavOvertarAnsvar(dagerNavOvertarAnsvar)) {
+            // ingen validering å gjøre :(
+        }
+        aktivitetslogg.info("Igangsetter overstyring av tidslinje")
+
+        return Revurderingseventyr.sykdomstidslinje(hendelse, this.skjæringstidspunkt, this.periode)
     }
 
     internal fun håndterAnmodningOmForkasting(eventBus: EventBus, anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
@@ -552,10 +561,8 @@ internal class Vedtaksperiode private constructor(
         // lagrer ALLTID inntekt på behandling
         behandlinger.håndterFaktaavklartInntekt(
             eventBus = eventBus,
-            behandlingEventBus = eventBus.behandlingEventBus,
             arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
             yrkesaktivitet = yrkesaktivitet,
-            behandlingkilde = inntektsmelding.metadata.behandlingkilde,
             aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst
         )
 
@@ -734,8 +741,12 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val bitAvArbeidsgiverperiode = BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, arbeidsgiverperiodetidslinje, emptyList())
         when (tilstand) {
+            AvsluttetUtenUtbetaling -> {
+                nyBehandling(eventBus, arbeidsgiveropplysninger)
+                håndterDager(eventBus, arbeidsgiveropplysninger, bitAvArbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst) {}
+            }
+
             AvventerInntektsmelding,
-            AvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode -> {
                 håndterDager(eventBus, arbeidsgiveropplysninger, bitAvArbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst) {}
             }
@@ -833,10 +844,8 @@ internal class Vedtaksperiode private constructor(
 
         behandlinger.håndterFaktaavklartInntekt(
             eventBus = eventBus,
-            behandlingEventBus = eventBus.behandlingEventBus,
             arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
             yrkesaktivitet = yrkesaktivitet,
-            behandlingkilde = hendelse.metadata.behandlingkilde,
             aktivitetslogg = aktivitetslogg
         )
         inntektshistorikk.leggTil(
@@ -1039,7 +1048,6 @@ internal class Vedtaksperiode private constructor(
     ) {
         oppdaterHistorikk(
             eventBus = eventBus,
-            behandlingkilde = hendelse.metadata.behandlingkilde,
             dokumentsporing = inntektsmeldingDager(hendelse.metadata.meldingsreferanseId),
             hendelseSykdomstidslinje = bit.sykdomstidslinje,
             aktivitetslogg = aktivitetslogg,
@@ -1482,9 +1490,7 @@ internal class Vedtaksperiode private constructor(
         )
         behandlinger.håndterRefusjonstidslinje(
             eventBus = eventBus,
-            behandlingEventBus = eventBus.behandlingEventBus,
             yrkesaktivitet = yrkesaktivitet,
-            behandlingkilde = sykepengegrunnlagForArbeidsgiver.metadata.behandlingkilde,
             dokumentsporing = inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId),
             aktivitetslogg = aktivitetslogg,
             beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
@@ -1518,10 +1524,8 @@ internal class Vedtaksperiode private constructor(
 
         behandlinger.håndterFaktaavklartInntekt(
             eventBus = eventBus,
-            behandlingEventBus = eventBus.behandlingEventBus,
             arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
             yrkesaktivitet = yrkesaktivitet,
-            behandlingkilde = sykepengegrunnlagForArbeidsgiver.metadata.behandlingkilde,
             aktivitetslogg = aktivitetslogg
         )
 
@@ -1816,9 +1820,7 @@ internal class Vedtaksperiode private constructor(
 
         behandlinger.håndterRefusjonstidslinje(
             eventBus = eventBus,
-            behandlingEventBus = eventBus.behandlingEventBus,
             yrkesaktivitet = yrkesaktivitet,
-            behandlingkilde = hendelse.metadata.behandlingkilde,
             dokumentsporing = dokumentsporing,
             aktivitetslogg = aktivitetslogg,
             beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
@@ -1971,7 +1973,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun oppdaterHistorikk(
         eventBus: EventBus,
-        behandlingkilde: Behandlingkilde,
         dokumentsporing: Dokumentsporing,
         hendelseSykdomstidslinje: Sykdomstidslinje,
         aktivitetslogg: IAktivitetslogg,
@@ -1981,10 +1982,8 @@ internal class Vedtaksperiode private constructor(
         val haddeFlereSkjæringstidspunkt = behandlinger.harFlereSkjæringstidspunkt()
         behandlinger.håndterSykdomstidslinje(
             eventBus = eventBus,
-            behandlingEventBus = eventBus.behandlingEventBus,
             person = person,
             yrkesaktivitet = yrkesaktivitet,
-            behandlingkilde = behandlingkilde,
             dokumentsporing = dokumentsporing,
             hendelseSykdomstidslinje = hendelseSykdomstidslinje,
             egenmeldingsdagerAndrePerioder = yrkesaktivitet.egenmeldingsperioderUnntatt(this),
@@ -2036,10 +2035,10 @@ internal class Vedtaksperiode private constructor(
 
         return behandlinger.nullstillEgenmeldingsdager(
             eventBus = eventBus,
-            behandlingEventBus = eventBus.behandlingEventBus,
+
             person = person,
             yrkesaktivitet = yrkesaktivitet,
-            behandlingkilde = hendelse.metadata.behandlingkilde,
+
             dokumentsporing = dokumentsporing,
             aktivitetslogg = aktivitetslogg,
         )
@@ -2058,7 +2057,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg
     ) {
         videreførEksisterendeRefusjonsopplysninger(eventBus, søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), aktivitetslogg)
-        oppdaterHistorikk(eventBus, søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
+        oppdaterHistorikk(eventBus, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
             søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, subsumsjonslogg, skjæringstidspunkt)
         }
     }
@@ -2075,7 +2074,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterOverlappendeSøknadRevurdering(eventBus: EventBus, søknad: Søknad, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Søknad har trigget en revurdering")
-        oppdaterHistorikk(eventBus, søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
+        oppdaterHistorikk(eventBus, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
             if (søknad.delvisOverlappende) aktivitetslogg.varsel(`Mottatt søknad som delvis overlapper`)
             søknad.valider(FunksjonelleFeilTilVarsler(aktivitetslogg), vilkårsgrunnlag, refusjonstidslinje, subsumsjonslogg, skjæringstidspunkt)
         }
@@ -2783,9 +2782,7 @@ internal class Vedtaksperiode private constructor(
         val benyttetRefusjonsopplysninger = behandlinger.endretRefusjonstidslinje(refusjonsopplysninger) ?: return
         behandlinger.håndterRefusjonstidslinje(
             eventBus = eventBus,
-            behandlingEventBus = eventBus.behandlingEventBus,
             yrkesaktivitet = yrkesaktivitet,
-            behandlingkilde = påminnelse.metadata.behandlingkilde,
             dokumentsporing = null,
             aktivitetslogg = aktivitetslogg,
             beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
@@ -2823,9 +2820,7 @@ internal class Vedtaksperiode private constructor(
         if (benyttetRefusjonstidslinje.isEmpty()) return
         this.behandlinger.håndterRefusjonstidslinje(
             eventBus,
-            eventBus.behandlingEventBus,
             yrkesaktivitet,
-            behandlingkilde,
             dokumentsporing,
             aktivitetslogg,
             person.skjæringstidspunkter,

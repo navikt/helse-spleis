@@ -354,7 +354,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                     assertNull(behandling.avsluttet)
                 }
                 behandlinger[1].also { behandling ->
-                    assertEquals(1, behandling.endringer.size)
+                    assertEquals(2, behandling.endringer.size)
                     assertEquals(Dokumentsporing.søknad(søknad2), behandling.endringer.last().dokumentsporing)
                     assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
                 }
@@ -376,7 +376,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                     assertEquals(8, behandling.endringer.size)
                 }
                 behandlinger[1].also { behandling ->
-                    assertEquals(1, behandling.endringer.size)
+                    assertEquals(2, behandling.endringer.size)
                     assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
                 }
             }
@@ -438,9 +438,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
+                val førsteBehandling = behandlinger.first()
                 val sisteBehandling = behandlinger.last()
+                assertEquals(2, sisteBehandling.endringer.size)
                 assertEquals(inntektsmeldingId.id, sisteBehandling.kilde.meldingsreferanseId)
-                assertEquals(Dokumentsporing.inntektsmeldingDager(inntektsmeldingId), sisteBehandling.endringer.single().dokumentsporing)
+                assertEquals(førsteBehandling.endringer.last().dokumentsporing, sisteBehandling.endringer[0].dokumentsporing)
+                assertEquals(Dokumentsporing.inntektsmeldingDager(inntektsmeldingId), sisteBehandling.endringer[1].dokumentsporing)
                 assertEquals(UBEREGNET_REVURDERING, sisteBehandling.tilstand)
             }
             assertVarsler(listOf(Varselkode.RV_IM_24), 2.vedtaksperiode.filter())

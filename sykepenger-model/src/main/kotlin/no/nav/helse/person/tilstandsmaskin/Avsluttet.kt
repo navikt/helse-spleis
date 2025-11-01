@@ -24,6 +24,7 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg
     ) {
+        vedtaksperiode.nyBehandling(eventBus, dager.hendelse)
         vedtaksperiode.håndterKorrigerendeInntektsmelding(eventBus, dager, FunksjonelleFeilTilVarsler(aktivitetslogg))
     }
 
