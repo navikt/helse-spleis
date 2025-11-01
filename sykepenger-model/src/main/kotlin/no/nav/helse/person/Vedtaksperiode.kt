@@ -386,6 +386,39 @@ internal class Vedtaksperiode private constructor(
     internal fun håndterKorrigertInntekt(eventBus: EventBus, hendelse: OverstyrArbeidsgiveropplysninger, inntektsopplysning: OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning, aktivietetslogg: IAktivitetslogg): Revurderingseventyr? {
         if (skjæringstidspunkt != hendelse.skjæringstidspunkt) return null
 
+        when (tilstand) {
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            TilUtbetaling -> nyBehandling(eventBus, hendelse)
+
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            Start,
+            TilAnnullering,
+            TilInfotrygd,
+            TilUtbetaling -> {}
+        }
         behandlinger.håndterKorrigertInntekt(
             eventBus = eventBus,
             behandlingEventBus = eventBus.behandlingEventBus,
