@@ -103,7 +103,7 @@ class Utbetaling private constructor(
 
     fun periode() = periode
     private fun gyldig() = tilstand !in setOf(Ny, Forkastet)
-    fun erUbetalt() = tilstand == Ubetalt
+    private fun erUbetalt() = tilstand == Ubetalt
     private fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
     private fun erAktiv() = erAvsluttet() || erInFlight()
     private fun erAktivEllerUbetalt() = erAktiv() || erUbetalt()

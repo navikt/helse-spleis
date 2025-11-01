@@ -190,7 +190,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun erAvsluttet() = behandlinger.last().erAvsluttet()
     internal fun erAvvist() = siste?.erAvvist() == true
     internal fun harUtbetalinger() = siste?.harUtbetalinger() == true
-    internal fun erUbetalt() = siste?.erUbetalt() == true
     internal fun kanForkastes(andreBehandlinger: List<Behandlinger>) = behandlinger.last().kanForkastes(andreBehandlinger.map { it.behandlinger.last() })
     internal fun forventerUtbetaling(periodeSomBeregner: Periode, skjæringstidspunkt: LocalDate, skalBehandlesISpeil: Boolean) =
         behandlinger.last().forventerUtbetaling(periodeSomBeregner, skjæringstidspunkt, skalBehandlesISpeil)
