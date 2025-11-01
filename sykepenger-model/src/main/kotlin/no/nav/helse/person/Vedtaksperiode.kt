@@ -1997,15 +1997,53 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun nullstillEgenmeldingsdager(eventBus: EventBus, hendelse: Hendelse, dokumentsporing: Dokumentsporing?, aktivitetslogg: IAktivitetslogg) = behandlinger.nullstillEgenmeldingsdager(
-        eventBus = eventBus,
-        behandlingEventBus = eventBus.behandlingEventBus,
-        person = person,
-        yrkesaktivitet = yrkesaktivitet,
-        behandlingkilde = hendelse.metadata.behandlingkilde,
-        dokumentsporing = dokumentsporing,
-        aktivitetslogg = aktivitetslogg,
-    )
+    private fun nullstillEgenmeldingsdager(eventBus: EventBus, hendelse: Hendelse, dokumentsporing: Dokumentsporing?, aktivitetslogg: IAktivitetslogg): Boolean {
+        if (behandlinger.egenmeldingsdager().isEmpty()) return false // Trenger ikke gjøre det om det ikke er noen egenmeldingsdager fra før
+
+        when (tilstand) {
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            TilUtbetaling -> nyBehandling(eventBus, hendelse)
+
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            Start,
+            TilAnnullering,
+            TilInfotrygd,
+            TilUtbetaling -> {}
+        }
+
+        return behandlinger.nullstillEgenmeldingsdager(
+            eventBus = eventBus,
+            behandlingEventBus = eventBus.behandlingEventBus,
+            person = person,
+            yrkesaktivitet = yrkesaktivitet,
+            behandlingkilde = hendelse.metadata.behandlingkilde,
+            dokumentsporing = dokumentsporing,
+            aktivitetslogg = aktivitetslogg,
+        )
+    }
 
     internal fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?): List<Revurderingseventyr> {
         val arbeidsgiverperiode = behandlinger.ventedager().dagerUtenNavAnsvar.periode ?: return emptyList()

@@ -443,8 +443,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         dokumentsporing: Dokumentsporing?,
         aktivitetslogg: IAktivitetslogg
     ): Boolean {
-        if (egenmeldingsdager().isEmpty()) return false // Trenger ikke gjøre det om det ikke er noen egenmeldingsdager fra før
-
+        check(åpenBehandling != null) { "Kan ikke nullstille egenmeldingsdager når det ikke finnes en åpen behandling" }
         håndterSykdomstidslinje(
             eventBus = eventBus,
             behandlingEventBus = behandlingEventBus,
