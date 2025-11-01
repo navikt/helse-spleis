@@ -390,8 +390,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal fun håndterFaktaavklartInntekt(eventBus: EventBus, behandlingEventBus: BehandlingEventBus, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg) {
-        behandlinger.last().håndterFaktaavklartInntekt(eventBus, behandlingEventBus, arbeidstakerFaktaavklartInntekt, yrkesaktivitet, behandlingkilde, aktivitetslogg)?.also {
-            leggTilNyBehandling(it)
+        checkNotNull(åpenBehandling).håndterFaktaavklartInntekt(eventBus, behandlingEventBus, arbeidstakerFaktaavklartInntekt, yrkesaktivitet, behandlingkilde, aktivitetslogg).also {
+            check(it == null) {
+                // denne sjekken er midlertidig ettersom håndterNyFakta() i teorien kan opprette en Behandling
+                "forventer ikke å lage ny behandling, vedtaksperioden har glemt å opprette Behandling"
+            }
         }
     }
 

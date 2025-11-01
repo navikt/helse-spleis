@@ -790,6 +790,14 @@ internal class Vedtaksperiode private constructor(
 
         val faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(id = UUID.randomUUID(), inntektsdata = inntektsdata, inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver)
 
+        // vi burde egentlig kunne sjekke tilstanden her, men siden inntekt kan komme
+        // samtidig som f.eks. dag- eller refusjonshåndtering fra inntektsmelding så kan tilstanden fremdeles være "Avsluttet" selv om
+        // det er opprettet en ny behandling allerede.
+        // ideelt sett skulle vi hatt bedre kontroll over flyten her
+        if (!behandlinger.åpenForEndring()) {
+            nyBehandling(eventBus, hendelse)
+        }
+
         behandlinger.håndterFaktaavklartInntekt(
             eventBus = eventBus,
             behandlingEventBus = eventBus.behandlingEventBus,
