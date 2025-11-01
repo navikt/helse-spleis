@@ -100,7 +100,8 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.nyBehandling(eventBus, dager.hendelse)
+        if (!vedtaksperiode.behandlinger.åpenForEndring())
+            vedtaksperiode.nyBehandling(eventBus, dager.hendelse)
         vedtaksperiode.håndterDager(eventBus, dager, aktivitetslogg)
 
         if (!aktivitetslogg.harFunksjonelleFeil()) return

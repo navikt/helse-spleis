@@ -90,6 +90,7 @@ import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -123,6 +124,71 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `periode i auu med egenmeldingsdager får inntektsmelding etter at vi har brukt skatteopplysninger`() {
+        håndterSøknad(Sykdom(7.januar, 20.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
+        nyPeriode(21.januar til 31.januar)
+        håndterPåminnelse(2.vedtaksperiode, påminnetTilstand = AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+        håndterSykepengegrunnlagForArbeidsgiver(7.januar)
+        assertVarsler(listOf(Varselkode.RV_IV_10), 2.vedtaksperiode.filter())
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        nullstillTilstandsendringer()
+
+        val arbeidsgiverperioder = listOf(
+            1.januar til 2.januar,
+            7.januar til 20.januar
+        )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beregnetInntekt = INNTEKT,
+            førsteFraværsdag = 7.januar
+        )
+        assertVarsler(listOf(Varselkode.RV_IV_10, RV_IM_4), 2.vedtaksperiode.filter())
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+
+        assertEquals(emptyList<Nothing>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
+        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(1.vedtaksperiode))
+        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(2.vedtaksperiode))
+    }
+
+    @Test
+    fun `periode i avsluttet med egenmeldingsdager får inntektsmelding etter at vi har brukt skatteopplysninger`() {
+        håndterSøknad(Sykdom(7.januar, 31.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
+        håndterPåminnelse(1.vedtaksperiode, påminnetTilstand = AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+        håndterSykepengegrunnlagForArbeidsgiver(7.januar)
+        assertVarsler(listOf(Varselkode.RV_IV_10), 1.vedtaksperiode.filter())
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        nullstillTilstandsendringer()
+
+        val arbeidsgiverperioder = listOf(
+            1.januar til 2.januar,
+            7.januar til 20.januar
+        )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beregnetInntekt = INNTEKT,
+            førsteFraværsdag = 7.januar
+        )
+        assertVarsler(listOf(Varselkode.RV_IV_10, RV_IM_4,  RV_IM_24), 1.vedtaksperiode.filter())
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+
+        assertEquals(emptyList<Nothing>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
+        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(1.vedtaksperiode))
+    }
 
     @Test
     fun `Arbeidsgiver opplyser om endret refusjon før søknad som kommer out of order`() {
