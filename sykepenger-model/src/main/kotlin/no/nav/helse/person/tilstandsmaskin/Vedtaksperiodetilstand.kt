@@ -54,7 +54,6 @@ internal sealed interface Vedtaksperiodetilstand {
     ) {
     }
 
-    fun nyAnnullering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {}
     fun gjenopptaBehandling(
         vedtaksperiode: Vedtaksperiode,
         eventBus: EventBus,

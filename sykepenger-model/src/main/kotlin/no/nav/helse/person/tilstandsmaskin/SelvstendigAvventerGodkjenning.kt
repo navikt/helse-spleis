@@ -12,10 +12,6 @@ internal data object SelvstendigAvventerGodkjenning : Vedtaksperiodetilstand {
         vedtaksperiode.trengerGodkjenning(eventBus, aktivitetslogg)
     }
 
-    override fun nyAnnullering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerBlokkerendePeriode)
-    }
-
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerGodkjenning(eventBus, aktivitetslogg)
     }

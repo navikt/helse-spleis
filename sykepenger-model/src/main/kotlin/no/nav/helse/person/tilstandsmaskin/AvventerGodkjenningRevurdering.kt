@@ -22,11 +22,6 @@ internal data object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         vedtaksperiode.håndterOverstyringIgangsattRevurderingArbeidstaker(eventBus, revurdering, aktivitetslogg)
     }
 
-    override fun nyAnnullering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        if (vedtaksperiode.behandlinger.erAvvist()) return
-        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRevurdering)
-    }
-
     override fun skalHåndtereDager(
         vedtaksperiode: Vedtaksperiode,
         dager: DagerFraInntektsmelding,
