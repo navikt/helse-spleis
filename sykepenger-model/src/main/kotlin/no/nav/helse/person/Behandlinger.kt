@@ -354,6 +354,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     private fun leggTilNyBehandling(behandling: Behandling?) {
         if (behandling == null) return
+        check(behandlinger.isEmpty() || åpenBehandling == null) { "Kan ikke opprette ny behandling når det finnes en åpen behandling" }
         if (behandlinger.isNotEmpty())
             check(behandlinger.last().tillaterNyBehandling(behandling)) {
                 "siste behandling ${behandlinger.last()} tillater ikke opprettelse av ny behandling $behandling"
