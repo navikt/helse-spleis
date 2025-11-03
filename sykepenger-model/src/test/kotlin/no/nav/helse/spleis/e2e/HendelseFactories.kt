@@ -408,6 +408,7 @@ internal fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dag
 internal fun manuellForeldrepengedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Foreldrepengerdag)
 internal fun manuellSykedag(dato: LocalDate, grad: Int = 100) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, grad)
 internal fun manuellArbeidsgiverdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Egenmeldingsdag)
+internal fun manuellArbeidsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Arbeidsdag)
 
 internal fun AbstractEndToEndTest.simulering(
     vedtaksperiodeIdInnhenter: IdInnhenter,

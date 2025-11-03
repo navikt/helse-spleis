@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -31,6 +32,51 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `oppdaterer skjæringstidspunkt på senere vedtak ved overstyring av tidligere vedtak`() {
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+
+            håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertVarsler(listOf(Varselkode.RV_IV_7), 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `oppdaterer skjæringstidspunkt på senere vedtak ved overstyring av tidligere auu`() {
+        a1 {
+            håndterSøknad(1.januar til 16.januar)
+            nyttVedtak(17.januar til 31.januar, førsteFraværsdag = 1.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+
+            håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertVarsler(listOf(Varselkode.RV_IV_7), 2.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `oppdaterer skjæringstidspunkt på senere auu ved overstyring av tidligere auu`() {
+        a1 {
+            håndterSøknad(1.januar til 5.januar)
+            håndterSøknad(6.januar til 16.januar)
+
+            håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
+
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertEquals(listOf(2.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(listOf(2.januar til 16.januar), inspektør.venteperiode(2.vedtaksperiode))
+        }
+    }
 
     @Test
     fun `skjæringstidspunkt skal ikke hensynta sykedager i et senere sykefraværstilefelle`() {
