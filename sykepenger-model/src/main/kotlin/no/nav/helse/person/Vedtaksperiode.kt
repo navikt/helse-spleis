@@ -796,12 +796,45 @@ internal class Vedtaksperiode private constructor(
                 håndterDager(eventBus, arbeidsgiveropplysninger, bitAvArbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst) {}
             }
 
-            else -> {
+            TilUtbetaling,
+            Avsluttet -> {
+                nyBehandling(eventBus, arbeidsgiveropplysninger)
                 // det er oppgitt arbeidsgiverperiode på uventede perioder; mest sannsynlig
                 // har da ikke vedtaksperioden bedt om Arbeidsgiverperiode som opplysning, men vi har fått det likevel
-                varselFraArbeidsgiveropplysning(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, RV_IM_24)
+                varselFraArbeidsgiveropplysning(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, RV_IM_24)
                 aktivitetsloggMedVedtaksperiodekontekst.info("Håndterer ikke arbeidsgiverperiode i ${tilstand.type}")
             }
+
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering -> {
+                // det er oppgitt arbeidsgiverperiode på uventede perioder; mest sannsynlig
+                // har da ikke vedtaksperioden bedt om Arbeidsgiverperiode som opplysning, men vi har fått det likevel
+                varselFraArbeidsgiveropplysning(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, RV_IM_24)
+                aktivitetsloggMedVedtaksperiodekontekst.info("Håndterer ikke arbeidsgiverperiode i ${tilstand.type}")
+            }
+
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            Start,
+            TilAnnullering,
+            TilInfotrygd -> error("forventer ikke å håndtere arbeidsgiverperiode i tilstand $tilstand")
         }
         return Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, periode)
     }
@@ -903,7 +936,7 @@ internal class Vedtaksperiode private constructor(
 
         // Skjæringstidspunktet er _ikke_ vilkårsprøvd før (det mest normale - står typisk i AvventerInntektsmelding)
         if (grunnlag == null) {
-            dokumentsporingFraArbeidsgiveropplysning(eventBus, hendelse, ::inntektsmeldingInntekt)
+            dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingInntekt)
             return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
         }
 
@@ -921,7 +954,7 @@ internal class Vedtaksperiode private constructor(
         val (nyttGrunnlag, _) = result
         person.lagreVilkårsgrunnlag(nyttGrunnlag)
         // Skjæringstidspunktet er allerede vilkårsprøvd, men inntekten for arbeidsgiveren er byttet ut med denne oppgitte inntekten
-        dokumentsporingFraArbeidsgiveropplysning(eventBus, hendelse, ::inntektsmeldingInntekt)
+        dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingInntekt)
         return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
     }
 
@@ -975,7 +1008,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterKorrigertOpphørAvNaturalytelser(eventBus: EventBus, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
         if (korrigerteArbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OpphørAvNaturalytelser>().isEmpty()) return emptyList()
-        varselFraArbeidsgiveropplysning(eventBus, korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_7)
+        sørgForNyBehandlingHvisIkkeÅpen(eventBus, korrigerteArbeidsgiveropplysninger)
+        varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_7)
         return listOf(Revurderingseventyr.arbeidsgiverperiode(korrigerteArbeidsgiveropplysninger, skjæringstidspunkt, periode))
     }
 
@@ -990,7 +1024,8 @@ internal class Vedtaksperiode private constructor(
                 .singleOrNull()
 
         if (korrigertUtbetalingIArbeidsgiverperiode != null) {
-            varselFraArbeidsgiveropplysning(eventBus, korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_8)
+            sørgForNyBehandlingHvisIkkeÅpen(eventBus, korrigerteArbeidsgiveropplysninger)
+            varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_8)
         }
 
         return listOf(Revurderingseventyr.arbeidsgiverperiode(korrigerteArbeidsgiveropplysninger, skjæringstidspunkt, periode))
@@ -998,9 +1033,14 @@ internal class Vedtaksperiode private constructor(
 
     private fun varselVedEndretArbeidsgiverperiode(eventBus: EventBus, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
         val oppgittArbeidgiverperiode = korrigerteArbeidsgiveropplysninger.filterIsInstance<OppgittArbeidgiverperiode>().singleOrNull() ?: return
-        val beregnetArbeidsgiverperiode = behandlinger.ventedager().dagerUtenNavAnsvar.periode ?: return varselFraArbeidsgiveropplysning(eventBus, korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_24)
+        val beregnetArbeidsgiverperiode = behandlinger.ventedager().dagerUtenNavAnsvar.periode
+        if (beregnetArbeidsgiverperiode == null) {
+            sørgForNyBehandlingHvisIkkeÅpen(eventBus, korrigerteArbeidsgiveropplysninger)
+            return varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_24)
+        }
         if (oppgittArbeidgiverperiode.perioder.periode()!! in beregnetArbeidsgiverperiode) return
-        varselFraArbeidsgiveropplysning(eventBus, korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_24)
+        sørgForNyBehandlingHvisIkkeÅpen(eventBus, korrigerteArbeidsgiveropplysninger)
+        varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_24)
     }
 
     private fun sykNavBit(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, perioderNavUtbetaler: List<Periode>): BitAvArbeidsgiverperiode? {
@@ -1012,19 +1052,12 @@ internal class Vedtaksperiode private constructor(
         return BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, Sykdomstidslinje(), dagerNavOvertarAnsvar)
     }
 
-    private fun <T> dokumentsporingFraArbeidsgiveropplysning(eventBus: EventBus, hendelse: T, dokumentsporing: (meldingsreferanseId: MeldingsreferanseId) -> Dokumentsporing) where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
-        behandlinger.sikreNyBehandling(
-            behandlingEventBus = eventBus.behandlingEventBus,
-            yrkesaktivitet = yrkesaktivitet,
-            behandlingkilde = hendelse.metadata.behandlingkilde,
-            beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
-            beregnetPerioderUtenNavAnsvar = yrkesaktivitet.perioderUtenNavAnsvar
-        )
+    private fun dokumentsporingFraArbeidsgiveropplysning(hendelse: Hendelse, dokumentsporing: (meldingsreferanseId: MeldingsreferanseId) -> Dokumentsporing) {
         behandlinger.oppdaterDokumentsporing(dokumentsporing(hendelse.metadata.meldingsreferanseId))
     }
 
-    private fun <T> varselFraArbeidsgiveropplysning(eventBus: EventBus, hendelse: T, aktivitetslogg: IAktivitetslogg, varselkode: Varselkode) where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
-        dokumentsporingFraArbeidsgiveropplysning(eventBus, hendelse, ::inntektsmeldingDager)
+    private fun varselFraArbeidsgiveropplysning(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, varselkode: Varselkode) {
+        dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingDager)
         aktivitetslogg.varsel(varselkode)
     }
 
