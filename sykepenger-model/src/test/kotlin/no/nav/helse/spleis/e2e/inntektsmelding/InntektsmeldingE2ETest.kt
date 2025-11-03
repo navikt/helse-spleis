@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime.MIN
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
@@ -124,6 +125,26 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `inntektsmelding for perioder med arbeid`() {
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), Arbeid(1.januar, 16.januar))
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), Arbeid(17.januar, 31.januar))
+
+        nullstillTilstandsendringer()
+
+        val arbeidsgiverperioder = listOf(1.januar til 16.januar)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = arbeidsgiverperioder
+        )
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+
+        assertEquals(emptyList<Nothing>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
+        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(1.vedtaksperiode))
+        assertEquals(emptyList<Nothing>(), inspektør.venteperiode(2.vedtaksperiode))
+    }
 
     @Test
     fun `periode i auu med egenmeldingsdager får inntektsmelding etter at vi har brukt skatteopplysninger`() {

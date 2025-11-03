@@ -558,9 +558,43 @@ internal class Vedtaksperiode private constructor(
 
         val faktaavklartInntekt = inntektsmelding.faktaavklartInntekt()
 
-        if (!behandlinger.åpenForEndring()) {
-            aktivitetslogg.info("lager ny behandling for håndtering av inntekt i $tilstand")
-            nyBehandling(eventBus, inntektsmelding)
+        when (tilstand) {
+            AvsluttetUtenUtbetaling -> if (!behandlinger.åpenForEndring()) {
+                nyBehandling(eventBus, inntektsmelding)
+            }
+
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering -> {}
+
+            Avsluttet,
+            TilUtbetaling -> check(behandlinger.åpenForEndring()) {
+                "forventer at vedtaksperioden er åpen for endring når inntekt håndteres (tilstand $tilstand)"
+            }
+
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            Start,
+            TilAnnullering,
+            TilInfotrygd -> error("Forventer ikke å håndtere inntekt i tilstand $tilstand")
         }
 
         // lagrer ALLTID inntekt på behandling
@@ -576,10 +610,6 @@ internal class Vedtaksperiode private constructor(
         if (!oppdaterVilkårsgrunnlagMedInntekt(faktaavklartInntekt)) {
             // har ikke laget nytt vilkårsgrunnlag for beløpet var det samme som det var. Legger heller ikke til inntekten på behandlingen
             return null
-        }
-
-        check(!behandlinger.erAvsluttet()) {
-            "forventer ikke at vedtaksperioden har en lukket behandling når inntekt håndteres"
         }
 
         aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
