@@ -2807,13 +2807,6 @@ internal class Vedtaksperiode private constructor(
         nesteTilstand: Vedtaksperiodetilstand
     ) {
         revurdering.inngåSomRevurdering(this, aktivitetslogg)
-        behandlinger.sikreNyBehandling(
-            eventBus.behandlingEventBus,
-            yrkesaktivitet,
-            revurdering.hendelse.metadata.behandlingkilde,
-            person.skjæringstidspunkter,
-            yrkesaktivitet.perioderUtenNavAnsvar
-        )
         tilstand(eventBus, aktivitetslogg, nesteTilstand)
     }
 

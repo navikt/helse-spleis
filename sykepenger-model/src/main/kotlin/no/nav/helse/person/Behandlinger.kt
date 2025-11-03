@@ -1365,9 +1365,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val starttilstand = when (tilstand) {
                 Tilstand.AvsluttetUtenVedtak -> Tilstand.UberegnetOmgjøring
                 Tilstand.VedtakFattet,
-                Tilstand.VedtakIverksatt -> Tilstand.UberegnetRevurdering
+                Tilstand.VedtakIverksatt,
+                Tilstand.RevurdertVedtakAvvist -> Tilstand.UberegnetRevurdering
 
-                Tilstand.RevurdertVedtakAvvist,
                 Tilstand.AnnullertPeriode,
                 Tilstand.Beregnet,
                 Tilstand.BeregnetOmgjøring,

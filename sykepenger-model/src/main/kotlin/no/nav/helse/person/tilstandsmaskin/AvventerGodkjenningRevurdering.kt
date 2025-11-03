@@ -19,6 +19,7 @@ internal data object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
+        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpen(eventBus, revurdering.hendelse)
         vedtaksperiode.håndterOverstyringIgangsattRevurderingArbeidstaker(eventBus, revurdering, aktivitetslogg)
     }
 
