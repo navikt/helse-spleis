@@ -14,7 +14,8 @@ internal data object SelvstendigTilUtbetaling : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        error("Kan ikke håndtere overstyring i tilstand $this for vedtaksperiode ${vedtaksperiode.id}")
+        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, revurdering.hendelse)
+        vedtaksperiode.håndterOverstyringIgangsattRevurderingSelvstendig(eventBus, revurdering, aktivitetslogg)
     }
 
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {

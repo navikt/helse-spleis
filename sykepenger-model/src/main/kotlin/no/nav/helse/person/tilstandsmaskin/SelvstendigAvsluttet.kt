@@ -24,6 +24,7 @@ internal data object SelvstendigAvsluttet : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
+        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, revurdering.hendelse)
         vedtaksperiode.håndterOverstyringIgangsattRevurderingSelvstendig(eventBus, revurdering, aktivitetslogg)
     }
 }

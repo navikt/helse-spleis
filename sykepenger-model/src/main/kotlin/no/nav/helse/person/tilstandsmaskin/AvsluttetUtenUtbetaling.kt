@@ -66,7 +66,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgAGP(eventBus, revurdering.hendelse)
+        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, revurdering.hendelse)
 
         if (vedtaksperiode.skalBehandlesISpeil()) {
             revurdering.inngåSomEndring(vedtaksperiode, aktivitetslogg)

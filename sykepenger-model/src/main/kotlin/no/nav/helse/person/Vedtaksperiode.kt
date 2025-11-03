@@ -306,7 +306,7 @@ internal class Vedtaksperiode private constructor(
         nyBehandling(eventBus, hendelse)
     }
 
-    internal fun sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgAGP(eventBus: EventBus, hendelse: Hendelse) {
+    internal fun sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus: EventBus, hendelse: Hendelse) {
         if (behandlinger.åpenForEndring()) return
         nyBehandling(eventBus, hendelse)
         // det kan ha skjedd ting mens perioden var avsluttet som gjør at skjæringstidspunktet / agp kanskje må oppdateres

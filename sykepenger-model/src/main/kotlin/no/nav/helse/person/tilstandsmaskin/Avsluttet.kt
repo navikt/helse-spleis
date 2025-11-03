@@ -44,7 +44,7 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgAGP(eventBus, revurdering.hendelse)
+        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, revurdering.hendelse)
         vedtaksperiode.subsumsjonslogg.logg(`fvl § 35 ledd 1`())
         revurdering.inngåSomRevurdering(vedtaksperiode, aktivitetslogg)
         vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRevurdering)

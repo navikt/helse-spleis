@@ -4,6 +4,8 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.forlengelseTilGodkjenning
+import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -32,6 +34,57 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `selvstendig - oppdaterer skjæringstidspunkt på senere vedtak ved overstyring av tidligere vedtak`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterForlengelsessøknadSelvstendig(februar)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            nullstillTilstandsendringer()
+
+            håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(2.vedtaksperiode))
+        }
+    }
+
+    @Test
+    fun `selvstendig - oppdaterer skjæringstidspunkt på senere periode til utbetaling ved overstyring av tidligere vedtak`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterForlengelsessøknadSelvstendig(februar)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+            nullstillTilstandsendringer()
+
+            håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(2.vedtaksperiode))
+        }
+    }
 
     @Test
     fun `oppdaterer skjæringstidspunkt på senere vedtak ved overstyring av tidligere vedtak`() {
@@ -75,6 +128,22 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(listOf(2.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
             assertEquals(listOf(2.januar til 16.januar), inspektør.venteperiode(2.vedtaksperiode))
+        }
+    }
+
+    @Test
+    fun `oppdaterer skjæringstidspunkt på senere periode til utbetaling ved overstyring av tidligere vedtak`() {
+        a1 {
+            nyttVedtak(januar)
+            forlengelseTilGodkjenning(februar)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+            håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertVarsler(listOf(Varselkode.RV_IV_7), 1.vedtaksperiode.filter())
         }
     }
 

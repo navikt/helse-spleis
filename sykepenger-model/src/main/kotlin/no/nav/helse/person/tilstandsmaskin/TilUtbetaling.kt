@@ -16,6 +16,7 @@ internal data object TilUtbetaling : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
+        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, revurdering.hendelse)
         vedtaksperiode.håndterOverstyringIgangsattRevurderingArbeidstaker(eventBus, revurdering, aktivitetslogg)
     }
 
