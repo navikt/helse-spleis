@@ -489,7 +489,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     fun oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>) {
-        behandlinger.last().oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar)
+        checkNotNull(åpenBehandling).oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar)
     }
 
     internal class Behandlingkilde(

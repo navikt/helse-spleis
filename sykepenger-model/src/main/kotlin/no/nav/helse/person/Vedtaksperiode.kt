@@ -306,6 +306,13 @@ internal class Vedtaksperiode private constructor(
         nyBehandling(eventBus, hendelse)
     }
 
+    internal fun sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgAGP(eventBus: EventBus, hendelse: Hendelse) {
+        if (behandlinger.åpenForEndring()) return
+        nyBehandling(eventBus, hendelse)
+        // det kan ha skjedd ting mens perioden var avsluttet som gjør at skjæringstidspunktet / agp kanskje må oppdateres
+        behandlinger.oppdaterSkjæringstidspunkt(person.skjæringstidspunkter, yrkesaktivitet.perioderUtenNavAnsvar)
+    }
+
     internal fun håndterSykmelding(sykmelding: Sykmelding) {
         sykmelding.trimLeft(periode.endInclusive)
     }
@@ -2993,7 +3000,11 @@ internal class Vedtaksperiode private constructor(
             beregnetSkjæringstidspunkter: Skjæringstidspunkter,
             beregnetArbeidsgiverperioder: List<PeriodeUtenNavAnsvar>
         ) {
-            forEach { it.behandlinger.oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnetArbeidsgiverperioder) }
+            forEach {
+                if (it.behandlinger.åpenForEndring()) {
+                    it.behandlinger.oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnetArbeidsgiverperioder)
+                }
+            }
         }
 
         internal fun List<Vedtaksperiode>.aktiveSkjæringstidspunkter(): Set<LocalDate> {

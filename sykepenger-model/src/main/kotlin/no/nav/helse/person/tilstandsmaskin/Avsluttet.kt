@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.behandlingkilde
 
 internal data object Avsluttet : Vedtaksperiodetilstand {
     override val type = TilstandType.AVSLUTTET
@@ -45,13 +44,7 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.behandlinger.sikreNyBehandling(
-            with (vedtaksperiode) {eventBus.behandlingEventBus },
-            vedtaksperiode.yrkesaktivitet,
-            revurdering.hendelse.metadata.behandlingkilde,
-            vedtaksperiode.person.skjæringstidspunkter,
-            vedtaksperiode.yrkesaktivitet.perioderUtenNavAnsvar
-        )
+        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgAGP(eventBus, revurdering.hendelse)
         vedtaksperiode.subsumsjonslogg.logg(`fvl § 35 ledd 1`())
         revurdering.inngåSomRevurdering(vedtaksperiode, aktivitetslogg)
         vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRevurdering)
