@@ -988,7 +988,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 maksdatoresultat: Maksdatoresultat = this.maksdatoresultat,
                 inntektjusteringer: Map<Inntektskilde, Beløpstidslinje> = this.inntektjusteringer,
                 faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt,
-                selvstendigForsikring: SelvstendigForsikring? = this.selvstendigForsikring,
                 korrigertInntekt: Saksbehandler? = this.korrigertInntekt
             ) = copy(
                 id = UUID.randomUUID(),
@@ -1009,7 +1008,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 maksdatoresultat = maksdatoresultat,
                 inntektjusteringer = inntektjusteringer,
                 faktaavklartInntekt = faktaavklartInntekt,
-                selvstendigForsikring = selvstendigForsikring,
                 korrigertInntekt = korrigertInntekt
             )
 
@@ -1057,13 +1055,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
             }
 
-            internal fun kopierMedBeregning(beregning: BeregnetBehandling, dagerNavOvertarAnsvar: List<Periode>, selvstendigForsikring: SelvstendigForsikring?) = kopierMed(
+            internal fun kopierMedBeregning(beregning: BeregnetBehandling, dagerNavOvertarAnsvar: List<Periode>) = kopierMed(
                 grunnlagsdata = beregning.grunnlagsdata,
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = beregning.maksdatoresultat,
                 inntektjusteringer = beregning.alleInntektjusteringer,
-                dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
-                selvstendigForsikring = selvstendigForsikring
+                dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
             )
 
             internal fun kopierMedUtbetaling(utbetaling: Utbetaling) = kopierMed(utbetaling = utbetaling)
@@ -1729,8 +1726,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.nyEndring(
                         behandling.gjeldende.kopierMedBeregning(
                             beregning,
-                            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
-                            selvstendigForsikring = beregning.selvstendigForsikring
+                            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
                         )
                     )
                     behandling.tilstand(Beregnet)
@@ -1763,7 +1759,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         }
                     } ?: behandling.dagerNavOvertarAnsvar
 
-                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar, beregning.selvstendigForsikring))
+                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar))
                     behandling.tilstand(BeregnetOmgjøring)
                 }
             }
@@ -1792,7 +1788,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         }
                     } ?: behandling.dagerNavOvertarAnsvar
 
-                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar, beregning.selvstendigForsikring))
+                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar))
                     behandling.tilstand(BeregnetRevurdering)
                 }
 
