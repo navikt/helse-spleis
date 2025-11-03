@@ -25,6 +25,8 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -90,8 +92,8 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     private val selvstendigForsikring = when(yrkesaktivitetssporing) {
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> packet["@løsning.${Behovtype.SelvstendigForsikring.name}"].firstOrNull()?.let {
             SelvstendigForsikring(
-                virkningsdato = it.path("startdato").asLocalDate(),
-                opphørsdato = it.path("sluttdato").asOptionalLocalDate(),
+                startdato = it.path("startdato").asLocalDate(),
+                sluttdato = it.path("sluttdato").asOptionalLocalDate(),
                 type = SelvstendigForsikring.Forsikringstype.valueOf(it.path("forsikringstype").asText())
             )
         }.also {

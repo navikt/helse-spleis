@@ -9,7 +9,6 @@ import no.nav.helse.dto.DagerUtenNavAnsvaravklaringDto
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.InntektskildeDto
 import no.nav.helse.dto.PeriodeDto
-import no.nav.helse.dto.SelvstendigForsikringDto
 import no.nav.helse.dto.SykdomstidslinjeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 
@@ -34,6 +33,5 @@ data class BehandlingendringUtDto(
     val maksdatoresultat: MaksdatoresultatUtDto,
     val inntektjusteringer: Map<InntektskildeDto, BeløpstidslinjeDto>,
     val faktaavklartInntekt: FaktaavklartInntektUtDto?,
-    val selvstendigForsikring: SelvstendigForsikringDto?,
     val korrigertInntekt: SaksbehandlerUtDto?
 )
