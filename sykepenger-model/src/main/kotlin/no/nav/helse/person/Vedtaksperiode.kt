@@ -301,6 +301,11 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    internal fun sørgForNyBehandlingHvisIkkeÅpen(eventBus: EventBus, hendelse: Hendelse) {
+        if (behandlinger.åpenForEndring()) return
+        nyBehandling(eventBus, hendelse)
+    }
+
     internal fun håndterSykmelding(sykmelding: Sykmelding) {
         sykmelding.trimLeft(periode.endInclusive)
     }
@@ -559,9 +564,7 @@ internal class Vedtaksperiode private constructor(
         val faktaavklartInntekt = inntektsmelding.faktaavklartInntekt()
 
         when (tilstand) {
-            AvsluttetUtenUtbetaling -> if (!behandlinger.åpenForEndring()) {
-                nyBehandling(eventBus, inntektsmelding)
-            }
+            AvsluttetUtenUtbetaling -> sørgForNyBehandlingHvisIkkeÅpen(eventBus, inntektsmelding)
 
             AvventerAOrdningen,
             AvventerAnnullering,
@@ -777,7 +780,7 @@ internal class Vedtaksperiode private constructor(
         val bitAvArbeidsgiverperiode = BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, arbeidsgiverperiodetidslinje, emptyList())
         when (tilstand) {
             AvsluttetUtenUtbetaling -> {
-                if (!behandlinger.åpenForEndring()) nyBehandling(eventBus, arbeidsgiveropplysninger)
+                sørgForNyBehandlingHvisIkkeÅpen(eventBus, arbeidsgiveropplysninger)
                 håndterDager(eventBus, arbeidsgiveropplysninger, bitAvArbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst) {}
             }
 
@@ -873,9 +876,7 @@ internal class Vedtaksperiode private constructor(
         // samtidig som f.eks. dag- eller refusjonshåndtering fra inntektsmelding så kan tilstanden fremdeles være "Avsluttet" selv om
         // det er opprettet en ny behandling allerede.
         // ideelt sett skulle vi hatt bedre kontroll over flyten her
-        if (!behandlinger.åpenForEndring()) {
-            nyBehandling(eventBus, hendelse)
-        }
+        sørgForNyBehandlingHvisIkkeÅpen(eventBus, hendelse)
 
         behandlinger.håndterFaktaavklartInntekt(
             eventBus = eventBus,
@@ -1848,9 +1849,7 @@ internal class Vedtaksperiode private constructor(
         // samtidig som f.eks. dag-håndtering fra inntektsmelding så kan tilstanden fremdeles være "Avsluttet" selv om
         // det er opprettet en ny behandling allerede.
         // ideelt sett skulle vi hatt bedre kontroll over flyten her
-        if (!behandlinger.åpenForEndring()) {
-            nyBehandling(eventBus, hendelse)
-        }
+        sørgForNyBehandlingHvisIkkeÅpen(eventBus, hendelse)
 
         behandlinger.håndterRefusjonstidslinje(
             eventBus = eventBus,

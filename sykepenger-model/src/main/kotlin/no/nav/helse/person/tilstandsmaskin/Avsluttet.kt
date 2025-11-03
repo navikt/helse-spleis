@@ -24,8 +24,7 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg
     ) {
-        if (!vedtaksperiode.behandlinger.åpenForEndring())
-            vedtaksperiode.nyBehandling(eventBus, dager.hendelse)
+        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpen(eventBus, dager.hendelse)
         vedtaksperiode.håndterKorrigerendeInntektsmelding(eventBus, dager, FunksjonelleFeilTilVarsler(aktivitetslogg))
     }
 
