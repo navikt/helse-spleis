@@ -742,7 +742,7 @@ internal class Vedtaksperiode private constructor(
         val bitAvArbeidsgiverperiode = BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, arbeidsgiverperiodetidslinje, emptyList())
         when (tilstand) {
             AvsluttetUtenUtbetaling -> {
-                nyBehandling(eventBus, arbeidsgiveropplysninger)
+                if (!behandlinger.åpenForEndring()) nyBehandling(eventBus, arbeidsgiveropplysninger)
                 håndterDager(eventBus, arbeidsgiveropplysninger, bitAvArbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst) {}
             }
 

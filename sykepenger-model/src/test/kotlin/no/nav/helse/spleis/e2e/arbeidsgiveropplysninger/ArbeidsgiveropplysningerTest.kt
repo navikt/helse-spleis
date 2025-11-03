@@ -77,6 +77,31 @@ import org.junit.jupiter.api.Test
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
 
     @Test
+    fun `arbeidsgiveropplysninger med periode i auu med egenmeldingsdager`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
+            håndterSøknad(Sykdom(10.januar, 18.januar, 100.prosent))
+
+            nullstillTilstandsendringer()
+
+            val arbeidsgiverperioden = listOf(1.januar til 16.januar)
+            håndterArbeidsgiveropplysninger(
+                2.vedtaksperiode,
+                OppgittArbeidgiverperiode(arbeidsgiverperioden),
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList())
+            )
+
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+
+            assertEquals(emptyList<Nothing>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
+            assertEquals(arbeidsgiverperioden, inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(arbeidsgiverperioden, inspektør.venteperiode(2.vedtaksperiode))
+        }
+    }
+
+    @Test
     fun `periode utenfor agp, som er i auu, dras ut av auu som følge av arbeidsgiveropplysninger`() {
         medJSONPerson("/personer/auu-utenfor-agp-med-ferie.json", 330)
         // setup:
