@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
@@ -13,6 +14,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -94,7 +96,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
     }
 
     @Test
-    fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov med hundre prosent forsikring fra dag en`() {
+    fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov med hundre prosent forsikring fra dag en`() = Toggle.SelvstendigForsikring.enable {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
@@ -165,12 +167,12 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 ),
                 inntektskilde = "EN_ARBEIDSGIVER"
             )
-
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
         }
     }
 
     @Test
-    fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov med hundre prosent forsikring fra dag sytten`() {
+    fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov med hundre prosent forsikring fra dag sytten`() = Toggle.SelvstendigForsikring.enable {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
@@ -241,7 +243,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 ),
                 inntektskilde = "EN_ARBEIDSGIVER"
             )
-
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
         }
     }
 

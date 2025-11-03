@@ -590,6 +590,8 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             // Sjekk at forsikringen (dager nav overtar) er lagret på behandlingsendringen
             assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
+
         }
     }
 
@@ -620,6 +622,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                     assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
                 }
             }
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
+
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
@@ -653,9 +657,38 @@ internal class SelvstendigTest : AbstractDslTest() {
                     assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
                 }
             }
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
+
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
+        }
+    }
+
+    @Test
+    fun `Kaster ut periode med selvstendig forsikring når toggle er av`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                selvstendigForsikring = SelvstendigForsikring(
+                    virkningsdato = 10.oktober(2017),
+                    opphørsdato = null,
+                    type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagEn
+                )
+            )
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                SELVSTENDIG_START,
+                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
+                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
+                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
+                SELVSTENDIG_AVVENTER_HISTORIKK,
+                TIL_INFOTRYGD,
+                varselkode = Varselkode.RV_AN_6
+            )
         }
     }
 }

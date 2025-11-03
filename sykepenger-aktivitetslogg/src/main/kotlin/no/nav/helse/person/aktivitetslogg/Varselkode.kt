@@ -286,6 +286,7 @@ enum class Varselkode(
     RV_AN_3("Feil i vilkårsgrunnlag i AVVENTER_VILKÅRSPRØVING_GAP", avviklet = true),
     RV_AN_4("Personen har blitt tilbakestilt og kan derfor ha avvik i historikken fra infotrygd.", avviklet = true),
     RV_AN_5("Personen har blitt behandlet på en tidligere ident"),
+    RV_AN_6("Bruker har forsikring som selvstendig næringsdrivende"),
 
     // YS: Yrkesskade
     RV_YS_1("Yrkesskade oppgitt i søknaden")

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.mediator.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Dagtype
@@ -218,6 +219,24 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         assertTilstander(
             0,
             "TIL_INFOTRYGD"
+        )
+    }
+
+    @Test
+    fun `Selvstendig søknad uten forsikring går gjennom til godkjenning`() = Toggle.SelvstendigForsikring.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendVilkårsgrunnlagSelvstendig(0, orgnummer = "SELVSTENDIG")
+        sendYtelserSelvstendig(0, orgnummer = "SELVSTENDIG")
+        sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
+        assertTilstander(
+            0,
+            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
+            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
+            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
+            "SELVSTENDIG_AVVENTER_HISTORIKK",
+            "SELVSTENDIG_AVVENTER_SIMULERING",
+            "SELVSTENDIG_AVVENTER_GODKJENNING"
         )
     }
 

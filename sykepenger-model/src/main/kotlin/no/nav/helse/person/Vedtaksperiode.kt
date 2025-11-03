@@ -1289,7 +1289,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         // steg 5: lage varsler ved gitte situasjoner
-        vurderVarsler(aktivitetslogg, ytelser, infotrygdhistorikk, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, minsteinntektsvurdering, harOpptjening, beregnetTidslinjePerVedtaksperiode)
+        vurderVarsler(aktivitetslogg, ytelser, infotrygdhistorikk, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, minsteinntektsvurdering, harOpptjening, beregnetTidslinjePerVedtaksperiode, selvstendigForsikring)
         // steg 6: subsummere ting
         subsummering(beregningsgrunnlag, minsteinntektsvurdering, uberegnetTidslinjePerArbeidsgiver, beregnetTidslinjePerVedtaksperiode, historisktidslinje)
 
@@ -1356,6 +1356,7 @@ internal class Vedtaksperiode private constructor(
         minsteinntektsvurdering: Minsteinntektsvurdering,
         harOpptjening: Boolean,
         beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
+        selvstendigForsikring: SelvstendigForsikring?
     ) {
         perioderDetSkalBeregnesUtbetalingFor
             .filter {
@@ -1392,8 +1393,12 @@ internal class Vedtaksperiode private constructor(
         when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> grunnlagsdata.valider(aktivitetslogg, yrkesaktivitet.organisasjonsnummer)
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-            Behandlingsporing.Yrkesaktivitet.Frilans,
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> {}
+            Behandlingsporing.Yrkesaktivitet.Frilans -> {}
+            Behandlingsporing.Yrkesaktivitet.Selvstendig ->
+                if (selvstendigForsikring != null) {
+                    if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
+                    else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_6)
+                }
         }
         if (!harOpptjening) aktivitetslogg.varsel(RV_OV_1)
 
