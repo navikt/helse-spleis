@@ -188,7 +188,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
             dekningsgrad = dekningsgrad,
             ventetid = sisteBehandling.dagerUtenNavAnsvar.periode,
-            dagerNavOvertarAnsvar = sisteBehandling.dagerNavOvertarAnsvar
+            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
         )
     }
 

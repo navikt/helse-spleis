@@ -249,8 +249,7 @@ internal class Vedtaksperiode private constructor(
             egenmeldingsdager = egenmeldingsperioder,
             faktaavklartInntekt = faktaavklartInntekt,
             dokumentsporing = dokumentsporing,
-            behandlingkilde = metadata.behandlingkilde,
-            dagerNavOvertarAnsvar = emptyList()
+            behandlingkilde = metadata.behandlingkilde
         )
     }
 
