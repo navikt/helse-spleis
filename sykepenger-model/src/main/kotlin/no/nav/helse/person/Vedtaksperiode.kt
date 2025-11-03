@@ -558,6 +558,11 @@ internal class Vedtaksperiode private constructor(
 
         val faktaavklartInntekt = inntektsmelding.faktaavklartInntekt()
 
+        if (!behandlinger.åpenForEndring()) {
+            aktivitetslogg.info("lager ny behandling for håndtering av inntekt i $tilstand")
+            nyBehandling(eventBus, inntektsmelding)
+        }
+
         // lagrer ALLTID inntekt på behandling
         behandlinger.håndterFaktaavklartInntekt(
             eventBus = eventBus,
