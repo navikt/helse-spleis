@@ -86,22 +86,27 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal constructor() : this(emptyList())
 
     companion object {
-        internal fun Map<UUID, Behandlinger>.berik(builder: UtkastTilVedtakBuilder) = mapValues { (_, behandlinger) -> behandlinger.behandlinger.last() }.berik(builder)
+        internal fun Map<UUID, Behandlinger>.berik(builder: UtkastTilVedtakBuilder) = mapValues { (_, behandlinger) -> behandlinger.sisteBehandling }.berik(builder)
         fun gjenopprett(dto: BehandlingerInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) = Behandlinger(
             behandlinger = dto.behandlinger.map { Behandling.gjenopprett(it, grunnlagsdata, utbetalinger) }
         )
     }
 
+    // alle behandlinger for vedtaksperioden
     private val behandlinger = behandlinger.toMutableList()
 
-    private val åpenBehandling get() = behandlinger.last().takeIf { it.erÅpenForEndring() }
+    // den siste behandlingen uavhengig er tilstand
+    private val sisteBehandling get() = behandlinger.last()
+    // den siste behandlingen, hvis den er åpen for endring. dvs. ikke fattet vedtak eller annullert
+    private val åpenBehandling get() = sisteBehandling.takeIf { it.erÅpenForEndring() }
+    // alle tidligere behandlinger der en beslutning er tatt
     private val tidligereBehandlinger get() = åpenBehandling?.let { behandlinger.dropLast(1) } ?: behandlinger
 
-    internal fun sisteUtbetalteUtbetaling() = behandlinger.lastOrNull { it.erFattetVedtak() }?.utbetaling()
+    internal fun sisteUtbetalteUtbetaling() = tidligereBehandlinger.lastOrNull()?.utbetaling()
 
-    internal fun harFattetVedtak() = behandlinger.any { it.erFattetVedtak() }
+    internal fun harFattetVedtak() = tidligereBehandlinger.isNotEmpty()
 
-    val sisteBehandlingId get() = behandlinger.last().id
+    val sisteBehandlingId get() = sisteBehandling.id
 
     internal fun åpenForEndring() = åpenBehandling != null
 
@@ -138,20 +143,20 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun ventedager() = VentedagerForVedtaksperiode(
         vedtaksperiode = periode(),
-        dagerUtenNavAnsvar = behandlinger.last().dagerUtenNavAnsvar,
-        dagerNavOvertarAnsvar = behandlinger.last().dagerNavOvertarAnsvar
+        dagerUtenNavAnsvar = sisteBehandling.dagerUtenNavAnsvar,
+        dagerNavOvertarAnsvar = sisteBehandling.dagerNavOvertarAnsvar
     )
 
     internal fun utbetalingstidslinjeBuilderForArbeidstaker(): ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode {
         return ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
-            arbeidsgiverperiode = behandlinger.last().dagerUtenNavAnsvar.dager,
-            dagerNavOvertarAnsvar = behandlinger.last().dagerNavOvertarAnsvar,
-            refusjonstidslinje = behandlinger.last().refusjonstidslinje
+            arbeidsgiverperiode = sisteBehandling.dagerUtenNavAnsvar.dager,
+            dagerNavOvertarAnsvar = sisteBehandling.dagerNavOvertarAnsvar,
+            refusjonstidslinje = sisteBehandling.refusjonstidslinje
         )
     }
 
     internal fun utbetalingstidslinjeBuilderForSelvstendig(): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
-        val dekningsgrad = when (val arbeidssituasjon = behandlinger.last().arbeidssituasjon) {
+        val dekningsgrad = when (val arbeidssituasjon = sisteBehandling.arbeidssituasjon) {
             Arbeidssituasjon.BARNEPASSER,
             Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> 80.prosent
 
@@ -166,16 +171,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
             dekningsgrad = dekningsgrad,
-            ventetid = behandlinger.last().dagerUtenNavAnsvar.periode,
-            dagerNavOvertarAnsvar = behandlinger.last().dagerNavOvertarAnsvar
+            ventetid = sisteBehandling.dagerUtenNavAnsvar.periode,
+            dagerNavOvertarAnsvar = sisteBehandling.dagerNavOvertarAnsvar
         )
     }
 
-    internal val maksdato get() = behandlinger.last().maksdato
-    internal val dagerNavOvertarAnsvar get() = behandlinger.last().dagerNavOvertarAnsvar
-    internal val faktaavklartInntekt get() = behandlinger.last().faktaavklartInntekt
-    internal val arbeidssituasjon get() = behandlinger.last().arbeidssituasjon
-    internal val utbetaling get() = behandlinger.last().utbetaling()
+    internal val maksdato get() = sisteBehandling.maksdato
+    internal val dagerNavOvertarAnsvar get() = sisteBehandling.dagerNavOvertarAnsvar
+    internal val faktaavklartInntekt get() = sisteBehandling.faktaavklartInntekt
+    internal val arbeidssituasjon get() = sisteBehandling.arbeidssituasjon
+    internal val utbetaling get() = sisteBehandling.utbetaling()
 
     internal fun nyBehandling(
         behandlingEventBus: BehandlingEventBus,
@@ -213,27 +218,27 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun analytiskDatapakke(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, vedtaksperiodeId: UUID): AnalytiskDatapakkeEvent {
         val forrigeBehandling = behandlinger.dropLast(1).lastOrNull()
-        return behandlinger.last().analytiskDatapakke(forrigeBehandling, yrkesaktivitetssporing, vedtaksperiodeId)
+        return sisteBehandling.analytiskDatapakke(forrigeBehandling, yrkesaktivitetssporing, vedtaksperiodeId)
     }
 
     internal fun utbetalingstidslinjeFraForrigeVedtak() = behandlinger.lastOrNull { it.erFattetVedtak() }?.utbetalingstidslinje()
-    internal fun utbetalingstidslinje() = behandlinger.last().utbetalingstidslinje()
-    internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
-    internal fun skjæringstidspunkter() = behandlinger.last().skjæringstidspunkter
-    internal fun egenmeldingsdager() = behandlinger.last().egenmeldingsdager
-    internal fun sykdomstidslinje() = behandlinger.last().sykdomstidslinje
-    internal fun refusjonstidslinje() = behandlinger.last().refusjonstidslinje
+    internal fun utbetalingstidslinje() = sisteBehandling.utbetalingstidslinje()
+    internal fun skjæringstidspunkt() = sisteBehandling.skjæringstidspunkt
+    internal fun skjæringstidspunkter() = sisteBehandling.skjæringstidspunkter
+    internal fun egenmeldingsdager() = sisteBehandling.egenmeldingsdager
+    internal fun sykdomstidslinje() = sisteBehandling.sykdomstidslinje
+    internal fun refusjonstidslinje() = sisteBehandling.refusjonstidslinje
     internal fun utbetales() = behandlinger.any { it.erInFlight() }
-    internal fun erAvsluttet() = behandlinger.last().erAvsluttet()
-    internal fun erAnnullert() = behandlinger.last().erAnnullert()
-    internal fun erAvvist() = behandlinger.last().erAvvist()
-    internal fun harUtbetalinger() = behandlinger.last().harOppdragMedUtbetalinger()
-    internal fun kanForkastes(andreBehandlinger: List<Behandlinger>) = behandlinger.last().kanForkastes(andreBehandlinger.map { it.behandlinger.last() })
+    internal fun erAvsluttet() = sisteBehandling.erAvsluttet()
+    internal fun erAnnullert() = sisteBehandling.erAnnullert()
+    internal fun erAvvist() = sisteBehandling.erAvvist()
+    internal fun harUtbetalinger() = sisteBehandling.harOppdragMedUtbetalinger()
+    internal fun kanForkastes(andreBehandlinger: List<Behandlinger>) = sisteBehandling.kanForkastes(andreBehandlinger.map { it.sisteBehandling })
     internal fun forventerUtbetaling(periodeSomBeregner: Periode, skjæringstidspunkt: LocalDate, skalBehandlesISpeil: Boolean) =
-        behandlinger.last().forventerUtbetaling(periodeSomBeregner, skjæringstidspunkt, skalBehandlesISpeil)
+        sisteBehandling.forventerUtbetaling(periodeSomBeregner, skjæringstidspunkt, skalBehandlesISpeil)
 
-    internal fun harFlereSkjæringstidspunkt() = behandlinger.last().harFlereSkjæringstidspunkt()
-    internal fun børBrukeSkatteinntekterDirekte() = behandlinger.last().skjæringstidspunkter.isEmpty()
+    internal fun harFlereSkjæringstidspunkt() = sisteBehandling.harFlereSkjæringstidspunkt()
+    internal fun børBrukeSkatteinntekterDirekte() = sisteBehandling.skjæringstidspunkter.isEmpty()
 
     internal fun håndterUtbetalinghendelseSisteInFlight(
         behandlingEventBus: BehandlingEventBus,
@@ -256,8 +261,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         return tidligereBehandlinger.last().also { it.håndterUtbetalinghendelse(behandlingEventBus, utbetalingEventBus, hendelse, aktivitetslogg) }
     }
 
-    internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
-    internal fun validerIkkeFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = behandlinger.last().validerIkkeFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
+    internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = sisteBehandling.validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
+    internal fun validerIkkeFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = sisteBehandling.validerIkkeFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Behandling", mapOf("behandlingId" to sisteBehandlingId.toString()))
@@ -266,7 +271,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun byggUtkastTilVedtak(builder: UtkastTilVedtakBuilder, behandling: Behandling?): UtkastTilVedtakBuilder {
         if (behandlinger.grunnbeløpsregulert()) builder.grunnbeløpsregulert()
         builder.historiskeHendelseIder(eksterneIder())
-        (behandling ?: behandlinger.last()).byggUtkastTilVedtak(builder)
+        (behandling ?: sisteBehandling).byggUtkastTilVedtak(builder)
         return builder
     }
 
@@ -275,12 +280,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal fun leggTilAnnullering(behandlingEventBus: BehandlingEventBus, utbetalingEventBus: UtbetalingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, aktivitetslogg: IAktivitetslogg) {
-        val forrigeVedtak = behandlinger.last { it.erFattetVedtak() }
-        behandlinger.last().leggTilAnnullering(behandlingEventBus, utbetalingEventBus, annullering, vurdering,  forrigeVedtak, aktivitetslogg)
+        val forrigeVedtak = tidligereBehandlinger.last()
+        checkNotNull(åpenBehandling).leggTilAnnullering(behandlingEventBus, utbetalingEventBus, annullering, vurdering,  forrigeVedtak, aktivitetslogg)
     }
 
     internal fun beregnetBehandling(beregning: BeregnetBehandling) {
-        behandlinger.last().utbetaling(beregning)
+        checkNotNull(åpenBehandling).utbetaling(beregning)
     }
 
     internal fun lagUtbetaling(
@@ -288,7 +293,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         utbetalinger: List<Utbetaling>,
         mottakerRefusjon: String,
         mottakerBruker: String
-    ) = behandlinger.last().lagUtbetaling(aktivitetslogg, utbetalinger, mottakerRefusjon, mottakerBruker)
+    ) = checkNotNull(åpenBehandling).lagUtbetaling(aktivitetslogg, utbetalinger, mottakerRefusjon, mottakerBruker)
 
     internal fun forkastÅpenBehandling(
         eventBus: EventBus,
@@ -302,17 +307,17 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal fun forkastBeregning(utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-        behandlinger.last().forkastBeregning(utbetalingEventBus, aktivitetslogg)
+        checkNotNull(åpenBehandling).forkastBeregning(utbetalingEventBus, aktivitetslogg)
     }
 
-    internal fun harIkkeUtbetaling() = behandlinger.last().harIkkeUtbetaling()
+    internal fun harIkkeUtbetaling() = sisteBehandling.harIkkeUtbetaling()
 
     fun vedtakFattet(behandlingEventBus: BehandlingEventBus, utbetalingEventBus: UtbetalingEventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg): Behandling {
-        return this.behandlinger.last().also { it.vedtakFattet(behandlingEventBus, utbetalingEventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg) }
+        return checkNotNull(åpenBehandling).also { it.vedtakFattet(behandlingEventBus, utbetalingEventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg) }
     }
 
     fun vedtakAvvist(behandlingEventBus: BehandlingEventBus, utbetalingEventBus: UtbetalingEventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg): Boolean {
-        return this.behandlinger.last().vedtakAvvist(behandlingEventBus, utbetalingEventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
+        return checkNotNull(åpenBehandling).vedtakAvvist(behandlingEventBus, utbetalingEventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
     }
 
     fun bekreftAvsluttetBehandlingMedVedtak(yrkesaktivitet: Yrkesaktivitet) {
@@ -323,7 +328,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     private fun erFattetVedtak(): Boolean {
-        return behandlinger.last().erFattetVedtak()
+        return sisteBehandling.erFattetVedtak()
     }
 
     private fun bekreftAvsluttetBehandling(yrkesaktivitet: Yrkesaktivitet) {
@@ -334,17 +339,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     fun avsluttUtenVedtak(behandlingEventBus: BehandlingEventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>): Behandling {
-        check(behandlinger.last().utbetaling() == null) {
+        val behandlingen = checkNotNull(åpenBehandling)
+        check(behandlingen.utbetaling() == null) {
             "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. "
         }
-        return this.behandlinger.last().also {
+        return behandlingen.also {
             it.avsluttUtenVedtak(behandlingEventBus, yrkesaktivitet, utbetalingstidslinje, inntekterForBeregning)
             bekreftAvsluttetBehandling(yrkesaktivitet)
         }
     }
 
     internal fun sykmeldingsperiode() = this.behandlinger.first().sykmeldingsperiode()
-    internal fun periode() = this.behandlinger.last().periode()
+    internal fun periode() = this.sisteBehandling.periode()
 
     private fun leggTilNyBehandling(behandling: Behandling) {
         check(behandlinger.isEmpty() || åpenBehandling == null) { "Kan ikke opprette ny behandling når det finnes en åpen behandling" }
@@ -353,7 +359,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     fun bekreftÅpenBehandling(yrkesaktivitet: Yrkesaktivitet) {
         yrkesaktivitet.bekreftErÅpen(periode())
-        check(behandlinger.last().harÅpenBehandling()) {
+        check(sisteBehandling.harÅpenBehandling()) {
             "forventer at vedtaksperioden er uberegnet når den går ut av Avsluttet/AvsluttetUtenUtbetaling"
         }
     }
@@ -364,7 +370,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlinger.last().id
+            behandlingId = sisteBehandling.id
         )
 
     internal fun hendelseIder() = behandlinger.dokumentsporing
@@ -387,7 +393,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.lagreGjenbrukbarInntekt(skjæringstidspunkt, organisasjonsnummer, yrkesaktivitet, aktivitetslogg)
 
     internal fun endretRefusjonstidslinje(refusjonstidslinje: Beløpstidslinje) =
-        behandlinger.last().endretRefusjonstidslinje(refusjonstidslinje)
+        sisteBehandling.endretRefusjonstidslinje(refusjonstidslinje)
 
     internal fun håndterRefusjonstidslinje(
         eventBus: EventBus,
@@ -1166,14 +1172,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             Tilstand.BeregnetRevurdering,
             Tilstand.Uberegnet,
             Tilstand.UberegnetOmgjøring,
-            Tilstand.UberegnetRevurdering -> true
+            Tilstand.UberegnetRevurdering,
+            Tilstand.UberegnetAnnullering -> true
 
             Tilstand.AnnullertPeriode,
             Tilstand.AvsluttetUtenVedtak,
             Tilstand.OverførtAnnullering,
             Tilstand.RevurdertVedtakAvvist,
             Tilstand.TilInfotrygd,
-            Tilstand.UberegnetAnnullering,
             Tilstand.VedtakFattet,
             Tilstand.VedtakIverksatt -> false
         }
