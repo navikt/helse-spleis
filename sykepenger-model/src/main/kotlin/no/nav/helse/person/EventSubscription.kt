@@ -333,9 +333,10 @@ interface EventSubscription {
         val beløpTilArbeidsgiver: Int,
         val beløpTilBruker: Int,
         val sykdomsgrad: Int,
+        val dekningsgrad: Int,
         val begrunnelser: List<EksternBegrunnelseDTO>?
     ) {
-        constructor(dato: LocalDate, type: Dagtype) : this(dato, type, 0, 0, 0, null)
+        constructor(dato: LocalDate, type: Dagtype, dekningsgrad: Int) : this(dato, type, 0, 0, 0, dekningsgrad, null)
 
         enum class Dagtype {
             ArbeidsgiverperiodeDag,

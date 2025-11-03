@@ -16,7 +16,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
     internal fun result(utbetalingstidslinje: Utbetalingstidslinje): List<EventSubscription.Utbetalingsdag> {
         return utbetalingstidslinje.map { dag ->
             when (dag) {
-                is Utbetalingsdag.Arbeidsdag -> EventSubscription.Utbetalingsdag(dag.dato, EventSubscription.Utbetalingsdag.Dagtype.Arbeidsdag)
+                is Utbetalingsdag.Arbeidsdag -> EventSubscription.Utbetalingsdag(dag.dato, EventSubscription.Utbetalingsdag.Dagtype.Arbeidsdag, dag.økonomi.dekningsgrad.toDouble().toInt())
                 is Utbetalingsdag.ArbeidsgiverperiodeDag,
                 is Utbetalingsdag.ArbeidsgiverperiodedagNav -> EventSubscription.Utbetalingsdag(
                     dato = dag.dato,
@@ -24,6 +24,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                     beløpTilArbeidsgiver = dag.økonomi.arbeidsgiverbeløp?.dagligInt ?: 0,
                     beløpTilBruker = dag.økonomi.personbeløp?.dagligInt ?: 0,
                     sykdomsgrad = dag.økonomi.sykdomsgrad.toDouble().toInt(),
+                    dekningsgrad = dag.økonomi.dekningsgrad.toDouble().toInt(),
                     begrunnelser = null
                 )
 
@@ -33,6 +34,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                     beløpTilArbeidsgiver = 0,
                     beløpTilBruker = dag.økonomi.personbeløp?.dagligInt ?: 0,
                     sykdomsgrad = dag.økonomi.sykdomsgrad.toDouble().toInt(),
+                    dekningsgrad = dag.økonomi.dekningsgrad.toDouble().toInt(),
                     begrunnelser = null
                 )
 
@@ -42,6 +44,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                     beløpTilArbeidsgiver = dag.økonomi.arbeidsgiverbeløp?.dagligInt ?: 0,
                     beløpTilBruker = dag.økonomi.personbeløp?.dagligInt ?: 0,
                     sykdomsgrad = dag.økonomi.sykdomsgrad.toDouble().toInt(),
+                    dekningsgrad = dag.økonomi.dekningsgrad.toDouble().toInt(),
                     begrunnelser = null
                 )
 
@@ -51,6 +54,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                     beløpTilArbeidsgiver = 0,
                     beløpTilBruker = 0,
                     sykdomsgrad = dag.økonomi.sykdomsgrad.toDouble().toInt(),
+                    dekningsgrad = dag.økonomi.dekningsgrad.toDouble().toInt(),
                     begrunnelser = null
                 )
 
@@ -62,12 +66,13 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                             beløpTilArbeidsgiver = 0,
                             beløpTilBruker = 0,
                             sykdomsgrad = 0,
+                            dekningsgrad = 0,
                             begrunnelser = listOf(sykdomsdag.tilEksternBegrunnelse())
                         )
 
-                        is Dag.Permisjonsdag -> EventSubscription.Utbetalingsdag(dag.dato, Permisjonsdag)
-                        is Dag.Feriedag -> EventSubscription.Utbetalingsdag(dag.dato, Feriedag)
-                        is Dag.ArbeidIkkeGjenopptattDag -> EventSubscription.Utbetalingsdag(dag.dato, ArbeidIkkeGjenopptattDag)
+                        is Dag.Permisjonsdag -> EventSubscription.Utbetalingsdag(dag.dato, Permisjonsdag, dag.økonomi.dekningsgrad.toDouble().toInt())
+                        is Dag.Feriedag -> EventSubscription.Utbetalingsdag(dag.dato, Feriedag, dag.økonomi.dekningsgrad.toDouble().toInt())
+                        is Dag.ArbeidIkkeGjenopptattDag -> EventSubscription.Utbetalingsdag(dag.dato, ArbeidIkkeGjenopptattDag, dag.økonomi.dekningsgrad.toDouble().toInt())
                         is Dag.Arbeidsdag,
                         is Dag.ArbeidsgiverHelgedag,
                         is Dag.Arbeidsgiverdag,
@@ -76,7 +81,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                         is Dag.ProblemDag,
                         is Dag.SykHelgedag,
                         is Dag.Sykedag,
-                        is Dag.UkjentDag -> EventSubscription.Utbetalingsdag(dag.dato, Fridag)
+                        is Dag.UkjentDag -> EventSubscription.Utbetalingsdag(dag.dato, Fridag, dag.økonomi.dekningsgrad.toDouble().toInt())
                     }
                 }
 
@@ -86,13 +91,14 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                     beløpTilArbeidsgiver = 0,
                     beløpTilBruker = 0,
                     sykdomsgrad = 0,
+                    dekningsgrad = dag.økonomi.dekningsgrad.toDouble().toInt(),
                     begrunnelser = dag.begrunnelser.map {
                         EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.fraBegrunnelse(it)
                     }
                 )
 
-                is Utbetalingsdag.ForeldetDag -> EventSubscription.Utbetalingsdag(dag.dato, EventSubscription.Utbetalingsdag.Dagtype.ForeldetDag)
-                is Utbetalingsdag.UkjentDag -> EventSubscription.Utbetalingsdag(dag.dato, EventSubscription.Utbetalingsdag.Dagtype.UkjentDag)
+                is Utbetalingsdag.ForeldetDag -> EventSubscription.Utbetalingsdag(dag.dato, EventSubscription.Utbetalingsdag.Dagtype.ForeldetDag, dag.økonomi.dekningsgrad.toDouble().toInt())
+                is Utbetalingsdag.UkjentDag -> EventSubscription.Utbetalingsdag(dag.dato, EventSubscription.Utbetalingsdag.Dagtype.UkjentDag, dag.økonomi.dekningsgrad.toDouble().toInt())
             }
         }
     }

@@ -45,13 +45,13 @@ internal class UtbetalingsdagerBuilderTest {
         val builder = UtbetalingsdagerBuilder(Sykdomstidslinje())
         assertEquals(
             listOf(
-                Utbetalingsdag(1.januar, ArbeidsgiverperiodeDag),
-                Utbetalingsdag(2.januar, NavDag, 0, 0, 100, null),
-                Utbetalingsdag(3.januar, NavHelgDag, 0, 0, 100, null),
-                Utbetalingsdag(4.januar, Arbeidsdag),
-                Utbetalingsdag(5.januar, Fridag),
-                Utbetalingsdag(6.januar, ForeldetDag),
-                Utbetalingsdag(7.januar, AvvistDag, 0, 0, 0, listOf(Utbetalingsdag.EksternBegrunnelseDTO.SykepengedagerOppbrukt))
+                Utbetalingsdag(1.januar, ArbeidsgiverperiodeDag, 100),
+                Utbetalingsdag(2.januar, NavDag, 0, 0, 100, 100, null),
+                Utbetalingsdag(3.januar, NavHelgDag, 0, 0, 100, 100, null),
+                Utbetalingsdag(4.januar, Arbeidsdag, 100),
+                Utbetalingsdag(5.januar, Fridag, 100),
+                Utbetalingsdag(6.januar, ForeldetDag, 100),
+                Utbetalingsdag(7.januar, AvvistDag, 0, 0, 0, 100, listOf(Utbetalingsdag.EksternBegrunnelseDTO.SykepengedagerOppbrukt))
             ), builder.result(utbetalingstidslinje)
         )
     }
@@ -62,12 +62,12 @@ internal class UtbetalingsdagerBuilderTest {
         val builder = UtbetalingsdagerBuilder(1.P + 3.F + 1.AIG + 1.UK)
         assertEquals(
             listOf(
-                Utbetalingsdag(1.januar, Permisjonsdag),
-                Utbetalingsdag(2.januar, Feriedag),
-                Utbetalingsdag(3.januar, Feriedag),
-                Utbetalingsdag(4.januar, Feriedag),
-                Utbetalingsdag(5.januar, ArbeidIkkeGjenopptattDag),
-                Utbetalingsdag(6.januar, Fridag)
+                Utbetalingsdag(1.januar, Permisjonsdag, 100),
+                Utbetalingsdag(2.januar, Feriedag, 100),
+                Utbetalingsdag(3.januar, Feriedag, 100),
+                Utbetalingsdag(4.januar, Feriedag, 100),
+                Utbetalingsdag(5.januar, ArbeidIkkeGjenopptattDag, 100),
+                Utbetalingsdag(6.januar, Fridag, 100)
             ), builder.result(utbetalingstidslinje)
         )
     }
@@ -78,12 +78,12 @@ internal class UtbetalingsdagerBuilderTest {
         val builder = UtbetalingsdagerBuilder(6.S)
         assertEquals(
             listOf(
-                Utbetalingsdag(1.januar, ArbeidsgiverperiodeDag, 0, 0, 100, null),
-                Utbetalingsdag(2.januar, ArbeidsgiverperiodeDag, 0, 0, 100, null),
-                Utbetalingsdag(3.januar, ArbeidsgiverperiodeDag, 0, 0, 100, null),
-                Utbetalingsdag(4.januar, ArbeidsgiverperiodeDag, 0, 0, 100, null),
-                Utbetalingsdag(5.januar, ArbeidsgiverperiodeDag, 0, 0, 100, null),
-                Utbetalingsdag(6.januar, ArbeidsgiverperiodeDag, 0, 0, 100, null)
+                Utbetalingsdag(1.januar, ArbeidsgiverperiodeDag, 0, 0, 100, 100, null),
+                Utbetalingsdag(2.januar, ArbeidsgiverperiodeDag, 0, 0, 100, 100, null),
+                Utbetalingsdag(3.januar, ArbeidsgiverperiodeDag, 0, 0, 100, 100, null),
+                Utbetalingsdag(4.januar, ArbeidsgiverperiodeDag, 0, 0, 100, 100, null),
+                Utbetalingsdag(5.januar, ArbeidsgiverperiodeDag, 0, 0, 100, 100, null),
+                Utbetalingsdag(6.januar, ArbeidsgiverperiodeDag, 0, 0, 100, 100, null)
             ), builder.result(utbetalingstidslinje)
         )
     }

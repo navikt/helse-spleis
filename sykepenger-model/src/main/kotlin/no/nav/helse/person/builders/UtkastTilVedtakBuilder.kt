@@ -428,6 +428,7 @@ private fun EventSubscription.Utbetalingsdag.tilBehovMap() =
         "beløpTilArbeidsgiver" to this.beløpTilArbeidsgiver,
         "beløpTilBruker" to this.beløpTilBruker,
         "sykdomsgrad" to this.sykdomsgrad,
+        "dekningsgrad" to this.dekningsgrad,
         "begrunnelser" to (this.begrunnelser?.map {
             when (it) {
                 EksternBegrunnelseDTO.SykepengedagerOppbrukt -> "SykepengedagerOppbrukt"
