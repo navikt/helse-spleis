@@ -37,6 +37,7 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.EventBus
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
@@ -170,6 +171,12 @@ internal class TestPerson(
     fun dto(): PersonUtDto {
         return person.dto()
     }
+
+    fun events(filter: EventFilter = { true }) = eventBus
+        .events
+        .filter(filter)
+
+    fun behandlingevents() = events(behandlingerEventFilter)
 
     inner class TestArbeidsgiver(
         internal val orgnummer: String,
@@ -899,3 +906,9 @@ internal fun TestPerson.nyPeriode(periode: Periode, vararg orgnummer: String, gr
     orgnummer.forEach { it { håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad)) } }
 }
 
+typealias EventFilter = (EventSubscription.Event) -> Boolean
+
+val behandlingerEventFilter: EventFilter = { it: EventSubscription.Event ->
+    it is EventSubscription.VedtaksperiodeOpprettet || it is EventSubscription.VedtaksperiodeAnnullertEvent || it is EventSubscription.VedtaksperiodeForkastetEvent
+        || it is EventSubscription.BehandlingOpprettetEvent || it is EventSubscription.BehandlingLukketEvent || it is EventSubscription.BehandlingForkastetEvent
+}
