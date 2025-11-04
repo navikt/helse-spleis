@@ -1,5 +1,5 @@
 val mainClass = "no.nav.helse.spleis.jobs.AppKt"
-val tbdLibsVersion = "2025.09.19-15.24-1a9c113f"
+val tbdLibsVersion = "2025.11.04-10.12-3a167132"
 val jacksonVersion = "2.18.3"
 
 tasks.withType<Test> {
