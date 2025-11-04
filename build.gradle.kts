@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import java.io.PrintWriter
 
 plugins {
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm") version "2.2.21" apply false
 }
 
 val junitJupiterVersion = "5.12.1"
@@ -10,8 +10,6 @@ val junitJupiterVersion = "5.12.1"
 allprojects {
     group = "no.nav.helse"
     version = properties["version"] ?: "local-build"
-
-    apply(plugin = "org.jetbrains.kotlin.jvm")
 
     repositories {
         val githubPassword: String? by project
@@ -29,6 +27,12 @@ allprojects {
         }
         maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
+}
+
+subprojects {
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin="java-library")
+    apply(plugin="java-test-fixtures")
 
     /*
         avhengigheter man legger til her blir lagt på -alle- prosjekter.
@@ -37,6 +41,8 @@ allprojects {
         Dersom det er flere som har behov så kan det være lurt å legge avhengigheten til
          dependencyResolutionManagement i settings.gradle.kts
      */
+    val testImplementation by configurations
+    val testRuntimeOnly by configurations
     dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -53,15 +59,6 @@ allprojects {
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
 
-    }
-}
-
-subprojects {
-    apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin="java-library")
-    apply(plugin="java-test-fixtures")
-
-    tasks {
         withType<Test> {
             maxHeapSize = "6G"
             useJUnitPlatform()
