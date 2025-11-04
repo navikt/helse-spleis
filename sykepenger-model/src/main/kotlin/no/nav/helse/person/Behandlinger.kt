@@ -106,11 +106,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     // alle tidligere behandlinger der en beslutning er tatt
     private val tidligereBehandlinger get() = åpenBehandling?.let { behandlinger.dropLast(1) } ?: behandlinger
 
+    val sisteBehandlingId get() = sisteBehandling.id
+
+    internal val maksdato get() = sisteBehandling.maksdato
+    internal val dagerNavOvertarAnsvar get() = sisteBehandling.dagerNavOvertarAnsvar
+    internal val dagerUtenNavAnsvar get() = behandlinger.last().dagerUtenNavAnsvar
+    internal val faktaavklartInntekt get() = sisteBehandling.faktaavklartInntekt
+    internal val arbeidssituasjon get() = sisteBehandling.arbeidssituasjon
+    internal val utbetaling get() = sisteBehandling.utbetaling()
+
     internal fun sisteUtbetalteUtbetaling() = tidligereBehandlinger.lastOrNull()?.utbetaling()
 
     internal fun harFattetVedtak() = tidligereBehandlinger.isNotEmpty()
-
-    val sisteBehandlingId get() = sisteBehandling.id
 
     internal fun åpenForEndring() = åpenBehandling != null
 
@@ -191,13 +198,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
         )
     }
-
-    internal val maksdato get() = sisteBehandling.maksdato
-    internal val dagerNavOvertarAnsvar get() = sisteBehandling.dagerNavOvertarAnsvar
-    internal val dagerUtenNavAnsvar get() = behandlinger.last().dagerUtenNavAnsvar
-    internal val faktaavklartInntekt get() = sisteBehandling.faktaavklartInntekt
-    internal val arbeidssituasjon get() = sisteBehandling.arbeidssituasjon
-    internal val utbetaling get() = sisteBehandling.utbetaling()
 
     internal fun nyBehandling(
         behandlingEventBus: BehandlingEventBus,
