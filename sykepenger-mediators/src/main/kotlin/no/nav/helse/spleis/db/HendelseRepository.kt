@@ -41,7 +41,6 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_FISKER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_FRILANS
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_JORDBRUKER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_NAV
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_SELVSTENDIG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
@@ -92,7 +91,6 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFiskerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadJordbrukerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -162,7 +160,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
         is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
         is SendtSøknadSelvstendigMessage -> SENDT_SØKNAD_SELVSTENDIG
-        is SendtSøknadJordbrukerMessage -> SENDT_SØKNAD_JORDBRUKER
         is SendtSøknadFiskerMessage -> SENDT_SØKNAD_FISKER
         is SendtSøknadAnnetMessage -> SENDT_SØKNAD_ANNET
         is SendtSøknadArbeidsledigTidligereArbeidstakerMessage -> SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER
@@ -234,7 +231,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         SENDT_SØKNAD_NAV,
         SENDT_SØKNAD_FRILANS,
         SENDT_SØKNAD_SELVSTENDIG,
-        SENDT_SØKNAD_JORDBRUKER,
         SENDT_SØKNAD_FISKER,
         SENDT_SØKNAD_ANNET,
         SENDT_SØKNAD_ARBEIDSLEDIG,

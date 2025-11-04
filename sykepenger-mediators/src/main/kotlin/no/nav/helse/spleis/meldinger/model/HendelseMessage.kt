@@ -121,7 +121,6 @@ private val HendelseMessage.kontekstnavn
         is SendtSøknadFrilansMessage,
         is SendtSøknadNavMessage,
         is SendtSøknadFiskerMessage,
-        is SendtSøknadJordbrukerMessage,
         is SendtSøknadAnnetMessage,
         is SendtSøknadSelvstendigMessage -> "Søknad"
 

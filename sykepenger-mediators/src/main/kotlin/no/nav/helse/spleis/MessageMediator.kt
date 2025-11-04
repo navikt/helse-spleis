@@ -50,7 +50,6 @@ import no.nav.helse.spleis.meldinger.SendtArbeidsgiverSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtArbeidsledigSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtFiskerSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtFrilansSøknaderRiver
-import no.nav.helse.spleis.meldinger.SendtJordbrukerSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtSelvstendigSøknaderRiver
 import no.nav.helse.spleis.meldinger.SimuleringerRiver
@@ -102,7 +101,6 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFiskerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadJordbrukerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -138,7 +136,6 @@ internal class MessageMediator(
             SendtNavSøknaderRiver(it, this)
             SendtFrilansSøknaderRiver(it, this)
             SendtSelvstendigSøknaderRiver(it, this)
-            SendtJordbrukerSøknaderRiver(it, this)
             SendtFiskerSøknaderRiver(it, this)
             SendtAnnetSøknaderRiver(it, this)
             SendtArbeidsledigSøknaderRiver(it, this)
@@ -280,7 +277,6 @@ internal class MessageMediator(
         is SendtSøknadArbeidsledigTidligereArbeidstakerMessage,
         is SendtSøknadFrilansMessage,
         is SendtSøknadNavMessage,
-        is SendtSøknadJordbrukerMessage,
         is SendtSøknadFiskerMessage,
         is SendtSøknadAnnetMessage,
         is SendtSøknadSelvstendigMessage -> true
