@@ -119,7 +119,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimuleringSelvstendig(0, SimuleringMessage.Simuleringstatus.OK)
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
         assertVedtaksperiodeBehov(behov, Godkjenning)
-        assertGodkjenningdetaljer(behov, erSelvstendig = true)
+        assertGodkjenningdetaljer(behov, erSelvstendig = true, "SELVSTENDIG_NÆRINGSDRIVENDE")
     }
 
     @Test
@@ -134,7 +134,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
         assertVedtaksperiodeBehov(behov, Godkjenning)
-        assertGodkjenningdetaljer(behov, erSelvstendig = false)
+        assertGodkjenningdetaljer(behov, erSelvstendig = false, "ARBEIDSTAKER")
     }
 
     @Test
@@ -268,7 +268,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertOppdragdetaljer(simulering, false)
     }
 
-    private fun assertGodkjenningdetaljer(behov: JsonNode, erSelvstendig: Boolean) {
+    private fun assertGodkjenningdetaljer(behov: JsonNode, erSelvstendig: Boolean, arbeidssituasjon: String) {
         val godkjenning = behov.path(Godkjenning.name)
         assertTrue(behov.path("utbetalingId").asText().isNotEmpty())
         assertDato(godkjenning.path("periodeFom").asText())
@@ -292,6 +292,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             assertDato(it.path("fom").asText())
             assertDato(it.path("tom").asText())
         }
+        assertEquals(arbeidssituasjon, godkjenning.path("arbeidssituasjon").asText())
         godkjenning.path("sykepengegrunnlagsfakta").also {
             it.path("fastsatt").asText() in listOf("EtterSkjønn", "EtterHovedregel", "IInfotrygd")
             assertTrue(it.path("6G").isDouble)

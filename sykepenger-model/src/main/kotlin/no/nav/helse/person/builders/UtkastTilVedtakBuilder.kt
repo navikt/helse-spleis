@@ -8,6 +8,7 @@ import kotlin.properties.Delegates
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype
 import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO
@@ -62,6 +63,8 @@ internal class UtkastTilVedtakBuilder(
 
     private lateinit var behandlingId: UUID
     internal fun behandlingId(behandlingId: UUID) = apply { this.behandlingId = behandlingId }
+    private lateinit var arbeidssituasjon: Arbeidssituasjon
+    internal fun arbeidssituasjon(arbeidssituasjon: Arbeidssituasjon) = apply { this.arbeidssituasjon = arbeidssituasjon }
     private var vedtakFattet: LocalDateTime? = null
     internal fun vedtakFattet(vedtakFattet: LocalDateTime) = apply { this.vedtakFattet = vedtakFattet }
     private var historiskeHendelseIder: Set<MeldingsreferanseId> = emptySet()
@@ -282,6 +285,7 @@ internal class UtkastTilVedtakBuilder(
                     Behandlingsporing.Yrkesaktivitet.Frilans-> TODO("Har ikke implementert disse yrkesaktivitetstypene enda i sykepengegrunnlagsfakta")
                 }
             ),
+            "arbeidssituasjon" to arbeidssituasjon
         )
 
         private fun arbeidstakerEtterSkjønnMap(sykepengegrunnlagsfakta: FastsattEtterSkjønn): Map<String, Any> = mapOf(

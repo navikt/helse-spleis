@@ -1464,6 +1464,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal fun byggUtkastTilVedtak(builder: UtkastTilVedtakBuilder): UtkastTilVedtakBuilder {
             builder
                 .behandlingId(id)
+                .arbeidssituasjon(arbeidssituasjon)
                 .apply { vedtakFattet?.also { vedtakFattet(it) } }
                 .hendelseIder(dokumentsporing.ider())
             gjeldende.byggUtkastTilVedtak(builder)

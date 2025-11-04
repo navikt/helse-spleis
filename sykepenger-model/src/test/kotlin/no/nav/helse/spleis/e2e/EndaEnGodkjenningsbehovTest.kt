@@ -32,6 +32,7 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
+import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -1051,7 +1052,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 )
             ),
             "selvstendig" to null
-        )
+        ),
+        arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER
     ) {
         val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
         val actualSkjæringstidspunkt = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "skjæringstidspunkt")!!
@@ -1069,6 +1071,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         val actualGjenståendeSykedager = hentFelt<Int>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "gjenståendeSykedager")!!
         val actualForeløpigBeregnetSluttPåSykepenger = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "foreløpigBeregnetSluttPåSykepenger")!!
         val actualUtbetalingsdager = hentFelt<List<Map<String, Any>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "utbetalingsdager")!!
+        val actualArbeidssituasjon = hentFelt<Arbeidssituasjon>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "arbeidssituasjon")!!
 
         hendelser?.let { assertHendelser(it, vedtaksperiodeId) }
         assertSykepengegrunnlagsfakta(vedtaksperiodeId, sykepengegrunnlagsfakta)
@@ -1088,6 +1091,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         assertEquals(gjenståendeSykedager, actualGjenståendeSykedager)
         assertEquals(foreløpigBeregnetSluttPåSykepenger.toString(), actualForeløpigBeregnetSluttPåSykepenger)
         assertEquals(utbetalingsdager, actualUtbetalingsdager)
+        assertEquals(arbeidssituasjon, actualArbeidssituasjon)
 
         val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
         assertEquals(actualtags, utkastTilVedtak.tags)
