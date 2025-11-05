@@ -443,18 +443,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         aktivitetslogg: IAktivitetslogg,
         validering: () -> Unit
     ) {
-        håndterSykdomstidslinje(
+        checkNotNull(åpenBehandling).håndterSykdomstidslinje(
             eventBus = eventBus,
-            person = person,
             yrkesaktivitet = yrkesaktivitet,
             dokumentsporing = dokumentsporing,
             hendelseSykdomstidslinje = hendelseSykdomstidslinje,
             egenmeldingsdagerAndrePerioder = egenmeldingsdagerAndrePerioder,
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             egenmeldingsdager = null,
-            aktivitetslogg = aktivitetslogg,
-            validering = validering
+            aktivitetslogg = aktivitetslogg
         )
+        person.sykdomshistorikkEndret()
+        validering()
     }
 
     internal fun nullstillEgenmeldingsdager(
@@ -464,38 +464,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         dokumentsporing: Dokumentsporing?,
         aktivitetslogg: IAktivitetslogg
     ) {
-        håndterSykdomstidslinje(
+        checkNotNull(åpenBehandling).nullstillEgenmeldingsdager(
             eventBus = eventBus,
-            person = person,
             yrkesaktivitet = yrkesaktivitet,
             dokumentsporing = dokumentsporing,
-            // Egenmeldingsdagene er ikke på sykdomstidslinjen, men påvirker beregning av AGP, derfor håndeteres det som en
-            // sykdomstidslinje-endring slik at vi beregner rett AGP når egenmeldingsdagene er nullstilt
-            hendelseSykdomstidslinje = Sykdomstidslinje(),
-            dagerNavOvertarAnsvar = null,
-            aktivitetslogg = aktivitetslogg,
-            /// skal ikke hensynta egenmeldingsdager fordi vi skal nullstille dem
-            egenmeldingsdagerAndrePerioder = emptyList(),
-            egenmeldingsdager = emptyList(),
-            validering = { /* nei takk */ }
+            aktivitetslogg = aktivitetslogg
         )
-    }
-
-    private fun håndterSykdomstidslinje(
-        eventBus: EventBus,
-        person: Person,
-        yrkesaktivitet: Yrkesaktivitet,
-        dokumentsporing: Dokumentsporing?,
-        hendelseSykdomstidslinje: Sykdomstidslinje,
-        egenmeldingsdagerAndrePerioder: List<Periode>,
-        dagerNavOvertarAnsvar: List<Periode>?,
-        egenmeldingsdager: List<Periode>?,
-        aktivitetslogg: IAktivitetslogg,
-        validering: () -> Unit
-    ) {
-        checkNotNull(åpenBehandling).håndterSykdomstidslinje(eventBus, yrkesaktivitet, dokumentsporing, hendelseSykdomstidslinje, egenmeldingsdagerAndrePerioder, dagerNavOvertarAnsvar, egenmeldingsdager, aktivitetslogg)
         person.sykdomshistorikkEndret()
-        validering()
     }
 
     fun oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>) {
@@ -688,7 +663,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal fun håndterSykdomstidslinje(
             eventBus: EventBus,
             yrkesaktivitet: Yrkesaktivitet,
-            dokumentsporing: Dokumentsporing?,
+            dokumentsporing: Dokumentsporing,
             hendelseSykdomstidslinje: Sykdomstidslinje,
             egenmeldingsdagerAndrePerioder: List<Periode>,
             dagerNavOvertarAnsvar: List<Periode>?,
@@ -698,14 +673,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             håndterNyFakta(
                 eventBus = eventBus,
                 endringMedNyFakta = { forrigeEndring ->
-                    val benyttetDokumentsporing = dokumentsporing ?: forrigeEndring.dokumentsporing
                     val hendelseSykdomstidslinjeFremTilOgMed = hendelseSykdomstidslinje.fremTilOgMed(forrigeEndring.periode.endInclusive)
                     val hendelseperiode = hendelseSykdomstidslinjeFremTilOgMed.periode()
                     val oppdatertPeriode = hendelseperiode?.let { forrigeEndring.periode.oppdaterFom(hendelseperiode) } ?: forrigeEndring.periode
                     // vi må oppdatere uansett om sykdomstidslinjen er tom, fordi egenmeldingsdager kan ha endret seg og dette påvirker agp
                     val egenmeldingsperioder = egenmeldingsdagerAndrePerioder + (egenmeldingsdager ?: forrigeEndring.egenmeldingsdager)
                     val (nySykdomstidslinje, nyeSkjæringstidspunkter, nyePerioderUtenNavAnsvar) = yrkesaktivitet.oppdaterSykdom(
-                        meldingsreferanseId = benyttetDokumentsporing.id,
+                        meldingsreferanseId = dokumentsporing.id,
                         sykdomstidslinje = hendelseSykdomstidslinjeFremTilOgMed.takeIf { hendelseperiode != null },
                         egenmeldingsperioder = egenmeldingsperioder
                     )
@@ -719,12 +693,46 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             periode = oppdatertPeriode
                         )
                         .copy(
-                            dokumentsporing = benyttetDokumentsporing,
+                            dokumentsporing = dokumentsporing,
                             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: forrigeEndring.dagerNavOvertarAnsvar,
                             sykdomstidslinje = sykdomstidslinje,
                             periode = oppdatertPeriode,
                             egenmeldingsdager = egenmeldingsdager ?: forrigeEndring.egenmeldingsdager,
                             refusjonstidslinje = forrigeEndring.refusjonstidslinje.fyll(oppdatertPeriode)
+                        )
+                },
+                yrkesaktivitet = yrkesaktivitet,
+                aktivitetslogg = aktivitetslogg
+            )
+        }
+        internal fun nullstillEgenmeldingsdager(
+            eventBus: EventBus,
+            yrkesaktivitet: Yrkesaktivitet,
+            dokumentsporing: Dokumentsporing?,
+            aktivitetslogg: IAktivitetslogg
+        ) {
+            håndterNyFakta(
+                eventBus = eventBus,
+                endringMedNyFakta = { forrigeEndring ->
+                    val benyttetDokumentsporing = dokumentsporing ?: forrigeEndring.dokumentsporing
+                    // vi må oppdatere uansett om sykdomstidslinjen er tom, fordi egenmeldingsdager kan ha endret seg og dette påvirker agp
+                    val (nySykdomstidslinje, nyeSkjæringstidspunkter, nyePerioderUtenNavAnsvar) = yrkesaktivitet.oppdaterSykdom(
+                        meldingsreferanseId = benyttetDokumentsporing.id,
+                        sykdomstidslinje = null,
+                        egenmeldingsperioder = emptyList()
+                    )
+                    val sykdomstidslinje = nySykdomstidslinje.subset(periode)
+
+                    forrigeEndring
+                        .copyMed(
+                            beregnSkjæringstidspunkt = nyeSkjæringstidspunkter,
+                            beregnetPerioderUtenNavAnsvar = nyePerioderUtenNavAnsvar,
+                            sykdomstidslinje = sykdomstidslinje
+                        )
+                        .copy(
+                            dokumentsporing = benyttetDokumentsporing,
+                            sykdomstidslinje = sykdomstidslinje,
+                            egenmeldingsdager = emptyList()
                         )
                 },
                 yrkesaktivitet = yrkesaktivitet,
