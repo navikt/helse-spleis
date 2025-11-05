@@ -14,6 +14,7 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -21,13 +22,23 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REV
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class AnmodningOmForkastingTest : AbstractDslTest() {
+
+    @Test
+    fun `kan forkaste auu når force-flagget er satt`() {
+        a1 {
+            håndterSøknad(1.januar til 16.januar)
+            nyttVedtak(17.januar til 31.januar, førsteFraværsdag = 1.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
+            assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        }
+    }
 
     @Test
     fun `anmodning avslås av en avsluttet vedtaksperiode`() {

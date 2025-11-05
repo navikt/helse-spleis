@@ -4,9 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.collections.last
-import kotlin.collections.map
-import kotlin.collections.plus
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
@@ -517,7 +514,7 @@ internal class Vedtaksperiode private constructor(
             AvventerInntektsmelding,
             AvventerBlokkerendePeriode,
             AvventerAOrdningen,
-            AvsluttetUtenUtbetaling -> forkast(eventBus, anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst)
+            AvsluttetUtenUtbetaling -> forkast(eventBus, anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst, anmodningOmForkasting.force)
 
             Avsluttet,
             AvventerGodkjenning,
