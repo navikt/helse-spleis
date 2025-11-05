@@ -1,0 +1,248 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": null,
+                    "type": "SELVSTENDIG"
+                  }
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": null,
+                    "type": "SELVSTENDIG"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": null,
+                    "type": "SELVSTENDIG"
+                  }
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": null,
+                    "type": "SELVSTENDIG"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "behandlinger": [
+              {
+                "endringer": [
+                  {
+                    "faktaavklartInntekt": {
+                      "kilde": null,
+                      "type": "SELVSTENDIG"
+                    }
+                  },
+                  {
+                    "faktaavklartInntekt": {
+                      "kilde": "AORDNINGEN",
+                      "type": "ARBEIDSTAKER",
+                      "årsakTilInnhenting": "MANGLENDE_INNTEKT_FRA_ARBEIDSGIVER"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": null
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": "INNTEKTSMELDING",
+                    "type": "ARBEIDSTAKER"
+                  }
+                }
+              ]
+            },
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": {
+                    "type": "ARBEIDSTAKER",
+                    "kilde": "INNTEKTSMELDING"
+                  }
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "type": "ARBEIDSTAKER",
+                    "kilde": "AORDNINGEN",
+                    "årsakTilInnhenting": "MANGLENDE_INNTEKT_FRA_ARBEIDSGIVER"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": "AORDNINGEN",
+                    "type": "ARBEIDSTAKER",
+                    "årsakTilInnhenting": "MANGLENDE_INNTEKT_FRA_ARBEIDSGIVER"
+                  }
+                },
+                {
+                  "faktaavklartInntekt": {
+                    "kilde": "AORDNINGEN",
+                    "type": "ARBEIDSTAKER",
+                    "årsakTilInnhenting": "MANGLENDE_INNTEKT_FRA_ARBEIDSGIVER"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [],
+            "selvstendigInntektsopplysninger": {
+              "inntektsopplysning": {
+                "kilde": null,
+                "type": "SELVSTENDIG"
+              }
+            },
+            "deaktiverteArbeidsforhold": [
+              {
+                "inntektsopplysning": {
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "AORDNINGEN",
+                  "type": "ARBEIDSTAKER",
+                  "hendelseId": "00000000-0000-0000-0000-000000000001",
+                  "årsakTilInnhenting": "MANGLENDE_INNTEKT_FRA_ARBEIDSGIVER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER"
+
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "AORDNINGEN",
+                  "type": "ARBEIDSTAKER",
+                  "hendelseId": "00000000-0000-0000-0000-000000000002",
+                  "årsakTilInnhenting": "FASTSETTING_AV_SYKEPENGEGRUNNLAG"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "inntektsopplysning": {
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "AORDNINGEN",
+                  "type": "ARBEIDSTAKER",
+                  "hendelseId": "00000000-0000-0000-0000-000000000003",
+                  "årsakTilInnhenting": "FASTSETTING_AV_SYKEPENGEGRUNNLAG"
+                }
+              }
+            ],
+            "selvstendigInntektsopplysninger": null
+          }
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [],
+            "selvstendigInntektsopplysninger": {
+              "inntektsopplysning": {
+                "kilde": null,
+                "type": "SELVSTENDIG"
+              }
+            }
+          }
+        },
+        {
+          "inntektsgrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "inntektsopplysning": {
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "AORDNINGEN",
+                  "type": "ARBEIDSTAKER",
+                  "hendelseId": "00000000-0000-0000-0000-000000000004",
+                  "årsakTilInnhenting": "MANGLENDE_INNTEKT_FRA_ARBEIDSGIVER"
+                }
+              },
+              {
+                "inntektsopplysning": {
+                  "kilde": "INFOTRYGD",
+                  "type": "ARBEIDSTAKER"
+                }
+              }
+            ],
+            "selvstendigInntektsopplysninger": null
+          }
+        }
+      ]
+    }
+  ]
+}
