@@ -27,6 +27,7 @@ import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
+import no.nav.helse.spleis.e2e.forlengTilGodkjentVedtak
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -164,6 +165,12 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
         assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(emptyList<Nothing>(), inspektør.venteperiode(1.vedtaksperiode))
+        assertEquals(1.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(listOf(1.februar til 16.februar), inspektør.venteperiode(2.vedtaksperiode))
+        assertEquals(1.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+        assertEquals(listOf(1.februar til 16.februar), inspektør.venteperiode(3.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -182,6 +189,24 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
         assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Antall dager mellom opplyst agp og gammel agp er mindre enn 10 - siste periode er til utbetaling`() {
+        nyttVedtak(10.januar til 31.januar)
+        forlengVedtak(februar)
+        forlengTilGodkjentVedtak(mars)
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+
+        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+        assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(emptyList<Nothing>(), inspektør.venteperiode(1.vedtaksperiode))
+        assertEquals(1.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(listOf(1.februar til 16.februar), inspektør.venteperiode(2.vedtaksperiode))
+        assertEquals(1.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+        assertEquals(listOf(1.februar til 16.februar), inspektør.venteperiode(3.vedtaksperiode))
     }
 
     @Test

@@ -51,22 +51,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -139,11 +124,27 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
 
+        assertForventetFeil(
+            forklaring = "perioden er teknisk sett utenfor AGP",
+            nå = {
+                assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            },
+            ønsket = {
+                assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_A_ORDNINGEN)
+            }
+        )
+
+        assertEquals("UUUUUGG UUUUUGG UUAAARR AAAAARR AAA", inspektør.sykdomstidslinje.toShortString())
         assertEquals(emptyList<Nothing>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
         assertEquals(arbeidsgiverperioder, inspektør.venteperiode(1.vedtaksperiode))
-        assertEquals(emptyList<Nothing>(), inspektør.venteperiode(2.vedtaksperiode))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertForventetFeil(
+            forklaring = "arbeidsgiverperioden er i starten av januar",
+            nå = { assertEquals(emptyList<Nothing>(), inspektør.venteperiode(2.vedtaksperiode)) },
+            ønsket = { assertEquals(arbeidsgiverperioder, inspektør.venteperiode(2.vedtaksperiode)) }
+        )
+        assertEquals(17.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
 
     @Test
