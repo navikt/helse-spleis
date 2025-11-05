@@ -569,7 +569,7 @@ internal class Vedtaksperiode private constructor(
         val faktaavklartInntekt = inntektsmelding.faktaavklartInntekt()
 
         when (tilstand) {
-            AvsluttetUtenUtbetaling -> sørgForNyBehandlingHvisIkkeÅpen(eventBus, inntektsmelding)
+            AvsluttetUtenUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, inntektsmelding)
 
             AvventerAOrdningen,
             AvventerAnnullering,
@@ -1575,8 +1575,6 @@ internal class Vedtaksperiode private constructor(
             yrkesaktivitet = yrkesaktivitet,
             dokumentsporing = inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId),
             aktivitetslogg = aktivitetslogg,
-            beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
-            beregnetPerioderUtenNavAnsvar = yrkesaktivitet.perioderUtenNavAnsvar,
             benyttetRefusjonsopplysninger = ingenRefusjon
         )
     }
@@ -1891,19 +1889,45 @@ internal class Vedtaksperiode private constructor(
         // refusjonshåndteringen er litt spesiell i og med at vi bare behandler den hvis det er en funksjonell endring
         val benyttetRefusjonsopplysninger = behandlinger.endretRefusjonstidslinje(refusjonstidslinje) ?: return null
 
-        // vi burde egentlig kunne sjekke tilstanden her, men siden refusjonsendringer kan komme
-        // samtidig som f.eks. dag-håndtering fra inntektsmelding så kan tilstanden fremdeles være "Avsluttet" selv om
-        // det er opprettet en ny behandling allerede.
-        // ideelt sett skulle vi hatt bedre kontroll over flyten her
-        sørgForNyBehandlingHvisIkkeÅpen(eventBus, hendelse)
+        when (tilstand) {
+            AvsluttetUtenUtbetaling,
+            Avsluttet,
+            TilUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, hendelse)
+
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering -> {}
+
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            Start,
+            TilAnnullering,
+            TilInfotrygd -> error("Forventer ikke å håndtere refusjon i tilstand $tilstand")
+        }
 
         behandlinger.håndterRefusjonstidslinje(
             eventBus = eventBus,
             yrkesaktivitet = yrkesaktivitet,
             dokumentsporing = dokumentsporing,
             aktivitetslogg = aktivitetslogg,
-            beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
-            beregnetPerioderUtenNavAnsvar = yrkesaktivitet.perioderUtenNavAnsvar,
             benyttetRefusjonsopplysninger = benyttetRefusjonsopplysninger
         )
         return Revurderingseventyr.refusjonsopplysninger(hendelse, skjæringstidspunkt, periode)
@@ -2888,8 +2912,6 @@ internal class Vedtaksperiode private constructor(
             yrkesaktivitet = yrkesaktivitet,
             dokumentsporing = null,
             aktivitetslogg = aktivitetslogg,
-            beregnetSkjæringstidspunkter = person.skjæringstidspunkter,
-            beregnetPerioderUtenNavAnsvar = yrkesaktivitet.perioderUtenNavAnsvar,
             benyttetRefusjonsopplysninger = benyttetRefusjonsopplysninger
         )
     }
@@ -2926,8 +2948,6 @@ internal class Vedtaksperiode private constructor(
             yrkesaktivitet,
             dokumentsporing,
             aktivitetslogg,
-            person.skjæringstidspunkter,
-            yrkesaktivitet.perioderUtenNavAnsvar,
             benyttetRefusjonstidslinje
         )
     }

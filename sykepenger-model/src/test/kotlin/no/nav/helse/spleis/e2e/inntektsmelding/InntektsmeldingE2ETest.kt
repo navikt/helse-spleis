@@ -124,26 +124,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-
-        assertForventetFeil(
-            forklaring = "perioden er teknisk sett utenfor AGP",
-            nå = {
-                assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-            },
-            ønsket = {
-                assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_A_ORDNINGEN)
-            }
-        )
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_A_ORDNINGEN)
 
         assertEquals("UUUUUGG UUUUUGG UUAAARR AAAAARR AAA", inspektør.sykdomstidslinje.toShortString())
         assertEquals(emptyList<Nothing>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
         assertEquals(arbeidsgiverperioder, inspektør.venteperiode(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertForventetFeil(
-            forklaring = "arbeidsgiverperioden er i starten av januar",
-            nå = { assertEquals(emptyList<Nothing>(), inspektør.venteperiode(2.vedtaksperiode)) },
-            ønsket = { assertEquals(arbeidsgiverperioder, inspektør.venteperiode(2.vedtaksperiode)) }
-        )
+        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(2.vedtaksperiode))
         assertEquals(17.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
 

@@ -417,11 +417,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         yrkesaktivitet: Yrkesaktivitet,
         dokumentsporing: Dokumentsporing?,
         aktivitetslogg: IAktivitetslogg,
-        beregnetSkjæringstidspunkter: Skjæringstidspunkter,
-        beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
         benyttetRefusjonsopplysninger: Beløpstidslinje
     ) {
-        checkNotNull(åpenBehandling).håndterRefusjonsopplysninger(eventBus, yrkesaktivitet, dokumentsporing, aktivitetslogg, beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar, benyttetRefusjonsopplysninger)
+        checkNotNull(åpenBehandling).håndterRefusjonsopplysninger(eventBus, yrkesaktivitet, dokumentsporing, aktivitetslogg, benyttetRefusjonsopplysninger)
     }
 
     internal fun håndterFaktaavklartInntekt(eventBus: EventBus, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) {
@@ -731,8 +729,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             yrkesaktivitet: Yrkesaktivitet,
             dokumentsporing: Dokumentsporing?,
             aktivitetslogg: IAktivitetslogg,
-            beregnetSkjæringstidspunkter: Skjæringstidspunkter,
-            beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
             benyttetRefusjonsopplysninger: Beløpstidslinje
         ) {
             val nyEndring = gjeldende
@@ -744,9 +740,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 eventBus = eventBus,
                 nyEndring = nyEndring,
                 yrkesaktivitet = yrkesaktivitet,
-                aktivitetslogg = aktivitetslogg,
-                beregnSkjæringstidspunkt = beregnetSkjæringstidspunkter,
-                beregnetPerioderUtenNavAnsvar = beregnetPerioderUtenNavAnsvar
+                aktivitetslogg = aktivitetslogg
             )
         }
 
