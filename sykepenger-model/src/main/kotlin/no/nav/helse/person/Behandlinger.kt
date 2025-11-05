@@ -450,7 +450,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             hendelseSykdomstidslinje = hendelseSykdomstidslinje,
             egenmeldingsdagerAndrePerioder = egenmeldingsdagerAndrePerioder,
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
-            egenmeldingsdager = null,
             aktivitetslogg = aktivitetslogg
         )
         person.sykdomshistorikkEndret()
@@ -667,42 +666,34 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             hendelseSykdomstidslinje: Sykdomstidslinje,
             egenmeldingsdagerAndrePerioder: List<Periode>,
             dagerNavOvertarAnsvar: List<Periode>?,
-            egenmeldingsdager: List<Periode>?,
             aktivitetslogg: IAktivitetslogg
         ) {
+            val hendelseSykdomstidslinjeFremTilOgMed = hendelseSykdomstidslinje.fremTilOgMed(periode.endInclusive)
+            val hendelseperiode = hendelseSykdomstidslinjeFremTilOgMed.periode()
+            val oppdatertPeriode = hendelseperiode?.let { periode.oppdaterFom(hendelseperiode) } ?: periode
+            val (nySykdomstidslinje, nyeSkjæringstidspunkter, nyePerioderUtenNavAnsvar) = yrkesaktivitet.oppdaterSykdom(
+                meldingsreferanseId = dokumentsporing.id,
+                sykdomstidslinje = hendelseSykdomstidslinjeFremTilOgMed.takeIf { hendelseperiode != null },
+                egenmeldingsperioder = egenmeldingsdagerAndrePerioder + gjeldende.egenmeldingsdager
+            )
+            val sykdomstidslinje = nySykdomstidslinje.subset(oppdatertPeriode)
+
+            val nyEndring = gjeldende
+                .copy(
+                    dokumentsporing = dokumentsporing,
+                    dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: gjeldende.dagerNavOvertarAnsvar,
+                    sykdomstidslinje = sykdomstidslinje,
+                    periode = oppdatertPeriode,
+                    refusjonstidslinje = gjeldende.refusjonstidslinje.fyll(oppdatertPeriode)
+                )
+
             håndterNyFakta(
                 eventBus = eventBus,
-                endringMedNyFakta = { forrigeEndring ->
-                    val hendelseSykdomstidslinjeFremTilOgMed = hendelseSykdomstidslinje.fremTilOgMed(forrigeEndring.periode.endInclusive)
-                    val hendelseperiode = hendelseSykdomstidslinjeFremTilOgMed.periode()
-                    val oppdatertPeriode = hendelseperiode?.let { forrigeEndring.periode.oppdaterFom(hendelseperiode) } ?: forrigeEndring.periode
-                    // vi må oppdatere uansett om sykdomstidslinjen er tom, fordi egenmeldingsdager kan ha endret seg og dette påvirker agp
-                    val egenmeldingsperioder = egenmeldingsdagerAndrePerioder + (egenmeldingsdager ?: forrigeEndring.egenmeldingsdager)
-                    val (nySykdomstidslinje, nyeSkjæringstidspunkter, nyePerioderUtenNavAnsvar) = yrkesaktivitet.oppdaterSykdom(
-                        meldingsreferanseId = dokumentsporing.id,
-                        sykdomstidslinje = hendelseSykdomstidslinjeFremTilOgMed.takeIf { hendelseperiode != null },
-                        egenmeldingsperioder = egenmeldingsperioder
-                    )
-                    val sykdomstidslinje = nySykdomstidslinje.subset(oppdatertPeriode)
-
-                    forrigeEndring
-                        .copyMed(
-                            beregnSkjæringstidspunkt = nyeSkjæringstidspunkter,
-                            beregnetPerioderUtenNavAnsvar = nyePerioderUtenNavAnsvar,
-                            sykdomstidslinje = sykdomstidslinje,
-                            periode = oppdatertPeriode
-                        )
-                        .copy(
-                            dokumentsporing = dokumentsporing,
-                            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: forrigeEndring.dagerNavOvertarAnsvar,
-                            sykdomstidslinje = sykdomstidslinje,
-                            periode = oppdatertPeriode,
-                            egenmeldingsdager = egenmeldingsdager ?: forrigeEndring.egenmeldingsdager,
-                            refusjonstidslinje = forrigeEndring.refusjonstidslinje.fyll(oppdatertPeriode)
-                        )
-                },
+                nyEndring = nyEndring,
                 yrkesaktivitet = yrkesaktivitet,
-                aktivitetslogg = aktivitetslogg
+                aktivitetslogg = aktivitetslogg,
+                beregnSkjæringstidspunkt = nyeSkjæringstidspunkter,
+                beregnetPerioderUtenNavAnsvar = nyePerioderUtenNavAnsvar
             )
         }
         internal fun nullstillEgenmeldingsdager(
@@ -711,32 +702,28 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             dokumentsporing: Dokumentsporing?,
             aktivitetslogg: IAktivitetslogg
         ) {
+            val benyttetDokumentsporing = dokumentsporing ?: gjeldende.dokumentsporing
+            // vi må oppdatere uansett om sykdomstidslinjen er tom, fordi egenmeldingsdager kan ha endret seg og dette påvirker agp
+            val (nySykdomstidslinje, nyeSkjæringstidspunkter, nyePerioderUtenNavAnsvar) = yrkesaktivitet.oppdaterSykdom(
+                meldingsreferanseId = benyttetDokumentsporing.id,
+                sykdomstidslinje = null,
+                egenmeldingsperioder = emptyList()
+            )
+            val sykdomstidslinje = nySykdomstidslinje.subset(periode)
+
+            val nyEndring = gjeldende
+                .copy(
+                    dokumentsporing = benyttetDokumentsporing,
+                    sykdomstidslinje = sykdomstidslinje,
+                    egenmeldingsdager = emptyList()
+                )
             håndterNyFakta(
                 eventBus = eventBus,
-                endringMedNyFakta = { forrigeEndring ->
-                    val benyttetDokumentsporing = dokumentsporing ?: forrigeEndring.dokumentsporing
-                    // vi må oppdatere uansett om sykdomstidslinjen er tom, fordi egenmeldingsdager kan ha endret seg og dette påvirker agp
-                    val (nySykdomstidslinje, nyeSkjæringstidspunkter, nyePerioderUtenNavAnsvar) = yrkesaktivitet.oppdaterSykdom(
-                        meldingsreferanseId = benyttetDokumentsporing.id,
-                        sykdomstidslinje = null,
-                        egenmeldingsperioder = emptyList()
-                    )
-                    val sykdomstidslinje = nySykdomstidslinje.subset(periode)
-
-                    forrigeEndring
-                        .copyMed(
-                            beregnSkjæringstidspunkt = nyeSkjæringstidspunkter,
-                            beregnetPerioderUtenNavAnsvar = nyePerioderUtenNavAnsvar,
-                            sykdomstidslinje = sykdomstidslinje
-                        )
-                        .copy(
-                            dokumentsporing = benyttetDokumentsporing,
-                            sykdomstidslinje = sykdomstidslinje,
-                            egenmeldingsdager = emptyList()
-                        )
-                },
+                nyEndring = nyEndring,
                 yrkesaktivitet = yrkesaktivitet,
-                aktivitetslogg = aktivitetslogg
+                aktivitetslogg = aktivitetslogg,
+                beregnSkjæringstidspunkt = nyeSkjæringstidspunkter,
+                beregnetPerioderUtenNavAnsvar = nyePerioderUtenNavAnsvar
             )
         }
 
@@ -756,21 +743,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
             benyttetRefusjonsopplysninger: Beløpstidslinje
         ) {
+            val nyEndring = gjeldende
+                .copy(
+                    dokumentsporing = dokumentsporing ?: gjeldende.dokumentsporing,
+                    refusjonstidslinje = benyttetRefusjonsopplysninger
+                )
             håndterNyFakta(
                 eventBus = eventBus,
-                endringMedNyFakta = { forrigeEndring ->
-                    forrigeEndring
-                        .copyMed(
-                            beregnSkjæringstidspunkt = beregnetSkjæringstidspunkter,
-                            beregnetPerioderUtenNavAnsvar = beregnetPerioderUtenNavAnsvar
-                        )
-                        .copy(
-                            dokumentsporing = dokumentsporing ?: forrigeEndring.dokumentsporing,
-                            refusjonstidslinje = benyttetRefusjonsopplysninger
-                        )
-                },
+                nyEndring = nyEndring,
                 yrkesaktivitet = yrkesaktivitet,
-                aktivitetslogg = aktivitetslogg
+                aktivitetslogg = aktivitetslogg,
+                beregnSkjæringstidspunkt = beregnetSkjæringstidspunkter,
+                beregnetPerioderUtenNavAnsvar = beregnetPerioderUtenNavAnsvar
             )
         }
 
@@ -782,11 +766,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         ) {
             håndterNyFakta(
                 eventBus = eventBus,
-                endringMedNyFakta = { forrigeEndring ->
-                    forrigeEndring.copy(
-                        faktaavklartInntekt = arbeidstakerFaktaavklartInntekt
-                    )
-                },
+                nyEndring = gjeldende.copy(faktaavklartInntekt = arbeidstakerFaktaavklartInntekt),
                 yrkesaktivitet = yrkesaktivitet,
                 aktivitetslogg = aktivitetslogg
             )
@@ -795,24 +775,22 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         fun håndterKorrigertInntekt(eventBus: EventBus, korrigertInntekt: Saksbehandler, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) {
             håndterNyFakta(
                 eventBus = eventBus,
-                endringMedNyFakta = { forrigeEndring ->
-                    forrigeEndring.copy(
-                        korrigertInntekt = korrigertInntekt
-                    )
-                },
+                nyEndring = gjeldende.copy(korrigertInntekt = korrigertInntekt),
                 yrkesaktivitet = yrkesaktivitet,
                 aktivitetslogg = aktivitetslogg
             )
         }
 
-        private fun håndterNyFakta(eventBus: EventBus, endringMedNyFakta: (forrigeEndring: Endring) -> Endring, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) {
+        private fun håndterNyFakta(
+            eventBus: EventBus,
+            nyEndring: Endring,
+            yrkesaktivitet: Yrkesaktivitet,
+            aktivitetslogg: IAktivitetslogg,
+            beregnSkjæringstidspunkt: Skjæringstidspunkter? = null,
+            beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>? = null
+        ) {
             // Forsikrer oss at ny endring er Uberegnet og får ny ID og tidsstempel
-            // Denne er lazy ettersom det ved endring på sykdomstidslinjen er viktig at perioden låses opp på arbeidsgiver _før_ endringen evalueres
-            val endringMedNyFakta by lazy { endringMedNyFakta(endringer.last()).kopierUtenBeregning() }
-
-            val uberegnetBehandling by lazy  {
-                nyEndring(endringMedNyFakta)
-            }
+            val endringMedNyFakta = nyEndring.kopierUtenBeregning(beregnSkjæringstidspunkt, beregnetPerioderUtenNavAnsvar)
 
             val beregnetBehandling = { uberegnetTilstand: Tilstand ->
                 gjeldende.forkastUtbetaling(with (yrkesaktivitet) {  eventBus.utbetalingEventBus }, aktivitetslogg)
@@ -823,7 +801,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             when (this.tilstand) {
                 Tilstand.Uberegnet,
                 Tilstand.UberegnetOmgjøring,
-                Tilstand.UberegnetRevurdering -> uberegnetBehandling
+                Tilstand.UberegnetRevurdering -> nyEndring(endringMedNyFakta)
 
                 Tilstand.Beregnet -> beregnetBehandling(Tilstand.Uberegnet)
                 Tilstand.BeregnetRevurdering -> beregnetBehandling(Tilstand.UberegnetRevurdering)
@@ -1042,21 +1020,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     skjæringstidspunkter = beregnetSkjæringstidspunkt?.second ?: this.skjæringstidspunkter,
                     dagerUtenNavAnsvar = dagerUtenNavAnsvar ?: this.dagerUtenNavAnsvar,
                     inntektjusteringer = emptyMap()
-                )
-            }
-
-            internal fun copyMed(
-                beregnSkjæringstidspunkt: Skjæringstidspunkter,
-                beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
-                periode: Periode = this.periode,
-                sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje
-            ): Endring {
-                val (skjæringstidspunkt, skjæringstidspunkter) = skjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode)
-                val dagerUtenNavAnsvar = dagerUtenNavAnsvar(beregnetPerioderUtenNavAnsvar)
-                return copy(
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    skjæringstidspunkter = skjæringstidspunkter,
-                    dagerUtenNavAnsvar = dagerUtenNavAnsvar
                 )
             }
 
@@ -1332,6 +1295,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             if (endring == null) return
             check(endringer.none { it.id == endring.id }) { "Endringer må ha unik ID" }
             check(endringer.none { it.tidsstempel == endring.tidsstempel }) { "Endringer må ha unik tidsstempel" }
+            check(endringer.none { it.tidsstempel > endring.tidsstempel }) { "Endringer må ha nyere tidsstempel" }
             endringer.add(endring)
         }
 
