@@ -118,7 +118,9 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             fraværFørSykmelding = null,
             harOppgittAvvikling = null,
             harOppgittNyIArbeidslivet = null,
-            harOppgittVarigEndring = null
+            harOppgittVarigEndring = null,
+            harOppgittOpprettholdtInntekt = null,
+            harOppgittOppholdIUtlandet = null
         ).apply {
             søknader.add(this)
         }
@@ -189,6 +191,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             refusjon = refusjon
         )
     )
+
     internal fun lagKorrigerendeArbeidsgiveropplysninger(
         arbeidsgiverperioder: List<Periode>?,
         beregnetInntekt: Inntekt?,
@@ -251,7 +254,6 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             ),
             besvart = LocalDateTime.now()
         )
-
 
     internal fun lagVilkårsgrunnlag(
         vedtaksperiodeId: UUID,

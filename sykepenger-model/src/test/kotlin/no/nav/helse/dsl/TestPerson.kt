@@ -249,7 +249,9 @@ internal class TestPerson(
             fraværFørSykmelding: Boolean? = null,
             harOppgittAvvikling: Boolean? = null,
             harOppgittVarigEndring: Boolean? = null,
-            harOppgittNyIArbeidslivet: Boolean? = null
+            harOppgittNyIArbeidslivet: Boolean? = null,
+            harOppgittOpprettholdtInntekt: Boolean? = null,
+            harOppgittOppholdIUtlandet: Boolean? = null
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode(this.orgnummer) {
@@ -272,7 +274,9 @@ internal class TestPerson(
                         fraværFørSykmelding = fraværFørSykmelding,
                         harOppgittAvvikling = harOppgittAvvikling,
                         harOppgittVarigEndring = harOppgittVarigEndring,
-                        harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet
+                        harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
+                        harOppgittOpprettholdtInntekt = harOppgittOpprettholdtInntekt,
+                        harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet
                     ).håndter(Person::håndterSøknad)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)) {
@@ -299,6 +303,8 @@ internal class TestPerson(
             harOppgittAvvikling: Boolean? = null,
             harOppgittVarigEndring: Boolean? = null,
             harOppgittNyIArbeidslivet: Boolean? = null,
+            harOppgittOpprettholdtInntekt: Boolean? = null,
+            harOppgittOppholdIUtlandet: Boolean? = null,
             søknadId: UUID = UUID.randomUUID()
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, sykdomsgrad),
@@ -309,6 +315,8 @@ internal class TestPerson(
             harOppgittAvvikling = harOppgittAvvikling,
             harOppgittVarigEndring = harOppgittVarigEndring,
             harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
+            harOppgittOpprettholdtInntekt = harOppgittOpprettholdtInntekt,
+            harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet,
             søknadId = søknadId
         )
 
@@ -591,7 +599,6 @@ internal class TestPerson(
             arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger, inntekterForBeregning, selvstendigForsikring)
                 .håndter(Person::håndterYtelser)
         }
-
 
         internal fun håndterYtelser(
             vedtaksperiodeId: UUID,

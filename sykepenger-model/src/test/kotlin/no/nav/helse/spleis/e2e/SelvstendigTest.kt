@@ -558,6 +558,24 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
+    fun `kaster ut når bruker har oppgitt at hen har opprettholdt inntekt`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar, harOppgittOpprettholdtInntekt = true)
+            assertFunksjonellFeil(Varselkode.RV_SØ_51, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `kaster ut når bruker har oppgitt at hen har opphold i utlandet`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar, harOppgittOppholdIUtlandet = true)
+            assertFunksjonellFeil(Varselkode.RV_SØ_52, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
     fun `foreslår utbetaling på 80 prosent dekning i ventetid ved denne type forsikring`() = Toggle.SelvstendigForsikring.enable {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)

@@ -44,6 +44,12 @@ internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val 
         val harOppgittAvviklingPåNyeMåten = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("NARINGSDRIVENDE_VIRKSOMHETEN_AVVIKLET").takeUnless { it.isMissingOrNull() }?.asBoolean()
         builder.harOppgittAvvikling((harOppgittAvviklingPåGamleMåten == true) || (harOppgittAvviklingPåNyeMåten == true))
 
+        val harOppgittOpprettholdtInntekt = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("NARINGSDRIVENDE_OPPRETTHOLDT_INNTEKT").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        builder.harOppgittOpprettholdtInntekt(harOppgittOpprettholdtInntekt)
+
+        val harOppgittOppholdIUtlandet = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("NARINGSDRIVENDE_OPPHOLD_I_UTLANDET").takeUnless { it.isMissingOrNull() }?.asBoolean()
+        builder.harOppgittOppholdIUtlandet(harOppgittOppholdIUtlandet)
+
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)
         mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
     }

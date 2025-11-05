@@ -76,7 +76,9 @@ class Søknad(
     private val fraværFørSykmelding: Boolean?,
     private val harOppgittNyIArbeidslivet: Boolean?,
     private val harOppgittVarigEndring: Boolean?,
-    private val harOppgittAvvikling: Boolean?
+    private val harOppgittAvvikling: Boolean?,
+    private val harOppgittOpprettholdtInntekt: Boolean?,
+    private val harOppgittOppholdIUtlandet: Boolean?
 ) : Hendelse {
 
     override val metadata = HendelseMetadata(
@@ -158,6 +160,9 @@ class Søknad(
         if (harOppgittAvvikling == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_47)
         if (harOppgittNyIArbeidslivet == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_48)
         if (harOppgittVarigEndring == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_49)
+
+        if (harOppgittOpprettholdtInntekt == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_51)
+        if (harOppgittOppholdIUtlandet == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_52)
 
         if (pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true) aktivitetslogg.funksjonellFeil(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
 

@@ -72,6 +72,8 @@ enum class Varselkode(
     RV_SØ_48("Selvstendigsøknad hvor bruker har oppgitt at de er ny i arbeidslivet"),
     RV_SØ_49("Selvstendigsøknad hvor bruker har oppgitt at de har varig endring i inntekt"),
     RV_SØ_50("Selvstendigsøknad hvor bruker har oppgitt at de har forsikring om ventetid", avviklet = true),
+    RV_SØ_51("Selvstendigsøknad hvor bruker har oppgitt at de har opprettholdt inntekt"),
+    RV_SØ_52("Selvstendigsøknad hvor bruker har oppgitt at de har opphold i utlandet"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne.", avviklet = true),

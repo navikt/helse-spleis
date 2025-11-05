@@ -27,6 +27,8 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
     private var harOppgittNyIArbeidslivet: Boolean? = null
     private var harOppgittVarigEndring: Boolean? = null
     private var harOppgittAvvikling: Boolean? = null
+    private var harOppgittOpprettholdtInntekt: Boolean? = null
+    private var harOppgittOppholdIUtlandet: Boolean? = null
     private val arbeidssituasjon = when (arbeidssituasjon) {
         "SELVSTENDIG_NARINGSDRIVENDE" -> Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
         "BARNEPASSER" -> Søknad.Arbeidssituasjon.BARNEPASSER
@@ -62,7 +64,9 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
         fraværFørSykmelding = fraværFørSykmelding,
         harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
         harOppgittVarigEndring = harOppgittVarigEndring,
-        harOppgittAvvikling = harOppgittAvvikling
+        harOppgittAvvikling = harOppgittAvvikling,
+        harOppgittOpprettholdtInntekt = harOppgittOpprettholdtInntekt,
+        harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet
     )
 
     internal fun pensjonsgivendeInntekter(pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>) = apply {
@@ -143,5 +147,13 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
 
     fun harOppgittAvvikling(harOppgittAvvikling: Boolean?) = apply {
         this.harOppgittAvvikling = harOppgittAvvikling
+    }
+
+    fun harOppgittOpprettholdtInntekt(harOppgittOpprettholdtInntekt: Boolean?) = apply {
+        this.harOppgittOpprettholdtInntekt = harOppgittOpprettholdtInntekt
+    }
+
+    fun harOppgittOppholdIUtlandet(harOppgittOppholdIUtlandet: Boolean?) = apply {
+        this.harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet
     }
 }
