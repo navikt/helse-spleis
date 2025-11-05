@@ -124,4 +124,52 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
             }
         }
     }
+
+    @Test
+    fun `arbeidsgiverperioden justeres for alle perioder når egenmeldingsdager fjernes`() {
+        a1 {
+            håndterSøknad(5.januar til 14.januar, egenmeldinger = listOf(1.januar til 4.januar))
+            håndterSøknad(15.januar til 16.januar)
+            håndterSøknad(17.januar til 29.januar)
+            nullstillTilstandsendringer()
+
+            with(1.vedtaksperiode) {
+                assertTilstander(this, AVSLUTTET_UTEN_UTBETALING)
+                assertEquals(listOf(1.januar til 4.januar), inspektør.egenmeldingsdager(this))
+                assertEquals(listOf(1.januar til 14.januar), inspektør.venteperiode(this))
+            }
+
+            with(2.vedtaksperiode) {
+                assertTilstander(this, AVSLUTTET_UTEN_UTBETALING)
+                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
+                assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(this))
+            }
+
+            with(3.vedtaksperiode) {
+                assertTilstander(this, AVVENTER_INNTEKTSMELDING)
+                assertEquals(emptyList<Nothing>(), inspektør.egenmeldingsdager(this))
+                assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(this))
+            }
+
+            håndterPåminnelse(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, flagg = setOf("nullstillEgenmeldingsdager"))
+
+            with(1.vedtaksperiode) {
+                assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
+                assertEquals(listOf(5.januar til 20.januar), inspektør.venteperiode(this))
+            }
+
+            with(2.vedtaksperiode) {
+                assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
+                assertEquals(listOf(5.januar til 20.januar), inspektør.venteperiode(this))
+            }
+
+            with(3.vedtaksperiode) {
+                assertTilstander(this, AVVENTER_INNTEKTSMELDING)
+                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
+                assertEquals(listOf(5.januar til 20.januar), inspektør.venteperiode(this))
+            }
+        }
+    }
 }

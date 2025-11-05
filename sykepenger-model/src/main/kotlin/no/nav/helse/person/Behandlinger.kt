@@ -702,19 +702,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             dokumentsporing: Dokumentsporing?,
             aktivitetslogg: IAktivitetslogg
         ) {
-            val benyttetDokumentsporing = dokumentsporing ?: gjeldende.dokumentsporing
             // vi må oppdatere uansett om sykdomstidslinjen er tom, fordi egenmeldingsdager kan ha endret seg og dette påvirker agp
-            val (nySykdomstidslinje, nyeSkjæringstidspunkter, nyePerioderUtenNavAnsvar) = yrkesaktivitet.oppdaterSykdom(
-                meldingsreferanseId = benyttetDokumentsporing.id,
-                sykdomstidslinje = null,
-                egenmeldingsperioder = emptyList()
-            )
-            val sykdomstidslinje = nySykdomstidslinje.subset(periode)
+            val nyePerioderUtenNavAnsvar = yrkesaktivitet.beregnPerioderUtenNavAnsvar(egenmeldingsperioder = emptyList())
 
             val nyEndring = gjeldende
                 .copy(
-                    dokumentsporing = benyttetDokumentsporing,
-                    sykdomstidslinje = sykdomstidslinje,
+                    dokumentsporing = dokumentsporing ?: gjeldende.dokumentsporing,
                     egenmeldingsdager = emptyList()
                 )
             håndterNyFakta(
@@ -722,7 +715,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 nyEndring = nyEndring,
                 yrkesaktivitet = yrkesaktivitet,
                 aktivitetslogg = aktivitetslogg,
-                beregnSkjæringstidspunkt = nyeSkjæringstidspunkter,
                 beregnetPerioderUtenNavAnsvar = nyePerioderUtenNavAnsvar
             )
         }
