@@ -463,8 +463,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         yrkesaktivitet: Yrkesaktivitet,
         dokumentsporing: Dokumentsporing?,
         aktivitetslogg: IAktivitetslogg
-    ): Boolean {
-        check(åpenBehandling != null) { "Kan ikke nullstille egenmeldingsdager når det ikke finnes en åpen behandling" }
+    ) {
         håndterSykdomstidslinje(
             eventBus = eventBus,
             person = person,
@@ -480,7 +479,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             egenmeldingsdager = emptyList(),
             validering = { /* nei takk */ }
         )
-        return true
     }
 
     private fun håndterSykdomstidslinje(

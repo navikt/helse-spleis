@@ -2103,8 +2103,9 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun nullstillEgenmeldingsdager(eventBus: EventBus, hendelse: Hendelse, dokumentsporing: Dokumentsporing?, aktivitetslogg: IAktivitetslogg): Boolean {
-        if (behandlinger.egenmeldingsdager().isEmpty()) return false // Trenger ikke gjøre det om det ikke er noen egenmeldingsdager fra før
+    private fun nullstillEgenmeldingsdager(eventBus: EventBus, hendelse: Hendelse, dokumentsporing: Dokumentsporing?, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        // Trenger ikke gjøre det om det ikke er noen egenmeldingsdager fra før
+        if (behandlinger.egenmeldingsdager().isEmpty()) return null
 
         when (tilstand) {
             Avsluttet,
@@ -2140,7 +2141,7 @@ internal class Vedtaksperiode private constructor(
             TilUtbetaling -> {}
         }
 
-        return behandlinger.nullstillEgenmeldingsdager(
+        behandlinger.nullstillEgenmeldingsdager(
             eventBus = eventBus,
 
             person = person,
@@ -2149,13 +2150,13 @@ internal class Vedtaksperiode private constructor(
             dokumentsporing = dokumentsporing,
             aktivitetslogg = aktivitetslogg,
         )
+        return Revurderingseventyr.arbeidsgiverperiode(hendelse, skjæringstidspunkt, periode)
     }
 
     internal fun nullstillEgenmeldingsdagerIArbeidsgiverperiode(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing?): List<Revurderingseventyr> {
         val arbeidsgiverperiode = behandlinger.ventedager().dagerUtenNavAnsvar.periode ?: return emptyList()
         return yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
-            .filter { it.nullstillEgenmeldingsdager(eventBus, hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg)) }
-            .map { Revurderingseventyr.arbeidsgiverperiode(hendelse, it.skjæringstidspunkt, it.periode) }
+            .mapNotNull { it.nullstillEgenmeldingsdager(eventBus, hendelse, dokumentsporing, it.registrerKontekst(aktivitetslogg)) }
     }
 
     private fun håndterSøknad(
