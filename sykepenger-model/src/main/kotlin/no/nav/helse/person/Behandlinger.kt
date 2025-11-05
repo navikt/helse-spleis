@@ -859,47 +859,49 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 maksdatoresultat = maksdatoresultat
             )
 
-            private fun dagerUtenNavAnsvar(beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>): DagerUtenNavAnsvaravklaring {
-                return beregnetPerioderUtenNavAnsvar.finn(this.periode)?.let {
-                    DagerUtenNavAnsvaravklaring(
-                        ferdigAvklart = it.ferdigAvklart,
-                        dager = it.dagerUtenAnsvar.grupperSammenhengendePerioder()
-                    )
-                } ?: DagerUtenNavAnsvaravklaring(false, emptyList())
-            }
-            private fun skjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje, periode: Periode = this.periode): Pair<LocalDate, List<LocalDate>> {
-                val sisteSykedag = sykdomstidslinje.lastOrNull {
-                    // uttømmende when-blokk (uten else) med hensikt, fordi om nye det lages nye
-                    // dagtyper så vil det bli compile error og vi blir tvunget til å måtte ta stilling til den
-                    when (it) {
-                        is ArbeidsgiverHelgedag,
-                        is Arbeidsgiverdag,
-                        is ForeldetSykedag,
-                        is SykHelgedag,
-                        is Sykedag -> true
-
-                        is AndreYtelser,
-                        is ArbeidIkkeGjenopptattDag,
-                        is Arbeidsdag,
-                        is Feriedag,
-                        is FriskHelgedag,
-                        is Permisjonsdag,
-                        is ProblemDag,
-                        is UkjentDag -> false
-                    }
-                }?.dato
-
-                // trimmer friskmelding/ferie i halen bort
-                val søkeperiode = sisteSykedag?.let { periode.start til sisteSykedag } ?: periode
-                val skjæringstidspunkter = beregnetSkjæringstidspunkter
-                    .alle(søkeperiode)
-                val fastsattSkjæringstidspunkt = skjæringstidspunkter.maxOrNull() ?: periode.start
-                return fastsattSkjæringstidspunkt to skjæringstidspunkter
-            }
-
             companion object {
                 val IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT = LocalDate.MIN
                 val List<Endring>.dokumentsporing get() = map { it.dokumentsporing }.toSet()
+
+                fun bestemDagerUtenNavAnsvar(periode: Periode, beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>): DagerUtenNavAnsvaravklaring {
+                    return beregnetPerioderUtenNavAnsvar.finn(periode)?.let {
+                        DagerUtenNavAnsvaravklaring(
+                            ferdigAvklart = it.ferdigAvklart,
+                            dager = it.dagerUtenAnsvar.grupperSammenhengendePerioder()
+                        )
+                    } ?: DagerUtenNavAnsvaravklaring(false, emptyList())
+                }
+
+                fun bestemSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, sykdomstidslinje: Sykdomstidslinje, periode: Periode): Pair<LocalDate, List<LocalDate>> {
+                    val sisteSykedag = sykdomstidslinje.lastOrNull {
+                        // uttømmende when-blokk (uten else) med hensikt, fordi om nye det lages nye
+                        // dagtyper så vil det bli compile error og vi blir tvunget til å måtte ta stilling til den
+                        when (it) {
+                            is ArbeidsgiverHelgedag,
+                            is Arbeidsgiverdag,
+                            is ForeldetSykedag,
+                            is SykHelgedag,
+                            is Sykedag -> true
+
+                            is AndreYtelser,
+                            is ArbeidIkkeGjenopptattDag,
+                            is Arbeidsdag,
+                            is Feriedag,
+                            is FriskHelgedag,
+                            is Permisjonsdag,
+                            is ProblemDag,
+                            is UkjentDag -> false
+                        }
+                    }?.dato
+
+                    // trimmer friskmelding/ferie i halen bort
+                    val søkeperiode = sisteSykedag?.let { periode.start til sisteSykedag } ?: periode
+                    val skjæringstidspunkter = beregnetSkjæringstidspunkter
+                        .alle(søkeperiode)
+                    val fastsattSkjæringstidspunkt = skjæringstidspunkter.maxOrNull() ?: periode.start
+                    return fastsattSkjæringstidspunkt to skjæringstidspunkter
+                }
+
                 fun gjenopprett(dto: BehandlingendringInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Endring {
                     val periode = Periode.gjenopprett(dto.periode)
                     val utbetaling = dto.utbetalingId?.let { utbetalinger.getValue(it) }
@@ -995,8 +997,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             )
 
             internal fun kopierMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>): Endring? {
-                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = skjæringstidspunkt(beregnetSkjæringstidspunkter)
-                val dagerUtenNavAnsvar = dagerUtenNavAnsvar(beregnetPerioderUtenNavAnsvar)
+                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = bestemSkjæringstidspunkt(beregnetSkjæringstidspunkter, sykdomstidslinje, periode)
+                val dagerUtenNavAnsvar = bestemDagerUtenNavAnsvar(periode, beregnetPerioderUtenNavAnsvar)
                 if (nyttSkjæringstidspunkt == this.skjæringstidspunkt && dagerUtenNavAnsvar == this.dagerUtenNavAnsvar) return null
                 return kopierMed(
                     skjæringstidspunkt = nyttSkjæringstidspunkt,
@@ -1009,8 +1011,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 beregnSkjæringstidspunkt: Skjæringstidspunkter? = null,
                 beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>? = null
             ): Endring {
-                val beregnetSkjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode) }
-                val dagerUtenNavAnsvar = beregnetPerioderUtenNavAnsvar?.let { dagerUtenNavAnsvar(it) }
+                val beregnetSkjæringstidspunkt = beregnSkjæringstidspunkt?.let { bestemSkjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode) }
+                val dagerUtenNavAnsvar = beregnetPerioderUtenNavAnsvar?.let { bestemDagerUtenNavAnsvar(periode, it) }
                 return kopierMed(
                     grunnlagsdata = null,
                     utbetaling = null,
