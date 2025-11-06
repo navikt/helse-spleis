@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.behandlingkilde
 
 internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_INNTEKTSMELDING
@@ -101,7 +100,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ): Boolean {
-        vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, hendelse.metadata.behandlingkilde, aktivitetslogg)
+        vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, aktivitetslogg)
 
         if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
             if (vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte()) {

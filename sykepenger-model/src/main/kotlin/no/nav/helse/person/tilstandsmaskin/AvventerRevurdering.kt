@@ -9,7 +9,6 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VenterPå
 import no.nav.helse.person.Venteårsak
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.behandlingkilde
 
 internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     override val type = TilstandType.AVVENTER_REVURDERING
@@ -50,7 +49,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.sikreRefusjonsopplysningerHvisTomt(eventBus, påminnelse, aktivitetslogg)
         if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
-            vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, påminnelse.metadata.behandlingkilde, aktivitetslogg)
+            vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, aktivitetslogg)
             if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) return
             aktivitetslogg.info("Ordnet opp i manglende inntekt/refusjon i AvventerRevurdering ved videreføring av eksisterende opplysninger.")
         }

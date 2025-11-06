@@ -9,7 +9,6 @@ import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.behandlingkilde
 import no.nav.helse.person.lagArbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 
@@ -76,7 +75,6 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
             )
             vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(
                 eventBus = eventBus,
-                behandlingkilde = revurdering.hendelse.metadata.behandlingkilde,
                 dokumentsporing = null,
                 aktivitetslogg = aktivitetslogg
             )

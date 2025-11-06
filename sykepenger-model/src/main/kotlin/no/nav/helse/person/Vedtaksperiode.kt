@@ -1583,7 +1583,6 @@ internal class Vedtaksperiode private constructor(
     private fun videreførEllerIngenRefusjon(eventBus: EventBus, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg) {
         videreførEksisterendeRefusjonsopplysninger(
             eventBus = eventBus,
-            behandlingkilde = sykepengegrunnlagForArbeidsgiver.metadata.behandlingkilde,
             dokumentsporing = null,
             aktivitetslogg = aktivitetslogg
         )
@@ -2213,7 +2212,7 @@ internal class Vedtaksperiode private constructor(
         søknad: Søknad,
         aktivitetslogg: IAktivitetslogg
     ) {
-        videreførEksisterendeRefusjonsopplysninger(eventBus, søknad.metadata.behandlingkilde, søknad(søknad.metadata.meldingsreferanseId), aktivitetslogg)
+        videreførEksisterendeRefusjonsopplysninger(eventBus, søknad(søknad.metadata.meldingsreferanseId), aktivitetslogg)
         oppdaterHistorikk(eventBus, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
             søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, subsumsjonslogg, skjæringstidspunkt)
         }
@@ -2686,7 +2685,7 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (revurdering.erIkkeRelevantFor(periode)) return sendNyttGodkjenningsbehov(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
         tilstand.igangsettOverstyring(this, eventBus, revurdering, aktivitetsloggMedVedtaksperiodekontekst)
-        videreførEksisterendeOpplysninger(eventBus, revurdering.hendelse.metadata.behandlingkilde, aktivitetsloggMedVedtaksperiodekontekst)
+        videreførEksisterendeOpplysninger(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     private fun sendNyttGodkjenningsbehov(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
@@ -2954,7 +2953,6 @@ internal class Vedtaksperiode private constructor(
 
     internal fun videreførEksisterendeRefusjonsopplysninger(
         eventBus: EventBus,
-        behandlingkilde: Behandlingkilde,
         dokumentsporing: Dokumentsporing?,
         aktivitetslogg: IAktivitetslogg
     ) {
@@ -2980,11 +2978,10 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal fun videreførEksisterendeOpplysninger(eventBus: EventBus, behandlingkilde: Behandlingkilde, aktivitetslogg: IAktivitetslogg) {
+    internal fun videreførEksisterendeOpplysninger(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         lagreGjenbrukbarInntekt(aktivitetslogg)
         videreførEksisterendeRefusjonsopplysninger(
             eventBus = eventBus,
-            behandlingkilde = behandlingkilde,
             dokumentsporing = null,
             aktivitetslogg = aktivitetslogg
         )
