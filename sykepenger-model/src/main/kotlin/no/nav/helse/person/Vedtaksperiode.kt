@@ -910,11 +910,39 @@ internal class Vedtaksperiode private constructor(
 
         val faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(id = UUID.randomUUID(), inntektsdata = inntektsdata, inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver)
 
-        // vi burde egentlig kunne sjekke tilstanden her, men siden inntekt kan komme
-        // samtidig som f.eks. dag- eller refusjonshåndtering fra inntektsmelding så kan tilstanden fremdeles være "Avsluttet" selv om
-        // det er opprettet en ny behandling allerede.
-        // ideelt sett skulle vi hatt bedre kontroll over flyten her
-        sørgForNyBehandlingHvisIkkeÅpen(eventBus, hendelse)
+        when (tilstand) {
+            AvsluttetUtenUtbetaling,
+            Avsluttet,
+            TilUtbetaling -> sørgForNyBehandlingHvisIkkeÅpen(eventBus, hendelse)
+
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering -> {}
+
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            Start,
+            TilAnnullering,
+            TilInfotrygd -> error("Forventer ikke å håndtere refusjon i tilstand $tilstand")
+        }
 
         behandlinger.håndterFaktaavklartInntekt(
             eventBus = eventBus,
