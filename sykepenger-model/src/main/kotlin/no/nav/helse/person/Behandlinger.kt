@@ -36,6 +36,8 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInn
 import no.nav.helse.person.Behandlinger.Behandling.Companion.vurderVarselForGjenbrukAvInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
+import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.bestemDagerUtenNavAnsvar
+import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.bestemSkjæringstidspunkt
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.eksterneIder
 import no.nav.helse.person.Dokumentsporing.Companion.ider
@@ -676,9 +678,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             )
             val sykdomstidslinje = nySykdomstidslinje.subset(oppdatertPeriode)
 
+            val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = bestemSkjæringstidspunkt(nyeSkjæringstidspunkter, sykdomstidslinje, oppdatertPeriode)
+            val dagerUtenNavAnsvar = bestemDagerUtenNavAnsvar(oppdatertPeriode, nyePerioderUtenNavAnsvar)
+
             val nyEndring = gjeldende
                 .copy(
                     dokumentsporing = dokumentsporing,
+                    skjæringstidspunkt = nyttSkjæringstidspunkt,
+                    skjæringstidspunkter = alleSkjæringstidspunkter,
+                    dagerUtenNavAnsvar = dagerUtenNavAnsvar,
                     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: gjeldende.dagerNavOvertarAnsvar,
                     sykdomstidslinje = sykdomstidslinje,
                     periode = oppdatertPeriode,
@@ -689,9 +697,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 eventBus = eventBus,
                 nyEndring = nyEndring,
                 yrkesaktivitet = yrkesaktivitet,
-                aktivitetslogg = aktivitetslogg,
-                beregnSkjæringstidspunkt = nyeSkjæringstidspunkter,
-                beregnetPerioderUtenNavAnsvar = nyePerioderUtenNavAnsvar
+                aktivitetslogg = aktivitetslogg
             )
         }
         internal fun nullstillEgenmeldingsdager(
@@ -702,18 +708,19 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         ) {
             // vi må oppdatere uansett om sykdomstidslinjen er tom, fordi egenmeldingsdager kan ha endret seg og dette påvirker agp
             val nyePerioderUtenNavAnsvar = yrkesaktivitet.beregnPerioderUtenNavAnsvar(egenmeldingsperioder = emptyList())
+            val dagerUtenNavAnsvar = bestemDagerUtenNavAnsvar(periode, nyePerioderUtenNavAnsvar)
 
             val nyEndring = gjeldende
                 .copy(
                     dokumentsporing = dokumentsporing ?: gjeldende.dokumentsporing,
+                    dagerUtenNavAnsvar = dagerUtenNavAnsvar,
                     egenmeldingsdager = emptyList()
                 )
             håndterNyFakta(
                 eventBus = eventBus,
                 nyEndring = nyEndring,
                 yrkesaktivitet = yrkesaktivitet,
-                aktivitetslogg = aktivitetslogg,
-                beregnetPerioderUtenNavAnsvar = nyePerioderUtenNavAnsvar
+                aktivitetslogg = aktivitetslogg
             )
         }
 
@@ -771,12 +778,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             eventBus: EventBus,
             nyEndring: Endring,
             yrkesaktivitet: Yrkesaktivitet,
-            aktivitetslogg: IAktivitetslogg,
-            beregnSkjæringstidspunkt: Skjæringstidspunkter? = null,
-            beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>? = null
+            aktivitetslogg: IAktivitetslogg
         ) {
             // Forsikrer oss at ny endring er Uberegnet og får ny ID og tidsstempel
-            val endringMedNyFakta = nyEndring.kopierUtenBeregning(beregnSkjæringstidspunkt, beregnetPerioderUtenNavAnsvar)
+            val endringMedNyFakta = nyEndring.kopierUtenBeregning()
 
             val beregnetBehandling = { uberegnetTilstand: Tilstand ->
                 gjeldende.forkastUtbetaling(with (yrkesaktivitet) {  eventBus.utbetalingEventBus }, aktivitetslogg)
@@ -993,20 +998,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
             }
 
-            internal fun kopierUtenBeregning(
-                beregnSkjæringstidspunkt: Skjæringstidspunkter? = null,
-                beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>? = null
-            ): Endring {
-                val beregnetSkjæringstidspunkt = beregnSkjæringstidspunkt?.let { bestemSkjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode) }
-                val dagerUtenNavAnsvar = beregnetPerioderUtenNavAnsvar?.let { bestemDagerUtenNavAnsvar(periode, it) }
+            internal fun kopierUtenBeregning(): Endring {
                 return kopierMed(
                     grunnlagsdata = null,
                     utbetaling = null,
                     utbetalingstidslinje = Utbetalingstidslinje(),
                     maksdatoresultat = Maksdatoresultat.IkkeVurdert,
-                    skjæringstidspunkt = beregnetSkjæringstidspunkt?.first ?: this.skjæringstidspunkt,
-                    skjæringstidspunkter = beregnetSkjæringstidspunkt?.second ?: this.skjæringstidspunkter,
-                    dagerUtenNavAnsvar = dagerUtenNavAnsvar ?: this.dagerUtenNavAnsvar,
                     inntektjusteringer = emptyMap()
                 )
             }
