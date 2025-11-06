@@ -37,16 +37,4 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
         aktivitetslogg: IAktivitetslogg
     ) =
         vedtaksperiode.skalHåndtereDagerRevurdering(dager, aktivitetslogg)
-
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, revurdering.hendelse)
-        vedtaksperiode.subsumsjonslogg.logg(`fvl § 35 ledd 1`())
-        revurdering.inngåSomRevurdering(vedtaksperiode, aktivitetslogg)
-        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRevurdering)
-    }
 }

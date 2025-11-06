@@ -45,16 +45,6 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         if (aktivitetslogg.harFunksjonelleFeil()) return vedtaksperiode.forkast(eventBus, dager.hendelse, aktivitetslogg)
     }
 
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)) return
-        vedtaksperiode.sendTrengerArbeidsgiveropplysninger(eventBus)
-    }
-
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)) {
             aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
@@ -94,7 +84,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
-    private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg): Boolean {
+    fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg): Boolean {
         vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, aktivitetslogg)
 
         if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {

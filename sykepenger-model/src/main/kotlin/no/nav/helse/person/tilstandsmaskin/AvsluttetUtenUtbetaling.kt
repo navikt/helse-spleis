@@ -59,34 +59,6 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         vedtaksperiode.behandlinger.bekreftÅpenBehandling(vedtaksperiode.yrkesaktivitet)
     }
 
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, revurdering.hendelse)
-
-        if (vedtaksperiode.skalBehandlesISpeil()) {
-            revurdering.inngåSomEndring(vedtaksperiode, aktivitetslogg)
-            revurdering.loggDersomKorrigerendeSøknad(
-                aktivitetslogg,
-                "Startet omgjøring grunnet korrigerende søknad"
-            )
-            vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(
-                eventBus = eventBus,
-                dokumentsporing = null,
-                aktivitetslogg = aktivitetslogg
-            )
-            aktivitetslogg.info("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden")
-            if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
-                aktivitetslogg.info("mangler nødvendige opplysninger fra arbeidsgiver")
-                return vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerInntektsmelding)
-            }
-        }
-        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerBlokkerendePeriode)
-    }
-
     override fun håndterKorrigerendeInntektsmelding(
         vedtaksperiode: Vedtaksperiode,
         eventBus: EventBus,

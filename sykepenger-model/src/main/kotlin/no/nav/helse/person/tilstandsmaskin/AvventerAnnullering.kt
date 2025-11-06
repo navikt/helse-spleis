@@ -20,8 +20,6 @@ internal data object AvventerAnnullering : Vedtaksperiodetilstand {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {}
-
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         if (vedtaksperiode.behandlinger.utbetales()) {
             aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")

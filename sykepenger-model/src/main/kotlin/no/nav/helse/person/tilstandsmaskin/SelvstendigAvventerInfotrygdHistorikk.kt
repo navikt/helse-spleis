@@ -34,12 +34,4 @@ internal data object SelvstendigAvventerInfotrygdHistorikk : Vedtaksperiodetilst
         aktivitetslogg: IAktivitetslogg
     ) {
     }
-
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-    }
 }

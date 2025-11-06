@@ -15,13 +15,4 @@ internal data object SelvstendigAvventerGodkjenning : Vedtaksperiodetilstand {
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerGodkjenning(eventBus, aktivitetslogg)
     }
-
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.håndterSelvstendigOverstyringIgangsattFørstegangsvurdering(eventBus, revurdering, aktivitetslogg)
-    }
 }

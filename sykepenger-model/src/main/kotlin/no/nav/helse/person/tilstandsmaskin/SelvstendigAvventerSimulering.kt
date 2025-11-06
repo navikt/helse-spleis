@@ -12,15 +12,6 @@ internal data object SelvstendigAvventerSimulering : Vedtaksperiodetilstand {
         trengerSimulering(vedtaksperiode, aktivitetslogg)
     }
 
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.håndterSelvstendigOverstyringIgangsattFørstegangsvurdering(eventBus, revurdering, aktivitetslogg)
-    }
-
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         trengerSimulering(vedtaksperiode, aktivitetslogg)
     }

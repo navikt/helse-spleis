@@ -13,16 +13,6 @@ internal data object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         vedtaksperiode.trengerGodkjenning(eventBus, aktivitetslogg)
     }
 
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpen(eventBus, revurdering.hendelse)
-        vedtaksperiode.håndterOverstyringIgangsattRevurderingArbeidstaker(eventBus, revurdering, aktivitetslogg)
-    }
-
     override fun skalHåndtereDager(
         vedtaksperiode: Vedtaksperiode,
         dager: DagerFraInntektsmelding,

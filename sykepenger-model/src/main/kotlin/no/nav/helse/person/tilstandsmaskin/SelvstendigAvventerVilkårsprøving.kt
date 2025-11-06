@@ -15,13 +15,4 @@ internal data object SelvstendigAvventerVilkårsprøving : Vedtaksperiodetilstan
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerVilkårsgrunnlag(aktivitetslogg)
     }
-
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.håndterSelvstendigOverstyringIgangsattFørstegangsvurdering(eventBus, revurdering, aktivitetslogg)
-    }
 }

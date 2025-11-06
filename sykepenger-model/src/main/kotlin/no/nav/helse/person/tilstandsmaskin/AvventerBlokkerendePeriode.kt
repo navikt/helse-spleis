@@ -62,20 +62,6 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.behandlinger.forkastBeregning(with (vedtaksperiode.yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
-        if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) vedtaksperiode.tilstand(
-            eventBus,
-            aktivitetslogg,
-            AvventerInntektsmelding
-        )
-    }
-
     private fun tilstand(
         vedtaksperiode: Vedtaksperiode,
     ): Tilstand {

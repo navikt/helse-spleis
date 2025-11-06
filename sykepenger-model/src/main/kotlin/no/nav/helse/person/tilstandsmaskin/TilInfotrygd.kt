@@ -20,13 +20,4 @@ internal data object TilInfotrygd : Vedtaksperiodetilstand {
         dager: DagerFraInntektsmelding,
         aktivitetslogg: IAktivitetslogg
     ) {}
-
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        throw IllegalStateException("Revurdering håndteres av en periode i til_infotrygd")
-    }
 }

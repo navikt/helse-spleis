@@ -17,13 +17,4 @@ internal data object AvventerHistorikk : Vedtaksperiodetilstand {
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerYtelser(aktivitetslogg)
     }
-
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.håndterOverstyringIgangsattFørstegangsvurdering(eventBus, revurdering, aktivitetslogg)
-    }
 }

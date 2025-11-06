@@ -14,6 +14,7 @@ import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
+import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-12 ledd 1 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-12 ledd 2`
 import no.nav.helse.etterlevelse.`§ 8-13 ledd 1`
@@ -2674,11 +2675,158 @@ internal class Vedtaksperiode private constructor(
     internal fun igangsettOverstyring(eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (revurdering.erIkkeRelevantFor(periode)) return sendNyttGodkjenningsbehov(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
-        if (behandlinger.åpenForEndring()) {
-            behandlinger.oppdaterSkjæringstidspunkt(person.skjæringstidspunkter, yrkesaktivitet.perioderUtenNavAnsvar)
-        }
-        tilstand.igangsettOverstyring(this, eventBus, revurdering, aktivitetsloggMedVedtaksperiodekontekst)
+
+        // 1. melde seg inn
+        // 2. åpne opp ny behandling
+        // 3. justere skjæringstidspunkt / ventetid
+        // 4. endre tilstand
+        // 5. gjøre eventuelt noe custom
+        nyBehandlingHvisAvsluttet(eventBus, revurdering.hendelse)
+
         videreførEksisterendeOpplysninger(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
+
+        when (val t = tilstand) {
+            SelvstendigStart -> {
+                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, when {
+                    !person.infotrygdhistorikk.harHistorikk() -> SelvstendigAvventerInfotrygdHistorikk
+                    else -> SelvstendigAvventerBlokkerendePeriode
+                })
+            }
+
+            Start -> {
+                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, when {
+                    !person.infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
+                    else -> when (yrkesaktivitet.yrkesaktivitetstype) {
+                        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> AvventerInntektsmelding
+                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                        Behandlingsporing.Yrkesaktivitet.Frilans -> AvventerBlokkerendePeriode
+
+                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> error("Selvstendig skal ikke være her")
+                    }
+                })
+            }
+
+            is AvventerInntektsmelding -> {
+                if (t.vurderOmKanGåVidere(this, eventBus, aktivitetsloggMedVedtaksperiodekontekst)) return
+                sendTrengerArbeidsgiveropplysninger(eventBus)
+            }
+
+            AvsluttetUtenUtbetaling -> {
+                if (skalBehandlesISpeil()) {
+                    revurdering.inngåSomEndring(this, aktivitetsloggMedVedtaksperiodekontekst)
+                    revurdering.loggDersomKorrigerendeSøknad(
+                        aktivitetsloggMedVedtaksperiodekontekst,
+                        "Startet omgjøring grunnet korrigerende søknad"
+                    )
+                    videreførEksisterendeRefusjonsopplysninger(
+                        eventBus = eventBus,
+                        dokumentsporing = null,
+                        aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst
+                    )
+                    aktivitetsloggMedVedtaksperiodekontekst.info("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden")
+                    if (måInnhenteInntektEllerRefusjon()) {
+                        aktivitetsloggMedVedtaksperiodekontekst.info("mangler nødvendige opplysninger fra arbeidsgiver")
+                        return tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
+                    }
+                }
+                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
+            }
+
+            SelvstendigAvsluttet,
+            SelvstendigTilUtbetaling -> {
+                revurdering.inngåSomRevurdering(this, aktivitetsloggMedVedtaksperiodekontekst)
+                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
+            }
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving -> {
+                revurdering.inngåSomEndring(this, aktivitetsloggMedVedtaksperiodekontekst)
+                behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
+                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
+            }
+
+            Avsluttet,
+            TilUtbetaling,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikkRevurdering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøvingRevurdering,
+            AvventerRevurdering -> {
+                behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
+                revurdering.inngåSomRevurdering(this, aktivitetsloggMedVedtaksperiodekontekst)
+                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerRevurdering)
+            }
+
+            AvventerAOrdningen -> {
+                if (måInnhenteInntektEllerRefusjon()) return
+                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
+            }
+
+            AvventerAnnullering,
+            AvventerInfotrygdHistorikk,
+            TilAnnullering,
+            SelvstendigAvventerInfotrygdHistorikk -> {}
+
+            AvventerBlokkerendePeriode -> {
+                behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
+                if (måInnhenteInntektEllerRefusjon()) tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
+            }
+
+            AvventerGodkjenning,
+            AvventerHistorikk,
+            AvventerSimulering,
+            AvventerVilkårsprøving -> {
+                revurdering.inngåSomEndring(this, aktivitetsloggMedVedtaksperiodekontekst)
+                behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
+                if (måInnhenteInntektEllerRefusjon()) return tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
+                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
+            }
+
+            TilInfotrygd -> error("Revurdering håndteres av en periode i til_infotrygd")
+        }
+    }
+
+    private fun nyBehandlingHvisAvsluttet(eventBus: EventBus, hendelse: Hendelse) {
+        when (tilstand) {
+            Avsluttet,
+            TilUtbetaling,
+            AvsluttetUtenUtbetaling,
+            SelvstendigAvsluttet,
+            SelvstendigTilUtbetaling,
+            AvventerGodkjenningRevurdering -> {
+                sørgForNyBehandlingHvisIkkeÅpen(eventBus, hendelse)
+                subsumsjonslogg.logg(`fvl § 35 ledd 1`())
+                behandlinger.oppdaterSkjæringstidspunkt(person.skjæringstidspunkter, yrkesaktivitet.perioderUtenNavAnsvar)
+            }
+
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            Start -> {
+                behandlinger.oppdaterSkjæringstidspunkt(person.skjæringstidspunkter, yrkesaktivitet.perioderUtenNavAnsvar)
+            }
+            TilAnnullering -> {}
+            TilInfotrygd -> error("Forventer ikke å håndtere overstyring når vi skal til infotrygd")
+        }
     }
 
     private fun sendNyttGodkjenningsbehov(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
@@ -2875,53 +3023,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode) = behandlinger.harSammeUtbetalingSom(annenVedtaksperiode)
-
-    internal fun håndterOverstyringIgangsattRevurderingArbeidstaker(
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        håndterOverstyringIgangsattRevurdering(eventBus, revurdering, aktivitetslogg, AvventerRevurdering)
-    }
-
-    internal fun håndterOverstyringIgangsattRevurderingSelvstendig(
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        håndterOverstyringIgangsattRevurdering(eventBus, revurdering, aktivitetslogg, SelvstendigAvventerBlokkerendePeriode)
-    }
-
-    private fun håndterOverstyringIgangsattRevurdering(
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg,
-        nesteTilstand: Vedtaksperiodetilstand
-    ) {
-        revurdering.inngåSomRevurdering(this, aktivitetslogg)
-        tilstand(eventBus, aktivitetslogg, nesteTilstand)
-    }
-
-    internal fun håndterOverstyringIgangsattFørstegangsvurdering(
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        revurdering.inngåSomEndring(this, aktivitetslogg)
-        behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
-        if (måInnhenteInntektEllerRefusjon()) return tilstand(eventBus, aktivitetslogg, AvventerInntektsmelding)
-        tilstand(eventBus, aktivitetslogg, AvventerBlokkerendePeriode)
-    }
-
-    internal fun håndterSelvstendigOverstyringIgangsattFørstegangsvurdering(
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        revurdering.inngåSomEndring(this, aktivitetslogg)
-        behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
-        tilstand(eventBus, aktivitetslogg, SelvstendigAvventerBlokkerendePeriode)
-    }
 
     internal fun sikreRefusjonsopplysningerHvisTomt(eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         if (!påminnelse.når(Flagg("fullRefusjon"))) return

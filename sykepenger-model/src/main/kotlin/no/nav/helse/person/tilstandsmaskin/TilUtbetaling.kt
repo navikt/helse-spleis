@@ -10,15 +10,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal data object TilUtbetaling : Vedtaksperiodetilstand {
     override val type = TilstandType.TIL_UTBETALING
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, revurdering.hendelse)
-        vedtaksperiode.håndterOverstyringIgangsattRevurderingArbeidstaker(eventBus, revurdering, aktivitetslogg)
-    }
 
     override fun håndterKorrigerendeInntektsmelding(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.nyBehandling(eventBus, dager.hendelse)

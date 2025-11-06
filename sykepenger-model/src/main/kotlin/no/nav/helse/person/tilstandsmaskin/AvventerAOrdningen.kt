@@ -17,14 +17,4 @@ internal data object AvventerAOrdningen : Vedtaksperiodetilstand {
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
     }
-
-    override fun igangsettOverstyring(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        revurdering: Revurderingseventyr,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) return
-        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerBlokkerendePeriode)
-    }
 }

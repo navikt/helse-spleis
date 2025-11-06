@@ -12,8 +12,6 @@ internal data object TilAnnullering : Vedtaksperiodetilstand {
     override val type = TilstandType.TIL_ANNULLERING
     val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-    override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {}
-
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående annullering")
     }
