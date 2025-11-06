@@ -43,6 +43,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertSkjæringstidspunktOgVenteperiode
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -517,14 +518,14 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-        assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
         val førsteUtbetalingsdag = inspektør.utbetaling(0).arbeidsgiverOppdrag[0].fom
         assertEquals(1.januar, førsteUtbetalingsdag)
         håndterOverstyrTidslinje((1.januar til 16.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
 
         assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-        assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
         håndterYtelser(1.vedtaksperiode)
         val førsteUtbetalingsdagEtterOverstyring = inspektør.utbetaling(1).arbeidsgiverOppdrag[0].fom

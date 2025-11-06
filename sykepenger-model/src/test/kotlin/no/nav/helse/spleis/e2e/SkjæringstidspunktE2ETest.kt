@@ -54,10 +54,8 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             nullstillTilstandsendringer()
 
             håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
-            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
         }
     }
 
@@ -79,10 +77,8 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             nullstillTilstandsendringer()
 
             håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
-            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
         }
     }
 
@@ -93,10 +89,8 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             forlengVedtak(februar)
 
             håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
-            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
             assertVarsler(listOf(Varselkode.RV_IV_7), 1.vedtaksperiode.filter())
         }
     }
@@ -108,10 +102,8 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             nyttVedtak(17.januar til 31.januar, førsteFraværsdag = 1.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
 
             håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
-            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
             assertVarsler(listOf(Varselkode.RV_IV_7), 2.vedtaksperiode.filter())
         }
     }
@@ -124,10 +116,8 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
 
             håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
 
-            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-            assertEquals(listOf(2.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(listOf(2.januar til 16.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 16.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 2.januar, listOf(2.januar til 16.januar))
         }
     }
 
@@ -139,10 +129,8 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
             håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
-            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
             assertVarsler(listOf(Varselkode.RV_IV_7), 1.vedtaksperiode.filter())
         }
     }

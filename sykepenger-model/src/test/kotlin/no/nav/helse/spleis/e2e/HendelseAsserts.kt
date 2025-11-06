@@ -103,6 +103,18 @@ internal fun AbstractEndToEndTest.assertTilstand(
     }
 }
 
+internal fun AbstractEndToEndTest.assertSkjæringstidspunktOgVenteperiode(
+    vedtaksperiodeIdInnhenter: IdInnhenter,
+    forventetSkjæringstidspunkt: LocalDate,
+    forventetVenteperiode: List<Periode>,
+    forventetEgenmeldingsdager: List<Periode> = emptyList(),
+    orgnummer: String = a1
+) {
+    assertEquals(forventetSkjæringstidspunkt, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter))
+    assertEquals(forventetVenteperiode, inspektør(orgnummer).venteperiode(vedtaksperiodeIdInnhenter))
+    assertEquals(forventetEgenmeldingsdager, inspektør(orgnummer).egenmeldingsdager(vedtaksperiodeIdInnhenter))
+}
+
 internal fun AbstractEndToEndTest.assertSisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter, tilstand: TilstandType, orgnummer: String = a1, errortekst: (() -> String)? = null) {
     assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeIdInnhenter.id(orgnummer)]?.last(), errortekst)
 }

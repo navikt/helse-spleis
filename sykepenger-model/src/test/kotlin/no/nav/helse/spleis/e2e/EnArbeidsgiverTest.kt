@@ -56,7 +56,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
 
             assertEquals(6.juli til 18.august, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
             assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertEquals(listOf(31.juli til 15.august), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 31.juli, listOf(31.juli til 15.august))
             assertEquals(listOf(31.juli, 8.juli), inspektør.skjæringstidspunkter(2.vedtaksperiode))
 
             håndterInntektsmelding(
@@ -69,8 +69,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
             assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
             assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertEquals(listOf(31.juli til 15.august), inspektør.venteperiode(2.vedtaksperiode))
-            assertEquals(31.juli, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 31.juli, listOf(31.juli til 15.august))
             assertEquals(listOf(31.juli, 8.juli), inspektør.skjæringstidspunkter(2.vedtaksperiode))
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -83,8 +82,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
 
             håndterOverstyrTidslinje((14.juli til 6.august).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
             assertEquals("ARG SSSSSJJ JJJJJJJ JJJJJJJ JSSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertEquals(listOf(25.juni til 5.juli, 8.juli til 12.juli), inspektør.venteperiode(2.vedtaksperiode))
-            assertEquals(31.juli, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 31.juli, listOf(25.juni til 5.juli, 8.juli til 12.juli))
             assertEquals(listOf(31.juli, 8.juli), inspektør.skjæringstidspunkter(2.vedtaksperiode))
             håndterYtelser(2.vedtaksperiode)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
@@ -115,9 +113,9 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
 
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(2.vedtaksperiode))
-            assertEquals(listOf(19.februar til 6.mars), inspektør.venteperiode(3.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+            assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 19.februar, listOf(19.februar til 6.mars))
 
             assertEquals(4, inspektør.antallUtbetalinger)
             val januar = inspektør.utbetaling(0)

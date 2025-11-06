@@ -95,9 +95,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
 
-            assertEquals(emptyList<Nothing>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
-            assertEquals(arbeidsgiverperioden, inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(arbeidsgiverperioden, inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, arbeidsgiverperioden)
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, arbeidsgiverperioden)
         }
     }
 
@@ -176,17 +175,15 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             nyttVedtak(1.januar til fredag(19.januar))
             håndterSøknad(Sykdom(15.februar, 20.februar, 100.prosent), egenmeldinger = listOf(mandag(5.februar).somPeriode()))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(2.vedtaksperiode))
-            assertEquals(listOf(5.februar.somPeriode()), inspektør.egenmeldingsdager(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 15.februar, listOf(1.januar til 16.januar), listOf(5.februar.somPeriode()))
 
             val forespørselPgaEgenmeldingsdager = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode }
-            assertEquals(listOf(5.februar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).egenmeldingsdager)
             assertEquals(setOf(Inntekt, Refusjon), forespørselPgaEgenmeldingsdager.opplysninger.forespurteOpplysninger)
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.clear()
 
             håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)))
-            assertEquals(listOf(15.februar til 20.februar), inspektør.venteperiode(2.vedtaksperiode))
-            assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 15.februar, listOf(15.februar til 20.februar))
             assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
             håndterYtelser(1.vedtaksperiode)
@@ -347,14 +344,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(3.januar, 18.januar, 50.prosent), egenmeldinger = listOf(1.januar til 2.januar))
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(listOf(1.januar til 2.januar), inspektør.egenmeldingsdager(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), listOf(1.januar til 2.januar))
             assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
 
             håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), IkkeNyArbeidsgiverperiode)
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertEquals(listOf(3.januar til 18.januar), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar))
             assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
 
             assertEquals(50.prosent, (inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje[3.januar] as Dag.Sykedag).grad)
@@ -382,14 +377,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSøknad(Sykdom(3.januar, 18.januar, 69.prosent), egenmeldinger = listOf(1.januar til 2.januar))
             observatør.assertEtterspurt(1.vedtaksperiode, Inntekt::class, Refusjon::class, Arbeidsgiverperiode::class)
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(listOf(1.januar til 2.januar), inspektør.egenmeldingsdager(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), listOf(1.januar til 2.januar))
             assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
 
             håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), IkkeUtbetaltArbeidsgiverperiode(ManglerOpptjening))
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertEquals(listOf(3.januar til 18.januar), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar))
             assertEquals(listOf(3.januar til 18.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
             assertTrue(inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.filterIsInstance<Dag.Sykedag>().all { it.grad == 69.prosent })
 

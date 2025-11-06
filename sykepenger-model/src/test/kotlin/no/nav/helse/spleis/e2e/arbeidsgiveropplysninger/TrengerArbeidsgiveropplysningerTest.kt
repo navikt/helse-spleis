@@ -40,6 +40,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertSkjæringstidspunktOgVenteperiode
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -158,14 +159,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(6.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar til 5.januar))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
-        assertEquals(listOf(1.januar til 5.januar), inspektør.egenmeldingsdager(1.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 6.januar, listOf(1.januar til 16.januar), listOf(1.januar til 5.januar))
 
         håndterSøknad(Sykdom(22.januar, 25.januar, 100.prosent), egenmeldinger = listOf(21.januar til 21.januar))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(2.vedtaksperiode))
-        assertEquals(listOf(21.januar til 21.januar), inspektør.egenmeldingsdager(2.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 22.januar, listOf(1.januar til 16.januar), listOf(21.januar til 21.januar))
 
         håndterArbeidsgiveropplysninger(
             listOf(6.januar til 17.januar),
@@ -173,12 +172,9 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertEquals(listOf(6.januar til 17.januar, 22.januar til 25.januar), inspektør.venteperiode(1.vedtaksperiode))
-        assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
-
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertEquals(listOf(6.januar til 17.januar, 22.januar til 25.januar), inspektør.venteperiode(2.vedtaksperiode))
-        assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(2.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 6.januar, listOf(6.januar til 17.januar, 22.januar til 25.januar))
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 22.januar, listOf(6.januar til 17.januar, 22.januar til 25.januar))
 
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }

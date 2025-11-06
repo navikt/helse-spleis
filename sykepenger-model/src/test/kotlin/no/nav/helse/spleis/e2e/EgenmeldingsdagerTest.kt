@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
@@ -10,7 +9,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class EgenmeldingsdagerTest: AbstractDslTest() {
@@ -21,8 +19,8 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
             håndterSøknad(3.januar til 18.januar)
             nullstillTilstandsendringer()
             håndterSøknad(19.januar til 31.januar, egenmeldinger = listOf(1.januar til 3.januar))
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), listOf(1.januar til 3.januar))
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
@@ -37,25 +35,15 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
             håndterSøknad(5.mai til 9.mai, egenmeldinger = listOf(1.mai til 2.mai))
             håndterSøknad(15.mai til 19.mai)
             håndterSøknad(25.mai til 29.mai, egenmeldinger = listOf(24.mai til 24.mai))
-            with(4.vedtaksperiode) {
-                assertEquals(listOf(1.mai til 2.mai, 5.mai til 9.mai, 15.mai til 19.mai, 24.mai til 27.mai), inspektør.venteperiode(this))
-            }
+
+            assertSkjæringstidspunktOgVenteperiode(4.vedtaksperiode, 25.mai, listOf(1.mai til 2.mai, 5.mai til 9.mai, 15.mai til 19.mai, 24.mai til 27.mai), listOf(24.mai til 24.mai))
 
             håndterInntektsmelding(arbeidsgiverperioder = listOf(15.mai til 19.mai, 25.mai til 29.mai))
-            with(1.vedtaksperiode) {
-                assertEquals(listOf(1.januar til 2.januar), inspektør.egenmeldingsdager(this))
-                assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(this))
-            }
-            with(2.vedtaksperiode) {
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
-            }
-            with(3.vedtaksperiode) {
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
-            }
-            with(4.vedtaksperiode) {
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
-                assertEquals(listOf(5.mai til 9.mai, 15.mai til 19.mai, 25.mai til 29.mai), inspektør.venteperiode(this))
-            }
+
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), listOf(1.januar til 2.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 5.mai, listOf(5.mai til 9.mai, 15.mai til 19.mai, 25.mai til 29.mai))
+            assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 15.mai, listOf(5.mai til 9.mai, 15.mai til 19.mai, 25.mai til 29.mai))
+            assertSkjæringstidspunktOgVenteperiode(4.vedtaksperiode, 25.mai, listOf(5.mai til 9.mai, 15.mai til 19.mai, 25.mai til 29.mai))
         }
     }
 
@@ -65,19 +53,13 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
             håndterSøknad(3.januar til 9.januar, egenmeldinger = listOf(1.januar til 2.januar))
             håndterSøknad(15.januar til 31.januar, egenmeldinger = listOf(14.januar til 14.januar))
 
-            with(2.vedtaksperiode) {
-                assertEquals(listOf(1.januar til 9.januar, 14.januar til 20.januar), inspektør.venteperiode(this))
-            }
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 9.januar), listOf(1.januar til 2.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 15.januar, listOf(1.januar til 9.januar, 14.januar til 20.januar), listOf(14.januar til 14.januar))
 
             håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 15.januar)
-            with(1.vedtaksperiode) {
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
-                assertEquals(listOf(3.januar til 9.januar, 15.januar til 23.januar), inspektør.venteperiode(this))
-            }
-            with(2.vedtaksperiode) {
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
-                assertEquals(listOf(3.januar til 9.januar, 15.januar til 23.januar), inspektør.venteperiode(this))
-            }
+
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 9.januar, 15.januar til 23.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 15.januar, listOf(3.januar til 9.januar, 15.januar til 23.januar))
         }
     }
 
@@ -91,36 +73,34 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
 
             with(1.vedtaksperiode) {
                 assertTilstander(this, AVSLUTTET_UTEN_UTBETALING)
-                assertEquals(listOf(1.januar til 2.januar), inspektør.egenmeldingsdager(this))
+                assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(1.januar til 2.januar, 5.januar til 9.januar), listOf(1.januar til 2.januar))
             }
 
             with(2.vedtaksperiode) {
                 assertTilstander(this, AVSLUTTET_UTEN_UTBETALING)
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
+                assertSkjæringstidspunktOgVenteperiode(this, 15.januar, listOf(1.januar til 2.januar, 5.januar til 9.januar, 15.januar til 19.januar))
             }
 
             with(3.vedtaksperiode) {
                 assertTilstander(this, AVVENTER_INNTEKTSMELDING)
-                assertEquals(listOf(24.januar til 24.januar), inspektør.egenmeldingsdager(this))
-                assertEquals(listOf(1.januar til 2.januar, 5.januar til 9.januar, 15.januar til 19.januar, 24.januar til 27.januar), inspektør.venteperiode(this))
+                assertSkjæringstidspunktOgVenteperiode(this, 25.januar, listOf(1.januar til 2.januar, 5.januar til 9.januar, 15.januar til 19.januar, 24.januar til 27.januar), listOf(24.januar til 24.januar))
             }
 
             håndterPåminnelse(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("nullstillEgenmeldingsdager"))
 
             with(1.vedtaksperiode) {
                 assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
+                assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(5.januar til 9.januar, 15.januar til 19.januar, 25.januar til 29.januar))
             }
 
             with(2.vedtaksperiode) {
                 assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
+                assertSkjæringstidspunktOgVenteperiode(this, 15.januar, listOf(5.januar til 9.januar, 15.januar til 19.januar, 25.januar til 29.januar))
             }
 
             with(3.vedtaksperiode) {
                 assertTilstander(this, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
-                assertEquals(listOf(5.januar til 9.januar, 15.januar til 19.januar, 25.januar til 29.januar), inspektør.venteperiode(this))
+                assertSkjæringstidspunktOgVenteperiode(this, 25.januar, listOf(5.januar til 9.januar, 15.januar til 19.januar, 25.januar til 29.januar))
             }
         }
     }
@@ -135,40 +115,34 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
 
             with(1.vedtaksperiode) {
                 assertTilstander(this, AVSLUTTET_UTEN_UTBETALING)
-                assertEquals(listOf(1.januar til 4.januar), inspektør.egenmeldingsdager(this))
-                assertEquals(listOf(1.januar til 14.januar), inspektør.venteperiode(this))
+                assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(1.januar til 14.januar), listOf(1.januar til 4.januar))
             }
 
             with(2.vedtaksperiode) {
                 assertTilstander(this, AVSLUTTET_UTEN_UTBETALING)
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
-                assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(this))
+                assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(1.januar til 16.januar))
             }
 
             with(3.vedtaksperiode) {
                 assertTilstander(this, AVVENTER_INNTEKTSMELDING)
-                assertEquals(emptyList<Nothing>(), inspektør.egenmeldingsdager(this))
-                assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(this))
+                assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(1.januar til 16.januar))
             }
 
             håndterPåminnelse(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, flagg = setOf("nullstillEgenmeldingsdager"))
 
             with(1.vedtaksperiode) {
                 assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
-                assertEquals(listOf(5.januar til 20.januar), inspektør.venteperiode(this))
+                assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(5.januar til 20.januar))
             }
 
             with(2.vedtaksperiode) {
                 assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
-                assertEquals(listOf(5.januar til 20.januar), inspektør.venteperiode(this))
+                assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(5.januar til 20.januar))
             }
 
             with(3.vedtaksperiode) {
                 assertTilstander(this, AVVENTER_INNTEKTSMELDING)
-                assertEquals(emptyList<Periode>(), inspektør.egenmeldingsdager(this))
-                assertEquals(listOf(5.januar til 20.januar), inspektør.venteperiode(this))
+                assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(5.januar til 20.januar))
             }
         }
     }

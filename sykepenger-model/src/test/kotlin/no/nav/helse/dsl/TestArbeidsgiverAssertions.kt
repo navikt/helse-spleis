@@ -50,6 +50,12 @@ internal class TestArbeidsgiverAssertions(
         }
     }
 
+    internal fun assertSkjæringstidspunktOgVenteperiode(id: UUID, forventetSkjæringstidspunkt: LocalDate, forventetVenteperiode: List<Periode>, forventetEgenmeldinger: List<Periode> = emptyList()) {
+        assertEquals(forventetSkjæringstidspunkt, inspektør.skjæringstidspunkt(id))
+        assertEquals(forventetVenteperiode, inspektør.venteperiode(id))
+        assertEquals(forventetEgenmeldinger, inspektør.egenmeldingsdager(id))
+    }
+
     internal fun assertSkjæringstidspunkt(vararg skjæringstidspunkt: LocalDate) {
         assertEquals(skjæringstidspunkt.toSet(), personInspektør.vilkårsgrunnlagHistorikk.aktiveSpleisSkjæringstidspunkt)
     }

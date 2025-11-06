@@ -172,6 +172,10 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertSisteTilstand(id, tilstand, errortekst)
     }
 
+    protected fun TestPerson.TestArbeidsgiver.assertSkjæringstidspunktOgVenteperiode(id: UUID, forventetSkjæringstidspunkt: LocalDate, forventetVenteperiode: List<Periode>, forventetEgenmeldinger: List<Periode> = emptyList()) {
+        testArbeidsgiverAsserter.assertSkjæringstidspunktOgVenteperiode(id, forventetSkjæringstidspunkt, forventetVenteperiode, forventetEgenmeldinger)
+    }
+
     protected fun TestPerson.TestArbeidsgiver.assertUtbetalingsbeløp(
         vedtaksperiodeId: UUID,
         forventetArbeidsgiverbeløp: Int,

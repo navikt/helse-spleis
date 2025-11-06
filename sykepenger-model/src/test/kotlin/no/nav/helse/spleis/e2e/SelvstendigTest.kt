@@ -59,7 +59,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_SØ_2), 1.vedtaksperiode.filter())
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         }
     }
 
@@ -275,7 +275,7 @@ internal class SelvstendigTest : AbstractDslTest() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
 
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
         }
     }
@@ -355,7 +355,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                 SELVSTENDIG_TIL_UTBETALING,
                 SELVSTENDIG_AVSLUTTET
             )
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
         }
     }
@@ -407,7 +407,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                 SELVSTENDIG_TIL_UTBETALING,
                 SELVSTENDIG_AVSLUTTET
             )
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
         }
     }
@@ -419,9 +419,9 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(mars)
 
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
             assertTilstander(2.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
-            assertEquals(listOf(1.mars til 16.mars), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.mars, listOf(1.mars til 16.mars))
 
         }
     }

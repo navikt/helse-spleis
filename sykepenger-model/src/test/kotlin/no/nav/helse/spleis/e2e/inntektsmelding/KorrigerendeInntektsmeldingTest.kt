@@ -24,6 +24,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertSkjæringstidspunktOgVenteperiode
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
@@ -65,7 +66,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
 
@@ -92,7 +93,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
         håndterYtelser(1.vedtaksperiode)
@@ -111,7 +112,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Korrigerende inntektsmelding som strekker agp fremover`() {
         nyttVedtak(januar)
         håndterInntektsmelding(listOf(2.januar til 17.januar))
-        assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -165,12 +166,9 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
         assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(emptyList<Nothing>(), inspektør.venteperiode(1.vedtaksperiode))
-        assertEquals(1.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertEquals(listOf(1.februar til 16.februar), inspektør.venteperiode(2.vedtaksperiode))
-        assertEquals(1.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
-        assertEquals(listOf(1.februar til 16.februar), inspektør.venteperiode(3.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, emptyList<Nothing>())
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.februar, listOf(1.februar til 16.februar))
+        assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 1.februar, listOf(1.februar til 16.februar))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -201,12 +199,9 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
         assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(emptyList<Nothing>(), inspektør.venteperiode(1.vedtaksperiode))
-        assertEquals(1.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertEquals(listOf(1.februar til 16.februar), inspektør.venteperiode(2.vedtaksperiode))
-        assertEquals(1.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
-        assertEquals(listOf(1.februar til 16.februar), inspektør.venteperiode(3.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, emptyList<Nothing>())
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.februar, listOf(1.februar til 16.februar))
+        assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 1.februar, listOf(1.februar til 16.februar))
     }
 
     @Test
@@ -354,15 +349,14 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
     fun `Endring i siste del av agp`() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         nyttVedtak(10.januar til 31.januar, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        val agpFør = inspektør.venteperiode(2.vedtaksperiode)
+
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 10.januar, listOf(1.januar til 5.januar, 10.januar til 20.januar))
+
         håndterInntektsmelding(
             listOf(12.januar til 27.januar)
         )
-        val agpEtter = inspektør.venteperiode(2.vedtaksperiode)
 
-        assertEquals(listOf(1.januar til 5.januar, 10.januar til 20.januar), agpFør)
-        assertEquals(listOf(1.januar til 5.januar, 12.januar til 22.januar), agpEtter)
-
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 12.januar, listOf(1.januar til 5.januar, 12.januar til 22.januar))
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -414,7 +408,13 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, listOf(10.januar til 25.januar))
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 10.januar, listOf(10.januar til 25.januar))
+
         håndterInntektsmelding(listOf(1.februar til 16.februar))
+
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, emptyList<Nothing>())
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.februar, listOf(1.februar til 16.februar))
 
         assertEquals("AAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)

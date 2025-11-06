@@ -5,7 +5,6 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -97,8 +96,8 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(setOf(1.januar, 10.mars), inspektør.vilkårsgrunnlaghistorikk().aktiveSpleisSkjæringstidspunkt)
 
-            assertEquals(emptyList<Periode>(), inspektør.venteperiode(1.vedtaksperiode))
-            assertEquals(emptyList<Periode>(), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, emptyList())
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 10.mars, emptyList())
 
             håndterYtelser(2.vedtaksperiode)
             inspektør.utbetaling(1).also { utbetalinginspektør ->

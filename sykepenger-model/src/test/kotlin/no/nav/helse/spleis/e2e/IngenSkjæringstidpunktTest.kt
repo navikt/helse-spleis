@@ -203,18 +203,15 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
             håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent))
 
-            assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(januar, inspektør.periode(1.vedtaksperiode))
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
-            assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 5.februar, listOf(1.januar til 16.januar))
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
-            assertEquals(24.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
             assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
-            assertEquals(listOf(24.februar til 28.februar), inspektør.venteperiode(3.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 24.februar, listOf(24.februar til 28.februar))
             assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
@@ -232,18 +229,15 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
             håndterSøknad(Sykdom(24.februar, 12.mars, 100.prosent))
 
-            assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(januar, inspektør.periode(1.vedtaksperiode))
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
-            assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 5.februar, listOf(1.januar til 16.januar))
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
-            assertEquals(24.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
             assertEquals(24.februar til 12.mars, inspektør.periode(3.vedtaksperiode))
-            assertEquals(listOf(24.februar til 11.mars), inspektør.venteperiode(3.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 24.februar, listOf(24.februar til 11.mars))
 
             assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
@@ -262,18 +256,15 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
             håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent), Ferie(24.februar, 28.februar))
 
-            assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(januar, inspektør.periode(1.vedtaksperiode))
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
-            assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 5.februar, listOf(1.januar til 16.januar))
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
-            assertEquals(24.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
             assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
-            assertEquals(emptyList<Any>(), inspektør.venteperiode(3.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 24.februar, emptyList())
             assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }

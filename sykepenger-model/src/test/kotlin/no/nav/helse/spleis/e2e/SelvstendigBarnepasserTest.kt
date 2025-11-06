@@ -103,7 +103,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
 
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
         }
     }
@@ -185,7 +185,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 SELVSTENDIG_TIL_UTBETALING,
                 SELVSTENDIG_AVSLUTTET
             )
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
         }
     }
@@ -238,7 +238,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 SELVSTENDIG_TIL_UTBETALING,
                 SELVSTENDIG_AVSLUTTET
             )
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
         }
     }
@@ -250,9 +250,9 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(mars, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
 
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
-            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
             assertTilstander(2.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
-            assertEquals(listOf(1.mars til 16.mars), inspektør.venteperiode(2.vedtaksperiode))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.mars, listOf(1.mars til 16.mars))
 
         }
     }

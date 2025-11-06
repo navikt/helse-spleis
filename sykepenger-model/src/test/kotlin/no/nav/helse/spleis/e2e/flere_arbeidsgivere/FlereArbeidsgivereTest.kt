@@ -717,13 +717,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterSøknad(10.januar til 31.januar)
             håndterInntektsmelding(listOf(1.januar til 1.januar, 8.januar til 22.januar), beregnetInntekt = a1Inntekt)
-            assertEquals(listOf(1.januar til 1.januar, 8.januar til 22.januar), inspektør.venteperioder { 1.vedtaksperiode })
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 8.januar, listOf(1.januar til 1.januar, 8.januar til 22.januar))
         }
 
         a2 {
             håndterSøknad(10.januar til 31.januar)
             håndterInntektsmelding(listOf(8.januar til 23.januar), beregnetInntekt = a2Inntekt, refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()))
-            assertEquals(listOf(8.januar til 23.januar), inspektør.venteperiode { 1.vedtaksperiode })
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 8.januar, listOf(8.januar til 23.januar))
         }
 
         a1 {

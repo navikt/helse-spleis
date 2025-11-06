@@ -65,6 +65,7 @@ import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.spleis.e2e.assertInntektshistorikkForDato
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertSkjæringstidspunktOgVenteperiode
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -128,11 +129,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_A_ORDNINGEN)
 
         assertEquals("UUUUUGG UUUUUGG UUAAARR AAAAARR AAA", inspektør.sykdomstidslinje.toShortString())
-        assertEquals(emptyList<Nothing>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
-        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(1.vedtaksperiode))
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(2.vedtaksperiode))
-        assertEquals(17.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, arbeidsgiverperioder)
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 17.januar, arbeidsgiverperioder)
     }
 
     @Test
@@ -164,9 +162,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
 
-        assertEquals(emptyList<Nothing>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
-        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(1.vedtaksperiode))
-        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(2.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 7.januar, arbeidsgiverperioder)
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 7.januar, arbeidsgiverperioder)
     }
 
     @Test
@@ -195,9 +192,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertVarsler(listOf(Varselkode.RV_IV_10, RV_IM_4,  RV_IM_24), 1.vedtaksperiode.filter())
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-
-        assertEquals(emptyList<Nothing>(), inspektør.egenmeldingsdager(1.vedtaksperiode))
-        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(1.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 7.januar, arbeidsgiverperioder)
     }
 
     @Test
@@ -658,7 +653,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
-        assertEquals(listOf(1.januar til 15.januar, 22.januar til 22.januar), inspektør.venteperioder(2.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 22.januar, listOf(1.januar til 15.januar, 22.januar til 22.januar))
         assertEquals("PNNNNHH NNNNNHH N", inspektør.utbetalingstidslinjer(2.vedtaksperiode).toString())
 
         assertVarsler(emptyList(), 2.vedtaksperiode.filter())
@@ -681,7 +676,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(mandag(22.januar), 31.januar, 100.prosent))
         assertEquals(4.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
-        assertEquals(listOf(4.januar til fredag(19.januar)), inspektør.venteperiode(1.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 4.januar, listOf(4.januar til fredag(19.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         assertEquals("UUGG UUUUUGG UUUUU?? SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
@@ -780,9 +775,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Arbeidsgiver opplyser om feilaktig ny arbeidsgiverperiode som dekker hele perioden som skal utbetales`()  {
         nyttVedtak(1.januar til 20.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
-        assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         nyttVedtak(25.januar til 25.januar, arbeidsgiverperiode = listOf(25.januar til 9.februar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(2.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 25.januar, listOf(1.januar til 16.januar))
     }
 
     @Test
@@ -967,8 +962,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
 
-        assertEquals(listOf(1.januar til 6.januar), inspektør.venteperioder(1.vedtaksperiode))
-        assertEquals(listOf(1.januar til 6.januar, 9.januar til 18.januar), inspektør.venteperioder(2.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 6.januar))
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 9.januar, listOf(1.januar til 6.januar, 9.januar til 18.januar))
 
         assertForventetFeil(
             forklaring = "Inntektsmelding forteller _implisitt_ at 1.jan-6.jan er arbeidsdager. Dagene henger igjen som sykedager i modellen",
@@ -2401,9 +2396,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(førsteDagIArbeidsgiverperioden til 15.mars)
         )
         assertEquals("R AAAAARR AAAAARR AAAAARR AAAAARR AASSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertEquals(emptyList<Any>(), inspektør.venteperiode(1.vedtaksperiode))
-        assertEquals(listOf(28.februar til 15.mars), inspektør.venteperiode(2.vedtaksperiode))
-        assertEquals(listOf(28.februar til 15.mars), inspektør.venteperiode(2.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 28.januar, emptyList())
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 28.februar, listOf(28.februar til 15.mars))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)

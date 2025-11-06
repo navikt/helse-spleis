@@ -50,6 +50,7 @@ import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertInntektshistorikkForDato
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertSkjæringstidspunktOgVenteperiode
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
@@ -473,12 +474,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterInntektsmelding(arbeidsgiverperioder)
 
         assertEquals("UUUGG UUUUSHR AAAAARH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
-        assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(1.vedtaksperiode))
-        assertEquals(28.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(2.vedtaksperiode))
-        assertEquals(28.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
-        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(3.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, arbeidsgiverperioder)
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 28.januar, arbeidsgiverperioder)
+        assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 28.januar, arbeidsgiverperioder)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -1006,10 +1004,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             assertInntektsgrunnlag(a1, riktigInntekt)
         }
 
-        assertEquals(22.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(listOf(22.januar til 6.februar), inspektør.venteperiode(1.vedtaksperiode))
-        assertEquals(22.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertEquals(listOf(22.januar til 6.februar), inspektør.venteperiode(2.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 22.januar, listOf(22.januar til 6.februar))
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 22.januar, listOf(22.januar til 6.februar))
 
         val førsteUtbetalingsdag = inspektør.utbetalingstidslinjer(1.vedtaksperiode)[7.februar]
         assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
@@ -1190,10 +1186,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             arbeidsgiverperioder,
             beregnetInntekt = INNTEKT * 1.2
         )
-        assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(1.vedtaksperiode))
-        assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertEquals(arbeidsgiverperioder, inspektør.venteperiode(2.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, arbeidsgiverperioder)
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 2.januar, arbeidsgiverperioder)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)

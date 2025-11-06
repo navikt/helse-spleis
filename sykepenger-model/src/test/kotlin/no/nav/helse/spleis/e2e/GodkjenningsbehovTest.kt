@@ -200,8 +200,16 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertEquals(utbetalingId, utbetaling.inspektør.utbetalingId)
 
         assertEquals(IKKE_UTBETALT, utbetaling.inspektør.tilstand)
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+        assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 1.mars, listOf(1.mars til 16.mars))
+
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingId = utbetalingId, utbetalingGodkjent = false, automatiskBehandling = false)
+
         assertEquals(IKKE_GODKJENT, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.tilstand)
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 17.januar, listOf(17.januar til 31.januar))
+        assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 1.mars, listOf(1.mars til 16.mars))
 
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
@@ -294,7 +302,13 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         assertTrue(kanAvvises(2.vedtaksperiode))
 
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
+
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.februar, listOf(1.februar til 16.februar))
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
         assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)

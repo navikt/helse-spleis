@@ -52,6 +52,7 @@ import no.nav.helse.spleis.e2e.assertHarHendelseIder
 import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertSkjæringstidspunktOgVenteperiode
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
@@ -936,7 +937,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-        assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
         val utbetaling1 = inspektør.utbetaling(0)
         val revurdering = inspektør.utbetaling(1)
