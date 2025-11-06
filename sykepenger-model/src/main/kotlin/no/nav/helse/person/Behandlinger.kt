@@ -670,28 +670,37 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         ) {
             val hendelseSykdomstidslinjeFremTilOgMed = hendelseSykdomstidslinje.fremTilOgMed(periode.endInclusive)
             val hendelseperiode = hendelseSykdomstidslinjeFremTilOgMed.periode()
-            val oppdatertPeriode = hendelseperiode?.let { periode.oppdaterFom(hendelseperiode) } ?: periode
-            val (nySykdomstidslinje, nyeSkjæringstidspunkter, nyePerioderUtenNavAnsvar) = yrkesaktivitet.oppdaterSykdom(
-                meldingsreferanseId = dokumentsporing.id,
-                sykdomstidslinje = hendelseSykdomstidslinjeFremTilOgMed.takeIf { hendelseperiode != null },
-                egenmeldingsperioder = egenmeldingsdagerAndrePerioder + gjeldende.egenmeldingsdager
-            )
-            val sykdomstidslinje = nySykdomstidslinje.subset(oppdatertPeriode)
 
-            val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = bestemSkjæringstidspunkt(nyeSkjæringstidspunkter, sykdomstidslinje, oppdatertPeriode)
-            val dagerUtenNavAnsvar = bestemDagerUtenNavAnsvar(oppdatertPeriode, nyePerioderUtenNavAnsvar)
-
-            val nyEndring = gjeldende
-                .copy(
-                    dokumentsporing = dokumentsporing,
-                    skjæringstidspunkt = nyttSkjæringstidspunkt,
-                    skjæringstidspunkter = alleSkjæringstidspunkter,
-                    dagerUtenNavAnsvar = dagerUtenNavAnsvar,
-                    dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: gjeldende.dagerNavOvertarAnsvar,
-                    sykdomstidslinje = sykdomstidslinje,
-                    periode = oppdatertPeriode,
-                    refusjonstidslinje = gjeldende.refusjonstidslinje.fyll(oppdatertPeriode)
+            val nyEndring = if (hendelseperiode == null) {
+                gjeldende
+                    .copy(
+                        dokumentsporing = dokumentsporing,
+                        dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: gjeldende.dagerNavOvertarAnsvar,
+                    )
+            } else {
+                val oppdatertPeriode = periode.oppdaterFom(hendelseperiode)
+                val (nySykdomstidslinje, nyeSkjæringstidspunkter, nyePerioderUtenNavAnsvar) = yrkesaktivitet.oppdaterSykdom(
+                    meldingsreferanseId = dokumentsporing.id,
+                    sykdomstidslinje = hendelseSykdomstidslinjeFremTilOgMed,
+                    egenmeldingsperioder = egenmeldingsdagerAndrePerioder + gjeldende.egenmeldingsdager
                 )
+                val sykdomstidslinje = nySykdomstidslinje.subset(oppdatertPeriode)
+
+                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = bestemSkjæringstidspunkt(nyeSkjæringstidspunkter, sykdomstidslinje, oppdatertPeriode)
+                val dagerUtenNavAnsvar = bestemDagerUtenNavAnsvar(oppdatertPeriode, nyePerioderUtenNavAnsvar)
+
+                gjeldende
+                    .copy(
+                        dokumentsporing = dokumentsporing,
+                        skjæringstidspunkt = nyttSkjæringstidspunkt,
+                        skjæringstidspunkter = alleSkjæringstidspunkter,
+                        dagerUtenNavAnsvar = dagerUtenNavAnsvar,
+                        dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: gjeldende.dagerNavOvertarAnsvar,
+                        sykdomstidslinje = sykdomstidslinje,
+                        periode = oppdatertPeriode,
+                        refusjonstidslinje = gjeldende.refusjonstidslinje.fyll(oppdatertPeriode)
+                    )
+            }
 
             håndterNyFakta(
                 eventBus = eventBus,
