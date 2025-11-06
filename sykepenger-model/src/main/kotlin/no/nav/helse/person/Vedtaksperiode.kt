@@ -506,50 +506,52 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.sykdomstidslinje(hendelse, this.skjæringstidspunkt, this.periode)
     }
 
-    internal fun håndterAnmodningOmForkasting(eventBus: EventBus, anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
-        if (!anmodningOmForkasting.erRelevant(id)) return
+    internal fun håndterAnmodningOmForkasting(eventBus: EventBus, anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        if (!anmodningOmForkasting.erRelevant(id)) return null
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         aktivitetsloggMedVedtaksperiodekontekst.info("Behandler anmodning om forkasting")
-        when (tilstand) {
-            AvventerInntektsmelding,
-            AvventerBlokkerendePeriode,
-            AvventerAOrdningen,
-            AvsluttetUtenUtbetaling -> forkast(eventBus, anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst, anmodningOmForkasting.force)
 
-            Avsluttet,
-            AvventerGodkjenning,
-            AvventerGodkjenningRevurdering,
-            AvventerHistorikk,
-            AvventerHistorikkRevurdering,
-            AvventerInfotrygdHistorikk,
-            AvventerRevurdering,
-            AvventerSimulering,
-            AvventerSimuleringRevurdering,
-            AvventerVilkårsprøving,
-            AvventerVilkårsprøvingRevurdering,
-            Start,
-            TilInfotrygd,
-            AvventerAnnullering,
-            TilAnnullering,
-            TilUtbetaling -> {
-                if (anmodningOmForkasting.force) return forkast(eventBus, anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst, true)
-                aktivitetsloggMedVedtaksperiodekontekst.info("Avslår anmodning om forkasting i $tilstand")
-            }
+        if (!anmodningOmForkasting.force) {
+            when (tilstand) {
+                AvventerInntektsmelding,
+                AvventerBlokkerendePeriode,
+                AvventerAOrdningen,
+                AvsluttetUtenUtbetaling,
+                SelvstendigAvventerBlokkerendePeriode -> {}
 
-            SelvstendigAvventerBlokkerendePeriode -> forkast(eventBus, anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst)
-
-            SelvstendigAvsluttet,
-            SelvstendigAvventerGodkjenning,
-            SelvstendigAvventerHistorikk,
-            SelvstendigAvventerInfotrygdHistorikk,
-            SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving,
-            SelvstendigStart,
-            SelvstendigTilUtbetaling -> {
-                if (anmodningOmForkasting.force) return forkast(eventBus, anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst, true)
-                aktivitetsloggMedVedtaksperiodekontekst.info("Avslår anmodning om forkasting i $tilstand")
+                Avsluttet,
+                AvventerGodkjenning,
+                AvventerGodkjenningRevurdering,
+                AvventerHistorikk,
+                AvventerHistorikkRevurdering,
+                AvventerInfotrygdHistorikk,
+                AvventerRevurdering,
+                AvventerSimulering,
+                AvventerSimuleringRevurdering,
+                AvventerVilkårsprøving,
+                AvventerVilkårsprøvingRevurdering,
+                Start,
+                TilInfotrygd,
+                AvventerAnnullering,
+                TilAnnullering,
+                TilUtbetaling,
+                SelvstendigAvsluttet,
+                SelvstendigAvventerGodkjenning,
+                SelvstendigAvventerHistorikk,
+                SelvstendigAvventerInfotrygdHistorikk,
+                SelvstendigAvventerSimulering,
+                SelvstendigAvventerVilkårsprøving,
+                SelvstendigStart,
+                SelvstendigTilUtbetaling -> {
+                    aktivitetsloggMedVedtaksperiodekontekst.info("Avslår anmodning om forkasting i $tilstand")
+                    return null
+                }
             }
         }
+
+        forkast(eventBus, anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst, true)
+        return Revurderingseventyr.forkasting(anmodningOmForkasting, skjæringstidspunkt, periode)
+
     }
 
     internal fun håndterInntektFraInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektshistorikk: Inntektshistorikk): Revurderingseventyr? {

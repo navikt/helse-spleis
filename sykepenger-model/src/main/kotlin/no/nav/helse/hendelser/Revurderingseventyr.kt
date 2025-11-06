@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Annullering
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsforhold
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiverperiode
+import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Forkasting
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmeldingInntektsopplysninger
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.KorrigertSøknad
@@ -29,6 +30,7 @@ class Revurderingseventyr private constructor(
 
     internal companion object {
         fun nyPeriode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(NyPeriode, skjæringstidspunkt, periodeForEndring, hendelse)
+        fun forkasting(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Forkasting, skjæringstidspunkt, periodeForEndring, hendelse)
         fun arbeidsforhold(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Arbeidsforhold, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
         fun korrigertSøknad(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertSøknad, skjæringstidspunkt, periodeForEndring, hendelse)
         fun reberegning(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Reberegning, skjæringstidspunkt, periodeForEndring, hendelse)
@@ -175,6 +177,10 @@ class Revurderingseventyr private constructor(
 
         data object NyPeriode : RevurderingÅrsak {
             override fun navn() = "NY_PERIODE"
+        }
+
+        data object Forkasting : RevurderingÅrsak {
+            override fun navn() = "FORKASTING"
         }
 
         data object Refusjonsopplysninger : RevurderingÅrsak {

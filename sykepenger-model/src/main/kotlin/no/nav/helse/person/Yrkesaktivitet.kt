@@ -484,10 +484,10 @@ internal class Yrkesaktivitet private constructor(
         forkastSykmeldingsperioder.forkast(sykmeldingsperioder)
     }
 
-    internal fun håndterAnmodningOmForkasting(eventBus: EventBus, anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
+    internal fun håndterAnmodningOmForkasting(eventBus: EventBus, anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedYrkesaktivitetkontekst = aktivitetslogg.kontekst(this)
-        håndter {
-            it.håndterAnmodningOmForkasting(eventBus, anmodningOmForkasting, aktivitetsloggMedYrkesaktivitetkontekst)
+        return énHåndtert(anmodningOmForkasting) {
+            håndterAnmodningOmForkasting(eventBus, anmodningOmForkasting, aktivitetsloggMedYrkesaktivitetkontekst)
         }
     }
 

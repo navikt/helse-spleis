@@ -193,7 +193,8 @@ class Person private constructor(
 
     fun håndterAnmodningOmForkasting(eventBus: EventBus, anmodningOmForkasting: AnmodningOmForkasting, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler anmodning om forkasting")
-        finnYrkesaktivitet(anmodningOmForkasting.behandlingsporing).håndterAnmodningOmForkasting(eventBus, anmodningOmForkasting, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr = finnYrkesaktivitet(anmodningOmForkasting.behandlingsporing).håndterAnmodningOmForkasting(eventBus, anmodningOmForkasting, aktivitetsloggMedPersonkontekst)
+        if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, anmodningOmForkasting, aktivitetsloggMedPersonkontekst)
     }
 
