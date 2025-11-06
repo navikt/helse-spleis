@@ -8,6 +8,7 @@ import no.nav.helse.august
 import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
@@ -294,7 +295,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `sender forespørsel når man går fra auu til avim pga annen im & dager nav dekker`() {
         håndterSøknad(1.januar til 12.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 16.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "Neitakk")
+        assertUgyldigSituasjon("Vedtaksperioden har allerede kvittert ut arbeidsgiveropplysninger! Hvorfor blir det forespurt på ny?") {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 16.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "Neitakk")
+        }
         assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter(a1))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
         assertEquals(1.vedtaksperiode.id(a1), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().opplysninger.vedtaksperiodeId)

@@ -47,6 +47,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         gjeldendeBehandlingstatus.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(0, LocalDateTime.now() to status)
     }
 
+    private val kvittertUtArbeidsgiveropplysninger = mutableSetOf<UUID>()
+
     override fun nyBehandling(event: EventSubscription.BehandlingOpprettetEvent) {
         check(behandlingOpprettetEventer.none { it.behandlingId == event.behandlingId }) {
             "behandling ${event.behandlingId} har allerede sendt ut opprettet event"
@@ -139,7 +141,20 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         }
     }
 
-    override fun inntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent) = IM.håndtert(event.meldingsreferanseId)
+    override fun trengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
+        if (event.opplysninger.vedtaksperiodeId in kvittertUtArbeidsgiveropplysninger) {
+            throw UgyldigSituasjonException(IllegalStateException("Vedtaksperioden har allerede kvittert ut arbeidsgiveropplysninger! Hvorfor blir det forespurt på ny?\n\t${event}"))
+        }
+    }
+
+    override fun trengerIkkeArbeidsgiveropplysninger(event: EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent) {
+        kvittertUtArbeidsgiveropplysninger.add(event.vedtaksperiodeId)
+    }
+
+    override fun inntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent) {
+        kvittertUtArbeidsgiveropplysninger.add(event.vedtaksperiodeId)
+        IM.håndtert(event.meldingsreferanseId)
+    }
     override fun inntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent) = IM.ikkeHåndtert(event.meldingsreferanseId)
     override fun inntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent) = IM.førSøknad(event.inntektsmeldingId)
     override fun overstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt) {
