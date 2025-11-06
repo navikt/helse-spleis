@@ -434,7 +434,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun håndterSykdomstidslinje(
         eventBus: EventBus,
-        person: Person,
         yrkesaktivitet: Yrkesaktivitet,
         dokumentsporing: Dokumentsporing,
         hendelseSykdomstidslinje: Sykdomstidslinje,
@@ -452,13 +451,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
             aktivitetslogg = aktivitetslogg
         )
-        person.sykdomshistorikkEndret()
         validering()
     }
 
     internal fun nullstillEgenmeldingsdager(
         eventBus: EventBus,
-        person: Person,
         yrkesaktivitet: Yrkesaktivitet,
         dokumentsporing: Dokumentsporing?,
         aktivitetslogg: IAktivitetslogg
@@ -469,7 +466,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             dokumentsporing = dokumentsporing,
             aktivitetslogg = aktivitetslogg
         )
-        person.sykdomshistorikkEndret()
     }
 
     fun oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>) {

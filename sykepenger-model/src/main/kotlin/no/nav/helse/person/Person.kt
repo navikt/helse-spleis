@@ -69,7 +69,6 @@ import no.nav.helse.person.Yrkesaktivitet.Companion.igangsettOverstyring
 import no.nav.helse.person.Yrkesaktivitet.Companion.mursteinsperioder
 import no.nav.helse.person.Yrkesaktivitet.Companion.nestemann
 import no.nav.helse.person.Yrkesaktivitet.Companion.nåværendeVedtaksperioder
-import no.nav.helse.person.Yrkesaktivitet.Companion.oppdatereSkjæringstidspunkter
 import no.nav.helse.person.Yrkesaktivitet.Companion.tidligsteDato
 import no.nav.helse.person.Yrkesaktivitet.Companion.validerTilstand
 import no.nav.helse.person.Yrkesaktivitet.Companion.vedtaksperioder
@@ -316,7 +315,6 @@ class Person private constructor(
         }
         beregnSkjæringstidspunkter()
         beregnArbeidsgiverperioder()
-        sykdomshistorikkEndret()
         emitOverlappendeInfotrygdperioder(eventBus)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetslogg)
         håndterGjenoppta(eventBus, hendelse, aktivitetslogg)
@@ -374,7 +372,8 @@ class Person private constructor(
 
     fun håndterUtbetalingsgodkjenning(eventBus: EventBus, utbetalingsgodkjenning: Utbetalingsgodkjenning, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler utbetalingsgodkjenning")
-        finnYrkesaktivitet(utbetalingsgodkjenning.behandlingsporing).håndterBehandlingsavgjørelse(eventBus, utbetalingsgodkjenning, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr = finnYrkesaktivitet(utbetalingsgodkjenning.behandlingsporing).håndterBehandlingsavgjørelse(eventBus, utbetalingsgodkjenning, aktivitetsloggMedPersonkontekst)
+        if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, utbetalingsgodkjenning, aktivitetsloggMedPersonkontekst)
     }
 
@@ -549,16 +548,11 @@ class Person private constructor(
         return skjæringstidspunkter
     }
 
-    internal fun sykdomshistorikkEndret() {
-        yrkesaktiviteter.oppdatereSkjæringstidspunkter(skjæringstidspunkter)
-    }
-
     internal fun søppelbøtte(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, vedtaksperioderSomSkalForkastes: List<Vedtaksperiode>) {
         aktivitetslogg.info("Forkaster ${vedtaksperioderSomSkalForkastes.size} vedtaksperioder")
         infotrygdhistorikk.tøm()
         Yrkesaktivitet.søppelbøtte(eventBus, yrkesaktiviteter, hendelse, aktivitetslogg, vedtaksperioderSomSkalForkastes)
         beregnSkjæringstidspunkter()
-        sykdomshistorikkEndret()
         ryddOppVilkårsgrunnlag(aktivitetslogg)
         gjenopptaBehandling(aktivitetslogg)
     }

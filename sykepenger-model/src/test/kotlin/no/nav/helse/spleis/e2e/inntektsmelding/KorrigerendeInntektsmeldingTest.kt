@@ -420,6 +420,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
     }
 
     @Test

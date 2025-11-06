@@ -206,6 +206,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingId = utbetalingId, utbetalingGodkjent = false, automatiskBehandling = false)
 
+        assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
         assertEquals(IKKE_GODKJENT, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.tilstand)
         assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 17.januar, listOf(17.januar til 31.januar))

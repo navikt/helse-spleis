@@ -174,7 +174,6 @@ import no.nav.helse.person.tilstandsmaskin.TilUtbetaling
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.Vedtaksperiodetilstand
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
-import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingEventBus
@@ -186,7 +185,6 @@ import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKEL
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
-import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -1460,10 +1458,10 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal fun håndterUtbetalingsavgjørelse(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
+    internal fun håndterUtbetalingsavgjørelse(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
-        when (tilstand) {
+        return when (tilstand) {
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering -> behandleAvgjørelseForVedtak(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, TilUtbetaling, Avsluttet)
             SelvstendigAvventerGodkjenning -> behandleAvgjørelseForVedtak(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigTilUtbetaling, SelvstendigAvsluttet)
@@ -1493,11 +1491,14 @@ internal class Vedtaksperiode private constructor(
             Start,
             TilAnnullering,
             TilInfotrygd,
-            TilUtbetaling -> check(!utbetalingsavgjørelse.relevantVedtaksperiode(id)) { "Forventet ikke utbetalingsavgjørelse i ${tilstand.type.name}" }
+            TilUtbetaling -> {
+                check(!utbetalingsavgjørelse.relevantVedtaksperiode(id)) { "Forventet ikke utbetalingsavgjørelse i ${tilstand.type.name}" }
+                null
+            }
         }
     }
 
-    private fun behandleAvgjørelseForVedtak(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg, nesteTilUtbetalingtilstand: Vedtaksperiodetilstand, nesteAvsluttettilstand: Vedtaksperiodetilstand) {
+    private fun behandleAvgjørelseForVedtak(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg, nesteTilUtbetalingtilstand: Vedtaksperiodetilstand, nesteAvsluttettilstand: Vedtaksperiodetilstand): Revurderingseventyr? {
         check(utbetalingsavgjørelse.relevantVedtaksperiode(id)) {
             "Utbetalingsavgjørelse gjelder en annen vedtaksperiode, er det flere perioder til godkjenning samtidig?"
         }
@@ -1509,20 +1510,23 @@ internal class Vedtaksperiode private constructor(
         with(utbetalingsavgjørelse) {
             when (godkjent) {
                 true -> vedtakFattet(eventBus, aktivitetslogg, nesteTilUtbetalingtilstand, nesteAvsluttettilstand)
-                false -> vedtakAvvist(eventBus, aktivitetslogg)
+                false -> return vedtakAvvist(eventBus, aktivitetslogg)
             }
         }
+        return null
     }
 
-    private fun Behandlingsavgjørelse.vedtakAvvist(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+    private fun Behandlingsavgjørelse.vedtakAvvist(eventBus: EventBus, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         if (automatisert) aktivitetslogg.info("Utbetaling markert som ikke godkjent automatisk $avgjørelsestidspunkt")
         else aktivitetslogg.info("Utbetaling markert som ikke godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
 
         if (behandlinger.vedtakAvvist(eventBus.behandlingEventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, yrkesaktivitet, this, aktivitetslogg)) {
-            return forkast(eventBus, this, aktivitetslogg, tvingForkasting = true)
+            forkast(eventBus, this, aktivitetslogg, tvingForkasting = true)
+            return Revurderingseventyr.forkasting(this, skjæringstidspunkt, periode)
         }
 
         aktivitetslogg.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
+        return null
     }
 
     private fun Behandlingsavgjørelse.vedtakFattet(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, nesteTilUtbetalingtilstand: Vedtaksperiodetilstand, nesteAvsluttettilstand: Vedtaksperiodetilstand) {
@@ -2139,7 +2143,6 @@ internal class Vedtaksperiode private constructor(
         val haddeFlereSkjæringstidspunkt = behandlinger.harFlereSkjæringstidspunkt()
         behandlinger.håndterSykdomstidslinje(
             eventBus = eventBus,
-            person = person,
             yrkesaktivitet = yrkesaktivitet,
             dokumentsporing = dokumentsporing,
             hendelseSykdomstidslinje = hendelseSykdomstidslinje,
@@ -2193,10 +2196,7 @@ internal class Vedtaksperiode private constructor(
 
         behandlinger.nullstillEgenmeldingsdager(
             eventBus = eventBus,
-
-            person = person,
             yrkesaktivitet = yrkesaktivitet,
-
             dokumentsporing = dokumentsporing,
             aktivitetslogg = aktivitetslogg,
         )
@@ -2686,6 +2686,9 @@ internal class Vedtaksperiode private constructor(
     internal fun igangsettOverstyring(eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (revurdering.erIkkeRelevantFor(periode)) return sendNyttGodkjenningsbehov(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
+        if (behandlinger.åpenForEndring()) {
+            behandlinger.oppdaterSkjæringstidspunkt(person.skjæringstidspunkter, yrkesaktivitet.perioderUtenNavAnsvar)
+        }
         tilstand.igangsettOverstyring(this, eventBus, revurdering, aktivitetsloggMedVedtaksperiodekontekst)
         videreførEksisterendeOpplysninger(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
     }
@@ -3079,17 +3082,6 @@ internal class Vedtaksperiode private constructor(
 
         private fun sykmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>): List<Periode> {
             return vedtaksperioder.map { it.sykmeldingsperiode }
-        }
-
-        internal fun List<Vedtaksperiode>.oppdatereSkjæringstidspunkter(
-            beregnetSkjæringstidspunkter: Skjæringstidspunkter,
-            beregnetArbeidsgiverperioder: List<PeriodeUtenNavAnsvar>
-        ) {
-            forEach {
-                if (it.behandlinger.åpenForEndring()) {
-                    it.behandlinger.oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnetArbeidsgiverperioder)
-                }
-            }
         }
 
         internal fun List<Vedtaksperiode>.aktiveSkjæringstidspunkter(): Set<LocalDate> {

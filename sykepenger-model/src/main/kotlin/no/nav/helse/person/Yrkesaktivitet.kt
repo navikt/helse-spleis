@@ -70,7 +70,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.medSammeUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.oppdatereSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
 import no.nav.helse.person.Vedtaksperiode.Companion.startdatoerPåSammenhengendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.validerTilstand
@@ -195,12 +194,6 @@ internal class Yrkesaktivitet private constructor(
 
         internal fun List<Yrkesaktivitet>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk): Skjæringstidspunkter =
                 infotrygdhistorikk.skjæringstidspunkt(map(Yrkesaktivitet::sykdomstidslinje))
-
-        internal fun List<Yrkesaktivitet>.oppdatereSkjæringstidspunkter(beregnetSkjæringstidspunkter: Skjæringstidspunkter) {
-            forEach {
-                it.vedtaksperioder.oppdatereSkjæringstidspunkter(beregnetSkjæringstidspunkter, it.perioderUtenNavAnsvar)
-            }
-        }
 
         internal fun List<Yrkesaktivitet>.aktiveSkjæringstidspunkter(): Set<LocalDate> {
             return flatMap { it.vedtaksperioder }.aktiveSkjæringstidspunkter()
@@ -660,10 +653,10 @@ internal class Yrkesaktivitet private constructor(
         håndter { it.håndter(eventBus, ytelser, aktivitetsloggMedYrkesaktivitetkontekst, infotrygdhistorikk) }
     }
 
-    internal fun håndterBehandlingsavgjørelse(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
+    internal fun håndterBehandlingsavgjørelse(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        håndter {
-            it.håndterUtbetalingsavgjørelse(eventBus, utbetalingsavgjørelse, aktivitetsloggMedArbeidsgiverkontekst)
+        return énHåndtert(utbetalingsavgjørelse) {
+            håndterUtbetalingsavgjørelse(eventBus, utbetalingsavgjørelse, aktivitetsloggMedArbeidsgiverkontekst)
         }
     }
 
