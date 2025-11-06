@@ -51,12 +51,12 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg
     ) {
-        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, revurdering.hendelse, aktivitetslogg)) return
+        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)) return
         vedtaksperiode.sendTrengerArbeidsgiveropplysninger(eventBus)
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)) {
+        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)) {
             aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
         }
 
@@ -77,12 +77,12 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
     override fun replayUtført(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.sendTrengerArbeidsgiveropplysninger(eventBus)
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
     override fun inntektsmeldingFerdigbehandlet(
@@ -91,15 +91,10 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
-    private fun vurderOmKanGåVidere(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg
-    ): Boolean {
+    private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg): Boolean {
         vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, aktivitetslogg)
 
         if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
