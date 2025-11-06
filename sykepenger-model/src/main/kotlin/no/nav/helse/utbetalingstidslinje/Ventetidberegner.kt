@@ -23,8 +23,12 @@ internal class Ventetidberegner {
         var aktivVentetid: Ventetidtelling? = null
         sykdomstidslinje.forEach { dag ->
             aktivVentetid = when (dag) {
-                is Dag.Sykedag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
-                is Dag.SykHelgedag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvventerUtbetaltDag)
+                is Dag.Sykedag,
+                is Dag.MeldingTilNavDag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
+
+                is Dag.SykHelgedag,
+                is Dag.MeldingTilNavHelgedag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvventerUtbetaltDag)
+
                 is Dag.ForeldetSykedag -> when (dag.dato.erHelg()) {
                     true -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvventerUtbetaltDag)
                     false -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
@@ -42,6 +46,7 @@ internal class Ventetidberegner {
                 is Dag.Feriedag,
                 is Dag.Permisjonsdag,
                 is Dag.ProblemDag -> error("forventer ikke dag av type ${dag::class.simpleName} i ventetidsberegning")
+
             }
         }
         return ventetider.toList() + listOfNotNull(aktivVentetid?.somAvklaring())

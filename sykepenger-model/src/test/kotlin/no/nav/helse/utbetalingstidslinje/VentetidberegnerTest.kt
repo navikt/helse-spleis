@@ -7,6 +7,7 @@ import no.nav.helse.mars
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.FORELDET
+import no.nav.helse.testhelpers.M
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.YF
 import no.nav.helse.testhelpers.opphold
@@ -276,7 +277,7 @@ internal class VentetidberegnerTest {
     }
 
     @Test
-    fun `samme ventetid hvis det er utbetalt sykepenger og inntil 15 dager sammenhengende opphold mellom`() {
+    fun `samme ventetid hvis det er utbetalt sykepenger og inntil 15 dager sammenhengende opphold melom`() {
         listOf(
             resetSeed { 17.S + 15.opphold + 10.S + 15.opphold + 10.S },
             resetSeed { 17.S + 15.A + 10.S + 15.A + 10.S }
@@ -475,6 +476,42 @@ internal class VentetidberegnerTest {
                 assertEquals(8.januar til 19.januar, it.omsluttendePeriode)
                 assertFalse(it.ferdigAvklart)
             }
+        }
+    }
+
+    @Test
+    fun `melding til nav-dager rett før sykmelding skal telle melding til nav som del av ventetid`() {
+        val tidslinje = resetSeed { 10.M + 10.S }
+        val resultat = tidslinje.ventetid()
+        assertEquals(1.januar til 16.januar, resultat.first().dagerUtenAnsvar.single())
+        assertTrue(resultat.first().ferdigAvklart)
+    }
+
+    @Test
+    fun `melding til nav-dager med opphold før sykemelding er ikke en del av ventetiden`() {
+        val tidslinje = resetSeed { 15.M + 1.opphold + 15.S }
+        val resultat = tidslinje.ventetid()
+        resultat[0].also {
+            assertEquals(1.januar til 15.januar, it.dagerUtenAnsvar.single())
+            assertFalse(it.ferdigAvklart)
+        }
+        resultat[1].also {
+            assertEquals(17.januar til 31.januar, it.dagerUtenAnsvar.single())
+            assertFalse(it.ferdigAvklart)
+        }
+    }
+
+    @Test
+    fun `melding til nav-dag etter opphold skal telle som del av neste ventetid`() {
+        val tidslinje = resetSeed { 7.S + 1.opphold + 2.M + 15.S }
+        val resultat = tidslinje.ventetid()
+        resultat[0].also {
+            assertEquals(1.januar til 7.januar, it.dagerUtenAnsvar.single())
+            assertFalse(it.ferdigAvklart)
+        }
+        resultat[1].also {
+            assertEquals(9.januar til 24.januar, it.dagerUtenAnsvar.single())
+            assertTrue(it.ferdigAvklart)
         }
     }
 

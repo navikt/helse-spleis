@@ -271,6 +271,24 @@ class Sykdomstidslinje private constructor(
                     )
             )
 
+        internal fun meldingTilNavdager(
+            førsteDato: LocalDate,
+            sisteDato: LocalDate,
+            grad: Prosentdel,
+            kilde: Hendelseskilde
+        ) =
+            Sykdomstidslinje(
+                førsteDato.datesUntil(sisteDato.plusDays(1))
+                    .collect(
+                        toMap(
+                            { it },
+                            {
+                                if (it.erHelg()) MeldingTilNavHelgedag(it, grad, kilde)
+                                else MeldingTilNavDag(it, grad, kilde)
+                            })
+                    )
+            )
+
         internal fun feriedager(
             førsteDato: LocalDate,
             sisteDato: LocalDate,

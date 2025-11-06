@@ -50,6 +50,15 @@ internal fun Int.S(hendelseskilde: Hendelseskilde, grad: Prosentdel = 100.prosen
     hendelseskilde
 ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
+internal val Int.M
+    get() = Sykdomstidslinje.meldingTilNavdager(
+        dagensDato,
+        dagensDato.plusDays(this.toLong() - 1),
+        100.prosent,
+        INGEN
+    )
+        .also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
 internal val Int.U
     get() = Sykdomstidslinje.arbeidsgiverdager(
         dagensDato,
