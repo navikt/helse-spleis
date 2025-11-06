@@ -413,7 +413,7 @@ internal class VentetidberegnerTest {
     }
 
     @Test
-    fun `samme ventetid hvis det er opphold i helg mellom - lørdag mellom`() {
+    fun `ny ventetid hvis det er opphold i helg mellom - lørdag mellom`() {
         val tidslinje = resetSeed { 5.S + 1.A + 12.S }
         val resultat = tidslinje.ventetid()
         assertEquals(2, resultat.size)
@@ -503,17 +503,31 @@ internal class VentetidberegnerTest {
 
     @Test
     fun `melding til nav-dag etter opphold skal telle som del av neste ventetid`() {
-        val tidslinje = resetSeed { 7.S + 1.opphold + 2.M + 15.S }
+        val tidslinje = resetSeed (frøDato = 4.januar) { 9.S + 1.A + 3.M + 15.S }
         val resultat = tidslinje.ventetid()
+        assertEquals(2, resultat.size)
         resultat[0].also {
-            assertEquals(1.januar til 7.januar, it.dagerUtenAnsvar.single())
+            assertEquals(4.januar til 12.januar, it.dagerUtenAnsvar.single())
             assertFalse(it.ferdigAvklart)
         }
         resultat[1].also {
-            assertEquals(9.januar til 24.januar, it.dagerUtenAnsvar.single())
+            assertEquals(14.januar til 29.januar, it.dagerUtenAnsvar.single())
             assertTrue(it.ferdigAvklart)
         }
     }
+
+
+    @Test
+    fun `Samme ventetid fortsetter ved melding til nav dag`() {
+        val tidslinje = resetSeed { 6.S + 1.M + 14.S }
+        val resultat = tidslinje.ventetid()
+        assertEquals(1, resultat.size)
+        resultat[0].also {
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
+            assertTrue(it.ferdigAvklart)
+        }
+    }
+
 
     private fun Sykdomstidslinje.ventetid(): List<PeriodeUtenNavAnsvar> {
         val beregner = Ventetidberegner()
