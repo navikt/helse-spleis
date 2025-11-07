@@ -2814,12 +2814,15 @@ internal class Vedtaksperiode private constructor(
             .filter { it.skjæringstidspunkt == skjæringstidspunkt }
     }
 
+    /**
+     * Finner alle perioder som må beregnes sammen for at vi skal kunne vurdere alle aktuelle vilkår.
+     *
+     * Unngår eldre perioder som slutter før this da de skal ha blitt beregnet før this
+     *
+     * For eksempel kan listen returnere senere perioder som ikke overlapper med this i det hele tatt,
+     * men som overlapper med en periode som overlapper med this
+     */
     private fun perioderSomMåHensyntasVedBeregning(): List<Vedtaksperiode> {
-        // finner alle perioder som må beregnes sammen for at vi skal
-        // kunne vurdere alle aktuelle vilkår.
-        // unngår eldre perioder som slutter før this da de skal ha blitt beregnet før this
-        // for eksempel kan listen returnere senere perioder som ikke overlapper med this i det hele tatt,
-        // men som overlapper med en periode som overlapper med this
         return mursteinsperioderMedSammeSkjæringstidspunkt()
             .filterNot { it.periode.endInclusive < this.periode.start }
     }
