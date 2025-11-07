@@ -1319,7 +1319,10 @@ internal class Vedtaksperiode private constructor(
 
         if (aktivitetslogg.harFunksjonelleFeil()) return forkast(eventBus, ytelser, aktivitetslogg)
 
-        høstingsresultater(eventBus, aktivitetslogg, nesteSimuleringtilstand, nesteGodkjenningtilstand)
+        when {
+            behandlinger.harUtbetalinger() -> tilstand(eventBus, aktivitetslogg, nesteSimuleringtilstand) { aktivitetslogg.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""") }
+            else -> tilstand(eventBus, aktivitetslogg, nesteGodkjenningtilstand) { aktivitetslogg.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""") }
+        }
     }
 
     private fun lagBeregnetBehandlinger(
@@ -2593,21 +2596,6 @@ internal class Vedtaksperiode private constructor(
         )
 
         eventBus.vedtaksperiodeEndret(event)
-    }
-
-    private fun høstingsresultater(
-        eventBus: EventBus,
-        aktivitetslogg: IAktivitetslogg,
-        simuleringtilstand: Vedtaksperiodetilstand,
-        godkjenningtilstand: Vedtaksperiodetilstand
-    ) = when {
-        behandlinger.harUtbetalinger() -> tilstand(eventBus, aktivitetslogg, simuleringtilstand) {
-            aktivitetslogg.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
-        }
-
-        else -> tilstand(eventBus, aktivitetslogg, godkjenningtilstand) {
-            aktivitetslogg.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
-        }
     }
 
     private fun Vedtaksperiodetilstand.påminnelse(
