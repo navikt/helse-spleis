@@ -13,6 +13,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.TypeEndring.OVERSTYRING
+import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.TypeEndring.REVURDERING
 import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -45,10 +47,11 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
 
-        revurderingIgangsattEvent {
+        assertOverstyringIgangsatt("NY_PERIODE", "ARBEIDSGIVERPERIODE", "SYKDOMSTIDSLINJE")
+        revurderingIgangsattEvent(nr = 2) {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
-            this avTypeEndring "REVURDERING"
+            this avTypeEndring REVURDERING
         }
     }
 
@@ -57,10 +60,11 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         tilGodkjenning(januar, a1)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
 
-        revurderingIgangsattEvent {
+        assertOverstyringIgangsatt("NY_PERIODE", "ARBEIDSGIVERPERIODE", "SYKDOMSTIDSLINJE")
+        revurderingIgangsattEvent(nr = 2) {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
-            this avTypeEndring "OVERSTYRING"
+            this avTypeEndring OVERSTYRING
         }
     }
 
@@ -85,10 +89,11 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
             )
         )
         )
-        revurderingIgangsattEvent {
+        assertOverstyringIgangsatt("NY_PERIODE", "ARBEIDSGIVERPERIODE", "SKJØNNSMESSIG_FASTSETTELSE")
+        revurderingIgangsattEvent(nr = 2) {
             this bleForårsaketAv "SKJØNNSMESSIG_FASTSETTELSE"
             this medSkjæringstidspunkt 1.januar
-            this avTypeEndring "OVERSTYRING"
+            this avTypeEndring OVERSTYRING
         }
     }
 
@@ -96,10 +101,11 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     fun `auu skal utbetales`() {
         håndterSøknad(1.januar til 16.januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(16.januar, Dagtype.SykedagNav, 100)))
-        revurderingIgangsattEvent {
+        assertOverstyringIgangsatt("NY_PERIODE", "SYKDOMSTIDSLINJE")
+        revurderingIgangsattEvent(nr = 1) {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
-            this avTypeEndring "OVERSTYRING"
+            this avTypeEndring OVERSTYRING
             assertEquals(
                 listOf(
                     VedtaksperiodeData(
@@ -107,7 +113,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
                         vedtaksperiodeId = 1.vedtaksperiode.id(a1),
                         periode = 1.januar til 16.januar,
                         skjæringstidspunkt = 1.januar,
-                        typeEndring = "ENDRING"
+                        typeEndring = OVERSTYRING
                     ),
                 ), this.berørtePerioder
             )
@@ -119,10 +125,11 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         tilGodkjenning(januar, a1)
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
 
-        revurderingIgangsattEvent {
+        assertOverstyringIgangsatt("NY_PERIODE", "ARBEIDSGIVERPERIODE", "ARBEIDSGIVEROPPLYSNINGER")
+        revurderingIgangsattEvent(nr = 2) {
             this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
             this medSkjæringstidspunkt 1.januar
-            this avTypeEndring "OVERSTYRING"
+            this avTypeEndring OVERSTYRING
         }
     }
 
@@ -134,7 +141,8 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         val januar = observatør.utbetalteVedtaksperioder.first()
         val februar = observatør.utbetalteVedtaksperioder.last()
 
-        revurderingIgangsattEvent {
+        assertOverstyringIgangsatt("NY_PERIODE", "ARBEIDSGIVERPERIODE", "NY_PERIODE", "SYKDOMSTIDSLINJE")
+        revurderingIgangsattEvent(nr = 3) {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (januar og februar)
@@ -152,10 +160,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
-        assertEquals(1, observatør.overstyringIgangsatt.size)
-        revurderingIgangsattEvent(0) {
-            this bleForårsaketAv "KORRIGERT_SØKNAD"
-        }
+        assertOverstyringIgangsatt("NY_PERIODE", "ARBEIDSGIVERPERIODE", "NY_PERIODE", "NY_PERIODE", "KORRIGERT_SØKNAD")
     }
 
     @Test
@@ -163,13 +168,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         håndterSøknad(29.januar til 30.januar)
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
-
-        revurderingIgangsattEvent(0) {
-            this bleForårsaketAv "KORRIGERT_SØKNAD"
-        }
-        revurderingIgangsattEvent(1) {
-            this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
-        }
+        assertOverstyringIgangsatt("NY_PERIODE", "ARBEIDSGIVERPERIODE", "KORRIGERT_SØKNAD", "ARBEIDSGIVEROPPLYSNINGER")
     }
 
     @Test
@@ -181,7 +180,8 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         val periodeAG1 = observatør.utbetalteVedtaksperioder.first()
         val periodeAG2 = observatør.utbetalteVedtaksperioder.last()
 
-        revurderingIgangsattEvent {
+        assertOverstyringIgangsatt("NY_PERIODE", "NY_PERIODE", "ARBEIDSGIVERPERIODE", "ARBEIDSGIVERPERIODE", "ARBEIDSGIVEROPPLYSNINGER")
+        revurderingIgangsattEvent(nr = 4) {
             this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
             this medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (periodeAG1 og periodeAG2)
@@ -192,14 +192,14 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
                         vedtaksperiodeId = periodeAG1,
                         periode = januar,
                         skjæringstidspunkt = 1.januar,
-                        typeEndring = "REVURDERING"
+                        typeEndring = REVURDERING
                     ),
                     VedtaksperiodeData(
                         yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2),
                         vedtaksperiodeId = periodeAG2,
                         periode = januar,
                         skjæringstidspunkt = 1.januar,
-                        typeEndring = "REVURDERING"
+                        typeEndring = REVURDERING
                     )
                 ), this.berørtePerioder
             )
@@ -221,16 +221,17 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         val overstyringId = UUID.randomUUID()
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar, meldingsreferanseId = overstyringId)
 
-        revurderingIgangsattEvent {
+        assertOverstyringIgangsatt("NY_PERIODE", "ARBEIDSGIVERPERIODE", "NY_PERIODE", "NY_PERIODE", "REFUSJONSOPPLYSNINGER", "NY_PERIODE", "ARBEIDSGIVEROPPLYSNINGER")
+        revurderingIgangsattEvent(nr = 6) {
             this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
             this medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (januar og februar og mars og april)
             assertEquals(
                 listOf(
-                    VedtaksperiodeData(yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), vedtaksperiodeId = januar, periode = 1.januar til 31.januar, skjæringstidspunkt = 1.januar, typeEndring = "REVURDERING"),
-                    VedtaksperiodeData(yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), vedtaksperiodeId = februar, periode = 1.februar til 15.februar, skjæringstidspunkt = 1.januar, typeEndring = "REVURDERING"),
-                    VedtaksperiodeData(yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), vedtaksperiodeId = mars, periode = 1.mars til 31.mars, skjæringstidspunkt = 1.mars, typeEndring = "REVURDERING"),
-                    VedtaksperiodeData(yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), vedtaksperiodeId = april, periode = 1.april til 30.april, skjæringstidspunkt = 1.mars, typeEndring = "REVURDERING")
+                    VedtaksperiodeData(yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), vedtaksperiodeId = januar, periode = 1.januar til 31.januar, skjæringstidspunkt = 1.januar, typeEndring = REVURDERING),
+                    VedtaksperiodeData(yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), vedtaksperiodeId = februar, periode = 1.februar til 15.februar, skjæringstidspunkt = 1.januar, typeEndring = REVURDERING),
+                    VedtaksperiodeData(yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), vedtaksperiodeId = mars, periode = 1.mars til 31.mars, skjæringstidspunkt = 1.mars, typeEndring = REVURDERING),
+                    VedtaksperiodeData(yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), vedtaksperiodeId = april, periode = 1.april til 30.april, skjæringstidspunkt = 1.mars, typeEndring = REVURDERING)
                 ), this.berørtePerioder
             )
         }
@@ -249,11 +250,16 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Dagtype.Feriedag)))
 
-        revurderingIgangsattEvent {
+        assertOverstyringIgangsatt("NY_PERIODE", "ARBEIDSGIVERPERIODE", "NY_PERIODE", "NY_PERIODE", "REFUSJONSOPPLYSNINGER", "NY_PERIODE", "SYKDOMSTIDSLINJE")
+        revurderingIgangsattEvent(nr = 6) {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
             this medførteRevurderingAv (februar og mars og april)
         }
+    }
+
+    private fun assertOverstyringIgangsatt(vararg event: String) {
+        assertEquals(event.toList(), observatør.overstyringIgangsatt.map { it.årsak })
     }
 
     private fun revurderingIgangsattEvent(nr: Int = 0, assertBlock: EventSubscription.OverstyringIgangsatt.() -> Unit) {
@@ -271,7 +277,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         return this
     }
 
-    private infix fun EventSubscription.OverstyringIgangsatt.avTypeEndring(typeEndring: String): EventSubscription.OverstyringIgangsatt {
+    private infix fun EventSubscription.OverstyringIgangsatt.avTypeEndring(typeEndring: EventSubscription.OverstyringIgangsatt.TypeEndring): EventSubscription.OverstyringIgangsatt {
         assertEquals(typeEndring, this.typeEndring)
         return this
     }

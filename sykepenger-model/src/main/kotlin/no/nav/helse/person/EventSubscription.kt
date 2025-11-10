@@ -554,14 +554,19 @@ interface EventSubscription {
         val berørtePerioder: List<VedtaksperiodeData>,
         val meldingsreferanseId: UUID
     ) : Event {
-        val typeEndring get() = if (berørtePerioder.any { it.typeEndring == "REVURDERING" }) "REVURDERING" else "OVERSTYRING"
+        enum class TypeEndring {
+            OVERSTYRING,
+            REVURDERING
+        }
+
+        val typeEndring get() = if (berørtePerioder.any { it.typeEndring == TypeEndring.REVURDERING }) TypeEndring.REVURDERING else TypeEndring.OVERSTYRING
 
         data class VedtaksperiodeData(
             val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
             val vedtaksperiodeId: UUID,
             val periode: Periode,
             val skjæringstidspunkt: LocalDate,
-            val typeEndring: String
+            val typeEndring: TypeEndring
         )
     }
 

@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Sykdomstidsl
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.VedtaksperiodeData
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Revurderingseventyr private constructor(
@@ -61,14 +60,8 @@ class Revurderingseventyr private constructor(
 
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
 
-    internal fun inngåSomRevurdering(vedtaksperiode: Vedtaksperiode) =
-        inngå(vedtaksperiode, TypeEndring.REVURDERING)
-
-    internal fun inngåSomEndring(vedtaksperiode: Vedtaksperiode) =
-        inngå(vedtaksperiode, TypeEndring.ENDRING)
-
-    private fun inngå(vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring) {
-        vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
+    fun inngå(vedtaksperiode: VedtaksperiodeData) {
+        vedtaksperioder.add(vedtaksperiode)
     }
 
     internal fun erIkkeRelevantFor(vedtaksperiode: Periode): Boolean {
@@ -84,11 +77,6 @@ class Revurderingseventyr private constructor(
         if (hvorfor == KorrigertSøknad) {
             aktivitetslogg.info(loggMelding)
         }
-    }
-
-    private enum class TypeEndring {
-        ENDRING,
-        REVURDERING
     }
 
     private sealed interface RevurderingÅrsak {

@@ -89,19 +89,22 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sendes ikke ut overstyring igangsatt når det kommer inntektsmelding i avventer inntektsmelding`() {
+    fun `sendes ut overstyring igangsatt når det kommer inntektsmelding i avventer inntektsmelding`() {
         håndterSøknad(januar)
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        assertEquals(0, observatør.overstyringIgangsatt.size)
+        assertEquals(2, observatør.overstyringIgangsatt.size)
     }
 
     @Test
-    fun `Senere perioder inngår ikke i overstyring igangsatt selv om det er en endring fra saksbehandler`() {
+    fun `Senere perioder inngår i overstyring igangsatt selv om det er en endring fra saksbehandler`() {
         tilGodkjenning(januar, a1)
         håndterSøknad(mars)
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)))
-        val overstyringIgangsatt = observatør.overstyringIgangsatt.single()
-        assertEquals(listOf(1.vedtaksperiode.id(a1)), overstyringIgangsatt.berørtePerioder.map { it.vedtaksperiodeId })
+        val overstyringIgangsatt = observatør.overstyringIgangsatt.last()
+        assertEquals(listOf(
+            1.vedtaksperiode.id(a1),
+            2.vedtaksperiode.id(a1)
+        ), overstyringIgangsatt.berørtePerioder.map { it.vedtaksperiodeId })
     }
 
     @Test

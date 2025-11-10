@@ -120,7 +120,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun sisteUtbetalteUtbetaling() = tidligereBehandlinger.lastOrNull()?.utbetaling()
 
-    internal fun harFattetVedtak() = tidligereBehandlinger.isNotEmpty()
+    internal fun harFattetVedtak() = tidligereBehandlinger.lastOrNull()?.erFattetVedtak() == true
 
     internal fun åpenForEndring() = åpenBehandling != null
 

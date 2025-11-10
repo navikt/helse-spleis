@@ -15,6 +15,8 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.TypeEndring.OVERSTYRING
+import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.TypeEndring.REVURDERING
 import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -87,47 +89,49 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         }
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt
-        assertEquals(3, overstyringerIgangsatt.size)
+        assertEquals(9, overstyringerIgangsatt.size)
 
-        overstyringerIgangsatt[0].also { event ->
+        overstyringerIgangsatt[6].also { event ->
             assertEquals(
                 EventSubscription.OverstyringIgangsatt(
                     årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
                     skjæringstidspunkt = 1.januar,
                     periodeForEndring = 1.januar til 1.januar,
                     berørtePerioder = listOf(
-                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
-                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 2.vedtaksperiode.id(a1), februar, 1.januar, "REVURDERING"),
-                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING"),
-                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 1.vedtaksperiode.id(a2), 1.januar til 31.januar, 1.januar, "REVURDERING")
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, REVURDERING),
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 2.vedtaksperiode.id(a1), februar, 1.januar, REVURDERING),
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, REVURDERING),
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 1.vedtaksperiode.id(a2), 1.januar til 31.januar, 1.januar, REVURDERING)
                     ),
                     meldingsreferanseId = im1
                 ), event
             )
         }
 
-        overstyringerIgangsatt[1].also { event ->
+        overstyringerIgangsatt[7].also { event ->
             assertEquals(
                 EventSubscription.OverstyringIgangsatt(
                     årsak = "NY_PERIODE",
                     skjæringstidspunkt = 1.januar,
                     periodeForEndring = 1.mars til 20.mars,
                     berørtePerioder = listOf(
-                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, REVURDERING),
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 2.vedtaksperiode.id(a2), 1.mars til 20.mars, 1.januar, OVERSTYRING)
                     ),
                     meldingsreferanseId = søknad
                 ), event
             )
         }
 
-        overstyringerIgangsatt[2].also { event ->
+        overstyringerIgangsatt[8].also { event ->
             assertEquals(
                 EventSubscription.OverstyringIgangsatt(
                     årsak = "ARBEIDSGIVERPERIODE",
                     skjæringstidspunkt = 1.mars,
                     periodeForEndring = 1.mars til 20.mars,
                     berørtePerioder = listOf(
-                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, REVURDERING),
+                        VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 2.vedtaksperiode.id(a2), 1.mars til 20.mars, 1.januar, OVERSTYRING)
                     ),
                     meldingsreferanseId = im2
                 ), event

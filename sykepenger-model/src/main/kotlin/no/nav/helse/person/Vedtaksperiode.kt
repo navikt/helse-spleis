@@ -2685,6 +2685,18 @@ internal class Vedtaksperiode private constructor(
         // 5. gjøre eventuelt noe custom
         nyBehandlingHvisAvsluttet(eventBus, revurdering.hendelse)
 
+        val inngå = EventSubscription.OverstyringIgangsatt.VedtaksperiodeData(
+            yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
+            vedtaksperiodeId = id,
+            skjæringstidspunkt = skjæringstidspunkt,
+            periode = periode,
+            typeEndring = when {
+                behandlinger.harFattetVedtak() -> EventSubscription.OverstyringIgangsatt.TypeEndring.REVURDERING
+                else -> EventSubscription.OverstyringIgangsatt.TypeEndring.OVERSTYRING
+            }
+        )
+        revurdering.inngå(inngå)
+
         behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
         videreførEksisterendeOpplysninger(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
 
@@ -2716,7 +2728,6 @@ internal class Vedtaksperiode private constructor(
 
             AvsluttetUtenUtbetaling -> {
                 if (skalBehandlesISpeil()) {
-                    revurdering.inngåSomEndring(this)
                     revurdering.loggDersomKorrigerendeSøknad(
                         aktivitetsloggMedVedtaksperiodekontekst,
                         "Startet omgjøring grunnet korrigerende søknad"
@@ -2737,7 +2748,6 @@ internal class Vedtaksperiode private constructor(
 
             SelvstendigAvsluttet,
             SelvstendigTilUtbetaling -> {
-                revurdering.inngåSomRevurdering(this)
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
             }
             SelvstendigAvventerBlokkerendePeriode,
@@ -2745,7 +2755,6 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerHistorikk,
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving -> {
-                revurdering.inngåSomEndring(this)
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
             }
 
@@ -2756,7 +2765,6 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøvingRevurdering,
             AvventerRevurdering -> {
-                revurdering.inngåSomRevurdering(this)
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerRevurdering)
             }
 
@@ -2778,7 +2786,6 @@ internal class Vedtaksperiode private constructor(
             AvventerHistorikk,
             AvventerSimulering,
             AvventerVilkårsprøving -> {
-                revurdering.inngåSomEndring(this)
                 if (måInnhenteInntektEllerRefusjon()) return tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
             }
@@ -2831,21 +2838,6 @@ internal class Vedtaksperiode private constructor(
     private fun sendNyttGodkjenningsbehov(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         if (this.tilstand !in setOf(AvventerGodkjenningRevurdering, AvventerGodkjenning, SelvstendigAvventerGodkjenning)) return
         this.trengerGodkjenning(eventBus, aktivitetslogg)
-    }
-
-    internal fun inngåIRevurderingseventyret(
-        vedtaksperioder: MutableList<EventSubscription.OverstyringIgangsatt.VedtaksperiodeData>,
-        typeEndring: String
-    ) {
-        vedtaksperioder.add(
-            EventSubscription.OverstyringIgangsatt.VedtaksperiodeData(
-                yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
-                vedtaksperiodeId = id,
-                skjæringstidspunkt = skjæringstidspunkt,
-                periode = periode,
-                typeEndring = typeEndring
-            )
-        )
     }
 
     // gitt at du står i tilstand X, hva/hvem henter du på og hvorfor?

@@ -184,7 +184,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
-        assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
+        assertEquals(listOf("NY_PERIODE", "ARBEIDSGIVERPERIODE", "NY_PERIODE", "NY_PERIODE", "ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
         assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
     }
@@ -272,7 +272,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
-        assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
+        assertEquals(listOf("NY_PERIODE", "ARBEIDSGIVERPERIODE", "NY_PERIODE", "NY_PERIODE", "ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
         assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
 
@@ -321,7 +321,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
-        assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
+        assertEquals(listOf("NY_PERIODE", "ARBEIDSGIVERPERIODE", "ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
         assertInntektsgrunnlag(15.januar, forventetAntallArbeidsgivere = 1) {
             assertInntektsgrunnlag(a1, INNTEKT * 1.1)
@@ -341,7 +341,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
-        assertEquals(listOf("KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER"), overstyringerIgangsatt)
+        assertEquals(listOf("NY_PERIODE", "ARBEIDSGIVERPERIODE", "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER"), overstyringerIgangsatt)
         assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
     }
 
