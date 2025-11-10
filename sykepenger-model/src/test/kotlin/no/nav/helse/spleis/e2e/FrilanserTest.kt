@@ -15,6 +15,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.oktober
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
@@ -22,9 +23,9 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.FRILANS_START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -37,7 +38,7 @@ internal class FrilanserTest : AbstractDslTest() {
         frilans {
             håndterSøknad(januar)
             assertFunksjonelleFeil()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, FRILANS_START, TIL_INFOTRYGD)
         }
     }
 

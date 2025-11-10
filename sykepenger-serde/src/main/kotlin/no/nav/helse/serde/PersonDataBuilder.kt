@@ -71,6 +71,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingData.Inntek
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.ArbeidssituasjonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.PeriodeUtenNavAnsvarData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.ARBEIDSLEDIG_START
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_ANNULLERING
@@ -87,6 +88,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.FRILANS_START
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_GODKJENNING
@@ -392,6 +394,7 @@ private fun ForkastetVedtaksperiodeUtDto.tilPersonData() = PersonData.Arbeidsgiv
 private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData(
     id = id,
     tilstand = when (tilstand) {
+        VedtaksperiodetilstandDto.ARBEIDSTAKER_START -> START
         VedtaksperiodetilstandDto.AVSLUTTET -> AVSLUTTET
         VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> AVSLUTTET_UTEN_UTBETALING
         VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> AVVENTER_BLOKKERENDE_PERIODE
@@ -407,12 +410,15 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
         VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> AVVENTER_SIMULERING_REVURDERING
         VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> AVVENTER_VILKÅRSPRØVING
         VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> AVVENTER_VILKÅRSPRØVING_REVURDERING
-        VedtaksperiodetilstandDto.START -> START
         VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TIL_INFOTRYGD
         VedtaksperiodetilstandDto.TIL_UTBETALING -> TIL_UTBETALING
 
         VedtaksperiodetilstandDto.AVVENTER_ANNULLERING -> AVVENTER_ANNULLERING
         VedtaksperiodetilstandDto.TIL_ANNULLERING -> TIL_ANNULLERING
+
+        VedtaksperiodetilstandDto.FRILANS_START -> FRILANS_START
+
+        VedtaksperiodetilstandDto.ARBEIDSLEDIG_START -> ARBEIDSLEDIG_START
 
         VedtaksperiodetilstandDto.SELVSTENDIG_START -> SELVSTENDIG_START
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK

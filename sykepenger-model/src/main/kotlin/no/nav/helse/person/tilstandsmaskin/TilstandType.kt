@@ -2,6 +2,9 @@ package no.nav.helse.person.tilstandsmaskin
 
 enum class TilstandType {
     START,
+    FRILANS_START,
+    ARBEIDSLEDIG_START,
+
     AVVENTER_INFOTRYGDHISTORIKK,
     AVVENTER_INNTEKTSMELDING,
     AVVENTER_BLOKKERENDE_PERIODE,

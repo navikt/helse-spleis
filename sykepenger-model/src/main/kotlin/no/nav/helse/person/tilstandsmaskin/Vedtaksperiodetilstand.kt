@@ -5,11 +5,12 @@ import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+
+internal val starttilstander = setOf(ArbeidstakerStart, SelvstendigStart, FrilansStart, ArbeidsledigStart)
 
 // Gang of four State pattern
 internal sealed interface Vedtaksperiodetilstand {

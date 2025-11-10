@@ -281,8 +281,10 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.AVVENTER_A_ORDNINGEN,
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-                VedtaksperiodetilstandDto.START,
+                VedtaksperiodetilstandDto.ARBEIDSTAKER_START,
                 VedtaksperiodetilstandDto.SELVSTENDIG_START,
+                VedtaksperiodetilstandDto.FRILANS_START,
+                VedtaksperiodetilstandDto.ARBEIDSLEDIG_START,
                 VedtaksperiodetilstandDto.TIL_INFOTRYGD,
                 VedtaksperiodetilstandDto.AVVENTER_ANNULLERING,
                 VedtaksperiodetilstandDto.TIL_ANNULLERING -> error("har ikke mappingregel for utbetalingstatus $behandlingtilstandDto og periodetilstand=$periodetilstand")

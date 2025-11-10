@@ -706,6 +706,9 @@ data class PersonData(
                 AVVENTER_ANNULLERING,
                 TIL_ANNULLERING,
 
+                FRILANS_START,
+                ARBEIDSLEDIG_START,
+
                 SELVSTENDIG_START,
                 SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
                 SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
@@ -721,6 +724,7 @@ data class PersonData(
             fun tilDto() = VedtaksperiodeInnDto(
                 id = this.id,
                 tilstand = when (tilstand) {
+                    TilstandTypeData.START -> VedtaksperiodetilstandDto.ARBEIDSTAKER_START
                     TilstandTypeData.AVVENTER_A_ORDNINGEN -> VedtaksperiodetilstandDto.AVVENTER_A_ORDNINGEN
                     TilstandTypeData.AVVENTER_HISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK
                     TilstandTypeData.AVVENTER_GODKJENNING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING
@@ -729,7 +733,6 @@ data class PersonData(
                     TilstandTypeData.TIL_INFOTRYGD -> VedtaksperiodetilstandDto.TIL_INFOTRYGD
                     TilstandTypeData.AVSLUTTET -> VedtaksperiodetilstandDto.AVSLUTTET
                     TilstandTypeData.AVSLUTTET_UTEN_UTBETALING -> VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING
-                    TilstandTypeData.START -> VedtaksperiodetilstandDto.START
                     TilstandTypeData.AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK
                     TilstandTypeData.AVVENTER_INNTEKTSMELDING -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING
                     TilstandTypeData.AVVENTER_BLOKKERENDE_PERIODE -> VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE
@@ -741,6 +744,9 @@ data class PersonData(
                     TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
                     TilstandTypeData.AVVENTER_ANNULLERING -> VedtaksperiodetilstandDto.AVVENTER_ANNULLERING
                     TilstandTypeData.TIL_ANNULLERING -> VedtaksperiodetilstandDto.TIL_ANNULLERING
+
+                    TilstandTypeData.FRILANS_START -> VedtaksperiodetilstandDto.FRILANS_START
+                    TilstandTypeData.ARBEIDSLEDIG_START -> VedtaksperiodetilstandDto.ARBEIDSLEDIG_START
 
                     TilstandTypeData.SELVSTENDIG_START -> VedtaksperiodetilstandDto.SELVSTENDIG_START
                     TilstandTypeData.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK

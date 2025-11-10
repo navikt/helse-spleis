@@ -5,8 +5,8 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.arbeidsledig
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.tilstandsmaskin.TilstandType.ARBEIDSLEDIG_START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -30,7 +30,7 @@ internal class ArbeidsledigTest : AbstractDslTest() {
         arbeidsledig {
             håndterSøknad(januar)
             assertFunksjonelleFeil()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, ARBEIDSLEDIG_START, TIL_INFOTRYGD)
         }
     }
 

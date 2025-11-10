@@ -73,6 +73,7 @@ data class AnnulleringskandidatDto(
 )
 
 sealed class VedtaksperiodetilstandDto {
+    data object ARBEIDSTAKER_START : VedtaksperiodetilstandDto()
     data object AVVENTER_HISTORIKK : VedtaksperiodetilstandDto()
     data object AVVENTER_GODKJENNING : VedtaksperiodetilstandDto()
     data object AVVENTER_SIMULERING : VedtaksperiodetilstandDto()
@@ -80,7 +81,6 @@ sealed class VedtaksperiodetilstandDto {
     data object TIL_INFOTRYGD : VedtaksperiodetilstandDto()
     data object AVSLUTTET : VedtaksperiodetilstandDto()
     data object AVSLUTTET_UTEN_UTBETALING : VedtaksperiodetilstandDto()
-    data object START : VedtaksperiodetilstandDto()
     data object AVVENTER_INFOTRYGDHISTORIKK : VedtaksperiodetilstandDto()
     data object AVVENTER_INNTEKTSMELDING : VedtaksperiodetilstandDto()
     data object AVVENTER_BLOKKERENDE_PERIODE : VedtaksperiodetilstandDto()
@@ -94,6 +94,9 @@ sealed class VedtaksperiodetilstandDto {
 
     data object AVVENTER_ANNULLERING : VedtaksperiodetilstandDto()
     data object TIL_ANNULLERING : VedtaksperiodetilstandDto()
+
+    data object FRILANS_START : VedtaksperiodetilstandDto()
+    data object ARBEIDSLEDIG_START : VedtaksperiodetilstandDto()
 
     data object SELVSTENDIG_AVSLUTTET : VedtaksperiodetilstandDto()
     data object SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE : VedtaksperiodetilstandDto()
