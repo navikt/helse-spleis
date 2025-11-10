@@ -2678,27 +2678,7 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (revurdering.erIkkeRelevantFor(periode)) return sendNyttGodkjenningsbehov(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
 
-        // 1. melde seg inn
-        // 2. åpne opp ny behandling
-        // 3. justere skjæringstidspunkt / ventetid
-        // 4. endre tilstand
-        // 5. gjøre eventuelt noe custom
-        nyBehandlingHvisAvsluttet(eventBus, revurdering.hendelse)
-
-        val inngå = EventSubscription.OverstyringIgangsatt.VedtaksperiodeData(
-            yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
-            vedtaksperiodeId = id,
-            skjæringstidspunkt = skjæringstidspunkt,
-            periode = periode,
-            typeEndring = when {
-                behandlinger.harFattetVedtak() -> EventSubscription.OverstyringIgangsatt.TypeEndring.REVURDERING
-                else -> EventSubscription.OverstyringIgangsatt.TypeEndring.OVERSTYRING
-            }
-        )
-        revurdering.inngå(inngå)
-
-        behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
-        videreførEksisterendeOpplysninger(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
+        igangsettOverstyringPåBehandlingen(eventBus, revurdering, aktivitetsloggMedVedtaksperiodekontekst)
 
         when (val t = tilstand) {
             SelvstendigStart -> {
@@ -2794,7 +2774,19 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun nyBehandlingHvisAvsluttet(eventBus: EventBus, hendelse: Hendelse) {
+    private fun igangsettOverstyringPåBehandlingen(eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
+        val inngå = EventSubscription.OverstyringIgangsatt.VedtaksperiodeData(
+            yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
+            vedtaksperiodeId = id,
+            skjæringstidspunkt = skjæringstidspunkt,
+            periode = periode,
+            typeEndring = when {
+                behandlinger.harFattetVedtak() -> EventSubscription.OverstyringIgangsatt.TypeEndring.REVURDERING
+                else -> EventSubscription.OverstyringIgangsatt.TypeEndring.OVERSTYRING
+            }
+        )
+        revurdering.inngå(inngå)
+
         when (tilstand) {
             Avsluttet,
             TilUtbetaling,
@@ -2802,37 +2794,20 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvsluttet,
             SelvstendigTilUtbetaling,
             AvventerGodkjenningRevurdering -> {
-                sørgForNyBehandlingHvisIkkeÅpen(eventBus, hendelse)
+                sørgForNyBehandlingHvisIkkeÅpen(eventBus, revurdering.hendelse)
                 subsumsjonslogg.logg(`fvl § 35 ledd 1`())
-                behandlinger.oppdaterSkjæringstidspunkt(person.skjæringstidspunkter, yrkesaktivitet.perioderUtenNavAnsvar)
             }
 
-            AvventerAOrdningen,
             AvventerAnnullering,
-            AvventerBlokkerendePeriode,
-            AvventerGodkjenning,
-            AvventerHistorikk,
-            AvventerHistorikkRevurdering,
-            AvventerInfotrygdHistorikk,
-            AvventerInntektsmelding,
-            AvventerRevurdering,
-            AvventerSimulering,
-            AvventerSimuleringRevurdering,
-            AvventerVilkårsprøving,
-            AvventerVilkårsprøvingRevurdering,
-            SelvstendigAvventerBlokkerendePeriode,
-            SelvstendigAvventerGodkjenning,
-            SelvstendigAvventerHistorikk,
-            SelvstendigAvventerInfotrygdHistorikk,
-            SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving,
-            SelvstendigStart,
-            Start -> {
-                behandlinger.oppdaterSkjæringstidspunkt(person.skjæringstidspunkter, yrkesaktivitet.perioderUtenNavAnsvar)
-            }
-            TilAnnullering -> {}
+            TilAnnullering -> return
+
             TilInfotrygd -> error("Forventer ikke å håndtere overstyring når vi skal til infotrygd")
+
+            else -> {}
         }
+        behandlinger.oppdaterSkjæringstidspunkt(person.skjæringstidspunkter, yrkesaktivitet.perioderUtenNavAnsvar)
+        behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
+        videreførEksisterendeOpplysninger(eventBus, aktivitetslogg)
     }
 
     private fun sendNyttGodkjenningsbehov(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
