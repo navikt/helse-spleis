@@ -65,7 +65,7 @@ class Inntektsmelding(
         }
     }
 
-    private val kompensertFørsteFraværsdag: LocalDate by lazy {
+    internal val inntektsdato: LocalDate by lazy {
         if (førsteFraværsdag != null && (grupperteArbeidsgiverperioder.isEmpty() || førsteFraværsdag > grupperteArbeidsgiverperioder.last().endInclusive.nesteDag)) førsteFraværsdag
         else grupperteArbeidsgiverperioder.maxOf { it.start }
     }
@@ -74,7 +74,7 @@ class Inntektsmelding(
     internal val datoForHåndteringAvInntekt = if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) {
         listOfNotNull(grupperteArbeidsgiverperioder.lastOrNull()?.endInclusive?.nesteDag, førsteFraværsdag).max()
     } else {
-        kompensertFørsteFraværsdag
+        inntektsdato
     }
 
     private val refusjonsdato: LocalDate by lazy {
@@ -87,9 +87,9 @@ class Inntektsmelding(
     private var håndtertInntekt = false
     val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
 
-    internal val inntektsdata = Inntektsdata(metadata.meldingsreferanseId, kompensertFørsteFraværsdag, beregnetInntekt, metadata.registrert)
+    internal val inntektsdata = Inntektsdata(metadata.meldingsreferanseId, inntektsdato, beregnetInntekt, metadata.registrert)
 
-    internal fun faktaavklartInntekt() = ArbeidstakerFaktaavklartInntekt(
+    internal val faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(
         id = UUID.randomUUID(),
         inntektsdata = inntektsdata,
         inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver

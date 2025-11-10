@@ -576,6 +576,84 @@ internal class Vedtaksperiode private constructor(
 
     }
 
+    private fun sikreÅpenBehandlingForInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding) {
+        when (tilstand) {
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            TilUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, inntektsmelding)
+
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering -> {}
+
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            TilAnnullering,
+            TilInfotrygd,
+            ArbeidsledigAvventerInfotrygdHistorikk,
+            ArbeidsledigStart,
+            ArbeidstakerStart,
+            FrilansAvventerInfotrygdHistorikk,
+            FrilansStart -> error("Forventer ikke å håndtere inntekt i tilstand $tilstand")
+        }
+    }
+
+    internal fun skjæringstidspunktForInntektsmeldinginntekt(eventBus: EventBus, inntektsmelding: Inntektsmelding): LocalDate {
+        sikreÅpenBehandlingForInntektsmelding(eventBus, inntektsmelding) // Må sikre at skjæringstidspunktet er up2date
+        return skjæringstidspunkt
+    }
+
+    internal fun håndterInntektPåPeriode(eventBus: EventBus, skjæringstidspunkt: LocalDate, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        sikreÅpenBehandlingForInntektsmelding(eventBus, inntektsmelding) // Må sikre at skjæringstidspunktet er up2date
+        if (this.skjæringstidspunkt != skjæringstidspunkt) return null
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        behandlinger.håndterFaktaavklartInntekt(
+            eventBus = eventBus,
+            arbeidstakerFaktaavklartInntekt = inntektsmelding.faktaavklartInntekt,
+            yrkesaktivitet = yrkesaktivitet,
+            aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst
+        )
+        return Revurderingseventyr.inntekt(inntektsmelding, this.skjæringstidspunkt)
+    }
+
+    internal fun håndterInntektPåVilkårsgrunnlag(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektshistorikk: Inntektshistorikk) {
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+
+        // 1. legger til inntekten sånn at den kanskje kan brukes i forbindelse med faktaavklaring av inntekt
+        // 1.1 lagrer på den datoen inntektsmeldingen mener
+        val inntektsmeldinginntekt = Inntektsmeldinginntekt(UUID.randomUUID(), inntektsmelding.inntektsdata, Inntektsmeldinginntekt.Kilde.Arbeidsgiver)
+        inntektshistorikk.leggTil(inntektsmeldinginntekt)
+        // 1.2 lagrer på vedtaksperioden også..
+        this.førsteFraværsdag?.takeUnless { it == inntektsmeldinginntekt.inntektsdata.dato }?.also { alternativDato ->
+            inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), inntektsmelding.inntektsdata.copy(dato = alternativDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
+        }
+        inntektsmeldingHåndtert(eventBus, inntektsmelding)
+
+        if (!oppdaterVilkårsgrunnlagMedInntekt(inntektsmelding.faktaavklartInntekt)) {
+            // har ikke laget nytt vilkårsgrunnlag for beløpet var det samme som det var
+            return
+        }
+        aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
+    }
+
     internal fun håndterInntektFraInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektshistorikk: Inntektshistorikk): Revurderingseventyr? {
         // håndterer kun inntekt hvis inntektsdato treffer perioden
         if (inntektsmelding.datoForHåndteringAvInntekt !in periode) return null
@@ -590,7 +668,7 @@ internal class Vedtaksperiode private constructor(
             inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), inntektsmelding.inntektsdata.copy(dato = alternativDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
         }
 
-        val faktaavklartInntekt = inntektsmelding.faktaavklartInntekt()
+        val faktaavklartInntekt = inntektsmelding.faktaavklartInntekt
 
         when (tilstand) {
             AvsluttetUtenUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, inntektsmelding)

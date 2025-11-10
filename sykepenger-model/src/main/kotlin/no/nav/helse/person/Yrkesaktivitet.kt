@@ -600,10 +600,18 @@ internal class Yrkesaktivitet private constructor(
         // 3. starter håndtering av refusjonsopplysninger på vegne av alle mulige perioder
         val refusjonsoverstyring = håndterRefusjonsopplysninger(eventBus, inntektsmelding, inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId), aktivitetsloggMedArbeidsgiverkontekst, inntektsmelding.refusjonsservitør)
 
+
         // 4. håndterer inntekten fra inntektsmeldingen
-        val inntektoverstyring = vedtaksperioder.firstNotNullOfOrNull {
-            it.håndterInntektFraInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst, inntektshistorikk)
-        }
+        val skjæringstidspunkt = vedtaksperioder.firstOrNull { inntektsmelding.inntektsdato in it.periode }?.skjæringstidspunktForInntektsmeldinginntekt(eventBus, inntektsmelding)
+        val perioderFraOgMedSkjæringstidspunkt = skjæringstidspunkt?.let { skjæringstidspunkt ->
+            vedtaksperioder.filter { skjæringstidspunkt in it.periode || it.periode.start > skjæringstidspunkt }
+        } ?: emptyList()
+
+        val inntektoverstyring = skjæringstidspunkt?.let { skjæringstidspunkt ->
+            perioderFraOgMedSkjæringstidspunkt.mapNotNull { it.håndterInntektPåPeriode(eventBus, skjæringstidspunkt, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst) }
+        }?.tidligsteEventyr()
+
+        (perioderFraOgMedSkjæringstidspunkt.firstOrNull { it.skalBehandlesISpeil() } ?: perioderFraOgMedSkjæringstidspunkt.firstOrNull())?.håndterInntektPåVilkårsgrunnlag(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst, inntektshistorikk)
 
         // 5. ferdigstiller håndtering av inntektsmelding
         inntektsmelding.ferdigstill(eventBus, aktivitetsloggMedArbeidsgiverkontekst, person, forkastede.perioder(), sykmeldingsperioder)
