@@ -2683,6 +2683,7 @@ internal class Vedtaksperiode private constructor(
         // 5. gjøre eventuelt noe custom
         nyBehandlingHvisAvsluttet(eventBus, revurdering.hendelse)
 
+        behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
         videreførEksisterendeOpplysninger(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
 
         when (val t = tilstand) {
@@ -2743,7 +2744,6 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving -> {
                 revurdering.inngåSomEndring(this, aktivitetsloggMedVedtaksperiodekontekst)
-                behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
             }
 
@@ -2754,7 +2754,6 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøvingRevurdering,
             AvventerRevurdering -> {
-                behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
                 revurdering.inngåSomRevurdering(this, aktivitetsloggMedVedtaksperiodekontekst)
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerRevurdering)
             }
@@ -2770,7 +2769,6 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerInfotrygdHistorikk -> {}
 
             AvventerBlokkerendePeriode -> {
-                behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
                 if (måInnhenteInntektEllerRefusjon()) tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
             }
 
@@ -2779,7 +2777,6 @@ internal class Vedtaksperiode private constructor(
             AvventerSimulering,
             AvventerVilkårsprøving -> {
                 revurdering.inngåSomEndring(this, aktivitetsloggMedVedtaksperiodekontekst)
-                behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
                 if (måInnhenteInntektEllerRefusjon()) return tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
             }

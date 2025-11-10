@@ -327,7 +327,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal fun forkastBeregning(utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-        checkNotNull(åpenBehandling).forkastBeregning(utbetalingEventBus, aktivitetslogg)
+        åpenBehandling?.forkastBeregning(utbetalingEventBus, aktivitetslogg)
     }
 
     internal fun harIkkeUtbetaling() = sisteBehandling.harIkkeUtbetaling()
@@ -1898,6 +1898,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     }
                     else behandling.tilstand(OverførtAnnullering)
                 }
+
+                override fun utenBeregning(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {}
             }
 
             data object OverførtAnnullering : Tilstand {
