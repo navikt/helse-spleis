@@ -2680,7 +2680,7 @@ internal class Vedtaksperiode private constructor(
 
         igangsettOverstyringPåBehandlingen(eventBus, revurdering, aktivitetsloggMedVedtaksperiodekontekst)
 
-        when (val t = tilstand) {
+        when (tilstand) {
             SelvstendigStart -> {
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, when {
                     !person.infotrygdhistorikk.harHistorikk() -> SelvstendigAvventerInfotrygdHistorikk
@@ -2701,9 +2701,13 @@ internal class Vedtaksperiode private constructor(
                 })
             }
 
-            is AvventerInntektsmelding -> {
-                if (t.vurderOmKanGåVidere(this, eventBus, aktivitetsloggMedVedtaksperiodekontekst)) return
-                sendTrengerArbeidsgiveropplysninger(eventBus)
+            AvventerInntektsmelding -> {
+                if (måInnhenteInntektEllerRefusjon()) {
+                    // send oppdatert forespørsel
+                    sendTrengerArbeidsgiveropplysninger(eventBus)
+                } else {
+                    tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
+                }
             }
 
             AvsluttetUtenUtbetaling -> {
@@ -2711,11 +2715,6 @@ internal class Vedtaksperiode private constructor(
                     revurdering.loggDersomKorrigerendeSøknad(
                         aktivitetsloggMedVedtaksperiodekontekst,
                         "Startet omgjøring grunnet korrigerende søknad"
-                    )
-                    videreførEksisterendeRefusjonsopplysninger(
-                        eventBus = eventBus,
-                        dokumentsporing = null,
-                        aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst
                     )
                     aktivitetsloggMedVedtaksperiodekontekst.info("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden")
                     if (måInnhenteInntektEllerRefusjon()) {
