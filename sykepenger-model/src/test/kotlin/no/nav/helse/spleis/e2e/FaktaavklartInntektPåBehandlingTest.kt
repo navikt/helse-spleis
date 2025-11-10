@@ -8,7 +8,9 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.selvstendig
+import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Søknad
@@ -28,6 +30,35 @@ import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
 
 internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
+
+    @Test
+    fun `Inntekten bør lagres på alle perioder`() {
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            val oppdatertInntekt = INNTEKT/2
+
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar, beregnetInntekt = oppdatertInntekt)
+            val faktaavklartInntektJanuar = inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView
+            val faktaavklartInntektFebruar = inspektør.faktaavklartInntekt(2.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView
+
+            assertForventetFeil(
+                forklaring = """
+                    Burde lagre inntekten på alle periodene på skjæringstidspunktet, ikke bare den som 'treffes' av inntektsmelding.
+                    Hvis ikke kan vi ende opp i en situasjon hvor vi skal vilkårsprøve på ny og velger første inntekt,
+                    .. og den ville jo blitt feil her da.
+                """,
+                ønsket = {
+                    assertEquals(oppdatertInntekt, faktaavklartInntektJanuar?.beløp)
+                    assertEquals(oppdatertInntekt, faktaavklartInntektFebruar?.beløp)
+                },
+                nå = {
+                    assertEquals(INNTEKT, faktaavklartInntektJanuar?.beløp)
+                    assertEquals(oppdatertInntekt, faktaavklartInntektFebruar?.beløp)
+                }
+            )
+        }
+    }
 
     @Test
     fun `Selvstendig får faktaavklart inntekt fra søknaden`() {
