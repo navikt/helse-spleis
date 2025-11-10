@@ -19,7 +19,6 @@ import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
 
 class Revurderingseventyr private constructor(
     private val hvorfor: RevurderingÅrsak,
@@ -62,14 +61,13 @@ class Revurderingseventyr private constructor(
 
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
 
-    internal fun inngåSomRevurdering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) =
-        inngå(vedtaksperiode, aktivitetslogg, TypeEndring.REVURDERING)
+    internal fun inngåSomRevurdering(vedtaksperiode: Vedtaksperiode) =
+        inngå(vedtaksperiode, TypeEndring.REVURDERING)
 
-    internal fun inngåSomEndring(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) =
-        inngå(vedtaksperiode, aktivitetslogg, TypeEndring.ENDRING)
+    internal fun inngåSomEndring(vedtaksperiode: Vedtaksperiode) =
+        inngå(vedtaksperiode, TypeEndring.ENDRING)
 
-    private fun inngå(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, typeEndring: TypeEndring) {
-        hvorfor.dersomInngått(aktivitetslogg)
+    private fun inngå(vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring) {
         vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
     }
 
@@ -94,8 +92,6 @@ class Revurderingseventyr private constructor(
     }
 
     private sealed interface RevurderingÅrsak {
-
-        fun dersomInngått(aktivitetslogg: IAktivitetslogg) {}
 
         fun emitOverstyringIgangsattEvent(eventBus: EventBus, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode, meldingsreferanseId: MeldingsreferanseId) {
             eventBus.emitOverstyringIgangsattEvent(
@@ -145,9 +141,6 @@ class Revurderingseventyr private constructor(
 
         data object Annullering : RevurderingÅrsak {
             override fun navn() = "ANNULLERING"
-            override fun dersomInngått(aktivitetslogg: IAktivitetslogg) {
-                aktivitetslogg.varsel(RV_RV_7)
-            }
         }
 
         data object MinimumSykdomsgradVurdert : RevurderingÅrsak {

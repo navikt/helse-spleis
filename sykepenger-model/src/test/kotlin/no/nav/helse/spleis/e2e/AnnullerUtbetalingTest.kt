@@ -465,8 +465,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
             assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
 
-            assertVarsel(Varselkode.RV_RV_7, 3.vedtaksperiode.filter())
-
             assertEquals(
                 BehandlingView.TilstandView.OVERFØRT_ANNULLERING,
                 inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
@@ -486,6 +484,8 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterUtbetalt()
 
             val utførtAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().endringer.last().utbetaling
+
+            assertVarsel(Varselkode.RV_RV_7, 3.vedtaksperiode.filter())
 
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
@@ -557,7 +557,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
-            assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
 
             assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
             assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
@@ -605,7 +604,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE)
             assertTrue(inspektør.utbetaling(1).erForkastet)
-            assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
 
             assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
             assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
@@ -824,8 +822,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
             assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
             assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
-            assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter())
-
             assertEquals(3, inspektør.utbetalinger.size)
             val utbetalingForlengelse = inspektør.utbetaling(1)
             val utbetalingRevurdering = inspektør.utbetaling(2)
@@ -884,7 +880,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
             assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
             assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger.size)
-            assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter())
 
             assertEquals(4, inspektør.utbetalinger.size)
             val utbetalingRevurdering = inspektør.utbetaling(3)
@@ -1064,9 +1059,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger.size)
             assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size)
 
-            assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter())
-            assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
-
             assertEquals(
                 BehandlingView.TilstandView.UBEREGNET_REVURDERING,
                 inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().tilstand
@@ -1158,7 +1150,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, TIL_ANNULLERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
@@ -1311,7 +1302,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.mars til 16.mars))
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
             assertFalse(testperson.personlogg.harFunksjonelleFeil())
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))

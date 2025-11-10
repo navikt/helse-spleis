@@ -41,7 +41,6 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
             val err = assertThrows<IllegalStateException> {
                 håndterSøknad(januar)
             }
-            assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
             assertEquals("Kan ikke håndtere søknad mens perioden er i TilAnnullering", err.message)
         }
     }
@@ -74,6 +73,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
         }
         a1 {
             håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
             assertIngenFunksjonelleFeil()
             assertEquals(Utbetalingtype.ANNULLERING, inspektør.sisteUtbetaling().type)
         }

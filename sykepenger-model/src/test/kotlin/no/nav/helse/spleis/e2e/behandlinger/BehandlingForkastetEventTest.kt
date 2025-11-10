@@ -189,9 +189,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
 
         a1 {
             håndterAnnullering(2.vedtaksperiode)
-            assertVarsel(Varselkode.RV_RV_7, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
-
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             nullstillTilstandsendringer()

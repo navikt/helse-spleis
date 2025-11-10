@@ -56,7 +56,6 @@ import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.FaktaavklartInntektView
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
-import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt.SelvstendigFaktaavklartInntektView
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
@@ -250,6 +249,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun refusjonstidslinje() = sisteBehandling.refusjonstidslinje
     internal fun utbetales() = behandlinger.any { it.erInFlight() }
     internal fun erAvsluttet() = sisteBehandling.erAvsluttet()
+    internal fun skalAnnulleres() = sisteBehandling.skalAnnulleres()
     internal fun erAnnullert() = sisteBehandling.erAnnullert()
     internal fun erAvvist() = sisteBehandling.erAvvist()
     internal fun harUtbetalinger() = sisteBehandling.harOppdragMedUtbetalinger()
@@ -1171,6 +1171,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal fun erInFlight() = erFattetVedtak() && !erAvsluttet()
         internal fun erAvsluttet() = avsluttet != null
         internal fun erAnnullert() = tilstand == Tilstand.AnnullertPeriode
+        internal fun skalAnnulleres() = tilstand == Tilstand.UberegnetAnnullering
         internal fun erAvvist() = tilstand == Tilstand.RevurdertVedtakAvvist
         internal fun harÅpenBehandling() = this.tilstand in setOf(Tilstand.UberegnetRevurdering, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)
         internal fun harIkkeUtbetaling() = this.tilstand in setOf(Tilstand.Uberegnet, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)

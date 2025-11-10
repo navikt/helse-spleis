@@ -115,6 +115,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_17
@@ -1749,6 +1750,14 @@ internal class Vedtaksperiode private constructor(
             )
         )
         forkast(eventBus, hendelse, aktivitetslogg)
+
+        // lager varsel perioider etter som ikke har blitt forkastet enda
+        person
+            .vedtaksperioder(OVERLAPPENDE_OG_ETTERGØLGENDE(this))
+            .filterNot { it.behandlinger.skalAnnulleres() }
+            .forEach {
+                it.registrerKontekst(aktivitetslogg).varsel(RV_RV_7)
+            }
     }
 
     private fun vedtakIverksattMensTilRevurdering(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
@@ -2714,7 +2723,7 @@ internal class Vedtaksperiode private constructor(
 
             AvsluttetUtenUtbetaling -> {
                 if (skalBehandlesISpeil()) {
-                    revurdering.inngåSomEndring(this, aktivitetsloggMedVedtaksperiodekontekst)
+                    revurdering.inngåSomEndring(this)
                     revurdering.loggDersomKorrigerendeSøknad(
                         aktivitetsloggMedVedtaksperiodekontekst,
                         "Startet omgjøring grunnet korrigerende søknad"
@@ -2735,7 +2744,7 @@ internal class Vedtaksperiode private constructor(
 
             SelvstendigAvsluttet,
             SelvstendigTilUtbetaling -> {
-                revurdering.inngåSomRevurdering(this, aktivitetsloggMedVedtaksperiodekontekst)
+                revurdering.inngåSomRevurdering(this)
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
             }
             SelvstendigAvventerBlokkerendePeriode,
@@ -2743,7 +2752,7 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerHistorikk,
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving -> {
-                revurdering.inngåSomEndring(this, aktivitetsloggMedVedtaksperiodekontekst)
+                revurdering.inngåSomEndring(this)
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
             }
 
@@ -2754,7 +2763,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøvingRevurdering,
             AvventerRevurdering -> {
-                revurdering.inngåSomRevurdering(this, aktivitetsloggMedVedtaksperiodekontekst)
+                revurdering.inngåSomRevurdering(this)
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerRevurdering)
             }
 
@@ -2776,7 +2785,7 @@ internal class Vedtaksperiode private constructor(
             AvventerHistorikk,
             AvventerSimulering,
             AvventerVilkårsprøving -> {
-                revurdering.inngåSomEndring(this, aktivitetsloggMedVedtaksperiodekontekst)
+                revurdering.inngåSomEndring(this)
                 if (måInnhenteInntektEllerRefusjon()) return tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
             }

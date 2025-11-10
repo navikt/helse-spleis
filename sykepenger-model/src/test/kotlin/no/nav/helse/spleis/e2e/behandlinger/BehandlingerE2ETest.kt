@@ -750,9 +750,6 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
             håndterAnnullering(3.vedtaksperiode)
 
-            assertVarsel(RV_RV_7, 4.vedtaksperiode.filter())
-            assertVarsel(RV_RV_7, 5.vedtaksperiode.filter())
-
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(3.vedtaksperiode, TIL_ANNULLERING)
@@ -760,6 +757,10 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertSisteTilstand(5.vedtaksperiode, AVVENTER_REVURDERING)
 
             håndterUtbetalt()
+
+            assertVarsel(RV_RV_7, 4.vedtaksperiode.filter())
+            assertVarsel(RV_RV_7, 5.vedtaksperiode.filter())
+
             assertSisteTilstand(4.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(5.vedtaksperiode, AVVENTER_REVURDERING)
         }
