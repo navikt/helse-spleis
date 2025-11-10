@@ -707,7 +707,10 @@ data class PersonData(
                 TIL_ANNULLERING,
 
                 FRILANS_START,
+                FRILANS_AVVENTER_INFOTRYGDHISTORIKK,
+
                 ARBEIDSLEDIG_START,
+                ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK,
 
                 SELVSTENDIG_START,
                 SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
@@ -746,7 +749,10 @@ data class PersonData(
                     TilstandTypeData.TIL_ANNULLERING -> VedtaksperiodetilstandDto.TIL_ANNULLERING
 
                     TilstandTypeData.FRILANS_START -> VedtaksperiodetilstandDto.FRILANS_START
+                    TilstandTypeData.FRILANS_AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.FRILANS_AVVENTER_INFOTRYGDHISTORIKK
+
                     TilstandTypeData.ARBEIDSLEDIG_START -> VedtaksperiodetilstandDto.ARBEIDSLEDIG_START
+                    TilstandTypeData.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK
 
                     TilstandTypeData.SELVSTENDIG_START -> VedtaksperiodetilstandDto.SELVSTENDIG_START
                     TilstandTypeData.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK

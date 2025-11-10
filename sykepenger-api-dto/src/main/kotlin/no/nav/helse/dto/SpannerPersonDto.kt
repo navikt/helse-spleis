@@ -410,7 +410,10 @@ data class SpannerPersonDto(
                 TIL_ANNULLERING,
 
                 FRILANS_START,
+                FRILANS_AVVENTER_INFOTRYGDHISTORIKK,
+
                 ARBEIDSLEDIG_START,
+                ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK,
 
                 SELVSTENDIG_START,
                 SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
@@ -1153,7 +1156,10 @@ private fun VedtaksperiodeUtDto.tilPersonData(
         VedtaksperiodetilstandDto.TIL_ANNULLERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_ANNULLERING
 
         VedtaksperiodetilstandDto.FRILANS_START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.FRILANS_START
+        VedtaksperiodetilstandDto.FRILANS_AVVENTER_INFOTRYGDHISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.FRILANS_AVVENTER_INFOTRYGDHISTORIKK
+
         VedtaksperiodetilstandDto.ARBEIDSLEDIG_START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.ARBEIDSLEDIG_START
+        VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK
 
         VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVSLUTTET
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE

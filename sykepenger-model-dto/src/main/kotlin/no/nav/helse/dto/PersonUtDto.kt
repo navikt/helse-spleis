@@ -96,7 +96,10 @@ sealed class VedtaksperiodetilstandDto {
     data object TIL_ANNULLERING : VedtaksperiodetilstandDto()
 
     data object FRILANS_START : VedtaksperiodetilstandDto()
+    data object FRILANS_AVVENTER_INFOTRYGDHISTORIKK : VedtaksperiodetilstandDto()
+
     data object ARBEIDSLEDIG_START : VedtaksperiodetilstandDto()
+    data object ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK : VedtaksperiodetilstandDto()
 
     data object SELVSTENDIG_AVSLUTTET : VedtaksperiodetilstandDto()
     data object SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE : VedtaksperiodetilstandDto()
