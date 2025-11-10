@@ -36,6 +36,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiver
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
@@ -2595,65 +2596,8 @@ internal class Vedtaksperiode private constructor(
         // send oppdatert forespørsel
         (tilstand as? AvventerInntektsmelding)?.sendTrengerArbeidsgiveropplysninger(this, eventBus)
 
-        when (tilstand) {
-            SelvstendigStart -> {
-                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, when {
-                    !person.infotrygdhistorikk.harHistorikk() -> SelvstendigAvventerInfotrygdHistorikk
-                    else -> SelvstendigAvventerBlokkerendePeriode
-                })
-            }
-
-            Start -> {
-                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, when {
-                    !person.infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
-                    else -> when (yrkesaktivitet.yrkesaktivitetstype) {
-                        is Arbeidstaker -> AvventerInntektsmelding
-                        Arbeidsledig,
-                        Frilans -> AvventerBlokkerendePeriode
-                        Selvstendig -> error("Selvstendig skal ikke være her")
-                    }
-                })
-            }
-
-            SelvstendigAvsluttet,
-            SelvstendigTilUtbetaling,
-            SelvstendigAvventerBlokkerendePeriode,
-            SelvstendigAvventerGodkjenning,
-            SelvstendigAvventerHistorikk,
-            SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving -> {
-                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
-            }
-
-            Avsluttet,
-            TilUtbetaling,
-            AvventerGodkjenningRevurdering,
-            AvventerHistorikkRevurdering,
-            AvventerSimuleringRevurdering,
-            AvventerVilkårsprøvingRevurdering,
-            AvventerRevurdering -> {
-                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerRevurdering)
-            }
-
-            AvventerAnnullering,
-            AvventerInfotrygdHistorikk,
-            TilAnnullering,
-            SelvstendigAvventerInfotrygdHistorikk -> {}
-
-            AvventerInntektsmelding,
-            AvventerAOrdningen,
-            AvsluttetUtenUtbetaling,
-            AvventerBlokkerendePeriode,
-            AvventerGodkjenning,
-            AvventerHistorikk,
-            AvventerSimulering,
-            AvventerVilkårsprøving -> {
-                if (måInnhenteInntektEllerRefusjon()) return tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
-                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
-            }
-
-            TilInfotrygd -> error("Revurdering håndteres av en periode i til_infotrygd")
-        }
+        val nesteTilstand = nesteTilstandEtterIgangsattOverstyring(yrkesaktivitet.yrkesaktivitetstype, person.infotrygdhistorikk, måInnhenteInntektEllerRefusjon(), tilstand)
+        tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, nesteTilstand)
     }
 
     private fun igangsettOverstyringPåBehandlingen(eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
@@ -3358,4 +3302,65 @@ private fun Vedtaksperiode.medVedtaksperiode(builder: ArbeidsgiverberegningBuild
         Frilans -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitet.yrkesaktivitetstype::class.simpleName}")
     }
     builder.vedtaksperiode(yrkesaktivitetstype, id, sykdomstidslinje, utbetalingstidslinjeBuilder)
+}
+
+private fun nesteTilstandEtterIgangsattOverstyring(
+    yrkesaktivitetstype: Behandlingsporing.Yrkesaktivitet,
+    infotrygdhistorikk: Infotrygdhistorikk,
+    måInnhenteInntektEllerRefusjon: Boolean,
+    tilstand: Vedtaksperiodetilstand
+) = when (tilstand) {
+    SelvstendigStart -> when {
+        !infotrygdhistorikk.harHistorikk() -> SelvstendigAvventerInfotrygdHistorikk
+        else -> SelvstendigAvventerBlokkerendePeriode
+    }
+
+    Start -> when {
+        !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
+        else -> when (yrkesaktivitetstype) {
+            is Arbeidstaker -> AvventerInntektsmelding
+            Arbeidsledig,
+            Frilans -> AvventerBlokkerendePeriode
+            Selvstendig -> error("Selvstendig skal ikke være her")
+        }
+    }
+
+    SelvstendigAvsluttet,
+    SelvstendigTilUtbetaling,
+    SelvstendigAvventerBlokkerendePeriode,
+    SelvstendigAvventerGodkjenning,
+    SelvstendigAvventerHistorikk,
+    SelvstendigAvventerSimulering,
+    SelvstendigAvventerVilkårsprøving -> {
+        SelvstendigAvventerBlokkerendePeriode
+    }
+
+    Avsluttet,
+    TilUtbetaling,
+    AvventerGodkjenningRevurdering,
+    AvventerHistorikkRevurdering,
+    AvventerSimuleringRevurdering,
+    AvventerVilkårsprøvingRevurdering,
+    AvventerRevurdering -> {
+        AvventerRevurdering
+    }
+
+    AvventerAnnullering,
+    AvventerInfotrygdHistorikk,
+    TilAnnullering,
+    SelvstendigAvventerInfotrygdHistorikk -> tilstand
+
+    AvventerInntektsmelding,
+    AvventerAOrdningen,
+    AvsluttetUtenUtbetaling,
+    AvventerBlokkerendePeriode,
+    AvventerGodkjenning,
+    AvventerHistorikk,
+    AvventerSimulering,
+    AvventerVilkårsprøving -> when {
+        måInnhenteInntektEllerRefusjon -> AvventerInntektsmelding
+        else -> AvventerBlokkerendePeriode
+    }
+
+    TilInfotrygd -> error("Revurdering håndteres av en periode i til_infotrygd")
 }
