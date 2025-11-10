@@ -2710,21 +2710,6 @@ internal class Vedtaksperiode private constructor(
                 }
             }
 
-            AvsluttetUtenUtbetaling -> {
-                if (skalBehandlesISpeil()) {
-                    revurdering.loggDersomKorrigerendeSøknad(
-                        aktivitetsloggMedVedtaksperiodekontekst,
-                        "Startet omgjøring grunnet korrigerende søknad"
-                    )
-                    aktivitetsloggMedVedtaksperiodekontekst.info("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden")
-                    if (måInnhenteInntektEllerRefusjon()) {
-                        aktivitetsloggMedVedtaksperiodekontekst.info("mangler nødvendige opplysninger fra arbeidsgiver")
-                        return tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
-                    }
-                }
-                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
-            }
-
             SelvstendigAvsluttet,
             SelvstendigTilUtbetaling -> {
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
@@ -2747,20 +2732,14 @@ internal class Vedtaksperiode private constructor(
                 tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerRevurdering)
             }
 
-            AvventerAOrdningen -> {
-                if (måInnhenteInntektEllerRefusjon()) return
-                tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
-            }
-
             AvventerAnnullering,
             AvventerInfotrygdHistorikk,
             TilAnnullering,
             SelvstendigAvventerInfotrygdHistorikk -> {}
 
-            AvventerBlokkerendePeriode -> {
-                if (måInnhenteInntektEllerRefusjon()) tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
-            }
-
+            AvventerAOrdningen,
+            AvsluttetUtenUtbetaling,
+            AvventerBlokkerendePeriode,
             AvventerGodkjenning,
             AvventerHistorikk,
             AvventerSimulering,

@@ -112,7 +112,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
                 listOf(5.februar til 20.februar)
             )
 
-            håndterPåminnelse(2.vedtaksperiode, AVVENTER_A_ORDNINGEN, 1.januar.atStartOfDay(), 1.januar.plusDays(90).atStartOfDay())
+            håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, 1.januar.atStartOfDay(), 1.januar.plusDays(90).atStartOfDay())
             håndterSykepengegrunnlagForArbeidsgiver(2.vedtaksperiode, 6.januar, emptyList())
             assertVarsel(Varselkode.RV_IV_10, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
