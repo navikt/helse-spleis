@@ -3,7 +3,6 @@ package no.nav.helse.person.tilstandsmaskin
 import java.time.LocalDateTime
 import java.time.Period
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
@@ -28,24 +27,6 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         check(vedtaksperiode.behandlinger.harIkkeUtbetaling()) {
             "hæ?! vedtaksperiodens behandling er ikke uberegnet!"
         }
-    }
-
-    override fun skalHåndtereDager(
-        vedtaksperiode: Vedtaksperiode,
-        dager: DagerFraInntektsmelding,
-        aktivitetslogg: IAktivitetslogg
-    ): Boolean {
-        return vedtaksperiode.skalHåndtereDagerAvventerInntektsmelding(dager, aktivitetslogg)
-    }
-
-    override fun håndterKorrigerendeInntektsmelding(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        dager: DagerFraInntektsmelding,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.håndterDager(eventBus, dager, aktivitetslogg)
-        if (aktivitetslogg.harFunksjonelleFeil()) return vedtaksperiode.forkast(eventBus, dager.hendelse, aktivitetslogg)
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {

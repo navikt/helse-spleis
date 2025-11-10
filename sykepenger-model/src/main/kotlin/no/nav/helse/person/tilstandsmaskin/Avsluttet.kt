@@ -1,9 +1,5 @@
 package no.nav.helse.person.tilstandsmaskin
 
-import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
-import no.nav.helse.hendelser.DagerFraInntektsmelding
-import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
-import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -17,24 +13,7 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    override fun håndterKorrigerendeInntektsmelding(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        dager: DagerFraInntektsmelding,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpen(eventBus, dager.hendelse)
-        vedtaksperiode.håndterKorrigerendeInntektsmelding(eventBus, dager, FunksjonelleFeilTilVarsler(aktivitetslogg))
-    }
-
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.behandlinger.bekreftÅpenBehandling(vedtaksperiode.yrkesaktivitet)
     }
-
-    override fun skalHåndtereDager(
-        vedtaksperiode: Vedtaksperiode,
-        dager: DagerFraInntektsmelding,
-        aktivitetslogg: IAktivitetslogg
-    ) =
-        vedtaksperiode.skalHåndtereDagerRevurdering(dager, aktivitetslogg)
 }

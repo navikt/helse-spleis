@@ -1110,38 +1110,116 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndterDagerFraInntektsmelding(eventBus: EventBus, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (!tilstand.skalHåndtereDager(this, dager, aktivitetsloggMedVedtaksperiodekontekst) || dager.alleredeHåndtert(behandlinger))
+        if (!skalHåndtereDagerFraInntektsmelding(dager) || dager.alleredeHåndtert(behandlinger))
             return dager.vurdertTilOgMed(periode.endInclusive)
-        tilstand.håndterKorrigerendeInntektsmelding(this, eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
+
+        when (tilstand) {
+            Avsluttet -> {
+                sørgForNyBehandlingHvisIkkeÅpen(eventBus, dager.hendelse)
+                håndterKorrigerendeInntektsmelding(eventBus, dager, FunksjonelleFeilTilVarsler(aktivitetsloggMedVedtaksperiodekontekst))
+            }
+
+            AvsluttetUtenUtbetaling -> {
+                sørgForNyBehandlingHvisIkkeÅpen(eventBus, dager.hendelse)
+                håndterDagerFørstegang(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
+            }
+
+            AvventerBlokkerendePeriode -> {
+                if (skalBehandlesISpeil()) {
+                    håndterKorrigerendeInntektsmelding(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
+                } else {
+                    håndterDagerFørstegang(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
+                }
+            }
+
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding -> {
+                håndterDagerFørstegang(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
+            }
+
+            AvventerAOrdningen,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering -> håndterKorrigerendeInntektsmelding(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
+
+            TilUtbetaling,
+            ArbeidsledigStart,
+            ArbeidstakerStart,
+            AvventerAnnullering,
+            FrilansStart,
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            TilAnnullering,
+            TilInfotrygd -> error("Forventer ikke å håndtere inntektsmelding i $tilstand")
+        }
+
+
         dager.vurdertTilOgMed(periode.endInclusive)
     }
 
-    internal fun skalHåndtereDagerRevurdering(dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg): Boolean {
-        return skalHåndtereDager(dager, aktivitetslogg) { sammenhengende ->
-            dager.skalHåndteresAvRevurdering(periode, sammenhengende, behandlinger.ventedager().dagerUtenNavAnsvar.dager)
+    private fun håndterDagerFørstegang(eventBus: EventBus, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
+        håndterDager(eventBus, dager, aktivitetslogg)
+
+        if (aktivitetslogg.harFunksjonelleFeil() && kanForkastes()) {
+            forkast(eventBus, dager.hendelse, aktivitetslogg)
         }
     }
 
-    internal fun skalHåndtereDagerAvventerInntektsmelding(
-        dager: DagerFraInntektsmelding,
-        aktivitetslogg: IAktivitetslogg
-    ): Boolean {
-        return skalHåndtereDager(dager, aktivitetslogg) { sammenhengende ->
-            dager.skalHåndteresAv(sammenhengende)
-        }
-    }
-
-    private fun skalHåndtereDager(
-        dager: DagerFraInntektsmelding,
-        aktivitetslogg: IAktivitetslogg,
-        strategi: DagerFraInntektsmelding.(Periode) -> Boolean
-    ): Boolean {
+    private fun skalHåndtereDagerFraInntektsmelding(dager: DagerFraInntektsmelding): Boolean {
         val sammenhengende = yrkesaktivitet.finnSammenhengendeVedtaksperioder(this)
             .map { it.periode }
-            .periode() ?: return false
-        if (!strategi(dager, sammenhengende)) return false
-        aktivitetslogg.info("Vedtaksperioden $periode håndterer dager fordi den sammenhengende perioden $sammenhengende overlapper med inntektsmelding")
-        return true
+            .periode()
+            ?: periode
+
+        return when (tilstand) {
+            Avsluttet,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikkRevurdering,
+            AvventerRevurdering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøvingRevurdering -> dager.skalHåndteresAvRevurdering(periode, sammenhengende, behandlinger.ventedager().dagerUtenNavAnsvar.dager)
+
+            AvventerInntektsmelding -> dager.skalHåndteresAv(sammenhengende)
+
+            AvsluttetUtenUtbetaling,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerHistorikk,
+            AvventerAOrdningen,
+            AvventerInfotrygdHistorikk,
+            AvventerSimulering,
+            AvventerVilkårsprøving -> dager.skalHåndteresAv(periode)
+
+            ArbeidsledigStart,
+            ArbeidstakerStart,
+            AvventerAnnullering,
+            FrilansStart,
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            TilAnnullering,
+            TilInfotrygd,
+            TilUtbetaling -> false
+        }
     }
 
     internal fun håndterDager(eventBus: EventBus, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {

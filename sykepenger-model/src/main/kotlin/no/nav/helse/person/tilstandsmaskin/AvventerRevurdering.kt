@@ -1,6 +1,5 @@
 package no.nav.helse.person.tilstandsmaskin
 
-import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.EventBus
@@ -43,13 +42,6 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         }
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
-
-    override fun skalHåndtereDager(
-        vedtaksperiode: Vedtaksperiode,
-        dager: DagerFraInntektsmelding,
-        aktivitetslogg: IAktivitetslogg
-    ) =
-        vedtaksperiode.skalHåndtereDagerRevurdering(dager, aktivitetslogg)
 
     private fun tilstand(vedtaksperiode: Vedtaksperiode): Tilstand {
         if (vedtaksperiode.behandlinger.utbetales()) return HarPågåendeUtbetaling

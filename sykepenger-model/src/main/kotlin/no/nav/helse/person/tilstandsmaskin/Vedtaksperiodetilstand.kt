@@ -1,7 +1,6 @@
 package no.nav.helse.person.tilstandsmaskin
 
 import java.time.LocalDateTime
-import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Påminnelse
@@ -33,17 +32,6 @@ internal sealed interface Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-    }
-
-    fun skalHåndtereDager(
-        vedtaksperiode: Vedtaksperiode,
-        dager: DagerFraInntektsmelding,
-        aktivitetslogg: IAktivitetslogg
-    ) =
-        dager.skalHåndteresAv(vedtaksperiode.periode)
-
-    fun håndterKorrigerendeInntektsmelding(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.håndterKorrigerendeInntektsmelding(eventBus, dager, aktivitetslogg)
     }
 
     fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}

@@ -1,8 +1,6 @@
 package no.nav.helse.person.tilstandsmaskin
 
-import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -18,11 +16,4 @@ internal data object AvventerHistorikkRevurdering : Vedtaksperiodetilstand {
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.trengerYtelser(aktivitetslogg)
     }
-
-    override fun skalHåndtereDager(
-        vedtaksperiode: Vedtaksperiode,
-        dager: DagerFraInntektsmelding,
-        aktivitetslogg: IAktivitetslogg
-    ) =
-        vedtaksperiode.skalHåndtereDagerRevurdering(dager, aktivitetslogg)
 }

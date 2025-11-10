@@ -2,8 +2,6 @@ package no.nav.helse.person.tilstandsmaskin
 
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.DagerFraInntektsmelding
-import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
@@ -57,19 +55,5 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
 
     override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
         vedtaksperiode.behandlinger.bekreftÅpenBehandling(vedtaksperiode.yrkesaktivitet)
-    }
-
-    override fun håndterKorrigerendeInntektsmelding(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        dager: DagerFraInntektsmelding,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vedtaksperiode.sørgForNyBehandlingHvisIkkeÅpen(eventBus, dager.hendelse)
-        vedtaksperiode.håndterDager(eventBus, dager, aktivitetslogg)
-
-        if (!aktivitetslogg.harFunksjonelleFeil()) return
-        if (!vedtaksperiode.kanForkastes()) return
-        vedtaksperiode.forkast(eventBus, dager.hendelse, aktivitetslogg)
     }
 }

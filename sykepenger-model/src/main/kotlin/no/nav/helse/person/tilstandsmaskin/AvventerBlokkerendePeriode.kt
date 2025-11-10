@@ -1,10 +1,8 @@
 package no.nav.helse.person.tilstandsmaskin
 
 import java.time.Period
-import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VenterPå
@@ -28,25 +26,6 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         AvventerTidligereEllerOverlappendeSøknad -> VenterPå.SegSelv(Venteårsak.SØKNAD)
         is TrengerInntektsmelding -> VenterPå.SegSelv(Venteårsak.INNTEKTSMELDING)
         is TrengerInntektsmeldingAnnenPeriode -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.INNTEKTSMELDING)
-    }
-
-    override fun håndterKorrigerendeInntektsmelding(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        dager: DagerFraInntektsmelding,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        if (vedtaksperiode.skalBehandlesISpeil()) return vedtaksperiode.håndterKorrigerendeInntektsmelding(
-            eventBus,
-            dager,
-            aktivitetslogg
-        )
-        vedtaksperiode.håndterDager(eventBus, dager, aktivitetslogg)
-        if (aktivitetslogg.harFunksjonelleFeil()) return vedtaksperiode.forkast(
-            eventBus,
-            dager.hendelse,
-            aktivitetslogg
-        )
     }
 
     override fun gjenopptaBehandling(
