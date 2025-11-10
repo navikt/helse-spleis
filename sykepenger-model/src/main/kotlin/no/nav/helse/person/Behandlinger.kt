@@ -52,6 +52,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
+import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.FaktaavklartInntektView
 import no.nav.helse.person.inntekt.Saksbehandler
@@ -427,6 +428,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal fun håndterFaktaavklartInntekt(eventBus: EventBus, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) {
+        check(arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) { "Inntekt med kilde ${arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class.simpleName} skal ikke lagres på behandlingen!"}
         checkNotNull(åpenBehandling).håndterFaktaavklartInntekt(eventBus, arbeidstakerFaktaavklartInntekt, yrkesaktivitet, aktivitetslogg)
     }
 

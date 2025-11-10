@@ -618,7 +618,7 @@ internal class Vedtaksperiode private constructor(
         inntektsmeldingHåndtert(eventBus, inntektsmelding)
 
         if (!oppdaterVilkårsgrunnlagMedInntekt(faktaavklartInntekt)) {
-            // har ikke laget nytt vilkårsgrunnlag for beløpet var det samme som det var. Legger heller ikke til inntekten på behandlingen
+            // har ikke laget nytt vilkårsgrunnlag for beløpet var det samme som det var
             return null
         }
 
@@ -1638,13 +1638,6 @@ internal class Vedtaksperiode private constructor(
                 tidsstempel = LocalDateTime.now()
             ),
             inntektsopplysningskilde = Arbeidstakerinntektskilde.AOrdningen(skatteopplysninger)
-        )
-
-        behandlinger.håndterFaktaavklartInntekt(
-            eventBus = eventBus,
-            arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
-            yrkesaktivitet = yrkesaktivitet,
-            aktivitetslogg = aktivitetslogg
         )
 
         yrkesaktivitet.lagreInntektFraAOrdningen(faktaavklartInntekt)

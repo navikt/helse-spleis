@@ -222,12 +222,12 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `lagrer faktaavklart inntekt fra a-ordningen`() {
+    fun `lagrer IKKE faktaavklart inntekt fra a-ordningen`() {
         a1 {
             håndterSøknad(januar)
             assertNull(inspektør.faktaavklartInntekt(1.vedtaksperiode))
             håndterPåminnelse(1.vedtaksperiode, TilstandType.AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
-            val hendelseId = håndterSykepengegrunnlagForArbeidsgiver(
+            håndterSykepengegrunnlagForArbeidsgiver(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 skjæringstidspunkt = 1.januar,
                 inntekter = listOf(
@@ -237,11 +237,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 )
             )
 
-            val faktaavklartInntekt = inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView
-            assertNotNull(faktaavklartInntekt)
-            assertEquals(INNTEKT, faktaavklartInntekt.beløp)
-            assertEquals(hendelseId, faktaavklartInntekt.hendelseId)
-
+            assertNull(inspektør.faktaavklartInntekt(1.vedtaksperiode))
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
         }
     }
