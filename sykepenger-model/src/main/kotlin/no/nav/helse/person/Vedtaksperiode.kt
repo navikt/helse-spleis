@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
@@ -253,7 +253,7 @@ internal class Vedtaksperiode private constructor(
     internal var tilstand: Vedtaksperiodetilstand = tilstand
         private set
 
-    private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
+    internal val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
     internal val periode get() = behandlinger.periode()
     internal val sykdomstidslinje get() = behandlinger.sykdomstidslinje()
     internal val subsumsjonslogg get() = behandlinger.subsumsjonslogg(regelverkslogg, id, person.fødselsnummer, yrkesaktivitet.organisasjonsnummer)
@@ -268,7 +268,7 @@ internal class Vedtaksperiode private constructor(
         )
     internal val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
     private val eksterneIderSet get() = behandlinger.eksterneIderUUID()
-    private val refusjonstidslinje get() = behandlinger.refusjonstidslinje()
+    internal val refusjonstidslinje get() = behandlinger.refusjonstidslinje()
 
     internal val EventBus.behandlingEventBus get() =
         BehandlingEventBus(this, yrkesaktivitet.yrkesaktivitetstype, id, behandlinger.søknadIder())
@@ -2494,96 +2494,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun opplysningerViTrenger(): Set<EventSubscription.ForespurtOpplysning> {
-        if (!skalBehandlesISpeil()) return emptySet() // perioden er AUU ✋
-
-        if (yrkesaktivitet.finnVedtaksperiodeRettFør(this)?.skalBehandlesISpeil() == true) return emptySet() // Da har perioden foran oss spurt for oss/ vi har det vi trenger ✋
-
-        val opplysninger = mutableSetOf<EventSubscription.ForespurtOpplysning>().apply {
-            if (!harEksisterendeInntekt()) addAll(setOf(EventSubscription.Inntekt, EventSubscription.Refusjon)) // HAG støtter ikke skjema uten refusjon, så når vi først spør om inntekt _må_ vi også spørre om refusjon
-            if (refusjonstidslinje.isEmpty()) add(EventSubscription.Refusjon) // For de tilfellene vi faktiske trenger refusjon
-        }
-        if (opplysninger.isEmpty()) return emptySet() // Om vi har inntekt og refusjon så er saken biff 🥩
-
-        if (behandlinger.dagerNavOvertarAnsvar.isNotEmpty()) return opplysninger // Trenger hvert fall ikke opplysninger om arbeidsgiverperiode dersom Nav har overtatt ansvar for den ✋
-
-        return opplysninger.apply {
-            val sisteDelAvAgp = behandlinger.ventedager().dagerUtenNavAnsvar.dager.lastOrNull()
-            // Vi "trenger" jo aldri AGP, men spør om vi perioden overlapper/er rett etter beregnet AGP
-            if (sisteDelAvAgp?.overlapperMed(periode) == true || sisteDelAvAgp?.erRettFør(periode) == true) {
-                add(EventSubscription.Arbeidsgiverperiode)
-            }
-        }
-    }
-
-    internal fun sendTrengerArbeidsgiveropplysninger(eventBus: EventBus) {
-        val forespurteOpplysninger = opplysningerViTrenger().takeUnless { it.isEmpty() } ?: return
-        eventBus.trengerArbeidsgiveropplysninger(trengerArbeidsgiveropplysninger(forespurteOpplysninger))
-
-        // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
-        yrkesaktivitet.finnVedtaksperiodeRettEtter(this)?.trengerIkkeArbeidsgiveropplysninger(eventBus)
-    }
-
-    private fun trengerArbeidsgiveropplysninger(
-        forespurteOpplysninger: Set<EventSubscription.ForespurtOpplysning>
-    ): EventSubscription.TrengerArbeidsgiveropplysninger {
-        val vedtaksperioder = when {
-            // For å beregne riktig arbeidsgiverperiode/første fraværsdag
-            EventSubscription.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne()
-            // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
-            else -> listOf(this)
-        }
-        return EventSubscription.TrengerArbeidsgiveropplysninger(
-            personidentifikator = person.personidentifikator,
-            yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
-            vedtaksperiodeId = id,
-            skjæringstidspunkt = skjæringstidspunkt,
-            sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
-            egenmeldingsperioder = vedtaksperioder.egenmeldingsperioder(),
-            førsteFraværsdager = førsteFraværsdagerForForespørsel(),
-            forespurteOpplysninger = forespurteOpplysninger
-        )
-    }
-
-    private fun førsteFraværsdagerForForespørsel(): List<EventSubscription.FørsteFraværsdag> {
-        val deAndre = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(this.skjæringstidspunkt))
-            .filterNot { it.yrkesaktivitet === this.yrkesaktivitet }
-            .groupBy { it.yrkesaktivitet }
-            .mapNotNull { (arbeidsgiver, perioder) ->
-                val førsteFraværsdagForArbeidsgiver = perioder
-                    .asReversed()
-                    .firstNotNullOfOrNull { it.førsteFraværsdag }
-                førsteFraværsdagForArbeidsgiver?.let {
-                    EventSubscription.FørsteFraværsdag(arbeidsgiver.yrkesaktivitetstype, it)
-                }
-            }
-        val minEgen = førsteFraværsdag?.let {
-            EventSubscription.FørsteFraværsdag(yrkesaktivitet.yrkesaktivitetstype, it)
-        } ?: return deAndre
-        return deAndre.plusElement(minEgen)
-    }
-
-    private fun vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(): List<Vedtaksperiode> {
-        val arbeidsgiverperiode = behandlinger.ventedager().dagerUtenNavAnsvar.periode ?: return listOf(this)
-        return yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it <= this }
-    }
-
-    private fun trengerIkkeArbeidsgiveropplysninger(eventBus: EventBus) {
-        eventBus.trengerIkkeArbeidsgiveropplysninger(
-            EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent(
-                yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
-                vedtaksperiodeId = id
-            )
-        )
-    }
-
-    internal fun trengerInntektsmeldingReplay(eventBus: EventBus) {
-        val erKortPeriode = !skalBehandlesISpeil()
-        val opplysningerViTrenger = if (erKortPeriode) opplysningerViTrenger() + EventSubscription.Arbeidsgiverperiode else opplysningerViTrenger()
-
-        eventBus.inntektsmeldingReplay(trengerArbeidsgiveropplysninger(opplysningerViTrenger))
-    }
-
     private fun emitVedtaksperiodeEndret(eventBus: EventBus, previousState: Vedtaksperiodetilstand) {
         val event = EventSubscription.VedtaksperiodeEndretEvent(
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
@@ -2704,7 +2614,7 @@ internal class Vedtaksperiode private constructor(
             AvventerInntektsmelding -> {
                 if (måInnhenteInntektEllerRefusjon()) {
                     // send oppdatert forespørsel
-                    sendTrengerArbeidsgiveropplysninger(eventBus)
+                    (tilstand as AvventerInntektsmelding).sendTrengerArbeidsgiveropplysninger(this, eventBus)
                 } else {
                     tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
                 }
@@ -2938,7 +2848,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
-    private fun harEksisterendeInntekt(): Boolean {
+    internal fun harEksisterendeInntekt(): Boolean {
         // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
         // hvis det finnes et vilkårsgrunnlag så antas det at inntekten er representert der (vil vi slå ut på tilkommen inntekt-error senere hvis ikke)
         val vilkårsgrunnlag = vilkårsgrunnlag
@@ -3114,10 +3024,6 @@ internal class Vedtaksperiode private constructor(
                     (Periode.mellom(periode, vedtaksperiode.periode)?.count() ?: 0) < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
                 }
             }
-        }
-
-        private fun sykmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>): List<Periode> {
-            return vedtaksperioder.map { it.sykmeldingsperiode }
         }
 
         internal fun List<Vedtaksperiode>.aktiveSkjæringstidspunkter(): Set<LocalDate> {
