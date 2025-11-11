@@ -2147,7 +2147,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun erForlengelse(): Boolean = yrkesaktivitet
         .finnVedtaksperiodeRettFør(this)
-        ?.takeIf { it.skalBehandlesISpeil() } != null
+        ?.behandlinger?.harFattetVedtak() == true
 
     internal fun forkast(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, tvingForkasting: Boolean = false) {
         val forkastinger = forkastingskandidater(aktivitetslogg, tvingForkasting)
