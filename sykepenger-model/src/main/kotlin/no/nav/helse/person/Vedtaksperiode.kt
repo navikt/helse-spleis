@@ -290,7 +290,7 @@ internal class Vedtaksperiode private constructor(
         egenmeldingsdager = behandlinger.egenmeldingsdager(),
         behandlinger = behandlinger.view(),
         førsteFraværsdag = førsteFraværsdag,
-        skalBehandlesISpeil = skalBehandlesISpeil(),
+        skalArbeidstakerBehandlesISpeil = (yrkesaktivitet.yrkesaktivitetstype as? Arbeidstaker)?.let { skalArbeidstakerBehandlesISpeil() } ?: false,
         annulleringskandidater = yrkesaktivitet.finnAnnulleringskandidater(this.id)
     )
 
@@ -1154,7 +1154,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             AvventerBlokkerendePeriode -> {
-                if (skalBehandlesISpeil()) {
+                if (skalArbeidstakerBehandlesISpeil()) {
                     håndterKorrigerendeInntektsmelding(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
                 } else {
                     håndterDagerFørstegang(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
@@ -2767,7 +2767,7 @@ internal class Vedtaksperiode private constructor(
         // send oppdatert forespørsel
         (tilstand as? AvventerInntektsmelding)?.sendTrengerArbeidsgiveropplysninger(this, eventBus)
 
-        val nesteTilstand = nesteTilstandEtterIgangsattOverstyring(person.infotrygdhistorikk, måInnhenteInntektEllerRefusjon(), tilstand)
+        val nesteTilstand = nesteTilstandEtterIgangsattOverstyring(person.infotrygdhistorikk, this::måInnhenteInntektEllerRefusjon, tilstand)
         tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, nesteTilstand)
     }
 
@@ -2815,7 +2815,7 @@ internal class Vedtaksperiode private constructor(
     // gitt at du står i tilstand X, hva/hvem henter du på og hvorfor?
     internal val venterPå
         get() = when (val t = tilstand) {
-            AvsluttetUtenUtbetaling -> when (skalBehandlesISpeil()) {
+            AvsluttetUtenUtbetaling -> when (skalArbeidstakerBehandlesISpeil()) {
                 true -> VenterPå.SegSelv(Venteårsak.HJELP fordi Venteårsak.Hvorfor.VIL_OMGJØRES)
                 false -> null
             }
@@ -2910,7 +2910,10 @@ internal class Vedtaksperiode private constructor(
         // lag utbetaling for seg selv + andre overlappende perioder hos andre arbeidsgivere (som ikke er utbetalt/avsluttet allerede)
         return person
             .nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
-            .filter { it.behandlinger.forventerUtbetaling(periode, skjæringstidspunkt, it.skalBehandlesISpeil()) }
+            .filter {
+                val skalBehandlesISpeil = it.yrkesaktivitet.yrkesaktivitetstype !is Arbeidstaker || it.skalArbeidstakerBehandlesISpeil()
+                it.behandlinger.forventerUtbetaling(periode, skjæringstidspunkt, skalBehandlesISpeil)
+            }
     }
 
     private fun mursteinsperioderMedSammeSkjæringstidspunkt(): List<Vedtaksperiode> {
@@ -2934,29 +2937,16 @@ internal class Vedtaksperiode private constructor(
             .filterNot { it.periode.endInclusive < this.periode.start }
     }
 
-    internal fun skalBehandlesISpeil(): Boolean {
-        return when (yrkesaktivitet.yrkesaktivitetstype) {
-            is Arbeidstaker -> behandlinger.ventedager().skalFatteVedtak
-
-            Arbeidsledig,
-            Frilans -> false
-
-            Selvstendig -> true
-        }
+    internal fun skalArbeidstakerBehandlesISpeil(): Boolean {
+        check(yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker) { "gir bare mening å kalle denne funksjonen for arbeidstakere" }
+        return behandlinger.ventedager().skalFatteVedtak
     }
 
     internal fun måInnhenteInntektEllerRefusjon(): Boolean {
-        when (yrkesaktivitet.yrkesaktivitetstype) {
-            is Arbeidstaker -> {
-                if (!skalBehandlesISpeil()) return false
-                if (harInntektOgRefusjon()) return false
-                return true
-            }
-
-            Arbeidsledig,
-            Frilans,
-            Selvstendig -> return false
-        }
+        check(yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker) { "gir bare mening å kalle denne funksjonen for arbeidstakere" }
+        if (!skalArbeidstakerBehandlesISpeil()) return false
+        if (harInntektOgRefusjon()) return false
+        return true
     }
 
     private fun harInntektOgRefusjon(): Boolean {
@@ -2982,12 +2972,17 @@ internal class Vedtaksperiode private constructor(
 
     internal fun førstePeriodeSomTrengerInntektsmelding(): Vedtaksperiode? {
         val førsteMursteinsperiodeSomTrengerInntektEllerRefusjon = perioderSomMåHensyntasVedBeregning()
+            .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
             .firstOrNull { it.måInnhenteInntektEllerRefusjon() }
 
         if (vilkårsgrunnlag != null) return førsteMursteinsperiodeSomTrengerInntektEllerRefusjon
 
-        val førstePeriodePåSkjæringstidspunktetAnnenArbeidsgiverSomTrengerInntektEllerRefusjon = person.nåværendeVedtaksperioder { other ->
-            this.yrkesaktivitet !== other.yrkesaktivitet && other.skjæringstidspunkt == skjæringstidspunkt && other.måInnhenteInntektEllerRefusjon()
+        val førstePeriodePåSkjæringstidspunktetAnnenArbeidsgiverSomTrengerInntektEllerRefusjon = person
+            .nåværendeVedtaksperioder { other ->
+                other.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker &&
+                    this.yrkesaktivitet !== other.yrkesaktivitet &&
+                    other.skjæringstidspunkt == skjæringstidspunkt &&
+                    other.måInnhenteInntektEllerRefusjon()
         }.minOrNull()
 
         return førstePeriodePåSkjæringstidspunktetAnnenArbeidsgiverSomTrengerInntektEllerRefusjon ?: førsteMursteinsperiodeSomTrengerInntektEllerRefusjon
@@ -3129,12 +3124,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val AUU_SOM_VIL_UTBETALES: VedtaksperiodeFilter = {
-            it.tilstand == AvsluttetUtenUtbetaling && it.skalBehandlesISpeil()
+            it.tilstand == AvsluttetUtenUtbetaling && it.skalArbeidstakerBehandlesISpeil()
         }
 
         internal fun SPEILRELATERT(vararg perioder: Periode): VedtaksperiodeFilter {
             return fun(vedtaksperiode: Vedtaksperiode): Boolean {
-                if (!vedtaksperiode.skalBehandlesISpeil()) return false // Om vedtaksperioden er en AUU skal den ikke hensyntas ved vurdering på avstand mellom perioder & vedtaksperiode
+                if (vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker && !vedtaksperiode.skalArbeidstakerBehandlesISpeil()) return false // Om vedtaksperioden er en AUU skal den ikke hensyntas ved vurdering på avstand mellom perioder & vedtaksperiode
                 return perioder.any { periode ->
                     // Om avstand mellom vedtaksperioden og en av periodene er mindre enn 18 dager er det speilrelatert.
                     // Når det ikke er noen periode mellom (?: 0) så er det kant-i-kant/overlapp som også er speilrelatert
@@ -3346,7 +3341,7 @@ internal data class VedtaksperiodeView(
     val egenmeldingsdager: List<Periode>,
     val behandlinger: BehandlingerView,
     val førsteFraværsdag: LocalDate?,
-    val skalBehandlesISpeil: Boolean,
+    val skalArbeidstakerBehandlesISpeil: Boolean,
     val annulleringskandidater: Set<Vedtaksperiode>
 ) {
     val sykdomstidslinje = behandlinger.behandlinger.last().endringer.last().sykdomstidslinje
@@ -3501,7 +3496,7 @@ private fun Vedtaksperiode.medVedtaksperiode(builder: ArbeidsgiverberegningBuild
 
 private fun nesteTilstandEtterIgangsattOverstyring(
     infotrygdhistorikk: Infotrygdhistorikk,
-    måInnhenteInntektEllerRefusjon: Boolean,
+    måInnhenteInntektEllerRefusjon: () -> Boolean,
     tilstand: Vedtaksperiodetilstand
 ) = when (tilstand) {
     SelvstendigStart -> when {
@@ -3563,7 +3558,7 @@ private fun nesteTilstandEtterIgangsattOverstyring(
     AvventerHistorikk,
     AvventerSimulering,
     AvventerVilkårsprøving -> when {
-        måInnhenteInntektEllerRefusjon -> AvventerInntektsmelding
+        måInnhenteInntektEllerRefusjon() -> AvventerInntektsmelding
         else -> AvventerBlokkerendePeriode
     }
 

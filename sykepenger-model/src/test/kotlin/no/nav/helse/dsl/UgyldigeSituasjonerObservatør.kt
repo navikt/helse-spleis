@@ -257,7 +257,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
                     behandling.endringer.last().let { endring ->
                         if (endring.refusjonstidslinje.isEmpty()) {
                             if (behandling.tilstand == AVSLUTTET_UTEN_VEDTAK) return@behandling // Ikke noe refusjonsopplysning på AUU er OK
-                            if (vedtaksperiode.tilstand == AVVENTER_BLOKKERENDE_PERIODE && !vedtaksperiode.skalBehandlesISpeil) return@behandling // Dette kan være AUU'er som skal tilbake til AUU, de må ikke ha refusjonsopplysninger.
+                            if (vedtaksperiode.tilstand == AVVENTER_BLOKKERENDE_PERIODE && !vedtaksperiode.skalArbeidstakerBehandlesISpeil) return@behandling // Dette kan være AUU'er som skal tilbake til AUU, de må ikke ha refusjonsopplysninger.
                             if (vedtaksperiode.tilstand in setOf(AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_A_ORDNINGEN)) return@behandling// Ikke fått refusjonsopplysninger enda da
                             error("Burde ikke ha tom refusjonstidslinje i tilstand ${vedtaksperiode.tilstand}")
                         }

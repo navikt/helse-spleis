@@ -83,9 +83,9 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     }
 
     private fun opplysningerViTrenger(vedtaksperiode: Vedtaksperiode): Set<EventSubscription.ForespurtOpplysning> {
-        if (!vedtaksperiode.skalBehandlesISpeil()) return emptySet() // perioden er AUU ✋
+        if (!vedtaksperiode.skalArbeidstakerBehandlesISpeil()) return emptySet() // perioden er AUU ✋
 
-        if (vedtaksperiode.yrkesaktivitet.finnVedtaksperiodeRettFør(vedtaksperiode)?.skalBehandlesISpeil() == true) return emptySet() // Da har perioden foran oss spurt for oss/ vi har det vi trenger ✋
+        if (vedtaksperiode.yrkesaktivitet.finnVedtaksperiodeRettFør(vedtaksperiode)?.skalArbeidstakerBehandlesISpeil() == true) return emptySet() // Da har perioden foran oss spurt for oss/ vi har det vi trenger ✋
 
         val opplysninger = mutableSetOf<EventSubscription.ForespurtOpplysning>().apply {
             if (!vedtaksperiode.harEksisterendeInntekt()) addAll(setOf(EventSubscription.Inntekt, EventSubscription.Refusjon)) // HAG støtter ikke skjema uten refusjon, så når vi først spør om inntekt _må_ vi også spørre om refusjon
@@ -167,7 +167,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     }
 
     private fun trengerInntektsmeldingReplay(vedtaksperiode: Vedtaksperiode, eventBus: EventBus) {
-        val erKortPeriode = !vedtaksperiode.skalBehandlesISpeil()
+        val erKortPeriode = !vedtaksperiode.skalArbeidstakerBehandlesISpeil()
         val opplysningerViTrenger = if (erKortPeriode)
             opplysningerViTrenger(vedtaksperiode) + EventSubscription.Arbeidsgiverperiode
         else

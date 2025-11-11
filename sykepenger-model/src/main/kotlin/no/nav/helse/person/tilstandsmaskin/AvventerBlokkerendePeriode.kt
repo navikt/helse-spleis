@@ -46,7 +46,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     ): Tilstand {
         val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
         return when {
-            !vedtaksperiode.skalBehandlesISpeil() -> ForventerIkkeInntekt
+            !vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> ForventerIkkeInntekt
             vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
             førstePeriodeSomTrengerInntektsmelding != null -> when (førstePeriodeSomTrengerInntektsmelding) {
                 vedtaksperiode -> TrengerInntektsmelding(førstePeriodeSomTrengerInntektsmelding)
