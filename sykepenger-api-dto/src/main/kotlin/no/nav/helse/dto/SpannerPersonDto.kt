@@ -411,6 +411,7 @@ data class SpannerPersonDto(
 
                 FRILANS_START,
                 FRILANS_AVVENTER_INFOTRYGDHISTORIKK,
+                FRILANS_AVVENTER_BLOKKERENDE_PERIODE,
 
                 ARBEIDSLEDIG_START,
                 ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK,
@@ -1157,6 +1158,7 @@ private fun VedtaksperiodeUtDto.tilPersonData(
 
         VedtaksperiodetilstandDto.FRILANS_START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.FRILANS_START
         VedtaksperiodetilstandDto.FRILANS_AVVENTER_INFOTRYGDHISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.FRILANS_AVVENTER_INFOTRYGDHISTORIKK
+        VedtaksperiodetilstandDto.FRILANS_AVVENTER_BLOKKERENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.FRILANS_AVVENTER_BLOKKERENDE_PERIODE
 
         VedtaksperiodetilstandDto.ARBEIDSLEDIG_START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.ARBEIDSLEDIG_START
         VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK

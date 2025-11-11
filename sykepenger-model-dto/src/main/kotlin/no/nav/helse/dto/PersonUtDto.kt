@@ -97,6 +97,7 @@ sealed class VedtaksperiodetilstandDto {
 
     data object FRILANS_START : VedtaksperiodetilstandDto()
     data object FRILANS_AVVENTER_INFOTRYGDHISTORIKK : VedtaksperiodetilstandDto()
+    data object FRILANS_AVVENTER_BLOKKERENDE_PERIODE : VedtaksperiodetilstandDto()
 
     data object ARBEIDSLEDIG_START : VedtaksperiodetilstandDto()
     data object ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK : VedtaksperiodetilstandDto()

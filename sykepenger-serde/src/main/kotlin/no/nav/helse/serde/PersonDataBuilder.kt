@@ -89,6 +89,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.FRILANS_AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.FRILANS_AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.FRILANS_START
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVSLUTTET
@@ -420,6 +421,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
 
         VedtaksperiodetilstandDto.FRILANS_START -> FRILANS_START
         VedtaksperiodetilstandDto.FRILANS_AVVENTER_INFOTRYGDHISTORIKK -> FRILANS_AVVENTER_INFOTRYGDHISTORIKK
+        VedtaksperiodetilstandDto.FRILANS_AVVENTER_BLOKKERENDE_PERIODE -> FRILANS_AVVENTER_BLOKKERENDE_PERIODE
 
         VedtaksperiodetilstandDto.ARBEIDSLEDIG_START -> ARBEIDSLEDIG_START
         VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK -> ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK

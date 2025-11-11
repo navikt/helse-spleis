@@ -708,6 +708,7 @@ data class PersonData(
 
                 FRILANS_START,
                 FRILANS_AVVENTER_INFOTRYGDHISTORIKK,
+                FRILANS_AVVENTER_BLOKKERENDE_PERIODE,
 
                 ARBEIDSLEDIG_START,
                 ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK,
@@ -750,6 +751,7 @@ data class PersonData(
 
                     TilstandTypeData.FRILANS_START -> VedtaksperiodetilstandDto.FRILANS_START
                     TilstandTypeData.FRILANS_AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.FRILANS_AVVENTER_INFOTRYGDHISTORIKK
+                    TilstandTypeData.FRILANS_AVVENTER_BLOKKERENDE_PERIODE -> VedtaksperiodetilstandDto.FRILANS_AVVENTER_BLOKKERENDE_PERIODE
 
                     TilstandTypeData.ARBEIDSLEDIG_START -> VedtaksperiodetilstandDto.ARBEIDSLEDIG_START
                     TilstandTypeData.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK
