@@ -51,7 +51,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
@@ -831,7 +830,7 @@ internal class Vedtaksperiode private constructor(
                 nyBehandling(eventBus, arbeidsgiveropplysninger)
                 // det er oppgitt arbeidsgiverperiode på uventede perioder; mest sannsynlig
                 // har da ikke vedtaksperioden bedt om Arbeidsgiverperiode som opplysning, men vi har fått det likevel
-                varselFraArbeidsgiveropplysning(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, RV_IM_24)
+                aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_24)
                 aktivitetsloggMedVedtaksperiodekontekst.info("Håndterer ikke arbeidsgiverperiode i ${tilstand.type}")
             }
 
@@ -849,7 +848,7 @@ internal class Vedtaksperiode private constructor(
             AvventerVilkårsprøvingRevurdering -> {
                 // det er oppgitt arbeidsgiverperiode på uventede perioder; mest sannsynlig
                 // har da ikke vedtaksperioden bedt om Arbeidsgiverperiode som opplysning, men vi har fått det likevel
-                varselFraArbeidsgiveropplysning(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, RV_IM_24)
+                aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_24)
                 aktivitetsloggMedVedtaksperiodekontekst.info("Håndterer ikke arbeidsgiverperiode i ${tilstand.type}")
             }
 
@@ -1071,7 +1070,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndterKorrigertOpphørAvNaturalytelser(eventBus: EventBus, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
         if (korrigerteArbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OpphørAvNaturalytelser>().isEmpty()) return emptyList()
         sørgForNyBehandlingHvisIkkeÅpen(eventBus, korrigerteArbeidsgiveropplysninger)
-        varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_7)
+        aktivitetslogg.varsel(RV_IM_7)
         return listOf(Revurderingseventyr.arbeidsgiverperiode(korrigerteArbeidsgiveropplysninger, skjæringstidspunkt, periode))
     }
 
@@ -1087,7 +1086,7 @@ internal class Vedtaksperiode private constructor(
 
         if (korrigertUtbetalingIArbeidsgiverperiode != null) {
             sørgForNyBehandlingHvisIkkeÅpen(eventBus, korrigerteArbeidsgiveropplysninger)
-            varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_8)
+            aktivitetslogg.varsel(RV_IM_8)
         }
 
         return listOf(Revurderingseventyr.arbeidsgiverperiode(korrigerteArbeidsgiveropplysninger, skjæringstidspunkt, periode))
@@ -1098,11 +1097,11 @@ internal class Vedtaksperiode private constructor(
         val beregnetArbeidsgiverperiode = behandlinger.ventedager().dagerUtenNavAnsvar.periode
         if (beregnetArbeidsgiverperiode == null) {
             sørgForNyBehandlingHvisIkkeÅpen(eventBus, korrigerteArbeidsgiveropplysninger)
-            return varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_24)
+            return aktivitetslogg.varsel(RV_IM_24)
         }
         if (oppgittArbeidgiverperiode.perioder.periode()!! in beregnetArbeidsgiverperiode) return
         sørgForNyBehandlingHvisIkkeÅpen(eventBus, korrigerteArbeidsgiveropplysninger)
-        varselFraArbeidsgiveropplysning(korrigerteArbeidsgiveropplysninger, aktivitetslogg, RV_IM_24)
+        aktivitetslogg.varsel(RV_IM_24)
     }
 
     private fun sykNavBit(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, perioderNavUtbetaler: List<Periode>): BitAvArbeidsgiverperiode? {
@@ -1112,11 +1111,6 @@ internal class Vedtaksperiode private constructor(
 
         if (dagerNavOvertarAnsvar.isEmpty()) return null
         return BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, Sykdomstidslinje(), dagerNavOvertarAnsvar)
-    }
-
-    private fun varselFraArbeidsgiveropplysning(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, varselkode: Varselkode) {
-        behandlinger.oppdaterDokumentsporing(inntektsmeldingDager(hendelse.metadata.meldingsreferanseId))
-        aktivitetslogg.varsel(varselkode)
     }
 
     internal fun håndterDagerFraInntektsmelding(eventBus: EventBus, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {

@@ -399,9 +399,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun eksterneIder() = behandlinger.dokumentsporing.eksterneIder()
     internal fun eksterneIderUUID() = eksterneIder().map { it.id }.toSet()
     internal fun søknadIder() = behandlinger.dokumentsporing.søknadIder()
-    internal fun oppdaterDokumentsporing(dokument: Dokumentsporing) {
-        return checkNotNull(åpenBehandling).oppdaterDokumentsporing(dokument)
-    }
 
     fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
         behandlinger.any { it.dokumentHåndtert(dokumentsporing) }
@@ -1038,7 +1035,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 inntektjusteringer = emptyMap()
             )
 
-            internal fun kopierDokument(dokument: Dokumentsporing) = kopierMed(dokumentsporing = dokument)
             internal fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) = kopierMed(
                 utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
                 inntektjusteringer = inntekterForBeregning
@@ -1270,15 +1266,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
             dokumentsporing in this.dokumentsporing
-
-        internal fun oppdaterDokumentsporing(dokument: Dokumentsporing) {
-            return tilstand.oppdaterDokumentsporing(this, dokument)
-        }
-
-        private fun kopierMedDokument(dokument: Dokumentsporing) {
-            if (gjeldende.dokumentsporing == dokument) return
-            nyEndring(gjeldende.kopierDokument(dokument))
-        }
 
         private fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
             nyEndring(gjeldende.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning))
@@ -1624,8 +1611,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 error("Støtter ikke å beregne behandlingen i $this")
             }
 
-            fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing) {}
-
             fun håndterUtbetalinghendelse(behandling: Behandling, behandlingEventBus: BehandlingEventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
                 error("forventer ikke å håndtere utbetalinghendelse i tilstand ${this.javaClass.simpleName}")
             }
@@ -1655,9 +1640,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 ) {
                     behandling.oppdaterMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar)
                 }
-
-                override fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing) =
-                    behandling.kopierMedDokument(dokument)
 
                 override fun utenBeregning(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {}
                 override fun beregning(
@@ -1778,9 +1760,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 ) {
                     behandling.oppdaterMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar)
                 }
-
-                override fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing) =
-                    behandling.kopierMedDokument(dokument)
 
                 override fun utenBeregning(behandling: Behandling, utbetalingEventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
                     behandling.utenBeregning(utbetalingEventBus, aktivitetslogg)
