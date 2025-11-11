@@ -278,9 +278,12 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.FRILANS_AVVENTER_INFOTRYGDHISTORIKK,
                 VedtaksperiodetilstandDto.FRILANS_AVVENTER_BLOKKERENDE_PERIODE,
 
+                VedtaksperiodetilstandDto.ARBEIDSLEDIG_START,
+                VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK,
+                VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE,
+
                 VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING,
                 VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK,
-                VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK,
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING,
                 VedtaksperiodetilstandDto.AVVENTER_A_ORDNINGEN,
@@ -288,7 +291,6 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING,
                 VedtaksperiodetilstandDto.ARBEIDSTAKER_START,
                 VedtaksperiodetilstandDto.SELVSTENDIG_START,
-                VedtaksperiodetilstandDto.ARBEIDSLEDIG_START,
                 VedtaksperiodetilstandDto.TIL_INFOTRYGD,
                 VedtaksperiodetilstandDto.AVVENTER_ANNULLERING,
                 VedtaksperiodetilstandDto.TIL_ANNULLERING -> error("har ikke mappingregel for utbetalingstatus $behandlingtilstandDto og periodetilstand=$periodetilstand")

@@ -71,6 +71,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingData.Inntek
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.ArbeidssituasjonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.PeriodeUtenNavAnsvarData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.ARBEIDSLEDIG_START
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET
@@ -425,6 +426,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
 
         VedtaksperiodetilstandDto.ARBEIDSLEDIG_START -> ARBEIDSLEDIG_START
         VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK -> ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK
+        VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE -> ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE
 
         VedtaksperiodetilstandDto.SELVSTENDIG_START -> SELVSTENDIG_START
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK

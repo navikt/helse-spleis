@@ -712,6 +712,7 @@ data class PersonData(
 
                 ARBEIDSLEDIG_START,
                 ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK,
+                ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE,
 
                 SELVSTENDIG_START,
                 SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
@@ -755,6 +756,7 @@ data class PersonData(
 
                     TilstandTypeData.ARBEIDSLEDIG_START -> VedtaksperiodetilstandDto.ARBEIDSLEDIG_START
                     TilstandTypeData.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK
+                    TilstandTypeData.ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE -> VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE
 
                     TilstandTypeData.SELVSTENDIG_START -> VedtaksperiodetilstandDto.SELVSTENDIG_START
                     TilstandTypeData.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK

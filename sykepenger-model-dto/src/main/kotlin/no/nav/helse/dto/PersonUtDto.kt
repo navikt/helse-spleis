@@ -101,6 +101,7 @@ sealed class VedtaksperiodetilstandDto {
 
     data object ARBEIDSLEDIG_START : VedtaksperiodetilstandDto()
     data object ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK : VedtaksperiodetilstandDto()
+    data object ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE : VedtaksperiodetilstandDto()
 
     data object SELVSTENDIG_AVSLUTTET : VedtaksperiodetilstandDto()
     data object SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE : VedtaksperiodetilstandDto()
