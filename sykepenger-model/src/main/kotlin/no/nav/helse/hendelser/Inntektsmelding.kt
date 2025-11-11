@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.mapWithNext
 import no.nav.helse.nesteDag
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
@@ -85,7 +84,6 @@ class Inntektsmelding(
     internal val refusjonsservitør get() = Refusjonsservitør.fra(refusjon.refusjonstidslinje(refusjonsdato, metadata.meldingsreferanseId, metadata.innsendt))
 
     private var håndtertInntekt = false
-    val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId)
 
     internal val inntektsdata = Inntektsdata(metadata.meldingsreferanseId, kompensertFørsteFraværsdag, beregnetInntekt, metadata.registrert)
 

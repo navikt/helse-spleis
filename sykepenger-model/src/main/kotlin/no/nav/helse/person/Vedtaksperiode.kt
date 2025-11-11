@@ -638,7 +638,8 @@ internal class Vedtaksperiode private constructor(
             eventBus = eventBus,
             arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
             yrkesaktivitet = yrkesaktivitet,
-            aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst
+            aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst,
+            dokumentsporing = inntektsmeldingInntekt(inntektsmelding.metadata.meldingsreferanseId)
         )
 
         inntektsmeldingHåndtert(eventBus, inntektsmelding)
@@ -654,7 +655,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun inntektsmeldingHåndtert(eventBus: EventBus, inntektsmelding: Inntektsmelding) {
         inntektsmelding.inntektHåndtert()
-        behandlinger.oppdaterDokumentsporing(inntektsmelding.dokumentsporing)
         eventBus.emitInntektsmeldingHåndtert(
             meldingsreferanseId = inntektsmelding.metadata.meldingsreferanseId.id,
             vedtaksperiodeId = id,
@@ -988,7 +988,8 @@ internal class Vedtaksperiode private constructor(
             eventBus = eventBus,
             arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
             yrkesaktivitet = yrkesaktivitet,
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = aktivitetslogg,
+            dokumentsporing = inntektsmeldingInntekt(hendelse.metadata.meldingsreferanseId)
         )
         inntektshistorikk.leggTil(
             Inntektsmeldinginntekt(
@@ -998,13 +999,9 @@ internal class Vedtaksperiode private constructor(
             )
         )
 
-        val grunnlag = vilkårsgrunnlag
+        val grunnlag = vilkårsgrunnlag ?: return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
 
         // Skjæringstidspunktet er _ikke_ vilkårsprøvd før (det mest normale - står typisk i AvventerInntektsmelding)
-        if (grunnlag == null) {
-            dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingInntekt)
-            return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
-        }
 
         val result = grunnlag.nyeArbeidsgiverInntektsopplysninger(
             organisasjonsnummer = yrkesaktivitet.organisasjonsnummer,
@@ -1020,7 +1017,6 @@ internal class Vedtaksperiode private constructor(
         val (nyttGrunnlag, _) = result
         person.lagreVilkårsgrunnlag(nyttGrunnlag)
         // Skjæringstidspunktet er allerede vilkårsprøvd, men inntekten for arbeidsgiveren er byttet ut med denne oppgitte inntekten
-        dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingInntekt)
         return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
     }
 
@@ -1118,12 +1114,8 @@ internal class Vedtaksperiode private constructor(
         return BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, Sykdomstidslinje(), dagerNavOvertarAnsvar)
     }
 
-    private fun dokumentsporingFraArbeidsgiveropplysning(hendelse: Hendelse, dokumentsporing: (meldingsreferanseId: MeldingsreferanseId) -> Dokumentsporing) {
-        behandlinger.oppdaterDokumentsporing(dokumentsporing(hendelse.metadata.meldingsreferanseId))
-    }
-
     private fun varselFraArbeidsgiveropplysning(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, varselkode: Varselkode) {
-        dokumentsporingFraArbeidsgiveropplysning(hendelse, ::inntektsmeldingDager)
+        behandlinger.oppdaterDokumentsporing(inntektsmeldingDager(hendelse.metadata.meldingsreferanseId))
         aktivitetslogg.varsel(varselkode)
     }
 

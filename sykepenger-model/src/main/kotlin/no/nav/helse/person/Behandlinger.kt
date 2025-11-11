@@ -427,9 +427,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         checkNotNull(åpenBehandling).håndterRefusjonsopplysninger(eventBus, yrkesaktivitet, dokumentsporing, aktivitetslogg, benyttetRefusjonsopplysninger)
     }
 
-    internal fun håndterFaktaavklartInntekt(eventBus: EventBus, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) {
+    internal fun håndterFaktaavklartInntekt(eventBus: EventBus, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, yrkesaktivitet: Yrkesaktivitet, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg) {
         check(arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) { "Inntekt med kilde ${arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class.simpleName} skal ikke lagres på behandlingen!"}
-        checkNotNull(åpenBehandling).håndterFaktaavklartInntekt(eventBus, arbeidstakerFaktaavklartInntekt, yrkesaktivitet, aktivitetslogg)
+        checkNotNull(åpenBehandling).håndterFaktaavklartInntekt(eventBus, arbeidstakerFaktaavklartInntekt, yrkesaktivitet, dokumentsporing, aktivitetslogg)
     }
 
     internal fun håndterKorrigertInntekt(eventBus: EventBus, korrigertInntekt: Saksbehandler, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) {
@@ -764,11 +764,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             eventBus: EventBus,
             arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
             yrkesaktivitet: Yrkesaktivitet,
+            dokumentsporing: Dokumentsporing,
             aktivitetslogg: IAktivitetslogg
         ) {
             håndterNyFakta(
                 eventBus = eventBus,
-                nyEndring = gjeldende.copy(faktaavklartInntekt = arbeidstakerFaktaavklartInntekt),
+                nyEndring = gjeldende.copy(faktaavklartInntekt = arbeidstakerFaktaavklartInntekt, dokumentsporing = dokumentsporing),
                 yrkesaktivitet = yrkesaktivitet,
                 aktivitetslogg = aktivitetslogg
             )
