@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -17,9 +16,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
-import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
-import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
 
@@ -44,6 +40,14 @@ class Inntektsmelding(
         automatiskBehandling = false
     )
 
+    internal val faktaavklartInntekt = Inntektsmeldinginntekt.faktaavklartInntekt(
+        meldingsreferanseId = meldingsreferanseId,
+        mottatt = mottatt,
+        arbeidsgiverperioder = arbeidsgiverperioder,
+        førsteFraværsdag = førsteFraværsdag,
+        beregnetInntekt = beregnetInntekt
+    )
+
     private val grupperteArbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
     private val dager by lazy {
         DagerFraInntektsmelding(
@@ -64,16 +68,11 @@ class Inntektsmelding(
         }
     }
 
-    private val kompensertFørsteFraværsdag: LocalDate by lazy {
-        if (førsteFraværsdag != null && (grupperteArbeidsgiverperioder.isEmpty() || førsteFraværsdag > grupperteArbeidsgiverperioder.last().endInclusive.nesteDag)) førsteFraværsdag
-        else grupperteArbeidsgiverperioder.maxOf { it.start }
-    }
-
     // dagen inntekten gjelder for er "dag nr 17", slik at ikke en auu-periode håndterer inntekten
     internal val datoForHåndteringAvInntekt = if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) {
         listOfNotNull(grupperteArbeidsgiverperioder.lastOrNull()?.endInclusive?.nesteDag, førsteFraværsdag).max()
     } else {
-        kompensertFørsteFraværsdag
+        faktaavklartInntekt.inntektsdata.dato
     }
 
     private val refusjonsdato: LocalDate by lazy {
@@ -84,14 +83,6 @@ class Inntektsmelding(
     internal val refusjonsservitør get() = Refusjonsservitør.fra(refusjon.refusjonstidslinje(refusjonsdato, metadata.meldingsreferanseId, metadata.innsendt))
 
     private var håndtertInntekt = false
-
-    internal val inntektsdata = Inntektsdata(metadata.meldingsreferanseId, kompensertFørsteFraværsdag, beregnetInntekt, metadata.registrert)
-
-    internal fun faktaavklartInntekt() = ArbeidstakerFaktaavklartInntekt(
-        id = UUID.randomUUID(),
-        inntektsdata = inntektsdata,
-        inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver
-    )
 
     internal fun inntektHåndtert() {
         håndtertInntekt = true

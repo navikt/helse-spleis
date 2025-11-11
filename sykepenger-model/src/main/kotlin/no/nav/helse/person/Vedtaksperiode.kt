@@ -580,16 +580,17 @@ internal class Vedtaksperiode private constructor(
         if (inntektsmelding.datoForHåndteringAvInntekt !in periode) return null
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
+        val faktaavklartInntekt = inntektsmelding.faktaavklartInntekt
+
         // 1. legger til inntekten sånn at den kanskje kan brukes i forbindelse med faktaavklaring av inntekt
         // 1.1 lagrer på den datoen inntektsmeldingen mener
-        val inntektsmeldinginntekt = Inntektsmeldinginntekt(UUID.randomUUID(), inntektsmelding.inntektsdata, Inntektsmeldinginntekt.Kilde.Arbeidsgiver)
+        val inntektsmeldinginntekt = Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata, Inntektsmeldinginntekt.Kilde.Arbeidsgiver)
         inntektshistorikk.leggTil(inntektsmeldinginntekt)
         // 1.2 lagrer på vedtaksperioden også..
-        this.førsteFraværsdag?.takeUnless { it == inntektsmeldinginntekt.inntektsdata.dato }?.also { alternativDato ->
-            inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), inntektsmelding.inntektsdata.copy(dato = alternativDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
-        }
 
-        val faktaavklartInntekt = inntektsmelding.faktaavklartInntekt()
+        this.førsteFraværsdag?.takeUnless { it == inntektsmeldinginntekt.inntektsdata.dato }?.also { alternativDato ->
+            inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata.copy(dato = alternativDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
+        }
 
         when (tilstand) {
             AvsluttetUtenUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, inntektsmelding)
