@@ -78,6 +78,22 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `egenmeldingsdager - nav overtar ikke ansvar`() {
+        undersøke(15.U, dagerNavOvertarAnsvar = listOf(1.januar til 15.januar))
+        assertEquals(15, inspektør.size)
+        assertEquals(15, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(0, inspektør.arbeidsgiverperiodedagNavTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(
+            PeriodeUtenNavAnsvar(
+                omsluttendePeriode = 1.januar til 15.januar,
+                dagerUtenAnsvar = listOf(1.januar til 15.januar),
+                ferdigAvklart = false
+            ), perioder.single()
+        )
+    }
+
+    @Test
     fun enkel() {
         undersøke(31.S)
         assertEquals(31, inspektør.size)

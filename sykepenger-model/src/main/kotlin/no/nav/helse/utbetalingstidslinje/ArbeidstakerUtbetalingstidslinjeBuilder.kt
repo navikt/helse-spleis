@@ -64,7 +64,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                 }
 
                 is Dag.Arbeidsgiverdag -> {
-                    if (erAGP(dag.dato)) arbeidsgiverperiodedagEllerNavAnsvar(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                    if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                     else avvistDag(builder, dag.dato, dag.grad, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode, inntekt, inntektjusteringer)
                 }
 
