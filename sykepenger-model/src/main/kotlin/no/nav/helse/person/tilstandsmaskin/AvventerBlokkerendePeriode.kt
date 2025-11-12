@@ -13,6 +13,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_BLOKKERENDE_PERIODE
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+        check(vedtaksperiode.skalArbeidstakerBehandlesISpeil()) { "forventer ikke at en periode som skal til AUU, skal ende opp i $this" }
         check(!vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
             "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}."
         }
@@ -20,7 +21,6 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     }
 
     fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
-        ForventerIkkeInntekt,
         KlarForBeregning,
         KlarForVilkårsprøving -> VenterPå.Nestemann
         AvventerTidligereEllerOverlappendeSøknad -> VenterPå.SegSelv(Venteårsak.SØKNAD)
@@ -46,7 +46,6 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     ): Tilstand {
         val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
         return when {
-            !vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> ForventerIkkeInntekt
             vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
             førstePeriodeSomTrengerInntektsmelding != null -> when (førstePeriodeSomTrengerInntektsmelding) {
                 vedtaksperiode -> TrengerInntektsmelding(førstePeriodeSomTrengerInntektsmelding)
@@ -77,17 +76,6 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
                 aktivitetslogg.varsel(Varselkode.RV_SY_4)
                 vedtaksperiode.person.fjernSykmeldingsperiode(vedtaksperiode.periode)
             }
-        }
-    }
-
-    private data object ForventerIkkeInntekt : Tilstand {
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            eventBus: EventBus,
-            hendelse: Hendelse,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvsluttetUtenUtbetaling)
         }
     }
 

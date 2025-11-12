@@ -33,6 +33,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -123,7 +124,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
             listOf(2.februar til 17.februar)
         )
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -138,7 +139,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals("UGG UUUUUGG UUUUUGH SSSSSHR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(2.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
@@ -342,7 +343,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
@@ -369,7 +370,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
@@ -398,7 +399,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 

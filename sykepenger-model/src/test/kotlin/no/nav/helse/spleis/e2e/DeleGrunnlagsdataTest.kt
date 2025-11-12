@@ -9,6 +9,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -144,9 +145,9 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(

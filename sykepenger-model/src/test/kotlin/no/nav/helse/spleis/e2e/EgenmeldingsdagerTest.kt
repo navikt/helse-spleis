@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import org.junit.jupiter.api.Test
@@ -89,17 +89,17 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
             håndterPåminnelse(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("nullstillEgenmeldingsdager"))
 
             with(1.vedtaksperiode) {
-                assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
                 assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(5.januar til 9.januar, 15.januar til 19.januar, 25.januar til 29.januar))
             }
 
             with(2.vedtaksperiode) {
-                assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
                 assertSkjæringstidspunktOgVenteperiode(this, 15.januar, listOf(5.januar til 9.januar, 15.januar til 19.januar, 25.januar til 29.januar))
             }
 
             with(3.vedtaksperiode) {
-                assertTilstander(this, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(this, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
                 assertSkjæringstidspunktOgVenteperiode(this, 25.januar, listOf(5.januar til 9.januar, 15.januar til 19.januar, 25.januar til 29.januar))
             }
         }
@@ -131,12 +131,12 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
             håndterPåminnelse(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, flagg = setOf("nullstillEgenmeldingsdager"))
 
             with(1.vedtaksperiode) {
-                assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
                 assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(5.januar til 20.januar))
             }
 
             with(2.vedtaksperiode) {
-                assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
                 assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(5.januar til 20.januar))
             }
 

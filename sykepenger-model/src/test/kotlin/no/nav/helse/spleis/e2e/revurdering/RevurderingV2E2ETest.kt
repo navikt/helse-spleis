@@ -25,6 +25,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -486,7 +487,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
@@ -579,7 +580,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.juni, 10.juni, 100.prosent))
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test

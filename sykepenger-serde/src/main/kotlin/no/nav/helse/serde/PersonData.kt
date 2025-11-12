@@ -691,6 +691,7 @@ data class PersonData(
                 TIL_INFOTRYGD,
                 AVSLUTTET,
                 AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
@@ -740,6 +741,7 @@ data class PersonData(
                     TilstandTypeData.AVSLUTTET_UTEN_UTBETALING -> VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING
                     TilstandTypeData.AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK
                     TilstandTypeData.AVVENTER_INNTEKTSMELDING -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING
+                    TilstandTypeData.AVVENTER_AVSLUTTET_UTEN_UTBETALING -> VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING
                     TilstandTypeData.AVVENTER_BLOKKERENDE_PERIODE -> VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE
                     TilstandTypeData.AVVENTER_VILKÅRSPRØVING -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING
                     TilstandTypeData.AVVENTER_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_REVURDERING

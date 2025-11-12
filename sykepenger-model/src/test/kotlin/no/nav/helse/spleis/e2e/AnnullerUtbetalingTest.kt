@@ -30,6 +30,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -137,7 +138,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))

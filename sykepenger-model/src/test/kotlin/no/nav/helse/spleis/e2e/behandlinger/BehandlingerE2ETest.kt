@@ -47,6 +47,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBel�
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -101,7 +102,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             nullstillTilstandsendringer()
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars)
             assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
                 assertEquals(2, it.size)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, it[0].tilstand)
@@ -486,7 +487,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(Dokumentsporing.søknad(overlappende), behandling.endringer.single().dokumentsporing)
             }
             assertVarsler(listOf(Varselkode.`Mottatt søknad som delvis overlapper`), 1.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }

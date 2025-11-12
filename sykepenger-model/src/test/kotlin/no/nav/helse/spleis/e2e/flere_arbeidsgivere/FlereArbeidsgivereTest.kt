@@ -47,6 +47,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -298,7 +299,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a3 {
             håndterSøknad(5.januar til 10.januar)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)
@@ -365,7 +366,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             observatør.vedtaksperiodeVenter.clear()
             håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertEquals(0, observatør.vedtaksperiodeVenter.size)
         }
     }
@@ -567,14 +568,14 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
         }
         a1 {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
         }
         a2 {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
@@ -773,7 +774,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             assertEquals(1.januar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
@@ -1485,11 +1486,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
-                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
-                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING
             )
             assertTilstander(
@@ -1503,9 +1504,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 START,
                 AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
-                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING
             )
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)

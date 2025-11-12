@@ -128,7 +128,8 @@ internal class SpeilGenerasjonerBuilder(
                 is VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode
 
                 is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                is VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> Periodetilstand.VenterPåAnnenPeriode
+                is VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE,
+                is VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING -> Periodetilstand.VenterPåAnnenPeriode
 
                 is VedtaksperiodetilstandDto.AVVENTER_HISTORIKK,
                 is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK,
@@ -283,6 +284,7 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE,
 
                 VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING,
+                VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK,
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING,

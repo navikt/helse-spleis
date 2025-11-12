@@ -71,15 +71,25 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg): Boolean {
         vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, aktivitetslogg)
 
-        if (vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
-            if (vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte()) {
-                vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAOrdningen)
-                return true
+        return when {
+            vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> when {
+                !vedtaksperiode.måInnhenteInntektEllerRefusjon() -> {
+                    vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerBlokkerendePeriode)
+                    true
+                }
+                else -> when {
+                    vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte() -> {
+                        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAOrdningen)
+                        true
+                    }
+                    else -> false
+                }
             }
-            return false
+            else -> {
+                vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAvsluttetUtenUtbetaling)
+                true
+            }
         }
-        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerBlokkerendePeriode)
-        return true
     }
 
     private fun opplysningerViTrenger(vedtaksperiode: Vedtaksperiode): Set<EventSubscription.ForespurtOpplysning> {

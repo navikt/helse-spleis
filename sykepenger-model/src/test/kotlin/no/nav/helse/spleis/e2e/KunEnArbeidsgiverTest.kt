@@ -31,6 +31,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
@@ -122,18 +123,18 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
@@ -178,18 +179,18 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
@@ -427,7 +428,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         assertIngenFunksjonelleFeil()
         assertActivities()
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(
             2.vedtaksperiode,
             START,
@@ -556,7 +557,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     fun `Person uten skjæringstidspunkt feiler ikke i validering av Utbetalingshistorikk`() {
         håndterSykmelding(Sykmeldingsperiode(23.oktober(2020), 18.november(2020)))
         håndterSøknad(Sykdom(23.oktober(2020), 18.november(2020), 100.prosent), Ferie(23.oktober(2020), 18.november(2020)))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test

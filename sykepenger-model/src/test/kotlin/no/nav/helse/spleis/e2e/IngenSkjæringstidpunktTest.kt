@@ -21,6 +21,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_A_ORDNINGEN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -212,7 +213,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
 
             assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
             assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 24.februar, listOf(24.februar til 28.februar))
-            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
@@ -265,7 +266,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
 
             assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
             assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 24.februar, emptyList())
-            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
         }
     }
 

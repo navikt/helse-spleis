@@ -47,6 +47,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.sykdomstidslinje.Dag
@@ -329,7 +330,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
             assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
 
             // Her har ko arbeidsgiverperioden flyttet seg
@@ -384,7 +385,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
             assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
             assertEquals(15.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }

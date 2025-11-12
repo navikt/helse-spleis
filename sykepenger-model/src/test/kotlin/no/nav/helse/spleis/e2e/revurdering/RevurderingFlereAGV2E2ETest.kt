@@ -23,6 +23,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -194,7 +195,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
     }
 
     @Test

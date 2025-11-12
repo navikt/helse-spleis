@@ -395,6 +395,7 @@ data class SpannerPersonDto(
                 TIL_INFOTRYGD,
                 AVSLUTTET,
                 AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
@@ -1139,6 +1140,7 @@ private fun VedtaksperiodeUtDto.tilPersonData(
         VedtaksperiodetilstandDto.ARBEIDSTAKER_START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.START
         VedtaksperiodetilstandDto.AVSLUTTET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVSLUTTET
         VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVSLUTTET_UTEN_UTBETALING
+        VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
         VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
         VedtaksperiodetilstandDto.AVVENTER_A_ORDNINGEN -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_A_ORDNINGEN
         VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_GODKJENNING

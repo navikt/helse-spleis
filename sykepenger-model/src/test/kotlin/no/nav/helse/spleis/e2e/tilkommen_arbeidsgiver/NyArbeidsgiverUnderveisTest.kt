@@ -132,7 +132,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Sykdom(31.januar, 15.februar, 100.prosent))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
             assertEquals(31.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             håndterInntektsmelding(listOf(31.januar til 15.februar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())

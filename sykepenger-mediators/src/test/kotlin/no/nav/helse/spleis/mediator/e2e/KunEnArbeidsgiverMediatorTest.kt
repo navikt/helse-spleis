@@ -38,7 +38,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             0,
             "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING",
-            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_AVSLUTTET_UTEN_UTBETALING",
             "AVSLUTTET_UTEN_UTBETALING"
         )
     }

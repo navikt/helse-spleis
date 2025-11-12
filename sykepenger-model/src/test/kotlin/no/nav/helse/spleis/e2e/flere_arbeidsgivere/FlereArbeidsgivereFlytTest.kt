@@ -19,6 +19,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -75,7 +76,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(13.januar, 26.januar, 100.prosent), orgnummer = a1)
 
         håndterSøknad(Sykdom(13.januar, 26.januar, 100.prosent), orgnummer = a2)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -89,7 +90,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertEquals(13.januar til 26.januar, inspektør(a1).periode(3.vedtaksperiode))
         assertEquals(1.januar til 26.januar, inspektør(a2).periode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
     }
@@ -142,7 +143,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertEquals(13.januar til 31.januar, inspektør(a1).periode(3.vedtaksperiode))
         assertEquals(januar, inspektør(a2).periode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
     }
