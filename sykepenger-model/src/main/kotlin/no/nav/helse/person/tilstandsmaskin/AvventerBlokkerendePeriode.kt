@@ -108,6 +108,11 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
             aktivitetslogg.info("Går tilbake til Avventer inntektsmelding fordi perioden mangler inntekt og/eller refusjonsopplysninger")
             vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerInntektsmelding)
         }
+
+        override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+            aktivitetslogg.info("Går tilbake til Avventer inntektsmelding fordi perioden mangler inntekt og/eller refusjonsopplysninger")
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerInntektsmelding)
+        }
     }
 
     private data class TrengerInntektsmeldingAnnenPeriode(val trengerInntektsmelding: Vedtaksperiode) :
