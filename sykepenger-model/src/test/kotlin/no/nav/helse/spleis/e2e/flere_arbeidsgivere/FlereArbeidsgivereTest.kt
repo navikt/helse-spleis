@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -36,8 +36,8 @@ import no.nav.helse.mai
 import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
-import no.nav.helse.person.GrunnlagsdataView
 import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.GrunnlagsdataView
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
@@ -56,6 +56,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTOR
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
@@ -213,7 +214,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             assertVenterPåSøknad(1.vedtaksperiode)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
             assertVenterPåSøknad(1.vedtaksperiode)
         }
         (a2 og a3) {
@@ -224,7 +225,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             val lengeNok = LocalDateTime.now().minusMonths(3).minusDays(1)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, tilstandsendringstidspunkt = ikkeLengeNok)
             assertVenterPåSøknad(1.vedtaksperiode)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, tilstandsendringstidspunkt = lengeNok)
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, tilstandsendringstidspunkt = lengeNok)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(1.vedtaksperiode, RV_SY_4)
         }
@@ -234,7 +235,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     private fun TestPerson.TestArbeidsgiver.assertVenterPåSøknad(vedtaksperiodeId: UUID) {
-        assertSisteTilstand(vedtaksperiodeId, AVVENTER_BLOKKERENDE_PERIODE)
+        assertSisteTilstand(vedtaksperiodeId, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
         val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == vedtaksperiodeId }.venterPå.venteårsak.hva
         assertEquals("SØKNAD", venterPå)
     }
@@ -1263,6 +1264,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 2.vedtaksperiode,
                 START,
                 AVVENTER_INNTEKTSMELDING,
+                AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -1313,14 +1315,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterSøknad(januar)
-            assertTilstander(
-                1.vedtaksperiode,
-                START,
-                AVVENTER_INFOTRYGDHISTORIKK,
-                AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE,
-
-                )
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
         }
     }
 
@@ -1342,10 +1337,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
+                AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
-
-                )
+            )
         }
         a2 {
             assertTilstander(
@@ -1353,8 +1348,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-
-                )
+            )
         }
     }
 

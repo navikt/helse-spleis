@@ -74,7 +74,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         return when {
             vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> when {
                 !vedtaksperiode.måInnhenteInntektEllerRefusjon() -> {
-                    vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerBlokkerendePeriode)
+                    vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
                     true
                 }
                 else -> when {

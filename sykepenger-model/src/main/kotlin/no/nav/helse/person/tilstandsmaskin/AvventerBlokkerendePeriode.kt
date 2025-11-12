@@ -1,6 +1,5 @@
 package no.nav.helse.person.tilstandsmaskin
 
-import java.time.Period
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.EventBus
@@ -8,14 +7,24 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VenterPå
 import no.nav.helse.person.Venteårsak
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
+
+internal fun nesteTilstandEtterInntekt(vedtaksperiode: Vedtaksperiode) =
+    when {
+        vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode) -> AvventerSøknadForOverlappendePeriode
+        else -> AvventerBlokkerendePeriode
+    }
+
+internal fun Vedtaksperiodetilstand.bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode: Vedtaksperiode) {
+    check(vedtaksperiode.skalArbeidstakerBehandlesISpeil()) { "forventer ikke at en periode som skal til AUU, skal ende opp i $this" }
+    check(!vedtaksperiode.måInnhenteInntektEllerRefusjon()) { "Periode i $this har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}." }
+}
 
 internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_BLOKKERENDE_PERIODE
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        check(vedtaksperiode.skalArbeidstakerBehandlesISpeil()) { "forventer ikke at en periode som skal til AUU, skal ende opp i $this" }
-        check(!vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
-            "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}."
+        bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode)
+        check(!vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode)) {
+            "forventer ikke å vente annen søknad"
         }
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
@@ -70,14 +79,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         }
 
         override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            if (påminnelse.når(Påminnelse.Predikat.VentetMinst(Period.ofMonths(3))) || påminnelse.når(
-                    Påminnelse.Predikat.Flagg(
-                        "forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"
-                    )
-                )) {
-                aktivitetslogg.varsel(Varselkode.RV_SY_4)
-                vedtaksperiode.person.fjernSykmeldingsperiode(vedtaksperiode.periode)
-            }
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerSøknadForOverlappendePeriode)
         }
     }
 
