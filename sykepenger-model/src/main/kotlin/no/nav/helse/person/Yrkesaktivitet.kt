@@ -596,10 +596,16 @@ internal class Yrkesaktivitet private constructor(
         }
         val vedtaksperioderMedSkjæringstidspunkt = vedtaksperioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
-        val revurderingseventyrPerioder = vedtaksperioderMedSkjæringstidspunkt.map { it.håndterInntektFraInntektsmeldingForPeriode(eventBus, inntektFraInntektsmelding, aktivitetsloggMedArbeidsgiverkontekst, inntektshistorikk) }.tidligsteEventyr()!!
-        val revurderingseventyrVilkårsgrunnlag = vedtaksperioderMedSkjæringstidspunkt.firstOrNull { it.vilkårsgrunnlag != null }?.håndterInntektFraInntektsmeldingForVilkårsgrunnlag(inntektFraInntektsmelding, aktivitetsloggMedArbeidsgiverkontekst)
+        val revurderingseventyrPerioder = vedtaksperioderMedSkjæringstidspunkt.map { it.håndterInntektFraInntektsmeldingForPeriode(eventBus, inntektFraInntektsmelding, aktivitetsloggMedArbeidsgiverkontekst) }.tidligsteEventyr()!!
+        val revurderingseventyrVilkårsgrunnlag = vedtaksperioderMedSkjæringstidspunkt.firstOrNull { it.vilkårsgrunnlag != null && it.skalArbeidstakerBehandlesISpeil() }?.håndterInntektFraInntektsmeldingForVilkårsgrunnlag(inntektFraInntektsmelding, aktivitetsloggMedArbeidsgiverkontekst)
 
-        vedtaksperioderMedSkjæringstidspunkt.firstOrNull { it.skalArbeidstakerBehandlesISpeil() }?.let { inntektFraInntektsmelding.håndtert(eventBus, it.id) }
+        when (val førstePeriodeSomSkalBehandlesISpeil = vedtaksperioderMedSkjæringstidspunkt.firstOrNull { it.skalArbeidstakerBehandlesISpeil() }) {
+            null -> inntektFraInntektsmelding.ikkeHåndtert(eventBus, aktivitetsloggMedArbeidsgiverkontekst, person, forkastede.perioder(), sykmeldingsperioder)
+            else -> {
+                førstePeriodeSomSkalBehandlesISpeil.håndterInntektFraInntektsmeldingForInntektshistorikk(inntektFraInntektsmelding, inntektshistorikk)
+                inntektFraInntektsmelding.håndtert(eventBus, førstePeriodeSomSkalBehandlesISpeil.id)
+            }
+        }
 
         return revurderingseventyrVilkårsgrunnlag ?: revurderingseventyrPerioder
     }

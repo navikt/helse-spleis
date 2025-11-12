@@ -592,6 +592,19 @@ internal class Vedtaksperiode private constructor(
 
     }
 
+    internal fun håndterInntektFraInntektsmeldingForInntektshistorikk(inntektFraInntektsmelding: InntektFraInntektsmelding, inntektshistorikk: Inntektshistorikk) {
+        val faktaavklartInntekt = inntektFraInntektsmelding.faktaavklartInntekt
+
+        // 1. legger til inntekten sånn at den kanskje kan brukes i forbindelse med faktaavklaring av inntekt
+        // 1.1 lagrer på den datoen inntektsmeldingen mener
+        val inntektsmeldinginntekt = Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata, Inntektsmeldinginntekt.Kilde.Arbeidsgiver)
+        inntektshistorikk.leggTil(inntektsmeldinginntekt)
+        // 1.2 lagrer på vedtaksperioden også..
+        this.førsteFraværsdag?.takeUnless { it == inntektsmeldinginntekt.inntektsdata.dato }?.also { alternativDato ->
+            inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata.copy(dato = alternativDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
+        }
+    }
+
     internal fun håndterInntektFraInntektsmeldingForVilkårsgrunnlag(inntektFraInntektsmelding: InntektFraInntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
@@ -605,19 +618,8 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(inntektFraInntektsmelding, skjæringstidspunkt, skjæringstidspunkt)
     }
 
-    internal fun håndterInntektFraInntektsmeldingForPeriode(eventBus: EventBus, inntektFraInntektsmelding: InntektFraInntektsmelding, aktivitetslogg: IAktivitetslogg, inntektshistorikk: Inntektshistorikk): Revurderingseventyr {
+    internal fun håndterInntektFraInntektsmeldingForPeriode(eventBus: EventBus, inntektFraInntektsmelding: InntektFraInntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-
-        val faktaavklartInntekt = inntektFraInntektsmelding.faktaavklartInntekt
-
-        // 1. legger til inntekten sånn at den kanskje kan brukes i forbindelse med faktaavklaring av inntekt
-        // 1.1 lagrer på den datoen inntektsmeldingen mener
-        val inntektsmeldinginntekt = Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata, Inntektsmeldinginntekt.Kilde.Arbeidsgiver)
-        inntektshistorikk.leggTil(inntektsmeldinginntekt)
-        // 1.2 lagrer på vedtaksperioden også..
-        this.førsteFraværsdag?.takeUnless { it == inntektsmeldinginntekt.inntektsdata.dato }?.also { alternativDato ->
-            inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata.copy(dato = alternativDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
-        }
 
         when (tilstand) {
             Avsluttet,
@@ -661,10 +663,9 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        // lagrer ALLTID inntekt på behandling
         behandlinger.håndterFaktaavklartInntekt(
             eventBus = eventBus,
-            arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
+            arbeidstakerFaktaavklartInntekt = inntektFraInntektsmelding.faktaavklartInntekt,
             yrkesaktivitet = yrkesaktivitet,
             aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst,
             dokumentsporing = inntektsmeldingInntekt(inntektFraInntektsmelding.metadata.meldingsreferanseId)
@@ -795,7 +796,6 @@ internal class Vedtaksperiode private constructor(
 
             AvventerBlokkerendePeriode,
             AvventerAvsluttetUtenUtbetaling,
-            AvventerAOrdningen,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
             AvventerHistorikk,
@@ -813,6 +813,7 @@ internal class Vedtaksperiode private constructor(
                 aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
             }
 
+            AvventerAOrdningen,
             Avsluttet,
             ArbeidstakerStart,
             TilInfotrygd -> {
