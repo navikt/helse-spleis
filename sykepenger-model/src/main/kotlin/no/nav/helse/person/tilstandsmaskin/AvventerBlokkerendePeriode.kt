@@ -21,6 +21,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     }
 
     fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
+        ForventerIkkeInntekt,
         KlarForBeregning,
         KlarForVilkårsprøving -> VenterPå.Nestemann
         AvventerTidligereEllerOverlappendeSøknad -> VenterPå.SegSelv(Venteårsak.SØKNAD)
@@ -37,7 +38,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        tilstand(vedtaksperiode).håndterPåminnelse(vedtaksperiode, påminnelse, aktivitetslogg)
+        tilstand(vedtaksperiode).håndterPåminnelse(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
@@ -46,6 +47,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     ): Tilstand {
         val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
         return when {
+            !vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> ForventerIkkeInntekt
             vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
             førstePeriodeSomTrengerInntektsmelding != null -> when (førstePeriodeSomTrengerInntektsmelding) {
                 vedtaksperiode -> TrengerInntektsmelding(førstePeriodeSomTrengerInntektsmelding)
@@ -59,7 +61,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
 
     private sealed interface Tilstand {
         fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg)
-        fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
+        fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
     }
 
     private data object AvventerTidligereEllerOverlappendeSøknad : Tilstand {
@@ -67,7 +69,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
             aktivitetslogg.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
         }
 
-        override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+        override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
             if (påminnelse.når(Påminnelse.Predikat.VentetMinst(Period.ofMonths(3))) || påminnelse.når(
                     Påminnelse.Predikat.Flagg(
                         "forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"
@@ -76,6 +78,21 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
                 aktivitetslogg.varsel(Varselkode.RV_SY_4)
                 vedtaksperiode.person.fjernSykmeldingsperiode(vedtaksperiode.periode)
             }
+        }
+    }
+
+    private data object ForventerIkkeInntekt : Tilstand {
+        override fun gjenopptaBehandling(
+            vedtaksperiode: Vedtaksperiode,
+            eventBus: EventBus,
+            hendelse: Hendelse,
+            aktivitetslogg: IAktivitetslogg
+        ) {
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvsluttetUtenUtbetaling)
+        }
+
+        override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAvsluttetUtenUtbetaling)
         }
     }
 
