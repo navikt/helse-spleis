@@ -226,13 +226,20 @@ class Person private constructor(
     fun håndterInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler inntektsmelding")
         val arbeidsgiver = finnEllerOpprettYrkesaktivitet(inntektsmelding.behandlingsporing, aktivitetsloggMedPersonkontekst)
-        val revurderingseventyr = arbeidsgiver.håndterInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr = arbeidsgiver.håndterInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedPersonkontekst, skalHåndtereInntekt = Toggle.OppdeltInntektsmelding.disabled)
         arbeidsgiver.inntektsmeldingFerdigbehandlet(eventBus, inntektsmelding, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, inntektsmelding, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndterInntektFraInntektsmelding(eventBus: EventBus, inntektFraInntektsmelding: InntektFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
+        if (Toggle.OppdeltInntektsmelding.disabled) return
+
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler inntekt fra inntektsmelding")
+        val arbeidsgiver = finnEllerOpprettYrkesaktivitet(inntektFraInntektsmelding.behandlingsporing, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr = arbeidsgiver.håndterInntektFraInntektsmelding(eventBus, inntektFraInntektsmelding, aktivitetsloggMedPersonkontekst)
+        if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(eventBus, inntektFraInntektsmelding, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndterInntektsmeldingerReplay(eventBus: EventBus, replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg) {

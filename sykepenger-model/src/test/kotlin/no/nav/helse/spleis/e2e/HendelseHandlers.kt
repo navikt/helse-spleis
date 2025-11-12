@@ -507,8 +507,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     val inntektFraInntektsmelding = InntektFraInntektsmelding(inntektsmelding.behandlingsporing, MeldingsreferanseId(id), inntektsmelding.metadata.registrert, arbeidsgiverperioder, førsteFraværsdag, beregnetInntekt)
     håndterOgReplayInntektsmeldinger(inntektsmelding.behandlingsporing.organisasjonsnummer) {
         inntektsmelding.håndter(Person::håndterInntektsmelding)
+        inntektFraInntektsmelding.håndter(Person::håndterInntektFraInntektsmelding)
     }
-    inntektFraInntektsmelding.håndter(Person::håndterInntektFraInntektsmelding)
     return id
 }
 

@@ -31,6 +31,7 @@ import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Hendelseskilde
+import no.nav.helse.hendelser.InntektFraInntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
@@ -587,7 +588,23 @@ internal class Yrkesaktivitet private constructor(
         return null
     }
 
-    internal fun håndterInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    internal fun håndterInntektFraInntektsmelding(eventBus: EventBus, inntektFraInntektsmelding: InntektFraInntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
+        val inntektFraInntektsmeldingDato = inntektFraInntektsmelding.faktaavklartInntekt.inntektsdata.dato
+        val skjæringstidspunkt = vedtaksperioder.firstOrNull { inntektFraInntektsmeldingDato in it.periode }?.skjæringstidspunkt ?: return null.also {
+            inntektFraInntektsmelding.ikkeHåndtert(eventBus, aktivitetsloggMedArbeidsgiverkontekst, person, forkastede.perioder(), sykmeldingsperioder)
+        }
+        val vedtaksperioderMedSkjæringstidspunkt = vedtaksperioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }
+
+        val revurderingseventyrPerioder = vedtaksperioderMedSkjæringstidspunkt.map { it.håndterInntektFraInntektsmeldingForPeriode(eventBus, inntektFraInntektsmelding, aktivitetsloggMedArbeidsgiverkontekst, inntektshistorikk) }.tidligsteEventyr()!!
+        val revurderingseventyrVilkårsgrunnlag = vedtaksperioderMedSkjæringstidspunkt.firstOrNull { it.vilkårsgrunnlag != null }?.håndterInntektFraInntektsmeldingForVilkårsgrunnlag(inntektFraInntektsmelding, aktivitetsloggMedArbeidsgiverkontekst)
+
+        vedtaksperioderMedSkjæringstidspunkt.firstOrNull { it.skalArbeidstakerBehandlesISpeil() }?.let { inntektFraInntektsmelding.håndtert(eventBus, it.id) }
+
+        return revurderingseventyrVilkårsgrunnlag ?: revurderingseventyrPerioder
+    }
+
+    internal fun håndterInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, skalHåndtereInntekt: Boolean): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         val dager = inntektsmelding.dager()
 
@@ -601,8 +618,15 @@ internal class Yrkesaktivitet private constructor(
         val refusjonsoverstyring = håndterRefusjonsopplysninger(eventBus, inntektsmelding, inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId), aktivitetsloggMedArbeidsgiverkontekst, inntektsmelding.refusjonsservitør)
 
         // 4. håndterer inntekten fra inntektsmeldingen
-        val inntektoverstyring = vedtaksperioder.firstNotNullOfOrNull {
-            it.håndterInntektFraInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst, inntektshistorikk)
+        val inntektoverstyring = when (skalHåndtereInntekt) {
+            true -> vedtaksperioder.firstNotNullOfOrNull {
+                it.håndterInntektFraInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst, inntektshistorikk)
+            }
+
+            false -> {
+                inntektsmelding.inntektHåndtert() // For å unngå å sende ut inntektsmelding_ikke_håndtert ettersom det nå skal sendes ut når inntekt fra inntektsmelding håndteres
+                null
+            }
         }
 
         // 5. ferdigstiller håndtering av inntektsmelding

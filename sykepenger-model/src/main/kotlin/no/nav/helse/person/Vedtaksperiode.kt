@@ -47,6 +47,7 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Hendelseskilde
+import no.nav.helse.hendelser.InntektFraInntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
@@ -62,6 +63,7 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.annullering
+import no.nav.helse.hendelser.Revurderingseventyr.Companion.inntekt
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Simulering
@@ -590,6 +592,87 @@ internal class Vedtaksperiode private constructor(
 
     }
 
+    internal fun håndterInntektFraInntektsmeldingForVilkårsgrunnlag(inntektFraInntektsmelding: InntektFraInntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+
+        val faktaavklartInntekt = inntektFraInntektsmelding.faktaavklartInntekt
+        if (!oppdaterVilkårsgrunnlagMedInntekt(faktaavklartInntekt)) {
+            // har ikke laget nytt vilkårsgrunnlag for beløpet var det samme som det var/inntekten gjelder for en annen måned enn skjæringstidspunktet
+            return null
+        }
+
+        aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
+        return Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(inntektFraInntektsmelding, skjæringstidspunkt, skjæringstidspunkt)
+    }
+
+    internal fun håndterInntektFraInntektsmeldingForPeriode(eventBus: EventBus, inntektFraInntektsmelding: InntektFraInntektsmelding, aktivitetslogg: IAktivitetslogg, inntektshistorikk: Inntektshistorikk): Revurderingseventyr {
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+
+        val faktaavklartInntekt = inntektFraInntektsmelding.faktaavklartInntekt
+
+        // 1. legger til inntekten sånn at den kanskje kan brukes i forbindelse med faktaavklaring av inntekt
+        // 1.1 lagrer på den datoen inntektsmeldingen mener
+        val inntektsmeldinginntekt = Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata, Inntektsmeldinginntekt.Kilde.Arbeidsgiver)
+        inntektshistorikk.leggTil(inntektsmeldinginntekt)
+        // 1.2 lagrer på vedtaksperioden også..
+        this.førsteFraværsdag?.takeUnless { it == inntektsmeldinginntekt.inntektsdata.dato }?.also { alternativDato ->
+            inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata.copy(dato = alternativDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
+        }
+
+        when (tilstand) {
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            TilUtbetaling -> nyBehandling(eventBus, inntektFraInntektsmelding)
+
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerBlokkerendePeriode,
+            AvventerAvsluttetUtenUtbetaling,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerRevurdering,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            ArbeidstakerStart,
+            FrilansAvventerBlokkerendePeriode,
+            FrilansAvventerInfotrygdHistorikk,
+            FrilansStart,
+            ArbeidsledigStart,
+            ArbeidsledigAvventerInfotrygdHistorikk,
+            ArbeidsledigAvventerBlokkerendePeriode,
+            TilAnnullering,
+            TilInfotrygd,
+            TilUtbetaling -> {
+            }
+        }
+
+        // lagrer ALLTID inntekt på behandling
+        behandlinger.håndterFaktaavklartInntekt(
+            eventBus = eventBus,
+            arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
+            yrkesaktivitet = yrkesaktivitet,
+            aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst,
+            dokumentsporing = inntektsmeldingInntekt(inntektFraInntektsmelding.metadata.meldingsreferanseId)
+        )
+
+        return inntekt(inntektFraInntektsmelding, skjæringstidspunkt)
+    }
+
     internal fun håndterInntektFraInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektshistorikk: Inntektshistorikk): Revurderingseventyr? {
         // håndterer kun inntekt hvis inntektsdato treffer perioden
         if (inntektsmelding.datoForHåndteringAvInntekt !in periode) return null
@@ -706,7 +789,7 @@ internal class Vedtaksperiode private constructor(
 
                 if (antallInntektsmeldinger > 1) aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
                 return inntektsmeldinger
-                    .mapNotNull { yrkesaktivitet.håndterInntektsmelding(eventBus, it, aktivitetsloggMedVedtaksperiodekontekst) }
+                    .mapNotNull { yrkesaktivitet.håndterInntektsmelding(eventBus, it, aktivitetsloggMedVedtaksperiodekontekst, skalHåndtereInntekt = true) }
                     .tidligsteEventyr()
             }
 
