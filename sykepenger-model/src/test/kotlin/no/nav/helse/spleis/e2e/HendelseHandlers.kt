@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.InntektFraInntektsmelding
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
@@ -491,20 +492,24 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     harFlereInntektsmeldinger: Boolean = false,
     mottatt: LocalDateTime? = null
 ): UUID {
-    return håndterInntektsmelding(
-        inntektsmelding(
-            id = id,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            beregnetInntekt = beregnetInntekt,
-            førsteFraværsdag = førsteFraværsdag,
-            refusjon = refusjon,
-            orgnummer = orgnummer,
-            opphørAvNaturalytelser = opphørAvNaturalytelser,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            mottatt = mottatt
-        )
+    val inntektsmelding = inntektsmelding(
+        id = id,
+        arbeidsgiverperioder = arbeidsgiverperioder,
+        beregnetInntekt = beregnetInntekt,
+        førsteFraværsdag = førsteFraværsdag,
+        refusjon = refusjon,
+        orgnummer = orgnummer,
+        opphørAvNaturalytelser = opphørAvNaturalytelser,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+        mottatt = mottatt
     )
+    val inntektFraInntektsmelding = InntektFraInntektsmelding(inntektsmelding.behandlingsporing, MeldingsreferanseId(id), inntektsmelding.metadata.registrert, arbeidsgiverperioder, førsteFraværsdag, beregnetInntekt)
+    håndterOgReplayInntektsmeldinger(inntektsmelding.behandlingsporing.organisasjonsnummer) {
+        inntektsmelding.håndter(Person::håndterInntektsmelding)
+    }
+    inntektFraInntektsmelding.håndter(Person::håndterInntektFraInntektsmelding)
+    return id
 }
 
 internal fun AbstractEndToEndTest.håndterKorrigerteArbeidsgiveropplysninger(
@@ -544,13 +549,6 @@ internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(
         opplysninger = opplysning.toList()
     ).håndter(Person::håndterArbeidsgiveropplysninger)
     return meldingsreferanseId
-}
-
-internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding): UUID {
-    håndterOgReplayInntektsmeldinger(inntektsmelding.behandlingsporing.organisasjonsnummer) {
-        inntektsmelding.håndter(Person::håndterInntektsmelding)
-    }
-    return inntektsmelding.metadata.meldingsreferanseId.id
 }
 
 internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(

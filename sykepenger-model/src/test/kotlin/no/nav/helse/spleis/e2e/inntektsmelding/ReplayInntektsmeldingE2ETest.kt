@@ -30,7 +30,6 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.inntektsmelding
 import no.nav.helse.spleis.e2e.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
@@ -62,11 +61,10 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Avhengig av replay av inntektsmelding for inntekt også i ikke-ghost-situasjon - første fraværsdag kant-i-kant`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        val inntektsmelding = inntektsmelding(
+        håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             førsteFraværsdag = 21.januar
         )
-        håndterInntektsmelding(inntektsmelding)
         assertEquals(1, observatør.inntektsmeldingIkkeHåndtert.size)
         assertEquals(emptyList<Any>(), inspektør.inntektInspektør.inntektsdatoer) // inntekten er ikke lagret fordi inntekten ikke blir håndtert
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
@@ -79,11 +77,10 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Avhengig av replay av inntektsmelding for inntekt også i ikke-ghost-situasjon - gap til første fraværsdag`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        val inntektsmelding = inntektsmelding(
+        håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             førsteFraværsdag = 25.januar
         )
-        håndterInntektsmelding(inntektsmelding)
         assertEquals(1, observatør.inntektsmeldingIkkeHåndtert.size)
         assertEquals(emptyList<Any>(), inspektør.inntektInspektør.inntektsdatoer) // inntekten er ikke lagret fordi inntekten ikke blir håndtert
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
@@ -96,11 +93,10 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Når arbeidsgiver bommer med første fraværsdag, og IM kommer før søknad er vi avhengig av replay-sjekk mot første fraværsdag for å gå videre når søknaden kommer`() {
         nyttVedtak(januar)
-        val inntektsmelding = inntektsmelding(
+        håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             førsteFraværsdag = 13.februar
         )
-        håndterInntektsmelding(inntektsmelding)
         assertEquals(1, observatør.inntektsmeldingIkkeHåndtert.size)
         assertEquals(listOf(1.januar), inspektør.inntektInspektør.inntektsdatoer)
         håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))

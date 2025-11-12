@@ -15,7 +15,7 @@ import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.økonomi.Inntekt
 
-class Inntektsmeldinginntekt(
+class InntektFraInntektsmelding(
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     meldingsreferanseId: MeldingsreferanseId,
     mottatt: LocalDateTime,

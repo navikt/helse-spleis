@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.InntektFraInntektsmelding
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsendringer
@@ -154,6 +155,22 @@ internal class ArbeidsgiverHendelsefabrikk(
 
     fun lagAvbruttSøknad(sykmeldingsperiode: Periode): AvbruttSøknad =
         AvbruttSøknad(sykmeldingsperiode, MeldingsreferanseId(UUID.randomUUID()), behandlingsporing)
+
+    internal fun lagOppdeltInntektsmelding(
+        arbeidsgiverperioder: List<Periode>,
+        beregnetInntekt: Inntekt,
+        førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        id: UUID = UUID.randomUUID(),
+        harFlereInntektsmeldinger: Boolean = false,
+        mottatt: LocalDateTime = LocalDateTime.now()
+    ): Pair<Inntektsmelding, InntektFraInntektsmelding> {
+        val inntektsmelding = lagInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, opphørAvNaturalytelser, begrunnelseForReduksjonEllerIkkeUtbetalt, id, harFlereInntektsmeldinger, mottatt)
+        val inntektFraInntektsmelding = InntektFraInntektsmelding(inntektsmelding.behandlingsporing, MeldingsreferanseId(id), mottatt, arbeidsgiverperioder, førsteFraværsdag, beregnetInntekt)
+        return inntektsmelding to inntektFraInntektsmelding
+    }
 
     internal fun lagInntektsmelding(
         arbeidsgiverperioder: List<Periode>,

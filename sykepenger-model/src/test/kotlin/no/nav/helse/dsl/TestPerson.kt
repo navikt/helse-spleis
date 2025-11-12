@@ -356,7 +356,7 @@ internal class TestPerson(
             orgnummer: String = "",
             mottatt: LocalDateTime = LocalDateTime.now()
         ): UUID {
-            arbeidsgiverHendelsefabrikk.lagInntektsmelding(
+            val (inntektsmelding, inntektFraInntektsmelding) = arbeidsgiverHendelsefabrikk.lagOppdeltInntektsmelding(
                 arbeidsgiverperioder,
                 beregnetInntekt,
                 førsteFraværsdag,
@@ -365,7 +365,9 @@ internal class TestPerson(
                 begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id,
                 mottatt = mottatt
-            ).håndter(Person::håndterInntektsmelding)
+            )
+            inntektsmelding.håndter(Person::håndterInntektsmelding)
+            inntektFraInntektsmelding.håndter(Person::håndterInntektFraInntektsmelding)
             return id
         }
 

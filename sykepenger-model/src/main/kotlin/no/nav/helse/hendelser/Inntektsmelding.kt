@@ -40,7 +40,7 @@ class Inntektsmelding(
         automatiskBehandling = false
     )
 
-    internal val faktaavklartInntekt = Inntektsmeldinginntekt.faktaavklartInntekt(
+    internal val faktaavklartInntekt = InntektFraInntektsmelding.faktaavklartInntekt(
         meldingsreferanseId = meldingsreferanseId,
         mottatt = mottatt,
         arbeidsgiverperioder = arbeidsgiverperioder,
