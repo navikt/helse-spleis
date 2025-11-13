@@ -49,9 +49,9 @@ internal class InntektsmeldingReplayTest : AbstractEndToEndMediatorTest() {
 
         assertTilstand(0, "AVSLUTTET_UTEN_UTBETALING")
         assertTilstand(1, "AVSLUTTET_UTEN_UTBETALING")
-        assertTilstand(2, "AVVENTER_BLOKKERENDE_PERIODE")
+        assertTilstand(2, "AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER")
         assertTilstand(3, "AVVENTER_INNTEKTSMELDING")
-        assertTilstand(4, "AVVENTER_BLOKKERENDE_PERIODE")
+        assertTilstand(4, "AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER")
         assertIngenVarsler()
 
         // At a2 nå spør om replay gjør at vi også replayer inntektsmeldingen a1 har sendt og a1 får
@@ -60,9 +60,9 @@ internal class InntektsmeldingReplayTest : AbstractEndToEndMediatorTest() {
 
         assertTilstand(0, "AVSLUTTET_UTEN_UTBETALING")
         assertTilstand(1, "AVSLUTTET_UTEN_UTBETALING")
-        assertTilstand(2, "AVVENTER_BLOKKERENDE_PERIODE")
+        assertTilstand(2, "AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER")
         assertTilstand(3, "AVVENTER_INNTEKTSMELDING")
-        assertTilstand(4, "AVVENTER_BLOKKERENDE_PERIODE")
+        assertTilstand(4, "AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER")
         assertTilstand(5, "AVVENTER_INNTEKTSMELDING")
         assertIngenVarsler()
     }

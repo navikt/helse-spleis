@@ -54,6 +54,8 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
@@ -273,7 +275,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             håndterSøknad(april)
-            assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
     }
 
@@ -314,7 +316,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1)))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE)
             val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }.venterPå
             assertEquals("a3", venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer)
             assertEquals("INNTEKTSMELDING", venterPå.venteårsak.hva)
@@ -571,7 +573,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-            assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(3.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE, AVVENTER_BLOKKERENDE_PERIODE)
 
         }
         a2 {
@@ -633,7 +635,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
         a1 {
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE)
         }
     }
 
@@ -835,7 +837,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 {
             håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -927,11 +929,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
 
         a1 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
         a2 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
 
@@ -941,11 +943,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
 
         a1 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
 
@@ -964,7 +966,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
@@ -992,7 +994,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 {
             håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -1033,7 +1035,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterInntektsmelding(
                 listOf(31.desember(2020) til 15.januar(2021))
             )
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -1076,7 +1078,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterInntektsmelding(
                 listOf(31.desember(2020) til 15.januar(2021))
             )
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -1108,7 +1110,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
 
                 )
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -1252,6 +1254,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
+                AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
@@ -1265,6 +1268,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
+                AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -1338,6 +1342,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
+                AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
             )
@@ -1503,7 +1508,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING
             )
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
     }
 
@@ -1561,7 +1566,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 { assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
         a2 {
-            assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
             assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
     }

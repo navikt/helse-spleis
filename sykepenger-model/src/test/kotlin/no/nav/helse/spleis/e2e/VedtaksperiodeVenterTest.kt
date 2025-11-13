@@ -20,6 +20,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
 import no.nav.helse.somOrganisasjonsnummer
@@ -63,7 +64,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
         a2 {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
             val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
             assertEquals(a1Vedtaksperiode2, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
             assertEquals("a1", vedtaksperiodeVenter.venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer)
@@ -118,7 +119,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
         val a2VedtaksperiodeId = a2 { 1.vedtaksperiode }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
             val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
             assertEquals(a2VedtaksperiodeId, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
             assertEquals("a2", vedtaksperiodeVenter.venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer)

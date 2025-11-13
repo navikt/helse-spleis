@@ -12,6 +12,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -28,14 +29,14 @@ internal class MakstidIAvventerBlokkerendePeriodeTest : AbstractDslTest() {
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertEquals(LocalDate.now().plusDays(180), venterTil(1.vedtaksperiode))
         }
         a1 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
             assertEquals(LocalDate.now().plusDays(180), venterTil(1.vedtaksperiode))
         }
     }
@@ -78,7 +79,7 @@ internal class MakstidIAvventerBlokkerendePeriodeTest : AbstractDslTest() {
         a1 {
             håndterInntektsmelding(listOf(1.mars til 16.mars))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -102,7 +103,7 @@ internal class MakstidIAvventerBlokkerendePeriodeTest : AbstractDslTest() {
         a1 {
             håndterInntektsmelding(listOf(1.mars til 16.mars))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             håndterInntektsmelding(listOf(1.mars til 16.mars))

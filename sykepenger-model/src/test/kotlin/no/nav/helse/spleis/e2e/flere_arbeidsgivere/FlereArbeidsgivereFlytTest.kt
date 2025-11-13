@@ -25,6 +25,8 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -282,7 +284,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
 
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE, orgnummer = a2)
 
         assertEquals(0, inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
     }
@@ -312,6 +314,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
+            AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             orgnummer = a1
@@ -334,7 +337,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, a1)
 
         håndterArbeidsgiveropplysninger(
             listOf(1.mars til 16.mars),
@@ -370,7 +373,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(5.januar, 5.februar, 100.prosent), orgnummer = a2)
         assertEquals(emptyList<Periode>(), inspektør(a2).sykmeldingsperioder())
-        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, a1)
         håndterArbeidsgiveropplysninger(
             listOf(5.januar til 20.januar),
             orgnummer = a2,
@@ -397,9 +400,9 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         assertIngenFunksjonelleFeil()
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE, orgnummer = a2)
     }
 
     @Test
@@ -415,7 +418,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             orgnummer = a1,
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
-        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
 
         håndterArbeidsgiveropplysninger(
@@ -457,8 +460,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         )
         observatør.assertEtterspurt(2.vedtaksperiode.id(a2), EventSubscription.Refusjon::class)
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE, orgnummer = a2)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
 
         håndterInntektsmelding(
@@ -511,7 +514,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         )
         observatør.assertEtterspurt(2.vedtaksperiode.id(a2), EventSubscription.Refusjon::class)
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
     }
@@ -550,7 +553,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         )
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
-        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
@@ -592,7 +595,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
-        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
@@ -827,6 +830,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             START,
             AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
+            AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_VILKÅRSPRØVING,
             TIL_INFOTRYGD,
@@ -907,7 +911,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
             orgnummer = a1
         )
         assertTilstander(
@@ -938,7 +942,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         // arbeidsgiveren spleis hører om først er den som blir valgt først til å gå videre i gjenopptaBehandling dersom periodenes tom er lik
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
-        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE, orgnummer = a1)
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {

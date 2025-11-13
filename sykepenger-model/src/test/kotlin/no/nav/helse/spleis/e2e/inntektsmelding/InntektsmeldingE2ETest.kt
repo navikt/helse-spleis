@@ -1761,7 +1761,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a2)
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
         assertForventetFeil(

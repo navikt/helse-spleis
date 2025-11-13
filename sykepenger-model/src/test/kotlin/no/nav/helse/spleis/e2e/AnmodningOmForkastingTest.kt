@@ -20,6 +20,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -59,7 +60,7 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
         a2 {
             nyPeriode(mars)
             håndterInntektsmelding(listOf(1.mars til 16.mars))
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a1 {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -69,7 +70,7 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
             håndterAnmodningOmForkasting(2.vedtaksperiode)
             assertInfo("Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet", 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, TIL_INFOTRYGD)
         }
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)

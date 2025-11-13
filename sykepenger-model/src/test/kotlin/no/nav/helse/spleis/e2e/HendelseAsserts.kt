@@ -99,7 +99,7 @@ internal fun AbstractEndToEndTest.assertTilstand(
 ) {
     val sisteTilstand = inspektør(orgnummer).sisteTilstand(vedtaksperiodeIdInnhenter)
     assertEquals(tilstand, sisteTilstand) {
-        "Forventet at perioden skal stå i tilstand $tilstand, mens den står faktisk i $sisteTilstand\n${personlogg}"
+        "Forventet at perioden skal stå i tilstand $tilstand, mens den står faktisk i $sisteTilstand"
     }
 }
 

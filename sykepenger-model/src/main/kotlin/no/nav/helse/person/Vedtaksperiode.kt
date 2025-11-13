@@ -177,6 +177,8 @@ import no.nav.helse.person.tilstandsmaskin.SelvstendigStart
 import no.nav.helse.person.tilstandsmaskin.SelvstendigTilUtbetaling
 import no.nav.helse.person.tilstandsmaskin.ArbeidstakerStart
 import no.nav.helse.person.tilstandsmaskin.AvventerAvsluttetUtenUtbetaling
+import no.nav.helse.person.tilstandsmaskin.AvventerInntektsopplysningerForAnnenArbeidsgiver
+import no.nav.helse.person.tilstandsmaskin.AvventerRefusjonsopplysningerAnnenPeriode
 import no.nav.helse.person.tilstandsmaskin.AvventerSøknadForOverlappendePeriode
 import no.nav.helse.person.tilstandsmaskin.FrilansAvventerBlokkerendePeriode
 import no.nav.helse.person.tilstandsmaskin.FrilansAvventerInfotrygdHistorikk
@@ -368,6 +370,8 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerInfotrygdHistorikk,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerAvsluttetUtenUtbetaling,
             AvventerInfotrygdHistorikk,
             AvventerInntektsmelding,
@@ -427,6 +431,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAnnullering,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerAvsluttetUtenUtbetaling,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
@@ -486,6 +492,8 @@ internal class Vedtaksperiode private constructor(
 
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerAvsluttetUtenUtbetaling,
             AvventerAOrdningen,
             AvventerGodkjenning,
@@ -552,6 +560,8 @@ internal class Vedtaksperiode private constructor(
                 AvventerInntektsmelding,
                 AvventerBlokkerendePeriode,
                 AvventerSøknadForOverlappendePeriode,
+                AvventerInntektsopplysningerForAnnenArbeidsgiver,
+                AvventerRefusjonsopplysningerAnnenPeriode,
                 AvventerAOrdningen,
                 AvsluttetUtenUtbetaling,
                 AvventerAvsluttetUtenUtbetaling,
@@ -636,6 +646,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAnnullering,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerAvsluttetUtenUtbetaling,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
@@ -705,6 +717,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAnnullering,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerAvsluttetUtenUtbetaling,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
@@ -804,6 +818,8 @@ internal class Vedtaksperiode private constructor(
 
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerAvsluttetUtenUtbetaling,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
@@ -951,6 +967,8 @@ internal class Vedtaksperiode private constructor(
                 aktivitetsloggMedVedtaksperiodekontekst.info("Håndterer ikke arbeidsgiverperiode i ${tilstand.type}")
             }
 
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerAOrdningen,
             AvventerAnnullering,
             AvventerGodkjenning,
@@ -1075,6 +1093,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAnnullering,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerAvsluttetUtenUtbetaling,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
@@ -1257,6 +1277,8 @@ internal class Vedtaksperiode private constructor(
             }
 
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerBlokkerendePeriode -> håndterKorrigerendeInntektsmelding(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
 
             AvventerInfotrygdHistorikk,
@@ -1330,6 +1352,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerGodkjenning,
             AvventerHistorikk,
             AvventerAOrdningen,
@@ -1413,6 +1437,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerAOrdningen,
             AvventerInntektsmelding,
             AvventerGodkjenning,
@@ -1463,6 +1489,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
             AvventerInfotrygdHistorikk,
@@ -1713,6 +1741,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAnnullering,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerHistorikk,
             AvventerHistorikkRevurdering,
             AvventerInfotrygdHistorikk,
@@ -1809,6 +1839,8 @@ internal class Vedtaksperiode private constructor(
             AvventerInntektsmelding,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
             AvventerHistorikk,
@@ -1957,6 +1989,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAnnullering,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
             AvventerHistorikk,
@@ -2092,6 +2126,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAOrdningen,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerGodkjenning,
             AvventerHistorikk,
             AvventerInfotrygdHistorikk,
@@ -2206,6 +2242,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAnnullering,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerAvsluttetUtenUtbetaling,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
@@ -2337,6 +2375,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerGodkjenning,
             AvventerHistorikk,
             AvventerInfotrygdHistorikk,
@@ -2461,6 +2501,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAnnullering,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
             AvventerHistorikk,
@@ -2943,9 +2985,11 @@ internal class Vedtaksperiode private constructor(
             }
 
             // disse to er litt spesielle, fordi tilstanden er både en ventetilstand og en "det er min tur"-tilstand
-            is AvventerBlokkerendePeriode -> t.venterpå(this)
             is AvventerRevurdering -> t.venterpå(this)
+            is AvventerInntektsopplysningerForAnnenArbeidsgiver -> t.venterpå(this)
+            is AvventerRefusjonsopplysningerAnnenPeriode -> t.venterpå(this)
 
+            AvventerBlokkerendePeriode -> VenterPå.Nestemann
             AvventerSøknadForOverlappendePeriode -> VenterPå.SegSelv(Venteårsak.SØKNAD)
             AvventerAvsluttetUtenUtbetaling -> VenterPå.Nestemann
 
@@ -3083,7 +3127,8 @@ internal class Vedtaksperiode private constructor(
     internal fun førstePeriodeSomVenterPåRefusjonsopplysninger(): Vedtaksperiode? {
         return perioderSomMåHensyntasVedBeregning()
             .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
-            .filter { it.tilstand in setOf(AvventerInntektsmelding, AvventerAOrdningen) }
+            .filter { it.tilstand in setOf(ArbeidstakerStart, AvventerInntektsmelding, AvventerAOrdningen) }
+            .filterNot { it === this }
             .minOrNull()
     }
 
@@ -3091,7 +3136,7 @@ internal class Vedtaksperiode private constructor(
         return person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
             .filter { it.yrkesaktivitet !== this.yrkesaktivitet }
-            .filter { it.tilstand in setOf(AvventerInntektsmelding, AvventerAOrdningen) }
+            .filter { it.tilstand in setOf(ArbeidstakerStart, AvventerInntektsmelding, AvventerAOrdningen) }
             .minOrNull()
     }
 
@@ -3290,6 +3335,8 @@ internal class Vedtaksperiode private constructor(
                     VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING -> AvventerAvsluttetUtenUtbetaling
                     VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> AvventerBlokkerendePeriode
                     VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE -> AvventerSøknadForOverlappendePeriode
+                    VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER -> AvventerInntektsopplysningerForAnnenArbeidsgiver
+                    VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE -> AvventerRefusjonsopplysningerAnnenPeriode
                     VedtaksperiodetilstandDto.AVVENTER_A_ORDNINGEN -> AvventerAOrdningen
                     VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> AvventerGodkjenning
                     VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING -> AvventerGodkjenningRevurdering
@@ -3385,6 +3432,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAvsluttetUtenUtbetaling, -> VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING
             AvventerBlokkerendePeriode -> VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE
             AvventerSøknadForOverlappendePeriode -> VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE
+            AvventerInntektsopplysningerForAnnenArbeidsgiver -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
+            AvventerRefusjonsopplysningerAnnenPeriode -> VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
             AvventerAOrdningen -> VedtaksperiodetilstandDto.AVVENTER_A_ORDNINGEN
             AvventerGodkjenning -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING
             AvventerGodkjenningRevurdering -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
@@ -3666,6 +3715,8 @@ private fun nesteTilstandEtterIgangsattOverstyring(
     AvventerAvsluttetUtenUtbetaling,
     AvventerBlokkerendePeriode,
     AvventerSøknadForOverlappendePeriode,
+    AvventerInntektsopplysningerForAnnenArbeidsgiver,
+    AvventerRefusjonsopplysningerAnnenPeriode,
     AvventerGodkjenning,
     AvventerHistorikk,
     AvventerSimulering,

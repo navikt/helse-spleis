@@ -109,6 +109,76 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     }
 
     @Test
+    fun `uberegnet periode venter på inntektsmelding annen arbeidsgiver`() {
+        håndterSøknad(1.januar til 19.januar, orgnummer = a1)
+        håndterSøknad(1.januar til 19.januar, orgnummer = a2)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
+        generasjoner(a1) {
+            0.generasjon {
+                uberegnetPeriode(0).also {
+                    assertEquals(VenterPåAnnenPeriode, it.periodetilstand)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `uberegnet periode venter på refusjonsopplysninger samme arbeidsgiver`() {
+        håndterSøknad(1.januar til 19.januar, orgnummer = a1)
+        håndterSøknad(25.januar til 31.januar, orgnummer = a1)
+        håndterSøknad(1.januar til 25.januar, orgnummer = a2)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a2)
+        generasjoner(a1) {
+            0.generasjon {
+                uberegnetPeriode(0).also {
+                    assertEquals(AvventerInntektsopplysninger, it.periodetilstand)
+                }
+                uberegnetPeriode(1).also {
+                    assertEquals(VenterPåAnnenPeriode, it.periodetilstand)
+                }
+            }
+        }
+        generasjoner(a2) {
+            0.generasjon {
+                uberegnetPeriode(0).also {
+                    assertEquals(VenterPåAnnenPeriode, it.periodetilstand)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `uberegnet periode venter på refusjonsopplysninger annen arbeidsgiver`() {
+        håndterSøknad(1.januar til 19.januar, orgnummer = a1)
+        håndterSøknad(20.januar til 31.januar, orgnummer = a1)
+        håndterSøknad(1.januar til 20.januar, orgnummer = a2)
+        håndterSøknad(25.januar til 31.januar, orgnummer = a2)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a2)
+        generasjoner(a1) {
+            0.generasjon {
+                uberegnetPeriode(0).also {
+                    assertEquals(VenterPåAnnenPeriode, it.periodetilstand)
+                }
+                uberegnetPeriode(1).also {
+                    assertEquals(VenterPåAnnenPeriode, it.periodetilstand)
+                }
+            }
+        }
+        generasjoner(a2) {
+            0.generasjon {
+                uberegnetPeriode(0).also {
+                    assertEquals(AvventerInntektsopplysninger, it.periodetilstand)
+                }
+                uberegnetPeriode(1).also {
+                    assertEquals(VenterPåAnnenPeriode, it.periodetilstand)
+                }
+            }
+        }
+    }
+
+    @Test
     fun `Selvstendig har pensjonsgivende inntekt også på uberegnet periode`() {
         håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
 

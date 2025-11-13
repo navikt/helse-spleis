@@ -4,15 +4,23 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VenterPå
-import no.nav.helse.person.Venteårsak
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
-internal fun nesteTilstandEtterInntekt(vedtaksperiode: Vedtaksperiode) =
-    when {
+internal fun nesteTilstandEtterInntekt(vedtaksperiode: Vedtaksperiode): Vedtaksperiodetilstand {
+    return tilstandHvisBlokkeresAvAndre(vedtaksperiode) ?: AvventerBlokkerendePeriode
+}
+
+private fun tilstandHvisBlokkeresAvAndre(vedtaksperiode: Vedtaksperiode): Vedtaksperiodetilstand? {
+    val førstePeriodeAnnenArbeidsgiverSomTrengerInntekt = vedtaksperiode.førstePeriodeSomVenterPåInntekt()
+    val førstePeriodeSomTrengerRefusjonsopplysninger = vedtaksperiode.førstePeriodeSomVenterPåRefusjonsopplysninger()
+
+    return when {
         vedtaksperiode.avventerSøknad() -> AvventerSøknadForOverlappendePeriode
-        else -> AvventerBlokkerendePeriode
+        vedtaksperiode.vilkårsgrunnlag == null && førstePeriodeAnnenArbeidsgiverSomTrengerInntekt != null -> AvventerInntektsopplysningerForAnnenArbeidsgiver
+        førstePeriodeSomTrengerRefusjonsopplysninger != null -> AvventerRefusjonsopplysningerAnnenPeriode
+        else -> null
     }
+}
 
 internal fun Vedtaksperiodetilstand.bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode: Vedtaksperiode) {
     check(vedtaksperiode.skalArbeidstakerBehandlesISpeil()) { "forventer ikke at en periode som skal til AUU, skal ende opp i $this" }
@@ -23,16 +31,8 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_BLOKKERENDE_PERIODE
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode)
-        check(!vedtaksperiode.avventerSøknad()) {
-            "forventer ikke å vente annen søknad"
-        }
+        check(!vedtaksperiode.avventerSøknad()) { "forventer ikke å vente annen søknad" }
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
-    }
-
-    fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
-        KlarForBeregning,
-        KlarForVilkårsprøving -> VenterPå.Nestemann
-        is TrengerInntektsmeldingAnnenPeriode -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.INNTEKTSMELDING)
     }
 
     override fun gjenopptaBehandling(
@@ -40,66 +40,20 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         eventBus: EventBus,
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
-    ) =
-        tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
+    ) {
+        val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
+        when {
+            nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
+            vedtaksperiode.vilkårsgrunnlag == null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøving)
+            else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
+        }
+    }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        tilstand(vedtaksperiode).håndterPåminnelse(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)
-        vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
-    }
-
-    private fun tilstand(vedtaksperiode: Vedtaksperiode): Tilstand {
-        return when {
-            vedtaksperiode.vilkårsgrunnlag == null -> when (val førstePeriodeSomTrengerInntekt = vedtaksperiode.førstePeriodeSomVenterPåInntekt()) {
-                null -> when (val førstePeriodeSomTrengerRefusjonsopplysninger = vedtaksperiode.førstePeriodeSomVenterPåRefusjonsopplysninger()) {
-                    null -> KlarForVilkårsprøving
-                    // om vi venter på refusjonsopplysninger så må det være pga. mursteinsproblematikk
-                    else -> TrengerInntektsmeldingAnnenPeriode(førstePeriodeSomTrengerRefusjonsopplysninger)
-                }
-                else -> TrengerInntektsmeldingAnnenPeriode(førstePeriodeSomTrengerInntekt)
-            }
-            else -> when (val førstePeriodeSomTrengerRefusjonsopplysninger = vedtaksperiode.førstePeriodeSomVenterPåRefusjonsopplysninger()) {
-                null -> KlarForBeregning
-                else -> TrengerInntektsmeldingAnnenPeriode(førstePeriodeSomTrengerRefusjonsopplysninger)
-            }
-        }
-    }
-
-    private sealed interface Tilstand {
-        fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg)
-        fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
-    }
-
-    private data class TrengerInntektsmeldingAnnenPeriode(val trengerInntektsmelding: Vedtaksperiode) : Tilstand {
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            eventBus: EventBus,
-            hendelse: Hendelse,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            aktivitetslogg.info("Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver")
-        }
-    }
-
-    private data object KlarForVilkårsprøving : Tilstand {
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            eventBus: EventBus,
-            hendelse: Hendelse,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøving)
-        }
-    }
-
-    private data object KlarForBeregning : Tilstand {
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            eventBus: EventBus,
-            hendelse: Hendelse,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
+        val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
+        when {
+            nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
+            else -> vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
     }
 }
