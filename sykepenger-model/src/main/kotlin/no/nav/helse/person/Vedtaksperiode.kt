@@ -3107,22 +3107,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode) = behandlinger.harSammeUtbetalingSom(annenVedtaksperiode)
 
-    internal fun sikreRefusjonsopplysningerHvisTomt(eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        if (!påminnelse.når(Flagg("fullRefusjon"))) return
-        if (!behandlinger.refusjonstidslinje().isEmpty()) return
-        val grunnlag = vilkårsgrunnlag ?: return
-        val inntekt = grunnlag.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.firstOrNull { it.orgnummer == yrkesaktivitet.organisasjonsnummer } ?: return
-        val refusjonsopplysninger = Beløpstidslinje.fra(periode, inntekt.fastsattÅrsinntekt, Kilde(inntekt.faktaavklartInntekt.inntektsdata.hendelseId, Avsender.ARBEIDSGIVER, inntekt.faktaavklartInntekt.inntektsdata.tidsstempel))
-        val benyttetRefusjonsopplysninger = behandlinger.endretRefusjonstidslinje(refusjonsopplysninger) ?: return
-        behandlinger.håndterRefusjonstidslinje(
-            eventBus = eventBus,
-            yrkesaktivitet = yrkesaktivitet,
-            dokumentsporing = null,
-            aktivitetslogg = aktivitetslogg,
-            benyttetRefusjonsopplysninger = benyttetRefusjonsopplysninger
-        )
-    }
-
     private fun prioritertNabolag(): List<Vedtaksperiode> {
         val (nabolagFør, nabolagEtter) = this.yrkesaktivitet.finnSammenhengendeVedtaksperioder(this)
             .partition { it.periode.endInclusive < this.periode.start }
