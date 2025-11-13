@@ -129,6 +129,7 @@ internal class SpeilGenerasjonerBuilder(
 
                 is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
                 is VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE,
+                is VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE,
                 is VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING -> Periodetilstand.VenterPåAnnenPeriode
 
                 is VedtaksperiodetilstandDto.AVVENTER_HISTORIKK,
