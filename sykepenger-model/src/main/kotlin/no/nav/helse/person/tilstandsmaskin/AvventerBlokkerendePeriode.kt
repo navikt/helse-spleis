@@ -48,17 +48,20 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    private fun tilstand(
-        vedtaksperiode: Vedtaksperiode,
-    ): Tilstand {
-        // venter enten på inntekt (på en arbeidsgiver, venter egentlig ikke på en vedtaksperiode) eller refusjonsopplysninger (en vedtaksperiode, kan være samme AG)
-        val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()?.also {
-            check(it !== vedtaksperiode) { "forventer ikke å vente på oss selv!" }
-        }
+    private fun tilstand(vedtaksperiode: Vedtaksperiode): Tilstand {
         return when {
-            førstePeriodeSomTrengerInntektsmelding != null -> TrengerInntektsmeldingAnnenPeriode(førstePeriodeSomTrengerInntektsmelding)
-            vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
-            else -> KlarForBeregning
+            vedtaksperiode.vilkårsgrunnlag == null -> when (val førstePeriodeSomTrengerInntekt = vedtaksperiode.førstePeriodeSomVenterPåInntekt()) {
+                null -> when (val førstePeriodeSomTrengerRefusjonsopplysninger = vedtaksperiode.førstePeriodeSomVenterPåRefusjonsopplysninger()) {
+                    null -> KlarForVilkårsprøving
+                    // om vi venter på refusjonsopplysninger så må det være pga. mursteinsproblematikk
+                    else -> TrengerInntektsmeldingAnnenPeriode(førstePeriodeSomTrengerRefusjonsopplysninger)
+                }
+                else -> TrengerInntektsmeldingAnnenPeriode(førstePeriodeSomTrengerInntekt)
+            }
+            else -> when (val førstePeriodeSomTrengerRefusjonsopplysninger = vedtaksperiode.førstePeriodeSomVenterPåRefusjonsopplysninger()) {
+                null -> KlarForBeregning
+                else -> TrengerInntektsmeldingAnnenPeriode(førstePeriodeSomTrengerRefusjonsopplysninger)
+            }
         }
     }
 

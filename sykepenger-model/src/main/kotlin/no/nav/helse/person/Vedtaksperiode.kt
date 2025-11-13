@@ -3090,6 +3090,21 @@ internal class Vedtaksperiode private constructor(
         return yrkesaktivitet.kanBeregneSykepengegrunnlag(skjæringstidspunkt, perioderMedSammeSkjæringstidspunkt)
     }
 
+    internal fun førstePeriodeSomVenterPåRefusjonsopplysninger(): Vedtaksperiode? {
+        return perioderSomMåHensyntasVedBeregning()
+            .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
+            .filter { it.tilstand in setOf(AvventerInntektsmelding, AvventerAOrdningen) }
+            .minOrNull()
+    }
+
+    internal fun førstePeriodeSomVenterPåInntekt(): Vedtaksperiode? {
+        return person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+            .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
+            .filter { it.yrkesaktivitet !== this.yrkesaktivitet }
+            .filter { it.tilstand in setOf(AvventerInntektsmelding, AvventerAOrdningen) }
+            .minOrNull()
+    }
+
     internal fun førstePeriodeSomTrengerInntektsmelding(): Vedtaksperiode? {
         val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
         val perioderSomMåHensyntasVedVilkårsprøving = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
