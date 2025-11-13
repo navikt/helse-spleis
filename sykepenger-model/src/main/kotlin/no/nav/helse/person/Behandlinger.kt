@@ -1089,7 +1089,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     }.toMap(),
                     faktaavklartInntekt = when (val fi = faktaavklartInntekt) {
                         is SelvstendigFaktaavklartInntekt -> fi.dto()
-                        is ArbeidstakerFaktaavklartInntekt -> fi.dto()
+                        is ArbeidstakerFaktaavklartInntekt -> when (fi.inntektsopplysningskilde) {
+                            Arbeidstakerinntektskilde.Arbeidsgiver -> fi.dto()
+                            is Arbeidstakerinntektskilde.AOrdningen,
+                            Arbeidstakerinntektskilde.Infotrygd -> migreringshjelpen?.faktaavklartInntekt(this.skjæringstidspunkt, this.grunnlagsdata, sisteEndring)
+                        }
                         null -> migreringshjelpen?.faktaavklartInntekt(this.skjæringstidspunkt, this.grunnlagsdata, sisteEndring)
                     },
                     korrigertInntekt = korrigertInntekt?.dto() ?: migreringshjelpen?.korrigertInntekt(this.grunnlagsdata)
