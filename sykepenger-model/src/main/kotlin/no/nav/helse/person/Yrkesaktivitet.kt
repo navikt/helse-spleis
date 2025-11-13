@@ -1103,7 +1103,7 @@ internal class Yrkesaktivitet private constructor(
             return yrkesaktivitet.avklarInntektFraInntektshistorikk(
                 skjæringstidspunkt = skjæringstidspunkt,
                 vedtaksperioder = yrkesaktivitet.vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-            )?.dto().also { inntekt ->
+            )?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }?.dto().also { inntekt ->
                 // Cacher så vi slipper å rote nedi der igjen
                 fraInntektshistorikkCache[skjæringstidspunkt] = inntekt
             }
