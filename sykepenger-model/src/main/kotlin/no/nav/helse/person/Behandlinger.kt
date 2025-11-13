@@ -1053,7 +1053,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
             }
 
-            internal fun dto(sisteEndring: Boolean, migreringshjelpen: Yrkesaktivitet.Migreringshjelpen?): BehandlingendringUtDto {
+            internal fun dto(): BehandlingendringUtDto {
                 val vilkårsgrunnlagUtDto = this.grunnlagsdata?.dto()
                 val utbetalingUtDto = this.utbetaling?.dto()
                 return BehandlingendringUtDto(
@@ -1089,14 +1089,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     }.toMap(),
                     faktaavklartInntekt = when (val fi = faktaavklartInntekt) {
                         is SelvstendigFaktaavklartInntekt -> fi.dto()
-                        is ArbeidstakerFaktaavklartInntekt -> when (fi.inntektsopplysningskilde) {
-                            Arbeidstakerinntektskilde.Arbeidsgiver -> fi.dto()
-                            is Arbeidstakerinntektskilde.AOrdningen,
-                            Arbeidstakerinntektskilde.Infotrygd -> migreringshjelpen?.faktaavklartInntekt(this.skjæringstidspunkt, this.grunnlagsdata, sisteEndring)
-                        }
-                        null -> migreringshjelpen?.faktaavklartInntekt(this.skjæringstidspunkt, this.grunnlagsdata, sisteEndring)
+                        is ArbeidstakerFaktaavklartInntekt -> fi.dto()
+                        null -> null
                     },
-                    korrigertInntekt = korrigertInntekt?.dto() ?: migreringshjelpen?.korrigertInntekt(this.grunnlagsdata)
+                    korrigertInntekt = korrigertInntekt?.dto()
                 )
             }
 
@@ -1909,7 +1905,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
         }
 
-        internal fun dto(sisteBehandling: Boolean, migreringshjelpen: Yrkesaktivitet.Migreringshjelpen?) = BehandlingUtDto(
+        internal fun dto() = BehandlingUtDto(
             id = this.id,
             tilstand = when (tilstand) {
                 Tilstand.AnnullertPeriode -> BehandlingtilstandDto.ANNULLERT_PERIODE
@@ -1927,20 +1923,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.UberegnetAnnullering -> BehandlingtilstandDto.UBEREGNET_ANNULLERING
                 Tilstand.OverførtAnnullering -> BehandlingtilstandDto.OVERFØRT_ANNULLERING
             },
-            endringer = this.endringer.map { it.dto(
-                sisteEndring = sisteBehandling && this.endringer.last().id == it.id,
-                migreringshjelpen = migreringshjelpen
-            ) },
+            endringer = this.endringer.map { it.dto() },
             vedtakFattet = this.vedtakFattet,
             avsluttet = this.avsluttet,
             kilde = this.kilde.dto(),
         )
     }
 
-    internal fun dto(migreringshjelpen: Yrkesaktivitet.Migreringshjelpen?) = BehandlingerUtDto(behandlinger = this.behandlinger.map { it.dto(
-        sisteBehandling = this.behandlinger.last().id == it.id,
-        migreringshjelpen = migreringshjelpen
-    )})
+    internal fun dto() = BehandlingerUtDto(behandlinger = this.behandlinger.map { it.dto() })
 
     internal fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode): Boolean {
         val sisteVedtak = behandlinger.lastOrNull { it.erFattetVedtak() } ?: return false
