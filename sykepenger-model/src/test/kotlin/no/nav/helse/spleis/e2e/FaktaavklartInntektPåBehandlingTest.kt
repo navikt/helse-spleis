@@ -118,8 +118,8 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
 
                 assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                     when (brukFaktaavklartInntektFraBehandling) {
-                        true -> assertInntektsgrunnlag(a1, INNTEKT*1.10) // Dette må jo være et bedre valg enn vi velger i dag 🎉
-                        false -> assertInntektsgrunnlag(a1, INNTEKT*1.05)
+                        true -> assertInntektsgrunnlag(a1, INNTEKT * 1.10) // Dette må jo være et bedre valg enn vi velger i dag 🎉
+                        false -> assertInntektsgrunnlag(a1, INNTEKT * 1.05)
                     }
                 }
 
@@ -128,26 +128,11 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 assertEquals(31.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
 
                 håndterVilkårsgrunnlag(1.vedtaksperiode)
-                when (brukFaktaavklartInntektFraBehandling) {
-                    true -> assertForventetFeil(
-                        forklaring = """
-                                Nå som vi ikke har noe inntekt i samme måned som skjæringstidspunktet velger vi sist ankomne, litt sus? 🤷‍
-                                Burde vi ikke endt opp med skatt når vi ikke har noen inntekter i den måneden ? 🏴‍☠️
-                            """,
-                        nå = {
-                            assertInntektsgrunnlag(31.desember(2017), forventetAntallArbeidsgivere = 1) {
-                                assertInntektsgrunnlag(a1, INNTEKT * 1.15)
-                            }
-                        },
-                        ønsket = {
-                            assertInntektsgrunnlag(31.desember(2017), forventetAntallArbeidsgivere = 1) {
-                                assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
-                            }
-                        }
-                    )
 
-                    false -> assertInntektsgrunnlag(31.desember(2017), forventetAntallArbeidsgivere = 1) {
-                        assertInntektsgrunnlag(a1, INNTEKT * 1.05)
+                assertInntektsgrunnlag(31.desember(2017), forventetAntallArbeidsgivere = 1) {
+                    when (brukFaktaavklartInntektFraBehandling) {
+                        true -> assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen) // Dette må jo være et bedre valg enn vi velger i dag 🎉
+                        false -> assertInntektsgrunnlag(a1, INNTEKT * 1.05)
                     }
                 }
             }
