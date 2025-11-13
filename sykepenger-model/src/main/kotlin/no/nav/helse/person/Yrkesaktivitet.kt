@@ -10,6 +10,7 @@ import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
+import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Regelverkslogg
@@ -1111,15 +1112,9 @@ internal class Yrkesaktivitet private constructor(
 
         internal fun faktaavklartInntekt(skjæringstidspunkt: LocalDate, vilkårsgrunlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, sisteEndring: Boolean): ArbeidstakerFaktaavklartInntektUtDto? {
             if (vilkårsgrunlag != null) {
-                val faktaavklartInntektFraVilkårsgrunnlag = arbeidsgiverInntektsopplysning(vilkårsgrunlag)?.faktaavklartInntekt ?: return null
-                return when (faktaavklartInntektFraVilkårsgrunnlag.inntektsopplysningskilde) {
-                    // Om det er Arbeidsgiver-inntekt, da er det bra greier 👍
-                    Arbeidstakerinntektskilde.Arbeidsgiver -> faktaavklartInntektFraVilkårsgrunnlag.dto()
-                    // Om det er Aordningen-inntekt så leter vi etter den underliggende inntektsmeldingen som er valgt bort (om det er noen)
-                    is Arbeidstakerinntektskilde.AOrdningen -> faktaavklartInntektFraInntektshistorikken(skjæringstidspunkt)
-                    // Om det er Infotrygd-inntekt så legger vi den ikke på behandlingen - Da er det nok best å ha null på behandling og en eventuell revurdering av gammel IT-periode fallbacker til Aordningen
-                    Arbeidstakerinntektskilde.Infotrygd -> null
-                }
+                val aktiv = aktivArbeidsgiverInntektsopplysning(vilkårsgrunlag)
+                if (aktiv != null) return aktiv.faktaavklartInntekt.mapFaktaavklartInntektFraVilkårsgrunnlag(skjæringstidspunkt)
+                return deaktivertArbeidsgiverInntektsopplysning(vilkårsgrunlag)?.faktaavklartInntekt?.mapFaktaavklartInntektFraVilkårsgrunnlag(skjæringstidspunkt)
             }
 
             // Når vi ikke har et vilkårsgrunnlag så gidder vi bare å sjekke opp i inntekshistorikken for siste endring
@@ -1127,11 +1122,27 @@ internal class Yrkesaktivitet private constructor(
             return faktaavklartInntektFraInntektshistorikken(skjæringstidspunkt)
         }
 
-        internal fun korrigertInntekt(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =
-            arbeidsgiverInntektsopplysning(grunnlagsdata)?.korrigertInntekt?.dto()
+        internal fun korrigertInntekt(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?): SaksbehandlerUtDto? {
+            if (vilkårsgrunnlag == null) return null
+            val aktiv = aktivArbeidsgiverInntektsopplysning(vilkårsgrunnlag)
+            if (aktiv != null) return aktiv.korrigertInntekt?.dto()
+            return deaktivertArbeidsgiverInntektsopplysning(vilkårsgrunnlag)?.korrigertInntekt?.dto()
+        }
 
-        private fun arbeidsgiverInntektsopplysning(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =
-            grunnlagsdata?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.firstOrNull { it.orgnummer == yrkesaktivitet.organisasjonsnummer }
+        private fun ArbeidstakerFaktaavklartInntekt.mapFaktaavklartInntektFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate) = when (inntektsopplysningskilde) {
+            // Om det er Arbeidsgiver-inntekt, da er det bra greier 👍
+            Arbeidstakerinntektskilde.Arbeidsgiver -> dto()
+            // Om det er Aordningen-inntekt så leter vi etter den underliggende inntektsmeldingen som er valgt bort (om det er noen)
+            is Arbeidstakerinntektskilde.AOrdningen -> faktaavklartInntektFraInntektshistorikken(skjæringstidspunkt)
+            // Om det er Infotrygd-inntekt så legger vi den ikke på behandlingen - Da er det nok best å ha null på behandling og en eventuell revurdering av gammel IT-periode fallbacker til Aordningen
+            Arbeidstakerinntektskilde.Infotrygd -> null
+        }
+
+        private fun aktivArbeidsgiverInntektsopplysning(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) =
+            vilkårsgrunnlag.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.firstOrNull { it.orgnummer == yrkesaktivitet.organisasjonsnummer }
+
+        private fun deaktivertArbeidsgiverInntektsopplysning(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) =
+            vilkårsgrunnlag.inntektsgrunnlag.deaktiverteArbeidsforhold.firstOrNull { it.orgnummer == yrkesaktivitet.organisasjonsnummer }
     }
 
     internal fun trengerArbeidsgiveropplysninger(periode: Periode): List<Periode> {
