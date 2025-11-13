@@ -3066,12 +3066,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun måInnhenteInntektEllerRefusjon(): Boolean {
         check(yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker) { "gir bare mening å kalle denne funksjonen for arbeidstakere" }
-        return !harInntektOgRefusjon()
-    }
-
-    private fun harInntektOgRefusjon(): Boolean {
-        if (refusjonstidslinje.isEmpty()) return false
-        return harEksisterendeInntekt() || behandlinger.harGjenbrukbarInntekt(yrkesaktivitet.organisasjonsnummer)
+        return refusjonstidslinje.isEmpty() || !harEksisterendeInntekt()
     }
 
     // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
