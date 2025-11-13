@@ -238,8 +238,6 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             AVSLUTTET,
             orgnummer = a1
@@ -296,8 +294,6 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,

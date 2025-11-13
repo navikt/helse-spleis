@@ -45,14 +45,21 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
 
     private fun tilstand(vedtaksperiode: Vedtaksperiode): Tilstand {
         if (vedtaksperiode.behandlinger.utbetales()) return HarPågåendeUtbetaling
-        val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
-        if (førstePeriodeSomTrengerInntektsmelding != null) {
-            if (førstePeriodeSomTrengerInntektsmelding === vedtaksperiode)
-                return TrengerInnteksopplysninger(vedtaksperiode)
-            return TrengerInntektsopplysningerAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmelding)
+
+        return when (vedtaksperiode.vilkårsgrunnlag) {
+            null -> when (val førstePeriodeSomTrengerInntekt = vedtaksperiode.førstePeriodeSomVenterPåInntekt()) {
+                null -> when {
+                    !vedtaksperiode.kanAvklareInntekt() && !vedtaksperiode.behandlinger.harGjenbrukbarInntekt(vedtaksperiode.yrkesaktivitet.organisasjonsnummer) -> TrengerInnteksopplysninger(vedtaksperiode)
+                    else -> KlarForVilkårsprøving
+                }
+                else -> TrengerInntektsopplysningerAnnenArbeidsgiver(førstePeriodeSomTrengerInntekt)
+            }
+
+            else -> when (val førstePeriodeSomTrengerRefusjonsopplysninger = vedtaksperiode.førstePeriodeSomVenterPåRefusjonsopplysninger()) {
+                null -> KlarForBeregning
+                else -> TrengerInntektsopplysningerAnnenArbeidsgiver(førstePeriodeSomTrengerRefusjonsopplysninger)
+            }
         }
-        if (vedtaksperiode.vilkårsgrunnlag == null) return KlarForVilkårsprøving
-        return KlarForBeregning
     }
 
     private sealed interface Tilstand {
