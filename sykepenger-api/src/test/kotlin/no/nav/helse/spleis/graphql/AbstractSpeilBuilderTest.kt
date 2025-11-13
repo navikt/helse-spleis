@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.PensjonsgivendeInntekt
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -119,6 +120,11 @@ internal abstract class AbstractSpeilBuilderTest {
             person.håndterInntektsmeldingerReplay(eventBus, fabrikker.getValue(orgnr).lagInntektsmeldingReplayUtført(vedtaksperiodeId), hendelselogg)
             ubesvarteBehov.addAll(hendelselogg.behov)
         }
+    }
+
+    protected fun håndterSykmelding(periode: Periode, orgnummer: String = a1) {
+        val sykmelding = fabrikker.getValue(orgnummer).lagSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
+        sykmelding.håndter(Person::håndterSykmelding)
     }
 
     protected fun håndterSøknad(periode: Periode, orgnummer: String = a1): UUID {

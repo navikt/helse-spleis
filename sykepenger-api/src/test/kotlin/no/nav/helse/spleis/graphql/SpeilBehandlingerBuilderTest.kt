@@ -95,6 +95,20 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     }
 
     @Test
+    fun `uberegnet periode venter på søknad annen arbeidsgiver`() {
+        håndterSykmelding(1.januar til 19.januar, orgnummer = a2)
+        håndterSøknad(1.januar til 19.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
+        generasjoner(a1) {
+            0.generasjon {
+                uberegnetPeriode(0).also {
+                    assertEquals(VenterPåAnnenPeriode, it.periodetilstand)
+                }
+            }
+        }
+    }
+
+    @Test
     fun `Selvstendig har pensjonsgivende inntekt også på uberegnet periode`() {
         håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
 
