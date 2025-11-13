@@ -1,9 +1,11 @@
 package no.nav.helse.person
 
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.collections.set
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -117,6 +119,7 @@ import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Ventetidberegner
 import no.nav.helse.økonomi.Prosentdel.Companion.HundreProsent
+import org.slf4j.LoggerFactory
 
 internal class Yrkesaktivitet private constructor(
     private val person: Person,
@@ -1061,7 +1064,9 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
     internal fun dto(nestemann: Vedtaksperiode?): ArbeidsgiverUtDto {
+        val migreringshjelpen = Migreringshjelpen(this).startet()
         val vedtaksperioderDto = vedtaksperioder.map { it.dto(nestemann, null) }
+        migreringshjelpen.ferdig()
         val refusjonsopplysningerPåSisteBehandling = vedtaksperioder.lastOrNull()?.let { sisteVedtaksperiode ->
             val sisteBehandlingId = vedtaksperioderDto.last().behandlinger.behandlinger.last().id
             val sisteRefusjonstidslinje =
@@ -1095,6 +1100,7 @@ internal class Yrkesaktivitet private constructor(
 
     internal data class Migreringshjelpen(private val yrkesaktivitet: Yrkesaktivitet) {
         private val fraInntektshistorikkCache = mutableMapOf<LocalDate, ArbeidstakerFaktaavklartInntektUtDto?>()
+        private val scenarioer = mutableSetOf<String>()
 
         private fun faktaavklartInntektFraInntektshistorikken(skjæringstidspunkt: LocalDate): ArbeidstakerFaktaavklartInntektUtDto? {
             if (fraInntektshistorikkCache.contains(skjæringstidspunkt)) {
@@ -1111,31 +1117,51 @@ internal class Yrkesaktivitet private constructor(
         }
 
         internal fun faktaavklartInntekt(skjæringstidspunkt: LocalDate, vilkårsgrunlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, sisteEndring: Boolean): ArbeidstakerFaktaavklartInntektUtDto? {
+            // Når vi har et vilkårsgrunnlag så sjekker vi kun det. Først aktivt, dernest deaktivert
             if (vilkårsgrunlag != null) {
                 val aktiv = aktivArbeidsgiverInntektsopplysning(vilkårsgrunlag)
-                if (aktiv != null) return aktiv.faktaavklartInntekt.mapFaktaavklartInntektFraVilkårsgrunnlag(skjæringstidspunkt)
-                return deaktivertArbeidsgiverInntektsopplysning(vilkårsgrunlag)?.faktaavklartInntekt?.mapFaktaavklartInntektFraVilkårsgrunnlag(skjæringstidspunkt)
+                if (aktiv != null) return aktiv.faktaavklartInntekt.mapFaktaavklartInntektFraVilkårsgrunnlag(skjæringstidspunkt, "AKTIV")
+                val deaktivert = deaktivertArbeidsgiverInntektsopplysning(vilkårsgrunlag)
+                if (deaktivert != null) return deaktivert.faktaavklartInntekt.mapFaktaavklartInntektFraVilkårsgrunnlag(skjæringstidspunkt, "DEAKTIVERT")
+                return null.also { scenarioer.add("FANT_IKKE_INNTEKT_I_VILKÅRSGRUNNLAG") }
             }
 
             // Når vi ikke har et vilkårsgrunnlag så gidder vi bare å sjekke opp i inntekshistorikken for siste endring
             if (!sisteEndring) return null
-            return faktaavklartInntektFraInntektshistorikken(skjæringstidspunkt)
+            return faktaavklartInntektFraInntektshistorikken(skjæringstidspunkt).also { fraInntektshistorikken -> when (fraInntektshistorikken) {
+                null -> scenarioer.add("IKKE_VILKÅRSPRØVD_FANT_IKKE_INNTEKT")
+                else -> scenarioer.add("IKKE_VILKÅRSPRØVD_FANT_INNTEKT")
+            }}
         }
 
         internal fun korrigertInntekt(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?): SaksbehandlerUtDto? {
             if (vilkårsgrunnlag == null) return null
             val aktiv = aktivArbeidsgiverInntektsopplysning(vilkårsgrunnlag)
-            if (aktiv != null) return aktiv.korrigertInntekt?.dto()
-            return deaktivertArbeidsgiverInntektsopplysning(vilkårsgrunnlag)?.korrigertInntekt?.dto()
+            if (aktiv != null) return aktiv.korrigertInntekt?.dto()?.also { scenarioer.add("AKTIV_KORRIGERT_INNTEKT") }
+            return deaktivertArbeidsgiverInntektsopplysning(vilkårsgrunnlag)?.korrigertInntekt?.dto()?.also { scenarioer.add("DEAKTIVERT_KORRIGERT_INNTEKT") }
         }
 
-        private fun ArbeidstakerFaktaavklartInntekt.mapFaktaavklartInntektFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate) = when (inntektsopplysningskilde) {
+        private lateinit var startet: LocalDateTime
+        internal fun startet() = apply {
+            this.startet = LocalDateTime.now()
+        }
+
+        internal fun ferdig() {
+            if (scenarioer.isEmpty()) return
+            val tidsbruk = Duration.between(this.startet, LocalDateTime.now())
+            sikkerlogg.info("[Migreringshjelpen] Brukte ${tidsbruk.toMillis()}ms for {} & {} traff følgende scenarioer: $scenarioer", keyValue("fødselsnummer", yrkesaktivitet.person.fødselsnummer), keyValue("organisasjonsnummer", yrkesaktivitet.organisasjonsnummer))
+        }
+
+        private fun ArbeidstakerFaktaavklartInntekt.mapFaktaavklartInntektFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate, prefix: String) = when (inntektsopplysningskilde) {
             // Om det er Arbeidsgiver-inntekt, da er det bra greier 👍
-            Arbeidstakerinntektskilde.Arbeidsgiver -> dto()
+            Arbeidstakerinntektskilde.Arbeidsgiver -> dto().also { scenarioer.add("${prefix}_INNTEKT_VILKÅRSGRUNNLAG_KILDE_ARBEIDSGIVER") }
             // Om det er Aordningen-inntekt så leter vi etter den underliggende inntektsmeldingen som er valgt bort (om det er noen)
-            is Arbeidstakerinntektskilde.AOrdningen -> faktaavklartInntektFraInntektshistorikken(skjæringstidspunkt)
+            is Arbeidstakerinntektskilde.AOrdningen -> faktaavklartInntektFraInntektshistorikken(skjæringstidspunkt).also { underliggende -> when (underliggende) {
+                null -> scenarioer.add("${prefix}_INNTEKT_VILKÅRSGRUNNLAG_KILDE_AORDNINGEN_FANT_IKKE_UNDERLIGGENDE_INNTEKT")
+                else -> scenarioer.add("${prefix}_INNTEKT_VILKÅRSGRUNNLAG_KILDE_AORDNINGEN_FANT_UNDERLIGGENDE_INNTEKT")
+            }}
             // Om det er Infotrygd-inntekt så legger vi den ikke på behandlingen - Da er det nok best å ha null på behandling og en eventuell revurdering av gammel IT-periode fallbacker til Aordningen
-            Arbeidstakerinntektskilde.Infotrygd -> null
+            Arbeidstakerinntektskilde.Infotrygd -> null.also { scenarioer.add("${prefix}_INNTEKT_VILKÅRSGRUNNLAG_KILDE_INFOTRYGD")}
         }
 
         private fun aktivArbeidsgiverInntektsopplysning(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) =
@@ -1143,6 +1169,10 @@ internal class Yrkesaktivitet private constructor(
 
         private fun deaktivertArbeidsgiverInntektsopplysning(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) =
             vilkårsgrunnlag.inntektsgrunnlag.deaktiverteArbeidsforhold.firstOrNull { it.orgnummer == yrkesaktivitet.organisasjonsnummer }
+
+        private companion object {
+            private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        }
     }
 
     internal fun trengerArbeidsgiveropplysninger(periode: Periode): List<Periode> {
