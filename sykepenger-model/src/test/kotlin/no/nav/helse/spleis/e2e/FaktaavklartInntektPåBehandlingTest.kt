@@ -3,20 +3,30 @@ package no.nav.helse.spleis.e2e
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt.ArbeistakerFaktaavklartInntektView
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -28,35 +38,82 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
 
-    @Test
-    fun `Inntekten bør lagres på alle perioder`() {
-        a1 {
-            nyttVedtak(januar)
-            forlengVedtak(februar)
-            val oppdatertInntekt = INNTEKT/2
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `Flere korrigerende inntektsmeldinger, også flytter skjæringstidspunktet på seg`(brukFaktaavklartInntektFraBehandling: Boolean) {
+        val test =  {
+            a1 {
+                nyttVedtak(2.januar til 20.januar, beregnetInntekt = INNTEKT*1.05)
+                forlengVedtak(21.januar til 31.januar)
+                forlengVedtak(februar)
+                forlengVedtak(mars)
+                håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT*1.20)
+                håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 21.januar, beregnetInntekt = INNTEKT*1.10)
+                håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT*1.15)
 
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar, beregnetInntekt = oppdatertInntekt)
-            val faktaavklartInntektJanuar = inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView
-            val faktaavklartInntektFebruar = inspektør.faktaavklartInntekt(2.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView
+                assertEquals(INNTEKT*1.05, faktaavvklartArbeidstakerBeløp(1.vedtaksperiode))
+                assertEquals(INNTEKT*1.10, faktaavvklartArbeidstakerBeløp(2.vedtaksperiode))
+                assertEquals(INNTEKT*1.15, faktaavvklartArbeidstakerBeløp(3.vedtaksperiode))
+                assertEquals(INNTEKT*1.20, faktaavvklartArbeidstakerBeløp(4.vedtaksperiode))
 
-            assertForventetFeil(
-                forklaring = """
-                    Burde lagre inntekten på alle periodene på skjæringstidspunktet, ikke bare den som 'treffes' av inntektsmelding.
-                    Hvis ikke kan vi ende opp i en situasjon hvor vi skal vilkårsprøve på ny og velger første inntekt,
-                    .. og den ville jo blitt feil her da.
-                """,
-                ønsket = {
-                    assertEquals(oppdatertInntekt, faktaavklartInntektJanuar?.beløp)
-                    assertEquals(oppdatertInntekt, faktaavklartInntektFebruar?.beløp)
-                },
-                nå = {
-                    assertEquals(INNTEKT, faktaavklartInntektJanuar?.beløp)
-                    assertEquals(oppdatertInntekt, faktaavklartInntektFebruar?.beløp)
+                assertInntektsgrunnlag(2.januar, forventetAntallArbeidsgivere = 1) {
+                    assertInntektsgrunnlag(a1, INNTEKT*1.10)
                 }
-            )
+
+                assertVarsler(2.vedtaksperiode, RV_IM_4)
+
+                assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+                håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
+                assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+
+                håndterVilkårsgrunnlag(1.vedtaksperiode)
+                assertVarsler(1.vedtaksperiode, RV_IV_7)
+
+                assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                    when (brukFaktaavklartInntektFraBehandling) {
+                        true -> assertInntektsgrunnlag(a1, INNTEKT*1.10) // Dette må jo være et bedre valg enn vi velger i dag 🎉
+                        false -> assertInntektsgrunnlag(a1, INNTEKT*1.05)
+                    }
+                }
+
+                assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+                håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.desember(2017), Dagtype.Sykedag, 100)))
+                assertEquals(31.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
+
+                håndterVilkårsgrunnlag(1.vedtaksperiode)
+                when (brukFaktaavklartInntektFraBehandling) {
+                    true -> assertForventetFeil(
+                        forklaring = """
+                                Nå som vi ikke har noe inntekt i samme måned som skjæringstidspunktet velger vi sist ankomne, litt sus? 🤷‍
+                                Burde vi ikke endt opp med skatt når vi ikke har noen inntekter i den måneden ? 🏴‍☠️
+                            """,
+                        nå = {
+                            assertInntektsgrunnlag(31.desember(2017), forventetAntallArbeidsgivere = 1) {
+                                assertInntektsgrunnlag(a1, INNTEKT * 1.15)
+                            }
+                        },
+                        ønsket = {
+                            assertInntektsgrunnlag(31.desember(2017), forventetAntallArbeidsgivere = 1) {
+                                assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                            }
+                        }
+                    )
+
+                    false -> assertInntektsgrunnlag(31.desember(2017), forventetAntallArbeidsgivere = 1) {
+                        assertInntektsgrunnlag(a1, INNTEKT * 1.05)
+                    }
+                }
+            }
+        }
+
+        when (brukFaktaavklartInntektFraBehandling) {
+            true -> Toggle.BrukFaktaavklartInntektFraBehandling.enable { test() }
+            false -> Toggle.BrukFaktaavklartInntektFraBehandling.disable { test() }
         }
     }
 
@@ -191,7 +248,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 assertEquals(hendelseIdKorrigerendeIM, faktaavklartInntekt.hendelseId)
             }
 
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 
@@ -280,4 +337,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             }
         }
     }
+
+    private fun faktaavvklartArbeidstakerInntekt(vedtaksperiodeId: UUID) = inspektør.faktaavklartInntekt(vedtaksperiodeId) as? ArbeistakerFaktaavklartInntektView
+    private fun faktaavvklartArbeidstakerBeløp(vedtaksperiodeId: UUID) = (faktaavvklartArbeidstakerInntekt(vedtaksperiodeId))?.beløp
 }

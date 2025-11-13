@@ -2550,15 +2550,6 @@ internal class Vedtaksperiode private constructor(
         if (aktivitetslogg.harFunksjonelleFeil()) return forkast(eventBus, dager.hendelse, aktivitetslogg)
     }
 
-    private fun arbeidstakerFaktaavklartInntekt(aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt? {
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return null
-        val faktaavklartInntekt = checkNotNull(behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) { "Her skal vi ha en inntekt!" }
-
-        behandlinger.vurderVarselForGjenbrukAvInntekt(faktaavklartInntekt, aktivitetslogg)
-
-        return faktaavklartInntekt
-    }
-
     private fun inntektForArbeidsgiver(
         hendelse: Hendelse,
         aktivitetsloggTilDenSomVilkårsprøver: IAktivitetslogg,
@@ -2566,21 +2557,21 @@ internal class Vedtaksperiode private constructor(
         alleForSammeArbeidsgiver: List<Vedtaksperiode>,
         flereArbeidsgivere: Boolean
     ): ArbeidstakerFaktaavklartInntekt {
-        val inntektForArbeidsgiver = (alleForSammeArbeidsgiver
-            .firstOrNull { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
-            ?.arbeidstakerFaktaavklartInntekt(aktivitetsloggTilDenSomVilkårsprøver)
-            ?: yrkesaktivitet.avklarInntektFraInntektshistorikk(skjæringstidspunkt, alleForSammeArbeidsgiver))
-            ?.takeUnless {
-                // velger bort inntekten hvis situasjonen er "fom ulik skjæringstidspunktet"
-                val ulikFom = skjæringstidspunkt.yearMonth < it.inntektsdata.dato.yearMonth
-                (flereArbeidsgivere && ulikFom).also { harUlikFomOgFlereArbeidsgivere ->
-                    if (harUlikFomOgFlereArbeidsgivere) aktivitetsloggTilDenSomVilkårsprøver.varsel(Varselkode.RV_VV_2)
-                    else if (ulikFom) aktivitetsloggTilDenSomVilkårsprøver.info("Skjæringstidspunktet ($skjæringstidspunkt) er i annen måned enn inntektsdatoen (${it.inntektsdata.dato}) med bare én arbeidsgiver")
-                }
+        val faktaavklartInntektFraArbeidsgiver = alleForSammeArbeidsgiver
+            .faktaavklartInntekt(aktivitetsloggTilDenSomVilkårsprøver, skjæringstidspunkt)
+            ?: yrkesaktivitet.avklarInntektFraInntektshistorikk(skjæringstidspunkt, alleForSammeArbeidsgiver)
+
+        val faktaavklartInntektHensyntattUlikFom = faktaavklartInntektFraArbeidsgiver?.takeUnless {
+            // velger bort inntekten hvis situasjonen er "fom ulik skjæringstidspunktet"
+            val ulikFom = skjæringstidspunkt.yearMonth < it.inntektsdata.dato.yearMonth
+            (flereArbeidsgivere && ulikFom).also { harUlikFomOgFlereArbeidsgivere ->
+                if (harUlikFomOgFlereArbeidsgivere) aktivitetsloggTilDenSomVilkårsprøver.varsel(Varselkode.RV_VV_2)
+                else if (ulikFom) aktivitetsloggTilDenSomVilkårsprøver.info("Skjæringstidspunktet ($skjæringstidspunkt) er i annen måned enn inntektsdatoen (${it.inntektsdata.dato}) med bare én arbeidsgiver")
             }
+        }
 
         val benyttetFaktaavklartInntekt = when {
-            inntektForArbeidsgiver != null -> inntektForArbeidsgiver
+            faktaavklartInntektHensyntattUlikFom != null -> faktaavklartInntektHensyntattUlikFom
             skatteopplysning != null -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), skatteopplysning.inntektsdata, Arbeidstakerinntektskilde.AOrdningen(skatteopplysning.treMånederFørSkjæringstidspunkt))
             else -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt), Arbeidstakerinntektskilde.AOrdningen(emptyList()))
         }
@@ -3189,6 +3180,22 @@ internal class Vedtaksperiode private constructor(
             }
 
             return startdatoer.values.toSet()
+        }
+
+        internal fun List<Vedtaksperiode>.periodeMedFaktaavklartInntekt(skjæringstidspunkt: LocalDate): Vedtaksperiode? {
+            if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return null
+            val vedtaksperioderMedFaktaavklartInntekt = filter { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
+
+            // Prioriterer siste ankomne i samme måned som skjæringstidspunktet
+            return vedtaksperioderMedFaktaavklartInntekt.filter { it.behandlinger.faktaavklartInntekt!!.inntektsdata.dato.yearMonth == skjæringstidspunkt.yearMonth }.maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
+                ?: vedtaksperioderMedFaktaavklartInntekt.maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
+        }
+
+        internal fun List<Vedtaksperiode>.faktaavklartInntekt(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): ArbeidstakerFaktaavklartInntekt? {
+            val periodeMedFaktaavklartInntekt = periodeMedFaktaavklartInntekt(skjæringstidspunkt) ?: return null
+            val faktaavklartInntekt = periodeMedFaktaavklartInntekt.behandlinger.faktaavklartInntekt as ArbeidstakerFaktaavklartInntekt
+            periodeMedFaktaavklartInntekt.behandlinger.vurderVarselForGjenbrukAvInntekt(faktaavklartInntekt, aktivitetslogg)
+            return faktaavklartInntekt
         }
 
         internal fun List<Vedtaksperiode>.medSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode) = this.filter { it.harSammeUtbetalingSom(vedtaksperiodeSomForsøkesAnnullert) }.toSet()
