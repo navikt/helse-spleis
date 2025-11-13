@@ -30,11 +30,8 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     }
 
     fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
-        ForventerIkkeInntekt,
         KlarForBeregning,
         KlarForVilkårsprøving -> VenterPå.Nestemann
-        AvventerTidligereEllerOverlappendeSøknad -> VenterPå.SegSelv(Venteårsak.SØKNAD)
-        is TrengerInntektsmelding -> VenterPå.SegSelv(Venteårsak.INNTEKTSMELDING)
         is TrengerInntektsmeldingAnnenPeriode -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.INNTEKTSMELDING)
     }
 
@@ -54,15 +51,12 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     private fun tilstand(
         vedtaksperiode: Vedtaksperiode,
     ): Tilstand {
-        val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()
+        // venter enten på inntekt (på en arbeidsgiver, venter egentlig ikke på en vedtaksperiode) eller refusjonsopplysninger (en vedtaksperiode, kan være samme AG)
+        val førstePeriodeSomTrengerInntektsmelding = vedtaksperiode.førstePeriodeSomTrengerInntektsmelding()?.also {
+            check(it !== vedtaksperiode) { "forventer ikke å vente på oss selv!" }
+        }
         return when {
-            !vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> ForventerIkkeInntekt
-            vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
-            førstePeriodeSomTrengerInntektsmelding != null -> when (førstePeriodeSomTrengerInntektsmelding) {
-                vedtaksperiode -> TrengerInntektsmelding(førstePeriodeSomTrengerInntektsmelding)
-                else -> TrengerInntektsmeldingAnnenPeriode(førstePeriodeSomTrengerInntektsmelding)
-            }
-
+            førstePeriodeSomTrengerInntektsmelding != null -> TrengerInntektsmeldingAnnenPeriode(førstePeriodeSomTrengerInntektsmelding)
             vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
             else -> KlarForBeregning
         }
@@ -73,50 +67,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {}
     }
 
-    private data object AvventerTidligereEllerOverlappendeSøknad : Tilstand {
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
-        }
-
-        override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerSøknadForOverlappendePeriode)
-        }
-    }
-
-    private data object ForventerIkkeInntekt : Tilstand {
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            eventBus: EventBus,
-            hendelse: Hendelse,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvsluttetUtenUtbetaling)
-        }
-
-        override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAvsluttetUtenUtbetaling)
-        }
-    }
-
-    private data class TrengerInntektsmelding(val segSelv: Vedtaksperiode) : Tilstand {
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            eventBus: EventBus,
-            hendelse: Hendelse,
-            aktivitetslogg: IAktivitetslogg
-        ) {
-            aktivitetslogg.info("Går tilbake til Avventer inntektsmelding fordi perioden mangler inntekt og/eller refusjonsopplysninger")
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerInntektsmelding)
-        }
-
-        override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Går tilbake til Avventer inntektsmelding fordi perioden mangler inntekt og/eller refusjonsopplysninger")
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerInntektsmelding)
-        }
-    }
-
-    private data class TrengerInntektsmeldingAnnenPeriode(val trengerInntektsmelding: Vedtaksperiode) :
-        Tilstand {
+    private data class TrengerInntektsmeldingAnnenPeriode(val trengerInntektsmelding: Vedtaksperiode) : Tilstand {
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
             eventBus: EventBus,
