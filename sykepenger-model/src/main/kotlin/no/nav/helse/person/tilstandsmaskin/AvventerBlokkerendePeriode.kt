@@ -10,7 +10,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal fun nesteTilstandEtterInntekt(vedtaksperiode: Vedtaksperiode) =
     when {
-        vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode) -> AvventerSøknadForOverlappendePeriode
+        vedtaksperiode.avventerSøknad() -> AvventerSøknadForOverlappendePeriode
         else -> AvventerBlokkerendePeriode
     }
 
@@ -23,7 +23,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_BLOKKERENDE_PERIODE
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode)
-        check(!vedtaksperiode.person.avventerSøknad(vedtaksperiode.periode)) {
+        check(!vedtaksperiode.avventerSøknad()) {
             "forventer ikke å vente annen søknad"
         }
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
