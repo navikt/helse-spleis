@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -14,6 +13,7 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -42,6 +42,48 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
 internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
+
+    @Test
+    fun `korrigert inntekt blir med når skjæringstidspunktet flyttes`() = Toggle.BrukFaktaavklartInntektFraBehandling.enable {
+        a1 {
+            nyttVedtak(2.januar til 31.januar)
+            håndterOverstyrArbeidsgiveropplysninger(2.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = "a1", inntekt = INNTEKT*1.1)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertEquals(INNTEKT, faktaavvklartArbeidstakerBeløp(1.vedtaksperiode))
+            assertEquals(INNTEKT*1.1, korrigertInntektBeløp(1.vedtaksperiode))
+            assertInntektsgrunnlag(2.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(
+                    orgnummer = a1,
+                    forventetFaktaavklartInntekt = INNTEKT,
+                    forventetOmregnetÅrsinntekt = INNTEKT*1.1,
+                    forventetKorrigertInntekt = INNTEKT*1.1
+                )
+            }
+
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertEquals(INNTEKT, faktaavvklartArbeidstakerBeløp(1.vedtaksperiode))
+            assertEquals(INNTEKT*1.1, korrigertInntektBeløp(1.vedtaksperiode))
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(
+                    orgnummer = a1,
+                    forventetFaktaavklartInntekt = INNTEKT,
+                    forventetOmregnetÅrsinntekt = INNTEKT*1.1,
+                    forventetKorrigertInntekt = INNTEKT*1.1
+                )
+            }
+            assertVarsler(1.vedtaksperiode, RV_IV_7)
+        }
+    }
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
@@ -340,4 +382,6 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
 
     private fun faktaavvklartArbeidstakerInntekt(vedtaksperiodeId: UUID) = inspektør.faktaavklartInntekt(vedtaksperiodeId) as? ArbeistakerFaktaavklartInntektView
     private fun faktaavvklartArbeidstakerBeløp(vedtaksperiodeId: UUID) = (faktaavvklartArbeidstakerInntekt(vedtaksperiodeId))?.beløp
+    private fun korrigertInntekt(vedtaksperiodeId: UUID) = inspektør.korrigertInntekt(vedtaksperiodeId)
+    private fun korrigertInntektBeløp(vedtaksperiodeId: UUID) = korrigertInntekt(vedtaksperiodeId)?.beløp
 }

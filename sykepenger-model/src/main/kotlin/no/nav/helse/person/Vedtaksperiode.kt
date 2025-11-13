@@ -2550,7 +2550,12 @@ internal class Vedtaksperiode private constructor(
         if (aktivitetslogg.harFunksjonelleFeil()) return forkast(eventBus, dager.hendelse, aktivitetslogg)
     }
 
-    private fun inntektForArbeidsgiver(
+    private fun korrigertInntektForArbeidsgiver(alleForSammeArbeidsgiver: List<Vedtaksperiode>): Saksbehandler? {
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return null
+        return alleForSammeArbeidsgiver.mapNotNull { it.behandlinger.korrigertInntekt }.maxByOrNull { it.inntektsdata.tidsstempel }
+    }
+
+    private fun faktaavklartInntektForArbeidsgiver(
         hendelse: Hendelse,
         aktivitetsloggTilDenSomVilkårsprøver: IAktivitetslogg,
         skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
@@ -2597,8 +2602,8 @@ internal class Vedtaksperiode private constructor(
 
         return ArbeidsgiverInntektsopplysning(
             orgnummer = yrkesaktivitet.organisasjonsnummer,
-            faktaavklartInntekt = inntektForArbeidsgiver(hendelse, aktivitetsloggTilDenSomVilkårsprøver, skatteopplysning, alleForSammeArbeidsgiver, flereArbeidsgivere),
-            korrigertInntekt = null,
+            faktaavklartInntekt = faktaavklartInntektForArbeidsgiver(hendelse, aktivitetsloggTilDenSomVilkårsprøver, skatteopplysning, alleForSammeArbeidsgiver, flereArbeidsgivere),
+            korrigertInntekt = korrigertInntektForArbeidsgiver(alleForSammeArbeidsgiver),
             skjønnsmessigFastsatt = null
         )
     }

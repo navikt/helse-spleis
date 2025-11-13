@@ -114,6 +114,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal val dagerNavOvertarAnsvar get() = sisteBehandling.dagerNavOvertarAnsvar
     internal val dagerUtenNavAnsvar get() = behandlinger.last().dagerUtenNavAnsvar
     internal val faktaavklartInntekt get() = sisteBehandling.faktaavklartInntekt
+    internal val korrigertInntekt get() = sisteBehandling.korrigertInntekt
     internal val arbeidssituasjon get() = sisteBehandling.arbeidssituasjon
     internal val utbetaling get() = sisteBehandling.utbetaling()
 
