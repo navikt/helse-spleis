@@ -73,6 +73,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.aktiv
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
+import no.nav.helse.person.Vedtaksperiode.Companion.igangsettOverstyring
 import no.nav.helse.person.Vedtaksperiode.Companion.medSammeUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
@@ -190,11 +191,7 @@ internal class Yrkesaktivitet private constructor(
             revurdering: Revurderingseventyr,
             aktivitetslogg: IAktivitetslogg
         ) {
-            forEach { yrkesaktivitet ->
-                yrkesaktivitet.looper {
-                    it.igangsettOverstyring(eventBus, revurdering, aktivitetslogg)
-                }
-            }
+            flatMap { it.vedtaksperioder }.igangsettOverstyring(eventBus, revurdering, aktivitetslogg)
         }
 
         internal fun List<Yrkesaktivitet>.venter() =

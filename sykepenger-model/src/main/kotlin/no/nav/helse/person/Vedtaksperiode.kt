@@ -2914,31 +2914,8 @@ internal class Vedtaksperiode private constructor(
         tilstand.gjenopptaBehandling(this, eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
-    internal fun igangsettOverstyring(eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (revurdering.erIkkeRelevantFor(periode)) return sendNyttGodkjenningsbehov(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
-
-        igangsettOverstyringPåBehandlingen(eventBus, revurdering, aktivitetsloggMedVedtaksperiodekontekst)
-
-        // send oppdatert forespørsel
-        (tilstand as? AvventerInntektsmelding)?.sendTrengerArbeidsgiveropplysninger(this, eventBus)
-
-        val nesteTilstand = nesteTilstandEtterIgangsattOverstyring(person.infotrygdhistorikk, this, tilstand)
-        tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, nesteTilstand)
-    }
-
     private fun igangsettOverstyringPåBehandlingen(eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
-        val inngå = EventSubscription.OverstyringIgangsatt.VedtaksperiodeData(
-            yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
-            vedtaksperiodeId = id,
-            skjæringstidspunkt = skjæringstidspunkt,
-            periode = periode,
-            typeEndring = when {
-                behandlinger.harFattetVedtak() -> EventSubscription.OverstyringIgangsatt.TypeEndring.REVURDERING
-                else -> EventSubscription.OverstyringIgangsatt.TypeEndring.OVERSTYRING
-            }
-        )
-        revurdering.inngå(inngå)
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         when (tilstand) {
             Avsluttet,
@@ -2959,13 +2936,18 @@ internal class Vedtaksperiode private constructor(
             else -> {}
         }
         behandlinger.oppdaterSkjæringstidspunkt(person.skjæringstidspunkter, yrkesaktivitet.perioderUtenNavAnsvar)
-        behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetslogg)
-        videreførEksisterendeOpplysninger(eventBus, aktivitetslogg)
+        behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
+        videreførEksisterendeOpplysninger(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
-    private fun sendNyttGodkjenningsbehov(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        if (this.tilstand !in setOf(AvventerGodkjenningRevurdering, AvventerGodkjenning, SelvstendigAvventerGodkjenning)) return
-        this.trengerGodkjenning(eventBus, aktivitetslogg)
+    private fun igangsettOverstyringEndreTilstand(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+
+        // send oppdatert forespørsel
+        (tilstand as? AvventerInntektsmelding)?.sendTrengerArbeidsgiveropplysninger(this, eventBus)
+
+        val nesteTilstand = nesteTilstandEtterIgangsattOverstyring(person.infotrygdhistorikk, this, tilstand)
+        tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, nesteTilstand)
     }
 
     // gitt at du står i tilstand X, hva/hvem henter du på og hvorfor?
@@ -3250,6 +3232,23 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.medSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode) = this.filter { it.harSammeUtbetalingSom(vedtaksperiodeSomForsøkesAnnullert) }.toSet()
 
         internal fun List<Vedtaksperiode>.aktiv(vedtaksperiodeId: UUID) = any { it.id == vedtaksperiodeId }
+
+        internal fun List<Vedtaksperiode>.igangsettOverstyring(eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
+            this
+                .filterNot { revurdering.erIkkeRelevantFor(it.periode) }
+                .onEach { revurdering.inngå(EventSubscription.OverstyringIgangsatt.VedtaksperiodeData(
+                    yrkesaktivitetssporing = it.yrkesaktivitet.yrkesaktivitetstype,
+                    vedtaksperiodeId = it.id,
+                    skjæringstidspunkt = it.skjæringstidspunkt,
+                    periode = it.periode,
+                    typeEndring = when {
+                        it.behandlinger.harFattetVedtak() -> EventSubscription.OverstyringIgangsatt.TypeEndring.REVURDERING
+                        else -> EventSubscription.OverstyringIgangsatt.TypeEndring.OVERSTYRING
+                    }
+                )) }
+                .onEach { it.igangsettOverstyringPåBehandlingen(eventBus, revurdering, aktivitetslogg) }
+                .onEach { it.igangsettOverstyringEndreTilstand(eventBus, aktivitetslogg) }
+        }
 
         // Fredet funksjonsnavn
         internal val OVERLAPPENDE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
