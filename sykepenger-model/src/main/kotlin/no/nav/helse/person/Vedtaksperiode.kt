@@ -3091,21 +3091,29 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun førstePeriodeSomTrengerInntektsmelding(): Vedtaksperiode? {
-        val førsteMursteinsperiodeSomTrengerInntektEllerRefusjon = perioderSomMåHensyntasVedBeregning()
+        val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
+        val perioderSomMåHensyntasVedVilkårsprøving = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+
+        val førstePeriodeSomVenterPåRefusjonsopplysninger = perioderSomMåHensyntasVedBeregning
             .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
-            .firstOrNull { it.skalArbeidstakerBehandlesISpeil() && it.måInnhenteInntektEllerRefusjon() }
+            .filter { it.skalArbeidstakerBehandlesISpeil() }
+            .filter { it.refusjonstidslinje.isEmpty() }
+            .minOrNull()
 
-        if (vilkårsgrunnlag != null) return førsteMursteinsperiodeSomTrengerInntektEllerRefusjon
+        val førstePeriodeSomVenterPåInntekt = perioderSomMåHensyntasVedVilkårsprøving
+            .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
+            .filter { it.skalArbeidstakerBehandlesISpeil() }
+            .groupBy { it.yrkesaktivitet }
+            .filterNot { (yrkesaktivitet, perioderMedSammeSkjæringstidspunkt) ->
+                yrkesaktivitet.kanBeregneSykepengegrunnlag(skjæringstidspunkt, perioderMedSammeSkjæringstidspunkt)
+            }
+            .map { (_, perioderMedSammeSkjæringstidspunkt) -> perioderMedSammeSkjæringstidspunkt.first() }
+            .minOrNull()
 
-        val førstePeriodePåSkjæringstidspunktetAnnenArbeidsgiverSomTrengerInntektEllerRefusjon = person
-            .nåværendeVedtaksperioder { other ->
-                other.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker &&
-                    this.yrkesaktivitet !== other.yrkesaktivitet &&
-                    other.skjæringstidspunkt == skjæringstidspunkt &&
-                    other.skalArbeidstakerBehandlesISpeil() && other.måInnhenteInntektEllerRefusjon()
-        }.minOrNull()
-
-        return førstePeriodePåSkjæringstidspunktetAnnenArbeidsgiverSomTrengerInntektEllerRefusjon ?: førsteMursteinsperiodeSomTrengerInntektEllerRefusjon
+        return when (vilkårsgrunnlag) {
+            null -> førstePeriodeSomVenterPåInntekt ?: førstePeriodeSomVenterPåRefusjonsopplysninger
+            else -> førstePeriodeSomVenterPåRefusjonsopplysninger
+        }
     }
 
     private fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode) = behandlinger.harSammeUtbetalingSom(annenVedtaksperiode)
