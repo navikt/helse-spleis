@@ -31,7 +31,6 @@ import no.nav.helse.hendelser.vurdering
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
-import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbarInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.vurderVarselForGjenbrukAvInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
@@ -404,9 +403,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.any { it.dokumentHåndtert(dokumentsporing) }
 
     internal fun vurderVarselForGjenbrukAvInntekt(faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, aktivitetslogg: IAktivitetslogg) = behandlinger.vurderVarselForGjenbrukAvInntekt(faktaavklartInntekt, aktivitetslogg)
-
-    internal fun harGjenbrukbarInntekt(organisasjonsnummer: String) =
-        behandlinger.harGjenbrukbarInntekt(organisasjonsnummer)
 
     internal fun lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
         behandlinger.lagreGjenbrukbarInntekt(skjæringstidspunkt, organisasjonsnummer, yrkesaktivitet, aktivitetslogg)

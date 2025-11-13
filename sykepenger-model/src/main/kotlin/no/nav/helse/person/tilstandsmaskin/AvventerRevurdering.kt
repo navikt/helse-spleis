@@ -43,7 +43,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         return when (vedtaksperiode.vilkårsgrunnlag) {
             null -> when (val førstePeriodeSomTrengerInntekt = vedtaksperiode.førstePeriodeSomVenterPåInntekt()) {
                 null -> when {
-                    !vedtaksperiode.kanAvklareInntekt() && !vedtaksperiode.behandlinger.harGjenbrukbarInntekt(vedtaksperiode.yrkesaktivitet.organisasjonsnummer) -> TrengerInnteksopplysninger(vedtaksperiode)
+                    !vedtaksperiode.kanAvklareInntekt() -> TrengerInnteksopplysninger(vedtaksperiode)
                     else -> KlarForVilkårsprøving
                 }
                 else -> TrengerInntektsopplysningerAnnenArbeidsgiver(førstePeriodeSomTrengerInntekt)
