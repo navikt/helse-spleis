@@ -2568,7 +2568,7 @@ internal class Vedtaksperiode private constructor(
 
         val faktaavklartInntektHensyntattUlikFom = faktaavklartInntektFraArbeidsgiver?.takeUnless {
             // velger bort inntekten hvis situasjonen er "fom ulik skjæringstidspunktet"
-            val ulikFom = skjæringstidspunkt.yearMonth < it.inntektsdata.dato.yearMonth
+            val ulikFom = skjæringstidspunkt.yearMonth != it.inntektsdata.dato.yearMonth
             (flereArbeidsgivere && ulikFom).also { harUlikFomOgFlereArbeidsgivere ->
                 if (harUlikFomOgFlereArbeidsgivere) aktivitetsloggTilDenSomVilkårsprøver.varsel(Varselkode.RV_VV_2)
                 else if (ulikFom) aktivitetsloggTilDenSomVilkårsprøver.info("Skjæringstidspunktet ($skjæringstidspunkt) er i annen måned enn inntektsdatoen (${it.inntektsdata.dato}) med bare én arbeidsgiver")
