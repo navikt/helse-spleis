@@ -1065,7 +1065,7 @@ internal class Yrkesaktivitet private constructor(
     internal fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
     internal fun dto(nestemann: Vedtaksperiode?): ArbeidsgiverUtDto {
         val migreringshjelpen = Migreringshjelpen(this).startet()
-        val vedtaksperioderDto = vedtaksperioder.map { it.dto(nestemann, null) }
+        val vedtaksperioderDto = vedtaksperioder.map { it.dto(nestemann, migreringshjelpen) }
         migreringshjelpen.ferdig()
         val refusjonsopplysningerPåSisteBehandling = vedtaksperioder.lastOrNull()?.let { sisteVedtaksperiode ->
             val sisteBehandlingId = vedtaksperioderDto.last().behandlinger.behandlinger.last().id
