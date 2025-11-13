@@ -3,11 +3,13 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.collections.set
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
+import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Regelverkslogg
@@ -1058,7 +1060,7 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
     internal fun dto(nestemann: Vedtaksperiode?): ArbeidsgiverUtDto {
-        val vedtaksperioderDto = vedtaksperioder.map { it.dto(nestemann) }
+        val vedtaksperioderDto = vedtaksperioder.map { it.dto(nestemann, null) }
         val refusjonsopplysningerPåSisteBehandling = vedtaksperioder.lastOrNull()?.let { sisteVedtaksperiode ->
             val sisteBehandlingId = vedtaksperioderDto.last().behandlinger.behandlinger.last().id
             val sisteRefusjonstidslinje =
@@ -1088,6 +1090,48 @@ internal class Yrkesaktivitet private constructor(
                 sisteBehandlingId = refusjonsopplysningerPåSisteBehandling?.first
             )
         )
+    }
+
+    internal data class Migreringshjelpen(private val yrkesaktivitet: Yrkesaktivitet) {
+        private val fraInntektshistorikkCache = mutableMapOf<LocalDate, ArbeidstakerFaktaavklartInntektUtDto?>()
+
+        private fun faktaavklartInntektFraInntektshistorikken(skjæringstidspunkt: LocalDate): ArbeidstakerFaktaavklartInntektUtDto? {
+            if (fraInntektshistorikkCache.contains(skjæringstidspunkt)) {
+                // Allerede sjekket skjæringstidspunktet i inntektshistorikken
+                return fraInntektshistorikkCache[skjæringstidspunkt]
+            }
+            return yrkesaktivitet.avklarInntektFraInntektshistorikk(
+                skjæringstidspunkt = skjæringstidspunkt,
+                vedtaksperioder = yrkesaktivitet.vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+            )?.dto().also { inntekt ->
+                // Cacher så vi slipper å rote nedi der igjen
+                fraInntektshistorikkCache[skjæringstidspunkt] = inntekt
+            }
+        }
+
+        internal fun faktaavklartInntekt(skjæringstidspunkt: LocalDate, vilkårsgrunlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, sisteEndring: Boolean): ArbeidstakerFaktaavklartInntektUtDto? {
+            if (vilkårsgrunlag != null) {
+                val faktaavklartInntektFraVilkårsgrunnlag = arbeidsgiverInntektsopplysning(vilkårsgrunlag)?.faktaavklartInntekt ?: return null
+                return when (faktaavklartInntektFraVilkårsgrunnlag.inntektsopplysningskilde) {
+                    // Om det er Arbeidsgiver-inntekt, da er det bra greier 👍
+                    Arbeidstakerinntektskilde.Arbeidsgiver -> faktaavklartInntektFraVilkårsgrunnlag.dto()
+                    // Om det er Aordningen-inntekt så leter vi etter den underliggende inntektsmeldingen som er valgt bort (om det er noen)
+                    is Arbeidstakerinntektskilde.AOrdningen -> faktaavklartInntektFraInntektshistorikken(skjæringstidspunkt)
+                    // Om det er Infotrygd-inntekt så legger vi den ikke på behandlingen - Da er det nok best å ha null på behandling og en eventuell revurdering av gammel IT-periode fallbacker til Aordningen
+                    Arbeidstakerinntektskilde.Infotrygd -> null
+                }
+            }
+
+            // Når vi ikke har et vilkårsgrunnlag så gidder vi bare å sjekke opp i inntekshistorikken for siste endring
+            if (!sisteEndring) return null
+            return faktaavklartInntektFraInntektshistorikken(skjæringstidspunkt)
+        }
+
+        internal fun korrigertInntekt(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =
+            arbeidsgiverInntektsopplysning(grunnlagsdata)?.korrigertInntekt?.dto()
+
+        private fun arbeidsgiverInntektsopplysning(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =
+            grunnlagsdata?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.firstOrNull { it.orgnummer == yrkesaktivitet.organisasjonsnummer }
     }
 
     internal fun trengerArbeidsgiveropplysninger(periode: Periode): List<Periode> {

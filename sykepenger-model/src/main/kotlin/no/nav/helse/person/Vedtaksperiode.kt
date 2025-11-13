@@ -3377,7 +3377,7 @@ internal class Vedtaksperiode private constructor(
             ))
     }
 
-    internal fun dto(nestemann: Vedtaksperiode?) = VedtaksperiodeUtDto(
+    internal fun dto(nestemann: Vedtaksperiode?, migreringshjelpen: Yrkesaktivitet.Migreringshjelpen?) = VedtaksperiodeUtDto(
         id = id,
         tilstand = when (tilstand) {
             Avsluttet -> VedtaksperiodetilstandDto.AVSLUTTET
@@ -3426,7 +3426,7 @@ internal class Vedtaksperiode private constructor(
         tom = this.periode.endInclusive,
         sykmeldingFom = this.sykmeldingsperiode.start,
         sykmeldingTom = this.sykmeldingsperiode.endInclusive,
-        behandlinger = behandlinger.dto(),
+        behandlinger = behandlinger.dto(migreringshjelpen),
         venteårsak = nestemann?.vedtaksperiodeVenter?.let { this.vedtaksperiodeVenter?.dto(it) },
         opprettet = opprettet,
         oppdatert = oppdatert,

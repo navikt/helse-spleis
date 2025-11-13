@@ -24,7 +24,7 @@ internal class ForkastetVedtaksperiode(
     private val periode: Periode) {
 
     internal fun view() = vedtaksperiode.view()
-    internal fun dto() = ForkastetVedtaksperiodeUtDto(vedtaksperiode.dto(null))
+    internal fun dto() = ForkastetVedtaksperiodeUtDto(vedtaksperiode.dto(null, null))
 
     internal companion object {
         internal fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.periode }
