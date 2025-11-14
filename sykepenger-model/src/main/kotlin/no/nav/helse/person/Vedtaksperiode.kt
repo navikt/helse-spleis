@@ -3204,17 +3204,15 @@ internal class Vedtaksperiode private constructor(
 
             return when {
                 // Har alt vi trenger 👍
-                avklartInntekt != null && aktuellVedtaksperiode.refusjonstidslinje.isNotEmpty() -> ArbeidsgiveropplysningerSituasjon.AvklartInntektOgRefusjon(avklartInntekt)
+                avklartInntekt != null && aktuellVedtaksperiode.refusjonstidslinje.isNotEmpty() -> ArbeidsgiveropplysningerSituasjon.AvklarteArbeidsgiveropplysninger(avklartInntekt)
                 // Om vi tidligere er vilkårsprøvd så går vi aldri tilbake til AvventerInntektsmelding
                 aktuellVedtaksperiode.behandlinger.harVilkårsprøvd() -> ArbeidsgiveropplysningerSituasjon.TidligereVilkårsprøvd
                 // Mangler inntekt & eller refusjon, men gidder ikke vente mer
                 aktuellVedtaksperiode.tilstand is AvventerInntektsmelding && Duration.between(aktuellVedtaksperiode.oppdatert, LocalDateTime.now()).toDays() > 90 -> ArbeidsgiveropplysningerSituasjon.GirOppÅVentePåArbeidsgiver
-                // Mangler refusjonsopplysninger
-                avklartInntekt != null && aktuellVedtaksperiode.refusjonstidslinje.isEmpty() -> ArbeidsgiveropplysningerSituasjon.ManglerRefusjon(avklartInntekt)
                 // Har ikke noe skjæringstidspunkt
                 aktuellVedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte() -> ArbeidsgiveropplysningerSituasjon.BrukerSkatteinntektPåDirekten
-                // Om ingen av disse sprø casene har slått til så mangler vi begge deler
-                else -> ArbeidsgiveropplysningerSituasjon.ManglerInntektOgRefusjon
+                // Om ingen av disse sprø casene har slått til så mangler vi minst en av de
+                else -> ArbeidsgiveropplysningerSituasjon.ManglerArbeidsgiveropplysninger
             }
         }
 
