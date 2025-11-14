@@ -16,9 +16,14 @@ internal sealed interface ArbeidsgiveropplysningerSituasjon {
 
     data object BrukerSkatteinntektPåDirekten : ArbeidsgiveropplysningerSituasjon
 
+    data object TrengerIkkeArbeidsgiveropplysninger : ArbeidsgiveropplysningerSituasjon {
+        override val klarForVilkårsprøving get() = error("Perioder innenfor arbeidsgiverperioden skal ikke vilkårsprøves")
+    }
+
     /** I denne situasjonene er vi ikke klar for å gå videre til vikårsprøving **/
 
     data object ManglerArbeidsgiveropplysninger : ArbeidsgiveropplysningerSituasjon {
+        override val faktaavklartInntekt get() = error("Skal ikke komme i en situasjon hvor vi henter faktaavklart inntekt fra ManglerArbeidsgiveropplysninger")
         override val klarForVilkårsprøving = false
     }
 }

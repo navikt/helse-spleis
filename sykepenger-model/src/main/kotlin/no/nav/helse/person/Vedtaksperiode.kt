@@ -3057,13 +3057,11 @@ internal class Vedtaksperiode private constructor(
         return refusjonstidslinje.isEmpty() || !harEksisterendeInntekt()
     }
 
-    internal fun arbeidsgiveropplysningerSituasjon(): ArbeidsgiveropplysningerSituasjon {
+    private fun arbeidsgiveropplysningerSituasjon(
+        alleForSammeArbeidsgiver: List<Vedtaksperiode> = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)).filter { it.yrkesaktivitet === this.yrkesaktivitet }
+    ): ArbeidsgiveropplysningerSituasjon {
         check(yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker) { "gir bare mening å kalle denne funksjonen for arbeidstakere" }
-        val perioderMedSammeSkjæringstidspunkt = person
-            .vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-            .filter { it.yrkesaktivitet === this.yrkesaktivitet }
-
-        return perioderMedSammeSkjæringstidspunkt.arbeidsgiveropplysningerSituasjon(skjæringstidspunkt, this)
+        return alleForSammeArbeidsgiver.arbeidsgiveropplysningerSituasjon(skjæringstidspunkt, this)
     }
 
     // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
@@ -3201,6 +3199,8 @@ internal class Vedtaksperiode private constructor(
                 ?.behandlinger?.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt
 
             return when {
+                // Perioden er en AUU
+                !aktuellVedtaksperiode.skalArbeidstakerBehandlesISpeil() -> ArbeidsgiveropplysningerSituasjon.TrengerIkkeArbeidsgiveropplysninger
                 // Har alt vi trenger 👍
                 avklartInntekt != null && aktuellVedtaksperiode.refusjonstidslinje.isNotEmpty() -> ArbeidsgiveropplysningerSituasjon.AvklarteArbeidsgiveropplysninger(avklartInntekt)
                 // Om vi tidligere er vilkårsprøvd så går vi aldri tilbake til AvventerInntektsmelding
