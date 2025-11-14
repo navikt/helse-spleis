@@ -3641,12 +3641,12 @@ private fun nesteTilstandEtterIgangsattOverstyring(
 
     ArbeidsledigStart -> when {
         !infotrygdhistorikk.harHistorikk() -> ArbeidsledigAvventerInfotrygdHistorikk
-        else -> AvventerBlokkerendePeriode
+        else -> ArbeidsledigAvventerBlokkerendePeriode
     }
 
     FrilansStart -> when {
         !infotrygdhistorikk.harHistorikk() -> FrilansAvventerInfotrygdHistorikk
-        else -> AvventerBlokkerendePeriode
+        else -> FrilansAvventerBlokkerendePeriode
     }
 
     SelvstendigAvsluttet,

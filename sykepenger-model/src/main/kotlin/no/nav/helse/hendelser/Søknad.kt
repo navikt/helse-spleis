@@ -123,8 +123,7 @@ class Søknad(
             }
 
             Arbeidssituasjon.ARBEIDSLEDIG -> validerArbeidsledig(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
-            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
-            Arbeidssituasjon.BARNEPASSER -> validerSelvstendig(aktivitetslogg, skjæringstidspunkt)
+            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> validerSelvstendig(aktivitetslogg, skjæringstidspunkt)
 
             Arbeidssituasjon.JORDBRUKER -> {
                 if (Toggle.Jordbruker.enabled) validerSelvstendig(aktivitetslogg, skjæringstidspunkt)
@@ -134,6 +133,7 @@ class Søknad(
                 }
             }
 
+            Arbeidssituasjon.BARNEPASSER,
             Arbeidssituasjon.FISKER,
             Arbeidssituasjon.ANNET -> {
                 aktivitetslogg.info("Har ikke støtte for søknadstypen $arbeidssituasjon")
