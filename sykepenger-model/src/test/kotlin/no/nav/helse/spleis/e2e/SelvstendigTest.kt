@@ -709,4 +709,35 @@ internal class SelvstendigTest : AbstractDslTest() {
             )
         }
     }
+
+    @Test
+    fun `Medlding til nav dager flytter skjæringstidspunkt`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(3.januar til 31.januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(1.vedtaksperiode)
+            håndterOverstyrTidslinje((1.januar til 2.januar).map { ManuellOverskrivingDag(it, Dagtype.MeldingTilNavdag) })
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelserSelvstendig(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, forventetVenteperiode = listOf(1.januar til 16.januar))
+        }
+    }
+
+    @Test
+    fun `Melding til Nav dager med opphold lager ny ventetid`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(6.januar til 31.januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(1.vedtaksperiode)
+            håndterOverstyrTidslinje((1.januar til 2.januar).map { ManuellOverskrivingDag(it, Dagtype.MeldingTilNavdag) })
+            håndterOverstyrTidslinje((4.januar til 5.januar).map { ManuellOverskrivingDag(it, Dagtype.MeldingTilNavdag) })
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelserSelvstendig(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 4.januar, forventetVenteperiode = listOf(4.januar til 19.januar))
+        }
+    }
 }

@@ -29,7 +29,8 @@ data class ManuellOverskrivingDag(
 
 enum class Dagtype {
     Sykedag, Feriedag, ArbeidIkkeGjenopptattDag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, SykedagNav,
-    Foreldrepengerdag, AAPdag, Omsorgspengerdag, Pleiepengerdag, Svangerskapspengerdag, Opplaringspengerdag, Dagpengerdag;
+    Foreldrepengerdag, AAPdag, Omsorgspengerdag, Pleiepengerdag, Svangerskapspengerdag, Opplaringspengerdag, Dagpengerdag,
+    MeldingTilNavdag;
 
     companion object {
         val gyldigeTyper = entries.map { it.name }
@@ -150,6 +151,13 @@ class OverstyrTidslinje(
                     sisteDato = it.dato,
                     kilde = kilde,
                     ytelse = Dagpenger
+                )
+
+                Dagtype.MeldingTilNavdag -> Sykdomstidslinje.meldingTilNavdager(
+                    førsteDato = it.dato,
+                    sisteDato = it.dato,
+                    grad = 100.prosent,
+                    kilde = kilde
                 )
             }
         }.reduce(Sykdomstidslinje::plus)
