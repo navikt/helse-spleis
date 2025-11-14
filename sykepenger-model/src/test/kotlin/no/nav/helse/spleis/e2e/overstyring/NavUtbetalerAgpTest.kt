@@ -2,8 +2,10 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.den
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.erHelg
@@ -34,6 +36,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -554,5 +557,38 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
                 assertEquals(listOf(Begrunnelse.MinimumInntekt), begrunnelse(it))
             }
         }
+    }
+    @Test
+    fun `IM med begrunnelse for reduksjon, men ikke AGP, lager utbetaling bare første fraværsdag` () {
+        håndterSøknad(1.januar til 10.januar)
+
+        håndterInntektsmelding(
+            arbeidsgiverperioder = emptyList(),
+            1.januar,
+            beregnetInntekt = 9000.månedlig,
+            refusjon = Refusjon(9000.månedlig, null),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        assertForventetFeil(
+            "Vet ikke helt hva som er riktig her. Skulle vi ha gått til AUU siden det ikke er AGP, fortsatt vært i AvIM, eller ha antatt at AGP går til 16 og gå videre?",
+            { assertEquals(listOf(1.januar til 1.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode)) },
+            { assertEquals(listOf(1.januar til 10.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode)) }
+        )
+
+        håndterInntektsmelding(
+            arbeidsgiverperioder = emptyList(),
+            1.januar,
+            beregnetInntekt = INNTEKT,
+            refusjon = Refusjon(INNTEKT, null),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+        )
+
+        // Mulig vi ikke burde være i AUU her
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertVarsler(listOf(RV_IM_8, Varselkode.RV_IM_4, RV_IM_24), 1.vedtaksperiode.filter())
     }
 }
