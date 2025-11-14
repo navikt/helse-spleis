@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -3058,6 +3059,15 @@ internal class Vedtaksperiode private constructor(
         return refusjonstidslinje.isEmpty() || !harEksisterendeInntekt()
     }
 
+    internal fun arbeidsgiveropplysningerSituasjon(): ArbeidsgiveropplysningerSituasjon {
+        check(yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker) { "gir bare mening å kalle denne funksjonen for arbeidstakere" }
+        val perioderMedSammeSkjæringstidspunkt = person
+            .vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+            .filter { it.yrkesaktivitet === this.yrkesaktivitet }
+
+        return perioderMedSammeSkjæringstidspunkt.arbeidsgiveropplysningerSituasjon(skjæringstidspunkt, this)
+    }
+
     // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
     internal fun harEksisterendeInntekt(): Boolean {
         // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
@@ -3179,6 +3189,33 @@ internal class Vedtaksperiode private constructor(
             }
 
             return startdatoer.values.toSet()
+        }
+
+        internal fun List<Vedtaksperiode>.arbeidsgiveropplysningerSituasjon(skjæringstidspunkt: LocalDate, aktuellVedtaksperiode: Vedtaksperiode): ArbeidsgiveropplysningerSituasjon {
+            val vedtaksperioderMedFaktaavklartInntekt = filter { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
+
+            // Her er det en slags inntektsturnering på hvilken inntekt vi skal velge, om det er fler
+            val avklartInntekt =
+                (
+                    vedtaksperioderMedFaktaavklartInntekt.filter { it.behandlinger.faktaavklartInntekt!!.inntektsdata.dato.yearMonth == skjæringstidspunkt.yearMonth }.maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
+                    ?: vedtaksperioderMedFaktaavklartInntekt.maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
+                )
+                ?.behandlinger?.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt
+
+            return when {
+                // Har alt vi trenger 👍
+                avklartInntekt != null && aktuellVedtaksperiode.refusjonstidslinje.isNotEmpty() -> ArbeidsgiveropplysningerSituasjon.AvklartInntektOgRefusjon(avklartInntekt)
+                // Om vi tidligere er vilkårsprøvd så går vi aldri tilbake til AvventerInntektsmelding
+                aktuellVedtaksperiode.behandlinger.harVilkårsprøvd() -> ArbeidsgiveropplysningerSituasjon.TidligereVilkårsprøvd
+                // Mangler inntekt & eller refusjon, men gidder ikke vente mer
+                aktuellVedtaksperiode.tilstand is AvventerInntektsmelding && Duration.between(aktuellVedtaksperiode.oppdatert, LocalDateTime.now()).toDays() > 90 -> ArbeidsgiveropplysningerSituasjon.GirOppÅVentePåArbeidsgiver
+                // Mangler refusjonsopplysninger
+                avklartInntekt != null && aktuellVedtaksperiode.refusjonstidslinje.isEmpty() -> ArbeidsgiveropplysningerSituasjon.ManglerRefusjon(avklartInntekt)
+                // Har ikke noe skjæringstidspunkt
+                aktuellVedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte() -> ArbeidsgiveropplysningerSituasjon.BrukerSkatteinntektPåDirekten
+                // Om ingen av disse sprø casene har slått til så mangler vi begge deler
+                else -> ArbeidsgiveropplysningerSituasjon.ManglerInntektOgRefusjon
+            }
         }
 
         internal fun List<Vedtaksperiode>.periodeMedFaktaavklartInntekt(skjæringstidspunkt: LocalDate): Vedtaksperiode? {
