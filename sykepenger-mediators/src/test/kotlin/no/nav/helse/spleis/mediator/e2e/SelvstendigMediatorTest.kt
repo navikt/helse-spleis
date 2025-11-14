@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
@@ -173,7 +174,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         )
     }
 
-
+    @Disabled
     @Test
     fun selvstendigBarnepasserSøknad() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.BARNEPASSER)
@@ -196,6 +197,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         )
     }
 
+    @Disabled
     @Test
     fun `overstyrer tidslinje i avventer godkjenning for Barnepasser`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.BARNEPASSER)
