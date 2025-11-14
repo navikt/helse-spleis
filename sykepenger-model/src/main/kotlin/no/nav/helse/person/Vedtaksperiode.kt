@@ -2966,10 +2966,18 @@ internal class Vedtaksperiode private constructor(
                 false -> VenterPå.SegSelv(Venteårsak.GODKJENNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
             }
 
-            // disse to er litt spesielle, fordi tilstanden er både en ventetilstand og en "det er min tur"-tilstand
+            // denne er litt spesiell, fordi tilstanden er både en ventetilstand og en "det er min tur"-tilstand
             is AvventerRevurdering -> t.venterpå(this)
-            is AvventerInntektsopplysningerForAnnenArbeidsgiver -> t.venterpå(this)
-            is AvventerRefusjonsopplysningerAnnenPeriode -> t.venterpå(this)
+
+            AvventerInntektsopplysningerForAnnenArbeidsgiver -> when (val annenPeriode = førstePeriodeSomVenterPåInntekt()) {
+                null -> VenterPå.Nestemann
+                else -> VenterPå.AnnenPeriode(annenPeriode.venter(), Venteårsak.INNTEKTSMELDING)
+            }
+
+            AvventerRefusjonsopplysningerAnnenPeriode -> when (val annenPeriode = førstePeriodeSomVenterPåRefusjonsopplysninger()) {
+                null -> VenterPå.Nestemann
+                else -> VenterPå.AnnenPeriode(annenPeriode.venter(), Venteårsak.INNTEKTSMELDING)
+            }
 
             AvventerBlokkerendePeriode -> VenterPå.Nestemann
             AvventerSøknadForOverlappendePeriode -> VenterPå.SegSelv(Venteårsak.SØKNAD)
