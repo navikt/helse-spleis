@@ -24,7 +24,6 @@ import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.InntektFraInntektsmelding
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
@@ -504,10 +503,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
         mottatt = mottatt
     )
-    val inntektFraInntektsmelding = InntektFraInntektsmelding(inntektsmelding.behandlingsporing, MeldingsreferanseId(id), inntektsmelding.metadata.registrert, arbeidsgiverperioder, førsteFraværsdag, beregnetInntekt)
     håndterOgReplayInntektsmeldinger(inntektsmelding.behandlingsporing.organisasjonsnummer) {
         inntektsmelding.håndter(Person::håndterInntektsmelding)
-        inntektFraInntektsmelding.håndter(Person::håndterInntektFraInntektsmelding)
     }
     return id
 }
