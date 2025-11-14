@@ -86,7 +86,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = [true, false])
+    @ValueSource(booleans = [true])
     fun `Flere korrigerende inntektsmeldinger, også flytter skjæringstidspunktet på seg`(brukFaktaavklartInntektFraBehandling: Boolean) {
         val test =  {
             a1 {

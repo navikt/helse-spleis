@@ -3058,6 +3058,14 @@ internal class Vedtaksperiode private constructor(
         return refusjonstidslinje.isEmpty() || !harEksisterendeInntekt()
     }
 
+    internal fun mjau(): Mjau? {
+        val perioderMedSammeSkjæringstidspunkt = person
+            .vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+            .filter { it.yrkesaktivitet === this.yrkesaktivitet }
+
+        return perioderMedSammeSkjæringstidspunkt.mjau(skjæringstidspunkt, this)
+    }
+
     // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
     internal fun harEksisterendeInntekt(): Boolean {
         // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
@@ -3179,6 +3187,22 @@ internal class Vedtaksperiode private constructor(
             }
 
             return startdatoer.values.toSet()
+        }
+
+        internal fun List<Vedtaksperiode>.mjau(skjæringstidspunkt: LocalDate, aktuellVedtaksperiode: Vedtaksperiode): Mjau? {
+            val vedtaksperioderMedFaktaavklartInntekt = filter { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
+            val avklartInntekt =
+                (vedtaksperioderMedFaktaavklartInntekt.filter { it.behandlinger.faktaavklartInntekt!!.inntektsdata.dato.yearMonth == skjæringstidspunkt.yearMonth }.maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
+                    ?: vedtaksperioderMedFaktaavklartInntekt.maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
+                    )
+                    ?.behandlinger?.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt
+
+            when {
+                avklartInntekt != null && aktuellVedtaksperiode.refusjonstidslinje.isNotEmpty() -> Mjau.AvklartInntektOgRefusjon(avklartInntekt)
+                this.filter { it.tilstand is AvventerInntektsmelding }.any {  }
+            }
+
+            if (avklartInntekt != null) return Mjau.AvklartInntektOgRefusjon(avklartInntekt)
         }
 
         internal fun List<Vedtaksperiode>.periodeMedFaktaavklartInntekt(skjæringstidspunkt: LocalDate): Vedtaksperiode? {
