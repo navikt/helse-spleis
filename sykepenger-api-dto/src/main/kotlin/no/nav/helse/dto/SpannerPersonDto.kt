@@ -412,6 +412,7 @@ data class SpannerPersonDto(
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVVENTER_ANNULLERING,
+                AVVENTER_ANNULLERING_TIL_UTBETALING,
                 TIL_ANNULLERING,
 
                 FRILANS_START,
@@ -1165,6 +1166,7 @@ private fun VedtaksperiodeUtDto.tilPersonData(
         VedtaksperiodetilstandDto.TIL_INFOTRYGD -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_INFOTRYGD
         VedtaksperiodetilstandDto.TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_UTBETALING
         VedtaksperiodetilstandDto.AVVENTER_ANNULLERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_ANNULLERING
+        VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_ANNULLERING_TIL_UTBETALING
         VedtaksperiodetilstandDto.TIL_ANNULLERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_ANNULLERING
 
         VedtaksperiodetilstandDto.FRILANS_START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.FRILANS_START

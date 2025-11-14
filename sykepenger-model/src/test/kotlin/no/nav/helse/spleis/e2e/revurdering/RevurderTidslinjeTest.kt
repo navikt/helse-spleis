@@ -28,6 +28,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING_TIL_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -151,8 +152,16 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
         håndterAnnullerUtbetaling()
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVVENTER_ANNULLERING)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVVENTER_ANNULLERING_TIL_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_ANNULLERING)
+
+        nullstillTilstandsendringer()
+
+        håndterUtbetalt()
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_ANNULLERING_TIL_UTBETALING, AVVENTER_ANNULLERING, TIL_ANNULLERING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_ANNULLERING)
     }
 
     @Test

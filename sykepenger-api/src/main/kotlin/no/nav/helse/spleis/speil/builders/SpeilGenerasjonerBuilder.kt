@@ -144,6 +144,7 @@ internal class SpeilGenerasjonerBuilder(
 
                 is VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> Periodetilstand.AvventerInntektsopplysninger
 
+                is VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING,
                 is VedtaksperiodetilstandDto.AVVENTER_ANNULLERING -> Periodetilstand.AvventerAnnullering
 
 
@@ -302,6 +303,7 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.SELVSTENDIG_START,
                 VedtaksperiodetilstandDto.TIL_INFOTRYGD,
                 VedtaksperiodetilstandDto.AVVENTER_REVURDERING_TIL_UTBETALING,
+                VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING,
                 VedtaksperiodetilstandDto.AVVENTER_ANNULLERING,
                 VedtaksperiodetilstandDto.TIL_ANNULLERING -> error("har ikke mappingregel for utbetalingstatus $behandlingtilstandDto og periodetilstand=$periodetilstand")
             }

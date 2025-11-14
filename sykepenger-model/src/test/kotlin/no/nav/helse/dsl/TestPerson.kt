@@ -918,4 +918,5 @@ typealias EventFilter = (EventSubscription.Event) -> Boolean
 val behandlingerEventFilter: EventFilter = { it: EventSubscription.Event ->
     it is EventSubscription.VedtaksperiodeOpprettet || it is EventSubscription.VedtaksperiodeAnnullertEvent || it is EventSubscription.VedtaksperiodeForkastetEvent
         || it is EventSubscription.BehandlingOpprettetEvent || it is EventSubscription.BehandlingLukketEvent || it is EventSubscription.BehandlingForkastetEvent
+        || it is EventSubscription.AvsluttetMedVedtakEvent
 }

@@ -709,6 +709,7 @@ data class PersonData(
                 AVVENTER_GODKJENNING_REVURDERING,
 
                 AVVENTER_ANNULLERING,
+                AVVENTER_ANNULLERING_TIL_UTBETALING,
                 TIL_ANNULLERING,
 
                 FRILANS_START,
@@ -758,6 +759,7 @@ data class PersonData(
                     TilstandTypeData.AVVENTER_SIMULERING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING
                     TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
                     TilstandTypeData.AVVENTER_ANNULLERING -> VedtaksperiodetilstandDto.AVVENTER_ANNULLERING
+                    TilstandTypeData.AVVENTER_ANNULLERING_TIL_UTBETALING -> VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING
                     TilstandTypeData.TIL_ANNULLERING -> VedtaksperiodetilstandDto.TIL_ANNULLERING
 
                     TilstandTypeData.FRILANS_START -> VedtaksperiodetilstandDto.FRILANS_START

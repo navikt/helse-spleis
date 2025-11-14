@@ -8,6 +8,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
@@ -138,9 +139,11 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
                 EventSubscription.VedtaksperiodeOpprettet::class,
                 EventSubscription.BehandlingOpprettetEvent::class,
                 EventSubscription.BehandlingLukketEvent::class,
+                EventSubscription.AvsluttetMedVedtakEvent::class,
                 EventSubscription.VedtaksperiodeOpprettet::class,
                 EventSubscription.BehandlingOpprettetEvent::class,
                 EventSubscription.BehandlingLukketEvent::class,
+                EventSubscription.AvsluttetMedVedtakEvent::class,
 
                 EventSubscription.BehandlingOpprettetEvent::class,
                 EventSubscription.BehandlingOpprettetEvent::class,
@@ -207,6 +210,82 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             assertEquals(EventSubscription.BehandlingOpprettetEvent.Type.Omgjøring, behandlingOpprettet[1].type)
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             assertEquals(1.vedtaksperiode, behandlingForkastetEvent.vedtaksperiodeId)
+        }
+    }
+
+    @Test
+    fun `Annuller periode til utbetaling`() {
+        a1 {
+            tilGodkjenning(januar)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterUtbetalt()
+
+            assertBehandlingEventRekkefølge(listOf(
+                EventSubscription.VedtaksperiodeOpprettet::class,
+                EventSubscription.BehandlingOpprettetEvent::class,
+                EventSubscription.BehandlingLukketEvent::class,
+                EventSubscription.BehandlingOpprettetEvent::class,
+                EventSubscription.AvsluttetMedVedtakEvent::class,
+                EventSubscription.BehandlingForkastetEvent::class,
+                EventSubscription.VedtaksperiodeAnnullertEvent::class,
+                EventSubscription.VedtaksperiodeForkastetEvent::class
+            ))
+        }
+    }
+
+    @Test
+    fun `Annuller revurdering til utbetaling`() {
+        a1 {
+            nyttVedtak(januar, 80.prosent)
+            håndterSøknad(januar)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterUtbetalt()
+
+            assertBehandlingEventRekkefølge(listOf(
+                EventSubscription.VedtaksperiodeOpprettet::class,
+                EventSubscription.BehandlingOpprettetEvent::class,
+                EventSubscription.BehandlingLukketEvent::class,
+                EventSubscription.AvsluttetMedVedtakEvent::class,
+                EventSubscription.BehandlingOpprettetEvent::class,
+                EventSubscription.BehandlingLukketEvent::class,
+                EventSubscription.BehandlingOpprettetEvent::class,
+                EventSubscription.AvsluttetMedVedtakEvent::class,
+                EventSubscription.BehandlingForkastetEvent::class,
+                EventSubscription.VedtaksperiodeAnnullertEvent::class,
+                EventSubscription.VedtaksperiodeForkastetEvent::class
+            ))
+        }
+    }
+
+    @Test
+    fun `Annuller revurdering mens førstegangsbehandlingen er til utbetaling`() {
+        a1 {
+            tilGodkjenning(januar, 80.prosent)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterSøknad(januar)
+            nullstillTilstandsendringer()
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterUtbetalt()
+
+            assertBehandlingEventRekkefølge(listOf(
+                EventSubscription.VedtaksperiodeOpprettet::class,
+                EventSubscription.BehandlingOpprettetEvent::class,
+                EventSubscription.BehandlingLukketEvent::class,
+                EventSubscription.BehandlingOpprettetEvent::class,
+                EventSubscription.AvsluttetMedVedtakEvent::class,
+                EventSubscription.BehandlingForkastetEvent::class,
+                EventSubscription.VedtaksperiodeAnnullertEvent::class,
+                EventSubscription.VedtaksperiodeForkastetEvent::class
+            ))
         }
     }
 

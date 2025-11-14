@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
@@ -30,6 +30,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING_TIL_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
@@ -37,6 +38,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REV
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING_TIL_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
@@ -1105,6 +1107,49 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
                 assertNull(it.detaljer()["maksdato"])
                 assertEquals("SPREF", it.detaljer()["fagområde"])
             }
+        }
+    }
+
+    @Test
+    fun `Annuller periode til utbetaling`() {
+        a1 {
+            tilGodkjenning(januar)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterUtbetalt()
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_ANNULLERING_TIL_UTBETALING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `Annuller revurdering til utbetaling`() {
+        a1 {
+            nyttVedtak(januar, 80.prosent)
+            håndterSøknad(januar)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterUtbetalt()
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_ANNULLERING_TIL_UTBETALING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `Annuller revurdering mens førstegangsbehandlingen er til utbetaling`() {
+        a1 {
+            tilGodkjenning(januar, 80.prosent)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterSøknad(januar)
+            nullstillTilstandsendringer()
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterUtbetalt()
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_ANNULLERING_TIL_UTBETALING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
         }
     }
 

@@ -77,6 +77,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_ANNULLERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_ANNULLERING_TIL_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_A_ORDNINGEN
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_BLOKKERENDE_PERIODE
@@ -428,6 +429,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
         VedtaksperiodetilstandDto.TIL_UTBETALING -> TIL_UTBETALING
 
         VedtaksperiodetilstandDto.AVVENTER_ANNULLERING -> AVVENTER_ANNULLERING
+        VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING -> AVVENTER_ANNULLERING_TIL_UTBETALING
         VedtaksperiodetilstandDto.TIL_ANNULLERING -> TIL_ANNULLERING
 
         VedtaksperiodetilstandDto.FRILANS_START -> FRILANS_START

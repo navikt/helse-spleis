@@ -98,6 +98,7 @@ sealed class VedtaksperiodetilstandDto {
     data object AVVENTER_GODKJENNING_REVURDERING : VedtaksperiodetilstandDto()
 
     data object AVVENTER_ANNULLERING : VedtaksperiodetilstandDto()
+    data object AVVENTER_ANNULLERING_TIL_UTBETALING : VedtaksperiodetilstandDto()
     data object TIL_ANNULLERING : VedtaksperiodetilstandDto()
 
     data object FRILANS_START : VedtaksperiodetilstandDto()

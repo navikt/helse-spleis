@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.time.Year
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.april
 import no.nav.helse.august
@@ -42,6 +42,7 @@ import no.nav.helse.spleis.speil.dto.Inntekt
 import no.nav.helse.spleis.speil.dto.Inntektkilde
 import no.nav.helse.spleis.speil.dto.Periodetilstand
 import no.nav.helse.spleis.speil.dto.Periodetilstand.Annullert
+import no.nav.helse.spleis.speil.dto.Periodetilstand.AvventerAnnullering
 import no.nav.helse.spleis.speil.dto.Periodetilstand.AvventerInntektsopplysninger
 import no.nav.helse.spleis.speil.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.spleis.speil.dto.Periodetilstand.IngenUtbetaling
@@ -187,6 +188,25 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             0.generasjon {
                 uberegnetPeriode(0).also {
                     assertEquals(VenterPåAnnenPeriode, it.periodetilstand)
+                }
+            }
+            1.generasjon {
+                beregnetPeriode(0).also {
+                    assertEquals(TilUtbetaling, it.periodetilstand)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `annullere periode til utbetaling`() {
+        tilGodkjenning(1.januar, 31.januar)
+        håndterUtbetalingsgodkjenning()
+        håndterAnnullerUtbetaling()
+        generasjoner(a1) {
+            0.generasjon {
+                uberegnetPeriode(0).also {
+                    assertEquals(AvventerAnnullering, it.periodetilstand)
                 }
             }
             1.generasjon {
