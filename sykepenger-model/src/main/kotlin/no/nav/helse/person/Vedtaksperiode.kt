@@ -1922,9 +1922,6 @@ internal class Vedtaksperiode private constructor(
             AvventerAnnulleringTilUtbetaling -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
             TilAnnullering -> håndterAnnulleringUtbetalinghendelse(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
             AvventerRevurderingTilUtbetaling -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, AvventerRevurdering)
-            // todo: <midlertidig fordi="pga det kan være ting i prod som er inflight">
-            AvventerRevurdering -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, AvventerRevurdering)
-            // todo: </midlertidig>
             SelvstendigTilUtbetaling -> vedtakIverksatt(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvsluttet)
             TilUtbetaling -> vedtakIverksatt(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, Avsluttet)
 
@@ -1948,6 +1945,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering,
+            AvventerRevurdering,
             SelvstendigAvsluttet,
             SelvstendigAvventerBlokkerendePeriode,
             SelvstendigAvventerGodkjenning,

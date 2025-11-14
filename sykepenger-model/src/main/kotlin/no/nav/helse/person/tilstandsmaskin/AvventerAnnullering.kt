@@ -3,7 +3,6 @@ package no.nav.helse.person.tilstandsmaskin
 import java.time.LocalDateTime
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Hendelse
-import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -21,10 +20,6 @@ internal data object AvventerAnnullering : Vedtaksperiodetilstand {
     }
 
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        if (vedtaksperiode.behandlinger.utbetales()) {
-            aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
-            return
-        }
         val sisteUtbetalteUtbetaling = vedtaksperiode.behandlinger.sisteUtbetalteUtbetaling()
         checkNotNull(sisteUtbetalteUtbetaling) { "Fant ikke en utbetalt utbetaling for vedtaksperiode ${vedtaksperiode.id}" }
 

@@ -17,8 +17,6 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
         is TrengerInntektsopplysningerAnnenArbeidsgiver -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.INNTEKTSMELDING)
 
-        HarPågåendeUtbetaling -> VenterPå.SegSelv(Venteårsak.UTBETALING)
-
         is TrengerInnteksopplysninger,
         KlarForVilkårsprøving,
         KlarForBeregning -> VenterPå.Nestemann
@@ -38,8 +36,6 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     }
 
     private fun tilstand(vedtaksperiode: Vedtaksperiode): Tilstand {
-        if (vedtaksperiode.behandlinger.utbetales()) return HarPågåendeUtbetaling
-
         return when (vedtaksperiode.vilkårsgrunnlag) {
             null -> when (val førstePeriodeSomTrengerInntekt = vedtaksperiode.førstePeriodeSomVenterPåInntekt()) {
                 null -> when {
@@ -64,12 +60,6 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Trenger inntektsopplysninger etter igangsatt revurdering. Etterspør inntekt fra skatt")
             vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
-        }
-    }
-
-    private data object HarPågåendeUtbetaling : Tilstand {
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
         }
     }
 
