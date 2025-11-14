@@ -30,6 +30,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING_TIL_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
@@ -208,7 +209,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a2)
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
         }
 
         inspektør(a2) {
@@ -221,7 +222,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING)
         }
 
         inspektør(a2) {
@@ -281,7 +282,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING)
             assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(a1)])
         }
         inspektør(a2) {
@@ -356,7 +357,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
         }
 
         inspektør(a2) {
@@ -367,7 +368,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING)
             assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(a1)])
         }
 
@@ -388,7 +389,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
         }
 
         inspektør(a2) {
@@ -404,7 +405,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
 
         inspektør(a1) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING)
             assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(a1)])
         }
 
@@ -433,7 +434,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a2)
 
         inspektør(a1) {
-            assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
+            assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
 
@@ -446,7 +447,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
         inspektør(a1) {
-            assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
 

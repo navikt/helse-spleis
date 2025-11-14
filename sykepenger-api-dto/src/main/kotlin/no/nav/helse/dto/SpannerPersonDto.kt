@@ -406,6 +406,7 @@ data class SpannerPersonDto(
                 AVVENTER_A_ORDNINGEN,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_REVURDERING,
+                AVVENTER_REVURDERING_TIL_UTBETALING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_VILKÅRSPRØVING_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -1156,6 +1157,7 @@ private fun VedtaksperiodeUtDto.tilPersonData(
         VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
         VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_INNTEKTSMELDING
         VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_REVURDERING_TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_REVURDERING_TIL_UTBETALING
         VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SIMULERING
         VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SIMULERING_REVURDERING
         VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_VILKÅRSPRØVING

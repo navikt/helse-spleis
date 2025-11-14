@@ -89,6 +89,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_REVURDERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_REVURDERING_TIL_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_SIMULERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE
@@ -418,6 +419,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
         VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> AVVENTER_INFOTRYGDHISTORIKK
         VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> AVVENTER_INNTEKTSMELDING
         VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> AVVENTER_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_REVURDERING_TIL_UTBETALING -> AVVENTER_REVURDERING_TIL_UTBETALING
         VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> AVVENTER_SIMULERING
         VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> AVVENTER_SIMULERING_REVURDERING
         VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> AVVENTER_VILKÅRSPRØVING

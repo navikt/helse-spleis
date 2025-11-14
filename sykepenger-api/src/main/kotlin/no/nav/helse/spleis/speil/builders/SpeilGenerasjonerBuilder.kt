@@ -125,6 +125,7 @@ internal class SpeilGenerasjonerBuilder(
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
             pensjonsgivendeInntekter = (sisteEndring.faktaavklartInntekt as? SelvstendigFaktaavklartInntektUtDto)?.pensjonsgivendeInntekter ?: emptyList(),
             periodetilstand = periodetilstand ?: generasjon.avsluttet?.let { Periodetilstand.IngenUtbetaling } ?: when (vedtaksperiode.tilstand) {
+                is VedtaksperiodetilstandDto.AVVENTER_REVURDERING_TIL_UTBETALING -> Periodetilstand.VenterPåAnnenPeriode
                 is VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode
 
                 is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
@@ -300,6 +301,7 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.ARBEIDSTAKER_START,
                 VedtaksperiodetilstandDto.SELVSTENDIG_START,
                 VedtaksperiodetilstandDto.TIL_INFOTRYGD,
+                VedtaksperiodetilstandDto.AVVENTER_REVURDERING_TIL_UTBETALING,
                 VedtaksperiodetilstandDto.AVVENTER_ANNULLERING,
                 VedtaksperiodetilstandDto.TIL_ANNULLERING -> error("har ikke mappingregel for utbetalingstatus $behandlingtilstandDto og periodetilstand=$periodetilstand")
             }

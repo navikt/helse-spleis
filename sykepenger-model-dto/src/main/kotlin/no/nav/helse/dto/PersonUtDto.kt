@@ -91,6 +91,7 @@ sealed class VedtaksperiodetilstandDto {
     data object AVVENTER_A_ORDNINGEN : VedtaksperiodetilstandDto()
     data object AVVENTER_VILKÅRSPRØVING : VedtaksperiodetilstandDto()
     data object AVVENTER_REVURDERING : VedtaksperiodetilstandDto()
+    data object AVVENTER_REVURDERING_TIL_UTBETALING : VedtaksperiodetilstandDto()
     data object AVVENTER_HISTORIKK_REVURDERING : VedtaksperiodetilstandDto()
     data object AVVENTER_VILKÅRSPRØVING_REVURDERING : VedtaksperiodetilstandDto()
     data object AVVENTER_SIMULERING_REVURDERING : VedtaksperiodetilstandDto()

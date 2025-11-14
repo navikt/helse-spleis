@@ -179,6 +179,25 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     }
 
     @Test
+    fun `revurdere periode til utbetaling`() {
+        tilGodkjenning(1.januar, 31.januar)
+        håndterUtbetalingsgodkjenning()
+        håndterSøknad(januar)
+        generasjoner(a1) {
+            0.generasjon {
+                uberegnetPeriode(0).also {
+                    assertEquals(VenterPåAnnenPeriode, it.periodetilstand)
+                }
+            }
+            1.generasjon {
+                beregnetPeriode(0).also {
+                    assertEquals(TilUtbetaling, it.periodetilstand)
+                }
+            }
+        }
+    }
+
+    @Test
     fun `Selvstendig har pensjonsgivende inntekt også på uberegnet periode`() {
         håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
 
