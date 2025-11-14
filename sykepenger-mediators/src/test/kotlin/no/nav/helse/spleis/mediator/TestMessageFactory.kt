@@ -650,6 +650,7 @@ internal class TestMessageFactory(
 
     fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         yrkesaktivitetstype: String = "ARBEIDSTAKER",
         sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(),
         orgnummer: String? = null,
@@ -657,6 +658,7 @@ internal class TestMessageFactory(
     ): Pair<String, String> {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             yrkesaktivitetstype = yrkesaktivitetstype,
             behov = listOf("Sykepengehistorikk"),
             løsninger = sykepengehistorikk.toJson(),
@@ -680,6 +682,7 @@ internal class TestMessageFactory(
     fun lagUtbetalingshistorikkForFeriepenger(testdata: UtbetalingshistorikkForFeriepengerTestdata) =
         lagBehovMedLøsning(
             vedtaksperiodeId = null,
+            behandlingId = null,
             behov = listOf("SykepengehistorikkForFeriepenger"),
             ekstraFelter = mapOf(
                 "SykepengehistorikkForFeriepenger" to mapOf(
@@ -936,6 +939,7 @@ internal class TestMessageFactory(
 
     fun lagYtelser(
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         pleiepenger: List<PleiepengerTestdata> = emptyList(),
         omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
         opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
@@ -963,6 +967,7 @@ internal class TestMessageFactory(
 
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
             behov = behovliste,
@@ -1045,6 +1050,7 @@ internal class TestMessageFactory(
 
     fun lagSykepengegrunnlagForArbeidsgiver(
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         orgnummer: String = organisasjonsnummer,
         skjæringstidspunkt: LocalDate,
         inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning>
@@ -1052,6 +1058,7 @@ internal class TestMessageFactory(
         return lagBehovMedLøsning(
             behov = listOf("InntekterForSykepengegrunnlagForArbeidsgiver"),
             vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             orgnummer = orgnummer,
             løsninger = mapOf(
                 "InntekterForSykepengegrunnlagForArbeidsgiver" to inntekterForSykepengegrunnlag
@@ -1080,6 +1087,7 @@ internal class TestMessageFactory(
 
     fun lagVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         skjæringstidspunkt: LocalDate,
         inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning>,
         inntekterForOpptjeningsvurdering: List<InntekterForOpptjeningsvurderingFraLøsning>,
@@ -1096,6 +1104,7 @@ internal class TestMessageFactory(
                 ArbeidsforholdV2.name
             ),
             vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
             løsninger = mapOf(
@@ -1167,6 +1176,7 @@ internal class TestMessageFactory(
 
     fun lagSimulering(
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         status: SimuleringMessage.Simuleringstatus,
         utbetalingId: UUID,
         fagsystemId: String = "fagsystemid",
@@ -1177,6 +1187,7 @@ internal class TestMessageFactory(
         return lagBehovMedLøsning(
             behov = listOf("Simulering"),
             vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
             løsninger = mapOf(
@@ -1263,12 +1274,14 @@ internal class TestMessageFactory(
                 "fagsystemId" to fagsystemId,
                 "gyldighetsdato" to gyldighetsdato,
             ),
-            vedtaksperiodeId = null
+            vedtaksperiodeId = null,
+            behandlingId = null
         )
     }
 
     fun lagUtbetalingsgodkjenning(
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         utbetalingId: UUID,
         utbetalingGodkjent: Boolean,
         saksbehandlerIdent: String,
@@ -1284,6 +1297,7 @@ internal class TestMessageFactory(
             orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
             vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             løsninger = mapOf(
                 "Godkjenning" to mapOf(
                     "godkjent" to utbetalingGodkjent,
@@ -1384,6 +1398,8 @@ internal class TestMessageFactory(
     fun lagUtbetaling(
         fagsystemId: String,
         utbetalingId: String,
+        vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         utbetalingOK: Boolean = true,
         avstemmingsnøkkel: Long = 123456L,
         overføringstidspunkt: LocalDateTime = LocalDateTime.now(),
@@ -1392,7 +1408,8 @@ internal class TestMessageFactory(
         return lagBehovMedLøsning(
             behov = listOf("Utbetaling"),
             yrkesaktivitetstype = yrkesaktivitetstype,
-            vedtaksperiodeId = null,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             løsninger = mapOf(
                 "Utbetaling" to mapOf(
                     "status" to if (utbetalingOK) Oppdragstatus.AKSEPTERT.name else Oppdragstatus.AVVIST.name,
@@ -1579,7 +1596,8 @@ internal class TestMessageFactory(
 
     private fun lagBehovMedLøsning(
         behov: List<String> = listOf(),
-        vedtaksperiodeId: UUID? = UUID.randomUUID(),
+        vedtaksperiodeId: UUID?,
+        behandlingId: UUID?,
         orgnummer: String = organisasjonsnummer,
         løsninger: Map<String, Any> = emptyMap(),
         ekstraFelter: Map<String, Any> = emptyMap(),
@@ -1596,6 +1614,7 @@ internal class TestMessageFactory(
         "@besvart" to besvart
     ).apply {
         vedtaksperiodeId?.let { this["vedtaksperiodeId"] = vedtaksperiodeId.toString() }
+        behandlingId?.let { this["behandlingId"] = behandlingId.toString() }
     }
     )
 

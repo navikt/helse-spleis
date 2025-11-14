@@ -34,7 +34,6 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as Hendelseperiode
 import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
@@ -42,6 +41,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepeng
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger
@@ -456,9 +456,12 @@ internal abstract class AbstractEndToEndMediatorTest {
         orgnummer: String = ORGNUMMER
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Godkjenning))
-        val yrkesaktivitetstype = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Godkjenning).path("yrkesaktivitetstype").asText()
+        val  behov = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Godkjenning)
+        val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
+        val behandlingId = behov.path("behandlingId").asText().toUUID()
         val (_, message) = meldingsfabrikk.lagUtbetalingsgodkjenning(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+            behandlingId = behandlingId,
             orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
             utbetalingId = UUID.fromString(testRapid.inspektør.etterspurteBehov(Godkjenning).path("utbetalingId").asText()),
@@ -505,10 +508,13 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Institusjonsopphold))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForBeregning))
-        val yrkesaktivitetstype = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger).path("yrkesaktivitetstype").asText()
+        val behov = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger)
+        val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
+        val behandlingId = behov.path("behandlingId").asText().toUUID()
         assertEquals(yrkesaktivitetstype == "SELVSTENDIG", testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, SelvstendigForsikring))
         val (_, message) = meldingsfabrikk.lagYtelser(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+            behandlingId = behandlingId,
             pleiepenger = pleiepenger,
             omsorgspenger = omsorgspenger,
             opplæringspenger = opplæringspenger,
@@ -545,11 +551,12 @@ internal abstract class AbstractEndToEndMediatorTest {
         orgnummer: String? = null
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
-        val yrkesaktivitetstype =
-            testRapid.inspektør.etterspurteBehov(Sykepengehistorikk).path("yrkesaktivitetstype").asText()
+        val behov = testRapid.inspektør.etterspurteBehov(Sykepengehistorikk)
+        val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
 
         val (_, message) = meldingsfabrikk.lagUtbetalingshistorikk(
             testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+            behandlingId = behov.path("behandlingId").asText().toUUID(),
             yrkesaktivitetstype = yrkesaktivitetstype,
             sykepengehistorikk = sykepengehistorikk,
             orgnummer = orgnummer,
@@ -577,8 +584,11 @@ internal abstract class AbstractEndToEndMediatorTest {
         ),
     ) {
         val vedtaksperiodeId = if (vedtaksperiodeIndeks == -1) UUID.randomUUID() else testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)
+        val behov = testRapid.inspektør.etterspurteBehov(InntekterForSykepengegrunnlagForArbeidsgiver)
+        val behandlingId = behov.path("behandlingId").asText().toUUID()
         val (_, message) = meldingsfabrikk.lagSykepengegrunnlagForArbeidsgiver(
             vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             orgnummer = orgnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag
@@ -594,10 +604,13 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag))
-        val skjæringstidspunktFraBehov = testRapid.inspektør.etterspurteBehov(Medlemskap).path("Medlemskap").path("skjæringstidspunkt").asLocalDate()
-        val yrkesaktivitetstypeFraBehov = testRapid.inspektør.etterspurteBehov(Medlemskap).path("yrkesaktivitetstype").asText()
+        val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
+        val skjæringstidspunktFraBehov = behov.path("Medlemskap").path("skjæringstidspunkt").asLocalDate()
+        val yrkesaktivitetstypeFraBehov = behov.path("yrkesaktivitetstype").asText()
+        val behandlingId = behov.path("behandlingId").asText().toUUID()
         val (_, message) = meldingsfabrikk.lagVilkårsgrunnlag(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+            behandlingId = behandlingId,
             skjæringstidspunkt = skjæringstidspunktFraBehov,
             inntekterForSykepengegrunnlag = emptyList(),
             inntekterForOpptjeningsvurdering = emptyList(),
@@ -625,10 +638,13 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag))
-        val skjæringstidspunktFraBehov = testRapid.inspektør.etterspurteBehov(Medlemskap).path("Medlemskap").path("skjæringstidspunkt").asLocalDate()
-        val yrkesaktivitetstypeFraBehov = testRapid.inspektør.etterspurteBehov(Medlemskap).path("yrkesaktivitetstype").asText()
+        val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
+        val skjæringstidspunktFraBehov = behov.path("Medlemskap").path("skjæringstidspunkt").asLocalDate()
+        val yrkesaktivitetstypeFraBehov = behov.path("yrkesaktivitetstype").asText()
+        val behandlingId = behov.path("behandlingId").asText().toUUID()
         val (_, message) = meldingsfabrikk.lagVilkårsgrunnlag(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+            behandlingId = behandlingId,
             skjæringstidspunkt = skjæringstidspunktFraBehov,
             inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
             inntekterForOpptjeningsvurdering = listOf(
@@ -663,10 +679,13 @@ internal abstract class AbstractEndToEndMediatorTest {
     ) {
         val fagområder = mutableSetOf<String>()
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Simulering))
-        val yrkesaktivitetstype = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Simulering).path("yrkesaktivitetstype").asText()
+        val behov = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Simulering)
+        val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
+        val behandlingId = behov.path("behandlingId").asText().toUUID()
         testRapid.inspektør.alleEtterspurteBehov(Simulering).forEach { behov ->
             val (_, message) = meldingsfabrikk.lagSimulering(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                behandlingId = behandlingId,
                 orgnummer = orgnummer,
                 yrkesaktivitetstype = yrkesaktivitetstype,
                 status = status,
@@ -719,6 +738,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             val (_, message) = meldingsfabrikk.lagUtbetaling(
                 fagsystemId = behov.path("fagsystemId").asText(),
                 utbetalingId = behov.path("utbetalingId").asText(),
+                vedtaksperiodeId = behov.path("vedtaksperiodeId").asText().toUUID(),
+                behandlingId = behov.path("behandlingId").asText().toUUID(),
                 utbetalingOK = utbetalingOK,
                 yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
             )

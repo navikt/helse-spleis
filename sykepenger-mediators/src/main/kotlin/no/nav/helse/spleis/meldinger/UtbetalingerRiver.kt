@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.spleis.IMessageMediator
@@ -29,6 +30,8 @@ internal class UtbetalingerRiver(
         message.requireKey("@løsning.${Utbetaling.name}")
         message.requireAny("@løsning.${Utbetaling.name}.status", gyldigeStatuser)
         message.requireKey("${Utbetaling.name}.fagsystemId", "utbetalingId", "@løsning.${Utbetaling.name}.beskrivelse")
+        message.require("vedtaksperiodeId") { it.asText().toUUID() }
+        message.require("behandlingId") { it.asText().toUUID() }
         message.requireKey("@løsning.${Utbetaling.name}.avstemmingsnøkkel")
         message.require("@løsning.${Utbetaling.name}.overføringstidspunkt", JsonNode::asLocalDateTime)
     }

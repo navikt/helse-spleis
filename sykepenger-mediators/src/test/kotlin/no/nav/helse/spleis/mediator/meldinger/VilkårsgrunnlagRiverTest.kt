@@ -28,6 +28,7 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
         assertNoErrors(
             testMessageFactory.lagVilkårsgrunnlag(
                 vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
                 skjæringstidspunkt = 1.januar,
                 inntekterForSykepengegrunnlag = listOf(
                     TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
@@ -55,6 +56,7 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
         assertNoErrors(
             testMessageFactory.lagVilkårsgrunnlag(
                 vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
                 skjæringstidspunkt = 1.januar,
                 inntekterForSykepengegrunnlag = listOf(
                     TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
