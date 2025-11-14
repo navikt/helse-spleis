@@ -90,6 +90,7 @@ import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.view.ArbeidsgiverView
 import no.nav.helse.sykdomstidslinje.Dag.Companion.bareNyeDager
@@ -211,8 +212,8 @@ internal class Yrkesaktivitet private constructor(
             val vilkårsgrunnlageventyr = firstNotNullOfOrNull { it.håndterOverstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger, aktivitetslogg) }
 
             if (vilkårsgrunnlageventyr != null) {
-                overstyrArbeidsgiveropplysninger.arbeidsgiveropplysninger.mapNotNull { inntektsopplysning ->
-                    finn(Arbeidstaker(inntektsopplysning.organisasjonsnummer))?.håndterKorrigertInntekt(eventBus, overstyrArbeidsgiveropplysninger, inntektsopplysning, aktivitetslogg)
+                overstyrArbeidsgiveropplysninger.arbeidsgiveropplysninger.mapNotNull { korrigering ->
+                    finn(Arbeidstaker(korrigering.organisasjonsnummer))?.håndterKorrigertInntekt(eventBus, overstyrArbeidsgiveropplysninger, korrigering.korrigertInntekt, aktivitetslogg)
                 }
             }
 
@@ -765,10 +766,10 @@ internal class Yrkesaktivitet private constructor(
         }.tidligsteEventyr()
     }
 
-    internal fun håndterKorrigertInntekt(eventBus: EventBus, hendelse: OverstyrArbeidsgiveropplysninger, inntektsopplysning: OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    internal fun håndterKorrigertInntekt(eventBus: EventBus, hendelse: OverstyrArbeidsgiveropplysninger, korrigertInntekt: Saksbehandler, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         return håndter {
-            it.håndterKorrigertInntekt(eventBus, hendelse, inntektsopplysning, aktivitetsloggMedArbeidsgiverkontekst)
+            it.håndterKorrigertInntekt(eventBus, hendelse, korrigertInntekt, aktivitetsloggMedArbeidsgiverkontekst)
         }.tidligsteEventyr()
     }
 

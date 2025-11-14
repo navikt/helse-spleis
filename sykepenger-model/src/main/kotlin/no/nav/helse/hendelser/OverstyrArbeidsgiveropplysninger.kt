@@ -2,12 +2,14 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav b`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav c`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 5`
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.Inntektsdata
+import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.økonomi.Inntekt
 
@@ -58,7 +60,11 @@ class OverstyrArbeidsgiveropplysninger(
         val inntektsdata: Inntektsdata,
         val begrunnelse: Overstyringbegrunnelse
     ) {
-        fun subsummer(subsumsjonslogg: Subsumsjonslogg, startdatoArbeidsforhold: LocalDate?) {
+        internal val korrigertInntekt = Saksbehandler(
+            id = UUID.randomUUID(),
+            inntektsdata = inntektsdata
+        )
+        internal fun subsummer(subsumsjonslogg: Subsumsjonslogg, startdatoArbeidsforhold: LocalDate?) {
             begrunnelse.subsummer(inntektsdata.dato, inntektsdata.beløp, organisasjonsnummer, subsumsjonslogg, startdatoArbeidsforhold)
         }
     }

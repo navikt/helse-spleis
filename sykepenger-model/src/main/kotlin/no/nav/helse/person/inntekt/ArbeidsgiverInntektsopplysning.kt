@@ -44,10 +44,7 @@ internal data class ArbeidsgiverInntektsopplysning(
         // bare sett inn ny inntekt hvis beløp er ulikt (speil sender inntekt- og refusjonoverstyring i samme melding)
         if (korrigering.inntektsdata.beløp == omregnetÅrsinntekt.beløp) return this
         return copy(
-            korrigertInntekt = Saksbehandler(
-                id = UUID.randomUUID(),
-                inntektsdata = korrigering.inntektsdata
-            ),
+            korrigertInntekt = korrigering.korrigertInntekt,
             skjønnsmessigFastsatt = null
         )
     }

@@ -419,7 +419,7 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
     }
 
-    internal fun håndterKorrigertInntekt(eventBus: EventBus, hendelse: OverstyrArbeidsgiveropplysninger, inntektsopplysning: OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning, aktivietetslogg: IAktivitetslogg): Revurderingseventyr? {
+    internal fun håndterKorrigertInntekt(eventBus: EventBus, hendelse: OverstyrArbeidsgiveropplysninger, korrigertInntekt: Saksbehandler, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         if (skjæringstidspunkt != hendelse.skjæringstidspunkt) return null
 
         when (tilstand) {
@@ -468,12 +468,9 @@ internal class Vedtaksperiode private constructor(
         }
         behandlinger.håndterKorrigertInntekt(
             eventBus = eventBus,
-            korrigertInntekt = Saksbehandler(
-                id = UUID.randomUUID(),
-                inntektsdata = inntektsopplysning.inntektsdata
-            ),
+            korrigertInntekt = korrigertInntekt,
             yrkesaktivitet = yrkesaktivitet,
-            aktivitetslogg = registrerKontekst(aktivietetslogg)
+            aktivitetslogg = registrerKontekst(aktivitetslogg)
         )
         return Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, periode.start)// TODO: Eget eventyr?
     }
