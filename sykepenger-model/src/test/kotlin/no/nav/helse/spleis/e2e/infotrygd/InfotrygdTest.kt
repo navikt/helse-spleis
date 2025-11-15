@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.infotrygd
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
+import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
@@ -60,7 +61,6 @@ import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -90,18 +90,19 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
 
         val eksisterendeUtbetaling = ArbeidsgiverUtbetalingsperiode("a1", 1.januar, 31.januar)
         val nyUtbetaling = ArbeidsgiverUtbetalingsperiode("a1", 20.desember(2017), 31.desember(2017))
+        nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(eksisterendeUtbetaling, nyUtbetaling)
 
         assertEquals(20.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(emptyList<VedtaksperiodeVenterEvent>(), observatør.vedtaksperiodeVenter)
-        nullstillTilstandsendringer()
-        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
 
-        håndterSykepengegrunnlagForArbeidsgiver(skjæringstidspunkt = 20.desember(2017))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertInntektsgrunnlag(20.desember(2017), forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        }
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
         assertVarsler(listOf(RV_IV_10, RV_IT_14), 1.vedtaksperiode.filter(a1))
         assertEquals(refusjonFør, inspektør.refusjon(1.vedtaksperiode))
     }

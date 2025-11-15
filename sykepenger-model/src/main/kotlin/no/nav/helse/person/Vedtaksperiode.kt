@@ -1768,12 +1768,6 @@ internal class Vedtaksperiode private constructor(
                 true
             }
 
-            AvventerRevurdering -> {
-                if (!håndterSykepengegrunnlagForArbeidsgiver(eventBus, sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedVedtaksperiodekontekst)) return false
-                person.gjenopptaBehandling(aktivitetslogg)
-                true
-            }
-
             Avsluttet,
             AvsluttetUtenUtbetaling,
             AvventerAvsluttetUtenUtbetaling,
@@ -1797,6 +1791,7 @@ internal class Vedtaksperiode private constructor(
             AvventerAnnulleringTilUtbetaling,
             TilAnnullering,
             TilUtbetaling,
+            AvventerRevurdering,
             AvventerRevurderingTilUtbetaling,
 
             ArbeidsledigStart,
@@ -2633,7 +2628,12 @@ internal class Vedtaksperiode private constructor(
 
         val benyttetFaktaavklartInntekt = when {
             faktaavklartInntektHensyntattUlikFom != null -> faktaavklartInntektHensyntattUlikFom
-            skatteopplysning != null -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), skatteopplysning.inntektsdata, Arbeidstakerinntektskilde.AOrdningen(skatteopplysning.treMånederFørSkjæringstidspunkt))
+            skatteopplysning != null -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), skatteopplysning.inntektsdata, Arbeidstakerinntektskilde.AOrdningen(skatteopplysning.treMånederFørSkjæringstidspunkt)).also {
+                val harIngenInntektMenSkalBehandlesISpeil = faktaavklartInntektFraArbeidsgiver == null && alleForSammeArbeidsgiver.any { it.skalArbeidstakerBehandlesISpeil() }
+                if (harIngenInntektMenSkalBehandlesISpeil) {
+                    aktivitetsloggTilDenSomVilkårsprøver.varsel(RV_IV_10)
+                }
+            }
             else -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt), Arbeidstakerinntektskilde.AOrdningen(emptyList()))
         }
 
