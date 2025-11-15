@@ -751,7 +751,9 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun håndterUtbetalingpåminnelse(eventBus: EventBus, påminnelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        utbetalinger.forEach { it.håndterUtbetalingpåminnelseHendelse(eventBus.utbetalingEventBus, påminnelse, aktivitetsloggMedArbeidsgiverkontekst) }
+        håndter {
+            it.håndterUtbetalingpåminnelse(eventBus, påminnelse, aktivitetsloggMedArbeidsgiverkontekst)
+        }
     }
 
     internal fun håndterPåminnelse(eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {

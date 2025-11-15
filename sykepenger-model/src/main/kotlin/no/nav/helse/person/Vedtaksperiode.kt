@@ -71,6 +71,7 @@ import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -1912,6 +1913,63 @@ internal class Vedtaksperiode private constructor(
             valider(simulering, wrapper)
             if (!erKlarForGodkjenning()) return wrapper.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
             tilstand(eventBus, wrapper, nesteTilstand)
+        }
+    }
+
+    private fun påminnUtbetaling(eventBus: EventBus, hendelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling?) {
+        checkNotNull(utbetaling) { "forventer ikke tom utbetaling" }
+        if (hendelse.utbetalingId != utbetaling.id) return
+        utbetaling.håndterUtbetalingpåminnelseHendelse(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
+    }
+
+    internal fun håndterUtbetalingpåminnelse(eventBus: EventBus, hendelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+
+        when (tilstand) {
+            AvventerAnnulleringTilUtbetaling,
+            AvventerRevurderingTilUtbetaling -> påminnUtbetaling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, behandlinger.sisteUtbetalteUtbetaling())
+
+            TilAnnullering,
+            SelvstendigTilUtbetaling,
+            TilUtbetaling -> påminnUtbetaling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, behandlinger.utbetaling)
+
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            AvventerAvsluttetUtenUtbetaling,
+            AvventerAOrdningen,
+            AvventerAnnullering,
+            AvventerAnnulleringTilUtbetaling,
+            AvventerBlokkerendePeriode,
+            AvventerSøknadForOverlappendePeriode,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            AvventerRevurdering,
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigStart,
+            ArbeidstakerStart,
+            FrilansStart,
+            FrilansAvventerInfotrygdHistorikk,
+            FrilansAvventerBlokkerendePeriode,
+            ArbeidsledigStart,
+            ArbeidsledigAvventerInfotrygdHistorikk,
+            ArbeidsledigAvventerBlokkerendePeriode,
+            TilInfotrygd -> {}
         }
     }
 
