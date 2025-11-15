@@ -6,12 +6,16 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.person.Dokumentsporing.Companion.inntektFraAOrdingen
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_INNTEKTSMELDING
@@ -30,12 +34,12 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)) {
+        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)) {
             aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
         }
 
         if (påminnelse.når(Påminnelse.Predikat.Flagg("trengerReplay"))) return trengerInntektsmeldingReplay(vedtaksperiode, eventBus)
-        if (vurderOmInntektsmeldingAldriKommer(påminnelse)) return vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAOrdningen)
+        if (vurderOmInntektsmeldingAldriKommer(påminnelse)) return gåVidereUtenInnntekt(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)
         sendTrengerArbeidsgiveropplysninger(vedtaksperiode, eventBus)
     }
 
@@ -51,12 +55,12 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
     }
 
     override fun replayUtført(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         sendTrengerArbeidsgiveropplysninger(vedtaksperiode, eventBus)
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
     }
 
     override fun inntektsmeldingFerdigbehandlet(
@@ -65,10 +69,10 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
     }
 
-    private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg): Boolean {
+    private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Boolean {
         vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, aktivitetslogg)
 
         return when {
@@ -79,7 +83,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
                 }
                 else -> when {
                     vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte() -> {
-                        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAOrdningen)
+                        gåVidereUtenInnntekt(vedtaksperiode, eventBus, hendelse, aktivitetslogg)
                         true
                     }
                     else -> false
@@ -90,6 +94,11 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
                 true
             }
         }
+    }
+
+    private fun gåVidereUtenInnntekt(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+        vedtaksperiode.videreførEllerIngenRefusjon(eventBus, hendelse, aktivitetslogg)
+        vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
     }
 
     private fun opplysningerViTrenger(vedtaksperiode: Vedtaksperiode): Set<EventSubscription.ForespurtOpplysning> {
@@ -190,3 +199,30 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
 private fun sykmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>): List<Periode> {
     return vedtaksperioder.map { it.sykmeldingsperiode }
 }
+
+private fun Vedtaksperiode.videreførEllerIngenRefusjon(eventBus: EventBus, sykepengegrunnlagForArbeidsgiver: Hendelse, aktivitetslogg: IAktivitetslogg) {
+    videreførEksisterendeRefusjonsopplysninger(
+        eventBus = eventBus,
+        dokumentsporing = null,
+        aktivitetslogg = aktivitetslogg
+    )
+    if (refusjonstidslinje.isNotEmpty()) return
+
+    val ingenRefusjon = Beløpstidslinje.fra(
+        periode = periode,
+        beløp = INGEN,
+        kilde = Kilde(
+            sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
+            sykepengegrunnlagForArbeidsgiver.metadata.avsender,
+            sykepengegrunnlagForArbeidsgiver.metadata.innsendt
+        )
+    )
+    behandlinger.håndterRefusjonstidslinje(
+        eventBus = eventBus,
+        yrkesaktivitet = yrkesaktivitet,
+        dokumentsporing = inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId),
+        aktivitetslogg = aktivitetslogg,
+        benyttetRefusjonsopplysninger = ingenRefusjon
+    )
+}
+

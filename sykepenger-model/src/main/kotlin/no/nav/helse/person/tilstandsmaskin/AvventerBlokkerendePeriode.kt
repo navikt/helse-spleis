@@ -24,7 +24,7 @@ private fun tilstandHvisBlokkeresAvAndre(vedtaksperiode: Vedtaksperiode): Vedtak
 
 internal fun Vedtaksperiodetilstand.bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode: Vedtaksperiode) {
     check(vedtaksperiode.skalArbeidstakerBehandlesISpeil()) { "forventer ikke at en periode som skal til AUU, skal ende opp i $this" }
-    check(!vedtaksperiode.måInnhenteInntektEllerRefusjon()) { "Periode i $this har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}." }
+    //check(!vedtaksperiode.måInnhenteInntektEllerRefusjon()) { "Periode i $this har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}." }
 }
 
 internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {

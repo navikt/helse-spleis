@@ -26,6 +26,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
@@ -103,8 +104,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSøknad(1.januar til 31.januar)
         assertEtterspurt(1.vedtaksperiode.id(a1), EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
-        håndterSykepengegrunnlagForArbeidsgiver(1.januar)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertTrue(observatør.inntektsmeldingHåndtert.isEmpty())
 
         assertVarsler(listOf(RV_IV_10), 1.vedtaksperiode.filter(a1))

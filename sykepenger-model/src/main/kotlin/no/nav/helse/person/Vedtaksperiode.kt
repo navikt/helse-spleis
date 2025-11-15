@@ -1762,12 +1762,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(eventBus: EventBus, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg): Boolean {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         return when (tilstand) {
-            AvventerAOrdningen -> {
-                if (!håndterSykepengegrunnlagForArbeidsgiver(eventBus, sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedVedtaksperiodekontekst)) return false
-                tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(this))
-                true
-            }
-
+            AvventerAOrdningen,
             Avsluttet,
             AvsluttetUtenUtbetaling,
             AvventerAvsluttetUtenUtbetaling,
@@ -1812,73 +1807,6 @@ internal class Vedtaksperiode private constructor(
             SelvstendigStart,
             SelvstendigTilUtbetaling -> false
         }
-    }
-
-    private fun videreførEllerIngenRefusjon(eventBus: EventBus, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg) {
-        videreførEksisterendeRefusjonsopplysninger(
-            eventBus = eventBus,
-            dokumentsporing = null,
-            aktivitetslogg = aktivitetslogg
-        )
-        if (refusjonstidslinje.isNotEmpty()) return
-
-        val ingenRefusjon = Beløpstidslinje.fra(
-            periode = periode,
-            beløp = INGEN,
-            kilde = Kilde(
-                sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
-                sykepengegrunnlagForArbeidsgiver.metadata.avsender,
-                sykepengegrunnlagForArbeidsgiver.metadata.innsendt
-            )
-        )
-        behandlinger.håndterRefusjonstidslinje(
-            eventBus = eventBus,
-            yrkesaktivitet = yrkesaktivitet,
-            dokumentsporing = inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId),
-            aktivitetslogg = aktivitetslogg,
-            benyttetRefusjonsopplysninger = ingenRefusjon
-        )
-    }
-
-    private fun håndterSykepengegrunnlagForArbeidsgiver(eventBus: EventBus, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg): Boolean {
-        if (sykepengegrunnlagForArbeidsgiver.skjæringstidspunkt != skjæringstidspunkt) {
-            aktivitetslogg.info("Vilkårsgrunnlag var relevant for Vedtaksperiode, men skjæringstidspunktene var ulikte: [$skjæringstidspunkt, ${sykepengegrunnlagForArbeidsgiver.skjæringstidspunkt}]")
-            return false
-        }
-
-        aktivitetslogg.info("Håndterer sykepengegrunnlag for arbeidsgiver")
-        aktivitetslogg.varsel(RV_IV_10)
-
-        val skatteopplysninger = sykepengegrunnlagForArbeidsgiver.inntekter()
-        val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteopplysninger)
-
-        val faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(
-            id = UUID.randomUUID(),
-            inntektsdata = Inntektsdata(
-                hendelseId = sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
-                dato = skjæringstidspunkt,
-                beløp = omregnetÅrsinntekt,
-                tidsstempel = LocalDateTime.now()
-            ),
-            inntektsopplysningskilde = Arbeidstakerinntektskilde.AOrdningen(skatteopplysninger)
-        )
-
-        yrkesaktivitet.lagreInntektFraAOrdningen(faktaavklartInntekt)
-
-        videreførEllerIngenRefusjon(eventBus, sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
-
-        val event = EventSubscription.SkatteinntekterLagtTilGrunnEvent(
-            yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
-            vedtaksperiodeId = id,
-            behandlingId = behandlinger.sisteBehandlingId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            skatteinntekter = skatteopplysninger.map {
-                EventSubscription.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.måned, it.beløp.månedlig)
-            },
-            omregnetÅrsinntekt = omregnetÅrsinntekt.årlig
-        )
-        eventBus.sendSkatteinntekterLagtTilGrunn(event)
-        return true
     }
 
     internal fun håndterVilkårsgrunnlag(eventBus: EventBus, vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
@@ -2626,15 +2554,16 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
+        val harIngenInntektMenSkalBehandlesISpeil = faktaavklartInntektFraArbeidsgiver == null && alleForSammeArbeidsgiver.any { it.skalArbeidstakerBehandlesISpeil() }
+
         val benyttetFaktaavklartInntekt = when {
             faktaavklartInntektHensyntattUlikFom != null -> faktaavklartInntektHensyntattUlikFom
             skatteopplysning != null -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), skatteopplysning.inntektsdata, Arbeidstakerinntektskilde.AOrdningen(skatteopplysning.treMånederFørSkjæringstidspunkt)).also {
-                val harIngenInntektMenSkalBehandlesISpeil = faktaavklartInntektFraArbeidsgiver == null && alleForSammeArbeidsgiver.any { it.skalArbeidstakerBehandlesISpeil() }
-                if (harIngenInntektMenSkalBehandlesISpeil) {
-                    aktivitetsloggTilDenSomVilkårsprøver.varsel(RV_IV_10)
-                }
+                if (harIngenInntektMenSkalBehandlesISpeil) aktivitetsloggTilDenSomVilkårsprøver.varsel(RV_IV_10)
             }
-            else -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt), Arbeidstakerinntektskilde.AOrdningen(emptyList()))
+            else -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt), Arbeidstakerinntektskilde.AOrdningen(emptyList())).also {
+                if (harIngenInntektMenSkalBehandlesISpeil) aktivitetsloggTilDenSomVilkårsprøver.varsel(RV_IV_10)
+            }
         }
 
         if (benyttetFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.AOrdningen)
