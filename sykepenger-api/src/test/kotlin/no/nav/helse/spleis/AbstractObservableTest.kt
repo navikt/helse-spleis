@@ -301,6 +301,8 @@ internal abstract class AbstractObservableTest {
     )
 
     protected fun utbetaling(
+        vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         fagsystemId: String,
         status: Oppdragstatus = AKSEPTERT,
         orgnummer: String = ORGNUMMER,
@@ -310,6 +312,8 @@ internal abstract class AbstractObservableTest {
         UtbetalingHendelse(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,
             status = status,

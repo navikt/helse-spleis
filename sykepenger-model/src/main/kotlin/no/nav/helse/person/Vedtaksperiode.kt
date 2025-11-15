@@ -1975,6 +1975,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndterUtbetalingHendelse(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        if (hendelse.vedtaksperiodeId != this.id) return
 
         when (tilstand) {
             AvventerAnnulleringTilUtbetaling -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
@@ -2019,7 +2020,7 @@ internal class Vedtaksperiode private constructor(
             ArbeidsledigStart,
             ArbeidsledigAvventerInfotrygdHistorikk,
             ArbeidsledigAvventerBlokkerendePeriode,
-            TilInfotrygd -> {}
+            TilInfotrygd -> error("forventer ikke utbetalinghendelse i $tilstand")
         }
     }
 

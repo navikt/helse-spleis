@@ -561,6 +561,8 @@ internal abstract class AbstractSpeilBuilderTest {
         val behov = hendelselogg.utbetalingbehov() ?: error("Fant ikke utbetalingbehov")
         behov.oppdrag.forEach {
             fabrikker.getValue(behov.orgnummer).lagUtbetalinghendelse(
+                vedtaksperiodeId = behov.vedtaksperiodeId,
+                behandlingId = behov.behandlingId,
                 utbetalingId = behov.utbetalingId,
                 fagsystemId = it.fagsystemId,
                 status = status
@@ -674,8 +676,12 @@ internal abstract class AbstractSpeilBuilderTest {
             ?.let {
                 ubesvarteBehov.removeAll(it)
                 val (utbetalingId, oppdrag) = it.groupBy { UUID.fromString(it.alleKontekster.getValue("utbetalingId")) }.entries.single()
+                val vedtaksperiodeId = UUID.fromString(oppdrag.first().alleKontekster.getValue("vedtaksperiodeId"))
+                val behandlingId = UUID.fromString(oppdrag.first().alleKontekster.getValue("behandlingId"))
                 val orgnummer = oppdrag.first().alleKontekster.getValue("organisasjonsnummer")
                 Utbetalingbehov(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    behandlingId = behandlingId,
                     orgnummer = orgnummer,
                     utbetalingId = utbetalingId,
                     oppdrag = oppdrag.map {
@@ -717,6 +723,8 @@ internal abstract class AbstractSpeilBuilderTest {
     )
 
     data class Utbetalingbehov(
+        val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
         val orgnummer: String,
         val utbetalingId: UUID,
         val oppdrag: List<Oppdragbehov>

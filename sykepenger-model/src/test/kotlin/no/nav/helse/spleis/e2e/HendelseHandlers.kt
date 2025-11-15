@@ -878,34 +878,37 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     orgnummer: String = a1,
     fagsystemId: String,
-    utbetalingId: UUID? = null,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) {
-    val faktiskUtbetalingId = utbetalingId?.toString() ?: personlogg.sisteBehov(Behovtype.Utbetaling).alleKontekster.getValue("utbetalingId")
+    val alleKontekster = personlogg.sisteBehov(Behovtype.Utbetaling).alleKontekster
+    val faktiskUtbetalingId = alleKontekster.getValue("utbetalingId")
+    val vedtaksperiodeId = UUID.fromString(alleKontekster.getValue("vedtaksperiodeId"))
+    val behandlingId = UUID.fromString(alleKontekster.getValue("behandlingId"))
     utbetaling(
         fagsystemId = fagsystemId,
         status = status,
         orgnummer = orgnummer,
         meldingsreferanseId = meldingsreferanseId,
-        utbetalingId = UUID.fromString(faktiskUtbetalingId)
+        utbetalingId = UUID.fromString(faktiskUtbetalingId),
+        vedtaksperiodeId = vedtaksperiodeId,
+        behandlingId = behandlingId
     ).håndter(Person::håndterUtbetalingHendelse)
 }
 
 private fun Oppdrag.fagsytemIdOrNull() = if (harUtbetalinger()) inspektør.fagsystemId() else null
 
-private fun AbstractEndToEndTest.førsteUhåndterteUtbetalingsbehov(orgnummer: String): Pair<UUID, List<String>>? {
-    val utbetalingsbehovUtbetalingIder = personlogg.behov
-        .filter { it.type == Behovtype.Utbetaling }
-        .map { UUID.fromString(it.alleKontekster.getValue("utbetalingId")) }
+private fun AbstractEndToEndTest.førsteUhåndterteUtbetalingsbehov(orgnummer: String): Pair<Triple<UUID, UUID, UUID>, List<String>>? {
+    val utbetalingsbehov = personlogg.behov.lastOrNull { it.type == Behovtype.Utbetaling } ?: return null
+
+    val vedtaksperiodeId = UUID.fromString(utbetalingsbehov.alleKontekster.getValue("vedtaksperiodeId"))
+    val behandlingId = UUID.fromString(utbetalingsbehov.alleKontekster.getValue("behandlingId"))
+    val utbetalingsbehovUtbetalingIder = UUID.fromString(utbetalingsbehov.alleKontekster.getValue("utbetalingId"))
 
     return inspektør(orgnummer).utbetalingerInFlight()
         .also { require(it.size < 2) { "For mange utbetalinger i spill! Er sendt ut godkjenningsbehov for periodene ${it.map { utbetaling -> utbetaling.periode }}" } }
-        .firstOrNull { it.utbetalingId in utbetalingsbehovUtbetalingIder }
+        .firstOrNull { it.utbetalingId == utbetalingsbehovUtbetalingIder }
         ?.let {
-            it.utbetalingId to listOfNotNull(
-                it.arbeidsgiverOppdrag.fagsytemIdOrNull(),
-                it.personOppdrag.fagsytemIdOrNull()
-            )
+            Triple(it.utbetalingId, vedtaksperiodeId, behandlingId) to listOfNotNull(it.arbeidsgiverOppdrag.fagsytemIdOrNull(), it.personOppdrag.fagsytemIdOrNull())
         }
 }
 
@@ -915,9 +918,18 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     orgnummer: String = a1,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) {
-    førsteUhåndterteUtbetalingsbehov(orgnummer)?.also { (utbetalingId, fagsystemIder) ->
+    førsteUhåndterteUtbetalingsbehov(orgnummer)?.also { (ider, fagsystemIder) ->
+        val (utbetalingId, vedtaksperiodeId, behandlingId) = ider
         fagsystemIder.forEach { fagsystemId ->
-            håndterUtbetalt(status, orgnummer, fagsystemId, utbetalingId, meldingsreferanseId)
+            utbetaling(
+                fagsystemId = fagsystemId,
+                status = status,
+                orgnummer = orgnummer,
+                meldingsreferanseId = meldingsreferanseId,
+                utbetalingId = utbetalingId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId
+            ).håndter(Person::håndterUtbetalingHendelse)
         }
     }
 }

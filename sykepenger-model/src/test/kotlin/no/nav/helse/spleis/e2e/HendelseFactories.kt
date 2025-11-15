@@ -71,20 +71,23 @@ internal fun AbstractEndToEndTest.utbetaling(
     status: Oppdragstatus,
     orgnummer: String = a1,
     meldingsreferanseId: UUID = UUID.randomUUID(),
-    utbetalingId: UUID? = null
-) =
-    UtbetalingHendelse(
+    utbetalingId: UUID,
+    vedtaksperiodeId: UUID,
+    behandlingId: UUID,
+): UtbetalingHendelse {
+    return UtbetalingHendelse(
         meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
+        vedtaksperiodeId = vedtaksperiodeId,
+        behandlingId = behandlingId,
         behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         fagsystemId = fagsystemId,
-        utbetalingId = utbetalingId
-            ?: personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Utbetaling).alleKontekster.getValue("utbetalingId")
-                .let { UUID.fromString(it) },
+        utbetalingId = utbetalingId,
         status = status,
         melding = "hei",
         avstemmingsnøkkel = 123456L,
         overføringstidspunkt = LocalDateTime.now()
     )
+}
 
 internal fun AbstractEndToEndTest.feriepengeutbetaling(
     fagsystemId: String,

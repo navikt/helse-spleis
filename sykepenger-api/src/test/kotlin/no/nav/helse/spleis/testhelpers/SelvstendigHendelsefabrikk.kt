@@ -290,6 +290,8 @@ internal class SelvstendigHendelsefabrikk() {
     )
 
     internal fun lagUtbetalinghendelse(
+        vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         utbetalingId: UUID,
         fagsystemId: String,
         status: Oppdragstatus,
@@ -298,6 +300,8 @@ internal class SelvstendigHendelsefabrikk() {
         UtbetalingHendelse(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Selvstendig,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,
             status = status,

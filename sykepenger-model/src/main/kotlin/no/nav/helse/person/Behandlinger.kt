@@ -1822,7 +1822,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 override fun håndterUtbetalinghendelse(behandling: Behandling, behandlingEventBus: BehandlingEventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
                     val utbetaling = checkNotNull(behandling.gjeldende.utbetaling) { "forventer utbetaling" }
-                    if (!utbetaling.gjelderFor(hendelse)) return
+                    check(hendelse.behandlingId == behandling.id) { "Utbetalinghendelse gjelder ikke for behandlingen" }
+                    check(hendelse.utbetalingId == utbetaling.id) { "Utbetalinghendelse gjelder ikke for utbetalingen til behandlingen" }
                     utbetaling.håndterUtbetalingmodulHendelse(utbetalingEventBus, hendelse, aktivitetslogg)
                     if (!utbetaling.erAvsluttet()) return
                     behandling.tilstand(VedtakIverksatt)
@@ -1887,7 +1888,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             data object OverførtAnnullering : Tilstand {
                 override fun håndterUtbetalinghendelse(behandling: Behandling, behandlingEventBus: BehandlingEventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
                     val utbetaling = checkNotNull(behandling.gjeldende.utbetaling) { "forventer utbetaling" }
-                    if (!utbetaling.gjelderFor(hendelse)) return
+                    check(hendelse.behandlingId == behandling.id) { "Utbetalinghendelse gjelder ikke for behandlingen" }
+                    check(hendelse.utbetalingId == utbetaling.id) { "Utbetalinghendelse gjelder ikke for utbetalingen til behandlingen" }
                     utbetaling.håndterUtbetalingmodulHendelse(utbetalingEventBus, hendelse, aktivitetslogg)
                     if (!utbetaling.erAvsluttet()) return
                     behandling.tilstand(AnnullertPeriode)

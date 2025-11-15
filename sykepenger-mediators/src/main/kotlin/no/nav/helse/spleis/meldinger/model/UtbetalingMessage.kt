@@ -14,6 +14,8 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 internal class UtbetalingMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
     private val behandlingsporing = packet.yrkesaktivitetssporing
     private val fagsystemId = packet["${Utbetaling.name}.fagsystemId"].asText().trim()
+    private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().toUUID()
+    private val behandlingId = packet["behandlingId"].asText().toUUID()
     private val utbetalingId = packet["utbetalingId"].asText().toUUID()
 
     private val status: Oppdragstatus = enumValueOf(packet["@løsning.${Utbetaling.name}.status"].asText())
@@ -25,6 +27,8 @@ internal class UtbetalingMessage(packet: JsonMessage, override val meldingsporin
         get() = UtbetalingHendelse(
             meldingsreferanseId = meldingsporing.id,
             behandlingsporing = behandlingsporing,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,
             status = status,

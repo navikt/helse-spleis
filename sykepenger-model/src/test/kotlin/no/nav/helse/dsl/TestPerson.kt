@@ -663,9 +663,11 @@ internal class TestPerson(
         internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT) {
             behovsamler.bekreftBehov(orgnummer, Utbetaling)
             behovsamler.detaljerFor(orgnummer, Utbetaling).forEach { (detaljer, kontekst) ->
+                val vedtaksperiodeId = UUID.fromString(kontekst.getValue("vedtaksperiodeId"))
+                val behandlingId = UUID.fromString(kontekst.getValue("behandlingId"))
                 val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
                 val fagsystemId = detaljer.getValue("fagsystemId") as String
-                arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(utbetalingId, fagsystemId, status)
+                arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(vedtaksperiodeId, behandlingId, utbetalingId, fagsystemId, status)
                     .håndter(Person::håndterUtbetalingHendelse)
             }
         }

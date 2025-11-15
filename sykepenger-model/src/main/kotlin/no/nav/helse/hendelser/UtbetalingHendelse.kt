@@ -8,6 +8,8 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 class UtbetalingHendelse(
     meldingsreferanseId: MeldingsreferanseId,
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
+    val vedtaksperiodeId: UUID,
+    val behandlingId: UUID,
     override val fagsystemId: String,
     override val utbetalingId: UUID,
     override val status: Oppdragstatus,

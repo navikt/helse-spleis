@@ -365,7 +365,7 @@ internal class OppdragTest {
         )
         )
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), UUID.randomUUID(), UUID.randomUUID(), oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag1))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
@@ -396,7 +396,7 @@ internal class OppdragTest {
             )
         )
         )
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), UUID.randomUUID(), UUID.randomUUID(), oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -426,8 +426,8 @@ internal class OppdragTest {
             )
         )
         )
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
-        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), oppdrag2.fagsystemId, UUID.randomUUID(), Oppdragstatus.AVVIST, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), UUID.randomUUID(), UUID.randomUUID(), oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), UUID.randomUUID(), UUID.randomUUID(), oppdrag2.fagsystemId, UUID.randomUUID(), Oppdragstatus.AVVIST, "", 1234L, LocalDateTime.now()))
         assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -457,8 +457,8 @@ internal class OppdragTest {
             )
         )
         )
-        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
-        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), oppdrag2.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), UUID.randomUUID(), UUID.randomUUID(), oppdrag1.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
+        oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker("orgnr"), UUID.randomUUID(), UUID.randomUUID(), oppdrag2.fagsystemId, UUID.randomUUID(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
 
@@ -604,6 +604,8 @@ internal class OppdragTest {
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
                 behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("5678"),
                 fagsystemId = oppdrag.fagsystemId,
                 utbetalingId = UUID.randomUUID(),
@@ -640,6 +642,8 @@ internal class OppdragTest {
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
                 behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("5678"),
                 fagsystemId = oppdrag.fagsystemId,
                 utbetalingId = UUID.randomUUID(),
@@ -654,6 +658,8 @@ internal class OppdragTest {
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
                 behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("5678"),
                 fagsystemId = oppdrag.fagsystemId,
                 utbetalingId = UUID.randomUUID(),
@@ -688,6 +694,8 @@ internal class OppdragTest {
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
                 behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("5678"),
                 fagsystemId = "${UUID.randomUUID()}",
                 utbetalingId = UUID.randomUUID(),
@@ -701,6 +709,8 @@ internal class OppdragTest {
         oppdrag.lagreOverføringsinformasjon(
             UtbetalingHendelse(
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
                 behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("5678"),
                 fagsystemId = "${UUID.randomUUID()}",
                 utbetalingId = UUID.randomUUID(),

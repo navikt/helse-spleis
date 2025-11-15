@@ -391,6 +391,8 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     )
 
     internal fun lagUtbetalinghendelse(
+        vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         utbetalingId: UUID,
         fagsystemId: String,
         status: Oppdragstatus,
@@ -399,6 +401,8 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         UtbetalingHendelse(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,
             status = status,

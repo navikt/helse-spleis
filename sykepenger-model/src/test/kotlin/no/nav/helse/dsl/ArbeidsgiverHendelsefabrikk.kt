@@ -434,6 +434,8 @@ internal class ArbeidsgiverHendelsefabrikk(
     )
 
     internal fun lagUtbetalinghendelse(
+        vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         utbetalingId: UUID,
         fagsystemId: String,
         status: Oppdragstatus,
@@ -444,6 +446,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             behandlingsporing = behandlingsporing,
             fagsystemId = fagsystemId,
             utbetalingId = utbetalingId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             status = status,
             melding = "hei",
             avstemmingsnøkkel = 123456L,
