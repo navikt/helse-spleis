@@ -7,7 +7,7 @@ internal sealed interface Inntektssitasjon {
         constructor(periodeMedInntektFraArbeidsgiver: Vedtaksperiode): this(periodeMedInntektFraArbeidsgiver.behandlinger.faktaavklartInntekt!! as ArbeidstakerFaktaavklartInntekt, periodeMedInntektFraArbeidsgiver)
         init { check(inntektFraArbeidsgiver.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) }
     }
-    data object GaOppÅVentePåArbeidsgiver: Inntektssitasjon
+    data class GaOppÅVentePåArbeidsgiver(val periodenSomGaOpp: Vedtaksperiode): Inntektssitasjon
 
     data object TidligereVilkårsprøvd: Inntektssitasjon
 

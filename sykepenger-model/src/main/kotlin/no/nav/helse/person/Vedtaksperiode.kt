@@ -2636,7 +2636,11 @@ internal class Vedtaksperiode private constructor(
             alleForSammeArbeidsgiver.none { it.skalArbeidstakerBehandlesISpeil() } -> Inntektssitasjon.TrengerIkkeInntektFraArbeidsgiver
             tidligereVilkårsprøvd -> Inntektssitasjon.TidligereVilkårsprøvd
             alleForSammeArbeidsgiver.any { it.behandlinger.børBrukeSkatteinntekterDirekte() } -> Inntektssitasjon.KanBehandlesUtenInntektFraArbeidsgiver
-            else -> Inntektssitasjon.GaOppÅVentePåArbeidsgiver
+            else -> {
+                // Vi vet at vi skal "Behandles i speil", at vi ikke er tidligere vilkårsprøvd (så ikke noe revurderingscase) - så da er vi enten den som vilkårsprøver eller en annen arbeidsgiver som venter på vilkårsprøvingen
+                val periodenSomGaOpp = alleForSammeArbeidsgiver.first { it.tilstand in setOf(AvventerVilkårsprøving, AvventerBlokkerendePeriode) }
+                Inntektssitasjon.GaOppÅVentePåArbeidsgiver(periodenSomGaOpp)
+            }
         }
     }
 
@@ -2646,6 +2650,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun faktaavklartInntektForArbeidsgiver(
+        eventBus: EventBus,
         hendelse: Hendelse,
         aktivitetsloggTilDenSomVilkårsprøver: IAktivitetslogg,
         skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
@@ -2667,10 +2672,32 @@ internal class Vedtaksperiode private constructor(
                     skatteopplysning.somFaktaavklartInntekt(hendelse)
                 }
             }
-            Inntektssitasjon.KanBehandlesUtenInntektFraArbeidsgiver,
-            Inntektssitasjon.TidligereVilkårsprøvd,
-            Inntektssitasjon.GaOppÅVentePåArbeidsgiver,
-            Inntektssitasjon.TrengerIkkeInntektFraArbeidsgiver -> skatteopplysning.somFaktaavklartInntekt(hendelse)
+            Inntektssitasjon.TrengerIkkeInntektFraArbeidsgiver,
+            Inntektssitasjon.KanBehandlesUtenInntektFraArbeidsgiver -> skatteopplysning.somFaktaavklartInntekt(hendelse)
+            Inntektssitasjon.TidligereVilkårsprøvd -> {
+                // TODO: Skal dette være noe varsel da montro? - men kanskje ikke RV_IV_10 da..
+                skatteopplysning.somFaktaavklartInntekt(hendelse)
+            }
+            is Inntektssitasjon.GaOppÅVentePåArbeidsgiver -> {
+                skatteopplysning.somFaktaavklartInntekt(hendelse)
+                // TODO: videreførEllerIngenRefusjon: Hmm, skal vi gjøre dette her? Eller før vi går videre.. Hmm2, kort gap hos en AG, bridges av annen så annet skjæringstidspunkt kommer jo aldri hit.. de casene burde kanskje hatt varsel RV_IV_10 - men eget for kun refusjon?
+                /*val faktaavklartSkatteinntekt = skatteopplysning.somFaktaavklartInntekt(hendelse)
+                val skatteinntekter = (faktaavklartSkatteinntekt.inntektsopplysningskilde as Arbeidstakerinntektskilde.AOrdningen).inntektsopplysninger
+                val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteinntekter)
+
+                aktivitetsloggTilDenSomVilkårsprøver.varsel(RV_IV_10)
+                val event = EventSubscription.SkatteinntekterLagtTilGrunnEvent(
+                    yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
+                    vedtaksperiodeId = inntektssitasjon.periodenSomGaOpp.id,
+                    behandlingId = inntektssitasjon.periodenSomGaOpp.behandlinger.sisteBehandlingId,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    skatteinntekter = skatteinntekter.map {
+                        EventSubscription.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.måned, it.beløp.månedlig)
+                    },
+                    omregnetÅrsinntekt = omregnetÅrsinntekt.årlig
+                )
+                eventBus.sendSkatteinntekterLagtTilGrunn(event)*/
+            }
         }
 
         if (benyttetFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.AOrdningen)
@@ -2680,6 +2707,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun avklarSykepengegrunnlagArbeidstaker(
+        eventBus: EventBus,
         hendelse: Hendelse,
         aktivitetsloggTilDenSomVilkårsprøver: IAktivitetslogg,
         skatteopplysning: SkatteopplysningerForSykepengegrunnlag?,
@@ -2694,7 +2722,7 @@ internal class Vedtaksperiode private constructor(
 
         return ArbeidsgiverInntektsopplysning(
             orgnummer = yrkesaktivitet.organisasjonsnummer,
-            faktaavklartInntekt = faktaavklartInntektForArbeidsgiver(hendelse, aktivitetsloggTilDenSomVilkårsprøver, skatteopplysning, alleForSammeArbeidsgiver, flereArbeidsgivere),
+            faktaavklartInntekt = faktaavklartInntektForArbeidsgiver(eventBus, hendelse, aktivitetsloggTilDenSomVilkårsprøver, skatteopplysning, alleForSammeArbeidsgiver, flereArbeidsgivere),
             korrigertInntekt = korrigertInntektForArbeidsgiver(alleForSammeArbeidsgiver),
             skjønnsmessigFastsatt = null
         )
@@ -2741,6 +2769,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun inntektsgrunnlagArbeidsgivere(
+        eventBus: EventBus,
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg,
         skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>
@@ -2759,6 +2788,7 @@ internal class Vedtaksperiode private constructor(
             .map { vedtaksperiode ->
                 val skatteopplysningForArbeidsgiver = skatteopplysninger.firstOrNull { it.arbeidsgiver == vedtaksperiode.yrkesaktivitet.organisasjonsnummer }
                 vedtaksperiode.avklarSykepengegrunnlagArbeidstaker(
+                    eventBus = eventBus,
                     hendelse = hendelse,
                     aktivitetsloggTilDenSomVilkårsprøver = aktivitetslogg,
                     skatteopplysning = skatteopplysningForArbeidsgiver,
@@ -2789,11 +2819,12 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun avklarSykepengegrunnlag(
+        eventBus: EventBus,
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg,
         skatteopplysninger: List<SkatteopplysningerForSykepengegrunnlag>
     ): Inntektsgrunnlag {
-        val inntektsgrunnlagArbeidsgivere = inntektsgrunnlagArbeidsgivere(hendelse, aktivitetslogg, skatteopplysninger)
+        val inntektsgrunnlagArbeidsgivere = inntektsgrunnlagArbeidsgivere(eventBus, hendelse, aktivitetslogg, skatteopplysninger)
         val inntektsgrunnlagSelvstendig = avklarSykepengegrunnlagForSelvstendig()
         // ghosts er alle inntekter fra skatt, som vi ikke har søknad for og som skal vektlegges som ghost
         val ghosts = ghostArbeidsgivere(inntektsgrunnlagArbeidsgivere, skatteopplysninger)
@@ -2820,6 +2851,7 @@ internal class Vedtaksperiode private constructor(
         val skatteopplysninger = vilkårsgrunnlag.skatteopplysninger()
 
         val sykepengegrunnlag = avklarSykepengegrunnlag(
+            eventBus = eventBus,
             hendelse = vilkårsgrunnlag,
             aktivitetslogg = aktivitetslogg,
             skatteopplysninger = skatteopplysninger
