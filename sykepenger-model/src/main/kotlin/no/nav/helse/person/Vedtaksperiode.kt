@@ -2675,7 +2675,6 @@ internal class Vedtaksperiode private constructor(
                 skatteopplysning.somFaktaavklartInntekt(hendelse)
             }
             is Inntektssituasjon.GaOppÅVentePåArbeidsgiver -> {
-                // TODO: videreførEllerIngenRefusjon: Hmm, skal vi gjøre dette her? Eller før vi går videre.. Hmm2, kort gap hos en AG, bridges av annen så annet skjæringstidspunkt kommer jo aldri hit.. de casene burde kanskje hatt varsel RV_IV_10 - men eget for kun refusjon?
                 val faktaavklartSkatteinntekt = skatteopplysning.somFaktaavklartInntekt(hendelse)
                 val skatteinntekter = (faktaavklartSkatteinntekt.inntektsopplysningskilde as Arbeidstakerinntektskilde.AOrdningen).inntektsopplysninger
                 val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteinntekter)

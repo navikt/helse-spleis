@@ -12,6 +12,7 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 
 internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_INNTEKTSMELDING
@@ -87,6 +88,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
 
         // Litt speical cases 🤏
         if (giOppÅVentePåArbeidsgiver || vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte() || vedtaksperiode.behandlinger.erTidligereVilkårspørvd()) {
+            if (vedtaksperiode.refusjonstidslinje.isEmpty() && vedtaksperiode.vilkårsgrunnlag != null) aktivitetslogg.varsel(Varselkode.RV_IV_10) // Burde dette være et eget varsel? Har jo bare brukt 0kr i refusjon 🤔
             vedtaksperiode.nullKronerRefusjonOmViManglerRefusjonsopplysninger(eventBus, hendelse.metadata, aktivitetslogg)
             vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
             return true

@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
 import java.time.YearMonth
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -33,7 +32,6 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
@@ -52,11 +50,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         a1 {
             håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            assertForventetFeil(
-                forklaring = "Burde være et varsel om refusjonsopplysninger her, eller?",
-                nå = { assertTrue(true) },
-                ønsket = { assertVarsler(2.vedtaksperiode, Varselkode.RV_IV_10) }
-            )
+            assertVarsler(2.vedtaksperiode, Varselkode.RV_IV_10)
         }
         a2 {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
