@@ -29,8 +29,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt.ArbeistakerFaktaavklartInntektView
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
-import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -42,6 +41,36 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
 internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
+
+    @Test
+    fun `Ny vilkårsprøving etter bruk av inntekter fra aordningen`() = Toggle.BrukFaktaavklartInntektFraBehandling.enable {
+        a1 {
+            håndterSøknad(2.januar til 31.januar)
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+            håndterSykepengegrunnlagForArbeidsgiver(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                skjæringstidspunkt = 2.januar,
+                inntekter = listOf(
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
+                )
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_IV_10)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            nullstillTilstandsendringer()
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
+
+            assertForventetFeil(
+                forklaring = "Periode kan ikke hoppe tilbake til AvventerInntektsmelding etter å ha vært til godkjenning. Skatt lagres ikke på behandlingen. I dag funker dette fordi inntekten lagres tilbake i historikken på ny dato (hack)",
+                ønsket = { assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)},
+                nå = { assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_INNTEKTSMELDING)}
+            )
+        }
+    }
 
     @Test
     fun `korrigert inntekt blir med når skjæringstidspunktet flyttes`() = Toggle.BrukFaktaavklartInntektFraBehandling.enable {
@@ -310,7 +339,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             assertNull(inspektør.faktaavklartInntekt(1.vedtaksperiode))
-            håndterPåminnelse(1.vedtaksperiode, TilstandType.AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
             håndterSykepengegrunnlagForArbeidsgiver(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 skjæringstidspunkt = 1.januar,
