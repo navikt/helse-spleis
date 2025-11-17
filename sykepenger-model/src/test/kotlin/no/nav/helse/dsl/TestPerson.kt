@@ -418,22 +418,25 @@ internal class TestPerson(
         internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
+            skatteinntekt: Inntekt = INNTEKT,
             orgnummer: String = "aa"
         ) = håndterVilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering
+            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
+            skatteinntekt = skatteinntekt
         )
 
         internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
             inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
+            skatteinntekt: Inntekt = INNTEKT,
             orgnummer: String = "aa"
         ) = håndterVilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId,
             medlemskapstatus = medlemskapstatus,
-            skatteinntekter = listOf(this.orgnummer to INNTEKT),
+            skatteinntekter = listOf(this.orgnummer to skatteinntekt),
             arbeidsforhold = arbeidsgivere.map { Triple(it.key, LocalDate.EPOCH, null) },
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering
         )

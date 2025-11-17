@@ -33,6 +33,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -117,7 +118,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, 1.januar.atStartOfDay(), 1.januar.plusDays(90).atStartOfDay())
             håndterSykepengegrunnlagForArbeidsgiver(2.vedtaksperiode, 6.januar, emptyList())
             assertVarsel(Varselkode.RV_IV_10, 2.vedtaksperiode.filter())
-            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterVilkårsgrunnlag(2.vedtaksperiode, skatteinntekt = 0.daglig)
             håndterYtelser(2.vedtaksperiode)
             assertVarsel(Varselkode.RV_SV_1, 2.vedtaksperiode.filter())
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)

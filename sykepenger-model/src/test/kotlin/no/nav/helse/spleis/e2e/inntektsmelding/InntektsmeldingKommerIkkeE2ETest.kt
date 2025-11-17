@@ -31,6 +31,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -152,7 +153,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             )
             )
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekt = 0.daglig)
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_IV_10, Varselkode.RV_VV_4), 1.vedtaksperiode.filter())
 
@@ -211,7 +212,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             val hendelser = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.hendelser
             assertTrue(hendelser.contains(Dokumentsporing.inntektFraAOrdingen(MeldingsreferanseId(meldingsreferanseId))))
 
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekt = inntektFraSkatt)
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
             assertUtbetalingsbeløp(
@@ -241,7 +242,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
             )
             )
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekt = INGEN)
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_IV_10, Varselkode.RV_VV_4), 1.vedtaksperiode.filter())
             assertUtbetalingsbeløp(
@@ -284,7 +285,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
             håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, 1.januar, emptyList())
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekt = 0.daglig)
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_IV_10, Varselkode.RV_VV_4), 1.vedtaksperiode.filter())
             assertUtbetalingsbeløp(
