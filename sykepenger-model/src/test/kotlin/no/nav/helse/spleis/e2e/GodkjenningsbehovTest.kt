@@ -57,7 +57,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        assertVarsel(RV_IV_10, 1.vedtaksperiode.filter(orgnummer = a2))
+        assertVarsel(RV_IV_10, 1.vedtaksperiode.filter(orgnummer = a1))
         val inntektskilder = inntektskilder(1.vedtaksperiode, orgnummer = a1)
         assertEquals(listOf(Inntektskilde.Arbeidsgiver, Inntektskilde.AOrdningen), inntektskilder)
     }
@@ -366,8 +366,8 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
             nå = 10.februar(2025).atStartOfDay()
         )
         håndterSykepengegrunnlagForArbeidsgiver()
-        assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
+        assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)

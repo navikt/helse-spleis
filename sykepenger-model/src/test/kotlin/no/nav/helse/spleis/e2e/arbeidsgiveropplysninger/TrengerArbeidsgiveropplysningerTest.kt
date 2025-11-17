@@ -107,6 +107,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertTrue(observatør.inntektsmeldingHåndtert.isEmpty())
 
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertVarsler(listOf(RV_IV_10), 1.vedtaksperiode.filter(a1))
 
         assertForventetFeil(

@@ -88,7 +88,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_GODKJENNING)
 
         håndterSøknad(Sykdom(10.april, 30.april, 100.prosent), Ferie(10.april, 10.april))
-        assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test

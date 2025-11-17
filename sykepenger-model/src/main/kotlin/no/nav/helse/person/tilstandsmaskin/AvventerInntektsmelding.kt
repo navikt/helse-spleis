@@ -31,12 +31,20 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
-        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)) {
+        val vurderOmInntektsmeldingAldriKommer = vurderOmInntektsmeldingAldriKommer(påminnelse)
+        if (vurderOmInntektsmeldingAldriKommer) {
+            // Det er ikke gitt at det er første periode som står i AvventerIM som blir påminnet først når vi gir opp å vente på IM
+            vedtaksperiode.yrkesaktivitet.finnSammenhengendeVedtaksperioder(vedtaksperiode).filter { it.tilstand is AvventerInntektsmelding }.forEach {
+                vurderOmKanGåVidere(it, eventBus, aktivitetslogg, påminnelse, true)
+            }
+            return
+        }
+        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, påminnelse)) {
             aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
+            return
         }
 
         if (påminnelse.når(Påminnelse.Predikat.Flagg("trengerReplay"))) return trengerInntektsmeldingReplay(vedtaksperiode, eventBus)
-        if (vurderOmInntektsmeldingAldriKommer(påminnelse)) return vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAOrdningen)
         sendTrengerArbeidsgiveropplysninger(vedtaksperiode, eventBus)
     }
 
@@ -52,12 +60,12 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, hendelse)
     }
 
     override fun replayUtført(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         sendTrengerArbeidsgiveropplysninger(vedtaksperiode, eventBus)
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, hendelse)
     }
 
     override fun inntektsmeldingFerdigbehandlet(
@@ -66,31 +74,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
-    }
-
-    private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg): Boolean {
-        vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, aktivitetslogg)
-
-        return when {
-            vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> when {
-                !vedtaksperiode.måInnhenteInntektEllerRefusjon() -> {
-                    vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
-                    true
-                }
-                else -> when {
-                    vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte() -> {
-                        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAOrdningen)
-                        true
-                    }
-                    else -> false
-                }
-            }
-            else -> {
-                vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAvsluttetUtenUtbetaling)
-                true
-            }
-        }
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, hendelse)
     }
 
     private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse, giOppÅVentePåArbeidsgiver: Boolean = false): Boolean {

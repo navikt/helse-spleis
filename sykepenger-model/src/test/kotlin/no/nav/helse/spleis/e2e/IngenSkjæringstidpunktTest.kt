@@ -22,13 +22,13 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_A_ORDNINGEN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -51,7 +51,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar))
             håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Ferie(10.februar, 28.februar))
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_A_ORDNINGEN)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
             håndterSykepengegrunnlagForArbeidsgiver(
                 2.vedtaksperiode, 10.februar, listOf(
@@ -60,7 +60,6 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
                 ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
             ))
 
-            assertVarsel(Varselkode.RV_IV_10, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -76,7 +75,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar))
             håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), Arbeid(17.januar, 25.januar))
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_A_ORDNINGEN)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         }
     }
 
@@ -88,7 +87,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar))
             håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent), Arbeid(21.januar, 25.januar))
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_A_ORDNINGEN)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
 
@@ -98,7 +97,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             nyttVedtak(1.januar til 23.januar)
             håndterSykmelding(Sykmeldingsperiode(24.januar, 25.januar))
             håndterSøknad(Sykdom(24.januar, 25.januar, 100.prosent), Arbeid(24.januar, 25.januar))
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_A_ORDNINGEN)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         }
     }
 
@@ -117,7 +116,6 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
 
             håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, 1.januar.atStartOfDay(), 1.januar.plusDays(90).atStartOfDay())
             håndterSykepengegrunnlagForArbeidsgiver(2.vedtaksperiode, 6.januar, emptyList())
-            assertVarsel(Varselkode.RV_IV_10, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode, skatteinntekt = 0.daglig)
             håndterYtelser(2.vedtaksperiode)
             assertVarsel(Varselkode.RV_SV_1, 2.vedtaksperiode.filter())
@@ -307,7 +305,6 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
 
             nullstillTilstandsendringer()
             assertVarsler(listOf(Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
-            assertVarsler(listOf(Varselkode.RV_IV_10), 2.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
         }
         a2 {

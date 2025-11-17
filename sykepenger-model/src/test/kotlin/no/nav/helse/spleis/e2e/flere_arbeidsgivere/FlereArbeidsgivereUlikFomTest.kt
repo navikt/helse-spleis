@@ -26,7 +26,6 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.EventSubscription.VedtaksperiodeVenterEvent
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -128,8 +127,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         // Nå gjenbruker vi alle type inntekter
         if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
             assertVarsler(listOf(Varselkode.RV_IV_7), 1.vedtaksperiode.filter(a2))
-        } else {
-            assertVarsler(listOf(RV_IV_10), 1.vedtaksperiode.filter(a2))
         }
     }
 

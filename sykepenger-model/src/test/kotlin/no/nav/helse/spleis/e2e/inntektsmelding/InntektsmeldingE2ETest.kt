@@ -126,7 +126,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_A_ORDNINGEN)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
 
         assertEquals("UUUUUGG UUUUUGG UUAAARR AAAAARR AAA", inspektør.sykdomstidslinje.toShortString())
         assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, arbeidsgiverperioder)
@@ -139,8 +139,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyPeriode(21.januar til 31.januar)
         håndterPåminnelse(2.vedtaksperiode, påminnetTilstand = AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
         håndterSykepengegrunnlagForArbeidsgiver(7.januar)
-        assertVarsler(listOf(Varselkode.RV_IV_10), 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
+        assertVarsler(listOf(Varselkode.RV_IV_10), 2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -171,8 +171,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(7.januar, 31.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
         håndterPåminnelse(1.vedtaksperiode, påminnetTilstand = AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
         håndterSykepengegrunnlagForArbeidsgiver(7.januar)
-        assertVarsler(listOf(Varselkode.RV_IV_10), 1.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
+        assertVarsler(listOf(Varselkode.RV_IV_10), 1.vedtaksperiode.filter())
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)

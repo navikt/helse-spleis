@@ -340,16 +340,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             håndterSøknad(januar)
             assertNull(inspektør.faktaavklartInntekt(1.vedtaksperiode))
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
-            håndterSykepengegrunnlagForArbeidsgiver(
-                vedtaksperiodeId = 1.vedtaksperiode,
-                skjæringstidspunkt = 1.januar,
-                inntekter = listOf(
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-                )
-            )
-
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertNull(inspektør.faktaavklartInntekt(1.vedtaksperiode))
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
         }

@@ -17,7 +17,6 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     fun venterpå(vedtaksperiode: Vedtaksperiode) = when (val t = tilstand(vedtaksperiode)) {
         is TrengerInntektsopplysningerAnnenArbeidsgiver -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.INNTEKTSMELDING)
 
-        is TrengerInnteksopplysninger,
         KlarForVilkårsprøving,
         KlarForBeregning -> VenterPå.Nestemann
     }
@@ -38,10 +37,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     private fun tilstand(vedtaksperiode: Vedtaksperiode): Tilstand {
         return when (vedtaksperiode.vilkårsgrunnlag) {
             null -> when (val førstePeriodeSomTrengerInntekt = vedtaksperiode.førstePeriodeSomVenterPåInntekt()) {
-                null -> when {
-                    !vedtaksperiode.kanAvklareInntekt() -> TrengerInnteksopplysninger(vedtaksperiode)
-                    else -> KlarForVilkårsprøving
-                }
+                null -> KlarForVilkårsprøving
                 else -> TrengerInntektsopplysningerAnnenArbeidsgiver(førstePeriodeSomTrengerInntekt)
             }
 
@@ -54,13 +50,6 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
 
     private sealed interface Tilstand {
         fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg)
-    }
-
-    private data class TrengerInnteksopplysninger(private val vedtaksperiode: Vedtaksperiode) : Tilstand {
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.info("Trenger inntektsopplysninger etter igangsatt revurdering. Etterspør inntekt fra skatt")
-            vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
-        }
     }
 
     private data class TrengerInntektsopplysningerAnnenArbeidsgiver(val trengerInntektsmelding: Vedtaksperiode) : Tilstand {
