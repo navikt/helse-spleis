@@ -1820,27 +1820,22 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun videreførEllerIngenRefusjon(eventBus: EventBus, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg) {
-        videreførEksisterendeRefusjonsopplysninger(
-            eventBus = eventBus,
-            dokumentsporing = null,
-            aktivitetslogg = aktivitetslogg
-        )
+    internal fun nullKronerRefusjonOmViManglerRefusjonsopplysninger(eventBus: EventBus, hendelseMetadata: HendelseMetadata, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing? = null) {
         if (refusjonstidslinje.isNotEmpty()) return
 
         val ingenRefusjon = Beløpstidslinje.fra(
             periode = periode,
             beløp = INGEN,
             kilde = Kilde(
-                sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
-                sykepengegrunnlagForArbeidsgiver.metadata.avsender,
-                sykepengegrunnlagForArbeidsgiver.metadata.innsendt
+                meldingsreferanseId = hendelseMetadata.meldingsreferanseId,
+                avsender = Avsender.SYSTEM,
+                tidsstempel = hendelseMetadata.innsendt
             )
         )
         behandlinger.håndterRefusjonstidslinje(
             eventBus = eventBus,
             yrkesaktivitet = yrkesaktivitet,
-            dokumentsporing = inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId),
+            dokumentsporing = dokumentsporing,
             aktivitetslogg = aktivitetslogg,
             benyttetRefusjonsopplysninger = ingenRefusjon
         )
@@ -1871,7 +1866,8 @@ internal class Vedtaksperiode private constructor(
 
         yrkesaktivitet.lagreInntektFraAOrdningen(faktaavklartInntekt)
 
-        videreførEllerIngenRefusjon(eventBus, sykepengegrunnlagForArbeidsgiver, aktivitetslogg)
+        videreførEksisterendeRefusjonsopplysninger(eventBus = eventBus, dokumentsporing = null, aktivitetslogg = aktivitetslogg)
+        nullKronerRefusjonOmViManglerRefusjonsopplysninger(eventBus, sykepengegrunnlagForArbeidsgiver.metadata, aktivitetslogg, inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId))
 
         val event = EventSubscription.SkatteinntekterLagtTilGrunnEvent(
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,

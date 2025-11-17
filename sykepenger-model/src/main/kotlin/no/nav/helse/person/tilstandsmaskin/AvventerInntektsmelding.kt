@@ -93,6 +93,31 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         }
     }
 
+    private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse, giOppÅVentePåArbeidsgiver: Boolean = false): Boolean {
+        vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, aktivitetslogg)
+
+        if (!vedtaksperiode.skalArbeidstakerBehandlesISpeil()) {
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAvsluttetUtenUtbetaling)
+            return true
+        }
+
+        // Litt speical cases 🤏
+        if (giOppÅVentePåArbeidsgiver || vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte() || vedtaksperiode.behandlinger.erTidligereVilkårspørvd()) {
+            vedtaksperiode.nullKronerRefusjonOmViManglerRefusjonsopplysninger(eventBus, hendelse.metadata, aktivitetslogg)
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
+            return true
+        }
+
+        // Mer normalt 😊
+        if (!vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
+            return true
+        }
+
+        return false
+    }
+
+
     private fun opplysningerViTrenger(vedtaksperiode: Vedtaksperiode): Set<EventSubscription.ForespurtOpplysning> {
         if (!vedtaksperiode.skalArbeidstakerBehandlesISpeil()) return emptySet() // perioden er AUU ✋
 
