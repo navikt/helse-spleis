@@ -367,7 +367,8 @@ internal class Yrkesaktivitet private constructor(
     }
 
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Boolean {
-        return (vedtaksperioder.periodeMedFaktaavklartInntekt(skjæringstidspunkt) != null) || (avklarInntektFraInntektshistorikk(skjæringstidspunkt, vedtaksperioder) != null)
+        val kanAvklareFraPerioder = vedtaksperioder.periodeMedFaktaavklartInntekt(skjæringstidspunkt)?.takeIf { Toggle.BrukFaktaavklartInntektFraBehandling.enabled } != null
+        return kanAvklareFraPerioder || (avklarInntektFraInntektshistorikk(skjæringstidspunkt, vedtaksperioder) != null)
     }
 
     internal fun avklarInntektFraInntektshistorikk(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): ArbeidstakerFaktaavklartInntekt? {

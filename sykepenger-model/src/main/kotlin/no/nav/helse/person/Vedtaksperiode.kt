@@ -2613,16 +2613,28 @@ internal class Vedtaksperiode private constructor(
         return alleForSammeArbeidsgiver.mapNotNull { it.behandlinger.korrigertInntekt }.maxByOrNull { it.inntektsdata.tidsstempel }
     }
 
-    private fun inntektssiuasjon(alleForSammeArbeidsgiver: List<Vedtaksperiode>): Inntektssitasjon {
+    private fun inntektssiuasjon(alleForSammeArbeidsgiver: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): Inntektssitasjon {
+        val fraInntektshistorikk = yrkesaktivitet.avklarInntektFraInntektshistorikk(skjæringstidspunkt, alleForSammeArbeidsgiver)?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }?.let { Inntektssitasjon.HarInntektFraArbeidsgiver(it) }
+        val fraPerioder = alleForSammeArbeidsgiver.periodeMedFaktaavklartInntekt(skjæringstidspunkt)?.let { Inntektssitasjon.HarInntektFraArbeidsgiver(it) }
+        val beløpFraInntekshistorikk = fraInntektshistorikk?.inntektFraArbeidsgiver?.inntektsdata?.beløp
+        val beløpFraPerioder = fraPerioder?.inntektFraArbeidsgiver?.inntektsdata?.beløp
+        val tidligereVilkårsprøvd by lazy { alleForSammeArbeidsgiver.any { it.behandlinger.erTidligereVilkårspørvd() } }
+
+        if (beløpFraInntekshistorikk != beløpFraPerioder && !tidligereVilkårsprøvd) {
+            // Hvorfor sjekker vi !tidligereVilkårsprøvd her? Jo nå skal du høre: Dagens gjenbruk lagrer den forrige inntekten tilbake i historikken på ny dato, så vi opplever det som at vi fant, men i realiteten er det bare et hack
+            // ..derfor er det bare interessant/mulig å logge i disse casene
+            aktivitetslogg.info("Fant ulik inntekt for ${yrkesaktivitet.organisasjonsnummer} på skjæringstidspunkt ${skjæringstidspunkt}. Inntektshistorikk=${beløpFraInntekshistorikk?.årlig}. Perioder=${beløpFraPerioder?.årlig}")
+        }
+
         val inntektFraArbeidsgiver = when (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-            true -> alleForSammeArbeidsgiver.periodeMedFaktaavklartInntekt(skjæringstidspunkt)?.let { Inntektssitasjon.HarInntektFraArbeidsgiver(it) }
-            false -> yrkesaktivitet.avklarInntektFraInntektshistorikk(skjæringstidspunkt, alleForSammeArbeidsgiver)?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }?.let { Inntektssitasjon.HarInntektFraArbeidsgiver(it) }
+            true -> fraPerioder
+            false -> fraInntektshistorikk
         }
 
         return when {
             inntektFraArbeidsgiver != null -> inntektFraArbeidsgiver
             alleForSammeArbeidsgiver.none { it.skalArbeidstakerBehandlesISpeil() } -> Inntektssitasjon.TrengerIkkeInntektFraArbeidsgiver
-            alleForSammeArbeidsgiver.any { it.behandlinger.erTidligereVilkårspørvd() } -> Inntektssitasjon.TidligereVilkårsprøvd
+            tidligereVilkårsprøvd -> Inntektssitasjon.TidligereVilkårsprøvd
             alleForSammeArbeidsgiver.any { it.behandlinger.børBrukeSkatteinntekterDirekte() } -> Inntektssitasjon.KanBehandlesUtenInntektFraArbeidsgiver
             else -> Inntektssitasjon.GaOppÅVentePåArbeidsgiver
         }
@@ -2640,7 +2652,7 @@ internal class Vedtaksperiode private constructor(
         alleForSammeArbeidsgiver: List<Vedtaksperiode>,
         flereArbeidsgivere: Boolean
     ): ArbeidstakerFaktaavklartInntekt {
-        val inntektssitasjon = inntektssiuasjon(alleForSammeArbeidsgiver)
+        val inntektssitasjon = inntektssiuasjon(alleForSammeArbeidsgiver, aktivitetsloggTilDenSomVilkårsprøver)
         aktivitetsloggTilDenSomVilkårsprøver.info("Arbeidsgiver ${yrkesaktivitet.organisasjonsnummer} har inntektssituasjon ${inntektssitasjon::class.simpleName} på skjæringstidspunktet $skjæringstidspunkt")
 
         val benyttetFaktaavklartInntekt = when (inntektssitasjon) {
@@ -3298,19 +3310,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal fun List<Vedtaksperiode>.periodeMedFaktaavklartInntekt(skjæringstidspunkt: LocalDate): Vedtaksperiode? {
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return null
             val vedtaksperioderMedFaktaavklartInntekt = filter { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
 
             // Prioriterer siste ankomne i samme måned som skjæringstidspunktet
             return vedtaksperioderMedFaktaavklartInntekt.filter { it.behandlinger.faktaavklartInntekt!!.inntektsdata.dato.yearMonth == skjæringstidspunkt.yearMonth }.maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
                 ?: vedtaksperioderMedFaktaavklartInntekt.maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
-        }
-
-        internal fun List<Vedtaksperiode>.faktaavklartInntekt(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate): ArbeidstakerFaktaavklartInntekt? {
-            val periodeMedFaktaavklartInntekt = periodeMedFaktaavklartInntekt(skjæringstidspunkt) ?: return null
-            val faktaavklartInntekt = periodeMedFaktaavklartInntekt.behandlinger.faktaavklartInntekt as ArbeidstakerFaktaavklartInntekt
-            periodeMedFaktaavklartInntekt.behandlinger.vurderVarselForGjenbrukAvInntekt(faktaavklartInntekt, aktivitetslogg)
-            return faktaavklartInntekt
         }
 
         internal fun List<Vedtaksperiode>.medSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode) = this.filter { it.harSammeUtbetalingSom(vedtaksperiodeSomForsøkesAnnullert) }.toSet()
