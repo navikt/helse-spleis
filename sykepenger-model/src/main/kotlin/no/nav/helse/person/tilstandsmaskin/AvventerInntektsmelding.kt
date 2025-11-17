@@ -20,6 +20,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
 
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         check(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) { "Forventer kun arbeidstakere her" }
+        //check(!vedtaksperiode.behandlinger.erTidligereVilkårspørvd()) { "En tidligere vilkårsprøvd periode skal ikke tilbake til AvventerInntektsmelding!" }
         trengerInntektsmeldingReplay(vedtaksperiode, eventBus)
     }
 

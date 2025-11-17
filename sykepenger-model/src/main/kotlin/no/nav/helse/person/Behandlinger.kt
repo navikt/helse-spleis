@@ -121,7 +121,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun sisteUtbetalteUtbetaling() = tidligereBehandlinger.lastOrNull()?.utbetaling()
 
     internal fun harFattetVedtak() = tidligereBehandlinger.lastOrNull()?.erFattetVedtak() == true
-    internal fun harVilkårsprøvd()= tidligereBehandlinger.lastOrNull()?.erTidligereVilkårsprøvd() == true
+    internal fun erTidligereVilkårspørvd() = åpenBehandling?.erTidligereVilkårsprøvd() == true || tidligereBehandlinger.any { it.erTidligereVilkårsprøvd() }
 
     internal fun åpenForEndring() = åpenBehandling != null
 
@@ -1165,7 +1165,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         internal fun erFattetVedtak() = vedtakFattet != null
-        internal fun erTidligereVilkårsprøvd() = gjeldende.grunnlagsdata != null
+        internal fun erTidligereVilkårsprøvd() = endringer.any { it.grunnlagsdata != null }
         internal fun erInFlight() = erFattetVedtak() && !erAvsluttet()
         internal fun erAvsluttet() = avsluttet != null
         internal fun erAnnullert() = tilstand == Tilstand.AnnullertPeriode

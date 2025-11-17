@@ -3263,7 +3263,7 @@ internal class Vedtaksperiode private constructor(
                 // Har alt vi trenger 👍
                 avklartInntekt != null && aktuellVedtaksperiode.refusjonstidslinje.isNotEmpty() -> ArbeidsgiveropplysningerSituasjon.AvklarteArbeidsgiveropplysninger(avklartInntekt)
                 // Om vi tidligere er vilkårsprøvd så går vi aldri tilbake til AvventerInntektsmelding
-                aktuellVedtaksperiode.behandlinger.harVilkårsprøvd() -> ArbeidsgiveropplysningerSituasjon.TidligereVilkårsprøvd
+                aktuellVedtaksperiode.behandlinger.erTidligereVilkårspørvd() -> ArbeidsgiveropplysningerSituasjon.TidligereVilkårsprøvd
                 // Mangler inntekt & eller refusjon, men gidder ikke vente mer
                 aktuellVedtaksperiode.tilstand is AvventerInntektsmelding && Duration.between(aktuellVedtaksperiode.oppdatert, LocalDateTime.now()).toDays() > 90 -> ArbeidsgiveropplysningerSituasjon.GirOppÅVentePåArbeidsgiver
                 // Har ikke noe skjæringstidspunkt
