@@ -140,6 +140,7 @@ import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
+import no.nav.helse.person.inntekt.Inntektssitasjon
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning
@@ -2612,6 +2613,26 @@ internal class Vedtaksperiode private constructor(
         return alleForSammeArbeidsgiver.mapNotNull { it.behandlinger.korrigertInntekt }.maxByOrNull { it.inntektsdata.tidsstempel }
     }
 
+    private fun inntektssiuasjon(alleForSammeArbeidsgiver: List<Vedtaksperiode>): Inntektssitasjon {
+        val inntektFraArbeidsgiver = when (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+            true -> alleForSammeArbeidsgiver.periodeMedFaktaavklartInntekt(skjæringstidspunkt)?.let { Inntektssitasjon.HarInntektFraArbeidsgiver(it) }
+            false -> yrkesaktivitet.avklarInntektFraInntektshistorikk(skjæringstidspunkt, alleForSammeArbeidsgiver)?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }?.let { Inntektssitasjon.HarInntektFraArbeidsgiver(it) }
+        }
+
+        return when {
+            inntektFraArbeidsgiver != null -> inntektFraArbeidsgiver
+            alleForSammeArbeidsgiver.none { it.skalArbeidstakerBehandlesISpeil() } -> Inntektssitasjon.TrengerIkkeInntektFraArbeidsgiver
+            alleForSammeArbeidsgiver.any { it.behandlinger.erTidligereVilkårspørvd() } -> Inntektssitasjon.TidligereVilkårsprøvd
+            alleForSammeArbeidsgiver.any { it.behandlinger.børBrukeSkatteinntekterDirekte() } -> Inntektssitasjon.KanBehandlesUtenInntektFraArbeidsgiver
+            else -> Inntektssitasjon.GaOppÅVentePåArbeidsgiver
+        }
+    }
+
+    private fun SkatteopplysningerForSykepengegrunnlag?.somFaktaavklartInntekt(hendelse: Hendelse) = when {
+        this != null -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), this.inntektsdata, Arbeidstakerinntektskilde.AOrdningen(this.treMånederFørSkjæringstidspunkt))
+        else -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt), Arbeidstakerinntektskilde.AOrdningen(emptyList()))
+    }
+
     private fun faktaavklartInntektForArbeidsgiver(
         hendelse: Hendelse,
         aktivitetsloggTilDenSomVilkårsprøver: IAktivitetslogg,
@@ -2619,22 +2640,25 @@ internal class Vedtaksperiode private constructor(
         alleForSammeArbeidsgiver: List<Vedtaksperiode>,
         flereArbeidsgivere: Boolean
     ): ArbeidstakerFaktaavklartInntekt {
-        val faktaavklartInntektFraArbeidsgiver = alleForSammeArbeidsgiver
-            .faktaavklartInntekt(aktivitetsloggTilDenSomVilkårsprøver, skjæringstidspunkt)
-            ?: yrkesaktivitet.avklarInntektFraInntektshistorikk(skjæringstidspunkt, alleForSammeArbeidsgiver)
+        val inntektssitasjon = inntektssiuasjon(alleForSammeArbeidsgiver)
+        aktivitetsloggTilDenSomVilkårsprøver.info("Arbeidsgiver ${yrkesaktivitet.organisasjonsnummer} har inntektssituasjon ${inntektssitasjon::class.simpleName} på skjæringstidspunktet $skjæringstidspunkt")
 
-        val faktaavklartInntektHensyntattUlikFom = faktaavklartInntektFraArbeidsgiver?.takeUnless {
-            // velger bort inntekten hvis situasjonen er "fom ulik skjæringstidspunktet"
-            (skjæringstidspunkt.yearMonth != it.inntektsdata.dato.yearMonth).also { ulikFom ->
-                if (ulikFom && flereArbeidsgivere) aktivitetsloggTilDenSomVilkårsprøver.varsel(Varselkode.RV_VV_2)
-                else if (ulikFom) aktivitetsloggTilDenSomVilkårsprøver.info("Skjæringstidspunktet ($skjæringstidspunkt) er i annen måned enn inntektsdatoen (${it.inntektsdata.dato}) med bare én arbeidsgiver")
+        val benyttetFaktaavklartInntekt = when (inntektssitasjon) {
+            is Inntektssitasjon.HarInntektFraArbeidsgiver -> when (skjæringstidspunkt.yearMonth == inntektssitasjon.inntektFraArbeidsgiver.inntektsdata.dato.yearMonth) {
+                true -> {
+                    inntektssitasjon.periodeMedInntektFraArbeidsgiver?.behandlinger?.vurderVarselForGjenbrukAvInntekt(inntektssitasjon.inntektFraArbeidsgiver, aktivitetsloggTilDenSomVilkårsprøver)
+                    inntektssitasjon.inntektFraArbeidsgiver
+                }
+                false -> {
+                    if (flereArbeidsgivere) aktivitetsloggTilDenSomVilkårsprøver.varsel(Varselkode.RV_VV_2)
+                    else aktivitetsloggTilDenSomVilkårsprøver.info("Skjæringstidspunktet ($skjæringstidspunkt) er i annen måned enn inntektsdatoen (${inntektssitasjon.inntektFraArbeidsgiver.inntektsdata.dato}) med bare én arbeidsgiver")
+                    skatteopplysning.somFaktaavklartInntekt(hendelse)
+                }
             }
-        }
-
-        val benyttetFaktaavklartInntekt = when {
-            faktaavklartInntektHensyntattUlikFom != null -> faktaavklartInntektHensyntattUlikFom
-            skatteopplysning != null -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), skatteopplysning.inntektsdata, Arbeidstakerinntektskilde.AOrdningen(skatteopplysning.treMånederFørSkjæringstidspunkt))
-            else -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt), Arbeidstakerinntektskilde.AOrdningen(emptyList()))
+            Inntektssitasjon.KanBehandlesUtenInntektFraArbeidsgiver,
+            Inntektssitasjon.TidligereVilkårsprøvd,
+            Inntektssitasjon.GaOppÅVentePåArbeidsgiver,
+            Inntektssitasjon.TrengerIkkeInntektFraArbeidsgiver -> skatteopplysning.somFaktaavklartInntekt(hendelse)
         }
 
         if (benyttetFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.AOrdningen)
