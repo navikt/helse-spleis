@@ -14,7 +14,7 @@ Parametrene skilles med mellomrom.
 
 ```
 % ./deploy_jobb.sh
-🐳 Image: imagenavnet mitt
+🐳 Image: imagenavnet mitt (husk det er spleis-jobs-imaget man skal ha)
 ☸️ Cluster (1: dev-gcp | 2: prod-gcp): 2
 🔑 API key: <hemmelig>
 🔑 Parallelism: (30 default) 
