@@ -78,7 +78,6 @@ import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -138,7 +137,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(7.januar, 20.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
         nyPeriode(21.januar til 31.januar)
         håndterPåminnelse(2.vedtaksperiode, påminnetTilstand = AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
-        håndterSykepengegrunnlagForArbeidsgiver(7.januar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_IV_10), 2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
@@ -170,7 +168,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `periode i avsluttet med egenmeldingsdager får inntektsmelding etter at vi har brukt skatteopplysninger`() {
         håndterSøknad(Sykdom(7.januar, 31.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
         håndterPåminnelse(1.vedtaksperiode, påminnetTilstand = AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
-        håndterSykepengegrunnlagForArbeidsgiver(7.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_IV_10), 1.vedtaksperiode.filter())
         håndterYtelser(1.vedtaksperiode)

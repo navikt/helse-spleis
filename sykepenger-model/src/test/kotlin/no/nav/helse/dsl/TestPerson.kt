@@ -685,19 +685,6 @@ internal class TestPerson(
             }
         }
 
-        internal fun håndterSykepengegrunnlagForArbeidsgiver(
-            vedtaksperiodeId: UUID,
-            skjæringstidspunkt: LocalDate,
-            inntekter: List<MånedligInntekt>
-        ): UUID {
-            val inntektFraOrdningen = arbeidsgiverHendelsefabrikk.lagSykepengegrunnlagForArbeidsgiver(
-                skjæringstidspunkt,
-                inntekter
-            )
-            inntektFraOrdningen.håndter(Person::håndterSykepengegrunnlagForArbeidsgiver)
-            return inntektFraOrdningen.metadata.meldingsreferanseId.id
-        }
-
         internal fun håndterPåminnelse(
             vedtaksperiodeId: UUID,
             tilstand: TilstandType,

@@ -13,7 +13,6 @@ import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
-import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dagtype
@@ -37,7 +36,6 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
-import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -52,14 +50,13 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
@@ -243,26 +240,6 @@ internal fun utbetalingpåminnelse(
         status = status,
         endringstidspunkt = tilstandsendringstidspunkt,
         påminnelsestidspunkt = LocalDateTime.now()
-    )
-}
-
-internal fun sykepengegrunnlagForArbeidsgiver(
-    skjæringstidspunkt: LocalDate = 1.januar,
-    orgnummer: String = a1,
-): SykepengegrunnlagForArbeidsgiver {
-    return SykepengegrunnlagForArbeidsgiver(
-        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        skjæringstidspunkt = skjæringstidspunkt,
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
-        inntekter = ArbeidsgiverInntekt(orgnummer, (1..3).map {
-            ArbeidsgiverInntekt.MånedligInntekt(
-                yearMonth = skjæringstidspunkt.yearMonth.minusMonths(it.toLong()),
-                inntekt = INNTEKT,
-                type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                fordel = "",
-                beskrivelse = ""
-            )
-        })
     )
 }
 

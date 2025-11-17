@@ -319,19 +319,6 @@ internal abstract class AbstractSpeilBuilderTest {
         return meldingsreferanseId
     }
 
-    protected fun håndterSykepengegrunnlagForArbeidsgiver(
-        orgnummer: String = a1,
-        skjæringstidspunkt: LocalDate,
-        skatteinntekter: List<ArbeidsgiverInntekt.MånedligInntekt>
-    ): UUID {
-        val hendelse = fabrikker.getValue(orgnummer).lagSykepengegrunnlagForArbeidsgiver(
-            skjæringstidspunkt = skjæringstidspunkt,
-            inntekter = skatteinntekter
-        )
-        hendelse.håndter(Person::håndterSykepengegrunnlagForArbeidsgiver)
-        return hendelse.metadata.meldingsreferanseId.id
-    }
-
     protected fun håndterVilkårsgrunnlag(arbeidsgivere: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT)) {
         håndterVilkårsgrunnlag(inntekter = arbeidsgivere, arbeidsforhold = arbeidsgivere.map { (orgnr, _) -> orgnr to EPOCH })
     }

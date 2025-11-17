@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.Year
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
@@ -16,7 +15,6 @@ import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
-import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -47,15 +45,6 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
         a1 {
             håndterSøknad(2.januar til 31.januar)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
-            håndterSykepengegrunnlagForArbeidsgiver(
-                vedtaksperiodeId = 1.vedtaksperiode,
-                skjæringstidspunkt = 2.januar,
-                inntekter = listOf(
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), INNTEKT, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-                )
-            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsler(1.vedtaksperiode, Varselkode.RV_IV_10)
             håndterYtelser(1.vedtaksperiode)

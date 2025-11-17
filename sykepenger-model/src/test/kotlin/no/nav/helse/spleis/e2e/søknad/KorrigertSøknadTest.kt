@@ -44,7 +44,6 @@ import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -80,7 +79,6 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
             nå = 10.februar(2025).atStartOfDay()
         )
-        håndterSykepengegrunnlagForArbeidsgiver(10.april)
         håndterVilkårsgrunnlag(4.vedtaksperiode)
         håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)

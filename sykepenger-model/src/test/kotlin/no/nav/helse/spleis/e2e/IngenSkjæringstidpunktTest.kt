@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.YearMonth
 import java.util.*
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -8,7 +7,6 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
-import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -34,7 +32,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -52,13 +49,6 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar))
             håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Ferie(10.februar, 28.februar))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-
-            håndterSykepengegrunnlagForArbeidsgiver(
-                2.vedtaksperiode, 10.februar, listOf(
-                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2018, 1), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-            ))
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -115,7 +105,6 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             )
 
             håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, 1.januar.atStartOfDay(), 1.januar.plusDays(90).atStartOfDay())
-            håndterSykepengegrunnlagForArbeidsgiver(2.vedtaksperiode, 6.januar, emptyList())
             håndterVilkårsgrunnlag(2.vedtaksperiode, skatteinntekt = 0.daglig)
             håndterYtelser(2.vedtaksperiode)
             assertVarsel(Varselkode.RV_SV_1, 2.vedtaksperiode.filter())
@@ -292,16 +281,6 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar))
             håndterSøknad(Sykdom(5.februar, 20.februar, 100.prosent), Ferie(5.februar, 20.februar))
-
-            håndterSykepengegrunnlagForArbeidsgiver(
-                2.vedtaksperiode,
-                5.februar,
-                listOf(
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2018, 1), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                )
-            )
 
             nullstillTilstandsendringer()
             assertVarsler(listOf(Varselkode.RV_VV_2), 1.vedtaksperiode.filter())

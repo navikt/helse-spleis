@@ -3,8 +3,7 @@ package no.nav.helse.spleis.graphql
 import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.time.Year
-import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.april
 import no.nav.helse.august
@@ -17,7 +16,6 @@ import no.nav.helse.dto.InntektbeløpDto.Årlig
 import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto
 import no.nav.helse.erHelg
 import no.nav.helse.februar
-import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -73,7 +71,6 @@ import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -312,21 +309,14 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `im som aldri kom`() {
-        val inntektFraSkatt = 10000.månedlig
         val søknadId = håndterSøknad(1.januar til 31.januar, orgnummer = a1)
         håndterPåminnelse(tilstand = TilstandType.AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
-        val inntektFraSkattId = håndterSykepengegrunnlagForArbeidsgiver(
-            skjæringstidspunkt = 1.januar, skatteinntekter = listOf(
-            ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-            ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-            ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-        )
-        )
+        håndterVilkårsgrunnlag()
         generasjoner(a1) {
             assertEquals(1, size)
             0.generasjon {
                 assertEquals(1, size)
-                uberegnetPeriode(0) medHendelser setOf(søknadId, inntektFraSkattId)
+                uberegnetPeriode(0) medHendelser setOf(søknadId)
             }
         }
     }
@@ -2203,11 +2193,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterUtbetalingsgodkjenning()
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Arbeid(1.februar, 28.februar))
-        håndterSykepengegrunnlagForArbeidsgiver(a1, 1.februar, listOf(
-            ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2018, 1), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-            ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-            ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), 10000.månedlig, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-        ))
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning()
 

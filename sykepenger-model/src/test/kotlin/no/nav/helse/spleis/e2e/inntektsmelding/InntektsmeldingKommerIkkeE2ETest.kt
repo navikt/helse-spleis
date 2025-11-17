@@ -17,7 +17,6 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
@@ -37,7 +36,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `varsel legges på perioden som håndterer skatteopplysningene -- helgegap og out of order`() {
-        val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(29.januar til 10.februar)
             håndterSøknad(1.januar til 26.januar)
@@ -45,15 +43,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
-            håndterSykepengegrunnlagForArbeidsgiver(
-                1.vedtaksperiode,
-                1.januar,
-                listOf(
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-                )
-            )
             assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
@@ -64,7 +53,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `legger varsel på riktig periode når det er en senere periode som blir påminnet -- helgegap`() {
-        val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(1.januar til 26.januar)
             håndterSøknad(29.januar til 10.februar)
@@ -72,15 +60,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             nullstillTilstandsendringer()
             håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
-            håndterSykepengegrunnlagForArbeidsgiver(
-                2.vedtaksperiode,
-                1.januar,
-                listOf(
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-                )
-            )
             assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
@@ -99,15 +78,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                 AVVENTER_INNTEKTSMELDING,
                 tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
                 nåtidspunkt = 10.februar(2025).atStartOfDay()
-            )
-            håndterSykepengegrunnlagForArbeidsgiver(
-                1.vedtaksperiode,
-                1.januar,
-                listOf(
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-                )
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekt = inntektFraSkatt)
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
@@ -140,13 +110,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                 AVVENTER_INNTEKTSMELDING,
                 tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
                 nåtidspunkt = 10.februar(2025).atStartOfDay()
-            )
-            håndterSykepengegrunnlagForArbeidsgiver(
-                1.vedtaksperiode, 1.januar, listOf(
-                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), sprøInntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-            )
             )
             håndterVilkårsgrunnlag(
                 vedtaksperiodeId = 1.vedtaksperiode,
@@ -192,7 +155,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt, nå)
-            assertIngenBehov(1.vedtaksperiode, Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
     }
 
@@ -202,13 +165,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
-            håndterSykepengegrunnlagForArbeidsgiver(
-                1.vedtaksperiode, 1.januar, listOf(
-                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-            )
-            )
 
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekt = inntektFraSkatt)
             håndterYtelser(1.vedtaksperiode)
@@ -226,17 +182,9 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
     fun `Tar med inntekter når det er rapportert 0 kr i AOrdningen`() {
-        val inntektFraSkatt = INGEN
         a1 {
             håndterSøknad(januar)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
-            håndterSykepengegrunnlagForArbeidsgiver(
-                1.vedtaksperiode, 1.januar, listOf(
-                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", "")
-            )
-            )
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekt = INGEN)
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_IV_10, Varselkode.RV_VV_4), 1.vedtaksperiode.filter())
@@ -264,21 +212,10 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `skal ikke slippe gjennom ting som har ventet veldig lenge`() {
-        val cutoff = 10.februar(2025)
-        a1 {
-            håndterSøknad(januar)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = cutoff.minusDays(1).minusMonths(3).atStartOfDay())
-            assertIngenBehov(1.vedtaksperiode, Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver)
-        }
-    }
-
-    @Test
     fun `Tar ikke med inntekter når det ikke er rapportert inntekt i AOrdningen`() {
         a1 {
             håndterSøknad(januar)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
-            håndterSykepengegrunnlagForArbeidsgiver(1.vedtaksperiode, 1.januar, emptyList())
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekt = null)
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_IV_10, Varselkode.RV_VV_4), 1.vedtaksperiode.filter())
