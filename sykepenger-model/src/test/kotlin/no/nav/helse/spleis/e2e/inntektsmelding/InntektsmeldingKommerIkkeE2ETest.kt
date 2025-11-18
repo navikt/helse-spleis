@@ -34,7 +34,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
@@ -51,7 +50,13 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
-            assertThrows<NoSuchElementException> { håndterVilkårsgrunnlag(1.vedtaksperiode) }
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        }
+        a2 {
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsler(1.vedtaksperiode, Varselkode.RV_IV_10)
         }
     }

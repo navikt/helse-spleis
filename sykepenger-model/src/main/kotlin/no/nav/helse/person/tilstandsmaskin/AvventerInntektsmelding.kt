@@ -33,9 +33,14 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, påminnelse, giOppÅVentePåArbeidsgiver = vurderOmInntektsmeldingAldriKommer(påminnelse))) {
+        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, påminnelse)) {
             aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
             return null
+        }
+
+        if (vurderOmInntektsmeldingAldriKommer(påminnelse)) {
+            gåVidereMedInntekterFraAOrdningen(vedtaksperiode, aktivitetslogg, påminnelse, eventBus)
+            return Revurderingseventyr.inntektsmeldingSomAldriKom(påminnelse, vedtaksperiode.periode)
         }
 
         if (påminnelse.når(Påminnelse.Predikat.Flagg("trengerReplay"))) {
@@ -75,7 +80,13 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, hendelse)
     }
 
-    private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse, giOppÅVentePåArbeidsgiver: Boolean = false): Boolean {
+    private fun gåVidereMedInntekterFraAOrdningen(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse, eventBus: EventBus) {
+        if (vedtaksperiode.refusjonstidslinje.isEmpty() && vedtaksperiode.vilkårsgrunnlag != null) aktivitetslogg.varsel(Varselkode.RV_IV_10) // Burde dette være et eget varsel? Har jo bare brukt 0kr i refusjon 🤔
+        vedtaksperiode.nullKronerRefusjonOmViManglerRefusjonsopplysninger(eventBus, hendelse.metadata, aktivitetslogg)
+        vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
+    }
+
+    private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse): Boolean {
         vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, aktivitetslogg)
 
         if (!vedtaksperiode.skalArbeidstakerBehandlesISpeil()) {
@@ -83,11 +94,9 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
             return true
         }
 
-        // Litt speical cases 🤏
-        if (giOppÅVentePåArbeidsgiver || vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte() || vedtaksperiode.behandlinger.erTidligereVilkårspørvd()) {
-            if (vedtaksperiode.refusjonstidslinje.isEmpty() && vedtaksperiode.vilkårsgrunnlag != null) aktivitetslogg.varsel(Varselkode.RV_IV_10) // Burde dette være et eget varsel? Har jo bare brukt 0kr i refusjon 🤔
-            vedtaksperiode.nullKronerRefusjonOmViManglerRefusjonsopplysninger(eventBus, hendelse.metadata, aktivitetslogg)
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
+        // Litt special cases 🤏
+        if (vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte()) {
+            gåVidereMedInntekterFraAOrdningen(vedtaksperiode, aktivitetslogg, hendelse, eventBus)
             return true
         }
 
