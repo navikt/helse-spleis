@@ -86,9 +86,10 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
-            assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
+            håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             assertVarsel(Varselkode.RV_IV_10, 2.vedtaksperiode.filter())
         }
@@ -103,9 +104,10 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             nullstillTilstandsendringer()
             håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
-            assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
         }

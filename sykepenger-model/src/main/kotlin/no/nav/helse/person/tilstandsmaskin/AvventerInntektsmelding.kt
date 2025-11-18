@@ -33,15 +33,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        val vurderOmInntektsmeldingAldriKommer = vurderOmInntektsmeldingAldriKommer(påminnelse)
-        if (vurderOmInntektsmeldingAldriKommer) {
-            // Det er ikke gitt at det er første periode som står i AvventerIM som blir påminnet først når vi gir opp å vente på IM
-            vedtaksperiode.yrkesaktivitet.finnSammenhengendeVedtaksperioder(vedtaksperiode).filter { it.tilstand is AvventerInntektsmelding }.forEach {
-                vurderOmKanGåVidere(it, eventBus, aktivitetslogg, påminnelse, true)
-            }
-            return null
-        }
-        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, påminnelse)) {
+        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, påminnelse, giOppÅVentePåArbeidsgiver = vurderOmInntektsmeldingAldriKommer(påminnelse))) {
             aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
             return null
         }
