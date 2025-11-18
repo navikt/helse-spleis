@@ -29,6 +29,7 @@ private val objectMapper: ObjectMapper = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 fun startFeriepenger(factory: ConsumerProducerFactory, arbeidId: String, datoForSisteFeriepengekjøringIInfotrygd: LocalDate, opptjeningsår: Year, antallPersonerOmGangen: Int = 10, dryrun: Boolean = true) {
+    sikkerlogg.info("Feriepengejobb starter med arbeidId=$arbeidId, datoForSisteFeriepengekjøringIInfotrygd=$datoForSisteFeriepengekjøringIInfotrygd, opptjeningsår=${opptjeningsår.value} og dryrun=$dryrun")
     factory.createProducer().use { producer ->
         opprettOgUtførArbeid(arbeidId, size = antallPersonerOmGangen) { session, fnr ->
             hentPerson(session, fnr).let { (skjemaVersjon, data) ->
@@ -48,6 +49,7 @@ fun startFeriepenger(factory: ConsumerProducerFactory, arbeidId: String, datoFor
         }
         producer.flush()
     }
+    sikkerlogg.info("Feriepengejobb ferdig med arbeidId=$arbeidId, datoForSisteFeriepengekjøringIInfotrygd=$datoForSisteFeriepengekjøringIInfotrygd, opptjeningsår=${opptjeningsår.value} og dryrun=$dryrun")
 }
 
 private fun PersonInnDto.potensiellFeriepengekjøring(opptjeningsår: Year): Boolean {
