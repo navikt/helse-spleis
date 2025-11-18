@@ -2442,7 +2442,7 @@ internal class Vedtaksperiode private constructor(
 
         val inntektFraArbeidsgiver = when (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
             true -> fraPerioder
-            false -> fraInntektshistorikk
+            false -> fraInntektshistorikk ?: fraPerioder
         }
 
         return when {

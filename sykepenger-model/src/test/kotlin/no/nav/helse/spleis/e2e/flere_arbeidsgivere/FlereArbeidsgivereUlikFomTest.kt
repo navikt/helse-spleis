@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -122,10 +121,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a2)
 
-        // Nå gjenbruker vi alle type inntekter
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-            assertVarsler(listOf(Varselkode.RV_IV_7), 1.vedtaksperiode.filter(a2))
-        }
+        assertVarsler(listOf(Varselkode.RV_IV_7), 1.vedtaksperiode.filter(a2))
     }
 
     @Test
