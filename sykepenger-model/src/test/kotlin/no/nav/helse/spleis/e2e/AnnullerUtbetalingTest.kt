@@ -1167,6 +1167,19 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         }
     }
 
+    @Test
+    fun `påminne annullering til utbetaling`() {
+        a1 {
+            nyttVedtak(3.januar til 26.januar, 100.prosent)
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt(status = Oppdragstatus.OVERFØRT)
+            assertSisteTilstand(1.vedtaksperiode, TIL_ANNULLERING)
+            håndterPåminnelse(1.vedtaksperiode, TIL_ANNULLERING)
+            håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
+            assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
+    }
+
     private fun sisteBehovErAnnullering(vedtaksperiodeIdInnhenter: UUID) {
         testperson.personlogg.behov.last().also {
             assertEquals(Behovtype.Utbetaling, it.type)
