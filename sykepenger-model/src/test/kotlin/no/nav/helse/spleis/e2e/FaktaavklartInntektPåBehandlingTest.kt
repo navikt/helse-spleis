@@ -52,12 +52,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
 
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
-
-            assertForventetFeil(
-                forklaring = "Periode kan ikke hoppe tilbake til AvventerInntektsmelding etter å ha vært til godkjenning. Skatt lagres ikke på behandlingen. I dag funker dette fordi inntekten lagres tilbake i historikken på ny dato (hack)",
-                ønsket = { assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)},
-                nå = { assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_INNTEKTSMELDING)}
-            )
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         }
     }
 

@@ -3772,10 +3772,18 @@ private fun nesteTilstandEtterIgangsattOverstyring(
     AvventerAnnulleringTilUtbetaling,
     SelvstendigAvventerInfotrygdHistorikk -> tilstand
 
-    AvventerInntektsmelding,
-    AvventerAOrdningen,
-    AvsluttetUtenUtbetaling,
     AvventerAvsluttetUtenUtbetaling,
+    AvsluttetUtenUtbetaling,
+    AvventerInntektsmelding -> when {
+        vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> when {
+            vedtaksperiode.måInnhenteInntektEllerRefusjon() -> AvventerInntektsmelding
+            else -> nesteTilstandEtterInntekt(vedtaksperiode)
+        }
+
+        else -> AvventerAvsluttetUtenUtbetaling
+    }
+
+    AvventerAOrdningen,
     AvventerBlokkerendePeriode,
     AvventerSøknadForOverlappendePeriode,
     AvventerInntektsopplysningerForAnnenArbeidsgiver,
@@ -3784,10 +3792,7 @@ private fun nesteTilstandEtterIgangsattOverstyring(
     AvventerHistorikk,
     AvventerSimulering,
     AvventerVilkårsprøving -> when {
-        vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> when {
-            vedtaksperiode.måInnhenteInntektEllerRefusjon() -> AvventerInntektsmelding
-            else -> nesteTilstandEtterInntekt(vedtaksperiode)
-        }
+        vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> nesteTilstandEtterInntekt(vedtaksperiode)
         else -> AvventerAvsluttetUtenUtbetaling
     }
 

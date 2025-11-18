@@ -110,7 +110,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
-            assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertEquals(16.april, inspektør.skjæringstidspunkt(4.vedtaksperiode))
         }
     }
