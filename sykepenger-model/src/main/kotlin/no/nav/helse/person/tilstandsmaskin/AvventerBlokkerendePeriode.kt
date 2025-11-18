@@ -2,6 +2,7 @@ package no.nav.helse.person.tilstandsmaskin
 
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -49,11 +50,12 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         }
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
         when {
             nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
             else -> vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
+        return null
     }
 }

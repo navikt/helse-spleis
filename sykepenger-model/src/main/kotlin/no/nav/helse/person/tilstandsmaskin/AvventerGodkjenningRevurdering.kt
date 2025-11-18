@@ -1,6 +1,7 @@
 package no.nav.helse.person.tilstandsmaskin
 
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -11,7 +12,8 @@ internal data object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         vedtaksperiode.trengerGodkjenning(eventBus, aktivitetslogg)
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         vedtaksperiode.trengerGodkjenning(eventBus, aktivitetslogg)
+        return null
     }
 }

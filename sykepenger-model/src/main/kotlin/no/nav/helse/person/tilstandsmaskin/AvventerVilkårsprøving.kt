@@ -12,7 +12,8 @@ internal data object AvventerVilkårsprøving : Vedtaksperiodetilstand {
         vedtaksperiode.trengerVilkårsgrunnlag(aktivitetslogg)
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         vedtaksperiode.trengerVilkårsgrunnlag(aktivitetslogg)
+        return null
     }
 }

@@ -2895,8 +2895,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
             return overstyring
         }
-        håndterPåminnelse(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)
-        return null
+        return håndterPåminnelse(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)
     }
 
     override fun toString() =

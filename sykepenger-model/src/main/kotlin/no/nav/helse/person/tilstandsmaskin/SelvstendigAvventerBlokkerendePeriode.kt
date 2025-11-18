@@ -25,7 +25,8 @@ internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilst
             vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerHistorikk)
         }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
+        return null
     }
 }

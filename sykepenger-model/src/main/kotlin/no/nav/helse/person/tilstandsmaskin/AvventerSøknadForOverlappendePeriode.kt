@@ -3,6 +3,7 @@ package no.nav.helse.person.tilstandsmaskin
 import java.time.Period
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -27,7 +28,7 @@ internal data object AvventerSøknadForOverlappendePeriode : Vedtaksperiodetilst
         gåVidere(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val ventetMinstTreMåneder = påminnelse.når(Påminnelse.Predikat.VentetMinst(Period.ofMonths(3)))
         val forkasteOverlappendeSykmeldingsperidoer = påminnelse.når(Påminnelse.Predikat.Flagg("forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"))
         if (ventetMinstTreMåneder || forkasteOverlappendeSykmeldingsperidoer) {
@@ -35,6 +36,7 @@ internal data object AvventerSøknadForOverlappendePeriode : Vedtaksperiodetilst
             vedtaksperiode.person.fjernSykmeldingsperiode(vedtaksperiode.periode)
             gåVidere(vedtaksperiode, eventBus, aktivitetslogg)
         }
+        return null
     }
 
     private fun gåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {

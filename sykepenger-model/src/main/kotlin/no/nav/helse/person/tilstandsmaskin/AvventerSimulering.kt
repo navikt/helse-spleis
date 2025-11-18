@@ -12,8 +12,9 @@ internal data object AvventerSimulering : Vedtaksperiodetilstand {
         trengerSimulering(vedtaksperiode, aktivitetslogg)
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         trengerSimulering(vedtaksperiode, aktivitetslogg)
+        return null
     }
 }
 

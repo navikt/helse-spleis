@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Vedtaksperiode
@@ -31,22 +32,26 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         }
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val vurderOmInntektsmeldingAldriKommer = vurderOmInntektsmeldingAldriKommer(påminnelse)
         if (vurderOmInntektsmeldingAldriKommer) {
             // Det er ikke gitt at det er første periode som står i AvventerIM som blir påminnet først når vi gir opp å vente på IM
             vedtaksperiode.yrkesaktivitet.finnSammenhengendeVedtaksperioder(vedtaksperiode).filter { it.tilstand is AvventerInntektsmelding }.forEach {
                 vurderOmKanGåVidere(it, eventBus, aktivitetslogg, påminnelse, true)
             }
-            return
+            return null
         }
         if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, påminnelse)) {
             aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
-            return
+            return null
         }
 
-        if (påminnelse.når(Påminnelse.Predikat.Flagg("trengerReplay"))) return trengerInntektsmeldingReplay(vedtaksperiode, eventBus)
+        if (påminnelse.når(Påminnelse.Predikat.Flagg("trengerReplay"))) {
+            trengerInntektsmeldingReplay(vedtaksperiode, eventBus)
+            return null
+        }
         sendTrengerArbeidsgiveropplysninger(vedtaksperiode, eventBus)
+        return null
     }
 
     private fun vurderOmInntektsmeldingAldriKommer(påminnelse: Påminnelse): Boolean {

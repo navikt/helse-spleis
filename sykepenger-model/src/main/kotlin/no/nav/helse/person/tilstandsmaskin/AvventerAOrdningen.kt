@@ -14,7 +14,8 @@ internal data object AvventerAOrdningen : Vedtaksperiodetilstand {
         aktivitetslogg.info("Forespør inntekter fra a-ordningen")
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         vedtaksperiode.trengerInntektFraSkatt(aktivitetslogg)
+        return null
     }
 }
