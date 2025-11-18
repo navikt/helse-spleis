@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -48,7 +48,6 @@ import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -56,10 +55,10 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.erLik
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsgiveropplysninger
+import no.nav.helse.person.EventSubscription.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.blokkererBehandlingAv
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.perioder
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.trengerArbeidsgiveropplysninger
-import no.nav.helse.person.EventSubscription.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SAMME_ARBEIDSGIVERPERIODE
@@ -748,13 +747,6 @@ internal class Yrkesaktivitet private constructor(
         )
         eventBus.planlagtAnnullering(planlagtAnnullering)
         return håndter { it.håndterAnnullerUtbetaling(eventBus, hendelse, aktivitetsloggMedArbeidsgiverkontekst, annulleringskandidater.toList()) }.tidligsteEventyr()
-    }
-
-    internal fun håndterUtbetalingpåminnelse(eventBus: EventBus, påminnelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        håndter {
-            it.håndterUtbetalingpåminnelse(eventBus, påminnelse, aktivitetsloggMedArbeidsgiverkontekst)
-        }
     }
 
     internal fun håndterPåminnelse(eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {

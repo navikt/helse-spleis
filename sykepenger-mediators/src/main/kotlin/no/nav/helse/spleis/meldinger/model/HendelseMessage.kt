@@ -124,6 +124,4 @@ private val HendelseMessage.kontekstnavn
         is SendtSøknadAnnetMessage,
         is SendtSøknadSelvstendigMessage -> "Søknad"
 
-        is UtbetalingpåminnelseMessage -> "Utbetalingpåminnelse"
-
     }

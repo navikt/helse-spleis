@@ -6,7 +6,6 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -58,7 +57,7 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
-        sendNyUtbetalingpåminnelse(0, Utbetalingstatus.OVERFØRT)
+        sendNyPåminnelse(0, TilstandType.TIL_UTBETALING)
         assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "OVERFØRT")
         assertEquals(2, (0 until testRapid.inspektør.antall()).filter { "Utbetaling" in testRapid.inspektør.melding(it).path("@behov").map(JsonNode::asText) }.size)
     }

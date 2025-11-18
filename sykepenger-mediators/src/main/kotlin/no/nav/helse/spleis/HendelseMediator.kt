@@ -32,7 +32,6 @@ import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
@@ -89,7 +88,6 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
 import no.nav.helse.spleis.meldinger.model.SykepengegrunnlagForArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
@@ -383,12 +381,6 @@ internal class HendelseMediator(
         hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
             HendelseProbe.onUtbetaling()
             person.håndterUtbetalingHendelse(eventBus, utbetaling, aktivitetslogg)
-        }
-    }
-
-    override fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext) {
-        hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
-            person.håndterUtbetalingPåminnelse(eventBus, påminnelse, aktivitetslogg)
         }
     }
 
@@ -781,7 +773,6 @@ internal interface IHendelseMediator {
     fun behandle(message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: MessageContext)
     fun behandle(message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext)
     fun behandle(message: InntektsmeldingerReplayMessage, replays: InntektsmeldingerReplay, context: MessageContext)
-    fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext)
     fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse, context: MessageContext)
     fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse, context: MessageContext)
     fun behandle(message: GjenopptaBehandlingMessage, gjenopptaBehandling: GjenopptaBehandling, context: MessageContext)

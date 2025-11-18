@@ -15,7 +15,6 @@ import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringHendelse
 import no.nav.helse.hendelser.UtbetalingmodulHendelse
-import no.nav.helse.hendelser.UtbetalingpåminnelseHendelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -150,14 +149,10 @@ class Utbetaling private constructor(
         tilstand.simuler(this, aktivitetsloggMedUtbetalingkontekst)
     }
 
-    fun håndterUtbetalingpåminnelseHendelse(eventBus: UtbetalingEventBus, påminnelse: UtbetalingpåminnelseHendelse, aktivitetslogg: IAktivitetslogg) {
-        if (påminnelse.utbetalingId != this.id) return
+    fun håndterUtbetalingpåminnelse(aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        if (påminnelse.status != this.tilstand.status) return
-        tilstand.håndterPåminnelse(this, eventBus, aktivitetsloggMedUtbetalingkontekst)
+        tilstand.håndterPåminnelse(this, aktivitetsloggMedUtbetalingkontekst)
     }
-
-    fun gjelderFor(hendelse: UtbetalingmodulHendelse) = relevantFor(hendelse)
 
     fun valider(simulering: SimuleringHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
@@ -531,7 +526,7 @@ class Utbetaling private constructor(
             error("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun håndterPåminnelse(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, påminnelse: IAktivitetslogg) {
+        fun håndterPåminnelse(utbetaling: Utbetaling, påminnelse: IAktivitetslogg) {
             påminnelse.info("Utbetaling ble påminnet, men gjør ingenting")
         }
 
@@ -591,7 +586,7 @@ class Utbetaling private constructor(
             utbetaling.overførBegge(aktivitetslogg)
         }
 
-        override fun håndterPåminnelse(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, påminnelse: IAktivitetslogg) {
+        override fun håndterPåminnelse(utbetaling: Utbetaling, påminnelse: IAktivitetslogg) {
             utbetaling.overførBegge(påminnelse)
         }
 

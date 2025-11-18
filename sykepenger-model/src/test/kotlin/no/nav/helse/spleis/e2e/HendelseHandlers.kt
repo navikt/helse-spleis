@@ -65,7 +65,6 @@ import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilSkj�
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
@@ -806,14 +805,6 @@ internal fun AbstractEndToEndTest.håndterYtelser(
         arbeidsavklaringspenger = arbeidsavklaringspenger,
         dagpenger = dagpenger
     ).håndter(Person::håndterYtelser)
-}
-
-internal fun AbstractEndToEndTest.håndterUtbetalingpåminnelse(
-    utbetalingIndeks: Int,
-    status: Utbetalingstatus,
-    tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
-) {
-    utbetalingpåminnelse(inspektør.utbetalingId(utbetalingIndeks), status, tilstandsendringstidspunkt).håndter(Person::håndterUtbetalingPåminnelse)
 }
 
 internal fun AbstractEndToEndTest.håndterPersonPåminnelse() = PersonHendelsefabrikk().lagPåminnelse().håndter(Person::håndterPersonPåminnelse)

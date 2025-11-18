@@ -71,7 +71,6 @@ import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -151,10 +150,13 @@ import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerBlokkerendePeriode
 import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerInfotrygdHistorikk
 import no.nav.helse.person.tilstandsmaskin.ArbeidsledigStart
+import no.nav.helse.person.tilstandsmaskin.ArbeidstakerStart
 import no.nav.helse.person.tilstandsmaskin.Avsluttet
 import no.nav.helse.person.tilstandsmaskin.AvsluttetUtenUtbetaling
 import no.nav.helse.person.tilstandsmaskin.AvventerAOrdningen
 import no.nav.helse.person.tilstandsmaskin.AvventerAnnullering
+import no.nav.helse.person.tilstandsmaskin.AvventerAnnulleringTilUtbetaling
+import no.nav.helse.person.tilstandsmaskin.AvventerAvsluttetUtenUtbetaling
 import no.nav.helse.person.tilstandsmaskin.AvventerBlokkerendePeriode
 import no.nav.helse.person.tilstandsmaskin.AvventerGodkjenning
 import no.nav.helse.person.tilstandsmaskin.AvventerGodkjenningRevurdering
@@ -162,11 +164,18 @@ import no.nav.helse.person.tilstandsmaskin.AvventerHistorikk
 import no.nav.helse.person.tilstandsmaskin.AvventerHistorikkRevurdering
 import no.nav.helse.person.tilstandsmaskin.AvventerInfotrygdHistorikk
 import no.nav.helse.person.tilstandsmaskin.AvventerInntektsmelding
+import no.nav.helse.person.tilstandsmaskin.AvventerInntektsopplysningerForAnnenArbeidsgiver
+import no.nav.helse.person.tilstandsmaskin.AvventerRefusjonsopplysningerAnnenPeriode
 import no.nav.helse.person.tilstandsmaskin.AvventerRevurdering
+import no.nav.helse.person.tilstandsmaskin.AvventerRevurderingTilUtbetaling
 import no.nav.helse.person.tilstandsmaskin.AvventerSimulering
 import no.nav.helse.person.tilstandsmaskin.AvventerSimuleringRevurdering
+import no.nav.helse.person.tilstandsmaskin.AvventerSøknadForOverlappendePeriode
 import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøving
 import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøvingRevurdering
+import no.nav.helse.person.tilstandsmaskin.FrilansAvventerBlokkerendePeriode
+import no.nav.helse.person.tilstandsmaskin.FrilansAvventerInfotrygdHistorikk
+import no.nav.helse.person.tilstandsmaskin.FrilansStart
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvsluttet
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerBlokkerendePeriode
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerGodkjenning
@@ -176,16 +185,6 @@ import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerSimulering
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerVilkårsprøving
 import no.nav.helse.person.tilstandsmaskin.SelvstendigStart
 import no.nav.helse.person.tilstandsmaskin.SelvstendigTilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.ArbeidstakerStart
-import no.nav.helse.person.tilstandsmaskin.AvventerAnnulleringTilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.AvventerAvsluttetUtenUtbetaling
-import no.nav.helse.person.tilstandsmaskin.AvventerInntektsopplysningerForAnnenArbeidsgiver
-import no.nav.helse.person.tilstandsmaskin.AvventerRefusjonsopplysningerAnnenPeriode
-import no.nav.helse.person.tilstandsmaskin.AvventerRevurderingTilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.AvventerSøknadForOverlappendePeriode
-import no.nav.helse.person.tilstandsmaskin.FrilansAvventerBlokkerendePeriode
-import no.nav.helse.person.tilstandsmaskin.FrilansAvventerInfotrygdHistorikk
-import no.nav.helse.person.tilstandsmaskin.FrilansStart
 import no.nav.helse.person.tilstandsmaskin.TilAnnullering
 import no.nav.helse.person.tilstandsmaskin.TilInfotrygd
 import no.nav.helse.person.tilstandsmaskin.TilUtbetaling
@@ -1910,63 +1909,6 @@ internal class Vedtaksperiode private constructor(
             valider(simulering, wrapper)
             if (!erKlarForGodkjenning()) return wrapper.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
             tilstand(eventBus, wrapper, nesteTilstand)
-        }
-    }
-
-    private fun påminnUtbetaling(eventBus: EventBus, hendelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling?) {
-        checkNotNull(utbetaling) { "forventer ikke tom utbetaling" }
-        if (hendelse.utbetalingId != utbetaling.id) return
-        utbetaling.håndterUtbetalingpåminnelseHendelse(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
-    }
-
-    internal fun håndterUtbetalingpåminnelse(eventBus: EventBus, hendelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-
-        when (tilstand) {
-            AvventerAnnulleringTilUtbetaling,
-            AvventerRevurderingTilUtbetaling -> påminnUtbetaling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, behandlinger.sisteUtbetalteUtbetaling())
-
-            TilAnnullering,
-            SelvstendigTilUtbetaling,
-            TilUtbetaling -> påminnUtbetaling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, behandlinger.utbetaling)
-
-            Avsluttet,
-            AvsluttetUtenUtbetaling,
-            AvventerAvsluttetUtenUtbetaling,
-            AvventerAOrdningen,
-            AvventerAnnullering,
-            AvventerAnnulleringTilUtbetaling,
-            AvventerBlokkerendePeriode,
-            AvventerSøknadForOverlappendePeriode,
-            AvventerInntektsopplysningerForAnnenArbeidsgiver,
-            AvventerRefusjonsopplysningerAnnenPeriode,
-            AvventerGodkjenning,
-            AvventerGodkjenningRevurdering,
-            AvventerHistorikk,
-            AvventerHistorikkRevurdering,
-            AvventerInfotrygdHistorikk,
-            AvventerInntektsmelding,
-            AvventerSimulering,
-            AvventerSimuleringRevurdering,
-            AvventerVilkårsprøving,
-            AvventerVilkårsprøvingRevurdering,
-            AvventerRevurdering,
-            SelvstendigAvsluttet,
-            SelvstendigAvventerBlokkerendePeriode,
-            SelvstendigAvventerGodkjenning,
-            SelvstendigAvventerHistorikk,
-            SelvstendigAvventerInfotrygdHistorikk,
-            SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving,
-            SelvstendigStart,
-            ArbeidstakerStart,
-            FrilansStart,
-            FrilansAvventerInfotrygdHistorikk,
-            FrilansAvventerBlokkerendePeriode,
-            ArbeidsledigStart,
-            ArbeidsledigAvventerInfotrygdHistorikk,
-            ArbeidsledigAvventerBlokkerendePeriode,
-            TilInfotrygd -> {}
         }
     }
 

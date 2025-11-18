@@ -4,7 +4,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
@@ -40,7 +40,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
@@ -56,7 +55,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
@@ -223,23 +221,6 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
         inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
         arbeidsforhold = arbeidsforhold
-    )
-}
-
-internal fun utbetalingpåminnelse(
-    utbetalingId: UUID,
-    status: Utbetalingstatus,
-    tilstandsendringstidspunkt: LocalDateTime,
-    orgnummer: String = a1
-): Utbetalingpåminnelse {
-    return Utbetalingpåminnelse(
-        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
-        utbetalingId = utbetalingId,
-        antallGangerPåminnet = 0,
-        status = status,
-        endringstidspunkt = tilstandsendringstidspunkt,
-        påminnelsestidspunkt = LocalDateTime.now()
     )
 }
 

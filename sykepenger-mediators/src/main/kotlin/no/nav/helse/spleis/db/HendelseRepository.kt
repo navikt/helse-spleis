@@ -47,7 +47,6 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGPÅMINNELSE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGODKJENNING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_ETTER_IT_ENDRING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_FOR_FERIEPENGER
@@ -97,7 +96,6 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
 import no.nav.helse.spleis.meldinger.model.SykepengegrunnlagForArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
@@ -168,7 +166,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is NavNoKorrigertInntektsmeldingMessage -> NAV_NO_KORRIGERT_INNTEKTSMELDING
         is NavNoInntektsmeldingMessage -> NAV_NO_INNTEKTSMELDING
         is InntektsmeldingMessage -> INNTEKTSMELDING
-        is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
         is YtelserMessage -> YTELSER
         is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
         is SimuleringMessage -> SIMULERING

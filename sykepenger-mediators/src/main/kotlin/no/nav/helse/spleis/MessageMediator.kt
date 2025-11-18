@@ -56,7 +56,6 @@ import no.nav.helse.spleis.meldinger.SimuleringerRiver
 import no.nav.helse.spleis.meldinger.SkjønnsmessigFastsettelseRiver
 import no.nav.helse.spleis.meldinger.SykepengegrunnlagForArbeidsgiverRiver
 import no.nav.helse.spleis.meldinger.UtbetalingerRiver
-import no.nav.helse.spleis.meldinger.UtbetalingpåminnelserRiver
 import no.nav.helse.spleis.meldinger.UtbetalingsgodkjenningerRiver
 import no.nav.helse.spleis.meldinger.UtbetalingshistorikkEtterInfotrygdendringRiver
 import no.nav.helse.spleis.meldinger.UtbetalingshistorikkForFeriepengerRiver
@@ -107,7 +106,6 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
 import no.nav.helse.spleis.meldinger.model.SykepengegrunnlagForArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
@@ -155,7 +153,6 @@ internal class MessageMediator(
             PåminnelserRiver(it, this)
             PersonPåminnelserRiver(it, this)
             GjenopptaBehandlingerRiver(it, this)
-            UtbetalingpåminnelserRiver(it, this)
             SimuleringerRiver(it, this)
             AnnullerUtbetalingerRiver(it, this)
             PersonAvstemmingRiver(it, this)
@@ -251,7 +248,6 @@ internal class MessageMediator(
         is PåminnelseMessage,
         is SkjønnsmessigFastsettelseMessage,
         is InntektsendringerMessage,
-        is UtbetalingpåminnelseMessage,
         is GjenopptaBehandlingMessage -> false
 
         // meldinger som må replayes/sendes på nytt ved feil får

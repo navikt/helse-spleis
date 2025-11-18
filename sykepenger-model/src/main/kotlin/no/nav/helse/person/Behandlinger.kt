@@ -262,6 +262,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun harFlereSkjæringstidspunkt() = sisteBehandling.harFlereSkjæringstidspunkt()
     internal fun børBrukeSkatteinntekterDirekte() = sisteBehandling.skjæringstidspunkter.isEmpty()
 
+    internal fun påminnUtbetaling(aktivitetslogg: IAktivitetslogg) {
+        tidligereBehandlinger.last().påminnUtbetaling(aktivitetslogg)
+    }
+
     internal fun håndterUtbetalinghendelseSisteInFlight(
         behandlingEventBus: BehandlingEventBus,
         utbetalingEventBus: UtbetalingEventBus,
@@ -1343,6 +1347,26 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 avsluttet = avsluttet,
                 kilde = behandlingkilde
             )
+        }
+
+        fun påminnUtbetaling(aktivitetslogg: IAktivitetslogg) {
+            when (tilstand) {
+                Tilstand.OverførtAnnullering,
+                Tilstand.VedtakFattet -> checkNotNull(gjeldende.utbetaling).håndterUtbetalingpåminnelse(aktivitetslogg)
+
+                Tilstand.AnnullertPeriode,
+                Tilstand.AvsluttetUtenVedtak,
+                Tilstand.Beregnet,
+                Tilstand.BeregnetOmgjøring,
+                Tilstand.BeregnetRevurdering,
+                Tilstand.RevurdertVedtakAvvist,
+                Tilstand.TilInfotrygd,
+                Tilstand.Uberegnet,
+                Tilstand.UberegnetAnnullering,
+                Tilstand.UberegnetOmgjøring,
+                Tilstand.UberegnetRevurdering,
+                Tilstand.VedtakIverksatt -> error("forventer ikke å påminne utbetaling i $tilstand")
+            }
         }
 
         fun håndterUtbetalinghendelse(behandlingEventBus: BehandlingEventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {

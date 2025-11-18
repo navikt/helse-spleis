@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -44,7 +44,6 @@ import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
@@ -417,12 +416,6 @@ class Person private constructor(
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler utbetaling")
         finnYrkesaktivitet(utbetaling.behandlingsporing).håndterUtbetalingHendelse(eventBus, utbetaling, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, utbetaling, aktivitetsloggMedPersonkontekst)
-    }
-
-    fun håndterUtbetalingPåminnelse(eventBus: EventBus, påminnelse: Utbetalingpåminnelse, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler utbetalingpåminnelse")
-        finnYrkesaktivitet(påminnelse.behandlingsporing).håndterUtbetalingpåminnelse(eventBus, påminnelse, aktivitetsloggMedPersonkontekst)
-        håndterGjenoppta(eventBus, påminnelse, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndterPersonPåminnelse(eventBus: EventBus, påminnelse: PersonPåminnelse, aktivitetslogg: IAktivitetslogg) {

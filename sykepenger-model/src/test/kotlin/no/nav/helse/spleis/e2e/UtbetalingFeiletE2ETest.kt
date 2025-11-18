@@ -27,7 +27,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus.OVERFØRT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.UTBETALT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -48,7 +47,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(Oppdragstatus.AVVIST)
 
-        håndterUtbetalingpåminnelse(2, OVERFØRT)
+        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
         håndterUtbetalt()
 
         val utbetalingJanuar = inspektør.utbetaling(0)
@@ -86,7 +85,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
         nullstillTilstandsendringer()
 
-        håndterUtbetalingpåminnelse(0, OVERFØRT)
+        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
         håndterUtbetalt()
 
         assertEquals(1, inspektør.antallUtbetalinger)
@@ -101,7 +100,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         forlengTilGodkjentVedtak(februar)
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
         nullstillTilstandsendringer()
-        håndterUtbetalingpåminnelse(1, OVERFØRT)
+        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
         håndterUtbetalt()
 
         assertEquals(2, inspektør.antallUtbetalinger)
@@ -134,7 +133,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         )
         nullstillTilstandsendringer()
 
-        håndterUtbetalingpåminnelse(0, OVERFØRT)
+        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
         assertEquals(1, hendelselogg.behov.size)
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,
@@ -170,7 +169,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         )
         nullstillTilstandsendringer()
 
-        håndterUtbetalingpåminnelse(0, OVERFØRT)
+        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
         assertEquals(1, hendelselogg.behov.size)
         håndterUtbetalt(
             status = Oppdragstatus.AKSEPTERT,

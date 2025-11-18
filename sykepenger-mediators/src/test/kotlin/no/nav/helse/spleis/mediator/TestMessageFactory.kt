@@ -44,7 +44,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.ArsakTilInnsending
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
@@ -1274,20 +1273,6 @@ internal class TestMessageFactory(
             ekstraFelter = mapOf(
                 "utbetalingId" to utbetalingId
             )
-        )
-    }
-
-    fun lagUtbetalingpåminnelse(utbetalingId: UUID, status: Utbetalingstatus): Pair<String, String> {
-        return nyHendelse(
-            "utbetalingpåminnelse", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "utbetalingId" to utbetalingId,
-            "status" to status.name,
-            "antallGangerPåminnet" to 0,
-            "endringstidspunkt" to LocalDateTime.now(),
-            "påminnelsestidspunkt" to LocalDateTime.now()
-        )
         )
     }
 

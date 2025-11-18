@@ -30,7 +30,6 @@ import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingpåminnelse
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
@@ -83,7 +82,6 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
 import no.nav.helse.spleis.meldinger.model.SykepengegrunnlagForArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
@@ -109,7 +107,6 @@ internal class TestHendelseMediator : IHendelseMediator {
     val lestPåminnelse get() = lestPåminnelseVerdi.get()
     val lestPersonpåminnelse get() = lestPersonpåminnelseVerdi.get()
     val lestAnmodningOmForkasting get() = lestAnmodningOmForkastingVerdi.get()
-    val lestutbetalingpåminnelse get() = lestutbetalingpåminnelseVerdi.get()
     val lestUtbetalingshistorikk get() = lestUtbetalingshistorikkVerdi.get()
     val lestUtbetalingshistorikkForFeriepenger get() = lestUtbetalingshistorikkForFeriepengerVerdi.get()
     val lestYtelser get() = lestYtelserVerdi.get()
@@ -379,10 +376,6 @@ internal class TestHendelseMediator : IHendelseMediator {
         gamleIdenter: Set<Personidentifikator>,
         context: MessageContext
     ) {
-    }
-
-    override fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext) {
-        lestutbetalingpåminnelseVerdi.set(true)
     }
 
     override fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse, context: MessageContext) {

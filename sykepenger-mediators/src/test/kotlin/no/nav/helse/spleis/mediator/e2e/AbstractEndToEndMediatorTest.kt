@@ -41,7 +41,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepeng
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger
@@ -80,7 +79,6 @@ import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel
 import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -423,12 +421,6 @@ internal abstract class AbstractEndToEndMediatorTest {
             testRapid.sendTestMessage(message)
             id.toUUID() to message
         }
-    }
-
-    protected fun sendNyUtbetalingpåminnelse(utbetalingIndeks: Int, status: Utbetalingstatus = Utbetalingstatus.IKKE_UTBETALT) {
-        val utbetalingId = testRapid.inspektør.utbetalingId(utbetalingIndeks)
-        val (_, message) = meldingsfabrikk.lagUtbetalingpåminnelse(utbetalingId, status)
-        testRapid.sendTestMessage(message)
     }
 
     protected fun sendNyPåminnelse(

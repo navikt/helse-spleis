@@ -285,7 +285,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.FEIL, sendOverførtKvittering = false)
-        håndterUtbetalingpåminnelse(0, OVERFØRT, LocalDateTime.now().minusDays(1))
+        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -311,7 +311,6 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.FEIL, sendOverførtKvittering = false)
-        håndterUtbetalingpåminnelse(0, OVERFØRT, LocalDateTime.now().minusDays(8))
         håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
         assertTilstander(
             1.vedtaksperiode,
@@ -363,7 +362,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AVVIST)
         assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
-        håndterUtbetalingpåminnelse(0, OVERFØRT)
+        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
         assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
         håndterUtbetalt(Oppdragstatus.AKSEPTERT, sendOverførtKvittering = false)
         assertTilstander(
