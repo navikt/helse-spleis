@@ -33,22 +33,30 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
     override fun result(sykdomstidslinje: Sykdomstidslinje, inntekt: Inntekt, inntektjusteringer: Beløpstidslinje): Utbetalingstidslinje {
         val builder = Utbetalingstidslinje.Builder()
         sykdomstidslinje.forEach { dag ->
+            val erVentetid = ventetid?.contains(dag.dato) == true
             when (dag) {
                 is Dag.Arbeidsdag -> arbeidsdag(builder, dag.dato, inntekt)
                 is Dag.ForeldetSykedag -> foreldetdag(builder, dag.dato, dag.grad, inntekt)
                 is Dag.FriskHelgedag -> arbeidsdag(builder, dag.dato, inntekt)
-                is Dag.SykHelgedag ->
-                    if (ventetid?.contains(dag.dato) == true )
-                        ventetidsdag(builder, dag.dato, dag.grad, inntekt, false)
-                    else
-                        helg(builder, dag.dato, dag.grad, inntekt)
-                is Dag.Sykedag ->
-                    if (ventetid?.contains(dag.dato) == true )
-                        ventetidsdag(builder, dag.dato, dag.grad, inntekt, navSkalUtbetaleVentetidsDag(dag.dato))
-                    else
-                        navDag(builder, dag.dato, dag.grad, inntekt)
-                is Dag.MeldingTilNavDag -> if (ventetid?.contains(dag.dato) == true) ventetidsdag(builder, dag.dato, dag.grad, inntekt, false) else avvistDag(builder, dag.dato, 0.prosent, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt)
-                is Dag.MeldingTilNavHelgedag -> if (ventetid?.contains(dag.dato) == true) ventetidsdag(builder, dag.dato, dag.grad, inntekt, false) else avvistDag(builder, dag.dato, 0.prosent, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt)
+                is Dag.SykHelgedag -> when (erVentetid) {
+                    true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt)
+                    false -> helg(builder, dag.dato, dag.grad, inntekt)
+                }
+                is Dag.Sykedag -> when (erVentetid) {
+                    true -> when (navSkalUtbetaleVentetidsDag(dag.dato)) {
+                        true -> forsikringsdag(builder, dag.dato, dag.grad, inntekt)
+                        false -> ventetidsdag(builder, dag.dato, dag.grad, inntekt)
+                    }
+                    false -> navDag(builder, dag.dato, dag.grad, inntekt)
+                }
+                is Dag.MeldingTilNavDag -> when (erVentetid) {
+                    true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt)
+                    else -> avvistDag(builder, dag.dato, 0.prosent, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt)
+                }
+                is Dag.MeldingTilNavHelgedag -> when (erVentetid) {
+                    true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt)
+                    false -> avvistDag(builder, dag.dato, 0.prosent, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt)
+                }
                 is Dag.AndreYtelser -> {
                     val begrunnelse = when (dag.ytelse) {
                         Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap
@@ -90,12 +98,12 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         builder.addArbeidsdag(dato, medInntektHvisFinnes(0.prosent, næringsinntekt).ikkeBetalt())
     }
 
-    private fun ventetidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt, skalUtbetales: Boolean) {
-        if (skalUtbetales) {
-            builder.addVentetidsdag(dato, medInntektHvisFinnes(sykdomsgrad, næringsinntekt))
-        } else {
-            builder.addVentetidsdag(dato, medInntektHvisFinnes(sykdomsgrad, næringsinntekt).ikkeBetalt())
-        }
+    private fun ventetidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt) {
+        builder.addVentetidsdag(dato, medInntektHvisFinnes(sykdomsgrad, næringsinntekt).ikkeBetalt())
+    }
+
+    private fun forsikringsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt) {
+        builder.addVentetidsdag(dato, medInntektHvisFinnes(sykdomsgrad, næringsinntekt))
     }
 
     private fun foreldetdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt) {
