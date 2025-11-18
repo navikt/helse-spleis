@@ -677,6 +677,7 @@ private fun BegrunnelseDto.tilPersonData() = when (this) {
     BegrunnelseDto.AndreYtelserPleiepenger -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserPleiepenger
     BegrunnelseDto.AndreYtelserSvangerskapspenger -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserSvangerskapspenger
     BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.EgenmeldingUtenforArbeidsgiverperiode
+    BegrunnelseDto.MeldingTilNavDagUtenforVentetid -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.MeldingTilNavDagUtenforVentetid
     BegrunnelseDto.EtterDødsdato -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.EtterDødsdato
     BegrunnelseDto.ManglerMedlemskap -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.ManglerMedlemskap
     BegrunnelseDto.ManglerOpptjening -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.ManglerOpptjening

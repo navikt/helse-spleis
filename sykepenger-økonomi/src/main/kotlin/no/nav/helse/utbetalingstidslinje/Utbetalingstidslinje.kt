@@ -245,6 +245,7 @@ sealed class Begrunnelse {
         AndreYtelserPleiepenger -> BegrunnelseDto.AndreYtelserPleiepenger
         AndreYtelserSvangerskapspenger -> BegrunnelseDto.AndreYtelserSvangerskapspenger
         EgenmeldingUtenforArbeidsgiverperiode -> BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode
+        MeldingTilNavDagUtenforVentetid -> BegrunnelseDto.MeldingTilNavDagUtenforVentetid
         EtterDødsdato -> BegrunnelseDto.EtterDødsdato
         ManglerMedlemskap -> BegrunnelseDto.ManglerMedlemskap
         ManglerOpptjening -> BegrunnelseDto.ManglerOpptjening
@@ -262,6 +263,7 @@ sealed class Begrunnelse {
     data object MinimumInntekt : Begrunnelse()
     data object MinimumInntektOver67 : Begrunnelse()
     data object EgenmeldingUtenforArbeidsgiverperiode : Begrunnelse()
+    data object MeldingTilNavDagUtenforVentetid : Begrunnelse()
     data object AndreYtelserForeldrepenger : Begrunnelse()
     data object AndreYtelserAap : Begrunnelse()
     data object AndreYtelserOmsorgspenger : Begrunnelse()
@@ -291,6 +293,7 @@ sealed class Begrunnelse {
                 BegrunnelseDto.AndreYtelserPleiepenger -> AndreYtelserPleiepenger
                 BegrunnelseDto.AndreYtelserSvangerskapspenger -> AndreYtelserSvangerskapspenger
                 BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
+                BegrunnelseDto.MeldingTilNavDagUtenforVentetid -> MeldingTilNavDagUtenforVentetid
                 BegrunnelseDto.EtterDødsdato -> EtterDødsdato
                 BegrunnelseDto.ManglerMedlemskap -> ManglerMedlemskap
                 BegrunnelseDto.ManglerOpptjening -> ManglerOpptjening

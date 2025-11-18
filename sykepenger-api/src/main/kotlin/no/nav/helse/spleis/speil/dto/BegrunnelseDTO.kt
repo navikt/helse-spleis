@@ -8,6 +8,7 @@ enum class BegrunnelseDTO {
     MinimumInntekt,
     MinimumInntektOver67,
     EgenmeldingUtenforArbeidsgiverperiode,
+    MeldingTilNavDagUtenforVentetid,
     AndreYtelserAap,
     AndreYtelserDagpenger,
     AndreYtelserForeldrepenger,
@@ -27,6 +28,7 @@ enum class BegrunnelseDTO {
             is BegrunnelseDto.SykepengedagerOppbruktOver67 -> SykepengedagerOppbruktOver67
             is BegrunnelseDto.MinimumSykdomsgrad -> MinimumSykdomsgrad
             is BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
+            is BegrunnelseDto.MeldingTilNavDagUtenforVentetid -> MeldingTilNavDagUtenforVentetid
             is BegrunnelseDto.MinimumInntekt -> MinimumInntekt
             is BegrunnelseDto.MinimumInntektOver67 -> MinimumInntektOver67
             is BegrunnelseDto.EtterDødsdato -> EtterDødsdato

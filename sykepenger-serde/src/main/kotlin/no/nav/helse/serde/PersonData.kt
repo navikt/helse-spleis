@@ -1305,6 +1305,7 @@ data class PersonData(
             MinimumInntekt,
             MinimumInntektOver67,
             EgenmeldingUtenforArbeidsgiverperiode,
+            MeldingTilNavDagUtenforVentetid,
             MinimumSykdomsgrad,
             AndreYtelserAap,
             AndreYtelserDagpenger,
@@ -1325,6 +1326,7 @@ data class PersonData(
                 MinimumInntekt -> BegrunnelseDto.MinimumInntekt
                 MinimumInntektOver67 -> BegrunnelseDto.MinimumInntektOver67
                 EgenmeldingUtenforArbeidsgiverperiode -> BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode
+                MeldingTilNavDagUtenforVentetid -> BegrunnelseDto.MeldingTilNavDagUtenforVentetid
                 MinimumSykdomsgrad -> BegrunnelseDto.MinimumSykdomsgrad
                 AndreYtelserAap -> BegrunnelseDto.AndreYtelserAap
                 AndreYtelserDagpenger -> BegrunnelseDto.AndreYtelserDagpenger

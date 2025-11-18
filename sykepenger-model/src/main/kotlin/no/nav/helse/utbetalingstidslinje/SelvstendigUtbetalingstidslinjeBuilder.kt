@@ -47,8 +47,8 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                         ventetidsdag(builder, dag.dato, dag.grad, inntekt, navSkalUtbetaleVentetidsDag(dag.dato))
                     else
                         navDag(builder, dag.dato, dag.grad, inntekt)
-                is Dag.MeldingTilNavDag -> if (ventetid?.contains(dag.dato) == true) ventetidsdag(builder, dag.dato, dag.grad, inntekt, false) else error("Hvorfor er MeldingTilNavDag ikke i ventetiden? Det skal vel ikke skje, eller?")
-                is Dag.MeldingTilNavHelgedag -> if (ventetid?.contains(dag.dato) == true) ventetidsdag(builder, dag.dato, dag.grad, inntekt, false) else error("Hvorfor er MeldingTilNavHelgedag ikke i ventetiden? Det skal vel ikke skje, eller?") // Enig i at denne og linja over er helt like, men det er ikke compilern :((
+                is Dag.MeldingTilNavDag -> if (ventetid?.contains(dag.dato) == true) ventetidsdag(builder, dag.dato, dag.grad, inntekt, false) else avvistDag(builder, dag.dato, 0.prosent, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt)
+                is Dag.MeldingTilNavHelgedag -> if (ventetid?.contains(dag.dato) == true) ventetidsdag(builder, dag.dato, dag.grad, inntekt, false) else avvistDag(builder, dag.dato, 0.prosent, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt)
                 is Dag.AndreYtelser -> {
                     val begrunnelse = when (dag.ytelse) {
                         Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap

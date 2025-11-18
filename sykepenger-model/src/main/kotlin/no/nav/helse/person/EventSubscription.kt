@@ -379,6 +379,7 @@ interface EventSubscription {
                     is Begrunnelse.SykepengedagerOppbruktOver67 -> SykepengedagerOppbruktOver67
                     is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
                     is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
+                    is Begrunnelse.MeldingTilNavDagUtenforVentetid -> EgenmeldingUtenforArbeidsgiverperiode // TODO: Map til MeldingTilNavDagUtenforVentetid
                     is Begrunnelse.MinimumInntekt -> MinimumInntekt
                     is Begrunnelse.MinimumInntektOver67 -> MinimumInntektOver67
                     is Begrunnelse.EtterDødsdato -> EtterDødsdato
