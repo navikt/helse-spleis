@@ -21,6 +21,8 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
+import no.nav.helse.utbetalingslinjer.Utbetalingtype.ETTERUTBETALING
+import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
@@ -439,8 +441,8 @@ class Utbetaling private constructor(
                 type = when (dto.type) {
                     UtbetalingtypeDto.UTBETALING -> UTBETALING
                     UtbetalingtypeDto.ANNULLERING -> ANNULLERING
-                    UtbetalingtypeDto.ETTERUTBETALING -> Utbetalingtype.ETTERUTBETALING
-                    UtbetalingtypeDto.REVURDERING -> Utbetalingtype.REVURDERING
+                    UtbetalingtypeDto.ETTERUTBETALING -> ETTERUTBETALING
+                    UtbetalingtypeDto.REVURDERING -> REVURDERING
                 },
                 maksdato = dto.maksdato,
                 forbrukteSykedager = dto.forbrukteSykedager,
@@ -469,11 +471,23 @@ class Utbetaling private constructor(
             Oppdragstatus.FEIL -> aktivitetslogg.info("Utbetaling feilet med status ${hendelse.status}. Feilmelding fra Oppdragsystemet: ${hendelse.melding}")
         }
 
-        val skalForsøkesIgjen = hendelse.status in setOf(Oppdragstatus.AVVIST, Oppdragstatus.FEIL)
-        val nesteTilstand = when {
-            skalForsøkesIgjen || Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag) -> return // utbetaling gjør retry ved neste påminnelse
-            type == ANNULLERING -> Annullert
-            else -> Utbetalt
+        if (Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag)) return
+
+        val nesteTilstand = when (hendelse.status) {
+            Oppdragstatus.OVERFØRT,
+            Oppdragstatus.AVVIST,
+            Oppdragstatus.FEIL -> return // utbetaling gjør retry ved neste påminnelse
+
+            Oppdragstatus.AKSEPTERT,
+            Oppdragstatus.AKSEPTERT_MED_FEIL -> when (Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag)) {
+                true -> return // må vente på at begge oppdrag er uten feil
+                false -> when (type) {
+                    UTBETALING,
+                    REVURDERING -> Utbetalt
+                    ANNULLERING -> Annullert
+                    ETTERUTBETALING -> error("Forventer ikke denne typen her")
+                }
+            }
         }
         tilstand(eventBus, nesteTilstand, aktivitetslogg)
     }
@@ -727,9 +741,9 @@ class Utbetaling private constructor(
         },
         type = when (type) {
             UTBETALING -> UtbetalingtypeDto.UTBETALING
-            Utbetalingtype.ETTERUTBETALING -> UtbetalingtypeDto.ETTERUTBETALING
+            ETTERUTBETALING -> UtbetalingtypeDto.ETTERUTBETALING
             ANNULLERING -> UtbetalingtypeDto.ANNULLERING
-            Utbetalingtype.REVURDERING -> UtbetalingtypeDto.REVURDERING
+            REVURDERING -> UtbetalingtypeDto.REVURDERING
         },
         maksdato = this.maksdato,
         forbrukteSykedager = this.forbrukteSykedager,
