@@ -699,7 +699,6 @@ data class PersonData(
                 AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE,
                 AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE,
-                AVVENTER_A_ORDNINGEN,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_REVURDERING,
                 AVVENTER_REVURDERING_TIL_UTBETALING,
@@ -736,7 +735,6 @@ data class PersonData(
                 id = this.id,
                 tilstand = when (tilstand) {
                     TilstandTypeData.START -> VedtaksperiodetilstandDto.ARBEIDSTAKER_START
-                    TilstandTypeData.AVVENTER_A_ORDNINGEN -> VedtaksperiodetilstandDto.AVVENTER_A_ORDNINGEN
                     TilstandTypeData.AVVENTER_HISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK
                     TilstandTypeData.AVVENTER_GODKJENNING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING
                     TilstandTypeData.AVVENTER_SIMULERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING

@@ -26,7 +26,6 @@ import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
@@ -80,7 +79,6 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
-import no.nav.helse.spleis.meldinger.model.SykepengegrunnlagForArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
@@ -255,14 +253,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     ) {
         lestNySøknadArbeidsledigVerdi.set(true)
     }
-
-    override fun behandle(
-        message: SykepengegrunnlagForArbeidsgiverMessage,
-        sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
-        context: MessageContext
-    ) {
-    }
-
+    
     override fun behandle(
         personopplysninger: Personopplysninger,
         message: SendtSøknadFrilansMessage,

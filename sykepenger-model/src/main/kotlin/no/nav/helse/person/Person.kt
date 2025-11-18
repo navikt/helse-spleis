@@ -40,7 +40,6 @@ import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
@@ -386,12 +385,6 @@ class Person private constructor(
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler kan ikke behandles her")
         finnYrkesaktivitet(kanIkkeBehandlesHer.behandlingsporing).håndterBehandlingsavgjørelse(eventBus, kanIkkeBehandlesHer, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, kanIkkeBehandlesHer, aktivitetsloggMedPersonkontekst)
-    }
-
-    fun håndterSykepengegrunnlagForArbeidsgiver(eventBus: EventBus, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler sykepengegrunnlag for arbeidsgiver")
-        finnYrkesaktivitet(sykepengegrunnlagForArbeidsgiver.behandlingsporing).håndterSykepengegrunnlagForArbeidsgiver(eventBus, sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedPersonkontekst)
-        håndterGjenoppta(eventBus, sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndterVilkårsgrunnlag(eventBus: EventBus, vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {

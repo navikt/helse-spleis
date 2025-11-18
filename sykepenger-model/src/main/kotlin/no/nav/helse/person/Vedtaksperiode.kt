@@ -67,7 +67,6 @@ import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
@@ -81,7 +80,6 @@ import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger.Behandling.Endring
 import no.nav.helse.person.Behandlinger.Behandlingkilde
 import no.nav.helse.person.Behandlinger.Companion.berik
-import no.nav.helse.person.Dokumentsporing.Companion.inntektFraAOrdingen
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingDager
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingInntekt
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
@@ -96,7 +94,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.foreldrepeng
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForBeregning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForOpptjeningsvurdering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
@@ -153,7 +150,6 @@ import no.nav.helse.person.tilstandsmaskin.ArbeidsledigStart
 import no.nav.helse.person.tilstandsmaskin.ArbeidstakerStart
 import no.nav.helse.person.tilstandsmaskin.Avsluttet
 import no.nav.helse.person.tilstandsmaskin.AvsluttetUtenUtbetaling
-import no.nav.helse.person.tilstandsmaskin.AvventerAOrdningen
 import no.nav.helse.person.tilstandsmaskin.AvventerAnnullering
 import no.nav.helse.person.tilstandsmaskin.AvventerAnnulleringTilUtbetaling
 import no.nav.helse.person.tilstandsmaskin.AvventerAvsluttetUtenUtbetaling
@@ -377,7 +373,6 @@ internal class Vedtaksperiode private constructor(
             AvventerAvsluttetUtenUtbetaling,
             AvventerInfotrygdHistorikk,
             AvventerInntektsmelding,
-            AvventerAOrdningen,
             AvventerGodkjenning,
             AvventerHistorikk,
             AvventerSimulering,
@@ -432,9 +427,8 @@ internal class Vedtaksperiode private constructor(
             AvsluttetUtenUtbetaling,
             TilUtbetaling -> nyBehandling(eventBus, hendelse)
 
-            AvventerAOrdningen,
             AvventerAnnullering,
-                AvventerAnnulleringTilUtbetaling,
+            AvventerAnnulleringTilUtbetaling,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
             AvventerInntektsopplysningerForAnnenArbeidsgiver,
@@ -499,7 +493,6 @@ internal class Vedtaksperiode private constructor(
             AvventerInntektsopplysningerForAnnenArbeidsgiver,
             AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerAvsluttetUtenUtbetaling,
-            AvventerAOrdningen,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
             AvventerHistorikk,
@@ -568,7 +561,6 @@ internal class Vedtaksperiode private constructor(
                 AvventerSøknadForOverlappendePeriode,
                 AvventerInntektsopplysningerForAnnenArbeidsgiver,
                 AvventerRefusjonsopplysningerAnnenPeriode,
-                AvventerAOrdningen,
                 AvsluttetUtenUtbetaling,
                 AvventerAvsluttetUtenUtbetaling,
                 SelvstendigAvventerBlokkerendePeriode,
@@ -636,7 +628,6 @@ internal class Vedtaksperiode private constructor(
         when (tilstand) {
             AvsluttetUtenUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, inntektsmelding)
 
-            AvventerAOrdningen,
             AvventerAnnullering,
             AvventerAnnulleringTilUtbetaling,
             AvventerBlokkerendePeriode,
@@ -765,7 +756,6 @@ internal class Vedtaksperiode private constructor(
                 aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
             }
 
-            AvventerAOrdningen,
             Avsluttet,
             ArbeidstakerStart,
             TilInfotrygd -> {
@@ -896,7 +886,6 @@ internal class Vedtaksperiode private constructor(
 
             AvventerInntektsopplysningerForAnnenArbeidsgiver,
             AvventerRefusjonsopplysningerAnnenPeriode,
-            AvventerAOrdningen,
             AvventerAnnullering,
             AvventerAnnulleringTilUtbetaling,
             AvventerGodkjenning,
@@ -1018,7 +1007,6 @@ internal class Vedtaksperiode private constructor(
             Avsluttet,
             TilUtbetaling -> sørgForNyBehandlingHvisIkkeÅpen(eventBus, hendelse)
 
-            AvventerAOrdningen,
             AvventerAnnullering,
             AvventerAnnulleringTilUtbetaling,
             AvventerBlokkerendePeriode,
@@ -1218,7 +1206,6 @@ internal class Vedtaksperiode private constructor(
                 håndterDagerFørstegang(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
             }
 
-            AvventerAOrdningen,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
             AvventerHistorikk,
@@ -1290,7 +1277,6 @@ internal class Vedtaksperiode private constructor(
             AvventerRefusjonsopplysningerAnnenPeriode,
             AvventerGodkjenning,
             AvventerHistorikk,
-            AvventerAOrdningen,
             AvventerInfotrygdHistorikk,
             AvventerSimulering,
             AvventerVilkårsprøving -> dager.skalHåndteresAv(periode)
@@ -1374,7 +1360,6 @@ internal class Vedtaksperiode private constructor(
             AvventerSøknadForOverlappendePeriode,
             AvventerInntektsopplysningerForAnnenArbeidsgiver,
             AvventerRefusjonsopplysningerAnnenPeriode,
-            AvventerAOrdningen,
             AvventerInntektsmelding,
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
@@ -1421,7 +1406,6 @@ internal class Vedtaksperiode private constructor(
         val (nesteSimuleringtilstand, nesteGodkjenningtilstand) = when (tilstand) {
             Avsluttet,
             AvsluttetUtenUtbetaling,
-            AvventerAOrdningen,
             AvventerAnnullering,
             AvventerAnnulleringTilUtbetaling,
             AvventerAvsluttetUtenUtbetaling,
@@ -1676,7 +1660,6 @@ internal class Vedtaksperiode private constructor(
             Avsluttet,
             AvsluttetUtenUtbetaling,
             AvventerAvsluttetUtenUtbetaling,
-            AvventerAOrdningen,
             AvventerAnnullering,
             AvventerAnnulleringTilUtbetaling,
             AvventerBlokkerendePeriode,
@@ -1759,66 +1742,6 @@ internal class Vedtaksperiode private constructor(
         tilstand(eventBus, aktivitetslogg, if (erVedtakIverksatt) nesteAvsluttettilstand else nesteTilUtbetalingtilstand)
     }
 
-    internal fun håndter(eventBus: EventBus, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg): Boolean {
-        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        return when (tilstand) {
-            AvventerAOrdningen -> {
-                if (!håndterSykepengegrunnlagForArbeidsgiver(eventBus, sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedVedtaksperiodekontekst)) return false
-                tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(this))
-                true
-            }
-
-            AvventerRevurdering -> {
-                if (!håndterSykepengegrunnlagForArbeidsgiver(eventBus, sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedVedtaksperiodekontekst)) return false
-                person.gjenopptaBehandling(aktivitetslogg)
-                true
-            }
-
-            Avsluttet,
-            AvsluttetUtenUtbetaling,
-            AvventerAvsluttetUtenUtbetaling,
-            AvventerInntektsmelding,
-            AvventerBlokkerendePeriode,
-            AvventerSøknadForOverlappendePeriode,
-            AvventerInntektsopplysningerForAnnenArbeidsgiver,
-            AvventerRefusjonsopplysningerAnnenPeriode,
-            AvventerGodkjenning,
-            AvventerGodkjenningRevurdering,
-            AvventerHistorikk,
-            AvventerHistorikkRevurdering,
-            AvventerInfotrygdHistorikk,
-            AvventerSimulering,
-            AvventerSimuleringRevurdering,
-            AvventerVilkårsprøving,
-            AvventerVilkårsprøvingRevurdering,
-            ArbeidstakerStart,
-            TilInfotrygd,
-            AvventerAnnullering,
-            AvventerAnnulleringTilUtbetaling,
-            TilAnnullering,
-            TilUtbetaling,
-            AvventerRevurderingTilUtbetaling,
-
-            ArbeidsledigStart,
-            ArbeidsledigAvventerInfotrygdHistorikk,
-            ArbeidsledigAvventerBlokkerendePeriode,
-
-            FrilansStart,
-            FrilansAvventerInfotrygdHistorikk,
-            FrilansAvventerBlokkerendePeriode,
-
-            SelvstendigAvsluttet,
-            SelvstendigAvventerBlokkerendePeriode,
-            SelvstendigAvventerGodkjenning,
-            SelvstendigAvventerHistorikk,
-            SelvstendigAvventerInfotrygdHistorikk,
-            SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving,
-            SelvstendigStart,
-            SelvstendigTilUtbetaling -> false
-        }
-    }
-
     internal fun nullKronerRefusjonOmViManglerRefusjonsopplysninger(eventBus: EventBus, hendelseMetadata: HendelseMetadata, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing? = null) {
         if (refusjonstidslinje.isNotEmpty()) return
 
@@ -1838,48 +1761,6 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg = aktivitetslogg,
             benyttetRefusjonsopplysninger = ingenRefusjon
         )
-    }
-
-    private fun håndterSykepengegrunnlagForArbeidsgiver(eventBus: EventBus, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, aktivitetslogg: IAktivitetslogg): Boolean {
-        if (sykepengegrunnlagForArbeidsgiver.skjæringstidspunkt != skjæringstidspunkt) {
-            aktivitetslogg.info("Vilkårsgrunnlag var relevant for Vedtaksperiode, men skjæringstidspunktene var ulikte: [$skjæringstidspunkt, ${sykepengegrunnlagForArbeidsgiver.skjæringstidspunkt}]")
-            return false
-        }
-
-        aktivitetslogg.info("Håndterer sykepengegrunnlag for arbeidsgiver")
-        aktivitetslogg.varsel(RV_IV_10)
-
-        val skatteopplysninger = sykepengegrunnlagForArbeidsgiver.inntekter()
-        val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteopplysninger)
-
-        val faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(
-            id = UUID.randomUUID(),
-            inntektsdata = Inntektsdata(
-                hendelseId = sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId,
-                dato = skjæringstidspunkt,
-                beløp = omregnetÅrsinntekt,
-                tidsstempel = LocalDateTime.now()
-            ),
-            inntektsopplysningskilde = Arbeidstakerinntektskilde.AOrdningen(skatteopplysninger)
-        )
-
-        yrkesaktivitet.lagreInntektFraAOrdningen(faktaavklartInntekt)
-
-        videreførEksisterendeRefusjonsopplysninger(eventBus = eventBus, dokumentsporing = null, aktivitetslogg = aktivitetslogg)
-        nullKronerRefusjonOmViManglerRefusjonsopplysninger(eventBus, sykepengegrunnlagForArbeidsgiver.metadata, aktivitetslogg, inntektFraAOrdingen(sykepengegrunnlagForArbeidsgiver.metadata.meldingsreferanseId))
-
-        val event = EventSubscription.SkatteinntekterLagtTilGrunnEvent(
-            yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
-            vedtaksperiodeId = id,
-            behandlingId = behandlinger.sisteBehandlingId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            skatteinntekter = skatteopplysninger.map {
-                EventSubscription.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.måned, it.beløp.månedlig)
-            },
-            omregnetÅrsinntekt = omregnetÅrsinntekt.årlig
-        )
-        eventBus.sendSkatteinntekterLagtTilGrunn(event)
-        return true
     }
 
     internal fun håndterVilkårsgrunnlag(eventBus: EventBus, vilkårsgrunnlag: Vilkårsgrunnlag, aktivitetslogg: IAktivitetslogg) {
@@ -1926,7 +1807,6 @@ internal class Vedtaksperiode private constructor(
             Avsluttet,
             AvsluttetUtenUtbetaling,
             AvventerAvsluttetUtenUtbetaling,
-            AvventerAOrdningen,
             AvventerAnnullering,
             AvventerAnnulleringTilUtbetaling,
             AvventerBlokkerendePeriode,
@@ -2071,7 +1951,6 @@ internal class Vedtaksperiode private constructor(
             AvventerAvsluttetUtenUtbetaling,
             AvventerAnnullering,
             AvventerAnnulleringTilUtbetaling,
-            AvventerAOrdningen,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
             AvventerInntektsopplysningerForAnnenArbeidsgiver,
@@ -2186,7 +2065,6 @@ internal class Vedtaksperiode private constructor(
             Avsluttet,
             TilUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, hendelse)
 
-            AvventerAOrdningen,
             AvventerAnnullering,
             AvventerAnnulleringTilUtbetaling,
             AvventerBlokkerendePeriode,
@@ -2322,7 +2200,6 @@ internal class Vedtaksperiode private constructor(
                 }
             }
 
-            AvventerAOrdningen,
             AvventerAvsluttetUtenUtbetaling,
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode,
@@ -2448,7 +2325,6 @@ internal class Vedtaksperiode private constructor(
             AvsluttetUtenUtbetaling,
             TilUtbetaling -> nyBehandling(eventBus, hendelse)
 
-            AvventerAOrdningen,
             AvventerAvsluttetUtenUtbetaling,
             AvventerAnnullering,
             AvventerAnnulleringTilUtbetaling,
@@ -2833,17 +2709,6 @@ internal class Vedtaksperiode private constructor(
         medlemskap(aktivitetslogg, skjæringstidspunkt, periode.start, periode.endInclusive)
     }
 
-    internal fun trengerInntektFraSkatt(aktivitetslogg: IAktivitetslogg) {
-        val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
-        inntekterForSykepengegrunnlagForArbeidsgiver(
-            aktivitetslogg,
-            skjæringstidspunkt,
-            yrkesaktivitet.organisasjonsnummer,
-            beregningSlutt.minusMonths(2),
-            beregningSlutt
-        )
-    }
-
     private fun emitVedtaksperiodeEndret(eventBus: EventBus, previousState: Vedtaksperiodetilstand) {
         val event = EventSubscription.VedtaksperiodeEndretEvent(
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
@@ -3030,7 +2895,6 @@ internal class Vedtaksperiode private constructor(
             FrilansAvventerInfotrygdHistorikk,
             AvventerInfotrygdHistorikk,
             AvventerVilkårsprøving,
-            AvventerAOrdningen,
             AvventerVilkårsprøvingRevurdering,
             SelvstendigAvventerInfotrygdHistorikk,
             SelvstendigAvventerVilkårsprøving,
@@ -3146,7 +3010,7 @@ internal class Vedtaksperiode private constructor(
     internal fun førstePeriodeSomVenterPåRefusjonsopplysninger(): Vedtaksperiode? {
         return perioderSomMåHensyntasVedBeregning()
             .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
-            .filter { it.tilstand in setOf(ArbeidstakerStart, AvventerInntektsmelding, AvventerAOrdningen) }
+            .filter { it.tilstand in setOf(ArbeidstakerStart, AvventerInntektsmelding) }
             .filterNot { it === this }
             .minOrNull()
     }
@@ -3155,7 +3019,7 @@ internal class Vedtaksperiode private constructor(
         return person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
             .filter { it.yrkesaktivitet !== this.yrkesaktivitet }
-            .filter { it.tilstand in setOf(ArbeidstakerStart, AvventerInntektsmelding, AvventerAOrdningen) }
+            .filter { it.tilstand in setOf(ArbeidstakerStart, AvventerInntektsmelding) }
             .minOrNull()
     }
 
@@ -3392,7 +3256,6 @@ internal class Vedtaksperiode private constructor(
                     VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE -> AvventerSøknadForOverlappendePeriode
                     VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER -> AvventerInntektsopplysningerForAnnenArbeidsgiver
                     VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE -> AvventerRefusjonsopplysningerAnnenPeriode
-                    VedtaksperiodetilstandDto.AVVENTER_A_ORDNINGEN -> AvventerAOrdningen
                     VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> AvventerGodkjenning
                     VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING -> AvventerGodkjenningRevurdering
                     VedtaksperiodetilstandDto.AVVENTER_HISTORIKK -> AvventerHistorikk
@@ -3491,7 +3354,6 @@ internal class Vedtaksperiode private constructor(
             AvventerSøknadForOverlappendePeriode -> VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE
             AvventerInntektsopplysningerForAnnenArbeidsgiver -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
             AvventerRefusjonsopplysningerAnnenPeriode -> VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
-            AvventerAOrdningen -> VedtaksperiodetilstandDto.AVVENTER_A_ORDNINGEN
             AvventerGodkjenning -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING
             AvventerGodkjenningRevurdering -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
             AvventerHistorikk -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK
@@ -3782,7 +3644,6 @@ private fun nesteTilstandEtterIgangsattOverstyring(
         else -> AvventerAvsluttetUtenUtbetaling
     }
 
-    AvventerAOrdningen,
     AvventerBlokkerendePeriode,
     AvventerSøknadForOverlappendePeriode,
     AvventerInntektsopplysningerForAnnenArbeidsgiver,

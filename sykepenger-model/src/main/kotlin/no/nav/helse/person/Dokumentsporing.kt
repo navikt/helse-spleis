@@ -14,7 +14,6 @@ data class Dokumentsporing(
         internal fun inntektsmeldingInntekt(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.InntektsmeldingInntekt)
         internal fun inntektsmeldingRefusjon(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.InntektsmeldingRefusjon)
         internal fun inntektsmeldingDager(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.InntektsmeldingDager)
-        internal fun inntektFraAOrdingen(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.InntektFraAOrdningen)
         internal fun overstyrTidslinje(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.OverstyrTidslinje)
         internal fun overstyrArbeidsgiveropplysninger(id: MeldingsreferanseId) = Dokumentsporing(id, DokumentType.OverstyrArbeidsgiveropplysninger)
 

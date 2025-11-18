@@ -45,7 +45,6 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_NAV
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_SELVSTENDIG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SKJØNNSMESSIG_FASTSETTELSE
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGODKJENNING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_ETTER_IT_ENDRING
@@ -94,7 +93,6 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
-import no.nav.helse.spleis.meldinger.model.SykepengegrunnlagForArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
@@ -187,7 +185,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is AvbruttSøknadMessage -> AVBRUTT_SØKNAD
         is InntektsmeldingerReplayMessage -> INNTEKTSMELDINGER_REPLAY
         is MinimumSykdomsgradVurdertMessage -> MINIMUM_SYKDOMSGRAD_VURDERT
-        is SykepengegrunnlagForArbeidsgiverMessage -> SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
 
         is MigrateMessage,
         is AvstemmingMessage,

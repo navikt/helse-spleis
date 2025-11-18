@@ -54,7 +54,6 @@ import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtSelvstendigSøknaderRiver
 import no.nav.helse.spleis.meldinger.SimuleringerRiver
 import no.nav.helse.spleis.meldinger.SkjønnsmessigFastsettelseRiver
-import no.nav.helse.spleis.meldinger.SykepengegrunnlagForArbeidsgiverRiver
 import no.nav.helse.spleis.meldinger.UtbetalingerRiver
 import no.nav.helse.spleis.meldinger.UtbetalingsgodkjenningerRiver
 import no.nav.helse.spleis.meldinger.UtbetalingshistorikkEtterInfotrygdendringRiver
@@ -104,7 +103,6 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
-import no.nav.helse.spleis.meldinger.model.SykepengegrunnlagForArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
@@ -145,7 +143,6 @@ internal class MessageMediator(
             UtbetalingshistorikkRiver(it, this)
             UtbetalingshistorikkForFeriepengerRiver(it, this)
             YtelserRiver(it, this)
-            SykepengegrunnlagForArbeidsgiverRiver(it, this)
             VilkårsgrunnlagRiver(it, this)
             UtbetalingsgodkjenningerRiver(it, this)
             UtbetalingerRiver(it, this)
@@ -228,7 +225,6 @@ internal class MessageMediator(
         is AnnulleringMessage,
         is AvstemmingMessage,
         is SimuleringMessage,
-        is SykepengegrunnlagForArbeidsgiverMessage,
         is UtbetalingMessage,
         is FeriepengeutbetalingMessage,
         is UtbetalingsgodkjenningMessage,

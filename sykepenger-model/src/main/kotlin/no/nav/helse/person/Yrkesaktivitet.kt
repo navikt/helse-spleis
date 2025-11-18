@@ -44,7 +44,6 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
@@ -649,29 +648,6 @@ internal class Yrkesaktivitet private constructor(
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         return énHåndtert(utbetalingsavgjørelse) {
             håndterUtbetalingsavgjørelse(eventBus, utbetalingsavgjørelse, aktivitetsloggMedArbeidsgiverkontekst)
-        }
-    }
-
-    internal fun lagreInntektFraAOrdningen(
-        faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
-    ) {
-        val im = Inntektsmeldinginntekt(
-            id = faktaavklartInntekt.id,
-            inntektsdata = faktaavklartInntekt.inntektsdata,
-            kilde = Inntektsmeldinginntekt.Kilde.AOrdningen
-        )
-
-        inntektshistorikk.leggTil(im)
-    }
-
-    internal fun håndterSykepengegrunnlagForArbeidsgiver(
-        eventBus: EventBus,
-        sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        énHarHåndtert(sykepengegrunnlagForArbeidsgiver) {
-            håndter(eventBus, sykepengegrunnlagForArbeidsgiver, aktivitetsloggMedArbeidsgiverkontekst)
         }
     }
 
