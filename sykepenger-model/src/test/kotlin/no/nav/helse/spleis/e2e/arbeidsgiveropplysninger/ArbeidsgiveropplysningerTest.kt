@@ -102,10 +102,9 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertInntektsgrunnlag(1.januar, 2) {
                 assertInntektsgrunnlag(a1, forventetFaktaavklartInntekt = INNTEKT * 1.2, forventetkilde = Arbeidstakerkilde.Arbeidsgiver)
-                assertInntektsgrunnlag(a2, forventetFaktaavklartInntekt = INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(a2, forventetFaktaavklartInntekt = INNTEKT * 1.1, forventetkilde = Arbeidstakerkilde.Arbeidsgiver)
             }
-            assertVarsler(1.vedtaksperiode, Varselkode.RV_IV_10)
-            assertEquals(1, observatør.skatteinntekterLagtTilGrunnEventer.size)
+            assertEquals(0, observatør.skatteinntekterLagtTilGrunnEventer.size)
         }
     }
 
