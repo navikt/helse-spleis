@@ -7,7 +7,6 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedDeque
-import kotlin.collections.first
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg
@@ -15,6 +14,7 @@ import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
@@ -38,11 +38,10 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.IdInnhenter
 import no.nav.helse.spleis.speil.serializePersonForSpeil
-import no.nav.helse.spleis.testhelpers.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.testhelpers.PersonHendelsefabrikk
-import no.nav.helse.spleis.testhelpers.SelvstendigHendelsefabrikk
 import no.nav.helse.spleis.testhelpers.TestObservatør
+import no.nav.helse.spleis.testhelpers.YrkesaktivitetHendelsefabrikk
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
@@ -64,14 +63,15 @@ internal abstract class AbstractSpeilBuilderTest {
         val INNTEKT = 48000.månedlig
 
         private val personfabrikk = PersonHendelsefabrikk()
-        private val a1fabrikk = ArbeidsgiverHendelsefabrikk(a1)
-        private val a2fabrikk = ArbeidsgiverHendelsefabrikk(a2)
-        private val a3fabrikk = ArbeidsgiverHendelsefabrikk(a3)
-        private val selvstendigFabrikk = SelvstendigHendelsefabrikk()
+        private val a1fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1))
+        private val a2fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2))
+        private val a3fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a3))
+        private val selvstendigFabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Selvstendig)
         private val fabrikker = mapOf(
             a1 to a1fabrikk,
             a2 to a2fabrikk,
-            a3 to a3fabrikk
+            a3 to a3fabrikk,
+            "SELVSTENDIG" to selvstendigFabrikk
         )
     }
 
@@ -173,10 +173,8 @@ internal abstract class AbstractSpeilBuilderTest {
             arbeidssituasjon = arbeidssituasjon,
             fraværFørSykmelding = fraværFørSykmelding
         )
-        søknad.håndter(Person::håndterSøknad)
 
-        val behov = hendelselogg.infotrygdhistorikkbehov()
-        if (behov != null) håndterUtbetalingshistorikkSelvstendig(behov.vedtaksperiodeId)
+        håndterSøknad(søknad)
 
         return søknadId
     }
@@ -186,7 +184,8 @@ internal abstract class AbstractSpeilBuilderTest {
         sykmeldingSkrevet: LocalDateTime = 1.januar.atStartOfDay(),
         sendtTilNAV: LocalDateTime = 1.januar.atStartOfDay(),
         orgnummer: String = a1,
-        inntekterFraNyeArbeidsforhold: Boolean = false
+        inntekterFraNyeArbeidsforhold: Boolean = false,
+        arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER
     ): UUID {
         val søknadId = UUID.randomUUID()
         val søknad = fabrikker.getValue(orgnummer).lagSøknad(
@@ -194,14 +193,20 @@ internal abstract class AbstractSpeilBuilderTest {
             sykmeldingSkrevet = sykmeldingSkrevet,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAV,
             id = søknadId,
+            arbeidssituasjon = arbeidssituasjon,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold
         )
+
+        håndterSøknad(søknad)
+
+        return søknadId
+    }
+
+    private fun håndterSøknad(søknad: Søknad) {
         søknad.håndter(Person::håndterSøknad)
 
         val behov = hendelselogg.infotrygdhistorikkbehov()
         if (behov != null) håndterUtbetalingshistorikk(behov.vedtaksperiodeId, orgnummer = behov.orgnummer)
-
-        return søknadId
     }
 
     protected fun håndterPåminnelse(
@@ -223,12 +228,6 @@ internal abstract class AbstractSpeilBuilderTest {
 
     protected fun håndterUtbetalingshistorikk(vedtaksperiodeId: UUID, orgnummer: String) {
         (fabrikker.getValue(orgnummer).lagUtbetalingshistorikk(
-            vedtaksperiodeId = vedtaksperiodeId
-        )).håndter(Person::håndterUtbetalingshistorikk)
-    }
-
-    protected fun håndterUtbetalingshistorikkSelvstendig(vedtaksperiodeId: UUID) {
-        (selvstendigFabrikk.lagUtbetalingshistorikk(
             vedtaksperiodeId = vedtaksperiodeId
         )).håndter(Person::håndterUtbetalingshistorikk)
     }
@@ -328,45 +327,50 @@ internal abstract class AbstractSpeilBuilderTest {
 
     protected fun håndterVilkårsgrunnlag(inntekter: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT), arbeidsforhold: List<Pair<String, LocalDate>> = listOf(a1 to EPOCH)) {
         val behov = hendelselogg.vilkårsgrunnlagbehov() ?: error("Fant ikke vilkårsgrunnlagbehov")
-        val vilkårsgrunnlagbehov = when (behov.yrkesaktivitetstype) {
-            "SELVSTENDIG" -> selvstendigFabrikk.lagVilkårsgrunnlag(
-                vedtaksperiodeId = behov.vedtaksperiodeId,
-                skjæringstidspunkt = behov.skjæringstidspunkt,
-                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-                arbeidsforhold = emptyList(),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
-                inntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(emptyList())
-            )
-            "ARBEIDSTAKER" -> fabrikker.getValue(behov.orgnummer).lagVilkårsgrunnlag(
-                vedtaksperiodeId = behov.vedtaksperiodeId,
-                skjæringstidspunkt = behov.skjæringstidspunkt,
-                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-                arbeidsforhold = arbeidsforhold.map { (orgnr, oppstart) ->
-                    Vilkårsgrunnlag.Arbeidsforhold(orgnr, oppstart, type = Arbeidsforholdtype.ORDINÆRT)
-                },
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = inntekter.map { (orgnr, inntekt) -> grunnlag(orgnr, behov.skjæringstidspunkt, (1..3).map { inntekt }) }
-                ),
-                inntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(inntekter = inntekter.map { arbeidsgiverInntekt ->
-                    val orgnummer = arbeidsgiverInntekt.first
-                    val inntekt = arbeidsgiverInntekt.second
-                    val måned = behov.skjæringstidspunkt.minusMonths(1L)
-                    ArbeidsgiverInntekt(
-                        arbeidsgiver = orgnummer,
-                        inntekter = listOf(
-                            ArbeidsgiverInntekt.MånedligInntekt(
-                                YearMonth.from(måned),
-                                inntekt,
-                                ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                                "kontantytelse",
-                                "fastloenn"
-                            )
+        val inntekterForOpptjeningsvurdering = when (behov.yrkesaktivitetstype) {
+            "SELVSTENDIG" -> InntekterForOpptjeningsvurdering(emptyList())
+            "ARBEIDSTAKER" -> InntekterForOpptjeningsvurdering(inntekter = inntekter.map { arbeidsgiverInntekt ->
+                val orgnummer = arbeidsgiverInntekt.first
+                val inntekt = arbeidsgiverInntekt.second
+                val måned = behov.skjæringstidspunkt.minusMonths(1L)
+                ArbeidsgiverInntekt(
+                    arbeidsgiver = orgnummer,
+                    inntekter = listOf(
+                        ArbeidsgiverInntekt.MånedligInntekt(
+                            YearMonth.from(måned),
+                            inntekt,
+                            ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                            "kontantytelse",
+                            "fastloenn"
                         )
                     )
-                })
-            )
-            else -> error("Kan ikke lage simulering for ${behov.yrkesaktivitetstype}")
+                )
+            })
+            else -> error("støtter ikke ${behov.yrkesaktivitetstype}")
         }
+        val inntektsvurderingForSykepengegrunnlag = when (behov.yrkesaktivitetstype) {
+            "SELVSTENDIG" -> InntektForSykepengegrunnlag(emptyList())
+            "ARBEIDSTAKER" -> InntektForSykepengegrunnlag(
+                inntekter = inntekter.map { (orgnr, inntekt) -> grunnlag(orgnr, behov.skjæringstidspunkt, (1..3).map { inntekt }) }
+            )
+            else -> error("støtter ikke ${behov.yrkesaktivitetstype}")
+        }
+        val arbeidsforhold = when (behov.yrkesaktivitetstype) {
+            "SELVSTENDIG" -> emptyList()
+            "ARBEIDSTAKER" -> arbeidsforhold.map { (orgnr, oppstart) ->
+                Vilkårsgrunnlag.Arbeidsforhold(orgnr, oppstart, type = Arbeidsforholdtype.ORDINÆRT)
+            }
+            else -> error("støtter ikke ${behov.yrkesaktivitetstype}")
+        }
+        val vilkårsgrunnlagbehov = fabrikker.getValue(behov.orgnummer).lagVilkårsgrunnlag(
+            vedtaksperiodeId = behov.vedtaksperiodeId,
+            skjæringstidspunkt = behov.skjæringstidspunkt,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            arbeidsforhold = arbeidsforhold,
+            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering
+        )
+
         vilkårsgrunnlagbehov.håndter(Person::håndterVilkårsgrunnlag)
     }
 
@@ -391,11 +395,7 @@ internal abstract class AbstractSpeilBuilderTest {
 
     protected fun håndterYtelser() {
         val ytelsebehov = hendelselogg.ytelserbehov() ?: error("Fant ikke ytelserbehov")
-        val ytelser = when (ytelsebehov.yrkesaktivitetstype) {
-            "SELVSTENDIG" -> selvstendigFabrikk.lagYtelser(vedtaksperiodeId = ytelsebehov.vedtaksperiodeId)
-            "ARBEIDSTAKER" -> fabrikker.getValue(ytelsebehov.orgnummer).lagYtelser(vedtaksperiodeId = ytelsebehov.vedtaksperiodeId)
-            else -> error("Kan ikke lage ytelsebehov for ${ytelsebehov.yrkesaktivitetstype}")
-        }
+        val ytelser = fabrikker.getValue(ytelsebehov.orgnummer).lagYtelser(vedtaksperiodeId = ytelsebehov.vedtaksperiodeId)
         ytelser.håndter(Person::håndterYtelser)
     }
 
@@ -403,11 +403,14 @@ internal abstract class AbstractSpeilBuilderTest {
         val simuleringer = hendelselogg.simuleringbehov() ?: error("Fant ikke simuleringsbehov")
         simuleringer.forEach { behov ->
             behov.oppdrag.forEach {
-                val simulering = when (behov.yrkesaktivitetstype) {
-                    "SELVSTENDIG" -> selvstendigFabrikk.lagSimulering(vedtaksperiodeId = behov.vedtaksperiodeId, utbetalingId = behov.utbetalingId, fagsystemId = it.fagsystemId, fagområde = it.fagområde, simuleringOK = true, simuleringsresultat = null)
-                    "ARBEIDSTAKER" -> fabrikker.getValue(behov.orgnummer).lagSimulering(vedtaksperiodeId = behov.vedtaksperiodeId, utbetalingId = behov.utbetalingId, fagsystemId = it.fagsystemId, fagområde = it.fagområde, simuleringOK = true, simuleringsresultat = null)
-                    else -> error("Kan ikke lage simulering for ${behov.yrkesaktivitetstype}")
-                }
+                val simulering = fabrikker.getValue(behov.orgnummer).lagSimulering(
+                    vedtaksperiodeId = behov.vedtaksperiodeId,
+                    utbetalingId = behov.utbetalingId,
+                    fagsystemId = it.fagsystemId,
+                    fagområde = it.fagområde,
+                    simuleringOK = true,
+                    simuleringsresultat = null
+                )
                 simulering.håndter(Person::håndterSimulering)
             }
         }
@@ -515,45 +518,25 @@ internal abstract class AbstractSpeilBuilderTest {
 
     protected fun håndterUtbetalingsgodkjenning(utbetalingGodkjent: Boolean = true) {
         val behov = hendelselogg.godkjenningbehov() ?: error("Fant ikke godkjenningsbehov")
-        val utbetalingsgodkjenning = when (behov.yrkesaktivitetstype) {
-            "SELVSTENDIG" -> selvstendigFabrikk.lagUtbetalingsgodkjenning(
-                vedtaksperiodeId = behov.vedtaksperiodeId,
-                utbetalingGodkjent = utbetalingGodkjent,
-                automatiskBehandling = true,
-                utbetalingId = behov.utbetalingId
-            )
-            "ARBEIDSTAKER" -> fabrikker.getValue(behov.orgnummer).lagUtbetalingsgodkjenning(
-                vedtaksperiodeId = behov.vedtaksperiodeId,
-                utbetalingGodkjent = utbetalingGodkjent,
-                automatiskBehandling = true,
-                utbetalingId = behov.utbetalingId
-            )
-            else -> error("Kan ikke lage simulering for ${behov.yrkesaktivitetstype}")
-        }
+        val utbetalingsgodkjenning = fabrikker.getValue(behov.orgnummer).lagUtbetalingsgodkjenning(
+            vedtaksperiodeId = behov.vedtaksperiodeId,
+            utbetalingGodkjent = utbetalingGodkjent,
+            automatiskBehandling = true,
+            utbetalingId = behov.utbetalingId
+        )
         utbetalingsgodkjenning.håndter(Person::håndterUtbetalingsgodkjenning)
     }
 
     protected fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT): Utbetalingbehov {
         val behov = hendelselogg.utbetalingbehov() ?: error("Fant ikke utbetalingbehov")
         behov.oppdrag.forEach {
-
-            val utbetaling = when (behov.yrkesaktivitetstype) {
-                "SELVSTENDIG" -> selvstendigFabrikk.lagUtbetalinghendelse(
-                    vedtaksperiodeId = behov.vedtaksperiodeId,
-                    behandlingId = behov.behandlingId,
-                    utbetalingId = behov.utbetalingId,
-                    fagsystemId = it.fagsystemId,
-                    status = status
-                )
-                "ARBEIDSTAKER" -> fabrikker.getValue(behov.orgnummer).lagUtbetalinghendelse(
-                    vedtaksperiodeId = behov.vedtaksperiodeId,
-                    behandlingId = behov.behandlingId,
-                    utbetalingId = behov.utbetalingId,
-                    fagsystemId = it.fagsystemId,
-                    status = status
-                )
-                else -> error("Kan ikke lage simulering for ${behov.yrkesaktivitetstype}")
-            }
+            val utbetaling = fabrikker.getValue(behov.orgnummer).lagUtbetalinghendelse(
+                vedtaksperiodeId = behov.vedtaksperiodeId,
+                behandlingId = behov.behandlingId,
+                utbetalingId = behov.utbetalingId,
+                fagsystemId = it.fagsystemId,
+                status = status
+            )
             utbetaling.håndter(Person::håndterUtbetalingHendelse)
         }
         return behov

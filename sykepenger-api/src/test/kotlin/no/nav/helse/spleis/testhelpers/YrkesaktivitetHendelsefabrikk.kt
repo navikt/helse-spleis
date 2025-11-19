@@ -41,6 +41,7 @@ import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.PensjonsgivendeInntekt
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
 import no.nav.helse.hendelser.Utbetalingshistorikk
@@ -54,7 +55,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 
-internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: String) {
+internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Behandlingsporing.Yrkesaktivitet) {
 
     private val sykmeldinger = mutableListOf<Sykmelding>()
     private val søknader = mutableListOf<Søknad>()
@@ -66,7 +67,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     ): Sykmelding {
         return Sykmelding(
             meldingsreferanseId = MeldingsreferanseId(id),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             sykeperioder = listOf(*sykeperioder)
         ).apply {
             sykmeldinger.add(this)
@@ -89,13 +90,20 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         opprinneligSendt: LocalDate? = null,
         yrkesskade: Boolean = false,
         egenmeldinger: List<Periode> = emptyList(),
-        arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER,
         registrert: LocalDateTime = LocalDateTime.now(),
-        inntekterFraNyeArbeidsforhold: Boolean = false
+        inntekterFraNyeArbeidsforhold: Boolean = false,
+        pensjonsgivendeInntekter: List<PensjonsgivendeInntekt> = emptyList(),
+        fraværFørSykmelding: Boolean? = null,
+        harOppgittAvvikling: Boolean? = null,
+        harOppgittNyIArbeidslivet: Boolean? = null,
+        harOppgittVarigEndring: Boolean? = null,
+        harOppgittOpprettholdtInntekt: Boolean? = null,
+        harOppgittOppholdIUtlandet: Boolean? = null,
+        arbeidssituasjon: Søknad.Arbeidssituasjon
     ): Søknad {
         return Søknad(
             meldingsreferanseId = MeldingsreferanseId(id),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             perioder = listOf(*perioder),
             andreInntektskilder = andreInntektskilder,
             ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
@@ -112,13 +120,13 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             arbeidssituasjon = arbeidssituasjon,
             registrert = registrert,
             inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-            pensjonsgivendeInntekter = null,
-            fraværFørSykmelding = null,
-            harOppgittAvvikling = null,
-            harOppgittNyIArbeidslivet = null,
-            harOppgittVarigEndring = null,
-            harOppgittOpprettholdtInntekt = null,
-            harOppgittOppholdIUtlandet = null
+            pensjonsgivendeInntekter = pensjonsgivendeInntekter,
+            fraværFørSykmelding = fraværFørSykmelding,
+            harOppgittAvvikling = harOppgittAvvikling,
+            harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
+            harOppgittVarigEndring = harOppgittVarigEndring,
+            harOppgittOpprettholdtInntekt = harOppgittOpprettholdtInntekt,
+            harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet
         ).apply {
             søknader.add(this)
         }
@@ -139,9 +147,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             Inntektsmelding(
                 meldingsreferanseId = MeldingsreferanseId(id),
                 refusjon = refusjon,
-                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                    organisasjonsnummer = organisasjonsnummer
-                ),
+                behandlingsporing = behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
                 beregnetInntekt = beregnetInntekt,
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
@@ -168,9 +174,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
         registrert = mottatt.plusSeconds(1),
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-            organisasjonsnummer = organisasjonsnummer
-        ),
+        behandlingsporing = behandlingsporing,
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
@@ -194,7 +198,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
         registrert = mottatt.plusSeconds(1),
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+        behandlingsporing = behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
@@ -206,11 +210,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     )
 
     internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) =
-        InntektsmeldingerReplay(
-            MeldingsreferanseId(UUID.randomUUID()), Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-            organisasjonsnummer = organisasjonsnummer
-        ), vedtaksperiodeId, emptyList()
-        )
+        InntektsmeldingerReplay(MeldingsreferanseId(UUID.randomUUID()), behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker, vedtaksperiodeId, emptyList())
 
     internal fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
@@ -219,7 +219,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     ) =
         Utbetalingshistorikk(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId,
             element = InfotrygdhistorikkElement.opprett(
                 oppdatert = besvart,
@@ -256,7 +256,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             skjæringstidspunkt = skjæringstidspunkt,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
@@ -280,7 +280,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             foreldrepenger = Foreldrepenger(
                 foreldrepengeytelse = foreldrepenger,
@@ -318,7 +318,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         return Simulering(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             fagsystemId = fagsystemId,
             fagområde = fagområde,
             simuleringOK = simuleringOK,
@@ -336,7 +336,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         godkjenttidspunkt: LocalDateTime = LocalDateTime.now()
     ) = Utbetalingsgodkjenning(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+        behandlingsporing = behandlingsporing,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         saksbehandler = "Ola Nordmann",
@@ -353,7 +353,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()
     ) = VedtakFattet(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+        behandlingsporing = behandlingsporing,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId,
         saksbehandlerIdent = "Vedtak fattesen",
@@ -368,9 +368,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
         automatisert: Boolean = true
     ) = KanIkkeBehandlesHer(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-            organisasjonsnummer = organisasjonsnummer
-        ),
+        behandlingsporing = behandlingsporing,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId,
         saksbehandlerIdent = "Info trygdesen",
@@ -389,7 +387,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     ) =
         UtbetalingHendelse(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             fagsystemId = fagsystemId,
@@ -403,9 +401,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagAnnullering(vedtaksperiodeId: UUID) =
         AnnullerUtbetaling(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                organisasjonsnummer = organisasjonsnummer
-            ),
+            behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId,
             saksbehandlerIdent = "Ola Nordmann",
             saksbehandlerEpost = "tbd@nav.no",
@@ -422,7 +418,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime, flagg: Set<String> = emptySet()) =
         Påminnelse(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             antallGangerPåminnet = 0,
             tilstand = tilstand,
@@ -443,18 +439,14 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagHåndterForkastSykmeldingsperioder(periode: Periode) =
         ForkastSykmeldingsperioder(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                organisasjonsnummer = organisasjonsnummer
-            ),
+            behandlingsporing = behandlingsporing,
             periode = periode
         )
 
     internal fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID, force: Boolean = false) =
         AnmodningOmForkasting(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                organisasjonsnummer = organisasjonsnummer
-            ),
+            behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId,
             force = force
         )
@@ -462,7 +454,7 @@ internal class ArbeidsgiverHendelsefabrikk(private val organisasjonsnummer: Stri
     internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>, meldingsreferanseId: UUID = UUID.randomUUID()) =
         OverstyrTidslinje(
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            behandlingsporing = behandlingsporing,
             dager = overstyringsdager,
             opprettet = LocalDateTime.now()
         )
