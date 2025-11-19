@@ -25,6 +25,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_37
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -97,7 +98,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
-        assertVarsler(listOf(RV_IT_14), 1.vedtaksperiode.filter(a1))
+        assertVarsler(listOf(RV_IT_14, RV_IV_10), 1.vedtaksperiode.filter(a1))
         assertEquals(refusjonFør, inspektør.refusjon(1.vedtaksperiode))
     }
 
