@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.person.Behovsamler
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Vedtaksperiode
@@ -20,7 +21,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
         tilstandsendringstidspunkt.plusDays(180)
 
-    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg, behovsamler: Behovsamler) {
         check(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) { "Forventer kun arbeidstakere her" }
         //check(!vedtaksperiode.behandlinger.erTidligereVilkårspørvd()) { "En tidligere vilkårsprøvd periode skal ikke tilbake til AvventerInntektsmelding!" }
         trengerInntektsmeldingReplay(vedtaksperiode, eventBus)
@@ -32,7 +33,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         }
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg, behovsamler: Behovsamler): Revurderingseventyr? {
         if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, påminnelse)) {
             aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
             return null
@@ -61,7 +62,8 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         vedtaksperiode: Vedtaksperiode,
         eventBus: EventBus,
         hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg
+        aktivitetslogg: IAktivitetslogg,
+        behovsamler: Behovsamler
     ) {
         vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, hendelse)
     }

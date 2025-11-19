@@ -276,10 +276,10 @@ class Person private constructor(
         håndterGjenoppta(eventBus, identOpphørt, aktivitetsloggMedPersonkontekst)
     }
 
-    fun håndterInfotrygdendringer(eventBus: EventBus, infotrygdendring: Infotrygdendring, aktivitetslogg: IAktivitetslogg) {
+    fun håndterInfotrygdendringer(eventBus: EventBus, infotrygdendring: Infotrygdendring, aktivitetslogg: IAktivitetslogg, behovsamler: Behovsamler) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler infotrygdendring")
         val tidligsteDato = yrkesaktiviteter.tidligsteDato()
-        infotrygdhistorikk.oppfrisk(aktivitetsloggMedPersonkontekst, tidligsteDato)
+        infotrygdhistorikk.oppfrisk(behovsamler, aktivitetsloggMedPersonkontekst, tidligsteDato)
         håndterGjenoppta(eventBus, infotrygdendring, aktivitetsloggMedPersonkontekst)
     }
 
@@ -478,8 +478,8 @@ class Person private constructor(
         .map { it.grunnlagForFeriepenger() }
         .fold(Feriepengegrunnlagstidslinje(emptyList()), Feriepengegrunnlagstidslinje::plus)
 
-    internal fun trengerHistorikkFraInfotrygd(aktivitetslogg: IAktivitetslogg) {
-        infotrygdhistorikk.oppfriskNødvendig(aktivitetslogg, yrkesaktiviteter.tidligsteDato())
+    internal fun trengerHistorikkFraInfotrygd(behovsamler: Behovsamler, aktivitetslogg: IAktivitetslogg) {
+        infotrygdhistorikk.oppfriskNødvendig(behovsamler, aktivitetslogg, yrkesaktiviteter.tidligsteDato())
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {

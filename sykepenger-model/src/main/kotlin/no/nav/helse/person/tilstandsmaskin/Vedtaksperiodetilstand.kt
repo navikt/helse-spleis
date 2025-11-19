@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.person.Behovsamler
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -17,7 +18,7 @@ internal sealed interface Vedtaksperiodetilstand {
     val type: TilstandType
     val erFerdigBehandlet: Boolean get() = false
 
-    fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {}
+    fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg, behovsamler: Behovsamler) {}
     fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
         LocalDateTime.MAX
 
@@ -35,7 +36,7 @@ internal sealed interface Vedtaksperiodetilstand {
     ) {
     }
 
-    fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg, behovsamler: Behovsamler): Revurderingseventyr? {
         return null
     }
 
@@ -50,7 +51,8 @@ internal sealed interface Vedtaksperiodetilstand {
         vedtaksperiode: Vedtaksperiode,
         eventBus: EventBus,
         hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg
+        aktivitetslogg: IAktivitetslogg,
+        behovsamler: Behovsamler
     ) {
         aktivitetslogg.info("Tidligere periode ferdigbehandlet, men gjør ingen tilstandsendring.")
     }

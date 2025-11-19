@@ -3,6 +3,7 @@ package no.nav.helse.person.tilstandsmaskin
 import java.time.LocalDateTime
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Hendelse
+import no.nav.helse.person.Behovsamler
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -15,11 +16,16 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 internal data object AvventerAnnullering : Vedtaksperiodetilstand {
     override val type = TilstandType.AVVENTER_ANNULLERING
 
-    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+    override fun entering(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        aktivitetslogg: IAktivitetslogg,
+        behovsamler: Behovsamler
+    ) {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+    override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, behovsamler: Behovsamler) {
         val sisteUtbetalteUtbetaling = vedtaksperiode.behandlinger.sisteUtbetalteUtbetaling()
         checkNotNull(sisteUtbetalteUtbetaling) { "Fant ikke en utbetalt utbetaling for vedtaksperiode ${vedtaksperiode.id}" }
 

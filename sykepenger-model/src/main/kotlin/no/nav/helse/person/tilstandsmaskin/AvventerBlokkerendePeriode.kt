@@ -3,6 +3,7 @@ package no.nav.helse.person.tilstandsmaskin
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.person.Behovsamler
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -30,7 +31,7 @@ internal fun Vedtaksperiodetilstand.bekreftAtPeriodenSkalBehandlesISpeilOgHarNok
 
 internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg, behovsamler: Behovsamler) {
         bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode)
         check(!vedtaksperiode.avventerSøknad()) { "forventer ikke å vente annen søknad" }
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
@@ -40,7 +41,8 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         vedtaksperiode: Vedtaksperiode,
         eventBus: EventBus,
         hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg
+        aktivitetslogg: IAktivitetslogg,
+        behovsamler: Behovsamler
     ) {
         val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
         when {
@@ -50,7 +52,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         }
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg, behovsamler: Behovsamler): Revurderingseventyr? {
         val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
         when {
             nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)

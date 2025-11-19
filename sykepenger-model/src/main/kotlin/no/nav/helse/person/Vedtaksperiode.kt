@@ -287,6 +287,13 @@ internal class Vedtaksperiode private constructor(
     private val eksterneIderSet get() = behandlinger.eksterneIderUUID()
     internal val refusjonstidslinje get() = behandlinger.refusjonstidslinje()
 
+    internal val BehovBus.behovsamler get() =
+        Behovsamler(this, listOf(
+            Behov.Behovkontekst.Yrkesaktivitet(yrkesaktivitet.yrkesaktivitetstype),
+            Behov.Behovkontekst.Vedtaksperiode(id),
+            Behov.Behovkontekst.Behandling(behandlinger.sisteBehandlingId),
+            Behov.Behovkontekst.Vedtaksperiodetilstand(tilstand.type)
+        ))
     internal val EventBus.behandlingEventBus get() =
         BehandlingEventBus(this, yrkesaktivitet.yrkesaktivitetstype, id, behandlinger.søknadIder())
 
@@ -2155,10 +2162,10 @@ internal class Vedtaksperiode private constructor(
         return annullering(hendelse, periodeForEndring)
     }
 
-    internal fun håndterPåminnelse(eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    internal fun håndterPåminnelse(eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg, behovsamler: Behovsamler): Revurderingseventyr? {
         if (!påminnelse.erRelevant(id)) return null
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        return tilstand.påminnelse(eventBus, this, påminnelse, aktivitetsloggMedVedtaksperiodekontekst)
+        return tilstand.påminnelse(eventBus, this, påminnelse, aktivitetsloggMedVedtaksperiodekontekst, behovsamler)
     }
 
     internal fun håndterOverstyrArbeidsgiveropplysninger(overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
@@ -2453,6 +2460,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun tilstand(
         eventBus: EventBus,
+        behovsamler: Behovsamler,
         event: IAktivitetslogg,
         nyTilstand: Vedtaksperiodetilstand,
         block: () -> Unit = {}
@@ -2467,7 +2475,7 @@ internal class Vedtaksperiode private constructor(
         block()
 
         emitVedtaksperiodeEndret(eventBus, previousState)
-        tilstand.entering(this, eventBus, event)
+        tilstand.entering(this, eventBus, event, behovsamler)
     }
 
     private fun oppdaterHistorikk(
@@ -2914,7 +2922,8 @@ internal class Vedtaksperiode private constructor(
         eventBus: EventBus,
         vedtaksperiode: Vedtaksperiode,
         påminnelse: Påminnelse,
-        aktivitetslogg: IAktivitetslogg
+        aktivitetslogg: IAktivitetslogg,
+        behovsamler: Behovsamler
     ): Revurderingseventyr? {
         if (!påminnelse.gjelderTilstand(aktivitetslogg, type)) {
             eventBus.vedtaksperiodeIkkePåminnet(id, yrkesaktivitet.organisasjonsnummer, type)
@@ -2944,7 +2953,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg.info("Reberegner perioden ettersom det er ønsket")
             return overstyring
         }
-        return håndterPåminnelse(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)
+        return håndterPåminnelse(vedtaksperiode, eventBus, påminnelse, aktivitetslogg, behovsamler)
     }
 
     override fun toString() =
@@ -2979,7 +2988,7 @@ internal class Vedtaksperiode private constructor(
     internal fun gjenopptaBehandling(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         aktivitetsloggMedVedtaksperiodekontekst.info("Forsøker å gjenoppta $this")
-        tilstand.gjenopptaBehandling(this, eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
+        tilstand.gjenopptaBehandling(this, eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst,)
     }
 
     private fun igangsettOverstyringPåBehandlingen(eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {

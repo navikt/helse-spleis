@@ -2,6 +2,7 @@ package no.nav.helse.person.tilstandsmaskin
 
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.person.Behovsamler
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
@@ -14,7 +15,12 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     override val type = TilstandType.AVSLUTTET_UTEN_UTBETALING
     override val erFerdigBehandlet = true
 
-    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+    override fun entering(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        aktivitetslogg: IAktivitetslogg,
+        behovsamler: Behovsamler
+    ) {
         avsluttUtenVedtak(vedtaksperiode, eventBus, aktivitetslogg)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }

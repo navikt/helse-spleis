@@ -5,7 +5,7 @@ import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkUtDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
+import no.nav.helse.person.Behovsamler
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -51,12 +51,12 @@ internal class Infotrygdhistorikk private constructor(
         siste.validerNyereOpplysninger(aktivitetslogg, periode)
     }
 
-    internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
-        oppfrisk(aktivitetslogg, tidligsteDato)
+    internal fun oppfriskNødvendig(behovsamler: Behovsamler, aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
+        oppfrisk(behovsamler, aktivitetslogg, tidligsteDato)
     }
 
-    internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
-        utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode(tidligsteDato))
+    internal fun oppfrisk(behovsamler: Behovsamler, aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
+        behovsamler.utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode(tidligsteDato))
     }
 
     private fun oppfriskningsperiode(tidligsteDato: LocalDate): Periode {
