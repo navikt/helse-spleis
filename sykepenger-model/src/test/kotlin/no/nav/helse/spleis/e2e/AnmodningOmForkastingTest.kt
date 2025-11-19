@@ -36,9 +36,10 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
             håndterSøknad(1.januar til 16.januar)
             nyttVedtak(17.januar til 31.januar, førsteFraværsdag = 1.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
             håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
-            assertVarsler(listOf(Varselkode.RV_IV_7), 2.vedtaksperiode.filter())
             assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            assertVarsler(listOf(Varselkode.RV_IV_7), 2.vedtaksperiode.filter())
         }
     }
 

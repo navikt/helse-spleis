@@ -149,7 +149,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false, automatiskBehandling = false)
 
-            assertVarsel(RV_IV_7, 3.vedtaksperiode.filter())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 11.januar, listOf(11.januar til 26.januar))
             assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 11.januar, listOf(11.januar til 26.januar))
@@ -157,6 +156,9 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+
+            håndterVilkårsgrunnlag(3.vedtaksperiode)
+            assertVarsel(RV_IV_7, 3.vedtaksperiode.filter())
         }
     }
 

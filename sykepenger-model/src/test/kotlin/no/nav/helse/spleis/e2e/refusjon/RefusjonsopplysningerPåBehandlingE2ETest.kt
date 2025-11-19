@@ -257,8 +257,8 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, 10.januar til 31.januar, INNTEKT)
 
             håndterOverstyrTidslinje((1.januar til 9.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
-            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag()
+            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
 
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT)
