@@ -3096,7 +3096,6 @@ internal class Vedtaksperiode private constructor(
             TilUtbetaling,
             AvventerRevurderingTilUtbetaling -> VenterPå.SegSelv(Venteårsak.UTBETALING)
 
-            // Eftersom vi prøver å unngå den interne tilstanden for revurdering så tenker jeg at venterpå burde bare være null, Tilstandens navn burde være nok til å si hva den venter på.
             SelvstendigAvventerRevurdering,
             SelvstendigAvventerGodkjenningRevurdering,
             SelvstendigAvventerHistorikkRevurdering,
@@ -3848,7 +3847,6 @@ private fun nesteTilstandEtterIgangsattOverstyring(
 
     SelvstendigAvventerTilUtbetalingRevurdering -> SelvstendigAvventerTilUtbetalingRevurdering
     SelvstendigAvventerRevurdering -> when (vedtaksperiode.vilkårsgrunnlag) {
-        // Hvis skjæringstidspunktet har flyttet seg så må vi ha ny vilkårsprøving, ellers kan vi gå direkte til historikk
         null -> SelvstendigAvventerVilkårsprøvingRevurdering
         else -> SelvstendigAvventerHistorikkRevurdering
     }
