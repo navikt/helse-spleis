@@ -626,6 +626,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         when (tilstand) {
+            Avsluttet,
+            TilUtbetaling,
             AvsluttetUtenUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, inntektsmelding)
 
             AvventerAnnullering,
@@ -647,12 +649,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering -> {}
-
-            Avsluttet,
-            TilUtbetaling -> check(behandlinger.åpenForEndring()) {
-                "forventer at vedtaksperioden er åpen for endring når inntekt håndteres (tilstand $tilstand)"
-            }
-
+            
             ArbeidsledigStart,
             ArbeidsledigAvventerInfotrygdHistorikk,
             ArbeidsledigAvventerBlokkerendePeriode,
