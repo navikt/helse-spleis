@@ -4,7 +4,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
@@ -175,10 +175,15 @@ import no.nav.helse.person.tilstandsmaskin.FrilansStart
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvsluttet
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerBlokkerendePeriode
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerGodkjenning
+import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerGodkjenningRevurdering
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerHistorikk
+import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerHistorikkRevurdering
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerInfotrygdHistorikk
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerSimulering
+import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerSimuleringRevurdering
+import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerTilUtbetalingRevurdering
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerVilkårsprøving
+import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerVilkårsprøvingRevurdering
 import no.nav.helse.person.tilstandsmaskin.SelvstendigStart
 import no.nav.helse.person.tilstandsmaskin.SelvstendigTilUtbetaling
 import no.nav.helse.person.tilstandsmaskin.TilAnnullering
@@ -382,7 +387,8 @@ internal class Vedtaksperiode private constructor(
             Avsluttet,
             TilUtbetaling,
             SelvstendigAvsluttet,
-            SelvstendigTilUtbetaling -> {
+            SelvstendigTilUtbetaling,
+            SelvstendigAvventerTilUtbetalingRevurdering -> {
                 nyBehandling(eventBus, søknad)
                 håndterOverlappendeSøknadRevurdering(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
             }
@@ -398,7 +404,6 @@ internal class Vedtaksperiode private constructor(
 
             ArbeidstakerStart,
             AvventerAnnullering,
-                AvventerAnnulleringTilUtbetaling,
             AvventerAnnulleringTilUtbetaling,
             TilAnnullering,
             TilInfotrygd,
@@ -410,10 +415,13 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerGodkjenning,
             SelvstendigAvventerHistorikk,
             SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving -> when (behandlinger.harFattetVedtak()) {
-                true -> håndterOverlappendeSøknadRevurdering(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
-                false -> håndterOverlappendeSøknad(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
-            }
+            SelvstendigAvventerVilkårsprøving -> håndterOverlappendeSøknad(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
+
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering -> håndterOverlappendeSøknadRevurdering(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
+
         }
         if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeil()) forkast(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
         return Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode)
@@ -455,6 +463,11 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
             SelvstendigTilUtbetaling,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
             ArbeidstakerStart,
             FrilansAvventerBlokkerendePeriode,
             FrilansAvventerInfotrygdHistorikk,
@@ -517,7 +530,13 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerHistorikk,
             SelvstendigAvventerInfotrygdHistorikk,
             SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving -> håndterHistorikkÅpenBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
+            SelvstendigAvventerVilkårsprøving,
+
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering -> håndterHistorikkÅpenBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
 
             ArbeidstakerStart,
             AvventerAnnullering,
@@ -596,7 +615,12 @@ internal class Vedtaksperiode private constructor(
                 SelvstendigAvventerSimulering,
                 SelvstendigAvventerVilkårsprøving,
                 SelvstendigStart,
-                SelvstendigTilUtbetaling -> {
+                SelvstendigTilUtbetaling,
+                SelvstendigAvventerGodkjenningRevurdering,
+                SelvstendigAvventerHistorikkRevurdering,
+                SelvstendigAvventerTilUtbetalingRevurdering,
+                SelvstendigAvventerSimuleringRevurdering,
+                SelvstendigAvventerVilkårsprøvingRevurdering -> {
                     aktivitetsloggMedVedtaksperiodekontekst.info("Avslår anmodning om forkasting i $tilstand")
                     return null
                 }
@@ -605,7 +629,6 @@ internal class Vedtaksperiode private constructor(
 
         forkast(eventBus, anmodningOmForkasting, aktivitetsloggMedVedtaksperiodekontekst, true)
         return Revurderingseventyr.forkasting(anmodningOmForkasting, skjæringstidspunkt, periode)
-
     }
 
     internal fun håndterInntektFraInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektshistorikk: Inntektshistorikk): Revurderingseventyr? {
@@ -665,6 +688,11 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
             SelvstendigTilUtbetaling,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
             ArbeidstakerStart,
             TilAnnullering,
             TilInfotrygd -> error("Forventer ikke å håndtere inntekt i tilstand $tilstand")
@@ -773,7 +801,12 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
-            SelvstendigTilUtbetaling -> error("Kan ikke håndtere replay av inntektsmelding i en selvstendigtilstand: $tilstand")
+            SelvstendigTilUtbetaling,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering -> error("Kan ikke håndtere replay av inntektsmelding i en selvstendigtilstand: $tilstand")
         }
         return null
     }
@@ -919,6 +952,11 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
             SelvstendigTilUtbetaling,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
             ArbeidstakerStart,
             TilAnnullering,
             TilInfotrygd -> error("forventer ikke å håndtere arbeidsgiverperiode i tilstand $tilstand")
@@ -1041,6 +1079,11 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
             SelvstendigTilUtbetaling,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
             ArbeidstakerStart,
             TilAnnullering,
             TilInfotrygd -> error("Forventer ikke å håndtere refusjon i tilstand $tilstand")
@@ -1233,6 +1276,11 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
             SelvstendigTilUtbetaling,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
             TilAnnullering,
             TilInfotrygd -> error("Forventer ikke å håndtere inntektsmelding i $tilstand")
         }
@@ -1296,6 +1344,11 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
             SelvstendigTilUtbetaling,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
             TilAnnullering,
             TilInfotrygd,
             TilUtbetaling -> false
@@ -1385,7 +1438,12 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
-            SelvstendigTilUtbetaling -> {
+            SelvstendigTilUtbetaling,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering -> {
                 /* gjør ingenting */
             }
         }
@@ -1428,6 +1486,10 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
             SelvstendigTilUtbetaling,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
             ArbeidstakerStart,
             FrilansStart,
             FrilansAvventerInfotrygdHistorikk,
@@ -1442,6 +1504,7 @@ internal class Vedtaksperiode private constructor(
             AvventerHistorikk -> (AvventerSimulering to AvventerGodkjenning)
             AvventerHistorikkRevurdering -> (AvventerSimuleringRevurdering to AvventerGodkjenningRevurdering)
             SelvstendigAvventerHistorikk -> (SelvstendigAvventerSimulering to SelvstendigAvventerGodkjenning)
+            SelvstendigAvventerHistorikkRevurdering -> (SelvstendigAvventerSimuleringRevurdering to SelvstendigAvventerGodkjenningRevurdering)
         }
 
         håndterYtelser(eventBus, ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk, nesteSimuleringtilstand, nesteGodkjenningtilstand)
@@ -1652,7 +1715,9 @@ internal class Vedtaksperiode private constructor(
         return when (tilstand) {
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering -> behandleAvgjørelseForVedtak(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, TilUtbetaling, Avsluttet)
+
             SelvstendigAvventerGodkjenning -> behandleAvgjørelseForVedtak(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigTilUtbetaling, SelvstendigAvsluttet)
+            SelvstendigAvventerGodkjenningRevurdering -> behandleAvgjørelseForVedtak(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerTilUtbetalingRevurdering, SelvstendigAvsluttet)
 
             Avsluttet,
             AvsluttetUtenUtbetaling,
@@ -1681,6 +1746,10 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
             SelvstendigTilUtbetaling,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
             ArbeidstakerStart,
             FrilansStart,
             FrilansAvventerInfotrygdHistorikk,
@@ -1767,7 +1836,50 @@ internal class Vedtaksperiode private constructor(
             AvventerVilkårsprøving -> AvventerHistorikk
             AvventerVilkårsprøvingRevurdering -> AvventerHistorikkRevurdering
             SelvstendigAvventerVilkårsprøving -> SelvstendigAvventerHistorikk
-            else -> return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke vilkårsgrunnlag i %s".format(tilstand.type))
+            SelvstendigAvventerVilkårsprøvingRevurdering -> SelvstendigAvventerHistorikkRevurdering
+
+            ArbeidsledigAvventerBlokkerendePeriode,
+            ArbeidsledigAvventerInfotrygdHistorikk,
+            ArbeidsledigStart,
+            ArbeidstakerStart,
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            AvventerAnnullering,
+            AvventerAnnulleringTilUtbetaling,
+            AvventerAvsluttetUtenUtbetaling,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
+            AvventerRevurdering,
+            AvventerRevurderingTilUtbetaling,
+            AvventerSimulering,
+            AvventerSimuleringRevurdering,
+            AvventerSøknadForOverlappendePeriode,
+            FrilansAvventerBlokkerendePeriode,
+            FrilansAvventerInfotrygdHistorikk,
+            FrilansStart,
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerSimulering,
+            SelvstendigAvventerSimuleringRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            TilAnnullering,
+            TilInfotrygd,
+            TilUtbetaling -> return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke vilkårsgrunnlag i %s".format(tilstand.type))
         }
         håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), nesteTilstand)
     }
@@ -1779,7 +1891,49 @@ internal class Vedtaksperiode private constructor(
             AvventerSimulering -> AvventerGodkjenning
             AvventerSimuleringRevurdering -> AvventerGodkjenningRevurdering
             SelvstendigAvventerSimulering -> SelvstendigAvventerGodkjenning
-            else -> return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke simulering i %s".format(tilstand.type.name))
+            SelvstendigAvventerSimuleringRevurdering -> SelvstendigAvventerGodkjenningRevurdering
+
+            ArbeidsledigAvventerBlokkerendePeriode,
+            ArbeidsledigAvventerInfotrygdHistorikk,
+            ArbeidsledigStart,
+            ArbeidstakerStart,
+            Avsluttet,
+            AvsluttetUtenUtbetaling,
+            AvventerAnnullering,
+            AvventerAnnulleringTilUtbetaling,
+            AvventerAvsluttetUtenUtbetaling,
+            AvventerBlokkerendePeriode,
+            AvventerGodkjenning,
+            AvventerGodkjenningRevurdering,
+            AvventerHistorikk,
+            AvventerHistorikkRevurdering,
+            AvventerInfotrygdHistorikk,
+            AvventerInntektsmelding,
+            AvventerInntektsopplysningerForAnnenArbeidsgiver,
+            AvventerRefusjonsopplysningerAnnenPeriode,
+            AvventerRevurdering,
+            AvventerRevurderingTilUtbetaling,
+            AvventerSøknadForOverlappendePeriode,
+            AvventerVilkårsprøving,
+            AvventerVilkårsprøvingRevurdering,
+            FrilansAvventerBlokkerendePeriode,
+            FrilansAvventerInfotrygdHistorikk,
+            FrilansStart,
+            SelvstendigAvsluttet,
+            SelvstendigAvventerBlokkerendePeriode,
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikk,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerInfotrygdHistorikk,
+            SelvstendigAvventerVilkårsprøving,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
+            SelvstendigStart,
+            SelvstendigTilUtbetaling,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            TilAnnullering,
+            TilInfotrygd,
+            TilUtbetaling -> return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke simulering i %s".format(tilstand.type.name))
         }
 
         val wrapper = aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig()
@@ -1798,6 +1952,8 @@ internal class Vedtaksperiode private constructor(
             AvventerAnnulleringTilUtbetaling -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
             TilAnnullering -> håndterAnnulleringUtbetalinghendelse(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
             AvventerRevurderingTilUtbetaling -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, AvventerRevurdering)
+
+            SelvstendigAvventerTilUtbetalingRevurdering -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvsluttet)
             SelvstendigTilUtbetaling -> vedtakIverksatt(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvsluttet)
             TilUtbetaling -> vedtakIverksatt(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, Avsluttet)
 
@@ -1829,6 +1985,10 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
             ArbeidstakerStart,
             FrilansStart,
             FrilansAvventerInfotrygdHistorikk,
@@ -1935,6 +2095,17 @@ internal class Vedtaksperiode private constructor(
             AvventerRevurdering -> håndterAnnulleringÅpenBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, periodeForEndring, AvventerAnnullering)
 
             AvventerRevurderingTilUtbetaling -> håndterAnnulleringÅpenBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, periodeForEndring, AvventerAnnulleringTilUtbetaling)
+
+            SelvstendigAvventerSimuleringRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+
+            SelvstendigAvventerGodkjenningRevurdering -> when {
+                behandlinger.erAvvist() -> håndterAnnulleringNyBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, periodeForEndring, AvventerAnnullering)
+                else -> håndterAnnulleringÅpenBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, periodeForEndring, AvventerAnnullering)
+            }
+
+            SelvstendigAvventerTilUtbetalingRevurdering -> håndterAnnulleringÅpenBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, periodeForEndring, AvventerAnnulleringTilUtbetaling)
 
             FrilansStart,
             FrilansAvventerInfotrygdHistorikk,
@@ -2091,6 +2262,11 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
             SelvstendigTilUtbetaling,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
             ArbeidstakerStart,
             FrilansStart,
             FrilansAvventerInfotrygdHistorikk,
@@ -2178,6 +2354,11 @@ internal class Vedtaksperiode private constructor(
             AvventerRevurderingTilUtbetaling,
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
             SelvstendigTilUtbetaling,
             TilUtbetaling,
             TilInfotrygd -> {
@@ -2349,6 +2530,11 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerSimulering,
             SelvstendigAvventerVilkårsprøving,
             SelvstendigStart,
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
             FrilansStart,
             FrilansAvventerInfotrygdHistorikk,
             FrilansAvventerBlokkerendePeriode,
@@ -2889,6 +3075,13 @@ internal class Vedtaksperiode private constructor(
             TilUtbetaling,
             AvventerRevurderingTilUtbetaling -> VenterPå.SegSelv(Venteårsak.UTBETALING)
 
+            // Eftersom vi prøver å unngå den interne tilstanden for revurdering så tenker jeg at venterpå burde bare være null, Tilstandens navn burde være nok til å si hva den venter på.
+            SelvstendigAvventerGodkjenningRevurdering,
+            SelvstendigAvventerHistorikkRevurdering,
+            SelvstendigAvventerSimuleringRevurdering,
+            SelvstendigAvventerTilUtbetalingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering,
+
             ArbeidsledigAvventerInfotrygdHistorikk,
             FrilansAvventerInfotrygdHistorikk,
             AvventerInfotrygdHistorikk,
@@ -3288,6 +3481,12 @@ internal class Vedtaksperiode private constructor(
                     VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING -> SelvstendigAvventerSimulering
                     VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING -> SelvstendigAvventerGodkjenning
 
+                    VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING -> SelvstendigAvventerGodkjenningRevurdering
+                    VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING -> SelvstendigAvventerHistorikkRevurdering
+                    VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING -> SelvstendigAvventerSimuleringRevurdering
+                    VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING -> SelvstendigAvventerTilUtbetalingRevurdering
+                    VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING -> SelvstendigAvventerVilkårsprøvingRevurdering
+
                     VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING -> SelvstendigTilUtbetaling
                     VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET -> SelvstendigAvsluttet
                 },
@@ -3347,7 +3546,7 @@ internal class Vedtaksperiode private constructor(
         tilstand = when (tilstand) {
             Avsluttet -> VedtaksperiodetilstandDto.AVSLUTTET
             AvsluttetUtenUtbetaling -> VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING
-            AvventerAvsluttetUtenUtbetaling, -> VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING
+            AvventerAvsluttetUtenUtbetaling -> VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING
             AvventerBlokkerendePeriode -> VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE
             AvventerSøknadForOverlappendePeriode -> VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE
             AvventerInntektsopplysningerForAnnenArbeidsgiver -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
@@ -3388,6 +3587,12 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerVilkårsprøving -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
             SelvstendigStart -> VedtaksperiodetilstandDto.SELVSTENDIG_START
             SelvstendigTilUtbetaling -> VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING
+
+            SelvstendigAvventerGodkjenningRevurdering -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING
+            SelvstendigAvventerHistorikkRevurdering -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING
+            SelvstendigAvventerSimuleringRevurdering -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
+            SelvstendigAvventerTilUtbetalingRevurdering -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING
+            SelvstendigAvventerVilkårsprøvingRevurdering -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING
         },
         skjæringstidspunkt = this.skjæringstidspunkt,
         fom = this.periode.start,
@@ -3597,8 +3802,6 @@ private fun nesteTilstandEtterIgangsattOverstyring(
         else -> FrilansAvventerBlokkerendePeriode
     }
 
-    SelvstendigAvsluttet,
-    SelvstendigTilUtbetaling,
     SelvstendigAvventerBlokkerendePeriode,
     SelvstendigAvventerGodkjenning,
     SelvstendigAvventerHistorikk,
@@ -3606,6 +3809,27 @@ private fun nesteTilstandEtterIgangsattOverstyring(
     SelvstendigAvventerVilkårsprøving -> {
         SelvstendigAvventerBlokkerendePeriode
     }
+
+    // Her må dobbelsjekkes med folk
+    SelvstendigTilUtbetaling,
+    SelvstendigAvsluttet -> {
+        when (vedtaksperiode.vilkårsgrunnlag) {
+            // Hvis skjæringstidspunktet har flyttet seg så må vi ha ny vilkårsprøving, ellers kan vi gå direkte til historikk
+            null -> SelvstendigAvventerVilkårsprøvingRevurdering
+            else -> SelvstendigAvventerHistorikkRevurdering
+        }
+    }
+
+    SelvstendigAvventerVilkårsprøvingRevurdering -> SelvstendigAvventerHistorikkRevurdering
+    SelvstendigAvventerHistorikkRevurdering -> when (vedtaksperiode.behandlinger.harUtbetalinger()) {
+        true -> SelvstendigAvventerSimuleringRevurdering
+        false -> SelvstendigAvventerGodkjenningRevurdering
+    }
+
+    SelvstendigAvventerSimuleringRevurdering -> SelvstendigAvventerGodkjenningRevurdering
+    SelvstendigAvventerGodkjenningRevurdering -> SelvstendigTilUtbetaling
+
+    SelvstendigAvventerTilUtbetalingRevurdering -> SelvstendigAvventerTilUtbetalingRevurdering
 
     TilUtbetaling,
     AvventerRevurderingTilUtbetaling -> AvventerRevurderingTilUtbetaling

@@ -259,6 +259,7 @@ internal class SpeilGenerasjonerBuilder(
             BehandlingtilstandDto.BEREGNET_REVURDERING -> when (periodetilstand) {
                 VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING,
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING,
                 VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> Periodetilstand.TilGodkjenning
 
                 VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING,
@@ -266,6 +267,8 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING,
                 VedtaksperiodetilstandDto.AVVENTER_HISTORIKK,
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING,
                 VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> Periodetilstand.ForberederGodkjenning
 
                 VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (revurdering)
@@ -300,6 +303,8 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING,
                 VedtaksperiodetilstandDto.ARBEIDSTAKER_START,
                 VedtaksperiodetilstandDto.SELVSTENDIG_START,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING,
                 VedtaksperiodetilstandDto.TIL_INFOTRYGD,
                 VedtaksperiodetilstandDto.AVVENTER_REVURDERING_TIL_UTBETALING,
                 VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING,

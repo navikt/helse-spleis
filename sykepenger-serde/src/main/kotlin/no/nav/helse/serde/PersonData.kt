@@ -456,7 +456,7 @@ data class PersonData(
                         ArbeidsgiverHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                     else
                         ArbeidsgiverdagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
-                    
+
                     JsonDagType.MELDING_TIL_NAV_DAG -> if (dagen.erHelg())
                         MeldingTilNavHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                     else
@@ -727,6 +727,12 @@ data class PersonData(
                 SELVSTENDIG_AVVENTER_SIMULERING,
                 SELVSTENDIG_AVVENTER_GODKJENNING,
 
+                SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING,
+                SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING,
+                SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING,
+                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING,
+
                 SELVSTENDIG_TIL_UTBETALING,
                 SELVSTENDIG_AVSLUTTET,
             }
@@ -777,6 +783,12 @@ data class PersonData(
                     TilstandTypeData.SELVSTENDIG_AVVENTER_GODKJENNING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING
                     TilstandTypeData.SELVSTENDIG_TIL_UTBETALING -> VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING
                     TilstandTypeData.SELVSTENDIG_AVSLUTTET -> VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET
+
+                    TilstandTypeData.SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING
+                    TilstandTypeData.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING
+                    TilstandTypeData.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
+                    TilstandTypeData.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING
+                    TilstandTypeData.SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING
                 },
                 behandlinger = BehandlingerInnDto(this.behandlinger.map { it.tilDto() }),
                 opprettet = opprettet,

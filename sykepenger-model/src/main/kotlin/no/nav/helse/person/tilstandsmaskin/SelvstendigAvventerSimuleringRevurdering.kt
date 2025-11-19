@@ -5,9 +5,10 @@ import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
 
-internal data object SelvstendigAvventerSimulering : Vedtaksperiodetilstand {
-    override val type: TilstandType = TilstandType.SELVSTENDIG_AVVENTER_SIMULERING
+internal data object SelvstendigAvventerSimuleringRevurdering : Vedtaksperiodetilstand {
+    override val type: TilstandType = SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         checkNotNull(vedtaksperiode.behandlinger.utbetaling).simuler(aktivitetslogg)
     }
