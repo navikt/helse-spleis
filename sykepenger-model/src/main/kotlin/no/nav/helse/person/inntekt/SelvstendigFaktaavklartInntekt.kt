@@ -1,7 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.Year
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
 import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
@@ -83,14 +83,25 @@ internal data class SelvstendigFaktaavklartInntekt(
 
         // alle inntekter opp til 6g
         private val inntekterOppTil6g = antallG.coerceAtMost(SEKS_G)
+        // alle inntekter mellom 6g og 12g
+        private val inntekterMellom6gOg12g = antallG.coerceIn(SEKS_G, TOLV_G) - SEKS_G
+        // alle inntekter over 12 g
+        private val inntekterOver12g = antallG.coerceAtLeast(TOLV_G) - TOLV_G
 
         // 1/3 av inntekter mellom 6g og 12g
-        private val enTredjedelAvInntekterMellom6gOg12g = (antallG.coerceIn(SEKS_G, TOLV_G) - SEKS_G) * EN_TREDJEDEL
+        private val enTredjedelAvInntekterMellom6gOg12g = inntekterMellom6gOg12g * EN_TREDJEDEL
+        // 2/3 av inntekter mellom 6g og 12g
+        private val toTredjedelAvInntekterMellom6gOg12g = inntekterMellom6gOg12g * TO_TREDJEDEL
 
-        private val antallGKompensert = inntekterOppTil6g + enTredjedelAvInntekterMellom6gOg12g
+        // alle intekter opp til 6g, 1/3 av inntekter mellom 6g og 12g, ingenting over 12g
+        private val antallGKompensert = antallG - inntekterOver12g - toTredjedelAvInntekterMellom6gOg12g
 
         // snitter antall kompenserte G over tre år
         private val Q = antallGKompensert / 3.0
+
+        init {
+            check(antallGKompensert <= 8) { "antall kompenserte G kan ikke være over 8, var $antallGKompensert" }
+        }
 
         fun justertÅrsgrunnlag(anvendtGrunnbeløp: Inntekt): Inntekt {
             return anvendtGrunnbeløp * Q
@@ -99,6 +110,7 @@ internal data class SelvstendigFaktaavklartInntekt(
         private companion object {
             private const val SEKS_G = 6.0
             private const val TOLV_G = 12.0
+            private const val TO_TREDJEDEL = 2 / 3.0
             private const val EN_TREDJEDEL = 1 / 3.0
         }
     }
