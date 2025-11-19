@@ -115,6 +115,7 @@ sealed class VedtaksperiodetilstandDto {
     data object SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK : VedtaksperiodetilstandDto()
     data object SELVSTENDIG_AVVENTER_SIMULERING : VedtaksperiodetilstandDto()
     data object SELVSTENDIG_AVVENTER_VILKÅRSPRØVING : VedtaksperiodetilstandDto()
+    data object SELVSTENDIG_AVVENTER_REVURDERING : VedtaksperiodetilstandDto()
     data object SELVSTENDIG_START : VedtaksperiodetilstandDto()
     data object SELVSTENDIG_TIL_UTBETALING : VedtaksperiodetilstandDto()
 

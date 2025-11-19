@@ -732,6 +732,7 @@ data class PersonData(
                 SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING,
                 SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING,
                 SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING,
+                SELVSTENDIG_AVVENTER_REVURDERING,
 
                 SELVSTENDIG_TIL_UTBETALING,
                 SELVSTENDIG_AVSLUTTET,
@@ -789,6 +790,7 @@ data class PersonData(
                     TilstandTypeData.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
                     TilstandTypeData.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING
                     TilstandTypeData.SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING
+                    TilstandTypeData.SELVSTENDIG_AVVENTER_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_REVURDERING
                 },
                 behandlinger = BehandlingerInnDto(this.behandlinger.map { it.tilDto() }),
                 opprettet = opprettet,

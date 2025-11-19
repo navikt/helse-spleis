@@ -271,6 +271,7 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING,
                 VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> Periodetilstand.ForberederGodkjenning
 
+                VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_REVURDERING, // er dette riktig?
                 VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (revurdering)
 
                 VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE,
