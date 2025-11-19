@@ -136,6 +136,9 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
+
+            håndterUtbetalt()
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_IV_7), 1.vedtaksperiode.filter())
         }
     }

@@ -243,7 +243,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         nyttVedtak(10.januar til 30.januar)
         forlengVedtak(31.januar til 31.januar)
         forlengVedtak(februar)
-        håndterInntektsmelding(
+        val inntektsmeldingIdFebruar = håndterInntektsmelding(
             listOf(1.februar til 16.februar)
         )
 
@@ -274,7 +274,9 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("NY_PERIODE", "ARBEIDSGIVERPERIODE", "NY_PERIODE", "NY_PERIODE", "ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
+        assertInntektsgrunnlag(1.februar, 1) {
+            assertInntektsgrunnlag(a1, INNTEKT, forventetKildeId = inntektsmeldingIdFebruar)
+        }
 
         val revurdering1Vedtaksperiode = inspektør.utbetaling(3)
         revurdering1Vedtaksperiode.also { utbetalingInspektør ->

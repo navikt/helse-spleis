@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
+import OpenInSpanner
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.april
@@ -470,6 +471,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
     @Test
     fun `mangler refusjonsopplysninger etter overstyring av saksbehander - ikke fravær`() {
+        val inntektsmeldingJanuarA2 = UUID.randomUUID()
         a1 {
             nyPeriode(7.januar til 31.januar)
             nyPeriode(februar)
@@ -483,18 +485,17 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 {
             håndterInntektsmelding(listOf(7.januar til 22.januar), førsteFraværsdag = 1.februar)
             // denne inntektsmeldingen lagrer refusjonsopplysninger uten første fraværsdag. Uten denne IMen så er testen useless
-            håndterInntektsmelding(listOf(7.januar til 22.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
+            håndterInntektsmelding(listOf(7.januar til 22.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer", id = inntektsmeldingJanuarA2)
             assertVarsler(listOf(Varselkode.RV_IM_24, Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
         }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
             assertInntektsgrunnlag(7.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, INGEN, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(a2, INNTEKT, forventetKildeId = inntektsmeldingJanuarA2)
             }
         }
 
@@ -527,7 +528,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a2 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         }
     }
 

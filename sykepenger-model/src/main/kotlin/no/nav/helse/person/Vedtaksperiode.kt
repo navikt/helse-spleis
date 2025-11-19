@@ -3274,6 +3274,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun lagreGjenbrukbarInntekt(aktivitetslogg: IAktivitetslogg) {
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) return
         if (harEksisterendeInntekt()) return // Trenger ikke lagre gjenbrukbare inntekter om vi har det vi trenger allerede
         // Ikke 100% at dette lagrer noe. F.eks.
         //  - det er en periode som aldri er vilkårsprøvd før
