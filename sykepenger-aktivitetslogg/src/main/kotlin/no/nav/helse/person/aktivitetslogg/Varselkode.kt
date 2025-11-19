@@ -201,6 +201,7 @@ enum class Varselkode(
     RV_IV_11("Perioden inneholder flere skjæringstidspunkt"),
     RV_IV_12("Fant færre enn 3 år med ferdiglignede inntekter for selvstending næringsdrivende"),
     RV_IV_13("Inntekter for både arbeidstaker og selvstendig"),
+    RV_IV_14("Èn arbeidsgiver, ingen inntekter i samme måned som skjæringstidspunktet, siste ankomne inntektsmelding er lagt til grunn"),
 
     // SV: Sykepengegrunnlagsvurdering
     RV_SV_1("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"),

@@ -144,7 +144,11 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
 
                 assertInntektsgrunnlag(31.desember(2017), forventetAntallArbeidsgivere = 1) {
                     when (brukFaktaavklartInntektFraBehandling) {
-                        true -> assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen) // Dette må jo være et bedre valg enn vi velger i dag 🎉
+                        true -> {
+                            assertInntektsgrunnlag(a1, INNTEKT * 1.15, forventetkilde = Arbeidstakerkilde.Arbeidsgiver) // Velger siste ankomne inntektsmelding
+                            assertVarsel(Varselkode.RV_IV_14, 1.vedtaksperiode.filter())
+                        }
+
                         false -> assertInntektsgrunnlag(a1, INNTEKT * 1.05)
                     }
                 }

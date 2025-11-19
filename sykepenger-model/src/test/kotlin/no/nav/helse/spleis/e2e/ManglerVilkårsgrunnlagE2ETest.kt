@@ -86,7 +86,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsler(listOf(Varselkode.RV_IT_14), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IT_14, Varselkode.RV_IV_14), 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()

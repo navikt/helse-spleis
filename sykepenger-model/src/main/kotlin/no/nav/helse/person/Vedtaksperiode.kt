@@ -2679,19 +2679,11 @@ internal class Vedtaksperiode private constructor(
         aktivitetsloggTilDenSomVilkårsprøver.info("Arbeidsgiver ${yrkesaktivitet.organisasjonsnummer} har inntektssituasjon ${inntektssituasjon::class.simpleName} på skjæringstidspunktet $skjæringstidspunkt")
 
         val benyttetFaktaavklartInntekt = when (inntektssituasjon) {
-            is Inntektssituasjon.HarInntektFraArbeidsgiver -> when (skjæringstidspunkt.yearMonth == inntektssituasjon.inntektFraArbeidsgiver.inntektsdata.dato.yearMonth) {
-                true -> {
-                    inntektssituasjon.periodeMedInntektFraArbeidsgiver?.behandlinger?.vurderVarselForGjenbrukAvInntekt(inntektssituasjon.inntektFraArbeidsgiver, aktivitetsloggTilDenSomVilkårsprøver)
-                    inntektssituasjon.inntektFraArbeidsgiver
-                }
-                false -> {
-                    if (flereArbeidsgivere) aktivitetsloggTilDenSomVilkårsprøver.varsel(Varselkode.RV_VV_2)
-                    else aktivitetsloggTilDenSomVilkårsprøver.info("Skjæringstidspunktet ($skjæringstidspunkt) er i annen måned enn inntektsdatoen (${inntektssituasjon.inntektFraArbeidsgiver.inntektsdata.dato}) med bare én arbeidsgiver")
-                    skatteopplysning.somFaktaavklartInntekt(hendelse)
-                }
-            }
+            is Inntektssituasjon.HarInntektFraArbeidsgiver -> inntektssituasjon.avklarInntekt(skjæringstidspunkt, skatteopplysning.somFaktaavklartInntekt(hendelse), flereArbeidsgivere, aktivitetsloggTilDenSomVilkårsprøver)
+
             Inntektssituasjon.TrengerIkkeInntektFraArbeidsgiver,
             Inntektssituasjon.KanBehandlesUtenInntektFraArbeidsgiver -> skatteopplysning.somFaktaavklartInntekt(hendelse)
+
             Inntektssituasjon.TidligereVilkårsprøvd -> {
                 // Her legger vi også skatt til grunn, men for å unngå at sykmeldte får gjentatte meldinger om skatteinntekter lagt til grunn blir det her kun varsel til saksbehandler
                 aktivitetsloggTilDenSomVilkårsprøver.varsel(RV_IV_10)
