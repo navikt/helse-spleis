@@ -128,6 +128,7 @@ internal class SpeilGenerasjonerBuilder(
                 is VedtaksperiodetilstandDto.AVVENTER_REVURDERING_TIL_UTBETALING -> Periodetilstand.VenterPåAnnenPeriode
                 is VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode
 
+                is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_REVURDERING,
                 is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
                 is VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE,
                 is VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE,
@@ -135,12 +136,14 @@ internal class SpeilGenerasjonerBuilder(
                 is VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE,
                 is VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING -> Periodetilstand.VenterPåAnnenPeriode
 
+                is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING,
                 is VedtaksperiodetilstandDto.AVVENTER_HISTORIKK,
                 is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK,
                 is VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING,
                 is VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING,
                 is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                is VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> Periodetilstand.ForberederGodkjenning
+                is VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                 is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING -> Periodetilstand.ForberederGodkjenning
 
                 is VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> Periodetilstand.AvventerInntektsopplysninger
 

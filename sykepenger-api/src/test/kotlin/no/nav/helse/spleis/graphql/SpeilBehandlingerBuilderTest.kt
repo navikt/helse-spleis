@@ -215,6 +215,103 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     }
 
     @Test
+    fun `utbetalt selvstendig periode`() {
+        håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        generasjoner(organisasjonsnummer = selvstendig) {
+            assertEquals(1, size)
+            0.generasjon {
+                beregnetPeriode(0) medTilstand Utbetalt
+            }
+        }
+    }
+
+    @Test
+    fun `utbetalt selvstendig periode avventer vilkårsprøving`() {
+        håndterSøknadSelvstendig(2.januar til 31.januar, 2.januar til 17.januar)
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
+
+        generasjoner(organisasjonsnummer = selvstendig) {
+            assertEquals(2, size)
+            0.generasjon {
+                uberegnetPeriode(0) medTilstand ForberederGodkjenning
+            }
+            1.generasjon {
+                beregnetPeriode(0) medTilstand Utbetalt
+            }
+        }
+    }
+
+    @Test
+    fun `utbetalt selvstendig periode avventer simulering`() {
+        håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar, grad = 90.prosent)
+        håndterYtelser()
+
+        generasjoner(organisasjonsnummer = selvstendig) {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(1, size)
+                beregnetPeriode(0) medTilstand ForberederGodkjenning
+            }
+            1.generasjon {
+                assertEquals(1, size)
+                beregnetPeriode(0) medTilstand Utbetalt
+            }
+        }
+    }
+
+    @Test
+    fun `utbetalt selvstendig periode avventer revurdering`() {
+        håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        håndterSøknadSelvstendig(1.mars til 31.mars, 1.mars til 16.mars)
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
+
+        generasjoner(organisasjonsnummer = selvstendig) {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, size)
+                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(1) medTilstand ForberederGodkjenning
+            }
+            1.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
+        }
+    }
+
+    @Test
     fun `Selvstendig har pensjonsgivende inntekt også på uberegnet periode`() {
         håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
 
@@ -237,8 +334,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     @Test
     fun `Selvstendig næringsdrivende med inntekt under 6G mappes riktig`() {
         håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
-        håndterVilkårsgrunnlagSelvstendig()
-        håndterYtelserSelvstendig()
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
 
         val forventetPensjonsgivendeInntekt = listOf(
             PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
@@ -272,8 +369,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
                 PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
             )
         )
-        håndterVilkårsgrunnlagSelvstendig()
-        håndterYtelserSelvstendig()
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
 
         val forventetPensjonsgivendeInntekt = listOf(
             PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846))),
