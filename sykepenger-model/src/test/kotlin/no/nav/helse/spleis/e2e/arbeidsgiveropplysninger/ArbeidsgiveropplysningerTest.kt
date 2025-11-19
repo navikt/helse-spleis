@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
@@ -77,6 +77,37 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
+
+    @Test
+    fun `to arbeidsgivere sender arbeidsgiveropplysninger - den første flytter sin egen første fraværsdag - den andre flytter skjæringstidspunktet`() {
+        a1 {
+            håndterSøknad(5.januar til 31.januar)
+        }
+        a2 {
+            håndterSøknad(5.januar til 31.januar)
+            assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+            assertEquals(5.januar, inspektør.førsteFraværsdag(1.vedtaksperiode))
+
+            håndterArbeidsgiveropplysninger(listOf(6.januar til 21.januar), beregnetInntekt = INNTEKT * 1.1)
+            assertEquals("AHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+            assertEquals(6.januar, inspektør.førsteFraværsdag(1.vedtaksperiode))
+
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
+        }
+        a1 {
+            assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.2)
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
+            assertInntektsgrunnlag(1.januar, 2) {
+                assertInntektsgrunnlag(a1, forventetFaktaavklartInntekt = INNTEKT * 1.2, forventetkilde = Arbeidstakerkilde.Arbeidsgiver)
+                assertInntektsgrunnlag(a2, forventetFaktaavklartInntekt = INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            }
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_IV_10)
+            assertEquals(1, observatør.skatteinntekterLagtTilGrunnEventer.size)
+        }
+    }
 
     @Test
     fun `arbeidsgiveropplysninger med periode i auu med egenmeldingsdager`() {
