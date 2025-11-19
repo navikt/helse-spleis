@@ -9,6 +9,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.selvstendig
+import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
@@ -28,6 +29,7 @@ import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
@@ -88,6 +90,132 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertTilstand(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET)
             assertTilstand(2.vedtaksperiode, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `revurdering mens avventer historikk revurdering`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
+
+            nullstillTilstandsendringer()
+
+            håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 100) })
+
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
+        }
+    }
+
+    @Test
+    fun `revurdering mens avventer simulering revurdering`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
+            håndterYtelser(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+
+            håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 90) })
+
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
+        }
+    }
+
+    @Test
+    fun `revurdering mens avventer godkjenning revurdering`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+
+            håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 90) })
+
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
+        }
+    }
+
+    @Test
+    fun `revurdering mens avventer utbetaling revurdering`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+
+            håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 90) })
+
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING)
+        }
+    }
+
+    @Test
+    fun `revurdering mens perioder allerede venter på revurdering`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterForlengelsessøknadSelvstendig(februar)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterForlengelsessøknadSelvstendig(mars)
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalt()
+
+            nullstillTilstandsendringer()
+
+            håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
+
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(2.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_REVURDERING)
+            assertTilstander(3.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_REVURDERING)
+
+            nullstillTilstandsendringer()
+
+            håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 100) })
+
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(2.vedtaksperiode, SELVSTENDIG_AVVENTER_REVURDERING)
+            assertTilstander(3.vedtaksperiode, SELVSTENDIG_AVVENTER_REVURDERING)
         }
     }
 
@@ -487,7 +615,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstander(
                 1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING,
-                SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING, SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING, SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING, SELVSTENDIG_AVSLUTTET
+                SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING, SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVSLUTTET
             )
             assertEquals(Utbetalingtype.REVURDERING, inspektør.utbetalinger(1.vedtaksperiode)[1].type)
             assertEquals(setOf(80), inspektør.sykdomstidslinje.inspektør.grader.values.toSet())
@@ -514,7 +642,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstander(
                 1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING,
-                SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING, SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING, SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING, SELVSTENDIG_AVSLUTTET
+                SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING, SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVSLUTTET
             )
             assertEquals(Utbetalingtype.REVURDERING, inspektør.utbetalinger(1.vedtaksperiode)[1].type)
             assertEquals(setOf(80), inspektør.sykdomstidslinje.inspektør.grader.values.toSet())
@@ -544,7 +672,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, forventetPersonbeløp = 617, subset = 20.januar til 31.januar)
             assertTilstander(
                 1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING,
-                SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING, SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING, SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING, SELVSTENDIG_AVSLUTTET
+                SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING, SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVSLUTTET
             )
             assertEquals(Utbetalingtype.REVURDERING, inspektør.utbetalinger(1.vedtaksperiode)[1].type)
         }

@@ -12,13 +12,10 @@ internal data object SelvstendigAvventerRevurdering : Vedtaksperiodetilstand {
     }
 
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        val førstevedtaksperiode = vedtaksperiode.yrkesaktivitet.finnSammenhengendeVedtaksperioder(vedtaksperiode).first { it.tilstand.type == TilstandType.SELVSTENDIG_AVVENTER_REVURDERING }
-        if (førstevedtaksperiode == vedtaksperiode) {
-            aktivitetslogg.info("Gjenopptar behandling for revurdering")
-            when (førstevedtaksperiode.vilkårsgrunnlag) {
-                null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerVilkårsprøvingRevurdering)
-                else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerHistorikkRevurdering)
-            }
+        aktivitetslogg.info("Gjenopptar behandling for revurdering")
+        when (vedtaksperiode.vilkårsgrunnlag) {
+            null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerVilkårsprøvingRevurdering)
+            else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerHistorikkRevurdering)
         }
     }
 }

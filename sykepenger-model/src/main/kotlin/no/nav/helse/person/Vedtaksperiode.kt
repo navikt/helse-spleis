@@ -502,6 +502,7 @@ internal class Vedtaksperiode private constructor(
             Avsluttet,
             AvsluttetUtenUtbetaling,
             TilUtbetaling,
+            SelvstendigTilUtbetaling,
             SelvstendigAvsluttet -> håndterHistorikkNyBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
 
             AvventerBlokkerendePeriode,
@@ -549,8 +550,7 @@ internal class Vedtaksperiode private constructor(
             TilInfotrygd,
             FrilansStart,
             ArbeidsledigStart,
-            SelvstendigStart,
-            SelvstendigTilUtbetaling -> error("Kan ikke overstyre tidslinjen i $tilstand")
+            SelvstendigStart -> error("Kan ikke overstyre tidslinjen i $tilstand")
         }
 
         hendelse.vurdertTilOgMed(periode.endInclusive)
@@ -1729,8 +1729,8 @@ internal class Vedtaksperiode private constructor(
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering -> behandleAvgjørelseForVedtak(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, TilUtbetaling, Avsluttet)
 
-            SelvstendigAvventerGodkjenning -> behandleAvgjørelseForVedtak(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigTilUtbetaling, SelvstendigAvsluttet)
-            SelvstendigAvventerGodkjenningRevurdering -> behandleAvgjørelseForVedtak(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerTilUtbetalingRevurdering, SelvstendigAvsluttet)
+            SelvstendigAvventerGodkjenning,
+            SelvstendigAvventerGodkjenningRevurdering -> behandleAvgjørelseForVedtak(eventBus, utbetalingsavgjørelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigTilUtbetaling, SelvstendigAvsluttet)
 
             Avsluttet,
             AvsluttetUtenUtbetaling,
@@ -3829,23 +3829,17 @@ private fun nesteTilstandEtterIgangsattOverstyring(
         SelvstendigAvventerBlokkerendePeriode
     }
 
+    SelvstendigAvsluttet,
+    SelvstendigAvventerGodkjenningRevurdering,
+    SelvstendigAvventerHistorikkRevurdering,
+    SelvstendigAvventerSimuleringRevurdering,
+    SelvstendigAvventerVilkårsprøvingRevurdering,
+    SelvstendigAvventerRevurdering -> {
+        SelvstendigAvventerRevurdering
+    }
+
     SelvstendigTilUtbetaling,
-    SelvstendigAvsluttet -> SelvstendigAvventerRevurdering
-
-    SelvstendigAvventerVilkårsprøvingRevurdering -> SelvstendigAvventerHistorikkRevurdering
-    SelvstendigAvventerHistorikkRevurdering -> when (vedtaksperiode.behandlinger.harUtbetalinger()) {
-        true -> SelvstendigAvventerSimuleringRevurdering
-        false -> SelvstendigAvventerGodkjenningRevurdering
-    }
-
-    SelvstendigAvventerSimuleringRevurdering -> SelvstendigAvventerGodkjenningRevurdering
-    SelvstendigAvventerGodkjenningRevurdering -> SelvstendigTilUtbetaling
-
     SelvstendigAvventerTilUtbetalingRevurdering -> SelvstendigAvventerTilUtbetalingRevurdering
-    SelvstendigAvventerRevurdering -> when (vedtaksperiode.vilkårsgrunnlag) {
-        null -> SelvstendigAvventerVilkårsprøvingRevurdering
-        else -> SelvstendigAvventerHistorikkRevurdering
-    }
 
     TilUtbetaling,
     AvventerRevurderingTilUtbetaling -> AvventerRevurderingTilUtbetaling
