@@ -649,7 +649,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering -> {}
-            
+
             ArbeidsledigStart,
             ArbeidsledigAvventerInfotrygdHistorikk,
             ArbeidsledigAvventerBlokkerendePeriode,
@@ -2445,8 +2445,8 @@ internal class Vedtaksperiode private constructor(
         return when {
             inntektFraArbeidsgiver != null -> inntektFraArbeidsgiver
             alleForSammeArbeidsgiver.none { it.skalArbeidstakerBehandlesISpeil() } -> Inntektssituasjon.TrengerIkkeInntektFraArbeidsgiver
-            tidligereVilkårsprøvd -> Inntektssituasjon.TidligereVilkårsprøvd
             alleForSammeArbeidsgiver.any { it.behandlinger.børBrukeSkatteinntekterDirekte() } -> Inntektssituasjon.KanBehandlesUtenInntektFraArbeidsgiver
+            tidligereVilkårsprøvd -> Inntektssituasjon.TidligereVilkårsprøvd
             else -> {
                 // Vi vet at vi skal "Behandles i speil", at vi ikke er tidligere vilkårsprøvd (så ikke noe revurderingscase) - så da er vi enten den som vilkårsprøver eller en annen arbeidsgiver som venter på vilkårsprøvingen
                 val periodenSomGaOpp = alleForSammeArbeidsgiver.first { it.tilstand in setOf(AvventerVilkårsprøving, AvventerBlokkerendePeriode) }
@@ -2486,7 +2486,8 @@ internal class Vedtaksperiode private constructor(
             Inntektssituasjon.TrengerIkkeInntektFraArbeidsgiver,
             Inntektssituasjon.KanBehandlesUtenInntektFraArbeidsgiver -> skatteopplysning.somFaktaavklartInntekt(hendelse)
             Inntektssituasjon.TidligereVilkårsprøvd -> {
-                // TODO: Skal dette være noe varsel da montro? - men kanskje ikke RV_IV_10 da..
+                // Her legger vi også skatt til grunn, men for å unngå at sykmeldte får gjentatte meldinger om skatteinntekter lagt til grunn blir det her kun varsel til saksbehandler
+                aktivitetsloggTilDenSomVilkårsprøver.varsel(RV_IV_10)
                 skatteopplysning.somFaktaavklartInntekt(hendelse)
             }
             is Inntektssituasjon.GaOppÅVentePåArbeidsgiver -> {

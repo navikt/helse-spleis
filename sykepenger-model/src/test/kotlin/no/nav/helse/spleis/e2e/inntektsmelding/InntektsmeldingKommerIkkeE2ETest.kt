@@ -2,14 +2,17 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
 import java.time.YearMonth
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -32,10 +35,25 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `friskmelding etter at perioden er vilkårsprøvd tidligere, ønsker ikke å forelegge opplysninger til den sykmeldte eller legge på varsel`() = Toggle.BrukFaktaavklartInntektFraBehandling.enable {
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(februar)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Arbeid(1.februar, 28.februar))
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
+            assertEquals(0, observatør.skatteinntekterLagtTilGrunnEventer.size)
+        }
+    }
 
     @Test
     fun `mangler inntektsmelding fra flere arbeidsgivere`() {
