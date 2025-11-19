@@ -35,7 +35,8 @@ internal data class SelvstendigFaktaavklartInntekt(
             }
     }
 
-    val inntektsgrunnlag = beregnInntektsgrunnlag(anvendtGrunnbeløp)
+    val normalinntekt = normalinntekt(anvendtGrunnbeløp)
+    val beregningsgrunnlag = beregningsgrunnlag(anvendtGrunnbeløp)
 
     internal fun funksjoneltLik(other: SelvstendigFaktaavklartInntekt): Boolean {
         if (!this.inntektsdata.funksjoneltLik(other.inntektsdata)) return false
@@ -51,8 +52,11 @@ internal data class SelvstendigFaktaavklartInntekt(
         anvendtGrunnbeløp = this.anvendtGrunnbeløp.dto()
     )
 
-    fun beregnInntektsgrunnlag(anvendtGrunnbeløp: Inntekt) =
-        Companion.beregnInntektsgrunnlag(pensjonsgivendeInntekter, anvendtGrunnbeløp)
+    fun normalinntekt(anvendtGrunnbeløp: Inntekt) =
+        normalinntekt(pensjonsgivendeInntekter, anvendtGrunnbeløp)
+
+    fun beregningsgrunnlag(anvendtGrunnbeløp: Inntekt) =
+        beregningsgrunnlag(pensjonsgivendeInntekter, anvendtGrunnbeløp)
 
     internal companion object {
         internal fun gjenopprett(dto: SelvstendigFaktaavklartInntektInnDto) = SelvstendigFaktaavklartInntekt(
@@ -64,12 +68,22 @@ internal data class SelvstendigFaktaavklartInntekt(
             anvendtGrunnbeløp = Inntekt.gjenopprett(dto.anvendtGrunnbeløp)
         )
 
-        fun beregnInntektsgrunnlag(
+        fun normalinntekt(
             inntekter: List<PensjonsgivendeInntekt>,
             anvendtGrunnbeløp: Inntekt
         ) =
             inntekter
-                .map { it.justertÅrsgrunnlag(anvendtGrunnbeløp) }
+                .map { it.normalinntekt(anvendtGrunnbeløp) }
+                .summer()
+                .årlig.toInt()
+                .årlig
+
+        fun beregningsgrunnlag(
+            inntekter: List<PensjonsgivendeInntekt>,
+            anvendtGrunnbeløp: Inntekt
+        ) =
+            inntekter
+                .map { it.beregningsgrunnlag(anvendtGrunnbeløp) }
                 .summer()
                 .årlig.toInt()
                 .årlig
@@ -96,6 +110,8 @@ internal data class SelvstendigFaktaavklartInntekt(
         // alle intekter opp til 6g, 1/3 av inntekter mellom 6g og 12g, ingenting over 12g
         private val antallGKompensert = antallG - inntekterOver12g - toTredjedelAvInntekterMellom6gOg12g
 
+        // normalinntekt basert på antall G over  tre år
+        private val P = antallG / 3.0
         // snitter antall kompenserte G over tre år
         private val Q = antallGKompensert / 3.0
 
@@ -103,7 +119,11 @@ internal data class SelvstendigFaktaavklartInntekt(
             check(antallGKompensert <= 8) { "antall kompenserte G kan ikke være over 8, var $antallGKompensert" }
         }
 
-        fun justertÅrsgrunnlag(anvendtGrunnbeløp: Inntekt): Inntekt {
+        fun normalinntekt(anvendtGrunnbeløp: Inntekt): Inntekt {
+            return anvendtGrunnbeløp * P
+        }
+
+        fun beregningsgrunnlag(anvendtGrunnbeløp: Inntekt): Inntekt {
             return anvendtGrunnbeløp * Q
         }
 
@@ -115,7 +135,7 @@ internal data class SelvstendigFaktaavklartInntekt(
         }
     }
 
-    internal fun view() = SelvstendigFaktaavklartInntektView(inntektsdata.hendelseId.id, inntektsgrunnlag)
+    internal fun view() = SelvstendigFaktaavklartInntektView(inntektsdata.hendelseId.id, normalinntekt)
 
     internal data class SelvstendigFaktaavklartInntektView(override val hendelseId: UUID, override val beløp: Inntekt) : FaktaavklartInntektView
 }

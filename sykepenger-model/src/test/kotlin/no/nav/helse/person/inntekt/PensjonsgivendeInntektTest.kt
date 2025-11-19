@@ -21,7 +21,9 @@ internal class PensjonsgivendeInntektTest {
         )
 
         val anvendtGrunnbeløp = `1G`.beløp(16.juni)
-        val selvstendigGrunnlag = SelvstendigFaktaavklartInntekt.beregnInntektsgrunnlag(inntekter, anvendtGrunnbeløp)
+        val normalinntekt = SelvstendigFaktaavklartInntekt.normalinntekt(inntekter, anvendtGrunnbeløp)
+        val selvstendigGrunnlag = SelvstendigFaktaavklartInntekt.beregningsgrunnlag(inntekter, anvendtGrunnbeløp)
+        assertEquals(478906.årlig, normalinntekt)
         assertEquals(478906.årlig, selvstendigGrunnlag)
     }
 
@@ -34,7 +36,9 @@ internal class PensjonsgivendeInntektTest {
         )
 
         val anvendtGrunnbeløp = `1G`.beløp(12.mai)
-        val selvstendigGrunnlag = SelvstendigFaktaavklartInntekt.beregnInntektsgrunnlag(inntekter, anvendtGrunnbeløp)
+        val normalinntekt = SelvstendigFaktaavklartInntekt.normalinntekt(inntekter, anvendtGrunnbeløp)
+        val selvstendigGrunnlag = SelvstendigFaktaavklartInntekt.beregningsgrunnlag(inntekter, anvendtGrunnbeløp)
+        assertEquals(629943.årlig, normalinntekt)
         assertEquals(589138.årlig, selvstendigGrunnlag)
     }
 
@@ -49,7 +53,9 @@ internal class PensjonsgivendeInntektTest {
         val skjæringstidspunkt = 12.mai
         val anvendtGrunnbeløp = `1G`.beløp(skjæringstidspunkt)
         val expected = (`2G`.beløp(skjæringstidspunkt) + `2G`.beløp(skjæringstidspunkt) / 3).årlig.toInt().årlig
-        val selvstendigGrunnlag = SelvstendigFaktaavklartInntekt.beregnInntektsgrunnlag(inntekter, anvendtGrunnbeløp)
+        val normalinntekt = SelvstendigFaktaavklartInntekt.normalinntekt(inntekter, anvendtGrunnbeløp)
+        val selvstendigGrunnlag = SelvstendigFaktaavklartInntekt.beregningsgrunnlag(inntekter, anvendtGrunnbeløp)
+        assertEquals(528030.årlig, normalinntekt)
         assertEquals(expected, selvstendigGrunnlag)
     }
 }

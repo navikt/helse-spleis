@@ -54,7 +54,7 @@ internal class Inntektsgrunnlag(
     private val omregnetÅrsinntekt = arbeidsgiverInntektsopplysninger.totalOmregnetÅrsinntekt()
 
     // summen av alle inntekter
-    val beregningsgrunnlag = selvstendigInntektsopplysning?.fastsattÅrsinntekt ?: arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt()
+    val beregningsgrunnlag = selvstendigInntektsopplysning?.beregningsgrunnlag ?: arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt()
     val sykepengegrunnlag = beregningsgrunnlag.coerceAtMost(this.`6G`)
     private val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (beregningsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 

@@ -69,7 +69,7 @@ internal data class InntektsgrunnlagAssert(val inntektsgrunnlag: Inntektsgrunnla
         assertEquals(beløp, inntektsgrunnlag.sykepengegrunnlag) { "feil sykepengegrunnlag" }
     }
 
-    private var fastsatteÅrsinntekter = mutableListOf<Inntekt>()
+    private var beregningsgrunnlag = mutableListOf<Inntekt>()
 
     internal fun assertInntektsgrunnlag(
         orgnummer: String,
@@ -81,7 +81,7 @@ internal data class InntektsgrunnlagAssert(val inntektsgrunnlag: Inntektsgrunnla
         forventetKildeId: UUID? = null,
         deaktivert: Boolean = false
     ) {
-        if (!deaktivert) fastsatteÅrsinntekter.add(forventetFastsattÅrsinntekt)
+        if (!deaktivert) beregningsgrunnlag.add(forventetFastsattÅrsinntekt)
 
         val aktiv = inntektsgrunnlag
             .arbeidsgiverInntektsopplysninger
@@ -102,13 +102,12 @@ internal data class InntektsgrunnlagAssert(val inntektsgrunnlag: Inntektsgrunnla
         forventetOmregnetÅrsinntekt: Inntekt = forventetFaktaavklartInntekt,
         forventetFastsattÅrsinntekt: Inntekt = forventetOmregnetÅrsinntekt,
     ) {
-        fastsatteÅrsinntekter.add(forventetFastsattÅrsinntekt)
-
         val selvstendigInntektsopplysning = inntektsgrunnlag
             .selvstendigInntektsopplysning
 
         val actual = selvstendigInntektsopplysning
         assertNotNull(actual)
+        beregningsgrunnlag.add(selvstendigInntektsopplysning.beregningsgrunnlag)
         assertSelvstendigInntektsopplysning(
             inspektør = actual.inspektør,
             forventetFaktaavklartInntekt = forventetFaktaavklartInntekt,
@@ -118,7 +117,7 @@ internal data class InntektsgrunnlagAssert(val inntektsgrunnlag: Inntektsgrunnla
     }
 
     internal fun assert() {
-        assertBeregningsgrunnlag(fastsatteÅrsinntekter.summer())
+        assertBeregningsgrunnlag(beregningsgrunnlag.summer())
     }
 }
 

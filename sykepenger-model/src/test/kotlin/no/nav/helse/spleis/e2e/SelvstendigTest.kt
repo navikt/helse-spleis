@@ -415,7 +415,9 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 0) {
-                assertSelvstendigInntektsgrunnlag(715713.årlig)
+                assertSelvstendigInntektsgrunnlag(1023532.årlig)
+                assertBeregningsgrunnlag(715713.årlig)
+                assertSykepengegrunnlag(561804.årlig)
             }
 
             val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje

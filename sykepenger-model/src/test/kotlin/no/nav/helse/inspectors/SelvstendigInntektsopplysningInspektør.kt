@@ -6,7 +6,7 @@ internal val SelvstendigInntektsopplysning.inspektør get() = SelvstendigInntekt
 
 internal class SelvstendigInntektsopplysningInspektør(arbeidsgiverInntektsopplysning: SelvstendigInntektsopplysning) {
     val faktaavklartInntekt = arbeidsgiverInntektsopplysning.faktaavklartInntekt
-    val omregnetÅrsinntekt = arbeidsgiverInntektsopplysning.inntektsgrunnlag.beløp
+    val omregnetÅrsinntekt = faktaavklartInntekt.inntektsdata.beløp
     val fastsattÅrsinntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt
     val skjønnsmessigFastsatt = arbeidsgiverInntektsopplysning.skjønnsmessigFastsatt
 }
