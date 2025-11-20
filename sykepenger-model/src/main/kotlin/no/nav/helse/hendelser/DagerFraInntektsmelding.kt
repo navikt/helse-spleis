@@ -160,7 +160,7 @@ internal class DagerFraInntektsmelding(
 
     internal fun tomBitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvArbeidsgiverperiode {
         håndterDager(aktivitetslogg, vedtaksperiode)
-        return BitAvArbeidsgiverperiode(hendelse.metadata, Sykdomstidslinje(), emptyList())
+        return BitAvArbeidsgiverperiode(hendelse.metadata, Sykdomstidslinje(), null)
     }
 
     private fun håndterDager(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): Sykdomstidslinje? {

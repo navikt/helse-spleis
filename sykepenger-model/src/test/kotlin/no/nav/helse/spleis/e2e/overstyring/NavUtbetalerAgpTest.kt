@@ -574,7 +574,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertForventetFeil(
-            "Vet ikke helt hva som er riktig her. Skulle vi ha gått til AUU siden det ikke er AGP, fortsatt vært i AvIM, eller ha antatt at AGP går til 16 og gå videre?",
+            "Vet ikke helt hva som er riktig her. Skulle vi ha gått til AUU siden det ikke er AGP, fortsatt vært i AvIM, eller ha antatt at AGP går til 16 og gå videre? <- Svar: Ja slik gjøres for LPS/Altinn, men HAG-opplysninger blir som ønsket",
             { assertEquals(listOf(1.januar til 1.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode)) },
             { assertEquals(listOf(1.januar til 10.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode)) }
         )
@@ -587,8 +587,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
         )
 
-        // Mulig vi ikke burde være i AUU her
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertVarsler(listOf(RV_IM_8, Varselkode.RV_IM_4, RV_IM_24), 1.vedtaksperiode.filter())
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertVarsler(listOf(RV_IM_8, Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
     }
 }
