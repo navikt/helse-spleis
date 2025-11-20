@@ -65,11 +65,11 @@ import no.nav.helse.person.Vedtaksperiode.Companion.aktiv
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
+import no.nav.helse.person.Vedtaksperiode.Companion.harFaktaavklartInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.igangsettOverstyring
 import no.nav.helse.person.Vedtaksperiode.Companion.medSammeUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.periodeMedFaktaavklartInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
 import no.nav.helse.person.Vedtaksperiode.Companion.startdatoerPåSammenhengendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.validerTilstand
@@ -365,8 +365,7 @@ internal class Yrkesaktivitet private constructor(
     }
 
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Boolean {
-        val kanAvklareFraPerioder = vedtaksperioder.periodeMedFaktaavklartInntekt(skjæringstidspunkt)?.takeIf { Toggle.BrukFaktaavklartInntektFraBehandling.enabled } != null
-        return kanAvklareFraPerioder || (avklarInntektFraInntektshistorikk(skjæringstidspunkt, vedtaksperioder) != null)
+        return vedtaksperioder.harFaktaavklartInntekt() || (avklarInntektFraInntektshistorikk(skjæringstidspunkt, vedtaksperioder) != null)
     }
 
     internal fun avklarInntektFraInntektshistorikk(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): ArbeidstakerFaktaavklartInntekt? {

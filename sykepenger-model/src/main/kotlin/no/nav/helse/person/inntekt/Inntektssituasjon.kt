@@ -7,8 +7,12 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.yearMonth
 
 internal sealed interface Inntektssituasjon {
-    data class HarInntektFraArbeidsgiver(val inntektFraArbeidsgiver: ArbeidstakerFaktaavklartInntekt, private val periodeMedInntektFraArbeidsgiver: Vedtaksperiode? = null) : Inntektssituasjon {
-        constructor(periodeMedInntektFraArbeidsgiver: Vedtaksperiode): this(periodeMedInntektFraArbeidsgiver.behandlinger.faktaavklartInntekt!! as ArbeidstakerFaktaavklartInntekt, periodeMedInntektFraArbeidsgiver)
+    data class HarInntektFraArbeidsgiver(
+        val inntektFraArbeidsgiver: ArbeidstakerFaktaavklartInntekt,
+        private val periodeMedInntektFraArbeidsgiver: Vedtaksperiode? = null,
+        private val førsteFraværsdag: LocalDate? = null
+    ) : Inntektssituasjon {
+        constructor(periodeMedInntektFraArbeidsgiver: Vedtaksperiode, førsteFraværsdag: LocalDate) : this(periodeMedInntektFraArbeidsgiver.behandlinger.faktaavklartInntekt!! as ArbeidstakerFaktaavklartInntekt, periodeMedInntektFraArbeidsgiver, førsteFraværsdag)
         init { check(inntektFraArbeidsgiver.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) }
 
         internal fun avklarInntekt(skjæringstidspunkt: LocalDate, skatteopplysning: ArbeidstakerFaktaavklartInntekt, flereArbeidsgivere: Boolean, aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt {
@@ -19,8 +23,10 @@ internal sealed interface Inntektssituasjon {
             }
         }
 
+        private fun utledetFørsteFraværsdag() = førsteFraværsdag ?: inntektFraArbeidsgiver.inntektsdata.dato
+
         private fun vedFlereArbeidsgivere(skjæringstidspunkt: LocalDate, skatteopplysning: ArbeidstakerFaktaavklartInntekt, aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt {
-            if (skjæringstidspunkt.yearMonth == inntektFraArbeidsgiver.inntektsdata.dato.yearMonth) return brukInntektFraArbeidsgiver(aktivitetslogg)
+            if (skjæringstidspunkt.yearMonth == utledetFørsteFraværsdag().yearMonth) return brukInntektFraArbeidsgiver(aktivitetslogg)
             aktivitetslogg.varsel(Varselkode.RV_VV_2)
             return skatteopplysning
         }

@@ -2633,7 +2633,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun inntektssituasjon(alleForSammeArbeidsgiver: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): Inntektssituasjon {
         val fraInntektshistorikk = yrkesaktivitet.avklarInntektFraInntektshistorikk(skjæringstidspunkt, alleForSammeArbeidsgiver)?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }?.let { Inntektssituasjon.HarInntektFraArbeidsgiver(it) }
-        val fraPerioder = alleForSammeArbeidsgiver.periodeMedFaktaavklartInntekt(skjæringstidspunkt)?.let { Inntektssituasjon.HarInntektFraArbeidsgiver(it) }
+        val fraPerioder = alleForSammeArbeidsgiver.periodeMedFaktaavklartInntektOgFørsteFraværsdag(skjæringstidspunkt)?.let { (periodeMedFaktaavklartInntekt, førsteFraværsdag) -> Inntektssituasjon.HarInntektFraArbeidsgiver(periodeMedFaktaavklartInntekt, førsteFraværsdag) }
         val beløpFraInntekshistorikk = fraInntektshistorikk?.inntektFraArbeidsgiver?.inntektsdata?.beløp
         val beløpFraPerioder = fraPerioder?.inntektFraArbeidsgiver?.inntektsdata?.beløp
         val tidligereVilkårsprøvd by lazy { alleForSammeArbeidsgiver.any { it.behandlinger.erTidligereVilkårspørvd() } }
@@ -3349,12 +3349,25 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        internal fun List<Vedtaksperiode>.periodeMedFaktaavklartInntekt(skjæringstidspunkt: LocalDate): Vedtaksperiode? {
+        internal fun List<Vedtaksperiode>.harFaktaavklartInntekt(): Boolean {
+            if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return false
+            return any { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
+        }
+
+        internal fun List<Vedtaksperiode>.periodeMedFaktaavklartInntektOgFørsteFraværsdag(skjæringstidspunkt: LocalDate): Pair<Vedtaksperiode, LocalDate>? {
+            val førsteFraværsdag = firstNotNullOfOrNull { it.førsteFraværsdag } ?: first().periode.start
             val vedtaksperioderMedFaktaavklartInntekt = filter { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
+            // Her kunne vi vurdert å legge på RV_IM_4 hvis det er flere vedtaksperioder i lista med faktaavklart inntekt
+            // Potensielt også der hvor vi lagrer en faktaavklart inntekt på behandlingen og det allerede lå en der fra før
 
             // Prioriterer siste ankomne i samme måned som skjæringstidspunktet
-            return vedtaksperioderMedFaktaavklartInntekt.filter { it.behandlinger.faktaavklartInntekt!!.inntektsdata.dato.yearMonth == skjæringstidspunkt.yearMonth }.maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
+            val periodeMedFaktaavklartInntekt = vedtaksperioderMedFaktaavklartInntekt
+                .filter { it.behandlinger.faktaavklartInntekt!!.inntektsdata.dato.yearMonth == skjæringstidspunkt.yearMonth }
+                .maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
                 ?: vedtaksperioderMedFaktaavklartInntekt.maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
+                ?: return null // Når vi skur på toggelen trenger ikke dette være en funksjon som returnerer null. Da kan vi bare ta .maxBy
+
+            return periodeMedFaktaavklartInntekt to førsteFraværsdag
         }
 
         internal fun List<Vedtaksperiode>.medSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode) = this.filter { it.harSammeUtbetalingSom(vedtaksperiodeSomForsøkesAnnullert) }.toSet()

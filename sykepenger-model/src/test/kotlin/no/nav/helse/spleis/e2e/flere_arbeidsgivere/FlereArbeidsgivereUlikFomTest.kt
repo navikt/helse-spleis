@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -76,6 +77,21 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `får varsel om ulik startdato selv om vi velger en inntekt i samme måned som skjæringstidspunktet`() = Toggle.BrukFaktaavklartInntektFraBehandling.enable {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, beregnetInntekt = INNTEKT * 1.1, førsteFraværsdag = 1.februar)
+        håndterInntektsmelding(emptyList(), orgnummer = a2, beregnetInntekt = INNTEKT * 1.2, førsteFraværsdag = 25.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
+        assertInntektsgrunnlag(1.januar, 2) {
+            assertInntektsgrunnlag(a1, forventetFaktaavklartInntekt = INNTEKT)
+            assertInntektsgrunnlag(a2, forventetFaktaavklartInntekt = INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+        }
+        assertVarsel(RV_VV_2, 1.vedtaksperiode(a1).filter())
+    }
 
     @Test
     fun `Gjenbruk av tidsnære opplysninger slår ikke til ved skatteinntekt i inntektsgrunnlaget`() {
