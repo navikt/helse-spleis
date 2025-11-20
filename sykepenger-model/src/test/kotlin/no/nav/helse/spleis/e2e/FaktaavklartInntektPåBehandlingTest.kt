@@ -130,10 +130,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 assertVarsler(1.vedtaksperiode, RV_IV_7)
 
                 assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
-                    when (brukFaktaavklartInntektFraBehandling) {
-                        true -> assertInntektsgrunnlag(a1, INNTEKT * 1.10) // Dette må jo være et bedre valg enn vi velger i dag 🎉
-                        false -> assertInntektsgrunnlag(a1, INNTEKT * 1.05)
-                    }
+                    assertInntektsgrunnlag(a1, INNTEKT * 1.05)
                 }
 
                 assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -143,14 +140,10 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 håndterVilkårsgrunnlag(1.vedtaksperiode)
 
                 assertInntektsgrunnlag(31.desember(2017), forventetAntallArbeidsgivere = 1) {
-                    when (brukFaktaavklartInntektFraBehandling) {
-                        true -> {
-                            assertInntektsgrunnlag(a1, INNTEKT * 1.15, forventetkilde = Arbeidstakerkilde.Arbeidsgiver) // Velger siste ankomne inntektsmelding
-                            assertVarsel(Varselkode.RV_IV_14, 1.vedtaksperiode.filter())
-                        }
-
-                        false -> assertInntektsgrunnlag(a1, INNTEKT * 1.05)
-                    }
+                    assertInntektsgrunnlag(a1, INNTEKT * 1.05, forventetkilde = Arbeidstakerkilde.Arbeidsgiver)
+                }
+                if (brukFaktaavklartInntektFraBehandling) {
+                    assertVarsel(Varselkode.RV_IV_14, 1.vedtaksperiode.filter())
                 }
             }
         }
