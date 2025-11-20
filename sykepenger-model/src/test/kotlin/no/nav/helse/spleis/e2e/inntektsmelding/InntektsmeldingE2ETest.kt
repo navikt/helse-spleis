@@ -113,6 +113,58 @@ import org.junit.jupiter.api.assertDoesNotThrow
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
+    fun `inkonsekvente valg av inntekt fra inntektsmeldingen - dette kan vel ikke være meningen?`() {
+        håndterSøknad(januar, a1)
+        håndterSøknad(februar, a1)
+
+        håndterSøknad(januar, a2)
+        håndterSøknad(februar, a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = INNTEKT * 1.1)
+        val imFebruar = håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.februar, orgnummer = a1, beregnetInntekt = INNTEKT * 1.2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+
+        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
+        assertInntektsgrunnlag(1.januar, 2) {
+            // Her velger vi sist ankomne inntektsmelding på a1 på tross av at første fraværsdag er i en annen måned
+            assertInntektsgrunnlag(a1, INNTEKT*1.2, forventetKildeId = imFebruar)
+            assertInntektsgrunnlag(a2, INNTEKT)
+        }
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.februar, orgnummer = a1, beregnetInntekt = INNTEKT * 1.3)
+        // HÆÆ? Ved første vilkårsprøving velger vi siste ankonme uavhhengig av måned, men når det kommer en korrigerende med samme første fraværsdag, da blir det plutselig ikke brukt
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        assertInntektsgrunnlag(1.januar, 2) {
+            // Her velger vi sist ankomne inntektsmelding på a1
+            assertInntektsgrunnlag(a1, INNTEKT*1.2, forventetKildeId = imFebruar)
+            assertInntektsgrunnlag(a2, INNTEKT)
+        }
+
+    }
+
+    @Test
     fun `inntektsmelding for perioder med arbeid`() {
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), Arbeid(1.januar, 16.januar))
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), Arbeid(17.januar, 31.januar))
