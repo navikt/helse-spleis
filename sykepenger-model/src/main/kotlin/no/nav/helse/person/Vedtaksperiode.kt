@@ -3369,18 +3369,10 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.periodeMedFaktaavklartInntektOgFørsteFraværsdag(): Pair<Vedtaksperiode, LocalDate>? {
             val førsteFraværsdag = firstNotNullOfOrNull { it.førsteFraværsdag } ?: first().periode.start
-            // Hvis vi har inntekt på perioden som inneholder første fraværsdag, bruker vi den
-            val vedtaksperiodeMedFørsteFraværsdag = this.firstOrNull { førsteFraværsdag in it.periode }?.takeIf { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
 
-            if (vedtaksperiodeMedFørsteFraværsdag != null) return vedtaksperiodeMedFørsteFraværsdag to førsteFraværsdag
-
-            // Bruker siste ankomne inntekt på skjæringstidspunktet
             val periodeMedFaktaavklartInntekt = this
-                .filter { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
-                .maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
+                .firstOrNull { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
                 ?: return null // Når vi skur på toggelen trenger ikke dette være en funksjon som returnerer null. Da kan vi bare ta .maxBy
-
-            // Her kan vi potensielt legge på et nytt varsel som kan hete "Inntekten som er lagt til grunn er mottatt på noe annet enn første fraværsdag"
 
             return periodeMedFaktaavklartInntekt to førsteFraværsdag
         }
