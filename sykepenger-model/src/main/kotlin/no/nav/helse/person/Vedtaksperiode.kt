@@ -143,6 +143,7 @@ import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
+import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklarteInntekter
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerBlokkerendePeriode
 import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerInfotrygdHistorikk
@@ -2646,7 +2647,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun inntektssituasjon(alleForSammeArbeidsgiver: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): Inntektssituasjon {
         val fraInntektshistorikk = yrkesaktivitet.avklarInntektFraInntektshistorikk(skjæringstidspunkt, alleForSammeArbeidsgiver)?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }?.let { Inntektssituasjon.HarInntektFraArbeidsgiver(it) }
-        val fraPerioder = alleForSammeArbeidsgiver.periodeMedFaktaavklartInntektOgFørsteFraværsdag()?.let { (periodeMedFaktaavklartInntekt, førsteFraværsdag) -> Inntektssituasjon.HarInntektFraArbeidsgiver(periodeMedFaktaavklartInntekt, førsteFraværsdag) }
+        val fraPerioder = alleForSammeArbeidsgiver.arbeidstakerFaktaavklarteInntekter()?.let { Inntektssituasjon.HarInntektFraArbeidsgiver.fraArbeidstakerFaktaavklarteInntekter(it) }
         val beløpFraInntekshistorikk = fraInntektshistorikk?.inntektFraArbeidsgiver?.inntektsdata?.beløp
         val beløpFraPerioder = fraPerioder?.inntektFraArbeidsgiver?.inntektsdata?.beløp
         val tidligereVilkårsprøvd by lazy { alleForSammeArbeidsgiver.any { it.behandlinger.erTidligereVilkårspørvd() } }
@@ -3367,14 +3368,10 @@ internal class Vedtaksperiode private constructor(
             return any { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
         }
 
-        internal fun List<Vedtaksperiode>.periodeMedFaktaavklartInntektOgFørsteFraværsdag(): Pair<Vedtaksperiode, LocalDate>? {
+        internal fun List<Vedtaksperiode>.arbeidstakerFaktaavklarteInntekter(): ArbeidstakerFaktaavklarteInntekter? {
             val førsteFraværsdag = firstNotNullOfOrNull { it.førsteFraværsdag } ?: first().periode.start
-
-            val periodeMedFaktaavklartInntekt = this
-                .firstOrNull { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
-                ?: return null // Når vi skur på toggelen trenger ikke dette være en funksjon som returnerer null. Da kan vi bare ta .maxBy
-
-            return periodeMedFaktaavklartInntekt to førsteFraværsdag
+            val vurderbareInntekter = mapNotNull { it.behandlinger.vurderbarArbeidstakerFaktaavklartInntekt() }.takeUnless { it.isEmpty() } ?: return null // Når toggle er på kan ikke den bli tom
+            return ArbeidstakerFaktaavklarteInntekter(førsteFraværsdag, vurderbareInntekter)
         }
 
         internal fun List<Vedtaksperiode>.medSammeUtbetaling(vedtaksperiodeSomForsøkesAnnullert: Vedtaksperiode) = this.filter { it.harSammeUtbetalingSom(vedtaksperiodeSomForsøkesAnnullert) }.toSet()

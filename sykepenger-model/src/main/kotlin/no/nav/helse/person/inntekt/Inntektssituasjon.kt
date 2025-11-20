@@ -9,10 +9,10 @@ import no.nav.helse.yearMonth
 internal sealed interface Inntektssituasjon {
     data class HarInntektFraArbeidsgiver(
         val inntektFraArbeidsgiver: ArbeidstakerFaktaavklartInntekt,
-        private val periodeMedInntektFraArbeidsgiver: Vedtaksperiode? = null,
-        private val førsteFraværsdag: LocalDate? = null
+        private val førsteFraværsdag: LocalDate = inntektFraArbeidsgiver.inntektsdata.dato,
+        private val vurderbarArbeidstakerFaktaavklartInntekt: VurderbarArbeidstakerFaktaavklartInntekt? = null
     ) : Inntektssituasjon {
-        constructor(periodeMedInntektFraArbeidsgiver: Vedtaksperiode, førsteFraværsdag: LocalDate) : this(periodeMedInntektFraArbeidsgiver.behandlinger.faktaavklartInntekt!! as ArbeidstakerFaktaavklartInntekt, periodeMedInntektFraArbeidsgiver, førsteFraværsdag)
+
         init { check(inntektFraArbeidsgiver.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) }
 
         internal fun avklarInntekt(skjæringstidspunkt: LocalDate, skatteopplysning: ArbeidstakerFaktaavklartInntekt, flereArbeidsgivere: Boolean, aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt {
@@ -23,10 +23,9 @@ internal sealed interface Inntektssituasjon {
             }
         }
 
-        private fun utledetFørsteFraværsdag() = førsteFraværsdag ?: inntektFraArbeidsgiver.inntektsdata.dato
 
         private fun vedFlereArbeidsgivere(skjæringstidspunkt: LocalDate, skatteopplysning: ArbeidstakerFaktaavklartInntekt, aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt {
-            if (skjæringstidspunkt.yearMonth == utledetFørsteFraværsdag().yearMonth) return brukInntektFraArbeidsgiver(aktivitetslogg)
+            if (skjæringstidspunkt.yearMonth == førsteFraværsdag.yearMonth) return brukInntektFraArbeidsgiver(aktivitetslogg)
             aktivitetslogg.varsel(Varselkode.RV_VV_2)
             return skatteopplysning
         }
@@ -38,8 +37,18 @@ internal sealed interface Inntektssituasjon {
         }
 
         private fun brukInntektFraArbeidsgiver(aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt {
-            periodeMedInntektFraArbeidsgiver?.behandlinger?.vurderVarselForGjenbrukAvInntekt(inntektFraArbeidsgiver, aktivitetslogg)
+            vurderbarArbeidstakerFaktaavklartInntekt?.vurder(aktivitetslogg)
             return inntektFraArbeidsgiver
+        }
+
+        internal companion object {
+            internal fun fraArbeidstakerFaktaavklarteInntekter(arbeidstakerFaktaavklarteInntekter: ArbeidstakerFaktaavklarteInntekter) = arbeidstakerFaktaavklarteInntekter.besteInntekt().let { besteInntekt ->
+                HarInntektFraArbeidsgiver(
+                    inntektFraArbeidsgiver = besteInntekt.faktaavklartInntekt,
+                    førsteFraværsdag = arbeidstakerFaktaavklarteInntekter.førsteFraværsdag,
+                    vurderbarArbeidstakerFaktaavklartInntekt = besteInntekt
+                )
+            }
         }
     }
     data class GaOppÅVentePåArbeidsgiver(val periodenSomGaOpp: Vedtaksperiode): Inntektssituasjon

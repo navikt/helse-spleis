@@ -33,6 +33,7 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.vurderVarselForGjenbrukAvInntekt
+import no.nav.helse.person.Behandlinger.Behandling.Companion.vurderbarArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.bestemDagerUtenNavAnsvar
@@ -54,6 +55,7 @@ import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.FaktaavklartInntektView
+import no.nav.helse.person.inntekt.VurderbarArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.sykdomstidslinje.Dag
@@ -409,6 +411,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.any { it.dokumentHåndtert(dokumentsporing) }
 
     internal fun vurderVarselForGjenbrukAvInntekt(faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, aktivitetslogg: IAktivitetslogg) = behandlinger.vurderVarselForGjenbrukAvInntekt(faktaavklartInntekt, aktivitetslogg)
+
+    internal fun vurderbarArbeidstakerFaktaavklartInntekt(): VurderbarArbeidstakerFaktaavklartInntekt? {
+        val inntekten = (faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) ?: return null
+        return behandlinger.vurderbarArbeidstakerFaktaavklartInntekt(
+            faktaavklartInntekt = inntekten,
+            skjæringstidspunkt = sisteBehandling.skjæringstidspunkt,
+            periode = sisteBehandling.periode(),
+            dagerUtenNavAnsvar = sisteBehandling.dagerUtenNavAnsvar
+        )
+    }
 
     internal fun lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
         behandlinger.lagreGjenbrukbarInntekt(skjæringstidspunkt, organisasjonsnummer, yrkesaktivitet, aktivitetslogg)
@@ -1517,6 +1529,25 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     forrigeDato = førsteEndringMedInntekten.skjæringstidspunkt,
                     harNyArbeidsgiverperiode = gjeldendeEndring().dagerUtenNavAnsvar != førsteEndringMedInntekten.dagerUtenNavAnsvar,
                     aktivitetslogg = aktivitetslogg
+                )
+            }
+
+            internal fun List<Behandling>.vurderbarArbeidstakerFaktaavklartInntekt(
+                skjæringstidspunkt: LocalDate,
+                periode: Periode,
+                dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaring,
+                faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
+            ): VurderbarArbeidstakerFaktaavklartInntekt {
+                val førsteEndringMedInntekten = firstNotNullOf { behandling -> behandling.endringer.firstOrNull { endring -> endring.faktaavklartInntekt == faktaavklartInntekt } }
+                val faktaavklarteInntektskilder = flatMap { it.endringer }.mapNotNull { (it.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt)?.inntektsdata?.hendelseId }.toSet()
+
+                return VurderbarArbeidstakerFaktaavklartInntekt(
+                    faktaavklartInntekt = faktaavklartInntekt,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    periode = periode,
+                    skjæringstidspunktVedMottattInntekt = førsteEndringMedInntekten.skjæringstidspunkt,
+                    nyArbeidsgiverperiodeEtterMottattInntekt = dagerUtenNavAnsvar != førsteEndringMedInntekten.dagerUtenNavAnsvar,
+                    harFlereFaktaavklarteInntekter = faktaavklarteInntektskilder.size > 1
                 )
             }
 
