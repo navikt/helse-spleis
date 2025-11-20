@@ -129,6 +129,9 @@ internal class TestArbeidsgiverAssertions(
     internal fun assertBehov(vedtaksperiode: UUID, behovtype: Aktivitet.Behov.Behovtype) =
         aktivitetsloggAsserts.assertBehov(vedtaksperiode, behovtype)
 
+    internal fun assertBehov(forventetBehov: List<Aktivitet.Behov.Behovtype>, block: () -> Unit) =
+        aktivitetsloggAsserts.assertBehov(forventetBehov, block)
+
     internal fun ingenNyeFunksjonelleFeil(block: () -> Unit) {
         return aktivitetsloggAsserts.ingenNyeFunksjonelleFeil(block)
     }

@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.time.temporal.Temporal
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.SimuleringResultatDto
@@ -665,14 +665,24 @@ internal class TestPerson(
 
         internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT) {
             behovsamler.bekreftBehov(orgnummer, Utbetaling)
-            behovsamler.detaljerFor(orgnummer, Utbetaling).forEach { (detaljer, kontekst) ->
-                val vedtaksperiodeId = UUID.fromString(kontekst.getValue("vedtaksperiodeId"))
-                val behandlingId = UUID.fromString(kontekst.getValue("behandlingId"))
-                val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
-                val fagsystemId = detaljer.getValue("fagsystemId") as String
-                arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(vedtaksperiodeId, behandlingId, utbetalingId, fagsystemId, status)
-                    .håndter(Person::håndterUtbetalingHendelse)
-            }
+            behovsamler.detaljerFor(orgnummer, Utbetaling)
+                .groupBy { (detaljer, kontekst) ->
+                    val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+                    val fagsystemId = detaljer.getValue("fagsystemId") as String
+                    "$$utbetalingId-$fagsystemId"
+                }
+                .forEach { (_, utbetalingsbehov) ->
+                    utbetalingsbehov
+                        .last() // velger bare siste behov per utbetalingId-fagsystemId-kombinasjon for å håndtere at vedtaksperioden kan ha blitt påminnet og produsert behovet flere ganger
+                        .also { (detaljer, kontekst) ->
+                            val vedtaksperiodeId = UUID.fromString(kontekst.getValue("vedtaksperiodeId"))
+                            val behandlingId = UUID.fromString(kontekst.getValue("behandlingId"))
+                            val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+                            val fagsystemId = detaljer.getValue("fagsystemId") as String
+                            arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(vedtaksperiodeId, behandlingId, utbetalingId, fagsystemId, status)
+                                .håndter(Person::håndterUtbetalingHendelse)
+                        }
+                }
         }
 
         internal fun håndterAnnullering(vedtaksperiodeId: UUID) {

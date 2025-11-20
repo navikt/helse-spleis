@@ -291,7 +291,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun validerIkkeFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = sisteBehandling.validerIkkeFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return SpesifikkKontekst("Behandling", mapOf("behandlingId" to sisteBehandlingId.toString()))
+        return sisteBehandling.toSpesifikkKontekst()
     }
 
     internal fun byggUtkastTilVedtak(builder: UtkastTilVedtakBuilder, behandling: Behandling?): UtkastTilVedtakBuilder {
@@ -508,7 +508,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         private var vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?,
         private val kilde: Behandlingkilde
-    ) {
+    ) : Aktivitetskontekst {
         var avsluttet: LocalDateTime? = avsluttet
             private set
         private val gjeldende get() = endringer.last()
@@ -534,6 +534,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             check(endringer.isNotEmpty()) {
                 "Må ha endringer for at det skal være vits med en behandling"
             }
+        }
+
+        override fun toSpesifikkKontekst(): SpesifikkKontekst {
+            return SpesifikkKontekst("Behandling", mapOf("behandlingId" to this.id.toString()))
         }
 
         fun behandlingOpprettet(behandlingEventBus: BehandlingEventBus) {
@@ -1352,7 +1356,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         fun påminnUtbetaling(aktivitetslogg: IAktivitetslogg) {
             when (tilstand) {
                 Tilstand.OverførtAnnullering,
-                Tilstand.VedtakFattet -> checkNotNull(gjeldende.utbetaling).håndterUtbetalingpåminnelse(aktivitetslogg)
+                Tilstand.VedtakFattet -> checkNotNull(gjeldende.utbetaling).håndterUtbetalingpåminnelse(aktivitetslogg.kontekst(this))
 
                 Tilstand.AnnullertPeriode,
                 Tilstand.AvsluttetUtenVedtak,

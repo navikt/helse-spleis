@@ -276,6 +276,10 @@ internal abstract class AbstractDslTest {
     protected fun TestPerson.TestArbeidsgiver.assertBehov(vedtaksperiodeId: UUID, behovtype: Aktivitet.Behov.Behovtype) =
         testArbeidsgiverAsserter.assertBehov(vedtaksperiodeId, behovtype)
 
+    protected fun TestPerson.TestArbeidsgiver.assertBehov(vararg behovtype: Aktivitet.Behov.Behovtype, block: () -> Unit) {
+        testArbeidsgiverAsserter.assertBehov(behovtype.toList(), block)
+    }
+
     protected fun nyPeriode(periode: Periode, vararg orgnummer: String, grad: Prosentdel = 100.prosent) {
         testperson.nyPeriode(periode, *orgnummer, grad = grad)
     }

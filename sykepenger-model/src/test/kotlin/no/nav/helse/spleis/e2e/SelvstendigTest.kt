@@ -26,6 +26,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.oktober
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
@@ -47,6 +48,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -174,6 +176,34 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING)
+        }
+    }
+
+    @Test
+    fun `påminnelse av utbetaling mens avventer utbetaling revurdering`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar, sykdomsgrad = 80.prosent)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 90) })
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+
+            håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 100) })
+            håndterUtbetalt(status = Oppdragstatus.OVERFØRT)
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING)
+            assertBehov(Aktivitet.Behov.Behovtype.Utbetaling) {
+                håndterPåminnelse(1.vedtaksperiode, SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING)
+            }
+
+            håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
         }
     }
 
