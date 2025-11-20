@@ -943,4 +943,54 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 4.januar, forventetVenteperiode = listOf(4.januar til 19.januar))
         }
     }
+
+    @Test
+    fun `tilkommet inntekt - tilkommet på en annen arbeidsgiver`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(1.vedtaksperiode, inntekterForBeregning = listOf(
+                InntekterForBeregning.Inntektsperiode(
+                    inntektskilde = a1,
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    inntekt = 1000.daglig
+                )
+            ))
+            håndterSimulering(1.vedtaksperiode)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, forventetArbeidsgiverbeløp = 0, forventetArbeidsgiverRefusjonsbeløp = 0, forventetPersonbeløp = 0, subset = 1.januar til 16.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, forventetArbeidsgiverbeløp = 0, forventetArbeidsgiverRefusjonsbeløp = 0, forventetPersonbeløp = 617, subset = 17.januar til 31.januar)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 0) {
+                assertSelvstendigInntektsgrunnlag( 460589.0.årlig)
+                assertBeregningsgrunnlag(460589.0.årlig)
+            }
+        }
+    }
+
+    @Test
+    fun `tilkommet inntekt - tilkommet på en selvstendig`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(1.vedtaksperiode, inntekterForBeregning = listOf(
+                InntekterForBeregning.Inntektsperiode(
+                    inntektskilde = "SELVSTENDIG",
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    inntekt = 1000.daglig
+                )
+            ))
+            håndterSimulering(1.vedtaksperiode)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, forventetArbeidsgiverbeløp = 0, forventetArbeidsgiverRefusjonsbeløp = 0, forventetPersonbeløp = 0, subset = 1.januar til 16.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, forventetArbeidsgiverbeløp = 0, forventetArbeidsgiverRefusjonsbeløp = 0, forventetPersonbeløp = 617, subset = 17.januar til 31.januar)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 0) {
+                assertSelvstendigInntektsgrunnlag( 460589.0.årlig)
+                assertBeregningsgrunnlag(460589.0.årlig)
+            }
+        }
+    }
 }

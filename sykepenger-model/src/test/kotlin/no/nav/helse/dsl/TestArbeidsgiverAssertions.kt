@@ -93,9 +93,9 @@ internal class TestArbeidsgiverAssertions(
         val utbetalingstidslinje = inspektør.utbetalingstidslinjer(vedtaksperiodeId).let { subset?.let(it::subset) ?: it }
 
         utbetalingstidslinje.filterNot { it.dato.erHelg() }.forEach { utbetalingsdag ->
-            assertEquals(forventetArbeidsgiverbeløp.daglig, utbetalingsdag.økonomi.inspektør.arbeidsgiverbeløp) { "feil arbeidsgiverbeløp for dag ${utbetalingsdag.dato} " }
+            assertEquals(forventetArbeidsgiverbeløp.daglig, utbetalingsdag.økonomi.inspektør.arbeidsgiverbeløp) { "feil arbeidsgiverbeløp for dag ${utbetalingsdag.dato} - ${utbetalingsdag::class.simpleName}" }
             assertEquals(forventetArbeidsgiverRefusjonsbeløp.daglig, utbetalingsdag.økonomi.inspektør.arbeidsgiverRefusjonsbeløp.rundTilDaglig())
-            assertEquals(forventetPersonbeløp.daglig, utbetalingsdag.økonomi.inspektør.personbeløp)
+            assertEquals(forventetPersonbeløp.daglig, utbetalingsdag.økonomi.inspektør.personbeløp) { "feil personbeløp for dag ${utbetalingsdag.dato} - ${utbetalingsdag::class.simpleName} " }
         }
     }
 

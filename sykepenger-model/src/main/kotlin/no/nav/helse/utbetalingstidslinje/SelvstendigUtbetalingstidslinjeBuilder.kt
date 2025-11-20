@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -16,17 +17,17 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
     private val ventetid: Periode?,
     private val dagerNavOvertarAnsvar: List<Periode>
 ) : UtbetalingstidslinjeBuilder {
-    private fun medInntektHvisFinnes(grad: Prosentdel, næringsinntekt: Inntekt): Økonomi {
-        return medInntekt(grad, næringsinntekt)
+    private fun medInntektHvisFinnes(dato: LocalDate, grad: Prosentdel, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje): Økonomi {
+        return medInntekt(dato, grad, næringsinntekt, inntektjusteringer)
     }
 
-    private fun medInntekt(grad: Prosentdel, næringsinntekt: Inntekt): Økonomi {
+    private fun medInntekt(dato: LocalDate, grad: Prosentdel, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje): Økonomi {
         return Økonomi.inntekt(
             sykdomsgrad = grad,
             aktuellDagsinntekt = næringsinntekt,
             dekningsgrad = dekningsgrad,
             refusjonsbeløp = INGEN,
-            inntektjustering = INGEN,
+            inntektjustering = (inntektjusteringer[dato] as? Beløpsdag)?.beløp ?: INGEN
         )
     }
 
@@ -35,27 +36,27 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         sykdomstidslinje.forEach { dag ->
             val erVentetid = ventetid?.contains(dag.dato) == true
             when (dag) {
-                is Dag.Arbeidsdag -> arbeidsdag(builder, dag.dato, inntekt)
-                is Dag.ForeldetSykedag -> foreldetdag(builder, dag.dato, dag.grad, inntekt)
-                is Dag.FriskHelgedag -> arbeidsdag(builder, dag.dato, inntekt)
+                is Dag.Arbeidsdag -> arbeidsdag(builder, dag.dato, inntekt, inntektjusteringer)
+                is Dag.ForeldetSykedag -> foreldetdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                is Dag.FriskHelgedag -> arbeidsdag(builder, dag.dato, inntekt, inntektjusteringer)
                 is Dag.SykHelgedag -> when (erVentetid) {
-                    true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt)
-                    false -> helg(builder, dag.dato, dag.grad, inntekt)
+                    true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                    false -> helg(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                 }
                 is Dag.Sykedag -> when (erVentetid) {
                     true -> when (navSkalUtbetaleVentetidsDag(dag.dato)) {
-                        true -> forsikringsdag(builder, dag.dato, dag.grad, inntekt)
-                        false -> ventetidsdag(builder, dag.dato, dag.grad, inntekt)
+                        true -> forsikringsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                        false -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                     }
-                    false -> navDag(builder, dag.dato, dag.grad, inntekt)
+                    false -> navDag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                 }
                 is Dag.MeldingTilNavDag -> when (erVentetid) {
-                    true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt)
-                    else -> avvistDag(builder, dag.dato, 0.prosent, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt)
+                    true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                    else -> avvistDag(builder, dag.dato, 0.prosent, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt, inntektjusteringer)
                 }
                 is Dag.MeldingTilNavHelgedag -> when (erVentetid) {
-                    true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt)
-                    false -> avvistDag(builder, dag.dato, 0.prosent, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt)
+                    true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                    false -> avvistDag(builder, dag.dato, 0.prosent, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt, inntektjusteringer)
                 }
                 is Dag.AndreYtelser -> {
                     val begrunnelse = when (dag.ytelse) {
@@ -67,7 +68,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                         Dag.AndreYtelser.AnnenYtelse.Pleiepenger -> Begrunnelse.AndreYtelserPleiepenger
                         Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger -> Begrunnelse.AndreYtelserSvangerskapspenger
                     }
-                    avvistDag(builder, dag.dato, 0.prosent, begrunnelse, inntekt)
+                    avvistDag(builder, dag.dato, 0.prosent, begrunnelse, inntekt, inntektjusteringer)
                 }
 
                 is Dag.ArbeidIkkeGjenopptattDag,
@@ -86,31 +87,31 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         return dagerNavOvertarAnsvar.any { it.contains(dato) }
     }
 
-    private fun helg(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, næringsinntekt: Inntekt) {
-        builder.addHelg(dato, medInntektHvisFinnes(grad, næringsinntekt).ikkeBetalt())
+    private fun helg(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
+        builder.addHelg(dato, medInntektHvisFinnes(dato, grad, næringsinntekt, inntektjusteringer).ikkeBetalt())
     }
 
-    private fun navDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, næringsinntekt: Inntekt) {
-        builder.addNAVdag(dato, medInntektHvisFinnes(grad, næringsinntekt))
+    private fun navDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
+        builder.addNAVdag(dato, medInntektHvisFinnes(dato, grad, næringsinntekt, inntektjusteringer))
     }
 
-    private fun arbeidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, næringsinntekt: Inntekt) {
-        builder.addArbeidsdag(dato, medInntektHvisFinnes(0.prosent, næringsinntekt).ikkeBetalt())
+    private fun arbeidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
+        builder.addArbeidsdag(dato, medInntektHvisFinnes(dato, 0.prosent, næringsinntekt, inntektjusteringer).ikkeBetalt())
     }
 
-    private fun ventetidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt) {
-        builder.addVentetidsdag(dato, medInntektHvisFinnes(sykdomsgrad, næringsinntekt).ikkeBetalt())
+    private fun ventetidsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
+        builder.addVentetidsdag(dato, medInntektHvisFinnes(dato, sykdomsgrad, næringsinntekt, inntektjusteringer).ikkeBetalt())
     }
 
-    private fun forsikringsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt) {
-        builder.addVentetidsdag(dato, medInntektHvisFinnes(sykdomsgrad, næringsinntekt))
+    private fun forsikringsdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
+        builder.addVentetidsdag(dato, medInntektHvisFinnes(dato, sykdomsgrad, næringsinntekt, inntektjusteringer))
     }
 
-    private fun foreldetdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt) {
-        builder.addForeldetDag(dato, medInntektHvisFinnes(sykdomsgrad, næringsinntekt).ikkeBetalt())
+    private fun foreldetdag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, sykdomsgrad: Prosentdel, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
+        builder.addForeldetDag(dato, medInntektHvisFinnes(dato, sykdomsgrad, næringsinntekt, inntektjusteringer).ikkeBetalt())
     }
 
-    private fun avvistDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, begrunnelse: Begrunnelse, næringsinntekt: Inntekt) {
-        builder.addAvvistDag(dato, medInntektHvisFinnes(grad, næringsinntekt).ikkeBetalt(), listOf(begrunnelse))
+    private fun avvistDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, begrunnelse: Begrunnelse, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
+        builder.addAvvistDag(dato, medInntektHvisFinnes(dato, grad, næringsinntekt, inntektjusteringer).ikkeBetalt(), listOf(begrunnelse))
     }
 }
