@@ -653,6 +653,26 @@ internal class Vedtaksperiode private constructor(
             inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata.copy(dato = alternativDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
         }
 
+        inntektsmeldingHåndtert(eventBus, inntektsmelding)
+
+        if (!oppdaterVilkårsgrunnlagMedInntekt(faktaavklartInntekt)) {
+            // har ikke laget nytt vilkårsgrunnlag for beløpet var det samme som det var
+            return null
+        }
+
+        aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
+        return Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(inntektsmelding, skjæringstidspunkt, skjæringstidspunkt)
+    }
+
+    internal fun håndterInntektFraInntektsmeldingPåPerioden(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        val faktaavklartInntekt = inntektsmelding.faktaavklartInntekt
+        if (faktaavklartInntekt.inntektsdata.dato !in periode) return null
+
+        // Enn så lenge sendes inntektsmelding håndtert ut i funksjonen over 👆. Frem til det flyttes til denne funksjonen må vi ha et ørlite hack for å ikke håndtere IM to ganger som følge av replay
+        if (behandlinger.faktaavklartInntekt?.inntektsdata?.hendelseId == inntektsmelding.metadata.meldingsreferanseId) return null
+
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+
         when (tilstand) {
             Avsluttet,
             TilUtbetaling,
@@ -676,7 +696,8 @@ internal class Vedtaksperiode private constructor(
             AvventerSimulering,
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
-            AvventerVilkårsprøvingRevurdering -> {}
+            AvventerVilkårsprøvingRevurdering -> {
+            }
 
             ArbeidsledigStart,
             ArbeidsledigAvventerInfotrygdHistorikk,
@@ -713,15 +734,7 @@ internal class Vedtaksperiode private constructor(
             dokumentsporing = inntektsmeldingInntekt(inntektsmelding.metadata.meldingsreferanseId)
         )
 
-        inntektsmeldingHåndtert(eventBus, inntektsmelding)
-
-        if (!oppdaterVilkårsgrunnlagMedInntekt(faktaavklartInntekt)) {
-            // har ikke laget nytt vilkårsgrunnlag for beløpet var det samme som det var
-            return null
-        }
-
-        aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
-        return Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(inntektsmelding, skjæringstidspunkt, skjæringstidspunkt)
+        return Revurderingseventyr.inntektFraInntektsmelding(inntektsmelding, periode)
     }
 
     private fun inntektsmeldingHåndtert(eventBus: EventBus, inntektsmelding: Inntektsmelding) {

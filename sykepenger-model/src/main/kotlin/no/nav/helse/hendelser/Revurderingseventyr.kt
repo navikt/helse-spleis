@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiver
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiverperiode
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Forkasting
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Grunnbeløpsregulering
+import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.InntektFraInntektsmelding
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.InntektsmeldingSomAldriKom
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmeldingInntektsopplysninger
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.KorrigertSøknad
@@ -46,6 +47,7 @@ class Revurderingseventyr private constructor(
         fun annullering(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(Annullering, periode.start, periode, hendelse)
         fun minimumSykdomsgradVurdert(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(MinimumSykdomsgradVurdert, periode.start, periode, hendelse)
         fun inntektsmeldingSomAldriKom(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(InntektsmeldingSomAldriKom, periode.start, periode, hendelse)
+        fun inntektFraInntektsmelding(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(InntektFraInntektsmelding, periode.start, periode, hendelse)
 
         fun tidligsteEventyr(a: Revurderingseventyr?, b: Revurderingseventyr?) = when {
             b == null || (a != null && a.periodeForEndring.start <= b.periodeForEndring.start) -> a
@@ -139,6 +141,10 @@ class Revurderingseventyr private constructor(
 
         data object InntektsmeldingSomAldriKom : RevurderingÅrsak {
             override fun navn(): String = "INNTEKTSMELDING_SOM_ALDRI_KOM"
+        }
+
+        data object InntektFraInntektsmelding : RevurderingÅrsak {
+            override fun navn(): String = "INNTEKT_FRA_INNTEKTSMELDING"
         }
 
         data object Reberegning : RevurderingÅrsak {

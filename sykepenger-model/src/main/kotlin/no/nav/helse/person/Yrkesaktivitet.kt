@@ -595,11 +595,15 @@ internal class Yrkesaktivitet private constructor(
             it.håndterInntektFraInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst, inntektshistorikk)
         }
 
+        val inntektPåPeriode = vedtaksperioder.firstNotNullOfOrNull {
+            it.håndterInntektFraInntektsmeldingPåPerioden(eventBus, inntektsmelding, aktivitetslogg)
+        }
+
         // 5. ferdigstiller håndtering av inntektsmelding
         inntektsmelding.ferdigstill(eventBus, aktivitetsloggMedArbeidsgiverkontekst, person, forkastede.perioder(), sykmeldingsperioder)
 
         // 6. igangsetter
-        val tidligsteOverstyring = listOfNotNull(egenmeldingsoverstyring, inntektoverstyring, dagoverstyring, refusjonsoverstyring).tidligsteEventyr()
+        val tidligsteOverstyring = listOfNotNull(egenmeldingsoverstyring, inntektoverstyring, dagoverstyring, refusjonsoverstyring, inntektPåPeriode).tidligsteEventyr()
         // hvis tidligsteOverstyring er null så er verken egenmeldingsdager, dager, refusjon eller inntekt håndtert
         return tidligsteOverstyring
     }
