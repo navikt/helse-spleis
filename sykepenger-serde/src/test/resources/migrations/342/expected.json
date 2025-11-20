@@ -1,0 +1,14 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "tilstand": "AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE"
+        },
+        {
+          "tilstand": "AVVENTER_BLOKKERENDE_PERIODE"
+        }
+      ]
+    }
+  ]
+}

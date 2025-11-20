@@ -131,7 +131,7 @@ internal class SpeilGenerasjonerBuilder(
                 is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_REVURDERING,
                 is VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
                 is VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE,
-                is VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE,
+                is VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
                 is VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 is VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE,
                 is VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING -> Periodetilstand.VenterPåAnnenPeriode
@@ -278,7 +278,7 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (revurdering)
 
                 VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE,
-                VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE,
+                VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
                 VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE,
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,

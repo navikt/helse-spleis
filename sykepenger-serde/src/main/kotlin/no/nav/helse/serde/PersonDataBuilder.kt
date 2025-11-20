@@ -92,7 +92,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_REVURDERING_TIL_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_SIMULERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.FRILANS_AVVENTER_BLOKKERENDE_PERIODE
@@ -414,7 +414,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
         VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> AVSLUTTET_UTEN_UTBETALING
         VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING -> AVVENTER_AVSLUTTET_UTEN_UTBETALING
         VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> AVVENTER_BLOKKERENDE_PERIODE
-        VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE -> AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE
+        VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE -> AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
         VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER -> AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
         VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE -> AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
         VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> AVVENTER_GODKJENNING

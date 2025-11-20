@@ -400,7 +400,7 @@ data class SpannerPersonDto(
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE,
+                AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
                 AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
@@ -1154,7 +1154,7 @@ private fun VedtaksperiodeUtDto.tilPersonData(
         VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVSLUTTET_UTEN_UTBETALING
         VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
         VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-        VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE
+        VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
         VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
         VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
         VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_GODKJENNING

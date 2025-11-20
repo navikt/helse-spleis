@@ -3474,7 +3474,7 @@ internal class Vedtaksperiode private constructor(
                     VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> AvsluttetUtenUtbetaling
                     VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING -> AvventerAvsluttetUtenUtbetaling
                     VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> AvventerBlokkerendePeriode
-                    VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE -> AvventerSøknadForOverlappendePeriode
+                    VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE -> AvventerSøknadForOverlappendePeriode
                     VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER -> AvventerInntektsopplysningerForAnnenArbeidsgiver
                     VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE -> AvventerRefusjonsopplysningerAnnenPeriode
                     VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> AvventerGodkjenning
@@ -3579,7 +3579,7 @@ internal class Vedtaksperiode private constructor(
             AvsluttetUtenUtbetaling -> VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING
             AvventerAvsluttetUtenUtbetaling -> VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING
             AvventerBlokkerendePeriode -> VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE
-            AvventerSøknadForOverlappendePeriode -> VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE
+            AvventerSøknadForOverlappendePeriode -> VedtaksperiodetilstandDto.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
             AvventerInntektsopplysningerForAnnenArbeidsgiver -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
             AvventerRefusjonsopplysningerAnnenPeriode -> VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
             AvventerGodkjenning -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING

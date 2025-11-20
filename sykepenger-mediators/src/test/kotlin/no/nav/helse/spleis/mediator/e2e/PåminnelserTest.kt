@@ -62,6 +62,35 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         assertEquals(2, (0 until testRapid.inspektør.antall()).filter { "Utbetaling" in testRapid.inspektør.melding(it).path("@behov").map(JsonNode::asText) }.size)
     }
 
+    @Test
+    fun `påminner vedtaksperiode i tilstand AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE med flagg forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere`() {
+        sendNySøknadFrilanser(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
+        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+
+        assertTilstander(
+            0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_INNTEKTSMELDING",
+            "AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE"
+        )
+
+        sendNyPåminnelse(0, TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, flagg = setOf("forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"))
+
+        assertTilstander(
+            0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_INNTEKTSMELDING",
+            "AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING"
+        )
+
+    }
+
     private fun assertVedtaksperiodePåminnet(melding: JsonNode) {
         assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
         assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
