@@ -32,7 +32,6 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInntekt
-import no.nav.helse.person.Behandlinger.Behandling.Companion.vurderVarselForGjenbrukAvInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.vurderbarArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
@@ -409,8 +408,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
         behandlinger.any { it.dokumentHåndtert(dokumentsporing) }
-
-    internal fun vurderVarselForGjenbrukAvInntekt(faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, aktivitetslogg: IAktivitetslogg) = behandlinger.vurderVarselForGjenbrukAvInntekt(faktaavklartInntekt, aktivitetslogg)
 
     internal fun vurderbarArbeidstakerFaktaavklartInntekt(): VurderbarArbeidstakerFaktaavklartInntekt? {
         val inntekten = (faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) ?: return null
@@ -1522,16 +1519,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     kilde = behandlingkilde
                 )
 
-            internal fun List<Behandling>.vurderVarselForGjenbrukAvInntekt(faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, aktivitetslogg: IAktivitetslogg) {
-                val førsteEndringMedInntekten = firstNotNullOf { behandling -> behandling.endringer.firstOrNull { endring -> endring.faktaavklartInntekt == faktaavklartInntekt } }
-
-                faktaavklartInntekt.medInnteksdato(gjeldendeEndring().skjæringstidspunkt).vurderVarselForGjenbrukAvInntekt(
-                    forrigeDato = førsteEndringMedInntekten.skjæringstidspunkt,
-                    harNyArbeidsgiverperiode = gjeldendeEndring().dagerUtenNavAnsvar != førsteEndringMedInntekten.dagerUtenNavAnsvar,
-                    aktivitetslogg = aktivitetslogg
-                )
-            }
-
             internal fun List<Behandling>.vurderbarArbeidstakerFaktaavklartInntekt(
                 skjæringstidspunkt: LocalDate,
                 periode: Periode,
@@ -1551,7 +1538,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
             }
 
-            internal fun List<Behandling>.harGjenbrukbarInntekt(organisasjonsnummer: String) = forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer) != null
             internal fun List<Behandling>.lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) {
                 val (forrigeEndring, vilkårsgrunnlag) = forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer) ?: return
                 val nyArbeidsgiverperiode = forrigeEndring.arbeidsgiverperiodeEndret(gjeldendeEndring())

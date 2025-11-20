@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -212,7 +211,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
 import no.nav.helse.utbetalingstidslinje.filtrerUtbetalingstidslinjer
-import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
@@ -3206,13 +3204,6 @@ internal class Vedtaksperiode private constructor(
         return refusjonstidslinje.isEmpty() || !harEksisterendeInntekt()
     }
 
-    private fun arbeidsgiveropplysningerSituasjon(
-        alleForSammeArbeidsgiver: List<Vedtaksperiode> = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)).filter { it.yrkesaktivitet === this.yrkesaktivitet }
-    ): ArbeidsgiveropplysningerSituasjon {
-        check(yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker) { "gir bare mening å kalle denne funksjonen for arbeidstakere" }
-        return alleForSammeArbeidsgiver.arbeidsgiveropplysningerSituasjon(skjæringstidspunkt, this)
-    }
-
     // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
     internal fun harEksisterendeInntekt(): Boolean {
         // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
@@ -3334,33 +3325,6 @@ internal class Vedtaksperiode private constructor(
             }
 
             return startdatoer.values.toSet()
-        }
-
-        internal fun List<Vedtaksperiode>.arbeidsgiveropplysningerSituasjon(skjæringstidspunkt: LocalDate, aktuellVedtaksperiode: Vedtaksperiode): ArbeidsgiveropplysningerSituasjon {
-            val vedtaksperioderMedFaktaavklartInntekt = filter { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
-
-            // Her er det en slags inntektsturnering på hvilken inntekt vi skal velge, om det er fler
-            val avklartInntekt =
-                (
-                    vedtaksperioderMedFaktaavklartInntekt.filter { it.behandlinger.faktaavklartInntekt!!.inntektsdata.dato.yearMonth == skjæringstidspunkt.yearMonth }.maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
-                    ?: vedtaksperioderMedFaktaavklartInntekt.maxByOrNull { it.behandlinger.faktaavklartInntekt!!.inntektsdata.tidsstempel }
-                )
-                ?.behandlinger?.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt
-
-            return when {
-                // Perioden er en AUU
-                !aktuellVedtaksperiode.skalArbeidstakerBehandlesISpeil() -> ArbeidsgiveropplysningerSituasjon.TrengerIkkeArbeidsgiveropplysninger
-                // Har alt vi trenger 👍
-                avklartInntekt != null && aktuellVedtaksperiode.refusjonstidslinje.isNotEmpty() -> ArbeidsgiveropplysningerSituasjon.AvklarteArbeidsgiveropplysninger(avklartInntekt)
-                // Om vi tidligere er vilkårsprøvd så går vi aldri tilbake til AvventerInntektsmelding
-                aktuellVedtaksperiode.behandlinger.erTidligereVilkårspørvd() -> ArbeidsgiveropplysningerSituasjon.TidligereVilkårsprøvd
-                // Mangler inntekt & eller refusjon, men gidder ikke vente mer
-                aktuellVedtaksperiode.tilstand is AvventerInntektsmelding && Duration.between(aktuellVedtaksperiode.oppdatert, LocalDateTime.now()).toDays() > 90 -> ArbeidsgiveropplysningerSituasjon.GirOppÅVentePåArbeidsgiver
-                // Har ikke noe skjæringstidspunkt
-                aktuellVedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte() -> ArbeidsgiveropplysningerSituasjon.BrukerSkatteinntektPåDirekten
-                // Om ingen av disse sprø casene har slått til så mangler vi minst en av de
-                else -> ArbeidsgiveropplysningerSituasjon.ManglerArbeidsgiveropplysninger
-            }
         }
 
         internal fun List<Vedtaksperiode>.harFaktaavklartInntekt(): Boolean {
