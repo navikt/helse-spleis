@@ -673,8 +673,6 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         when (tilstand) {
-            Avsluttet,
-            TilUtbetaling,
             AvsluttetUtenUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, inntektsmelding)
 
             AvventerAnnullering,
@@ -695,7 +693,11 @@ internal class Vedtaksperiode private constructor(
             AvventerSimulering,
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
-            AvventerVilkårsprøvingRevurdering -> {
+            AvventerVilkårsprøvingRevurdering -> {}
+
+            Avsluttet,
+            TilUtbetaling -> check(behandlinger.åpenForEndring()) {
+                "forventer at vedtaksperioden er åpen for endring når inntekt håndteres (tilstand $tilstand)"
             }
 
             ArbeidsledigStart,
