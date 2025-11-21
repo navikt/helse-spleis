@@ -16,11 +16,13 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
 import no.nav.helse.erHelg
+import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig.somString
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.inspectors.inspektør
@@ -256,6 +258,9 @@ internal class ArbeidsgiverberegningTest {
     }
 
     private fun ArbeidsgiverberegningBuilder.inntektsjusteringer(inntektskilde: Inntektskilde, fom: LocalDate, tom: LocalDate, inntekt: Inntekt) = apply {
-        inntektsjusteringer(inntektskilde, Beløpstidslinje.fra(fom til tom, inntekt, Kilde(MeldingsreferanseId(UUID.randomUUID()), Avsender.SYSTEM, LocalDateTime.now())))
+        inntektsjusteringer(inntektskilde, InntekterForBeregning.Inntektsperioder(
+            kilde = Kilde(MeldingsreferanseId(UUID.randomUUID()), Avsender.SYSTEM, LocalDateTime.now()),
+            inntektsperioder = listOf(InntekterForBeregning.Inntektsperiode.Beløp(inntektskilde.somString, fom til tom, inntekt)
+        )))
     }
 }

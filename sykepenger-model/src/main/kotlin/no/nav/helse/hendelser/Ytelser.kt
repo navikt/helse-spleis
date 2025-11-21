@@ -69,7 +69,7 @@ class Ytelser(
 
     internal fun selvstendigForsikring(): SelvstendigForsikring? = selvstendigForsikring
 
-    internal fun inntektsendringer(): Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje> {
+    internal fun inntektsendringer(): Map<Arbeidsgiverberegning.Inntektskilde, InntekterForBeregning.Inntektsperioder> {
         val kilde = Kilde(metadata.meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
         return inntekterForBeregning.inntektsperioder
             .groupBy { it.inntektskilde }
@@ -81,11 +81,8 @@ class Ytelser(
                     else -> AnnenInntektskilde(it)
                 }
             }}
-            .mapValues { (_, inntektsperioder) ->
-                inntektsperioder.filterIsInstance<InntekterForBeregning.Inntektsperiode.Beløp>().fold(Beløpstidslinje()) { resultat, inntektsperiode ->
-                    resultat + Beløpstidslinje.fra(inntektsperiode.periode, inntektsperiode.beløp, kilde)
-                }
-            }
+            .mapValues { (_, inntektsperioder) -> InntekterForBeregning.Inntektsperioder(kilde, inntektsperioder) }
+
     }
 }
 

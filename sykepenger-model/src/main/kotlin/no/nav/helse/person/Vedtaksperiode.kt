@@ -47,6 +47,7 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Hendelseskilde
+import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
@@ -1551,7 +1552,7 @@ internal class Vedtaksperiode private constructor(
         val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
         val inntektsperioder = ytelser.inntektsendringer()
         val selvstendigForsikring = ytelser.selvstendigForsikring()
-        val uberegnetTidslinjePerArbeidsgiver = lagArbeidsgiverberegning(perioderSomMåHensyntasVedBeregning, grunnlagsdata, inntektsperioder, selvstendigForsikring)
+        val (uberegnetTidslinjePerArbeidsgiver, inntektsperioderMedBeløpstidslinjer)  = lagArbeidsgiverberegning(perioderSomMåHensyntasVedBeregning, grunnlagsdata, inntektsperioder, selvstendigForsikring)
         // steg 3: beregn alle utbetalingstidslinjer (avslå dager, beregne maksdato og utbetalingsbeløp)
         val harOpptjening = harOpptjening(grunnlagsdata)
         val sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag
@@ -1581,7 +1582,7 @@ internal class Vedtaksperiode private constructor(
         )
         // steg 4.1: lag beregnede behandlinger
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
-        lagBeregnetBehandlinger(perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder, selvstendigForsikring)
+        lagBeregnetBehandlinger(perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioderMedBeløpstidslinjer, selvstendigForsikring)
 
         /* steg 4.2 lag utbetalinger */
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
@@ -3735,9 +3736,9 @@ private fun maksdatosubsummering(
 internal fun lagArbeidsgiverberegning(
     vedtaksperioder: List<Vedtaksperiode>,
     vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
-    inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje> = emptyMap(),
+    inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, InntekterForBeregning.Inntektsperioder> = emptyMap(),
     selvstendigForsikring: SelvstendigForsikring? = null,
-): List<Arbeidsgiverberegning> {
+): Pair<List<Arbeidsgiverberegning>, Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje>> {
     return with(ArbeidsgiverberegningBuilder()) {
         vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.forEach {
             fastsattÅrsinntekt(Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
@@ -3748,11 +3749,14 @@ internal fun lagArbeidsgiverberegning(
         vilkårsgrunnlag?.inntektsgrunnlag?.selvstendigInntektsopplysning?.also {
             selvstendigNæringsdrivende(it.fastsattÅrsinntekt)
         }
-        inntektsperioder.forEach { (inntektskilde, inntektsjustering) ->
-            inntektsjusteringer(inntektskilde, inntektsjustering)
+        vilkårsgrunnlag?.inntektsgrunnlag?.sykepengegrunnlag?.also {
+            sykepengegrunnlag(it)
+        }
+        inntektsperioder.forEach { (inntektskilde, inntektsperioder) ->
+            inntektsjusteringer(inntektskilde, inntektsperioder)
         }
         vedtaksperioder.forEach { it.medVedtaksperiode(this, selvstendigForsikring) }
-        build()
+        build() to inntektsendringer()
     }
 }
 

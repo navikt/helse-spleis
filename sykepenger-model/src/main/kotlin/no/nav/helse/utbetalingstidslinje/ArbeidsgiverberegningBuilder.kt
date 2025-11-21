@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.util.*
 import no.nav.helse.erHelg
+import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.beløp.Beløpsdag
@@ -17,6 +18,7 @@ internal class ArbeidsgiverberegningBuilder {
     private val inntekter: MutableMap<Yrkesaktivitet, Inntekt> = mutableMapOf()
     private val inntektsjusteringer: MutableMap<Inntektskilde, Beløpstidslinje> = mutableMapOf()
     private val vedtaksperioder: MutableMap<Yrkesaktivitet, MutableList<UberegnetVedtaksperiode>> = mutableMapOf()
+    private var sykepengegrunnlag: Inntekt = Inntekt.INGEN
 
     fun fastsattÅrsinntekt(yrkesaktivitet: Yrkesaktivitet.Arbeidstaker, inntekt: Inntekt) = apply {
         leggTilInntekt(yrkesaktivitet, inntekt)
@@ -27,14 +29,26 @@ internal class ArbeidsgiverberegningBuilder {
         leggTilInntekt(yrkesaktivitet, inntekt)
     }
 
+    fun sykepengegrunnlag(sykepengegrunnlag: Inntekt) = apply {
+        this.sykepengegrunnlag = sykepengegrunnlag
+    }
+
     private fun leggTilInntekt(yrkesaktivitet: Yrkesaktivitet, inntekt: Inntekt) {
         inntektskilder.add(yrkesaktivitet)
         inntekter[yrkesaktivitet] = inntekt
     }
 
-    fun inntektsjusteringer(inntektskilde: Inntektskilde, beløpstidslinje: Beløpstidslinje) = apply {
+    private fun InntekterForBeregning.Inntektsperioder.beløpstidslinje() = inntektsperioder.fold(Beløpstidslinje()) { resultat, inntektsperiode ->
+        val beløpstidslinje = when (inntektsperiode) {
+            is InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag -> Beløpstidslinje.fra(inntektsperiode.periode, (sykepengegrunnlag * inntektsperiode.andel), kilde)
+            is InntekterForBeregning.Inntektsperiode.Beløp -> Beløpstidslinje.fra(inntektsperiode.periode, inntektsperiode.beløp, kilde)
+        }
+        resultat + beløpstidslinje
+    }
+
+    fun inntektsjusteringer(inntektskilde: Inntektskilde, inntektsperioder: InntekterForBeregning.Inntektsperioder) = apply {
         inntektskilder.add(inntektskilde)
-        inntektsjusteringer[inntektskilde] = (inntektsjusteringer[inntektskilde] ?: Beløpstidslinje()) + beløpstidslinje
+        inntektsjusteringer[inntektskilde] = (inntektsjusteringer[inntektskilde] ?: Beløpstidslinje()) + inntektsperioder.beløpstidslinje()
     }
 
     fun vedtaksperiode(yrkesaktivitet: Yrkesaktivitet, vedtaksperiodeId: UUID, sykdomstidslinje: Sykdomstidslinje, builder: UtbetalingstidslinjeBuilder) = apply {
@@ -91,6 +105,7 @@ internal class ArbeidsgiverberegningBuilder {
         }
         return resultat
     }
+    fun inntektsendringer()= inntektsjusteringer.toMap()
 
     private fun vedtaksperioder(yrkesaktivitet: Yrkesaktivitet, inntekt: Inntekt?, inntektsjusteringer: Beløpstidslinje): List<Vedtaksperiodeberegning> {
         return (vedtaksperioder[yrkesaktivitet]?.toList() ?: emptyList()).map {
