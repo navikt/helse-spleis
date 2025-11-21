@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
@@ -127,6 +128,27 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             }
 
             assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23, Varselkode.RV_VV_4)
+        }
+    }
+
+    @Test
+    fun `gradert sykmeldt, graderte foreldrepenger og 6G-begrenset`() {
+        a1 {
+            nyttVedtak(1.juni(2025) til 30.juni(2025), beregnetInntekt = 2_000_000.årlig, grad = 50.prosent)
+            assertInntektsgrunnlag(1.juni(2025), 1) {
+                assertInntektsgrunnlag(a1, 2_000_000.årlig)
+                assertSykepengegrunnlag(780_960.årlig)
+            }
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1502, 7692, subset = 17.juni(2025) til 30.juni(2025))
+
+            håndterInntektsendringer(1.juni(2025))
+            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(
+                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("FORELDREPENGER", 1.juni(2025) til 30.juni(2025), 50.prosent),
+            ))
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 915, 7692, subset = 17.juni(2025) til 30.juni(2025))
+
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23)
         }
     }
 }
