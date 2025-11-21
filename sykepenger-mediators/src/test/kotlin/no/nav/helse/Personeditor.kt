@@ -43,22 +43,27 @@ internal object Personeditor {
         println(" - Legger arbeidsfiler på '${workingDirectory}'")
         println(" - ..og lagrer backups på '${backupDirectory}'")
 
-        val jdbcUrl = ventPåJdbcUrl()
+        val (jdbcUrl, epost) = ventPåJdbcUrl()
 
         println("## Fyll inn fødselsnummer på personen det skal endres på")
         val fødselsnummer = ventPåInput { it.length == 11 && kotlin.runCatching { it.toLong() }.isSuccess }
 
         gåVidereVedJa("Ønsker du å gå videre å gå videre med å endre på '$fødselsnummer'? ⚠️", false)
 
+        println("## Beskriv _hvorfor_ du gjør denne endringen (for auditlog) - minst 15 makreller lang 🤏")
+        val beskrivelse = ventPåInput { it.trim().length >= 15 }
+
         fådetpå(
             jdbcUrl = jdbcUrl,
             fødselsnummer = fødselsnummer,
+            epost = epost,
+            beskrivelse = beskrivelse,
             workingdirectory = workingDirectory,
             backupsdirectory = backupDirectory
         )
     }
 
-    private fun fådetpå(jdbcUrl: String, fødselsnummer: String, workingdirectory: Path, backupsdirectory: Path) {
+    private fun fådetpå(jdbcUrl: String, fødselsnummer: String, epost: String, beskrivelse: String, workingdirectory: Path, backupsdirectory: Path) {
         val id = "${LocalDateTime.now()}-${fødselsnummer}-${UUID.randomUUID()}"
         val backupfil = File("${backupsdirectory}/$id.json")
         val resultatfil = File("${workingdirectory}/$id.json")
@@ -94,7 +99,8 @@ internal object Personeditor {
                 val resultat = resultatfil.somJson()
 
                 println("## Dette er endringene du har gjort")
-                println("\n${diff(data, resultat)}")
+                val diff = diff(data, resultat)
+                println("\n$diff")
 
                 gåVidereVedJa("Ser endringene bra ut? Nå er det no way back om du sier ja ⚠️", default = false)
 
@@ -102,7 +108,15 @@ internal object Personeditor {
                     stmt.setString(1, resultat)
                     stmt.setLong(2, fødselsnummer.toLong())
                     stmt.executeUpdate()
-                }) { "forventet å oppdatere nøyaktig én rad" }
+                }) { "forventet å oppdatere nøyaktig én rad ved oppdatering av person" }
+
+                check(1 == prepareStatement("INSERT INTO auditlog (personidentifikator, epost, diff, beskrivelse) VALUES (?,?,?,?)").use { stmt ->
+                    stmt.setString(1, fødselsnummer)
+                    stmt.setString(2, epost)
+                    stmt.setString(3, diff)
+                    stmt.setString(4, beskrivelse)
+                    stmt.executeUpdate()
+                }) { "forventet å oppdatere nøyaktig én rad ved auditlogging" }
 
                 println(" - Endringene dine er live ✅")
             }
@@ -125,7 +139,7 @@ internal object Personeditor {
         return svar
     }
 
-    private fun ventPåJdbcUrl(): String {
+    private fun ventPåJdbcUrl(): Pair<String, String> {
         println("## Fyll inn databaseport. Defaulten er '5432'")
         val defaultPort = "5432"
         val port = ventPåInput(defaultPort) { it.length == 4 && kotlin.runCatching { it.toInt() }.isSuccess }
@@ -137,7 +151,7 @@ internal object Personeditor {
         val epost = ventPåInput(defaultEpost) { it.endsWith("@nav.no") }
         val jdbcUrl = "jdbc:postgresql://localhost:$port/spleis?user=${epost}"
         println(" - Bruker JdbcUrl '$jdbcUrl'")
-        return jdbcUrl
+        return jdbcUrl to epost
     }
 
     private fun hentEpostFraGCloud(): String? {
@@ -199,6 +213,7 @@ internal object Personeditor {
         .replace("but got", "til")
         .replace("got", "til")
         .replace("but none found", "<slettet>")
+        .replace("Unexpected", "Nytt felt")
 
     private val printer = DefaultPrettyPrinter().apply {
         indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE)
