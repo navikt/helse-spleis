@@ -151,6 +151,7 @@ private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(
         YrkesaktivitetstypeDto.ARBEIDSLEDIG -> YrkesaktivitetTypeData.ARBEIDSLEDIG
         YrkesaktivitetstypeDto.FRILANS -> YrkesaktivitetTypeData.FRILANS
         YrkesaktivitetstypeDto.SELVSTENDIG -> YrkesaktivitetTypeData.SELVSTENDIG
+        YrkesaktivitetstypeDto.JORDBRUKER -> YrkesaktivitetTypeData.JORDBRUKER
     },
     inntektshistorikk = this.inntektshistorikk.historikk.map { it.tilPersonData() },
     sykdomshistorikk = this.sykdomshistorikk.elementer.map { it.tilPersonData() },

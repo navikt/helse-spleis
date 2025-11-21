@@ -3,7 +3,7 @@ package no.nav.helse.person.builders
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.properties.Delegates
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -280,7 +280,7 @@ internal class UtkastTilVedtakBuilder(
                         is FastsattEtterSkjønn -> arbeidstakerEtterSkjønnMap(sykepengegrunnlagsfakta)
                     }.plus("selvstendig" to null)
 
-                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> selvstendigMap()
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig, Behandlingsporing.Yrkesaktivitet.Jordbruker -> selvstendigMap()
 
                     Behandlingsporing.Yrkesaktivitet.Frilans-> TODO("Har ikke implementert disse yrkesaktivitetstypene enda i sykepengegrunnlagsfakta")
                 }

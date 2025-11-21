@@ -123,6 +123,7 @@ internal class TestPerson(
 
     private fun String.tilYrkesaktivitet(): Behandlingsporing.Yrkesaktivitet = when (this) {
         selvstendig -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+        jordbruker -> Behandlingsporing.Yrkesaktivitet.Jordbruker
         frilans -> Behandlingsporing.Yrkesaktivitet.Frilans
         arbeidsledig -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
         else -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(this)
@@ -569,6 +570,7 @@ internal class TestPerson(
                     is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, INNTEKT, skjæringstidspunkt)
 
                     Behandlingsporing.Yrkesaktivitet.Frilans,
+                    Behandlingsporing.Yrkesaktivitet.Jordbruker,
                     Behandlingsporing.Yrkesaktivitet.Selvstendig -> lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, 0.månedlig, skjæringstidspunkt)
                 }
             }

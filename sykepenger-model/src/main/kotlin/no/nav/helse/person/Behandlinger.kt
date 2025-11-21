@@ -1283,6 +1283,26 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
             dokumentsporing in this.dokumentsporing
 
+        private fun medBeregning(nesteTilstand: Tilstand, beregning: BeregnetBehandling, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) {
+            val dagerNavOvertarAnsvar = when (yrkesaktivitet) {
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                is Arbeidstaker,
+                Behandlingsporing.Yrkesaktivitet.Frilans -> null
+
+                Behandlingsporing.Yrkesaktivitet.Jordbruker,
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (beregning.selvstendigForsikring?.type) {
+                    Forsikringstype.HundreProsentFraDagEn,
+                    Forsikringstype.ÅttiProsentFraDagEn -> dagerUtenNavAnsvar.dager
+
+                    Forsikringstype.HundreProsentFraDagSytten -> emptyList()
+                    null -> null
+                }
+            } ?: dagerNavOvertarAnsvar
+
+            nyEndring(gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar = dagerNavOvertarAnsvar))
+            tilstand(nesteTilstand)
+        }
+
         private fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
             nyEndring(gjeldende.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning))
         }
@@ -1691,27 +1711,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregning: BeregnetBehandling,
                     yrkesaktivitet: Behandlingsporing.Yrkesaktivitet
                 ) {
-                    val dagerNavOvertarAnsvar = when (yrkesaktivitet) {
-                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                        is Arbeidstaker,
-                        Behandlingsporing.Yrkesaktivitet.Frilans -> null
-
-                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (beregning.selvstendigForsikring?.type) {
-                            Forsikringstype.HundreProsentFraDagEn,
-                            Forsikringstype.ÅttiProsentFraDagEn -> behandling.dagerUtenNavAnsvar.dager
-
-                            Forsikringstype.HundreProsentFraDagSytten -> emptyList()
-                            null -> null
-                        }
-                    } ?: behandling.dagerNavOvertarAnsvar
-
-                    behandling.nyEndring(
-                        behandling.gjeldende.kopierMedBeregning(
-                            beregning,
-                            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
-                        )
-                    )
-                    behandling.tilstand(Beregnet)
+                    behandling.medBeregning(Beregnet, beregning, yrkesaktivitet)
                 }
 
                 override fun avsluttUtenVedtak(behandling: Behandling, behandlingEventBus: BehandlingEventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
@@ -1727,22 +1727,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregning: BeregnetBehandling,
                     yrkesaktivitet: Behandlingsporing.Yrkesaktivitet
                 ) {
-                    val dagerNavOvertarAnsvar = when (yrkesaktivitet) {
-                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                        is Arbeidstaker,
-                        Behandlingsporing.Yrkesaktivitet.Frilans -> null
-
-                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (beregning.selvstendigForsikring?.type) {
-                            Forsikringstype.HundreProsentFraDagEn,
-                            Forsikringstype.ÅttiProsentFraDagEn -> behandling.dagerUtenNavAnsvar.dager
-
-                            Forsikringstype.HundreProsentFraDagSytten -> emptyList()
-                            null -> null
-                        }
-                    } ?: behandling.dagerNavOvertarAnsvar
-
-                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar))
-                    behandling.tilstand(BeregnetOmgjøring)
+                    behandling.medBeregning(BeregnetOmgjøring, beregning, yrkesaktivitet)
                 }
             }
 
@@ -1756,22 +1741,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     beregning: BeregnetBehandling,
                     yrkesaktivitet: Behandlingsporing.Yrkesaktivitet
                 ) {
-                    val dagerNavOvertarAnsvar = when (yrkesaktivitet) {
-                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                        is Arbeidstaker,
-                        Behandlingsporing.Yrkesaktivitet.Frilans -> null
-
-                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (beregning.selvstendigForsikring?.type) {
-                            Forsikringstype.HundreProsentFraDagEn,
-                            Forsikringstype.ÅttiProsentFraDagEn -> behandling.dagerUtenNavAnsvar.dager
-
-                            Forsikringstype.HundreProsentFraDagSytten -> emptyList()
-                            null -> null
-                        }
-                    } ?: behandling.dagerNavOvertarAnsvar
-
-                    behandling.nyEndring(behandling.gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar))
-                    behandling.tilstand(BeregnetRevurdering)
+                    behandling.medBeregning(BeregnetRevurdering, beregning, yrkesaktivitet)
                 }
 
                 override fun håndterAnnullering(

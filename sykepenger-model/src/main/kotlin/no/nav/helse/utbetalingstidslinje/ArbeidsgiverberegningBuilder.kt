@@ -25,8 +25,7 @@ internal class ArbeidsgiverberegningBuilder {
     }
 
     fun selvstendigNæringsdrivende(inntekt: Inntekt) = apply {
-        val yrkesaktivitet = Yrkesaktivitet.Selvstendig
-        leggTilInntekt(yrkesaktivitet, inntekt)
+        leggTilInntekt(Yrkesaktivitet.Selvstendig, inntekt)
     }
 
     fun sykepengegrunnlag(sykepengegrunnlag: Inntekt) = apply {

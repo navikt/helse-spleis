@@ -39,6 +39,7 @@ import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Jordbruker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
@@ -247,6 +248,7 @@ internal class Vedtaksperiode private constructor(
         id = UUID.randomUUID(),
         tilstand = when (yrkesaktivitet.yrkesaktivitetstype) {
             Selvstendig -> SelvstendigStart
+            Jordbruker -> SelvstendigStart
             Arbeidsledig -> ArbeidsledigStart
             is Arbeidstaker -> ArbeidstakerStart
             Frilans -> FrilansStart
@@ -1691,7 +1693,8 @@ internal class Vedtaksperiode private constructor(
             is Arbeidstaker -> grunnlagsdata.valider(aktivitetslogg, yrkesaktivitet.organisasjonsnummer)
             Arbeidsledig,
             Frilans -> {}
-            Selvstendig ->
+            Selvstendig,
+            Jordbruker ->
                 if (selvstendigForsikring != null) {
                     if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
                     else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_6)
@@ -2750,7 +2753,16 @@ internal class Vedtaksperiode private constructor(
     private fun avklarSykepengegrunnlagForSelvstendig(): SelvstendigInntektsopplysning? {
         return person
             .vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-            .firstOrNull { it.yrkesaktivitet.yrkesaktivitetstype is Selvstendig }
+            .firstOrNull {
+                when (it.yrkesaktivitet.yrkesaktivitetstype) {
+                    Arbeidsledig,
+                    is Arbeidstaker,
+                    Frilans -> false
+
+                    Jordbruker,
+                    Selvstendig -> true
+                }
+            }
             ?.inntektForSelvstendig()
     }
 
@@ -2885,7 +2897,8 @@ internal class Vedtaksperiode private constructor(
 
         when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> grunnlagsdata.validerFørstegangsvurderingArbeidstaker(aktivitetslogg)
-            Selvstendig -> grunnlagsdata.validerFørstegangsvurderingSelvstendig(subsumsjonslogg)
+            Selvstendig,
+            Jordbruker -> grunnlagsdata.validerFørstegangsvurderingSelvstendig(subsumsjonslogg)
             Arbeidsledig,
             Frilans -> error("Støtter ikke Arbeidsledig/Frilans")
         }
@@ -2906,8 +2919,13 @@ internal class Vedtaksperiode private constructor(
         dagpenger(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
         inntekterForBeregning(aktivitetslogg, perioderSomMåHensyntasVedBeregning().map { it.periode }.reduce(Periode::plus))
 
-        if (yrkesaktivitet.yrkesaktivitetstype == Selvstendig) {
-            selvstendigForsikring(aktivitetslogg, this.skjæringstidspunkt)
+        when (yrkesaktivitet.yrkesaktivitetstype) {
+            Arbeidsledig,
+            is Arbeidstaker,
+            Frilans -> {}
+
+            Jordbruker,
+            Selvstendig -> selvstendigForsikring(aktivitetslogg, this.skjæringstidspunkt)
         }
     }
 
@@ -3765,11 +3783,11 @@ private fun Vedtaksperiode.medVedtaksperiode(builder: ArbeidsgiverberegningBuild
         Arbeidsledig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig
         is Arbeidstaker -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(yrkesaktivitet.yrkesaktivitetstype.organisasjonsnummer)
         Frilans -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Frilans
-        Selvstendig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Selvstendig
+        Selvstendig, Jordbruker -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Selvstendig
     }
     val utbetalingstidslinjeBuilder = when (yrkesaktivitet.yrkesaktivitetstype) {
         is Arbeidstaker -> behandlinger.utbetalingstidslinjeBuilderForArbeidstaker()
-        Selvstendig -> behandlinger.utbetalingstidslinjeBuilderForSelvstendig(selvstendigForsikring)
+        Selvstendig, Jordbruker -> behandlinger.utbetalingstidslinjeBuilderForSelvstendig(selvstendigForsikring)
 
         Arbeidsledig,
         Frilans -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitet.yrkesaktivitetstype::class.simpleName}")

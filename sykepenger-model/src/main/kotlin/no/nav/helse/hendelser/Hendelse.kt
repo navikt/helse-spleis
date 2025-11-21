@@ -40,6 +40,7 @@ sealed interface Behandlingsporing {
         data object Selvstendig : Yrkesaktivitet
         data object Frilans : Yrkesaktivitet
         data object Arbeidsledig : Yrkesaktivitet
+        data object Jordbruker : Yrkesaktivitet
 
         val Yrkesaktivitet.somOrganisasjonsnummer
             get() = when (this) {
@@ -47,6 +48,7 @@ sealed interface Behandlingsporing {
                 is Arbeidstaker -> organisasjonsnummer
                 Frilans -> "FRILANS"
                 Selvstendig -> "SELVSTENDIG"
+                Jordbruker -> "JORDBRUKER"
             }
 
     }
@@ -58,6 +60,7 @@ fun Behandlingsporing.erLik(other: Behandlingsporing) = when (this) {
     is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> other is Behandlingsporing.Yrkesaktivitet.Arbeidstaker && this.organisasjonsnummer == other.organisasjonsnummer
     Behandlingsporing.Yrkesaktivitet.Frilans -> other is Behandlingsporing.Yrkesaktivitet.Frilans
     Behandlingsporing.Yrkesaktivitet.Selvstendig -> other is Behandlingsporing.Yrkesaktivitet.Selvstendig
+    Behandlingsporing.Yrkesaktivitet.Jordbruker -> other is Behandlingsporing.Yrkesaktivitet.Jordbruker
 }
 
 // en value-class for uuid-er som representerer @id til en melding fra kafka

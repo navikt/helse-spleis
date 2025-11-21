@@ -99,6 +99,7 @@ internal class PersonMediator(
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> organisasjonsnummer
             Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+            Behandlingsporing.Yrkesaktivitet.Jordbruker -> "JORDBRUKER"
         }
 
     private val Behandlingsporing.Yrkesaktivitet.somYrkesaktivitetstype
@@ -107,6 +108,7 @@ internal class PersonMediator(
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> "ARBEIDSTAKER"
             Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+            Behandlingsporing.Yrkesaktivitet.Jordbruker -> "JORDBRUKER"
         }
 
     private fun mapInntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent): JsonMessage {

@@ -93,7 +93,8 @@ class Vilkårsgrunnlag(
                 }
                 arbeidstakerOpptjening
             }
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> null
+            Behandlingsporing.Yrkesaktivitet.Selvstendig,
+            Behandlingsporing.Yrkesaktivitet.Jordbruker -> null
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans -> error("Støtter ikke Arbeidsledig/Frilans")
         }

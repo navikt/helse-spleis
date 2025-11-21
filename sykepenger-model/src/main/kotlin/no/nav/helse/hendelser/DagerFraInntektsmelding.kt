@@ -278,6 +278,7 @@ internal class DagerFraInntektsmelding(
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans,
             Behandlingsporing.Yrkesaktivitet.Selvstendig,
+            Behandlingsporing.Yrkesaktivitet.Jordbruker,
             Behandlingsporing.IngenYrkesaktivitet -> error("Inntektsmelding uten arbeidsgiver?!?! Det blir litt vel tøysete spør du meg")
         }
         private val perioderViTrorInntektsmeldingenPrøverÅSiNoeOm = listOfNotNull(
