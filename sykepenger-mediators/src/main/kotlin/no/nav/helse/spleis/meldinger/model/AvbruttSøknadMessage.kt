@@ -9,17 +9,14 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
-internal class AvbruttSøknadMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
+internal class AvbruttSøknadMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, val behandlingsporing: Behandlingsporing.Yrkesaktivitet) : HendelseMessage(packet) {
 
-    private val organisasjonsnummer = packet["arbeidsgiver.orgnummer"].asText()
     private val periode = packet["fom"].asLocalDate() til packet["tom"].asLocalDate()
 
     private val avbruttSøknad
         get() = AvbruttSøknad(
             meldingsreferanseId = meldingsporing.id,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                organisasjonsnummer = organisasjonsnummer
-            ),
+            behandlingsporing = behandlingsporing,
             periode = periode
         )
 

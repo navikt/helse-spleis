@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
-import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigSøknadMessage
-import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigTidligereArbeidstakerSøknadMessage
+import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 
 internal class AvbruttArbeidsledigSøknadRiver(
@@ -31,9 +31,12 @@ internal class AvbruttArbeidsledigSøknadRiver(
             id = packet.meldingsreferanseId(),
             fødselsnummer = packet["fnr"].asText()
         )
-        val tidligereArbeidsgiver = packet["tidligereArbeidsgiverOrgnummer"]
+        val behandlingsporing = packet["tidligereArbeidsgiverOrgnummer"]
             .takeIf(JsonNode::isTextual)
-            ?.asText() ?: return AvbruttArbeidsledigSøknadMessage(packet, meldingsporing)
-        return AvbruttArbeidsledigTidligereArbeidstakerSøknadMessage(packet, tidligereArbeidsgiver, meldingsporing)
+            ?.asText()
+            ?.let {
+                Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer = it)
+            } ?: Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+        return AvbruttSøknadMessage(packet, meldingsporing, behandlingsporing)
     }
 }

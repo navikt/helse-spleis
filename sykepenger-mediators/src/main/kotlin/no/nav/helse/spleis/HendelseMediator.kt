@@ -45,8 +45,6 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
-import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigSøknadMessage
-import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigTidligereArbeidstakerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
@@ -533,28 +531,6 @@ internal class HendelseMediator(
     }
 
     override fun behandle(
-        message: AvbruttArbeidsledigSøknadMessage,
-        avbruttSøknad: AvbruttSøknad,
-        context: MessageContext
-    ) {
-        hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
-            HendelseProbe.onAvbruttSøknad()
-            person.håndterAvbruttSøknad(eventBus, avbruttSøknad, aktivitetslogg)
-        }
-    }
-
-    override fun behandle(
-        message: AvbruttArbeidsledigTidligereArbeidstakerSøknadMessage,
-        avbruttSøknad: AvbruttSøknad,
-        context: MessageContext
-    ) {
-        hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
-            HendelseProbe.onAvbruttSøknad()
-            person.håndterAvbruttSøknad(eventBus, avbruttSøknad, aktivitetslogg)
-        }
-    }
-
-    override fun behandle(
         message: SkjønnsmessigFastsettelseMessage,
         skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse,
         context: MessageContext
@@ -794,8 +770,6 @@ internal interface IHendelseMediator {
     fun behandle(message: UtbetalingshistorikkEtterInfotrygdendringMessage, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, context: MessageContext)
     fun behandle(message: ForkastSykmeldingsperioderMessage, forkastSykmeldingsperioder: ForkastSykmeldingsperioder, context: MessageContext)
     fun behandle(message: AvbruttSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)
-    fun behandle(message: AvbruttArbeidsledigSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)
-    fun behandle(message: AvbruttArbeidsledigTidligereArbeidstakerSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)
     fun behandle(message: SkjønnsmessigFastsettelseMessage, skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse, context: MessageContext)
     fun behandle(message: MinimumSykdomsgradVurdertMessage, minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding, context: MessageContext)
 }

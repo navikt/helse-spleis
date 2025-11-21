@@ -19,6 +19,8 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.AnmodningOmForkastingRiver
 import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 import no.nav.helse.spleis.meldinger.AvbruttArbeidsledigSøknadRiver
+import no.nav.helse.spleis.meldinger.AvbruttFrilansSøknadRiver
+import no.nav.helse.spleis.meldinger.AvbruttSelvstendigSøknadRiver
 import no.nav.helse.spleis.meldinger.AvbruttSøknadRiver
 import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
 import no.nav.helse.spleis.meldinger.FeriepengeutbetalingerRiver
@@ -63,8 +65,6 @@ import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
-import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigSøknadMessage
-import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigTidligereArbeidstakerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
@@ -165,6 +165,8 @@ internal class MessageMediator(
             ForkastSykmeldingsperioderRiver(it, this)
             AvbruttSøknadRiver(it, this)
             AvbruttArbeidsledigSøknadRiver(it, this)
+            AvbruttSelvstendigSøknadRiver(it, this)
+            AvbruttFrilansSøknadRiver(it, this)
             AnmodningOmForkastingRiver(it, this)
             IdentOpphørtRiver(it, this)
             SkjønnsmessigFastsettelseRiver(it, this)
@@ -249,8 +251,6 @@ internal class MessageMediator(
         // meldinger som må replayes/sendes på nytt ved feil får
         // en feilhåndtering som medfører at podden går ned
         is UtbetalingshistorikkEtterInfotrygdendringMessage,
-        is AvbruttArbeidsledigSøknadMessage,
-        is AvbruttArbeidsledigTidligereArbeidstakerSøknadMessage,
         is AvbruttSøknadMessage,
         is DødsmeldingMessage,
         is IdentOpphørtMessage,

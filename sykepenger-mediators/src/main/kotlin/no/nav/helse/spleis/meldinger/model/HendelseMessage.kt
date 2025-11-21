@@ -73,8 +73,6 @@ private val HendelseMessage.kontekstnavn
         is AnmodningOmForkastingMessage -> "AnmodningOmForkasting"
         is AnnulleringMessage -> "AnnullerUtbetaling"
 
-        is AvbruttArbeidsledigSøknadMessage,
-        is AvbruttArbeidsledigTidligereArbeidstakerSøknadMessage,
         is AvbruttSøknadMessage -> "AvbruttSøknad"
 
         is AvstemmingMessage -> "Avstemming"

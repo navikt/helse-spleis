@@ -9,30 +9,26 @@ import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 
-internal class AvbruttSøknadRiver(
+internal class AvbruttSelvstendigSøknadRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
 
-    override val eventName = "avbrutt_søknad"
-    override val riverName = "Avbrutt søknad"
+    override val eventName = "avbrutt_selvstendig_søknad"
+    override val riverName = "Avbrutt selvstendig søknad"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("@id", "fnr", "arbeidsgiver.orgnummer")
+        message.requireKey("@id", "fnr")
         message.require("fom", JsonNode::asLocalDate)
         message.require("tom", JsonNode::asLocalDate)
     }
 
-    override fun createMessage(packet: JsonMessage): AvbruttSøknadMessage {
-        return AvbruttSøknadMessage(
-            packet = packet,
-            meldingsporing = Meldingsporing(
-                id = packet.meldingsreferanseId(),
-                fødselsnummer = packet["fnr"].asText()
-            ),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                organisasjonsnummer = packet["arbeidsgiver.orgnummer"].asText()
-            )
-        )
-    }
+    override fun createMessage(packet: JsonMessage) = AvbruttSøknadMessage(
+        packet = packet,
+        meldingsporing = Meldingsporing(
+            id = packet.meldingsreferanseId(),
+            fødselsnummer = packet["fnr"].asText()
+        ),
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Selvstendig
+    )
 }

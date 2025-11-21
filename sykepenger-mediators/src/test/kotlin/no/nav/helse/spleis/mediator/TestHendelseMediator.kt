@@ -39,8 +39,6 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
-import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigSøknadMessage
-import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigTidligereArbeidstakerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
@@ -477,20 +475,6 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(
         message: AvbruttSøknadMessage,
-        avbruttSøknad: AvbruttSøknad,
-        context: MessageContext
-    ) {
-    }
-
-    override fun behandle(
-        message: AvbruttArbeidsledigSøknadMessage,
-        avbruttSøknad: AvbruttSøknad,
-        context: MessageContext
-    ) {
-    }
-
-    override fun behandle(
-        message: AvbruttArbeidsledigTidligereArbeidstakerSøknadMessage,
         avbruttSøknad: AvbruttSøknad,
         context: MessageContext
     ) {
