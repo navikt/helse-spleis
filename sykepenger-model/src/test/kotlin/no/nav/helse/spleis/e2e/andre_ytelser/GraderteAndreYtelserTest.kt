@@ -6,13 +6,16 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class GraderteAndreYtelserTest: AbstractDslTest() {
@@ -98,6 +101,32 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 1750, 2000, subset = 30.januar til 30.januar) // tilkommen
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 31.januar til 31.januar) // ingen
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+    }
+
+
+    @Test
+    fun `så mye foreldrepenger at du havner under 20 prosent sykepenger`() {
+        a1 {
+            nyttVedtak(januar, beregnetInntekt = 520_000.årlig)
+            assertInntektsgrunnlag(1.januar, 1) {
+                assertInntektsgrunnlag(a1, 520_000.årlig)
+                assertSykepengegrunnlag(520_000.årlig)
+            }
+            assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
+            håndterInntektsendringer(20.januar)
+            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(
+                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("FORELDREPENGER", januar, 81.prosent),
+            ))
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 2000, subset = 17.januar til 31.januar)
+
+            with(inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager) {
+                assertEquals(11, size)
+                assertTrue(all { it.begrunnelser == listOf(MinimumSykdomsgrad)})
+            }
+
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23, Varselkode.RV_VV_4)
         }
     }
 }
