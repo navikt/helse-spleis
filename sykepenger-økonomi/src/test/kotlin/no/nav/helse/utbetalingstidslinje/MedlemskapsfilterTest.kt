@@ -38,7 +38,7 @@ class MedlemskapsfilterTest {
 
         val arbeidsgivere = tidslinjer.mapIndexed { index, it ->
             Arbeidsgiverberegning(
-                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
+                inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),

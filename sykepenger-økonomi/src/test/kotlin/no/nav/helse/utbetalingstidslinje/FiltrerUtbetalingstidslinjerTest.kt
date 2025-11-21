@@ -24,8 +24,8 @@ class FiltrerUtbetalingstidslinjerTest {
 
     private companion object {
         private val `32 år 10 januar 2018` = 10.januar(1988)
-        private val a1 = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a1")
-        private val a2 = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a2")
+        private val a1 = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a1")
+        private val a2 = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a2")
     }
 
     @Test
@@ -171,7 +171,7 @@ class FiltrerUtbetalingstidslinjerTest {
         }
     }
 
-    private fun beregning(utbetalingstidslinje: Utbetalingstidslinje?, yrkesaktivitet: Arbeidsgiverberegning.Yrkesaktivitet, ghostsOgAndreInntektskilder: List<Utbetalingstidslinje> = emptyList()): Arbeidsgiverberegning {
+    private fun beregning(utbetalingstidslinje: Utbetalingstidslinje?, yrkesaktivitet: Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet, ghostsOgAndreInntektskilder: List<Utbetalingstidslinje> = emptyList()): Arbeidsgiverberegning {
         val vedtaksperioder = utbetalingstidslinje?.let {
             listOf(
                 Vedtaksperiodeberegning(
@@ -181,7 +181,7 @@ class FiltrerUtbetalingstidslinjerTest {
             )
         } ?: emptyList()
         return Arbeidsgiverberegning(
-            yrkesaktivitet = yrkesaktivitet,
+            inntektskilde = yrkesaktivitet,
             vedtaksperioder = vedtaksperioder,
             ghostOgAndreInntektskilder = ghostsOgAndreInntektskilder
         )

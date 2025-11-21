@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 
 data class Arbeidsgiverberegning(
-    val yrkesaktivitet: Yrkesaktivitet,
+    val inntektskilde: Inntektskilde,
     val vedtaksperioder: List<Vedtaksperiodeberegning>,
     val ghostOgAndreInntektskilder: List<Utbetalingstidslinje>
 ) {
@@ -20,11 +20,23 @@ data class Arbeidsgiverberegning(
         }
     )
 
-    sealed interface Yrkesaktivitet {
-        data class Arbeidstaker(val organisasjonsnummer: String) : Yrkesaktivitet
-        data object Selvstendig : Yrkesaktivitet
-        data object Frilans : Yrkesaktivitet
-        data object Arbeidsledig : Yrkesaktivitet
+    sealed interface Inntektskilde {
+        sealed interface Yrkesaktivitet: Inntektskilde {
+            data class Arbeidstaker(val organisasjonsnummer: String) : Yrkesaktivitet
+            data object Selvstendig : Yrkesaktivitet
+            data object Frilans : Yrkesaktivitet
+            data object Arbeidsledig : Yrkesaktivitet
+        }
+        data class AnnenInntektskilde(val kilde: String) : Inntektskilde
+
+        val Inntektskilde.somString
+            get() = when (this) {
+                is AnnenInntektskilde -> this.kilde
+                is Yrkesaktivitet.Arbeidstaker -> this.organisasjonsnummer
+                Yrkesaktivitet.Frilans -> "FRILANS"
+                Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+                Yrkesaktivitet.Arbeidsledig -> error("Inntektsendring som arbeidsledig virker litt snedig 🤏")
+            }
     }
 }
 

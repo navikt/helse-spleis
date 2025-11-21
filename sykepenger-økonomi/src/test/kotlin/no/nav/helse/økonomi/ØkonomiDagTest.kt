@@ -131,7 +131,7 @@ internal class ØkonomiDagTest {
     private fun List<Utbetalingstidslinje>.betal(sykepengegrunnlagBegrenset6G: Inntekt): List<Utbetalingstidslinje> {
         val input = mapIndexed { index, it ->
             Arbeidsgiverberegning(
-                yrkesaktivitet = Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
+                inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
                 vedtaksperioder = listOf(
                     Vedtaksperiodeberegning(
                         vedtaksperiodeId = UUID.randomUUID(),

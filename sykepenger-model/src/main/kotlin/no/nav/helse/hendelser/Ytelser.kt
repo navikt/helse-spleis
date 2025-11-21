@@ -4,12 +4,15 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.text.uppercase
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.AnnenInntektskilde
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet
 
 class Ytelser(
     meldingsreferanseId: MeldingsreferanseId,
@@ -66,15 +69,18 @@ class Ytelser(
 
     internal fun selvstendigForsikring(): SelvstendigForsikring? = selvstendigForsikring
 
-    internal fun inntektsendringer(): Map<Arbeidsgiverberegning.Yrkesaktivitet, Beløpstidslinje> {
+    internal fun inntektsendringer(): Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje> {
         val kilde = Kilde(metadata.meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
         return inntekterForBeregning.inntektsperioder
             .groupBy { it.inntektskilde }
-            .mapKeys { (inntektskilde, _) -> when (inntektskilde) {
-                "SELVSTENDIG" -> Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig
-                "FRILANS" -> Arbeidsgiverberegning.Yrkesaktivitet.Frilans
-                else -> Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker(inntektskilde)
-            } }
+            .mapKeys { (inntektskilde, _) -> inntektskilde.uppercase().let {
+                when {
+                    it == "SELVSTENDIG" -> Yrkesaktivitet.Selvstendig
+                    it == "FRILANS" -> Yrkesaktivitet.Frilans
+                    it.matches("\\d{9}".toRegex()) -> Yrkesaktivitet.Arbeidstaker(it)
+                    else -> AnnenInntektskilde(it)
+                }
+            }}
             .mapValues { (_, inntektsperioder) ->
                 inntektsperioder.filterIsInstance<InntekterForBeregning.Inntektsperiode.Beløp>().fold(Beløpstidslinje()) { resultat, inntektsperiode ->
                     resultat + Beløpstidslinje.fra(inntektsperiode.periode, inntektsperiode.beløp, kilde)

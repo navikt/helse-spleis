@@ -199,6 +199,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingEventBus
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig.somString
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverberegningBuilder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
@@ -1604,7 +1605,7 @@ internal class Vedtaksperiode private constructor(
         perioderDetSkalBeregnesUtbetalingFor: List<Vedtaksperiode>,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
-        inntektsperioder: Map<Arbeidsgiverberegning.Yrkesaktivitet, Beløpstidslinje>,
+        inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje>,
         selvstendigForsikring: SelvstendigForsikring?
     ): List<BeregnetBehandling> {
         if (perioderDetSkalBeregnesUtbetalingFor.isEmpty()) return emptyList()
@@ -1613,15 +1614,8 @@ internal class Vedtaksperiode private constructor(
             "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
         }
         val alleInntektjusteringer = inntektsperioder
-            .mapKeys { (yrkesaktivitet, _) ->
-                Inntektskilde(
-                    when (yrkesaktivitet) {
-                        is Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker -> yrkesaktivitet.organisasjonsnummer
-                        Arbeidsgiverberegning.Yrkesaktivitet.Frilans -> "FRILANS"
-                        Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
-                        Arbeidsgiverberegning.Yrkesaktivitet.Arbeidsledig -> error("Inntektsjustering som arbeidsledig?? Merkelig")
-                    }
-                )
+            .mapKeys { (inntektskilde, _) ->
+                Inntektskilde(inntektskilde.somString)
             }
 
         return perioderDetSkalBeregnesUtbetalingFor
@@ -3741,21 +3735,21 @@ private fun maksdatosubsummering(
 internal fun lagArbeidsgiverberegning(
     vedtaksperioder: List<Vedtaksperiode>,
     vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
-    inntektsperioder: Map<Arbeidsgiverberegning.Yrkesaktivitet, Beløpstidslinje> = emptyMap(),
+    inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje> = emptyMap(),
     selvstendigForsikring: SelvstendigForsikring? = null,
 ): List<Arbeidsgiverberegning> {
     return with(ArbeidsgiverberegningBuilder()) {
         vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.forEach {
-            fastsattÅrsinntekt(Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
+            fastsattÅrsinntekt(Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
         }
         vilkårsgrunnlag?.inntektsgrunnlag?.deaktiverteArbeidsforhold?.forEach {
-            fastsattÅrsinntekt(Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker(it.orgnummer), INGEN)
+            fastsattÅrsinntekt(Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(it.orgnummer), INGEN)
         }
         vilkårsgrunnlag?.inntektsgrunnlag?.selvstendigInntektsopplysning?.also {
             selvstendigNæringsdrivende(it.fastsattÅrsinntekt)
         }
-        inntektsperioder.forEach { (yrkesaktivitet, inntektsjustering) ->
-            inntektsjusteringer(yrkesaktivitet, inntektsjustering)
+        inntektsperioder.forEach { (inntektskilde, inntektsjustering) ->
+            inntektsjusteringer(inntektskilde, inntektsjustering)
         }
         vedtaksperioder.forEach { it.medVedtaksperiode(this, selvstendigForsikring) }
         build()
@@ -3764,10 +3758,10 @@ internal fun lagArbeidsgiverberegning(
 
 private fun Vedtaksperiode.medVedtaksperiode(builder: ArbeidsgiverberegningBuilder, selvstendigForsikring: SelvstendigForsikring?) {
     val yrkesaktivitetstype = when (yrkesaktivitet.yrkesaktivitetstype) {
-        Arbeidsledig -> Arbeidsgiverberegning.Yrkesaktivitet.Arbeidsledig
-        is Arbeidstaker -> Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker(yrkesaktivitet.yrkesaktivitetstype.organisasjonsnummer)
-        Frilans -> Arbeidsgiverberegning.Yrkesaktivitet.Frilans
-        Selvstendig -> Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig
+        Arbeidsledig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig
+        is Arbeidstaker -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(yrkesaktivitet.yrkesaktivitetstype.organisasjonsnummer)
+        Frilans -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Frilans
+        Selvstendig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Selvstendig
     }
     val utbetalingstidslinjeBuilder = when (yrkesaktivitet.yrkesaktivitetstype) {
         is Arbeidstaker -> behandlinger.utbetalingstidslinjeBuilderForArbeidstaker()

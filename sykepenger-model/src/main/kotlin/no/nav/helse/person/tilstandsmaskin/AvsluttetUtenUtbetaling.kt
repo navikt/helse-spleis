@@ -23,11 +23,12 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         val utbetalingstidslinje = lagArbeidsgiverberegning(listOf(vedtaksperiode))
             .single {
                 val vedtaksperiodeYrkesaktivitet = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype
-                when (val ya = it.yrkesaktivitet) {
-                    Arbeidsgiverberegning.Yrkesaktivitet.Arbeidsledig -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-                    is Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Arbeidstaker && ya.organisasjonsnummer == vedtaksperiode.yrkesaktivitet.organisasjonsnummer
-                    Arbeidsgiverberegning.Yrkesaktivitet.Frilans -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Frilans
-                    Arbeidsgiverberegning.Yrkesaktivitet.Selvstendig -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Selvstendig
+                when (val ya = it.inntektskilde) {
+                    Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+                    is Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Arbeidstaker && ya.organisasjonsnummer == vedtaksperiode.yrkesaktivitet.organisasjonsnummer
+                    Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Frilans -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Frilans
+                    Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Selvstendig -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Selvstendig
+                    is Arbeidsgiverberegning.Inntektskilde.AnnenInntektskilde -> false
                 }
             }
             .vedtaksperioder
