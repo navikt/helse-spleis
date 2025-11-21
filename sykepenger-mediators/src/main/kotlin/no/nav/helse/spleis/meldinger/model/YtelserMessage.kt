@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -70,11 +71,10 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
 
     })
     private val inntekterForBeregning = InntekterForBeregning(packet["@løsning.${Behovtype.InntekterForBeregning.name}.inntekter"].map {
-        InntekterForBeregning.Inntektsperiode(
+        InntekterForBeregning.Inntektsperiode.Beløp(
             inntektskilde = it.path("inntektskilde").asText(),
-            fom = it.path("fom").asLocalDate(),
-            tom = it.path("tom").asLocalDate(),
-            inntekt = when {
+            periode = it.path("fom").asLocalDate() til it.path("tom").asLocalDate(),
+            beløp = when {
                 it.path("daglig").isNumber -> it.path("daglig").asDouble().daglig
                 it.path("måndelig").isNumber -> it.path("måndelig").asDouble().månedlig
                 it.path("årlig").isNumber -> it.path("årlig").asDouble().årlig

@@ -76,8 +76,8 @@ class Ytelser(
                 else -> Arbeidsgiverberegning.Yrkesaktivitet.Arbeidstaker(inntektskilde)
             } }
             .mapValues { (_, inntektsperioder) ->
-                inntektsperioder.fold(Beløpstidslinje()) { resultat, inntektsperiode ->
-                    resultat + Beløpstidslinje.fra(inntektsperiode.fom til inntektsperiode.tom, inntektsperiode.inntekt, kilde)
+                inntektsperioder.filterIsInstance<InntekterForBeregning.Inntektsperiode.Beløp>().fold(Beløpstidslinje()) { resultat, inntektsperiode ->
+                    resultat + Beløpstidslinje.fra(inntektsperiode.periode, inntektsperiode.beløp, kilde)
                 }
             }
     }
