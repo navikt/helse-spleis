@@ -26,6 +26,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -364,14 +365,21 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
         a1 {
             // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel
+            assertEquals(listOf(15.januar til 30.januar), inspektør.venteperiode(2.vedtaksperiode))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100)))
+            assertEquals(listOf(9.januar.somPeriode(), 15.januar til 29.januar), inspektør.venteperiode(2.vedtaksperiode))
+
             assertSykdomstidslinjedag(9.januar, Dag.Sykedag::class, OverstyrTidslinje::class)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
+            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+                // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
+                assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+            }
 
+            håndterYtelser(1.vedtaksperiode)
         }
         val sykepengegrunnlagEtter = a2 {
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }

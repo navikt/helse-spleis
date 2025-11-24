@@ -3,11 +3,13 @@ package no.nav.helse.spleis.e2e.revurdering
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -20,6 +22,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
@@ -48,8 +51,17 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         nyPeriode(5.januar til 20.januar)
         nyttVedtak(21.januar til 31.januar, arbeidsgiverperiode = listOf(5.januar til 20.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
+
+        assertEquals(listOf(5.januar til 20.januar), inspektør.venteperiode(1.vedtaksperiode))
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 4.januar))
+        assertEquals(emptyList<Periode>(), inspektør.venteperiode(1.vedtaksperiode))
+
         håndterVilkårsgrunnlag(1.vedtaksperiode)
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+            // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+        }
+
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
         assertIngenOverlappendeInfotrygdutbetaling()
     }

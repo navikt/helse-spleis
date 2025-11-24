@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.forlengVedtak
@@ -9,6 +10,7 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -18,6 +20,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_9
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -30,6 +33,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class VarselE2ETest : AbstractDslTest() {
@@ -154,10 +158,19 @@ internal class VarselE2ETest : AbstractDslTest() {
             nyttVedtak(10.februar til 28.februar)
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterSøknad(mars)
+
+            assertEquals(listOf(10.februar til 25.februar), inspektør.venteperiode(1.vedtaksperiode))
             håndterUtbetalingshistorikkEtterInfotrygdendring(
                 listOf(ArbeidsgiverUtbetalingsperiode(a1, 5.februar, 11.februar))
             )
+            assertEquals(emptyList<Periode>(), inspektør.venteperiode(1.vedtaksperiode))
+
             håndterVilkårsgrunnlag(1.vedtaksperiode)
+            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+                // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
+                assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+            }
+
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)

@@ -230,8 +230,16 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
+            assertEquals(listOf(2.januar til 5.januar, 8.januar til 12.januar, 15.januar til 19.januar, 22.januar til 23.januar), inspektør.venteperiode(1.vedtaksperiode))
             håndterOverstyrTidslinje((2.januar til 23.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
+
             håndterVilkårsgrunnlag(1.vedtaksperiode)
+            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+                // Det er ny arbeidsgiverperiode, så her fikses en bug
+                assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
+            }
+
             håndterYtelser(1.vedtaksperiode)
             assertBeløpstidslinje(SAKSBEHANDLER.beløpstidslinje(2.januar til 25.januar, INGEN) + ARBEIDSGIVER.beløpstidslinje(26.januar til 31.januar, INNTEKT), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
         }

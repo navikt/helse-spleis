@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
@@ -11,10 +12,12 @@ import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -47,6 +50,7 @@ import no.nav.helse.spleis.e2e.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
@@ -65,8 +69,16 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         nullstillTilstandsendringer()
 
+        assertEquals(listOf(1.januar.somPeriode(), 3.januar til 17.januar), inspektør.venteperiode(2.vedtaksperiode))
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 2.januar, 2.januar))
+        assertEquals(listOf(1.januar.somPeriode()), inspektør.venteperiode(2.vedtaksperiode))
+
         håndterVilkårsgrunnlag(2.vedtaksperiode)
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+            // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+        }
+
         håndterYtelser(2.vedtaksperiode)
         assertVarsel(Varselkode.RV_IT_14, 2.vedtaksperiode.filter())
 

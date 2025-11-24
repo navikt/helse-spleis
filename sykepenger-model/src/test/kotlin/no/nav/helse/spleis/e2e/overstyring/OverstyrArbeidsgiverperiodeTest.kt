@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -20,6 +21,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -88,14 +90,21 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
             håndterSimulering(3.vedtaksperiode)
 
             nullstillTilstandsendringer()
+            assertEquals(listOf(1.april til 16.april), inspektør.venteperiode(3.vedtaksperiode))
             håndterOverstyrTidslinje(
                 listOf(
                     ManuellOverskrivingDag(1.april, Dagtype.Arbeidsdag),
                     ManuellOverskrivingDag(2.april, Dagtype.Arbeidsdag),
                 )
             )
+            assertEquals(listOf(3.april til 18.april), inspektør.venteperiode(3.vedtaksperiode))
 
             håndterVilkårsgrunnlag(3.vedtaksperiode)
+            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+                // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
+                assertVarsel(RV_IV_7, 3.vedtaksperiode.filter())
+            }
+
             håndterYtelser(3.vedtaksperiode)
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
