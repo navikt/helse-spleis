@@ -2,11 +2,11 @@ package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
@@ -43,6 +43,7 @@ internal class YtelserRiver(
         message.requireKey("@løsning.${Omsorgspenger.name}")
         message.requireKey("@løsning.${Opplæringspenger.name}")
         message.requireKey("@løsning.${Institusjonsopphold.name}")
+        message.interestedIn("@løsning.${SelvstendigForsikring.name}")
         message.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse")
         message.interestedIn("@løsning.${Foreldrepenger.name}.Svangerskapsytelse")
         message.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse.fom") { it.asLocalDate() }
@@ -92,23 +93,25 @@ internal class YtelserRiver(
             interestedIn("årlig", JsonNode::asDouble)
         }
 
-        message.requireKey("yrkesaktivitetstype")
-        if (message["yrkesaktivitetstype"].asText() == "SELVSTENDIG") {
-            message.require("@løsning.${SelvstendigForsikring.name}") {forsikringer ->
-                (forsikringer as ArrayNode).forEach {
-                    it.path("forsikringstype").textValue()
-                    it.path("startdato").asLocalDate()
-                    it.path("sluttdato").asOptionalLocalDate()
-                }
+        message.interestedIn("@løsning.${SelvstendigForsikring.name}") { forsikringer ->
+            forsikringer as ArrayNode
+            forsikringer.forEach {
+                val feltnavn = it.fieldNames().asSequence().toSet()
+                it as ObjectNode
+                check("forsikringstype" in feltnavn)
+                check("startdato" in feltnavn)
+                it.path("startdato").asLocalDate()
+                it.path("sluttdato").asOptionalLocalDate()
             }
         }
 
     }
 
     override fun createMessage(packet: JsonMessage) = YtelserMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
+        packet = packet,
+        meldingsporing = Meldingsporing(
+            id = packet.meldingsreferanseId(),
+            fødselsnummer = packet["fødselsnummer"].asText()
+        )
     )
 }
