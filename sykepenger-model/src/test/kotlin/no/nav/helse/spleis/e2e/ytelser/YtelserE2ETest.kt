@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.ytelser
 
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -208,6 +209,10 @@ internal class YtelserE2ETest : AbstractDslTest() {
         }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
+            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+                // De HAG-greiene, se mer utfyllende kommentar og TOOD i annen test
+                assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+            }
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         }
         a2 {

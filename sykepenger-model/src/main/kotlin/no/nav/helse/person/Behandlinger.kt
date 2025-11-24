@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.Toggle
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
@@ -1021,12 +1022,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
             }
 
-            internal fun kopierMedBeregning(beregning: BeregnetBehandling, dagerNavOvertarAnsvar: List<Periode>) = kopierMed(
+            internal fun kopierMedBeregning(beregning: BeregnetBehandling, dagerNavOvertarAnsvar: List<Periode>, faktaavklartInntekt: FaktaavklartInntekt?) = kopierMed(
                 grunnlagsdata = beregning.grunnlagsdata,
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = beregning.maksdatoresultat,
                 inntektjusteringer = beregning.alleInntektjusteringer,
-                dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
+                dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+                faktaavklartInntekt = when (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+                    true -> faktaavklartInntekt ?: this.faktaavklartInntekt
+                    false -> this.faktaavklartInntekt
+                }
             )
 
             internal fun kopierMedUtbetaling(utbetaling: Utbetaling) = kopierMed(utbetaling = utbetaling)
@@ -1288,7 +1293,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 }
             } ?: dagerNavOvertarAnsvar
 
-            nyEndring(gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar = dagerNavOvertarAnsvar))
+            val faktaavklartInntektBruktVedBeregning: FaktaavklartInntekt? = when (yrkesaktivitet) {
+                is Arbeidstaker -> beregning.grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.firstOrNull { it.orgnummer == yrkesaktivitet.organisasjonsnummer }?.faktaavklartInntekt?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                Behandlingsporing.Yrkesaktivitet.Frilans,
+                Behandlingsporing.Yrkesaktivitet.Jordbruker,
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> null
+            }
+
+            nyEndring(gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar = dagerNavOvertarAnsvar, faktaavklartInntekt = faktaavklartInntektBruktVedBeregning))
             tilstand(nesteTilstand)
         }
 

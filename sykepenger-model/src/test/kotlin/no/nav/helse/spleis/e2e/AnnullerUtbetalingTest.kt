@@ -25,7 +25,6 @@ import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -201,7 +200,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertSisteTilstand(2.vedtaksperiode, TIL_ANNULLERING)
 
-            assertVarsler(2.vedtaksperiode, RV_IV_7, RV_IV_10)
+            assertVarsler(2.vedtaksperiode, RV_IV_7)
         }
     }
 

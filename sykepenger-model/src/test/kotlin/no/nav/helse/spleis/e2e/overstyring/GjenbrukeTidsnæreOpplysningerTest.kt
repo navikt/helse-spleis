@@ -46,9 +46,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -147,9 +145,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
-            }
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
@@ -159,14 +154,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
         a2 {
             håndterYtelser(2.vedtaksperiode)
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                håndterSimulering(2.vedtaksperiode)
-            }
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                håndterUtbetalt()
-                assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
-            }
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         }
     }
@@ -993,8 +981,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             }
             assertInntektsgrunnlag(1.februar, forventetAntallArbeidsgivere = 1) {
                 if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                    assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen, forventetFastsattÅrsinntekt = INNTEKT - 500.daglig, forventetOmregnetÅrsinntekt = INNTEKT - 500.daglig, forventetKorrigertInntekt = INNTEKT - 500.daglig)
-                    assertVarsel(Varselkode.RV_IV_10, 2.vedtaksperiode.filter())
+                    assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.Arbeidsgiver, forventetFastsattÅrsinntekt = INNTEKT - 500.daglig, forventetOmregnetÅrsinntekt = INNTEKT - 500.daglig, forventetKorrigertInntekt = INNTEKT - 500.daglig)
                 } else {
                     assertInntektsgrunnlag(a1, INNTEKT - 500.daglig, forventetFastsattÅrsinntekt = INNTEKT - 500.daglig)
                 }
@@ -1049,12 +1036,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             }
 
             assertInntektsgrunnlag(1.februar, forventetAntallArbeidsgivere = 1) {
-                if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                    assertInntektsgrunnlag(a1, INNTEKT, forventetFastsattÅrsinntekt = beregnetInntektIM, forventetkilde = Arbeidstakerkilde.AOrdningen)
-                    assertVarsel(Varselkode.RV_IV_10, 2.vedtaksperiode.filter())
-                } else {
-                    assertInntektsgrunnlag(a1, beregnetInntektIM, forventetFastsattÅrsinntekt = beregnetInntektIM)
-                }
+                assertInntektsgrunnlag(a1, beregnetInntektIM, forventetFastsattÅrsinntekt = beregnetInntektIM)
             }
         }
     }

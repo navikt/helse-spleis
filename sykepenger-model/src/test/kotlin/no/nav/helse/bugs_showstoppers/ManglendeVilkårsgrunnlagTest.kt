@@ -1,5 +1,6 @@
 package no.nav.helse.bugs_showstoppers
 
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -97,6 +98,8 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        } else assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
     }
 }
