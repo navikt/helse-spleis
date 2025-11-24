@@ -60,6 +60,7 @@ internal abstract class AbstractSpeilBuilderTest {
         const val a2 = "a2"
         const val a3 = "a3"
         const val selvstendig = "SELVSTENDIG"
+        const val jordbruker = "JORDBRUKER"
         val INNTEKT = 48000.månedlig
 
         private val personfabrikk = PersonHendelsefabrikk()
@@ -67,11 +68,13 @@ internal abstract class AbstractSpeilBuilderTest {
         private val a2fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2))
         private val a3fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a3))
         private val selvstendigFabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Selvstendig)
+        private val jordbrukerfabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Jordbruker)
         private val fabrikker = mapOf(
             a1 to a1fabrikk,
             a2 to a2fabrikk,
             a3 to a3fabrikk,
-            "SELVSTENDIG" to selvstendigFabrikk
+            "SELVSTENDIG" to selvstendigFabrikk,
+            "JORDBRUKER" to jordbrukerfabrikk
         )
     }
 
@@ -164,7 +167,17 @@ internal abstract class AbstractSpeilBuilderTest {
         )
     ): UUID {
         val søknadId = UUID.randomUUID()
-        val søknad = selvstendigFabrikk.lagSøknad(
+        val fabrikk = when (arbeidssituasjon) {
+            Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> selvstendigFabrikk
+            Søknad.Arbeidssituasjon.JORDBRUKER -> jordbrukerfabrikk
+            Søknad.Arbeidssituasjon.ARBEIDSTAKER,
+            Søknad.Arbeidssituasjon.ARBEIDSLEDIG,
+            Søknad.Arbeidssituasjon.FRILANSER,
+            Søknad.Arbeidssituasjon.BARNEPASSER,
+            Søknad.Arbeidssituasjon.FISKER,
+            Søknad.Arbeidssituasjon.ANNET -> error("Ugyldig arbeidssituasjon $arbeidssituasjon for selvstendig søknad")
+        }
+        val søknad = fabrikk.lagSøknad(
             Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad),
             sykmeldingSkrevet = 1.januar.atStartOfDay(),
             sendtTilNAVEllerArbeidsgiver = 1.januar.atStartOfDay(),
@@ -328,7 +341,8 @@ internal abstract class AbstractSpeilBuilderTest {
     protected fun håndterVilkårsgrunnlag(inntekter: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT), arbeidsforhold: List<Pair<String, LocalDate>> = listOf(a1 to EPOCH)) {
         val behov = hendelselogg.vilkårsgrunnlagbehov() ?: error("Fant ikke vilkårsgrunnlagbehov")
         val inntekterForOpptjeningsvurdering = when (behov.yrkesaktivitetstype) {
-            "SELVSTENDIG" -> InntekterForOpptjeningsvurdering(emptyList())
+            "SELVSTENDIG",
+             "JORDBRUKER" -> InntekterForOpptjeningsvurdering(emptyList())
             "ARBEIDSTAKER" -> InntekterForOpptjeningsvurdering(inntekter = inntekter.map { arbeidsgiverInntekt ->
                 val orgnummer = arbeidsgiverInntekt.first
                 val inntekt = arbeidsgiverInntekt.second
@@ -349,14 +363,16 @@ internal abstract class AbstractSpeilBuilderTest {
             else -> error("støtter ikke ${behov.yrkesaktivitetstype}")
         }
         val inntektsvurderingForSykepengegrunnlag = when (behov.yrkesaktivitetstype) {
-            "SELVSTENDIG" -> InntektForSykepengegrunnlag(emptyList())
+            "SELVSTENDIG",
+             "JORDBRUKER" -> InntektForSykepengegrunnlag(emptyList())
             "ARBEIDSTAKER" -> InntektForSykepengegrunnlag(
                 inntekter = inntekter.map { (orgnr, inntekt) -> grunnlag(orgnr, behov.skjæringstidspunkt, (1..3).map { inntekt }) }
             )
             else -> error("støtter ikke ${behov.yrkesaktivitetstype}")
         }
         val arbeidsforhold = when (behov.yrkesaktivitetstype) {
-            "SELVSTENDIG" -> emptyList()
+            "SELVSTENDIG",
+             "JORDBRUKER" -> emptyList()
             "ARBEIDSTAKER" -> arbeidsforhold.map { (orgnr, oppstart) ->
                 Vilkårsgrunnlag.Arbeidsforhold(orgnr, oppstart, type = Arbeidsforholdtype.ORDINÆRT)
             }
