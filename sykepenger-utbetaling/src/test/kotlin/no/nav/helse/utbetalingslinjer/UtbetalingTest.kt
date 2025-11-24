@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test
 
 internal class UtbetalingTest {
 
-    private lateinit var eventBus: UtbetalingEventBus
+    private lateinit var eventBus: UtbetalingObserver
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     private companion object {
@@ -52,7 +52,9 @@ internal class UtbetalingTest {
 
     @BeforeEach
     internal fun initEach() {
-        eventBus = UtbetalingEventBus()
+        eventBus = object : UtbetalingObserver {
+            override fun utbetalingEndret(id: UUID, type: Utbetalingtype, arbeidsgiverOppdrag: Oppdrag, personOppdrag: Oppdrag, forrigeTilstand: Utbetalingstatus, nesteTilstand: Utbetalingstatus, korrelasjonsId: UUID) {}
+        }
         aktivitetslogg = Aktivitetslogg()
     }
 

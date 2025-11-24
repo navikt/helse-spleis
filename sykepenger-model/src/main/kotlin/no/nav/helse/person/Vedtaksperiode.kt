@@ -199,7 +199,6 @@ import no.nav.helse.person.tilstandsmaskin.starttilstander
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.UtbetalingEventBus
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig.somString
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverberegningBuilder
@@ -486,9 +485,8 @@ internal class Vedtaksperiode private constructor(
             TilUtbetaling -> {}
         }
         behandlinger.håndterKorrigertInntekt(
-            eventBus = eventBus,
+            behandlingEventBus = eventBus.behandlingEventBus,
             korrigertInntekt = korrigertInntekt,
-            yrkesaktivitet = yrkesaktivitet,
             aktivitetslogg = registrerKontekst(aktivitetslogg)
         )
         return Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, periode.start)// TODO: Eget eventyr?
@@ -732,9 +730,8 @@ internal class Vedtaksperiode private constructor(
 
         // lagrer ALLTID inntekt på behandling
         behandlinger.håndterFaktaavklartInntekt(
-            eventBus = eventBus,
+            behandlingEventBus = eventBus.behandlingEventBus,
             arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
-            yrkesaktivitet = yrkesaktivitet,
             aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst,
             dokumentsporing = inntektsmeldingInntekt(inntektsmelding.metadata.meldingsreferanseId)
         )
@@ -1117,9 +1114,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         behandlinger.håndterFaktaavklartInntekt(
-            eventBus = eventBus,
+            behandlingEventBus = eventBus.behandlingEventBus,
             arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
-            yrkesaktivitet = yrkesaktivitet,
             aktivitetslogg = aktivitetslogg,
             dokumentsporing = inntektsmeldingInntekt(hendelse.metadata.meldingsreferanseId)
         )
@@ -1642,8 +1638,13 @@ internal class Vedtaksperiode private constructor(
             mottakerRefusjon = yrkesaktivitet.organisasjonsnummer,
             mottakerBruker = person.fødselsnummer
         )
-        yrkesaktivitet.leggTilNyUtbetaling(eventBus, aktivitetslogg, utbetaling)
+        leggTilNyUtbetaling(eventBus, aktivitetslogg, utbetaling)
         eventBus.nyVedtaksperiodeUtbetaling(yrkesaktivitet.organisasjonsnummer, utbetaling.id, this.id)
+    }
+
+    internal fun leggTilNyUtbetaling(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling) {
+        yrkesaktivitet.leggTilNyUtbetaling(utbetaling)
+        utbetaling.opprett(eventBus.behandlingEventBus, aktivitetslogg)
     }
 
     private fun vurderVarsler(
@@ -1814,7 +1815,7 @@ internal class Vedtaksperiode private constructor(
         if (automatisert) aktivitetslogg.info("Utbetaling markert som ikke godkjent automatisk $avgjørelsestidspunkt")
         else aktivitetslogg.info("Utbetaling markert som ikke godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
 
-        if (behandlinger.vedtakAvvist(eventBus.behandlingEventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, yrkesaktivitet, this, aktivitetslogg)) {
+        if (behandlinger.vedtakAvvist(eventBus.behandlingEventBus, yrkesaktivitet, this, aktivitetslogg)) {
             forkast(eventBus, this, aktivitetslogg, tvingForkasting = true)
             return Revurderingseventyr.forkasting(this, skjæringstidspunkt, periode)
         }
@@ -1828,7 +1829,7 @@ internal class Vedtaksperiode private constructor(
         else aktivitetslogg.info("Utbetaling markert som godkjent av saksbehandler ${saksbehandler()} $avgjørelsestidspunkt")
 
         val erVedtakIverksatt = behandlinger
-            .vedtakFattet(eventBus.behandlingEventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, yrkesaktivitet, this, aktivitetslogg)
+            .vedtakFattet(eventBus.behandlingEventBus, yrkesaktivitet, this, aktivitetslogg)
             .vedtakIverksatt(eventBus)
 
         tilstand(eventBus, aktivitetslogg, if (erVedtakIverksatt) nesteAvsluttettilstand else nesteTilUtbetalingtilstand)
@@ -1847,8 +1848,7 @@ internal class Vedtaksperiode private constructor(
             )
         )
         behandlinger.håndterRefusjonstidslinje(
-            eventBus = eventBus,
-            yrkesaktivitet = yrkesaktivitet,
+            behandlingEventBus = eventBus.behandlingEventBus,
             dokumentsporing = dokumentsporing,
             aktivitetslogg = aktivitetslogg,
             benyttetRefusjonsopplysninger = ingenRefusjon
@@ -1978,7 +1978,7 @@ internal class Vedtaksperiode private constructor(
 
         when (tilstand) {
             AvventerAnnulleringTilUtbetaling -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
-            TilAnnullering -> håndterAnnulleringUtbetalinghendelse(eventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
+            TilAnnullering -> håndterAnnulleringUtbetalinghendelse(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
             AvventerRevurderingTilUtbetaling -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, AvventerRevurdering)
 
             SelvstendigAvventerTilUtbetalingRevurdering -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerRevurdering)
@@ -2029,8 +2029,8 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun håndterAnnulleringUtbetalinghendelse(eventBus: EventBus, utbetalingEventBus: UtbetalingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-        if (!behandlinger.håndterUtbetalinghendelseSisteBehandling(eventBus.behandlingEventBus, utbetalingEventBus, hendelse, aktivitetslogg).erAvsluttet()) return
+    private fun håndterAnnulleringUtbetalinghendelse(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+        if (!behandlinger.håndterUtbetalinghendelseSisteBehandling(eventBus.behandlingEventBus, hendelse, aktivitetslogg).erAvsluttet()) return
 
         aktivitetslogg.info("Annulleringen fikk OK fra Oppdragssystemet")
         vedtakAnnullert(eventBus, hendelse, aktivitetslogg)
@@ -2059,7 +2059,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun vedtakIverksattMensTilRevurdering(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
         val erVedtakIverksatt = behandlinger
-            .håndterUtbetalinghendelseSisteInFlight(eventBus.behandlingEventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
+            .håndterUtbetalinghendelseSisteInFlight(eventBus.behandlingEventBus, hendelse, aktivitetslogg)
             ?.vedtakIverksatt(eventBus)
             ?: false
         if (!erVedtakIverksatt) return
@@ -2070,7 +2070,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun vedtakIverksatt(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
         val erVedtakIverksatt = behandlinger
-            .håndterUtbetalinghendelseSisteBehandling(eventBus.behandlingEventBus, with (yrkesaktivitet) { eventBus.utbetalingEventBus }, hendelse, aktivitetslogg)
+            .håndterUtbetalinghendelseSisteBehandling(eventBus.behandlingEventBus, hendelse, aktivitetslogg)
             .vedtakIverksatt(eventBus)
         if (!erVedtakIverksatt) return
         tilstand(eventBus, aktivitetslogg, nesteTilstand) {
@@ -2177,8 +2177,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterAnnulleringÅpenBehandling(eventBus: EventBus, hendelse: AnnullerUtbetaling, aktivitetslogg: IAktivitetslogg, periodeForEndring: Periode, nesteTilstand: Vedtaksperiodetilstand): Revurderingseventyr {
         behandlinger.håndterAnnullering(
-            utbetalingEventBus = with (yrkesaktivitet) { eventBus.utbetalingEventBus },
-            yrkesaktivitet = yrkesaktivitet,
+            behandlingEventBus = eventBus.behandlingEventBus,
             aktivitetslogg = aktivitetslogg
         )
         tilstand(eventBus, aktivitetslogg, nesteTilstand)
@@ -2310,8 +2309,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         behandlinger.håndterRefusjonstidslinje(
-            eventBus = eventBus,
-            yrkesaktivitet = yrkesaktivitet,
+            behandlingEventBus = eventBus.behandlingEventBus,
             dokumentsporing = dokumentsporing,
             aktivitetslogg = aktivitetslogg,
             benyttetRefusjonsopplysninger = benyttetRefusjonsopplysninger
@@ -2512,7 +2510,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         val haddeFlereSkjæringstidspunkt = behandlinger.harFlereSkjæringstidspunkt()
         behandlinger.håndterSykdomstidslinje(
-            eventBus = eventBus,
+            behandlingEventBus = eventBus.behandlingEventBus,
             yrkesaktivitet = yrkesaktivitet,
             dokumentsporing = dokumentsporing,
             hendelseSykdomstidslinje = hendelseSykdomstidslinje,
@@ -2582,7 +2580,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         behandlinger.nullstillEgenmeldingsdager(
-            eventBus = eventBus,
+            behandlingEventBus = eventBus.behandlingEventBus,
             yrkesaktivitet = yrkesaktivitet,
             dokumentsporing = dokumentsporing,
             aktivitetslogg = aktivitetslogg,
@@ -3049,7 +3047,7 @@ internal class Vedtaksperiode private constructor(
             else -> {}
         }
         behandlinger.oppdaterSkjæringstidspunkt(person.skjæringstidspunkter, yrkesaktivitet.perioderUtenNavAnsvar)
-        behandlinger.forkastBeregning(with (yrkesaktivitet) { eventBus.utbetalingEventBus }, aktivitetsloggMedVedtaksperiodekontekst)
+        behandlinger.forkastBeregning(eventBus.behandlingEventBus, aktivitetsloggMedVedtaksperiodekontekst)
         videreførEksisterendeOpplysninger(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
@@ -3280,8 +3278,7 @@ internal class Vedtaksperiode private constructor(
         val benyttetRefusjonstidslinje = (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
         if (benyttetRefusjonstidslinje.isEmpty()) return
         this.behandlinger.håndterRefusjonstidslinje(
-            eventBus,
-            yrkesaktivitet,
+            eventBus.behandlingEventBus,
             dokumentsporing,
             aktivitetslogg,
             benyttetRefusjonstidslinje

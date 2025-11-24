@@ -55,7 +55,6 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.erLik
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsgiveropplysninger
-import no.nav.helse.person.EventSubscription.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.blokkererBehandlingAv
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.perioder
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.trengerArbeidsgiveropplysninger
@@ -83,7 +82,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsgiveropplysninger for forkastet periode`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsgiveropplysninger for periode som allerede har opplysninger`
 import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
@@ -104,14 +102,9 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.kunEnIkkeUtbetalt
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.validerNyUtbetaling
-import no.nav.helse.utbetalingslinjer.UtbetalingEventBus
-import no.nav.helse.utbetalingslinjer.UtbetalingObserver
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Ventetidberegner
 import no.nav.helse.økonomi.Prosentdel.Companion.HundreProsent
 
@@ -411,19 +404,10 @@ internal class Yrkesaktivitet private constructor(
             .fold(Feriepengegrunnlagstidslinje(emptyList()), Feriepengegrunnlagstidslinje::plus)
     }
 
-    internal val EventBus.utbetalingEventBus get() =
-        utbetalingEventBus(yrkesaktivitetstype, UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje()))
-
-    internal fun leggTilNyUtbetaling(
-        eventBus: EventBus,
-        aktivitetslogg: IAktivitetslogg,
-        utbetaling: Utbetaling
-    ) {
+    internal fun leggTilNyUtbetaling(utbetaling: Utbetaling) {
         _utbetalinger.validerNyUtbetaling(utbetaling)
         check(_utbetalinger.tillaterOpprettelseAvUtbetaling(utbetaling)) { "Har laget en overlappende utbetaling" }
         _utbetalinger.add(utbetaling)
-
-        utbetaling.opprett(eventBus.utbetalingEventBus, aktivitetslogg)
     }
 
     internal fun utbetalFeriepenger(
@@ -1046,151 +1030,5 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun trengerArbeidsgiveropplysninger(periode: Periode): List<Periode> {
         return forkastede.trengerArbeidsgiveropplysninger(periode, vedtaksperioder.map { it.periode })
-    }
-}
-
-internal fun EventBus.utbetalingEventBus(yrkesaktivitetstype: Behandlingsporing.Yrkesaktivitet, builder: UtbetalingsdagerBuilder): UtbetalingEventBus {
-    val utbetalingEventBus = UtbetalingEventBus()
-    val formidler = Utbetalingseventformidler(this, yrkesaktivitetstype, builder)
-    utbetalingEventBus.register(formidler)
-    return utbetalingEventBus
-}
-
-private class Utbetalingseventformidler(
-    private val eventBus: EventBus,
-    private val yrkesaktivitetstype: Behandlingsporing.Yrkesaktivitet,
-    private val builder: UtbetalingsdagerBuilder
-) : UtbetalingObserver {
-    override fun utbetalingUtbetalt(
-        id: UUID,
-        korrelasjonsId: UUID,
-        type: Utbetalingtype,
-        periode: Periode,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int,
-        gjenståendeSykedager: Int,
-        stønadsdager: Int,
-        arbeidsgiverOppdrag: Oppdrag,
-        personOppdrag: Oppdrag,
-        epost: String,
-        tidspunkt: LocalDateTime,
-        automatiskBehandling: Boolean,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        ident: String,
-    ) {
-        eventBus.utbetalingUtbetalt(
-            EventSubscription.UtbetalingUtbetaltEvent(
-                yrkesaktivitetssporing = yrkesaktivitetstype,
-                utbetalingId = id,
-                type = type.name,
-                korrelasjonsId = korrelasjonsId,
-                fom = periode.start,
-                tom = periode.endInclusive,
-                maksdato = maksdato,
-                forbrukteSykedager = forbrukteSykedager,
-                gjenståendeSykedager = gjenståendeSykedager,
-                stønadsdager = stønadsdager,
-                epost = epost,
-                tidspunkt = tidspunkt,
-                automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = EventSubscription.OppdragEventDetaljer.mapOppdrag(
-                    arbeidsgiverOppdrag
-                ),
-                personOppdrag = EventSubscription.OppdragEventDetaljer.mapOppdrag(personOppdrag),
-                utbetalingsdager = builder.result(utbetalingstidslinje),
-                ident = ident
-            )
-        )
-    }
-
-    override fun utbetalingUtenUtbetaling(
-        id: UUID,
-        korrelasjonsId: UUID,
-        type: Utbetalingtype,
-        periode: Periode,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int,
-        gjenståendeSykedager: Int,
-        stønadsdager: Int,
-        personOppdrag: Oppdrag,
-        ident: String,
-        arbeidsgiverOppdrag: Oppdrag,
-        tidspunkt: LocalDateTime,
-        automatiskBehandling: Boolean,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        epost: String,
-    ) {
-        eventBus.utbetalingUtenUtbetaling(
-            EventSubscription.UtbetalingUtenUtbetalingEvent(
-                yrkesaktivitetssporing = yrkesaktivitetstype,
-                utbetalingId = id,
-                type = type.name,
-                fom = periode.start,
-                tom = periode.endInclusive,
-                maksdato = maksdato,
-                forbrukteSykedager = forbrukteSykedager,
-                gjenståendeSykedager = gjenståendeSykedager,
-                stønadsdager = stønadsdager,
-                epost = epost,
-                tidspunkt = tidspunkt,
-                automatiskBehandling = automatiskBehandling,
-                arbeidsgiverOppdrag = EventSubscription.OppdragEventDetaljer.mapOppdrag(
-                    arbeidsgiverOppdrag
-                ),
-                personOppdrag = EventSubscription.OppdragEventDetaljer.mapOppdrag(personOppdrag),
-                utbetalingsdager = builder.result(utbetalingstidslinje),
-                ident = ident,
-                korrelasjonsId = korrelasjonsId
-            )
-        )
-    }
-
-    override fun utbetalingEndret(
-        id: UUID,
-        type: Utbetalingtype,
-        arbeidsgiverOppdrag: Oppdrag,
-        personOppdrag: Oppdrag,
-        forrigeTilstand: Utbetalingstatus,
-        nesteTilstand: Utbetalingstatus,
-        korrelasjonsId: UUID
-    ) {
-        eventBus.utbetalingEndret(
-            EventSubscription.UtbetalingEndretEvent(
-                yrkesaktivitetssporing = yrkesaktivitetstype,
-                utbetalingId = id,
-                type = type.name,
-                forrigeStatus = forrigeTilstand.name,
-                gjeldendeStatus = nesteTilstand.name,
-                arbeidsgiverOppdrag = OppdragEventDetaljer.mapOppdrag(arbeidsgiverOppdrag),
-                personOppdrag = OppdragEventDetaljer.mapOppdrag(personOppdrag),
-                korrelasjonsId = korrelasjonsId
-            )
-        )
-    }
-
-    override fun utbetalingAnnullert(
-        id: UUID,
-        korrelasjonsId: UUID,
-        periode: Periode,
-        personFagsystemId: String,
-        godkjenttidspunkt: LocalDateTime,
-        saksbehandlerEpost: String,
-        saksbehandlerIdent: String,
-        arbeidsgiverFagsystemId: String
-    ) {
-        eventBus.annullert(
-            EventSubscription.UtbetalingAnnullertEvent(
-                yrkesaktivitetssporing = yrkesaktivitetstype,
-                korrelasjonsId = korrelasjonsId,
-                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
-                personFagsystemId = personFagsystemId,
-                utbetalingId = id,
-                fom = periode.start,
-                tom = periode.endInclusive,
-                annullertAvSaksbehandler = godkjenttidspunkt,
-                saksbehandlerEpost = saksbehandlerEpost,
-                saksbehandlerIdent = saksbehandlerIdent
-            )
-        )
     }
 }

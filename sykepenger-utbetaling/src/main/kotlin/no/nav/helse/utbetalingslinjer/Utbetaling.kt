@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory
 
 class Utbetaling private constructor(
     val id: UUID,
-    private val korrelasjonsId: UUID,
-    private val periode: Periode,
+    val korrelasjonsId: UUID,
+    val periode: Periode,
     val utbetalingstidslinje: Utbetalingstidslinje,
     val arbeidsgiverOppdrag: Oppdrag,
     val personOppdrag: Oppdrag,
@@ -43,12 +43,14 @@ class Utbetaling private constructor(
     private val gjenståendeSykedager: Int?,
     // annulleringer brukes ikke mer, men finnes av historiske årsaker da listen kan være "ikke-tom" på tidligere utbetalinger
     private val annulleringer: List<Utbetaling>,
-    private var vurdering: Vurdering?,
+    vurdering: Vurdering?,
     private var overføringstidspunkt: LocalDateTime?,
     private var avstemmingsnøkkel: Long?,
     private var avsluttet: LocalDateTime?,
     private var oppdatert: LocalDateTime = tidsstempel
 ) : Aktivitetskontekst {
+    var vurdering: Vurdering? = vurdering
+        private set
     val view
         get() = UtbetalingView(
             id = id,
@@ -96,7 +98,7 @@ class Utbetaling private constructor(
     internal var tilstand: Tilstand = tilstand
         private set
 
-    private val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
+    val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
     private var forrigeHendelse: UtbetalingmodulHendelse? = null
 
     private fun harHåndtert(hendelse: UtbetalingmodulHendelse) =
@@ -125,16 +127,16 @@ class Utbetaling private constructor(
 
     fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
 
-    fun opprett(eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
+    fun opprett(observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        tilstand.opprett(this, eventBus, aktivitetsloggMedUtbetalingkontekst)
+        tilstand.opprett(this, observer, aktivitetsloggMedUtbetalingkontekst)
     }
 
-    fun håndterUtbetalingmodulHendelse(eventBus: UtbetalingEventBus, utbetaling: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
+    fun håndterUtbetalingmodulHendelse(observer: UtbetalingObserver, utbetaling: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (!relevantFor(utbetaling)) return
         if (harHåndtert(utbetaling)) return
-        tilstand.kvittér(this, eventBus, utbetaling, aktivitetsloggMedUtbetalingkontekst)
+        tilstand.kvittér(this, observer, utbetaling, aktivitetsloggMedUtbetalingkontekst)
     }
 
     private fun relevantFor(utbetaling: UtbetalingmodulHendelse) =
@@ -202,9 +204,9 @@ class Utbetaling private constructor(
         }
     }
 
-    fun forkast(eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
+    fun forkast(observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        tilstand.forkast(this, eventBus, aktivitetsloggMedUtbetalingkontekst)
+        tilstand.forkast(this, observer, aktivitetsloggMedUtbetalingkontekst)
     }
 
     fun arbeidsgiverOppdrag() = arbeidsgiverOppdrag
@@ -214,17 +216,17 @@ class Utbetaling private constructor(
     override fun toSpesifikkKontekst() =
         SpesifikkKontekst("Utbetaling", mapOf("utbetalingId" to "$id"))
 
-    fun ikkeGodkjent(eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
+    fun ikkeGodkjent(observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        tilstand.ikkeGodkjent(this, eventBus, aktivitetsloggMedUtbetalingkontekst, vurdering)
+        tilstand.ikkeGodkjent(this, observer, aktivitetsloggMedUtbetalingkontekst, vurdering)
     }
 
-    fun godkjent(eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
+    fun godkjent(observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        tilstand.godkjent(this, eventBus, aktivitetsloggMedUtbetalingkontekst, vurdering)
+        tilstand.godkjent(this, observer, aktivitetsloggMedUtbetalingkontekst, vurdering)
     }
 
-    private fun tilstand(eventBus: UtbetalingEventBus, neste: Tilstand, aktivitetslogg: IAktivitetslogg) {
+    private fun tilstand(observer: UtbetalingObserver, neste: Tilstand, aktivitetslogg: IAktivitetslogg) {
         oppdatert = LocalDateTime.now()
         if (Oppdrag.ingenFeil(arbeidsgiverOppdrag, personOppdrag) && !Oppdrag.synkronisert(
                 arbeidsgiverOppdrag,
@@ -233,7 +235,7 @@ class Utbetaling private constructor(
         ) return aktivitetslogg.info("Venter på status på det andre oppdraget før vi kan gå videre")
         val forrigeTilstand = tilstand
         tilstand = neste
-        eventBus.utbetalingEndret(
+        observer.utbetalingEndret(
             id,
             type,
             arbeidsgiverOppdrag,
@@ -242,7 +244,7 @@ class Utbetaling private constructor(
             neste.status,
             korrelasjonsId
         )
-        tilstand.entering(this, eventBus, aktivitetslogg)
+        tilstand.entering(this, aktivitetslogg)
     }
 
     private fun nyUtbetaling(
@@ -462,7 +464,7 @@ class Utbetaling private constructor(
         vurdering?.overfør(aktivitetslogg, personOppdrag, maksdato.takeUnless { type == ANNULLERING })
     }
 
-    private fun håndterKvittering(eventBus: UtbetalingEventBus, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
+    private fun håndterKvittering(observer: UtbetalingObserver, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
         when (hendelse.status) {
             Oppdragstatus.OVERFØRT,
             Oppdragstatus.AKSEPTERT -> {} // all is good
@@ -489,7 +491,7 @@ class Utbetaling private constructor(
                 }
             }
         }
-        tilstand(eventBus, nesteTilstand, aktivitetslogg)
+        tilstand(observer, nesteTilstand, aktivitetslogg)
     }
 
     fun overlapperMed(other: Periode): Boolean {
@@ -512,15 +514,15 @@ class Utbetaling private constructor(
 
     internal sealed interface Tilstand {
         val status: Utbetalingstatus
-        fun forkast(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {}
+        fun forkast(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {}
 
-        fun opprett(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
+        fun opprett(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {
             error("Forventet ikke å opprette utbetaling i tilstand=${this::class.simpleName}")
         }
 
         fun ikkeGodkjent(
             utbetaling: Utbetaling,
-            eventBus: UtbetalingEventBus,
+            observer: UtbetalingObserver,
             aktivitetslogg: IAktivitetslogg,
             vurdering: Vurdering
         ) {
@@ -529,14 +531,14 @@ class Utbetaling private constructor(
 
         fun godkjent(
             utbetaling: Utbetaling,
-            eventBus: UtbetalingEventBus,
+            observer: UtbetalingObserver,
             aktivitetslogg: IAktivitetslogg,
             vurdering: Vurdering
         ) {
             error("Forventet ikke godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun kvittér(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
+        fun kvittér(utbetaling: Utbetaling, observer: UtbetalingObserver, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
             error("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
@@ -548,31 +550,31 @@ class Utbetaling private constructor(
             error("Forventet ikke simulering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun entering(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {}
+        fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {}
     }
 
     internal data object Ny : Tilstand {
         override val status = Utbetalingstatus.NY
-        override fun opprett(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-            utbetaling.tilstand(eventBus, Ubetalt, aktivitetslogg)
+        override fun opprett(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {
+            utbetaling.tilstand(observer, Ubetalt, aktivitetslogg)
         }
     }
 
     internal data object Ubetalt : Tilstand {
         override val status = Utbetalingstatus.IKKE_UTBETALT
-        override fun forkast(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
+        override fun forkast(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Forkaster utbetaling")
-            utbetaling.tilstand(eventBus, Forkastet, aktivitetslogg)
+            utbetaling.tilstand(observer, Forkastet, aktivitetslogg)
         }
 
-        override fun ikkeGodkjent(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
+        override fun ikkeGodkjent(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
             utbetaling.vurdering = vurdering
-            utbetaling.tilstand(eventBus, IkkeGodkjent, aktivitetslogg)
+            utbetaling.tilstand(observer, IkkeGodkjent, aktivitetslogg)
         }
 
-        override fun godkjent(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
+        override fun godkjent(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
             utbetaling.vurdering = vurdering
-            utbetaling.tilstand(eventBus, when {
+            utbetaling.tilstand(observer, when {
                 utbetaling.harOppdragMedUtbetalinger() -> Overført
                 utbetaling.type == ANNULLERING -> Annullert
                 else -> GodkjentUtenUtbetaling
@@ -587,16 +589,15 @@ class Utbetaling private constructor(
 
     internal data object GodkjentUtenUtbetaling : Tilstand {
         override val status = Utbetalingstatus.GODKJENT_UTEN_UTBETALING
-        override fun entering(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
+        override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             check(!utbetaling.harOppdragMedUtbetalinger())
-            utbetaling.vurdering?.avsluttetUtenUtbetaling(utbetaling, eventBus)
             utbetaling.avsluttet = LocalDateTime.now()
         }
     }
 
     internal data object Overført : Tilstand {
         override val status = Utbetalingstatus.OVERFØRT
-        override fun entering(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
+        override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             utbetaling.overførBegge(aktivitetslogg)
         }
 
@@ -604,26 +605,24 @@ class Utbetaling private constructor(
             utbetaling.overførBegge(påminnelse)
         }
 
-        override fun kvittér(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
+        override fun kvittér(utbetaling: Utbetaling, observer: UtbetalingObserver, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
             utbetaling.lagreOverføringsinformasjon(aktivitetslogg, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
             utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
             utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
-            utbetaling.håndterKvittering(eventBus, hendelse, aktivitetslogg)
+            utbetaling.håndterKvittering(observer, hendelse, aktivitetslogg)
         }
     }
 
     internal data object Annullert : Tilstand {
         override val status = Utbetalingstatus.ANNULLERT
-        override fun entering(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-            utbetaling.vurdering?.annullert(utbetaling, eventBus)
+        override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             utbetaling.avsluttet = LocalDateTime.now()
         }
     }
 
     internal data object Utbetalt : Tilstand {
         override val status = Utbetalingstatus.UTBETALT
-        override fun entering(utbetaling: Utbetaling, eventBus: UtbetalingEventBus, aktivitetslogg: IAktivitetslogg) {
-            utbetaling.vurdering?.utbetalt(utbetaling, eventBus)
+        override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             utbetaling.avsluttet = LocalDateTime.now()
         }
     }
@@ -638,64 +637,11 @@ class Utbetaling private constructor(
 
     class Vurdering(
         private val godkjent: Boolean,
-        private val ident: String,
-        private val epost: String,
+        val ident: String,
+        val epost: String,
         private val tidspunkt: LocalDateTime,
-        private val automatiskBehandling: Boolean
+        val automatiskBehandling: Boolean
     ) {
-        fun annullert(utbetaling: Utbetaling, eventBus: UtbetalingEventBus) {
-            eventBus.utbetalingAnnullert(
-                id = utbetaling.id,
-                korrelasjonsId = utbetaling.korrelasjonsId,
-                periode = utbetaling.periode,
-                personFagsystemId = utbetaling.personOppdrag.fagsystemId,
-                godkjenttidspunkt = tidspunkt,
-                saksbehandlerEpost = epost,
-                saksbehandlerIdent = ident,
-                arbeidsgiverFagsystemId = utbetaling.arbeidsgiverOppdrag.fagsystemId
-            )
-        }
-
-        fun utbetalt(utbetaling: Utbetaling, eventBus: UtbetalingEventBus) {
-            eventBus.utbetalingUtbetalt(
-                utbetaling.id,
-                utbetaling.korrelasjonsId,
-                utbetaling.type,
-                utbetaling.periode,
-                utbetaling.maksdato,
-                utbetaling.forbrukteSykedager!!,
-                utbetaling.gjenståendeSykedager!!,
-                utbetaling.stønadsdager,
-                utbetaling.arbeidsgiverOppdrag,
-                utbetaling.personOppdrag,
-                epost,
-                tidspunkt,
-                automatiskBehandling,
-                utbetaling.utbetalingstidslinje,
-                ident
-            )
-        }
-
-        fun avsluttetUtenUtbetaling(utbetaling: Utbetaling, eventBus: UtbetalingEventBus) {
-            eventBus.utbetalingUtenUtbetaling(
-                utbetaling.id,
-                utbetaling.korrelasjonsId,
-                utbetaling.type,
-                utbetaling.periode,
-                utbetaling.maksdato,
-                utbetaling.forbrukteSykedager!!,
-                utbetaling.gjenståendeSykedager!!,
-                utbetaling.stønadsdager,
-                utbetaling.personOppdrag,
-                ident,
-                utbetaling.arbeidsgiverOppdrag,
-                tidspunkt,
-                automatiskBehandling,
-                utbetaling.utbetalingstidslinje,
-                epost
-            )
-        }
-
         fun overfør(aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag, maksdato: LocalDate?) {
             oppdrag.overfør(aktivitetslogg, maksdato, ident)
         }
