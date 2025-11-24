@@ -13,20 +13,22 @@ internal data class ArbeidstakerFaktaavklarteInntekter(
     fun besteInntekt(): VurderbarArbeidstakerFaktaavklartInntekt {
         val sortert = vurderbareArbeidstakerFaktavklateInntekter.sortedBy { it.periode.start }
         val valgt = sortert.firstOrNull { førsteFraværsdag in it.periode || førsteFraværsdag > it.periode.endInclusive } ?: sortert.first()
-        return when (vurderbareArbeidstakerFaktavklateInntekter.size > 1) {
-            true -> valgt.copy(harFlereFaktaavklarteInntekter = true)
-            false -> valgt
+        val harFlereFaktaavklarteInntekter = when {
+            vurderbareArbeidstakerFaktavklateInntekter.any { it.harFlereFaktaavklarteInntekter } -> true
+            vurderbareArbeidstakerFaktavklateInntekter.any { it.faktaavklartInntekt.id != valgt.faktaavklartInntekt.id } -> true
+            else -> false
         }
+        return valgt.copy(harFlereFaktaavklarteInntekter = harFlereFaktaavklarteInntekter)
     }
 }
 
 internal data class VurderbarArbeidstakerFaktaavklartInntekt(
     val faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
     val periode: Periode,
+    val harFlereFaktaavklarteInntekter: Boolean,
     private val skjæringstidspunkt: LocalDate,
     private val skjæringstidspunktVedMottattInntekt: LocalDate,
-    private val nyArbeidsgiverperiodeEtterMottattInntekt: Boolean,
-    private val harFlereFaktaavklarteInntekter: Boolean
+    private val nyArbeidsgiverperiodeEtterMottattInntekt: Boolean
 )  {
     fun vurder(aktivitetslogg: IAktivitetslogg) {
         faktaavklartInntekt.medInnteksdato(skjæringstidspunkt).vurderVarselForGjenbrukAvInntekt(

@@ -1546,7 +1546,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
             ): VurderbarArbeidstakerFaktaavklartInntekt {
                 val førsteEndringMedInntekten = firstNotNullOf { behandling -> behandling.endringer.firstOrNull { endring -> endring.faktaavklartInntekt == faktaavklartInntekt } }
-                val faktaavklarteInntektskilder = flatMap { it.endringer }.mapNotNull { (it.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt)?.inntektsdata?.hendelseId }.toSet()
+
+                val harFlereFaktaavklarteInntekter = this
+                    .any { behandling -> behandling.endringer
+                    .any { endring ->
+                        endring.faktaavklartInntekt != null && endring.faktaavklartInntekt.id != faktaavklartInntekt.id
+                    }}
 
                 return VurderbarArbeidstakerFaktaavklartInntekt(
                     faktaavklartInntekt = faktaavklartInntekt,
@@ -1554,7 +1559,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     periode = periode,
                     skjæringstidspunktVedMottattInntekt = førsteEndringMedInntekten.skjæringstidspunkt,
                     nyArbeidsgiverperiodeEtterMottattInntekt = dagerUtenNavAnsvar != førsteEndringMedInntekten.dagerUtenNavAnsvar,
-                    harFlereFaktaavklarteInntekter = faktaavklarteInntektskilder.size > 1
+                    harFlereFaktaavklarteInntekter = harFlereFaktaavklarteInntekter
                 )
             }
 
