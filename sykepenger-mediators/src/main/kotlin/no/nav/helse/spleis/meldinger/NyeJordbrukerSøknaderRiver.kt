@@ -4,17 +4,17 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
-import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
+import no.nav.helse.spleis.meldinger.model.NyJordbrukerSøknadMessage
 
-internal class NyeSelvstendigSøknaderRiver(
+internal class NyeJordbrukerSøknaderRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : SøknadRiver(rapidsConnection, messageMediator) {
     override val eventName = "ny_søknad_selvstendig"
-    override val riverName = "Ny selvstendig søknad"
+    override val riverName = "Ny jordbruker søknad"
 
     override fun precondition(packet: JsonMessage) {
-        packet.requireAny("arbeidssituasjon", listOf("SELVSTENDIG_NARINGSDRIVENDE", "BARNEPASSER", "FISKER", "ANNET"))
+        packet.requireValue("arbeidssituasjon", "JORDBRUKER")
     }
 
     override fun validate(message: JsonMessage) {
@@ -23,7 +23,7 @@ internal class NyeSelvstendigSøknaderRiver(
         message.interestedIn("fremtidig_søknad")
     }
 
-    override fun createMessage(packet: JsonMessage) = NySelvstendigSøknadMessage(
+    override fun createMessage(packet: JsonMessage) = NyJordbrukerSøknadMessage(
         packet = packet,
         meldingsporing = Meldingsporing(
             id = packet.meldingsreferanseId(),

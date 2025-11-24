@@ -69,12 +69,12 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun jordbruker() {
+    fun jordbruker() = Toggle.Jordbruker.enable {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
         assertTilstander(
             0,
-            "TIL_INFOTRYGD"
+            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK", "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE", "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING"
         )
     }
 

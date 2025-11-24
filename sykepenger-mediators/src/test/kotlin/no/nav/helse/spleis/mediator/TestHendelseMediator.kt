@@ -60,6 +60,7 @@ import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessag
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigTidligereArbeidstakerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
+import no.nav.helse.spleis.meldinger.model.NyJordbrukerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
@@ -73,6 +74,7 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFiskerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadJordbrukerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -212,6 +214,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestNySøknadVerdi.set(true)
     }
 
+    override fun behandle(personopplysninger: Personopplysninger, message: NyJordbrukerSøknadMessage, sykmelding: Sykmelding, context: MessageContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {}
+
     override fun behandle(
         personopplysninger: Personopplysninger,
         message: NyFrilansSøknadMessage,
@@ -271,6 +275,8 @@ internal class TestHendelseMediator : IHendelseMediator {
     ) {
         lestSendtSøknadSelvstendigVerdi.set(true)
     }
+
+    override fun behandle(personopplysninger: Personopplysninger, message: SendtSøknadJordbrukerMessage, søknad: Søknad, context: MessageContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {}
 
     override fun behandle(
         personopplysninger: Personopplysninger,
