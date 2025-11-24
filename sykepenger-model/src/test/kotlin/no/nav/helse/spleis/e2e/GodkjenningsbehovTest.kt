@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -199,7 +200,6 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingId = utbetalingId, utbetalingGodkjent = false, automatiskBehandling = false)
 
-        assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
         assertEquals(IKKE_GODKJENT, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.tilstand)
         assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 17.januar, listOf(17.januar til 31.januar))
@@ -208,6 +208,9 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
 
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
     }
@@ -290,6 +293,8 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
+
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -310,7 +315,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
-        assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertFalse(kanAvvises(1.vedtaksperiode))
     }

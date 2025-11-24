@@ -76,7 +76,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
             // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
-            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
         }
 
         håndterYtelser(2.vedtaksperiode)

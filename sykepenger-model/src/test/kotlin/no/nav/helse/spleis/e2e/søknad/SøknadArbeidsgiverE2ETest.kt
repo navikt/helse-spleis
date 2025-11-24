@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.søknad
 
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
@@ -12,6 +13,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
@@ -87,7 +89,11 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
             (13.januar til 15.januar).forEach { dato ->
                 assertEquals(Dag.Feriedag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
             }
-            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
+
+            if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) {
+                // Vi legger ikke på varselet når toggle er på fordi perioden blir ikke vilkårsprøvd
+                assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+            }
             assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         }
     }
@@ -109,7 +115,11 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
             (13.januar til 15.januar).forEach { dato ->
                 assertEquals(Dag.Feriedag::class, inspektør.sykdomstidslinje[dato]::class) { "$dato er av annen dagtype" }
             }
-            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
+
+            if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) {
+                // Vi legger ikke på varselet når toggle er på fordi perioden blir ikke vilkårsprøvd
+                assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+            }
             assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         }
     }

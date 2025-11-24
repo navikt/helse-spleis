@@ -49,6 +49,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -2640,11 +2641,17 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterSøknad(januar)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
 
-        assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+            // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
+            assertVarsel(RV_IV_7, 3.vedtaksperiode.filter())
+        } else {
+            assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
+        }
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
     }

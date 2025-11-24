@@ -807,6 +807,13 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Arbeid(20.mars, 31.mars))
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalt()
+            assertVarsel(Varselkode.RV_UT_23, 3.vedtaksperiode.filter())
+
+            håndterVilkårsgrunnlag(4.vedtaksperiode)
             assertVarsel(RV_IV_7, 4.vedtaksperiode.filter())
         }
     }
@@ -828,6 +835,13 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(13.februar, 28.februar))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
+
+            håndterVilkårsgrunnlag(3.vedtaksperiode)
             assertVarsel(RV_IV_7, 3.vedtaksperiode.filter())
         }
     }
@@ -1163,7 +1177,11 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
-                assertInntektsgrunnlag(a1, overstyring2Inntekt, forventetKildeId = inntektsmeldingId)
+                if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
+                    assertInntektsgrunnlag(a1, INNTEKT, forventetKildeId = inntektsmeldingId, forventetKorrigertInntekt = overstyring2Inntekt, forventetOmregnetÅrsinntekt = overstyring2Inntekt)
+                } else {
+                    assertInntektsgrunnlag(a1, overstyring2Inntekt, forventetKildeId = inntektsmeldingId)
+                }
             }
         }
     }
