@@ -35,8 +35,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 
 internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
 
@@ -98,59 +96,48 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
         }
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = [true, false])
-    fun `Flere korrigerende inntektsmeldinger, også flytter skjæringstidspunktet på seg`(brukFaktaavklartInntektFraBehandling: Boolean) {
-        val test =  {
-            a1 {
-                nyttVedtak(2.januar til 20.januar, beregnetInntekt = INNTEKT*1.05)
-                forlengVedtak(21.januar til 31.januar)
-                forlengVedtak(februar)
-                forlengVedtak(mars)
-                håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT*1.20)
-                håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 21.januar, beregnetInntekt = INNTEKT*1.10)
-                håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT*1.15)
+    @Test
+    fun `Flere korrigerende inntektsmeldinger, også flytter skjæringstidspunktet på seg`() {
+        a1 {
+            nyttVedtak(2.januar til 20.januar, beregnetInntekt = INNTEKT * 1.05)
+            forlengVedtak(21.januar til 31.januar)
+            forlengVedtak(februar)
+            forlengVedtak(mars)
+            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT * 1.20)
+            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 21.januar, beregnetInntekt = INNTEKT * 1.10)
+            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT * 1.15)
 
-                assertEquals(INNTEKT*1.05, faktaavvklartArbeidstakerBeløp(1.vedtaksperiode))
-                assertEquals(INNTEKT*1.10, faktaavvklartArbeidstakerBeløp(2.vedtaksperiode))
-                assertEquals(INNTEKT*1.15, faktaavvklartArbeidstakerBeløp(3.vedtaksperiode))
-                assertEquals(INNTEKT*1.20, faktaavvklartArbeidstakerBeløp(4.vedtaksperiode))
+            assertEquals(INNTEKT * 1.05, faktaavvklartArbeidstakerBeløp(1.vedtaksperiode))
+            assertEquals(INNTEKT * 1.10, faktaavvklartArbeidstakerBeløp(2.vedtaksperiode))
+            assertEquals(INNTEKT * 1.15, faktaavvklartArbeidstakerBeløp(3.vedtaksperiode))
+            assertEquals(INNTEKT * 1.20, faktaavvklartArbeidstakerBeløp(4.vedtaksperiode))
 
-                assertInntektsgrunnlag(2.januar, forventetAntallArbeidsgivere = 1) {
-                    assertInntektsgrunnlag(a1, INNTEKT*1.10)
-                }
-
-                assertVarsler(2.vedtaksperiode, RV_IM_4)
-
-                assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-                håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
-                assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-                assertVarsler(1.vedtaksperiode, RV_IV_7)
-
-                assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
-                    assertInntektsgrunnlag(a1, INNTEKT * 1.05)
-                }
-
-                assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-                håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.desember(2017), Dagtype.Sykedag, 100)))
-                assertEquals(31.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
-
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-
-                assertInntektsgrunnlag(31.desember(2017), forventetAntallArbeidsgivere = 1) {
-                    assertInntektsgrunnlag(a1, INNTEKT * 1.05, forventetkilde = Arbeidstakerkilde.Arbeidsgiver)
-                }
-                if (brukFaktaavklartInntektFraBehandling) {
-                    assertVarsel(Varselkode.RV_IV_14, 1.vedtaksperiode.filter())
-                }
+            assertInntektsgrunnlag(2.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT * 1.10)
             }
-        }
 
-        when (brukFaktaavklartInntektFraBehandling) {
-            true -> Toggle.BrukFaktaavklartInntektFraBehandling.enable { test() }
-            false -> Toggle.BrukFaktaavklartInntektFraBehandling.disable { test() }
+            assertVarsler(2.vedtaksperiode, RV_IM_4)
+
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertVarsler(1.vedtaksperiode, RV_IV_7)
+
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT * 1.05)
+            }
+
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.desember(2017), Dagtype.Sykedag, 100)))
+            assertEquals(31.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
+
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+
+            assertInntektsgrunnlag(31.desember(2017), forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a1, INNTEKT * 1.05, forventetkilde = Arbeidstakerkilde.Arbeidsgiver)
+            }
         }
     }
 

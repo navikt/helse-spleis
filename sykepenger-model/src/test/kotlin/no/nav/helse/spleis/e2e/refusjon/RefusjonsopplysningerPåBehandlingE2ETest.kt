@@ -829,7 +829,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
 
             if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                assertVarsler(2.vedtaksperiode, Varselkode.RV_IV_7, Varselkode.RV_IV_14)
+                assertVarsler(2.vedtaksperiode, Varselkode.RV_IV_7)
             } else {
                 assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
             }
@@ -864,7 +864,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterUtbetalt()
 
             if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                assertVarsler(vedtaksperiodeJanuar, Varselkode.RV_IV_7, Varselkode.RV_IV_14)
+                assertVarsler(vedtaksperiodeJanuar, Varselkode.RV_IV_7)
             } else {
                 assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
             }
@@ -883,7 +883,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
 
             if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                assertVarsler(2.vedtaksperiode, Varselkode.RV_IV_7, Varselkode.RV_IV_14)
+                assertVarsler(2.vedtaksperiode, Varselkode.RV_IV_7)
             } else {
                 assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
             }

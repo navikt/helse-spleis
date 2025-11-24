@@ -19,21 +19,14 @@ internal sealed interface Inntektssituasjon {
             check(skatteopplysning.inntektsopplysningskilde is Arbeidstakerinntektskilde.AOrdningen)
             return when (flereArbeidsgivere) {
                 true -> vedFlereArbeidsgivere(skjæringstidspunkt, skatteopplysning, aktivitetslogg)
-                false -> vedÉnArbeidsgiver(skjæringstidspunkt, aktivitetslogg)
+                false -> brukInntektFraArbeidsgiver(aktivitetslogg)
             }
         }
-
 
         private fun vedFlereArbeidsgivere(skjæringstidspunkt: LocalDate, skatteopplysning: ArbeidstakerFaktaavklartInntekt, aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt {
             if (skjæringstidspunkt.yearMonth == førsteFraværsdag.yearMonth) return brukInntektFraArbeidsgiver(aktivitetslogg)
             aktivitetslogg.varsel(Varselkode.RV_VV_2)
             return skatteopplysning
-        }
-
-        private fun vedÉnArbeidsgiver(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt {
-            if (skjæringstidspunkt.yearMonth == inntektFraArbeidsgiver.inntektsdata.dato.yearMonth) return brukInntektFraArbeidsgiver(aktivitetslogg)
-            aktivitetslogg.varsel(Varselkode.RV_IV_14)
-            return brukInntektFraArbeidsgiver(aktivitetslogg)
         }
 
         private fun brukInntektFraArbeidsgiver(aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt {
