@@ -1133,11 +1133,7 @@ internal class Vedtaksperiode private constructor(
 
         val result = grunnlag.nyeArbeidsgiverInntektsopplysninger(
             organisasjonsnummer = yrkesaktivitet.organisasjonsnummer,
-            inntekt = ArbeidstakerFaktaavklartInntekt(
-                id = UUID.randomUUID(),
-                inntektsdata = inntektsdata,
-                inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver
-            )
+            inntekt = faktaavklartInntekt
         )
         // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
             ?: return emptyList()
