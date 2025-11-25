@@ -132,6 +132,14 @@ class Utbetaling private constructor(
         tilstand.opprett(this, observer, aktivitetsloggMedUtbetalingkontekst)
     }
 
+    fun overførOppdrag(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate? = null) {
+        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
+        val vurdering = checkNotNull(vurdering) { "forventer vurdering ved overføring" }
+        check((maksdato == null && type == ANNULLERING) || (maksdato != null && type != ANNULLERING)) { "forventer maksdato ved overføring av utbetaling eller revurdering" }
+        vurdering.overfør(aktivitetsloggMedUtbetalingkontekst, arbeidsgiverOppdrag, maksdato)
+        vurdering.overfør(aktivitetsloggMedUtbetalingkontekst, personOppdrag, maksdato)
+    }
+
     fun håndterUtbetalingmodulHendelse(observer: UtbetalingObserver, utbetaling: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (!relevantFor(utbetaling)) return
@@ -151,11 +159,6 @@ class Utbetaling private constructor(
     fun simuler(aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         tilstand.simuler(this, aktivitetsloggMedUtbetalingkontekst)
-    }
-
-    fun håndterUtbetalingpåminnelse(aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        tilstand.håndterPåminnelse(this, aktivitetsloggMedUtbetalingkontekst)
     }
 
     fun valider(simulering: SimuleringHendelse, aktivitetslogg: IAktivitetslogg) {
@@ -244,7 +247,7 @@ class Utbetaling private constructor(
             neste.status,
             korrelasjonsId
         )
-        tilstand.entering(this, aktivitetslogg)
+        tilstand.entering(this)
     }
 
     private fun nyUtbetaling(
@@ -459,11 +462,6 @@ class Utbetaling private constructor(
         }
     }
 
-    private fun overførBegge(aktivitetslogg: IAktivitetslogg) {
-        vurdering?.overfør(aktivitetslogg, arbeidsgiverOppdrag, maksdato.takeUnless { type == ANNULLERING })
-        vurdering?.overfør(aktivitetslogg, personOppdrag, maksdato.takeUnless { type == ANNULLERING })
-    }
-
     private fun håndterKvittering(observer: UtbetalingObserver, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
         when (hendelse.status) {
             Oppdragstatus.OVERFØRT,
@@ -542,15 +540,11 @@ class Utbetaling private constructor(
             error("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun håndterPåminnelse(utbetaling: Utbetaling, påminnelse: IAktivitetslogg) {
-            påminnelse.info("Utbetaling ble påminnet, men gjør ingenting")
-        }
-
         fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
             error("Forventet ikke simulering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {}
+        fun entering(utbetaling: Utbetaling) {}
     }
 
     internal data object Ny : Tilstand {
@@ -589,7 +583,7 @@ class Utbetaling private constructor(
 
     internal data object GodkjentUtenUtbetaling : Tilstand {
         override val status = Utbetalingstatus.GODKJENT_UTEN_UTBETALING
-        override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+        override fun entering(utbetaling: Utbetaling) {
             check(!utbetaling.harOppdragMedUtbetalinger())
             utbetaling.avsluttet = LocalDateTime.now()
         }
@@ -597,13 +591,6 @@ class Utbetaling private constructor(
 
     internal data object Overført : Tilstand {
         override val status = Utbetalingstatus.OVERFØRT
-        override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            utbetaling.overførBegge(aktivitetslogg)
-        }
-
-        override fun håndterPåminnelse(utbetaling: Utbetaling, påminnelse: IAktivitetslogg) {
-            utbetaling.overførBegge(påminnelse)
-        }
 
         override fun kvittér(utbetaling: Utbetaling, observer: UtbetalingObserver, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
             utbetaling.lagreOverføringsinformasjon(aktivitetslogg, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
@@ -615,14 +602,14 @@ class Utbetaling private constructor(
 
     internal data object Annullert : Tilstand {
         override val status = Utbetalingstatus.ANNULLERT
-        override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+        override fun entering(utbetaling: Utbetaling) {
             utbetaling.avsluttet = LocalDateTime.now()
         }
     }
 
     internal data object Utbetalt : Tilstand {
         override val status = Utbetalingstatus.UTBETALT
-        override fun entering(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
+        override fun entering(utbetaling: Utbetaling) {
             utbetaling.avsluttet = LocalDateTime.now()
         }
     }
