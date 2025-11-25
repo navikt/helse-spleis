@@ -154,9 +154,10 @@ class Utbetaling private constructor(
         arbeidsgiverOppdrag.håndterSimulering(simulering)
     }
 
-    fun simuler(aktivitetslogg: IAktivitetslogg) {
+    fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        tilstand.simuler(this, aktivitetsloggMedUtbetalingkontekst)
+        arbeidsgiverOppdrag.simuler(aktivitetsloggMedUtbetalingkontekst, maksdato, systemident)
+        personOppdrag.simuler(aktivitetsloggMedUtbetalingkontekst, maksdato, systemident)
     }
 
     fun valider(simulering: SimuleringHendelse, aktivitetslogg: IAktivitetslogg) {
@@ -537,10 +538,6 @@ class Utbetaling private constructor(
             error("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            error("Forventet ikke simulering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-        }
-
         fun entering(utbetaling: Utbetaling) {}
     }
 
@@ -571,11 +568,6 @@ class Utbetaling private constructor(
                 else -> GodkjentUtenUtbetaling
             }
             )
-        }
-
-        override fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            utbetaling.arbeidsgiverOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
-            utbetaling.personOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
         }
     }
 

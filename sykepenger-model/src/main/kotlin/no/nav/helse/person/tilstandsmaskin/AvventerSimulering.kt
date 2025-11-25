@@ -19,5 +19,5 @@ internal data object AvventerSimulering : Vedtaksperiodetilstand {
 }
 
 internal fun trengerSimulering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-    checkNotNull(vedtaksperiode.behandlinger.utbetaling).simuler(aktivitetslogg)
+    checkNotNull(vedtaksperiode.behandlinger.utbetaling).simuler(aktivitetslogg, vedtaksperiode.behandlinger.maksdato.maksdato)
 }
