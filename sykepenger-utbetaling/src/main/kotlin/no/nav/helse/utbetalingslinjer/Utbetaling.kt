@@ -99,10 +99,6 @@ class Utbetaling private constructor(
         private set
 
     val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
-    private var forrigeHendelse: UtbetalingmodulHendelse? = null
-
-    private fun harHåndtert(hendelse: UtbetalingmodulHendelse) =
-        (hendelse === forrigeHendelse).also { forrigeHendelse = hendelse }
 
     fun periode() = periode
     private fun gyldig() = tilstand !in setOf(Ny, Forkastet)
@@ -143,7 +139,6 @@ class Utbetaling private constructor(
     fun håndterUtbetalingmodulHendelse(observer: UtbetalingObserver, utbetaling: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (!relevantFor(utbetaling)) return
-        if (harHåndtert(utbetaling)) return
         tilstand.kvittér(this, observer, utbetaling, aktivitetsloggMedUtbetalingkontekst)
     }
 
