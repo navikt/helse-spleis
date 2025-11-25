@@ -229,13 +229,8 @@ class Utbetaling private constructor(
         tilstand.godkjent(this, observer, aktivitetsloggMedUtbetalingkontekst, vurdering)
     }
 
-    private fun tilstand(observer: UtbetalingObserver, neste: Tilstand, aktivitetslogg: IAktivitetslogg) {
+    private fun tilstand(observer: UtbetalingObserver, neste: Tilstand) {
         oppdatert = LocalDateTime.now()
-        if (Oppdrag.ingenFeil(arbeidsgiverOppdrag, personOppdrag) && !Oppdrag.synkronisert(
-                arbeidsgiverOppdrag,
-                personOppdrag
-            )
-        ) return aktivitetslogg.info("Venter på status på det andre oppdraget før vi kan gå videre")
         val forrigeTilstand = tilstand
         tilstand = neste
         observer.utbetalingEndret(
@@ -481,15 +476,19 @@ class Utbetaling private constructor(
             Oppdragstatus.AKSEPTERT,
             Oppdragstatus.AKSEPTERT_MED_FEIL -> when (Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag)) {
                 true -> return // må vente på at begge oppdrag er uten feil
-                false -> when (type) {
-                    UTBETALING,
-                    REVURDERING -> Utbetalt
-                    ANNULLERING -> Annullert
-                    ETTERUTBETALING -> error("Forventer ikke denne typen her")
+                false -> when (Oppdrag.synkronisert(arbeidsgiverOppdrag, personOppdrag)) {
+                    false -> return // må vente på at begge oppdrag har samme status
+                    true -> when (type) {
+                        UTBETALING,
+                        REVURDERING -> Utbetalt
+                        ANNULLERING -> Annullert
+                        ETTERUTBETALING -> error("Forventer ikke denne typen her")
+                    }
                 }
             }
         }
-        tilstand(observer, nesteTilstand, aktivitetslogg)
+
+        tilstand(observer, nesteTilstand)
     }
 
     fun overlapperMed(other: Periode): Boolean {
@@ -550,7 +549,7 @@ class Utbetaling private constructor(
     internal data object Ny : Tilstand {
         override val status = Utbetalingstatus.NY
         override fun opprett(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {
-            utbetaling.tilstand(observer, Ubetalt, aktivitetslogg)
+            utbetaling.tilstand(observer, Ubetalt)
         }
     }
 
@@ -558,12 +557,12 @@ class Utbetaling private constructor(
         override val status = Utbetalingstatus.IKKE_UTBETALT
         override fun forkast(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Forkaster utbetaling")
-            utbetaling.tilstand(observer, Forkastet, aktivitetslogg)
+            utbetaling.tilstand(observer, Forkastet)
         }
 
         override fun ikkeGodkjent(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
             utbetaling.vurdering = vurdering
-            utbetaling.tilstand(observer, IkkeGodkjent, aktivitetslogg)
+            utbetaling.tilstand(observer, IkkeGodkjent)
         }
 
         override fun godkjent(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
@@ -572,7 +571,8 @@ class Utbetaling private constructor(
                 utbetaling.harOppdragMedUtbetalinger() -> Overført
                 utbetaling.type == ANNULLERING -> Annullert
                 else -> GodkjentUtenUtbetaling
-            }, aktivitetslogg)
+            }
+            )
         }
 
         override fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
