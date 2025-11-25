@@ -340,7 +340,7 @@ internal class UtbetalingTest {
         val utbetaling = opprettUtbetaling(tidslinje)
         val annullering = annuller(utbetaling)
 
-        annullering.overførOppdrag(aktivitetslogg)
+        annullering.overførAnnullering(aktivitetslogg)
 
         assertEquals(listOf(annullering.inspektør.utbetalingId.toString()), aktivitetslogg.aktiviteter.filterIsInstance<Aktivitet.Behov>().map { it.alleKontekster["utbetalingId"] })
         assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())

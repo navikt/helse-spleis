@@ -1386,8 +1386,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         fun påminnUtbetaling(aktivitetslogg: IAktivitetslogg) {
             when (tilstand) {
-                Tilstand.OverførtAnnullering -> checkNotNull(gjeldende.utbetaling).overførOppdrag(aktivitetslogg.kontekst(this))
-                Tilstand.VedtakFattet -> checkNotNull(gjeldende.utbetaling).overførOppdrag(aktivitetslogg.kontekst(this), maksdato.maksdato)
+                Tilstand.OverførtAnnullering -> checkNotNull(gjeldende.utbetaling).overførAnnullering(aktivitetslogg.kontekst(this))
+                Tilstand.VedtakFattet -> checkNotNull(gjeldende.utbetaling).overførUtbetalinger(aktivitetslogg.kontekst(this), maksdato.maksdato)
 
                 Tilstand.AnnullertPeriode,
                 Tilstand.AvsluttetUtenVedtak,
@@ -1796,7 +1796,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandling.behandlingLukket(behandlingEventBus, yrkesaktivitet)
                     if (utbetaling.harOppdragMedUtbetalinger()) {
                         behandling.tilstand(VedtakFattet)
-                        utbetaling.overførOppdrag(aktivitetslogg, behandling.maksdato.maksdato)
+                        utbetaling.overførUtbetalinger(aktivitetslogg, behandling.maksdato.maksdato)
                     } else {
                         behandling.tilstand(VedtakIverksatt)
 
@@ -1945,7 +1945,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         behandlingEventBus.behandlingForkastet(behandling.id, false)
                     } else {
                         behandling.tilstand(OverførtAnnullering)
-                        annullering.overførOppdrag(aktivitetslogg)
+                        annullering.overførAnnullering(aktivitetslogg)
                     }
                 }
 

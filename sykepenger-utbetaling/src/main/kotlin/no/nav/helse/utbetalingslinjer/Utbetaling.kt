@@ -128,7 +128,10 @@ class Utbetaling private constructor(
         tilstand.opprett(this, observer, aktivitetsloggMedUtbetalingkontekst)
     }
 
-    fun overførOppdrag(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate? = null) {
+    fun overførUtbetalinger(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate) = overførOppdrag(aktivitetslogg, maksdato)
+    fun overførAnnullering(aktivitetslogg: IAktivitetslogg) = overførOppdrag(aktivitetslogg, null)
+
+    private fun overførOppdrag(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate? = null) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         val vurdering = checkNotNull(vurdering) { "forventer vurdering ved overføring" }
         check((maksdato == null && type == ANNULLERING) || (maksdato != null && type != ANNULLERING)) { "forventer maksdato ved overføring av utbetaling eller revurdering" }
