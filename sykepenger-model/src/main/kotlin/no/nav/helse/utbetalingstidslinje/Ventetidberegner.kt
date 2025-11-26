@@ -23,10 +23,10 @@ internal class Ventetidberegner {
         var aktivVentetid: Ventetidtelling? = null
         sykdomstidslinje.forEach { dag ->
             aktivVentetid = when (dag) {
-                is Dag.Sykedag,
-                is Dag.MeldingTilNavDag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
+                is Dag.Sykedag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
 
                 is Dag.SykHelgedag,
+                is Dag.MeldingTilNavDag,
                 is Dag.MeldingTilNavHelgedag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvventerUtbetaltDag)
 
                 is Dag.ForeldetSykedag -> when (dag.dato.erHelg()) {

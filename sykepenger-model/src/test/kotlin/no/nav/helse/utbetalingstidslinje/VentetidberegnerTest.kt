@@ -44,6 +44,30 @@ internal class VentetidberegnerTest {
     }
 
     @Test
+    fun `mer enn 16 dager med melding til nav`() {
+        val tidslinje = resetSeed { 19.M }
+        val resultat = tidslinje.ventetid()
+        assertEquals(1, resultat.size)
+        resultat[0].also {
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
+            assertEquals(1.januar til 19.januar, it.omsluttendePeriode)
+            assertFalse(it.ferdigAvklart)
+        }
+    }
+
+    @Test
+    fun `mer enn 16 dager med melding til nav etterfulgt av sykdom`() {
+        val tidslinje = resetSeed { 19.M + 13.S }
+        val resultat = tidslinje.ventetid()
+        assertEquals(1, resultat.size)
+        resultat[0].also {
+            assertEquals(1.januar til 16.januar, it.dagerUtenAnsvar.single())
+            assertEquals(1.januar til 1.februar, it.omsluttendePeriode)
+            assertTrue(it.ferdigAvklart)
+        }
+    }
+
+    @Test
     fun `ventetiden utgjør de første 16 dagene - etterfølges av 15 oppholdsdager`() {
         val tidslinje = resetSeed { 17.S + 15.A }
         val resultat = tidslinje.ventetid()
