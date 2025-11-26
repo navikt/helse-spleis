@@ -602,6 +602,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         fun sykmeldingsperiode() = endringer.first().sykmeldingsperiode
         fun periode() = periode
 
+        fun nettobeløpTilBruker(forrigeBehandling: Behandling?): Double {
+            return this.utbetalingstidslinje.totalbeløpPerson.daglig - (forrigeBehandling?.utbetalingstidslinje?.totalbeløpPerson?.daglig ?: 0.0)
+        }
+
+        fun nettobeløpTilArbeidsgiver(forrigeBehandling: Behandling?): Double {
+            return this.utbetalingstidslinje.totalbeløpRefusjon.daglig - (forrigeBehandling?.utbetalingstidslinje?.totalbeløpRefusjon?.daglig ?: 0.0)
+        }
+
         fun analytiskDatapakke(
             forrigeBehandling: Behandling?,
             yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -614,11 +622,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 skjæringstidspunkt = this.skjæringstidspunkt,
                 beløpTilBruker = AnalytiskDatapakkeEvent.Pengeinformasjon(
                     totalBeløp = this.utbetalingstidslinje.totalbeløpPerson.daglig,
-                    nettoBeløp = this.utbetalingstidslinje.totalbeløpPerson.daglig - (forrigeBehandling?.utbetalingstidslinje?.totalbeløpPerson?.daglig ?: 0.0),
+                    nettoBeløp = this.nettobeløpTilBruker(forrigeBehandling),
                 ),
                 beløpTilArbeidsgiver = AnalytiskDatapakkeEvent.Pengeinformasjon(
                     totalBeløp = this.utbetalingstidslinje.totalbeløpRefusjon.daglig,
-                    nettoBeløp = this.utbetalingstidslinje.totalbeløpRefusjon.daglig - (forrigeBehandling?.utbetalingstidslinje?.totalbeløpRefusjon?.daglig ?: 0.0),
+                    nettoBeløp = this.nettobeløpTilArbeidsgiver(forrigeBehandling),
                 ),
                 fom = this.periode.start,
                 tom = this.periode.endInclusive,
