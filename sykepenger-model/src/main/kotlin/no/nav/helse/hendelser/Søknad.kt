@@ -51,6 +51,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 
 class Søknad(
@@ -154,8 +155,9 @@ class Søknad(
     }
 
     private fun validerSelvstendig(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
-        val næringsinntekter = pensjonsgivendeInntekter?.filter { it.erFerdigLignet }
-        if (næringsinntekter == null || næringsinntekter.size < 3) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
+        val ferdiglignetPensjonsgivendeInntekter = pensjonsgivendeInntekter?.filter { it.erFerdigLignet }
+        val harMinst3årMedFerdiglignetInntekter = ferdiglignetPensjonsgivendeInntekter == null || ferdiglignetPensjonsgivendeInntekter.size < 3
+        if (harMinst3årMedFerdiglignetInntekter) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
 
         if (harOppgittAvvikling == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_47)
         if (harOppgittNyIArbeidslivet == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_48)
@@ -406,11 +408,21 @@ class Søknad(
         val erFerdigLignet: Boolean
     ) {
         companion object {
-            fun List<PensjonsgivendeInntekt>.harFlereTyperPensjonsgivendeInntekt() =
-                any { pensjonsgivendeInntekt ->
-                    listOf(pensjonsgivendeInntekt.næringsinntekt, pensjonsgivendeInntekt.næringsinntektFraFiskeFangstEllerFamiliebarnehage, pensjonsgivendeInntekt.lønnsinntekt, pensjonsgivendeInntekt.lønnsinntektBarePensjonsdel)
-                        .count { it != Inntekt.INGEN } > 1
+            fun List<PensjonsgivendeInntekt>.harFlereTyperPensjonsgivendeInntekt(): Boolean {
+                var næringsinntekt = INGEN
+                var lønnsinntekt = INGEN
+                var lønnsinntektBarePensjonsdel = INGEN
+                var næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN
+
+                this.forEach {
+                    lønnsinntekt += it.lønnsinntekt
+                    lønnsinntektBarePensjonsdel += it.lønnsinntektBarePensjonsdel
+                    næringsinntekt += it.næringsinntekt
+                    næringsinntektFraFiskeFangstEllerFamiliebarnehage += it.næringsinntektFraFiskeFangstEllerFamiliebarnehage
                 }
+
+                return listOf(næringsinntekt, lønnsinntekt, lønnsinntektBarePensjonsdel, næringsinntektFraFiskeFangstEllerFamiliebarnehage).count { it > INGEN } > 1
+            }
         }
     }
 
