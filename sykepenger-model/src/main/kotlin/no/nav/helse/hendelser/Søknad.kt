@@ -124,10 +124,10 @@ class Søknad(
             }
 
             Arbeidssituasjon.ARBEIDSLEDIG -> validerArbeidsledig(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
-            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> validerSelvstendig(aktivitetslogg, skjæringstidspunkt)
+            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> validerSelvstendig(aktivitetslogg, skjæringstidspunkt, vilkårsgrunnlag)
 
             Arbeidssituasjon.JORDBRUKER -> {
-                if (Toggle.Jordbruker.enabled) validerSelvstendig(aktivitetslogg, skjæringstidspunkt)
+                if (Toggle.Jordbruker.enabled) validerSelvstendig(aktivitetslogg, skjæringstidspunkt, vilkårsgrunnlag)
                 else {
                     aktivitetslogg.info("Har ikke støtte for søknadstypen $arbeidssituasjon")
                     aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
@@ -154,7 +154,7 @@ class Søknad(
         aktivitetslogg.varsel(`Arbeidsledigsøknad er lagt til grunn`)
     }
 
-    private fun validerSelvstendig(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
+    private fun validerSelvstendig(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, vilkårsgrunnlag: VilkårsgrunnlagElement?) {
         val ferdiglignetPensjonsgivendeInntekter = pensjonsgivendeInntekter?.filter { it.erFerdigLignet }
         val harMinst3årMedFerdiglignetInntekter = ferdiglignetPensjonsgivendeInntekter == null || ferdiglignetPensjonsgivendeInntekter.size < 3
         if (harMinst3årMedFerdiglignetInntekter) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
@@ -166,7 +166,7 @@ class Søknad(
         if (harOppgittOpprettholdtInntekt == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_51)
         if (harOppgittOppholdIUtlandet == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_52)
 
-        if (pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true) aktivitetslogg.funksjonellFeil(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
+        if (vilkårsgrunnlag == null && pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true) aktivitetslogg.varsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
 
         vurderOpptjeningForSelvstendig(aktivitetslogg, skjæringstidspunkt)
     }
@@ -233,7 +233,7 @@ class Søknad(
                 val avklartePensjonsgivendeInntekter = pensjonsgivendeInntekter?.map {
                     SelvstendigFaktaavklartInntekt.PensjonsgivendeInntekt(
                         årstall = it.inntektsår,
-                        beløp = it.næringsinntekt
+                        beløp = it.sumAvPensjonsgivendeInntekter
                     )
                 } ?: emptyList()
                 SelvstendigFaktaavklartInntekt(
@@ -424,6 +424,8 @@ class Søknad(
                 return listOf(næringsinntekt, lønnsinntekt, lønnsinntektBarePensjonsdel, næringsinntektFraFiskeFangstEllerFamiliebarnehage).count { it > INGEN } > 1
             }
         }
+
+        val sumAvPensjonsgivendeInntekter = næringsinntekt + lønnsinntekt + lønnsinntektBarePensjonsdel + næringsinntektFraFiskeFangstEllerFamiliebarnehage
     }
 
     enum class Arbeidssituasjon {

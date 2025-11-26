@@ -28,6 +28,7 @@ import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
@@ -57,6 +58,8 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 
 internal class SelvstendigTest : AbstractDslTest() {
 
@@ -363,18 +366,165 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Kaster ut søknader når det også er oppgitt lønnsinntekter`() {
+    fun `inget varsel om flere pensjonsgivende inntekter i en forlengelse`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(
-                periode = januar,
+                januar,
                 pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INNTEKT, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, 1.årlig, 2.årlig, 3.årlig, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true)
                 )
             )
-            assertFunksjonellFeil(Varselkode.RV_SØ_45, 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+
+            assertVarsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`, 1.vedtaksperiode.filter())
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+
+
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            // format: år, næringsinntekt, lønnsinntekt, lønnsinntektBarePensjonsdel, næringsinntektFraFiskeFangstEllerFamiliebarnehage for hvert av de tre årene, og forventet varsel
+            "2017, 450000,  0,          0,      0, 2016, 450000,    0,      0, 0, 2015, 450000, 0,       0, 0,        false",
+            "2017, 0,       450000,     0,      0, 2016, 0,         450000, 0, 0, 2015, 0,      450000,  0, 0,        false",
+            "2017, 225000,  225000,     0,      0, 2016, 225000,    225000, 0, 0, 2015, 225000, 225000,  0, 0,        true",
+            "2017, 450000,  0,          0,      0, 2016, 450000,    0,      0, 0, 2015, 0,      450000,  0, 0,        true",
+            "2017, 225000,  0,          225000, 0, 2016, 450000,    0,      0, 0, 2015, 450000, 0,       0, 0,        true",
+            "2017, 450000,  0,          0,      0, 2016, 450000,    0,      0, 0, 2015, 0,      0,       0, 450000,   true",
+        ]
+    )
+    fun `beregner korrekt utbetaling for selvstendig med både nærings- og lønnsinntekt under 6G og uten forskring`(
+        år1: Int, næringsinntekt1: Int, lønnsinntekt1: Int, lønnsinntektBarePensjonsdel1: Int, næringsinntektFraFiskeFangstEllerFamiliebarnehage1: Int,
+        år2: Int, næringsinntekt2: Int, lønnsinntekt2: Int, lønnsinntektBarePensjonsdel2: Int, næringsinntektFraFiskeFangstEllerFamiliebarnehage2: Int,
+        år3: Int, næringsinntekt3: Int, lønnsinntekt3: Int, lønnsinntektBarePensjonsdel3: Int, næringsinntektFraFiskeFangstEllerFamiliebarnehage3: Int,
+        forventetVarsel: Boolean
+    ) {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(
+                januar,
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(år1), næringsinntekt1.årlig, lønnsinntekt1.årlig, lønnsinntektBarePensjonsdel1.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage1.årlig, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(år2), næringsinntekt2.årlig, lønnsinntekt2.årlig, lønnsinntektBarePensjonsdel2.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage2.årlig, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(år3), næringsinntekt3.årlig, lønnsinntekt3.årlig, lønnsinntektBarePensjonsdel3.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage3.årlig, erFerdigLignet = true)
+                )
+            )
+            if (forventetVarsel) assertVarsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`, 1.vedtaksperiode.filter())
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 0) {
+                assertSelvstendigInntektsgrunnlag(460589.årlig)
+            }
+            val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
+            val ventetidsdager = utbetalingstidslinje.filterIsInstance<Utbetalingsdag.Ventetidsdag>()
+
+            assertEquals(16, ventetidsdager.size)
+            assertEquals(true, ventetidsdager.all { it.økonomi.utbetalingsgrad == 0.prosent && it.økonomi.sykdomsgrad == 100.prosent })
+            assertEquals(11, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavDag>().size)
+            assertEquals(4, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavHelgDag>().size)
+
+            inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
+                assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
+                assertEquals(1, utbetalinginspektør.personOppdrag.size)
+                utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
+                    assertEquals(17.januar til 31.januar, linje.periode)
+                    assertEquals(1417, linje.beløp)
+                    assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
+                }
+            }
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstander(
+                1.vedtaksperiode,
+                SELVSTENDIG_START,
+                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
+                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
+                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
+                SELVSTENDIG_AVVENTER_HISTORIKK,
+                SELVSTENDIG_AVVENTER_SIMULERING,
+                SELVSTENDIG_AVVENTER_GODKJENNING,
+                SELVSTENDIG_TIL_UTBETALING,
+                SELVSTENDIG_AVSLUTTET
+            )
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            // format: år, næringsinntekt, lønnsinntekt, lønnsinntektBarePensjonsdel, næringsinntektFraFiskeFangstEllerFamiliebarnehage for hvert av de tre årene, og forventet varsel
+            "2017, 1000000, 0,          0,      0, 2016, 1000000,   0,       0, 0, 2015, 1000000,   0,       0, 0,        false",
+            "2017, 0,       1000000,    0,      0, 2016, 0,         1000000, 0, 0, 2015, 0,         1000000, 0, 0,        false",
+            "2017, 500000,  500000,     0,      0, 2016, 500000,    500000,  0, 0, 2015, 500000,    500000,  0, 0,        true",
+            "2017, 1000000, 0,          0,      0, 2016, 1000000,   0,       0, 0, 2015, 0,         1000000, 0, 0,        true",
+            "2017, 500000,  0,          500000, 0, 2016, 1000000,   0,       0, 0, 2015, 1000000,   0,       0, 0,        true",
+            "2017, 1000000, 0,          0,      0, 2016, 1000000,   0,       0, 0, 2015, 0,         0,       0, 1000000,  true",
+        ]
+    )
+    fun `beregner korrekt utbetaling for selvstendig med både nærings- og lønnsinntekt over 6G og uten forskring`(
+        år1: Int, næringsinntekt1: Int, lønnsinntekt1: Int, lønnsinntektBarePensjonsdel1: Int, næringsinntektFraFiskeFangstEllerFamiliebarnehage1: Int,
+        år2: Int, næringsinntekt2: Int, lønnsinntekt2: Int, lønnsinntektBarePensjonsdel2: Int, næringsinntektFraFiskeFangstEllerFamiliebarnehage2: Int,
+        år3: Int, næringsinntekt3: Int, lønnsinntekt3: Int, lønnsinntektBarePensjonsdel3: Int, næringsinntektFraFiskeFangstEllerFamiliebarnehage3: Int,
+        forventetVarsel: Boolean
+    ) {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(
+                januar,
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(år1), næringsinntekt1.årlig, lønnsinntekt1.årlig, lønnsinntektBarePensjonsdel1.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage1.årlig, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(år2), næringsinntekt2.årlig, lønnsinntekt2.årlig, lønnsinntektBarePensjonsdel2.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage2.årlig, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(år3), næringsinntekt3.årlig, lønnsinntekt3.årlig, lønnsinntektBarePensjonsdel3.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage3.årlig, erFerdigLignet = true)
+                )
+            )
+            if (forventetVarsel) assertVarsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`, 1.vedtaksperiode.filter())
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 0) {
+                assertSelvstendigInntektsgrunnlag(1023532.årlig)
+                assertBeregningsgrunnlag(715713.årlig)
+                assertSykepengegrunnlag(561804.årlig)
+            }
+
+            val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
+            assertEquals(16, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.Ventetidsdag>().size)
+            assertEquals(11, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavDag>().size)
+            assertEquals(4, utbetalingstidslinje.filterIsInstance<Utbetalingsdag.NavHelgDag>().size)
+
+            inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
+                assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
+                assertEquals(1, utbetalinginspektør.personOppdrag.size)
+                utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
+                    assertEquals(17.januar til 31.januar, linje.periode)
+                    assertEquals(1729, linje.beløp)
+                    assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
+                }
+            }
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstander(
+                1.vedtaksperiode,
+                SELVSTENDIG_START,
+                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
+                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
+                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
+                SELVSTENDIG_AVVENTER_HISTORIKK,
+                SELVSTENDIG_AVVENTER_SIMULERING,
+                SELVSTENDIG_AVVENTER_GODKJENNING,
+                SELVSTENDIG_TIL_UTBETALING,
+                SELVSTENDIG_AVSLUTTET
+            )
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         }
     }
 
@@ -950,19 +1100,21 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
 
-            håndterYtelserSelvstendig(1.vedtaksperiode, inntekterForBeregning = listOf(
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode, inntekterForBeregning = listOf(
                 InntekterForBeregning.Inntektsperiode.Beløp(
                     inntektskilde = a1,
                     periode = 1.januar til 31.januar,
                     beløp = 1000.daglig
                 )
-            ))
+            )
+            )
             håndterSimulering(1.vedtaksperiode)
 
             assertUtbetalingsbeløp(1.vedtaksperiode, forventetArbeidsgiverbeløp = 0, forventetArbeidsgiverRefusjonsbeløp = 0, forventetPersonbeløp = 0, subset = 1.januar til 16.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, forventetArbeidsgiverbeløp = 0, forventetArbeidsgiverRefusjonsbeløp = 0, forventetPersonbeløp = 617, subset = 17.januar til 31.januar)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 0) {
-                assertSelvstendigInntektsgrunnlag( 460589.0.årlig)
+                assertSelvstendigInntektsgrunnlag(460589.0.årlig)
                 assertBeregningsgrunnlag(460589.0.årlig)
             }
         }
@@ -974,19 +1126,21 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
 
-            håndterYtelserSelvstendig(1.vedtaksperiode, inntekterForBeregning = listOf(
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode, inntekterForBeregning = listOf(
                 InntekterForBeregning.Inntektsperiode.Beløp(
                     inntektskilde = "SELVSTENDIG",
                     periode = 1.januar til 31.januar,
                     beløp = 1000.daglig
                 )
-            ))
+            )
+            )
             håndterSimulering(1.vedtaksperiode)
 
             assertUtbetalingsbeløp(1.vedtaksperiode, forventetArbeidsgiverbeløp = 0, forventetArbeidsgiverRefusjonsbeløp = 0, forventetPersonbeløp = 0, subset = 1.januar til 16.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, forventetArbeidsgiverbeløp = 0, forventetArbeidsgiverRefusjonsbeløp = 0, forventetPersonbeløp = 617, subset = 17.januar til 31.januar)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 0) {
-                assertSelvstendigInntektsgrunnlag( 460589.0.årlig)
+                assertSelvstendigInntektsgrunnlag(460589.0.årlig)
                 assertBeregningsgrunnlag(460589.0.årlig)
             }
         }
