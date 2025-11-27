@@ -934,6 +934,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
 
             assertGodkjenningsbehov(
                 hendelser = setOf(søknadId!!, inntektsmeldingId),
+                relevanteSøknader = setOf(søknadId),
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon")
             )
         }
@@ -1019,6 +1020,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         assertEquals(hendelser, actualHendelser)
     }
 
+    private fun assertRelevanteSøknader(hendelser: Set<UUID>, vedtaksperiodeId: UUID) {
+        val actualHendelser = hentFelt<Set<UUID>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "relevanteSøknader")!!
+        assertEquals(hendelser, actualHendelser)
+    }
+
     private fun assertGodkjenningsbehov(
         tags: Set<String>,
         skjæringstidspunkt: LocalDate = 1.januar,
@@ -1026,6 +1032,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         periodeTom: LocalDate = 31.januar,
         vedtaksperiodeId: UUID = 1.vedtaksperiode(a1),
         hendelser: Set<UUID>? = null,
+        relevanteSøknader: Set<UUID>? = null,
         orgnummere: Set<String> = setOf(a1),
         kanAvvises: Boolean = true,
         periodeType: String = "FØRSTEGANGSBEHANDLING",
@@ -1074,6 +1081,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         val actualArbeidssituasjon = hentFelt<Arbeidssituasjon>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "arbeidssituasjon")!!
 
         hendelser?.let { assertHendelser(it, vedtaksperiodeId) }
+        relevanteSøknader?.let { assertRelevanteSøknader(it, vedtaksperiodeId) }
         assertSykepengegrunnlagsfakta(vedtaksperiodeId, sykepengegrunnlagsfakta)
         assertEquals(tags, actualtags)
         assertEquals(skjæringstidspunkt.toString(), actualSkjæringstidspunkt)

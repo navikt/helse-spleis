@@ -281,6 +281,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(godkjenning.path("inntektskilde").asText().isNotEmpty())
         assertTrue(godkjenning.path("orgnummereMedRelevanteArbeidsforhold").isArray)
         assertFalse(godkjenning.path("orgnummereMedRelevanteArbeidsforhold").isEmpty)
+        assertTrue(godkjenning.path("relevanteSøknader").isArray)
         assertTrue(godkjenning.path("tags").isArray)
         assertTrue(godkjenning.path("kanAvvises").isBoolean)
         assertTrue(godkjenning.path("behandlingId").asText().isNotEmpty())

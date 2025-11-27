@@ -69,6 +69,8 @@ internal class UtkastTilVedtakBuilder(
     internal fun vedtakFattet(vedtakFattet: LocalDateTime) = apply { this.vedtakFattet = vedtakFattet }
     private var historiskeHendelseIder: Set<MeldingsreferanseId> = emptySet()
     internal fun historiskeHendelseIder(historiskeHendelseIder: Set<MeldingsreferanseId>) = apply { this.historiskeHendelseIder = historiskeHendelseIder }
+    private var relevanteSøknader: Set<UUID> = emptySet()
+    internal fun relevanteSøknader(relevanteSøknader: Set<MeldingsreferanseId>) = apply { this.relevanteSøknader = relevanteSøknader.map { it.id }.toSet() }
     private lateinit var periode: Periode
     internal fun periode(arbeidsgiverperiode: List<Periode>, arbeidsgiverperiodeFerdigAvklart: Boolean, periode: Periode) = apply {
         this.periode = periode
@@ -253,6 +255,7 @@ internal class UtkastTilVedtakBuilder(
             "kanAvvises" to kanForkastes,
             "behandlingId" to "$behandlingId",
             "hendelser" to hendelseIder,
+            "relevanteSøknader" to relevanteSøknader,
             "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt.map {
                 mapOf(
                     "vedtaksperiodeId" to "${it.vedtaksperiodeId}",

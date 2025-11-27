@@ -273,6 +273,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun byggUtkastTilVedtak(builder: UtkastTilVedtakBuilder, behandling: Behandling?): UtkastTilVedtakBuilder {
         if (behandlinger.grunnbeløpsregulert()) builder.grunnbeløpsregulert()
         builder.historiskeHendelseIder(eksterneIder())
+        builder.relevanteSøknader(søknadIder())
         (behandling ?: sisteBehandling).byggUtkastTilVedtak(builder)
         return builder
     }
