@@ -111,6 +111,15 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
                         sendtNav = LocalDateTime.parse(node.path("sendtNav").asText())
                     )
 
+                    Meldingstype.SENDT_SØKNAD_JORDBRUKER -> HendelseDTO.sendtSøknadJordbruker(
+                        id = node.path("@id").asText(),
+                        eksternDokumentId = node.path("id").asText(),
+                        fom = LocalDate.parse(node.path("fom").asText()),
+                        tom = LocalDate.parse(node.path("tom").asText()),
+                        rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
+                        sendtNav = LocalDateTime.parse(node.path("sendtNav").asText())
+                    )
+
                     Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER,
                     Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG -> HendelseDTO.sendtSøknadArbeidsledig(
                         id = node.path("@id").asText(),
@@ -161,6 +170,7 @@ internal class HendelseDao(private val dataSource: () -> DataSource, private val
         SENDT_SØKNAD_SELVSTENDIG,
         SENDT_SØKNAD_ARBEIDSGIVER,
         SENDT_SØKNAD_ARBEIDSLEDIG,
+        SENDT_SØKNAD_JORDBRUKER,
         SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER,
         NAV_NO_SELVBESTEMT_INNTEKTSMELDING,
         NAV_NO_KORRIGERT_INNTEKTSMELDING,
