@@ -263,25 +263,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun harFlereSkjæringstidspunkt() = sisteBehandling.harFlereSkjæringstidspunkt()
     internal fun børBrukeSkatteinntekterDirekte() = sisteBehandling.skjæringstidspunkter.isEmpty()
 
-    internal fun håndterUtbetalinghendelseSisteInFlight(
-        behandlingEventBus: BehandlingEventBus,
-        hendelse: UtbetalingHendelse,
-        aktivitetslogg: IAktivitetslogg
-    ): Behandling? {
-        return tidligereBehandlinger
-            .lastOrNull { it.erInFlight() }
-            ?.also { it.håndterUtbetalinghendelse(behandlingEventBus, hendelse, aktivitetslogg) }
-    }
-
-    internal fun håndterUtbetalinghendelseSisteBehandling(
-        behandlingEventBus: BehandlingEventBus,
-        hendelse: UtbetalingHendelse,
-        aktivitetslogg: IAktivitetslogg
-    ): Behandling {
-        check(åpenBehandling == null) { "Kan ikke håndtere utbetalinghendelse på åpen behandling" }
-        return tidligereBehandlinger.last().also { it.håndterUtbetalinghendelse(behandlingEventBus, hendelse, aktivitetslogg) }
-    }
-
     internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = sisteBehandling.validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
     internal fun validerIkkeFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = sisteBehandling.validerIkkeFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
 

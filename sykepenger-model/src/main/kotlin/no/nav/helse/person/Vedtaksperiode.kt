@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
@@ -132,6 +132,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
+import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklarteInntekter
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
@@ -144,7 +145,6 @@ import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
-import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklarteInntekter
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerBlokkerendePeriode
 import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerInfotrygdHistorikk
@@ -182,9 +182,9 @@ import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerHistorikk
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerHistorikkRevurdering
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerInfotrygdHistorikk
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerRevurdering
+import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerRevurderingTilUtbetaling
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerSimulering
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerSimuleringRevurdering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerRevurderingTilUtbetaling
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerVilkårsprøving
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerVilkårsprøvingRevurdering
 import no.nav.helse.person.tilstandsmaskin.SelvstendigStart
@@ -1826,9 +1826,12 @@ internal class Vedtaksperiode private constructor(
 
         val erVedtakIverksatt = behandlinger
             .vedtakFattet(eventBus.behandlingEventBus, yrkesaktivitet, this, aktivitetslogg)
-            .vedtakIverksatt(eventBus)
+            .erAvsluttet()
 
-        tilstand(eventBus, aktivitetslogg, if (erVedtakIverksatt) nesteAvsluttettilstand else nesteTilUtbetalingtilstand)
+        when (erVedtakIverksatt) {
+            true -> vedtakIverksatt(eventBus, aktivitetslogg, nesteAvsluttettilstand)
+            false -> tilstand(eventBus, aktivitetslogg, nesteTilUtbetalingtilstand)
+        }
     }
 
     internal fun nullKronerRefusjonOmViManglerRefusjonsopplysninger(eventBus: EventBus, hendelseMetadata: HendelseMetadata, aktivitetslogg: IAktivitetslogg, dokumentsporing: Dokumentsporing? = null) {
@@ -1972,14 +1975,18 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (hendelse.vedtaksperiodeId != this.id) return
 
-        when (tilstand) {
-            AvventerAnnulleringTilUtbetaling -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
-            TilAnnullering -> håndterAnnulleringUtbetalinghendelse(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
-            AvventerRevurderingTilUtbetaling -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, AvventerRevurdering)
+        behandlinger.forrigeBehandling.håndterUtbetalinghendelse(eventBus.behandlingEventBus, hendelse, aktivitetslogg)
 
-            SelvstendigAvventerRevurderingTilUtbetaling -> vedtakIverksattMensTilRevurdering(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerRevurdering)
-            SelvstendigTilUtbetaling -> vedtakIverksatt(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvsluttet)
-            TilUtbetaling -> vedtakIverksatt(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst, Avsluttet)
+        if (!behandlinger.forrigeBehandling.erAvsluttet()) return
+
+        when (tilstand) {
+            TilAnnullering -> vedtakAnnullert(eventBus, hendelse, aktivitetslogg)
+
+            AvventerAnnulleringTilUtbetaling -> vedtakIverksatt(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerAnnullering)
+            AvventerRevurderingTilUtbetaling -> vedtakIverksatt(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerRevurdering)
+            SelvstendigAvventerRevurderingTilUtbetaling -> vedtakIverksatt(eventBus, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerRevurdering)
+            SelvstendigTilUtbetaling -> vedtakIverksatt(eventBus, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvsluttet)
+            TilUtbetaling -> vedtakIverksatt(eventBus, aktivitetsloggMedVedtaksperiodekontekst, Avsluttet)
 
             Avsluttet,
             AvsluttetUtenUtbetaling,
@@ -2025,13 +2032,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun håndterAnnulleringUtbetalinghendelse(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
-        if (!behandlinger.håndterUtbetalinghendelseSisteBehandling(eventBus.behandlingEventBus, hendelse, aktivitetslogg).erAvsluttet()) return
-
-        aktivitetslogg.info("Annulleringen fikk OK fra Oppdragssystemet")
-        vedtakAnnullert(eventBus, hendelse, aktivitetslogg)
-    }
-
     internal fun vedtakAnnullert(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         eventBus.vedtaksperiodeAnnullert(
             EventSubscription.VedtaksperiodeAnnullertEvent(
@@ -2053,33 +2053,11 @@ internal class Vedtaksperiode private constructor(
             }
     }
 
-    private fun vedtakIverksattMensTilRevurdering(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
-        val erVedtakIverksatt = behandlinger
-            .håndterUtbetalinghendelseSisteInFlight(eventBus.behandlingEventBus, hendelse, aktivitetslogg)
-            ?.vedtakIverksatt(eventBus)
-            ?: false
-        if (!erVedtakIverksatt) return
-        tilstand(eventBus, aktivitetslogg, nesteTilstand) {
-            aktivitetslogg.info("OK fra Oppdragssystemet")
-        }
-    }
-
-    private fun vedtakIverksatt(eventBus: EventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
-        val erVedtakIverksatt = behandlinger
-            .håndterUtbetalinghendelseSisteBehandling(eventBus.behandlingEventBus, hendelse, aktivitetslogg)
-            .vedtakIverksatt(eventBus)
-        if (!erVedtakIverksatt) return
-        tilstand(eventBus, aktivitetslogg, nesteTilstand) {
-            aktivitetslogg.info("OK fra Oppdragssystemet")
-        }
-    }
-
-    private fun Behandlinger.Behandling.vedtakIverksatt(eventBus: EventBus): Boolean {
-        if (!erAvsluttet()) return false
-        val utkastTilVedtakBuilder = utkastTilVedtakBuilder(this)
+    private fun vedtakIverksatt(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
+        tilstand(eventBus, aktivitetslogg, nesteTilstand)
+        val utkastTilVedtakBuilder = utkastTilVedtakBuilder(behandlinger.forrigeBehandling)
         eventBus.avsluttetMedVedtak(utkastTilVedtakBuilder.buildAvsluttedMedVedtak())
         eventBus.analytiskDatapakke(behandlinger.analytiskDatapakke(yrkesaktivitet.yrkesaktivitetstype, this@Vedtaksperiode.id))
-        return true
     }
 
     internal fun håndterAnnullerUtbetaling(
