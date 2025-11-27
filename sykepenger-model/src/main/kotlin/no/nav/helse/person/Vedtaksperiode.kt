@@ -3381,7 +3381,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         private val HAR_AVVENTENDE_GODKJENNING: VedtaksperiodeFilter = {
-            it.tilstand == AvventerGodkjenning || it.tilstand == AvventerGodkjenningRevurdering
+            it.tilstand in setOf(AvventerGodkjenning, AvventerGodkjenningRevurdering, SelvstendigAvventerGodkjenning, SelvstendigAvventerGodkjenningRevurdering)
         }
 
         private val HAR_PÅGÅENDE_UTBETALING: VedtaksperiodeFilter = { it.behandlinger.utbetales() }
