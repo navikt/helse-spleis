@@ -128,17 +128,6 @@ class Utbetaling private constructor(
         tilstand.opprett(this, observer, aktivitetsloggMedUtbetalingkontekst)
     }
 
-    fun overførUtbetalinger(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate) = overførOppdrag(aktivitetslogg, maksdato)
-    fun overførAnnullering(aktivitetslogg: IAktivitetslogg) = overførOppdrag(aktivitetslogg, null)
-
-    private fun overførOppdrag(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate? = null) {
-        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        val vurdering = checkNotNull(vurdering) { "forventer vurdering ved overføring" }
-        check((maksdato == null && type == ANNULLERING) || (maksdato != null && type != ANNULLERING)) { "forventer maksdato ved overføring av utbetaling eller revurdering" }
-        vurdering.overfør(aktivitetsloggMedUtbetalingkontekst, arbeidsgiverOppdrag, maksdato)
-        vurdering.overfør(aktivitetsloggMedUtbetalingkontekst, personOppdrag, maksdato)
-    }
-
     fun håndterUtbetalingmodulHendelse(observer: UtbetalingObserver, utbetaling: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (!relevantFor(utbetaling)) return
@@ -152,12 +141,6 @@ class Utbetaling private constructor(
         if (simulering.utbetalingId != this.id) return
         personOppdrag.håndterSimulering(simulering)
         arbeidsgiverOppdrag.håndterSimulering(simulering)
-    }
-
-    fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate) {
-        val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        arbeidsgiverOppdrag.simuler(aktivitetsloggMedUtbetalingkontekst, maksdato, systemident)
-        personOppdrag.simuler(aktivitetsloggMedUtbetalingkontekst, maksdato, systemident)
     }
 
     fun valider(simulering: SimuleringHendelse, aktivitetslogg: IAktivitetslogg) {
@@ -290,8 +273,6 @@ class Utbetaling private constructor(
 
         val log: Logger = LoggerFactory.getLogger("Utbetaling")
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-
-        private const val systemident = "SPLEIS"
 
         fun lagUtbetaling(
             utbetalinger: List<Utbetaling>,
@@ -619,10 +600,6 @@ class Utbetaling private constructor(
         private val tidspunkt: LocalDateTime,
         val automatiskBehandling: Boolean
     ) {
-        fun overfør(aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag, maksdato: LocalDate?) {
-            oppdrag.overfør(aktivitetslogg, maksdato, ident)
-        }
-
         fun dto() = UtbetalingVurderingDto(
             godkjent = godkjent,
             ident = ident,

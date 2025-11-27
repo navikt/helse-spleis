@@ -210,24 +210,6 @@ data class Utbetalingslinje(
         }
     }
 
-    fun behovdetaljer() = mapOf<String, Any?>(
-        "fom" to fom.toString(),
-        "tom" to tom.toString(),
-        "satstype" to "DAG",
-        "sats" to beløp,
-        "grad" to grad.toDouble(), // backwards-compatibility mot andre systemer som forventer double: må gjennomgås
-        "stønadsdager" to stønadsdager(),
-        "totalbeløp" to totalbeløp(),
-        "endringskode" to endringskode.toString(),
-        "delytelseId" to delytelseId,
-        "refDelytelseId" to refDelytelseId,
-        "refFagsystemId" to refFagsystemId,
-        "statuskode" to statuskode,
-        "datoStatusFom" to datoStatusFom?.toString(),
-        "klassekode" to klassekode.verdi,
-        "datoKlassifikFom" to fom.toString(),
-    )
-
     fun dto() = UtbetalingslinjeUtDto(
         fom = this.fom,
         tom = this.tom,

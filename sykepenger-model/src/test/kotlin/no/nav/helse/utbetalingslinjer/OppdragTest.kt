@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -463,14 +463,6 @@ internal class OppdragTest {
     }
 
     @Test
-    fun `tomt oppdrag ber ikke om simulering (brukerutbetaling)`() {
-        val oppdrag = Oppdrag("mottaker", Fagområde.Sykepenger)
-        val aktivitetslogg = Aktivitetslogg()
-        oppdrag.simuler(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov.isEmpty())
-    }
-
-    @Test
     fun `nettobeløp for annulleringer`() {
         val oppdrag = Oppdrag(
             "mottaker", Fagområde.Sykepenger, listOf(
@@ -490,50 +482,6 @@ internal class OppdragTest {
     }
 
     @Test
-    fun `uend linjer i oppdrag ber ikke om simulering (brukerutbetaling)`() {
-        val oppdrag = Oppdrag(
-            "mottaker", Fagområde.Sykepenger, listOf(
-            Utbetalingslinje(
-                fom = 1.januar,
-                tom = 16.januar,
-                endringskode = Endringskode.UEND,
-                beløp = 1000,
-                grad = 100,
-                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
-            )
-
-        )
-        )
-        val aktivitetslogg = Aktivitetslogg()
-        oppdrag.simuler(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov.isEmpty())
-    }
-
-    @Test
-    fun `tomt oppdrag ber ikke om overføring (brukerutbetaling)`() {
-        val oppdrag = Oppdrag("mottaker", Fagområde.Sykepenger)
-        val aktivitetslogg = Aktivitetslogg()
-        oppdrag.overfør(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov.isEmpty())
-    }
-
-    @Test
-    fun `tomt oppdrag ber ikke om simulering (arbeidsgiver)`() {
-        val oppdrag = Oppdrag("mottaker", Fagområde.SykepengerRefusjon)
-        val aktivitetslogg = Aktivitetslogg()
-        oppdrag.simuler(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov.isEmpty())
-    }
-
-    @Test
-    fun `tomt oppdrag ber ikke om overføring (arbeidsgiver)`() {
-        val oppdrag = Oppdrag("mottaker", Fagområde.SykepengerRefusjon)
-        val aktivitetslogg = Aktivitetslogg()
-        oppdrag.overfør(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov.isEmpty())
-    }
-
-    @Test
     fun `er relevant`() {
         val fagsystemId = "a"
         val fagområde = Fagområde.SykepengerRefusjon
@@ -541,46 +489,6 @@ internal class OppdragTest {
         assertTrue(oppdrag.erRelevant(fagsystemId, fagområde))
         assertFalse(oppdrag.erRelevant(fagsystemId, Fagområde.Sykepenger))
         assertFalse(oppdrag.erRelevant("b", fagområde))
-    }
-
-    @Test
-    fun `simulerer oppdrag med linjer`() {
-        val oppdrag = Oppdrag(
-            "mottaker", Fagområde.Sykepenger, listOf(
-            Utbetalingslinje(
-                fom = 17.januar,
-                tom = 31.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100,
-                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
-            )
-
-        )
-        )
-        val aktivitetslogg = Aktivitetslogg()
-        oppdrag.simuler(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov.isNotEmpty())
-    }
-
-    @Test
-    fun `overfører oppdrag med linjer`() {
-        val oppdrag = Oppdrag(
-            "mottaker", Fagområde.Sykepenger, listOf(
-            Utbetalingslinje(
-                fom = 17.januar,
-                tom = 31.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100,
-                klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
-            )
-
-        )
-        )
-        val aktivitetslogg = Aktivitetslogg()
-        oppdrag.overfør(aktivitetslogg, 1.januar, "Sara Saksbehandler")
-        assertTrue(aktivitetslogg.behov.isNotEmpty())
     }
 
     @Test

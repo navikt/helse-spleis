@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.OppdragstatusDto
@@ -12,7 +12,6 @@ import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.hendelser.SimuleringHendelse
 import no.nav.helse.hendelser.UtbetalingmodulHendelse
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -123,42 +122,7 @@ class Oppdrag private constructor(
         )
     }
 
-    fun overfør(
-        aktivitetslogg: IAktivitetslogg,
-        maksdato: LocalDate?,
-        saksbehandler: String
-    ) {
-        val aktivitetsloggMedOppdragkontekst = aktivitetslogg.kontekst(this)
-        if (status == AKSEPTERT) return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag som allerede er akseptert for fagområde=$fagområde med fagsystemId=$fagsystemId")
-        if (!harUtbetalinger()) return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
-        check(endringskode != Endringskode.UEND)
-        aktivitetsloggMedOppdragkontekst.behov(Behovtype.Utbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer(saksbehandler, maksdato))
-    }
-
-    fun simuler(aktivitetslogg: IAktivitetslogg, maksdato: LocalDate, saksbehandler: String) {
-        val aktivitetsloggMedOppdragkontekst = aktivitetslogg.kontekst(this)
-        if (!harUtbetalinger()) return aktivitetsloggMedOppdragkontekst.info("Simulerer ikke oppdrag uten endring fagområde=$fagområde med fagsystemId=$fagsystemId")
-        check(endringskode != Endringskode.UEND)
-        check(status == null)
-        aktivitetsloggMedOppdragkontekst.behov(Behovtype.Simulering, "Trenger simulering fra Oppdragssystemet", behovdetaljer(saksbehandler, maksdato))
-    }
-
     override fun toSpesifikkKontekst() = SpesifikkKontekst("Oppdrag", mapOf("fagsystemId" to fagsystemId))
-
-    private fun behovdetaljer(saksbehandler: String, maksdato: LocalDate?): MutableMap<String, Any> {
-        return mutableMapOf(
-            "mottaker" to mottaker,
-            "fagområde" to "$fagområde",
-            "linjer" to kopierKunLinjerMedEndring().map(Utbetalingslinje::behovdetaljer),
-            "fagsystemId" to fagsystemId,
-            "endringskode" to "$endringskode",
-            "saksbehandler" to saksbehandler
-        ).apply {
-            maksdato?.let {
-                put("maksdato", maksdato.toString())
-            }
-        }
-    }
 
     fun totalbeløp() = linjerUtenOpphør().sumOf { it.totalbeløp() }
     fun stønadsdager() = sumOf { it.stønadsdager() }
@@ -174,7 +138,7 @@ class Oppdrag private constructor(
     fun erRelevant(fagsystemId: String, fagområde: Fagområde) =
         this.fagsystemId == fagsystemId && this.fagområde == fagområde
 
-    private fun kopierKunLinjerMedEndring() = kopierMed(filter(Utbetalingslinje::erForskjell))
+    fun linjerMedEndring() = kopierMed(filter(Utbetalingslinje::erForskjell))
 
     private fun kopierUtenOpphørslinjer() = kopierMed(linjerUtenOpphør())
 

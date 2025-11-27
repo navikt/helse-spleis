@@ -15,7 +15,7 @@ internal data object AvventerAnnulleringTilUtbetaling : Vedtaksperiodetilstand {
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        vedtaksperiode.behandlinger.påminnUtbetaling(aktivitetslogg)
+        trengerUtbetaling(vedtaksperiode, aktivitetslogg)
         return null
     }
 }

@@ -109,6 +109,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     private val åpenBehandling get() = sisteBehandling.takeIf { it.erÅpenForEndring() }
     // alle tidligere behandlinger der en beslutning er tatt
     private val tidligereBehandlinger get() = åpenBehandling?.let { behandlinger.dropLast(1) } ?: behandlinger
+    val forrigeBehandling get() = tidligereBehandlinger.last()
 
     val sisteBehandlingId get() = sisteBehandling.id
 
@@ -119,8 +120,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal val korrigertInntekt get() = sisteBehandling.korrigertInntekt
     internal val arbeidssituasjon get() = sisteBehandling.arbeidssituasjon
     internal val utbetaling get() = sisteBehandling.utbetaling()
-
-    internal fun sisteUtbetalteUtbetaling() = tidligereBehandlinger.lastOrNull()?.utbetaling()
 
     internal fun harFattetVedtak() = tidligereBehandlinger.lastOrNull()?.erFattetVedtak() == true
     internal fun erTidligereVilkårspørvd() = åpenBehandling?.erTidligereVilkårsprøvd() == true || tidligereBehandlinger.any { it.erTidligereVilkårsprøvd() }
@@ -263,10 +262,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun harFlereSkjæringstidspunkt() = sisteBehandling.harFlereSkjæringstidspunkt()
     internal fun børBrukeSkatteinntekterDirekte() = sisteBehandling.skjæringstidspunkter.isEmpty()
-
-    internal fun påminnUtbetaling(aktivitetslogg: IAktivitetslogg) {
-        tidligereBehandlinger.last().påminnUtbetaling(aktivitetslogg)
-    }
 
     internal fun håndterUtbetalinghendelseSisteInFlight(
         behandlingEventBus: BehandlingEventBus,
@@ -1392,26 +1387,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             )
         }
 
-        fun påminnUtbetaling(aktivitetslogg: IAktivitetslogg) {
-            when (tilstand) {
-                Tilstand.OverførtAnnullering -> checkNotNull(gjeldende.utbetaling).overførAnnullering(aktivitetslogg.kontekst(this))
-                Tilstand.VedtakFattet -> checkNotNull(gjeldende.utbetaling).overførUtbetalinger(aktivitetslogg.kontekst(this), maksdato.maksdato)
-
-                Tilstand.AnnullertPeriode,
-                Tilstand.AvsluttetUtenVedtak,
-                Tilstand.Beregnet,
-                Tilstand.BeregnetOmgjøring,
-                Tilstand.BeregnetRevurdering,
-                Tilstand.RevurdertVedtakAvvist,
-                Tilstand.TilInfotrygd,
-                Tilstand.Uberegnet,
-                Tilstand.UberegnetAnnullering,
-                Tilstand.UberegnetOmgjøring,
-                Tilstand.UberegnetRevurdering,
-                Tilstand.VedtakIverksatt -> error("forventer ikke å påminne utbetaling i $tilstand")
-            }
-        }
-
         fun håndterUtbetalinghendelse(behandlingEventBus: BehandlingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
             tilstand.håndterUtbetalinghendelse(this, behandlingEventBus, hendelse, aktivitetslogg)
         }
@@ -1802,9 +1777,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     utbetaling.godkjent(behandlingEventBus, aktivitetslogg, utbetalingsavgjørelse.vurdering)
                     behandling.vedtakFattet = utbetalingsavgjørelse.avgjørelsestidspunkt
                     behandling.behandlingLukket(behandlingEventBus, yrkesaktivitet)
+
+                    // todo: bare endre tilstand til VedtakFattet
+                    // tilstanden VedtakIverksatt burde være signal fra Vedtaksperiode
                     if (utbetaling.harOppdragMedUtbetalinger()) {
                         behandling.tilstand(VedtakFattet)
-                        utbetaling.overførUtbetalinger(aktivitetslogg, behandling.maksdato.maksdato)
                     } else {
                         behandling.tilstand(VedtakIverksatt)
 
@@ -1953,7 +1930,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         behandlingEventBus.behandlingForkastet(behandling.id, false)
                     } else {
                         behandling.tilstand(OverførtAnnullering)
-                        annullering.overførAnnullering(aktivitetslogg)
                     }
                 }
 

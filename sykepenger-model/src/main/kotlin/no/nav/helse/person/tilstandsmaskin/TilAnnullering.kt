@@ -10,12 +10,20 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 internal data object TilAnnullering : Vedtaksperiodetilstand {
     override val type = TilstandType.TIL_ANNULLERING
 
+    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+        trengerAnnullering(vedtaksperiode, aktivitetslogg)
+    }
+
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående annullering")
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        vedtaksperiode.behandlinger.påminnUtbetaling(aktivitetslogg)
+        trengerAnnullering(vedtaksperiode, aktivitetslogg)
         return null
     }
+}
+
+private fun trengerAnnullering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+    return trengerUtbetaling(vedtaksperiode, aktivitetslogg, medMaksdato = false)
 }

@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.math.roundToInt
 import no.nav.helse.august
 import no.nav.helse.dto.EndringskodeDto
@@ -37,23 +37,6 @@ internal class UtbetalingslinjeForskjellTest {
     @BeforeEach
     fun setup() {
         aktivitetslogg = Aktivitetslogg()
-    }
-
-    @Test
-    fun hendelsemap() {
-        (1.januar to 5.januar dagsats 500).asUtbetalingslinje().behovdetaljer().also { map ->
-            assertEquals("${1.januar}", map.getValue("fom"))
-            assertEquals("${5.januar}", map.getValue("tom"))
-            assertEquals("DAG", map.getValue("satstype"))
-            assertEquals(500, map.getValue("sats"))
-            assertEquals(2500, map.getValue("totalbeløp"))
-            assertEquals(100.0, map.getValue("grad"))
-            assertEquals(5, map.getValue("stønadsdager"))
-            assertEquals("NY", map.getValue("endringskode"))
-            assertEquals(1, map.getValue("delytelseId"))
-            assertNull(map.getValue("refDelytelseId"))
-            assertNull(map.getValue("refFagsystemId"))
-        }
     }
 
     @Test

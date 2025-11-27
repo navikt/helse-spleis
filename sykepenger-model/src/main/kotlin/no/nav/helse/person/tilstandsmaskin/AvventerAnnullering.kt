@@ -20,9 +20,6 @@ internal data object AvventerAnnullering : Vedtaksperiodetilstand {
     }
 
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        val sisteUtbetalteUtbetaling = vedtaksperiode.behandlinger.sisteUtbetalteUtbetaling()
-        checkNotNull(sisteUtbetalteUtbetaling) { "Fant ikke en utbetalt utbetaling for vedtaksperiode ${vedtaksperiode.id}" }
-
         val annullering = lagAnnulleringsutbetaling(eventBus, vedtaksperiode, aktivitetslogg)
 
         val vurdering = (hendelse as? AnnullerUtbetaling)?.vurdering
