@@ -435,7 +435,7 @@ data class SpannerPersonDto(
                 SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING,
                 SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING,
                 SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING,
-                SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING,
+                SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING,
                 SELVSTENDIG_AVVENTER_REVURDERING,
 
                 SELVSTENDIG_TIL_UTBETALING,
@@ -1198,7 +1198,7 @@ private fun VedtaksperiodeUtDto.tilPersonData(
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING
-        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_REVURDERING
     },
     skjæringstidspunkt = skjæringstidspunkt,

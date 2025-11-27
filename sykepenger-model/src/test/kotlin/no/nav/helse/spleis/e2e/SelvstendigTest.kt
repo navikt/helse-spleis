@@ -41,7 +41,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_INF
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_TIL_UTBETALING
@@ -178,7 +178,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 90) })
 
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING)
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING)
         }
     }
 
@@ -200,13 +200,13 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 100) })
             håndterUtbetalt(status = Oppdragstatus.OVERFØRT)
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING)
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING)
             assertBehov(Aktivitet.Behov.Behovtype.Utbetaling) {
-                håndterPåminnelse(1.vedtaksperiode, SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING)
+                håndterPåminnelse(1.vedtaksperiode, SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING)
             }
 
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
         }
     }
 

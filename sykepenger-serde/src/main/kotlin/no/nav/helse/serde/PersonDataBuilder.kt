@@ -108,7 +108,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_REVURDERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_SIMULERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_START
@@ -457,7 +457,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING -> SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING -> SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING -> SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING
-        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING -> SELVSTENDIG_AVVENTER_TIL_UTBETALING_REVURDERING
+        VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING -> SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING
         VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_REVURDERING -> SELVSTENDIG_AVVENTER_REVURDERING
 
         VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING -> SELVSTENDIG_TIL_UTBETALING
