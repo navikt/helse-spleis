@@ -646,7 +646,7 @@ internal abstract class AbstractSpeilBuilderTest {
                         oppdrag = oppdrag.map {
                             Oppdragbehov(
                                 fagområde = it.detaljer().getValue("fagområde") as String,
-                                fagsystemId = it.alleKontekster.getValue("fagsystemId"),
+                                fagsystemId = it.detaljer().getValue("fagsystemId") as String,
                             )
                         }
                     )
@@ -681,7 +681,7 @@ internal abstract class AbstractSpeilBuilderTest {
                     oppdrag = oppdrag.map {
                         Oppdragbehov(
                             fagområde = it.detaljer().getValue("fagområde") as String,
-                            fagsystemId = it.alleKontekster.getValue("fagsystemId"),
+                            fagsystemId = it.detaljer().getValue("fagsystemId") as String,
                         )
                     }
                 )

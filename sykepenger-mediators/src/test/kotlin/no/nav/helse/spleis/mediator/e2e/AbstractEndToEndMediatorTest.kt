@@ -706,7 +706,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         val etterspurteBehov = testRapid.inspektør.alleEtterspurteBehov(Utbetaling)
         etterspurteBehov.forEach { behov ->
             val (_, message) = meldingsfabrikk.lagUtbetaling(
-                fagsystemId = behov.path("fagsystemId").asText(),
+                fagsystemId = behov.path("Utbetaling").path("fagsystemId").asText(),
                 utbetalingId = behov.path("utbetalingId").asText(),
                 vedtaksperiodeId = behov.path("vedtaksperiodeId").asText().toUUID(),
                 behandlingId = behov.path("behandlingId").asText().toUUID(),
