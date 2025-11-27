@@ -644,7 +644,7 @@ internal class TestPerson(
 
         internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true, automatiskBehandling: Boolean = true, godkjenttidspunkt: LocalDateTime = LocalDateTime.now()) {
             behovsamler.bekreftBehov(vedtaksperiodeId, Godkjenning)
-            val (_, kontekst) = behovsamler.detaljerFor(vedtaksperiodeId, Godkjenning).last() // TODO: Det er last() istedenfor single() pga dette hacket: 1622276bcd7303fb46037bd6d9e114f071700d44
+            val (_, kontekst) = behovsamler.detaljerFor(vedtaksperiodeId, Godkjenning).single()
             val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
             arbeidsgiverHendelsefabrikk.lagUtbetalingsgodkjenning(vedtaksperiodeId, godkjent, automatiskBehandling, utbetalingId, godkjenttidspunkt)
                 .håndter(Person::håndterUtbetalingsgodkjenning)

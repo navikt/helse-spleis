@@ -82,7 +82,7 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription {
     private fun kvitterVedtaksperiode(vedtaksperiodeId: UUID) {
         val vedtaksperiodebehov = behov
             // kvitterer ikke ut utbetalingsbehov som følge av at vedtaksperioden endrer tilstand
-            .filter { it.utbetalingId == null }
+            .filterNot { it.type == Behovtype.Utbetaling }
             .filter(vedtaksperiodebehov(vedtaksperiodeId))
             .takeUnless { it.isEmpty() } ?: return
         log.log("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.type.toString() }})")
