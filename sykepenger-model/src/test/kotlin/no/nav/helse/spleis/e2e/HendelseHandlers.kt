@@ -845,14 +845,23 @@ internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     utbetalingGodkjent: Boolean = true,
     orgnummer: String = a1,
+    automatiskBehandling: Boolean = false
+) {
+    val behandlingId = UUID.fromString(checkNotNull(personlogg.sisteBehov(Behovtype.Godkjenning).alleKontekster["behandlingId"]))
+    val utbetalingId = UUID.fromString(checkNotNull(personlogg.sisteBehov(Behovtype.Godkjenning).alleKontekster["utbetalingId"]))
+    håndterUtbetalingsgodkjenning(vedtaksperiodeIdInnhenter, utbetalingGodkjent, orgnummer, automatiskBehandling, behandlingId, utbetalingId)
+}
+
+internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
+    vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+    utbetalingGodkjent: Boolean = true,
+    orgnummer: String = a1,
     automatiskBehandling: Boolean = false,
-    utbetalingId: UUID = UUID.fromString(
-        personlogg.sisteBehov(Behovtype.Godkjenning).alleKontekster["utbetalingId"]
-            ?: throw IllegalStateException("Finner ikke utbetalingId i: ${personlogg.sisteBehov(Behovtype.Godkjenning).alleKontekster}")
-    ),
+    behandlingId: UUID,
+    utbetalingId: UUID
 ) {
     assertEtterspurt(Utbetalingsgodkjenning::class, Behovtype.Godkjenning, vedtaksperiodeIdInnhenter, orgnummer)
-    utbetalingsgodkjenning(vedtaksperiodeIdInnhenter, utbetalingGodkjent, orgnummer, automatiskBehandling, utbetalingId).håndter(Person::håndterUtbetalingsgodkjenning)
+    utbetalingsgodkjenning(vedtaksperiodeIdInnhenter, behandlingId, utbetalingGodkjent, orgnummer, automatiskBehandling, utbetalingId).håndter(Person::håndterUtbetalingsgodkjenning)
 }
 
 internal fun AbstractEndToEndTest.håndterUtbetalt(

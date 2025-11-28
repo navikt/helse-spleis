@@ -284,6 +284,7 @@ internal abstract class AbstractObservableTest {
 
     protected fun utbetalingsgodkjenning(
         vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+        behandlingId: UUID,
         utbetalingGodkjent: Boolean = true,
         orgnummer: String = ORGNUMMER,
         automatiskBehandling: Boolean = false,
@@ -292,7 +293,8 @@ internal abstract class AbstractObservableTest {
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         utbetalingId = utbetalingId,
-        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
+        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer),
+        behandlingId = behandlingId,
         saksbehandler = "Ola Nordmann",
         saksbehandlerEpost = "ola.nordmann@nav.no",
         utbetalingGodkjent = utbetalingGodkjent,

@@ -3,6 +3,7 @@ package no.nav.helse.bugs_showstoppers
 import java.util.UUID
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -12,6 +13,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.håndterPåminnelse
@@ -51,7 +53,8 @@ internal class UtdatertGodkjenningBugE2ETest : AbstractEndToEndTest() {
         håndterYtelser()
         håndterSimulering()
         assertThrows<IllegalStateException> {
-            håndterUtbetalingsgodkjenning(utbetalingId = UUID.randomUUID())
+            val behandlingId = UUID.fromString(checkNotNull(personlogg.sisteBehov(Behovtype.Godkjenning).alleKontekster["behandlingId"]))
+            håndterUtbetalingsgodkjenning(behandlingId = behandlingId, utbetalingId = UUID.randomUUID())
         }
         assertTilstander(
             1.vedtaksperiode,

@@ -330,6 +330,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
 
     internal fun lagUtbetalingsgodkjenning(
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         utbetalingGodkjent: Boolean,
         automatiskBehandling: Boolean,
         utbetalingId: UUID,
@@ -338,7 +339,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         behandlingsporing = behandlingsporing,
         utbetalingId = utbetalingId,
-        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        vedtaksperiodeId = vedtaksperiodeId,
+        behandlingId = behandlingId,
         saksbehandler = "Ola Nordmann",
         saksbehandlerEpost = "ola.nordmann@nav.no",
         utbetalingGodkjent = utbetalingGodkjent,

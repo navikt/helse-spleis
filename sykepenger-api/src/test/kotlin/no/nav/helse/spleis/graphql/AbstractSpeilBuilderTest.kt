@@ -536,6 +536,7 @@ internal abstract class AbstractSpeilBuilderTest {
         val behov = hendelselogg.godkjenningbehov() ?: error("Fant ikke godkjenningsbehov")
         val utbetalingsgodkjenning = fabrikker.getValue(behov.orgnummer).lagUtbetalingsgodkjenning(
             vedtaksperiodeId = behov.vedtaksperiodeId,
+            behandlingId = behov.behandlingId,
             utbetalingGodkjent = utbetalingGodkjent,
             automatiskBehandling = true,
             utbetalingId = behov.utbetalingId
@@ -659,6 +660,7 @@ internal abstract class AbstractSpeilBuilderTest {
             vedtaksperiodeId = UUID.fromString(it.alleKontekster.getValue("vedtaksperiodeId")),
             yrkesaktivitetstype = it.alleKontekster.getValue("yrkesaktivitetstype"),
             orgnummer = it.alleKontekster.getValue("organisasjonsnummer"),
+            behandlingId = UUID.fromString(it.alleKontekster.getValue("behandlingId")),
             utbetalingId = UUID.fromString(it.alleKontekster.getValue("utbetalingId"))
         )
     }
@@ -717,6 +719,7 @@ internal abstract class AbstractSpeilBuilderTest {
         val vedtaksperiodeId: UUID,
         val yrkesaktivitetstype: String,
         val orgnummer: String,
+        val behandlingId: UUID,
         val utbetalingId: UUID
     )
 

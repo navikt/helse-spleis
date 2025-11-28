@@ -436,22 +436,17 @@ internal fun standardSimuleringsresultat(orgnummer: String, totalbeløp: Int = 2
 
 internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     vedtaksperiodeIdInnhenter: IdInnhenter,
+    behandlingId: UUID,
     utbetalingGodkjent: Boolean,
     orgnummer: String,
     automatiskBehandling: Boolean,
-    utbetalingId: UUID = UUID.fromString(
-        personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).alleKontekster["utbetalingId"]
-            ?: throw IllegalStateException(
-                "Finner ikke utbetalingId i: ${
-                    personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).alleKontekster
-                }"
-            )
-    ),
+    utbetalingId: UUID
 ) = Utbetalingsgodkjenning(
     meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
     behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
     utbetalingId = utbetalingId,
-    vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
+    vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer),
+    behandlingId = behandlingId,
     saksbehandler = "Ola Nordmann",
     saksbehandlerEpost = "ola.nordmann@nav.no",
     utbetalingGodkjent = utbetalingGodkjent,
