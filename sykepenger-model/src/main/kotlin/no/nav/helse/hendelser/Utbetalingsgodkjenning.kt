@@ -8,8 +8,8 @@ class Utbetalingsgodkjenning(
     meldingsreferanseId: MeldingsreferanseId,
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     override val utbetalingId: UUID,
-    private val vedtaksperiodeId: UUID,
-    private val behandlingId: UUID,
+    override val vedtaksperiodeId: UUID,
+    override val behandlingId: UUID,
     private val saksbehandler: String,
     private val saksbehandlerEpost: String,
     utbetalingGodkjent: Boolean,
@@ -24,7 +24,6 @@ class Utbetalingsgodkjenning(
         automatiskBehandling = automatiskBehandling
     )
 
-    override fun relevantVedtaksperiode(id: UUID) = id == this.vedtaksperiodeId
     override fun saksbehandler() = Saksbehandler(saksbehandler, saksbehandlerEpost)
     override val godkjent = utbetalingGodkjent
     override val avgjørelsestidspunkt = metadata.innsendt

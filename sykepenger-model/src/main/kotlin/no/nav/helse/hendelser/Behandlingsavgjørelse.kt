@@ -4,8 +4,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 sealed interface Behandlingsavgjørelse : Hendelse {
-    fun relevantVedtaksperiode(id: UUID): Boolean
     fun saksbehandler(): Saksbehandler
+    val vedtaksperiodeId: UUID
+    val behandlingId: UUID
     val utbetalingId: UUID
     val godkjent: Boolean
     val avgjørelsestidspunkt: LocalDateTime

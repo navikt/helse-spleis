@@ -8,7 +8,8 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 class KanIkkeBehandlesHer(
     meldingsreferanseId: MeldingsreferanseId,
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
-    private val vedtaksperiodeId: UUID,
+    override val vedtaksperiodeId: UUID,
+    override val behandlingId: UUID,
     override val utbetalingId: UUID,
     private val saksbehandlerIdent: String,
     private val saksbehandlerEpost: String,
@@ -26,5 +27,4 @@ class KanIkkeBehandlesHer(
     override val avgjørelsestidspunkt = opprettet
     override val godkjent = false
     override fun saksbehandler() = Saksbehandler(saksbehandlerIdent, saksbehandlerEpost)
-    override fun relevantVedtaksperiode(id: UUID) = vedtaksperiodeId == id
 }

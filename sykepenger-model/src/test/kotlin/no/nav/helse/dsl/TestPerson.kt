@@ -656,13 +656,31 @@ internal class TestPerson(
                 .håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
         }
 
-        internal fun håndterVedtakFattet(vedtaksperiodeId: UUID, utbetalingId: UUID = inspektør.sisteUtbetalingId { vedtaksperiodeId }, automatisert: Boolean = true, vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()) {
-            arbeidsgiverHendelsefabrikk.lagVedtakFattet(vedtaksperiodeId, utbetalingId, automatisert, vedtakFattetTidspunkt)
+        internal fun håndterVedtakFattet(vedtaksperiodeId: UUID, automatisert: Boolean = true, vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()) {
+            behovsamler.bekreftBehov(vedtaksperiodeId, Godkjenning)
+            val (_, kontekst) = behovsamler.detaljerFor(vedtaksperiodeId, Godkjenning).single()
+            val behandlingId = UUID.fromString(kontekst.getValue("behandlingId"))
+            val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+            arbeidsgiverHendelsefabrikk.lagVedtakFattet(vedtaksperiodeId, behandlingId, utbetalingId, automatisert, vedtakFattetTidspunkt)
                 .håndter(Person::håndterVedtakFattet)
         }
 
-        internal fun håndterKanIkkeBehandlesHer(vedtaksperiodeId: UUID, utbetalingId: UUID = inspektør.sisteUtbetalingId { vedtaksperiodeId }, automatisert: Boolean = true) {
-            arbeidsgiverHendelsefabrikk.lagKanIkkeBehandlesHer(vedtaksperiodeId, utbetalingId, automatisert)
+        internal fun håndterKanIkkeBehandlesHer(vedtaksperiodeId: UUID, automatisert: Boolean = true) {
+            behovsamler.bekreftBehov(vedtaksperiodeId, Godkjenning)
+            val (_, kontekst) = behovsamler.detaljerFor(vedtaksperiodeId, Godkjenning).single()
+            val behandlingId = UUID.fromString(kontekst.getValue("behandlingId"))
+            val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+            arbeidsgiverHendelsefabrikk.lagKanIkkeBehandlesHer(vedtaksperiodeId, behandlingId, utbetalingId, automatisert)
+                .håndter(Person::håndterKanIkkeBehandlesHer)
+        }
+
+        internal fun håndterVedtakFattet(vedtaksperiodeId: UUID, behandlingId: UUID, utbetalingId: UUID, automatisert: Boolean = true, vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()) {
+            arbeidsgiverHendelsefabrikk.lagVedtakFattet(vedtaksperiodeId, behandlingId, utbetalingId, automatisert, vedtakFattetTidspunkt)
+                .håndter(Person::håndterVedtakFattet)
+        }
+
+        internal fun håndterKanIkkeBehandlesHer(vedtaksperiodeId: UUID, behandlingId: UUID, utbetalingId: UUID, automatisert: Boolean = true) {
+            arbeidsgiverHendelsefabrikk.lagKanIkkeBehandlesHer(vedtaksperiodeId, behandlingId, utbetalingId, automatisert)
                 .håndter(Person::håndterKanIkkeBehandlesHer)
         }
 

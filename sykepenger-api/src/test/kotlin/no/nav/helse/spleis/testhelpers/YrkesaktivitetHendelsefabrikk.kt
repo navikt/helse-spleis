@@ -350,6 +350,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
 
     internal fun lagVedtakFattet(
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         utbetalingId: UUID,
         automatisert: Boolean = true,
         vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()
@@ -358,6 +359,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         behandlingsporing = behandlingsporing,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId,
+        behandlingId = behandlingId,
         saksbehandlerIdent = "Vedtak fattesen",
         saksbehandlerEpost = "vedtak.fattesen@nav.no",
         vedtakFattetTidspunkt = vedtakFattetTidspunkt,
@@ -366,6 +368,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
 
     internal fun lagKanIkkeBehandlesHer(
         vedtaksperiodeId: UUID,
+        behandlingId: UUID,
         utbetalingId: UUID,
         automatisert: Boolean = true
     ) = KanIkkeBehandlesHer(
@@ -373,6 +376,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         behandlingsporing = behandlingsporing,
         utbetalingId = utbetalingId,
         vedtaksperiodeId = vedtaksperiodeId,
+        behandlingId = behandlingId,
         saksbehandlerIdent = "Info trygdesen",
         saksbehandlerEpost = "info.trygdesen@nav.no",
         opprettet = LocalDateTime.now(),

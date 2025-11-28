@@ -1783,14 +1783,14 @@ internal class Vedtaksperiode private constructor(
             TilAnnullering,
             TilInfotrygd,
             TilUtbetaling -> {
-                check(!utbetalingsavgjørelse.relevantVedtaksperiode(id)) { "Forventet ikke utbetalingsavgjørelse i ${tilstand.type.name}" }
+                check(utbetalingsavgjørelse.vedtaksperiodeId != this.id) { "Forventet ikke utbetalingsavgjørelse i ${tilstand.type.name}" }
                 null
             }
         }
     }
 
     private fun behandleAvgjørelseForVedtak(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg, nesteTilUtbetalingtilstand: Vedtaksperiodetilstand, nesteAvsluttettilstand: Vedtaksperiodetilstand): Revurderingseventyr? {
-        check(utbetalingsavgjørelse.relevantVedtaksperiode(id)) {
+        check(utbetalingsavgjørelse.vedtaksperiodeId == this.id) {
             "Utbetalingsavgjørelse gjelder en annen vedtaksperiode, er det flere perioder til godkjenning samtidig?"
         }
         check(utbetalingsavgjørelse.utbetalingId == behandlinger.utbetaling?.id) {
