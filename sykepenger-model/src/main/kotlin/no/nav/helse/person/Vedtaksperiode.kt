@@ -1732,6 +1732,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndterUtbetalingsavgjørelse(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        if (utbetalingsavgjørelse.vedtaksperiodeId != this.id) return null
+
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         return when (tilstand) {
@@ -1783,20 +1785,14 @@ internal class Vedtaksperiode private constructor(
             TilAnnullering,
             TilInfotrygd,
             TilUtbetaling -> {
-                check(utbetalingsavgjørelse.vedtaksperiodeId != this.id) { "Forventet ikke utbetalingsavgjørelse i ${tilstand.type.name}" }
-                null
+                error("Forventet ikke utbetalingsavgjørelse i ${tilstand.type.name}")
             }
         }
     }
 
     private fun behandleAvgjørelseForVedtak(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg, nesteTilUtbetalingtilstand: Vedtaksperiodetilstand, nesteAvsluttettilstand: Vedtaksperiodetilstand): Revurderingseventyr? {
-        check(utbetalingsavgjørelse.vedtaksperiodeId == this.id) {
-            "Utbetalingsavgjørelse gjelder en annen vedtaksperiode, er det flere perioder til godkjenning samtidig?"
-        }
-        check(utbetalingsavgjørelse.utbetalingId == behandlinger.utbetaling?.id) {
-            // todo: burde bruke behandlingId istedenfor
-            "Utbetalingsavgjørelse gjelder en annen utbetaling"
-        }
+        check(utbetalingsavgjørelse.behandlingId == behandlinger.sisteBehandlingId) { "Utbetalingsavgjørelse gjelder en annen behandling" }
+        check(utbetalingsavgjørelse.utbetalingId == behandlinger.utbetaling?.id) { "Utbetalingsavgjørelse gjelder en annen utbetaling" }
 
         with(utbetalingsavgjørelse) {
             when (godkjent) {
