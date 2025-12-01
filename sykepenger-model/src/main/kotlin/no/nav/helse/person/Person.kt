@@ -175,7 +175,7 @@ class Person private constructor(
 
     fun håndterAvbruttSøknad(eventBus: EventBus, avbruttSøknad: AvbruttSøknad, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler avbrutt søknad")
-        val yrkesaktivitet = finnYrkesaktivitet(avbruttSøknad.behandlingsporing)
+        val yrkesaktivitet = finnEllerOpprettYrkesaktivitet(avbruttSøknad.behandlingsporing, aktivitetsloggMedPersonkontekst)
         yrkesaktivitet.håndterAvbruttSøknad(avbruttSøknad, aktivitetsloggMedPersonkontekst)
         gjenopptaBehandling(aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, avbruttSøknad, aktivitetsloggMedPersonkontekst)
