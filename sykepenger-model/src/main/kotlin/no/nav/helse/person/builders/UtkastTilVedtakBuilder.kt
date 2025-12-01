@@ -67,8 +67,6 @@ internal class UtkastTilVedtakBuilder(
     internal fun arbeidssituasjon(arbeidssituasjon: Arbeidssituasjon) = apply { this.arbeidssituasjon = arbeidssituasjon }
     private var vedtakFattet: LocalDateTime? = null
     internal fun vedtakFattet(vedtakFattet: LocalDateTime) = apply { this.vedtakFattet = vedtakFattet }
-    private var historiskeHendelseIder: Set<MeldingsreferanseId> = emptySet()
-    internal fun historiskeHendelseIder(historiskeHendelseIder: Set<MeldingsreferanseId>) = apply { this.historiskeHendelseIder = historiskeHendelseIder }
     private var relevanteSøknader: Set<UUID> = emptySet()
     internal fun relevanteSøknader(relevanteSøknader: Set<MeldingsreferanseId>) = apply { this.relevanteSøknader = relevanteSøknader.map { it.id }.toSet() }
     private lateinit var periode: Periode
@@ -87,8 +85,6 @@ internal class UtkastTilVedtakBuilder(
         }
     }
 
-    private val hendelseIder = mutableSetOf<UUID>()
-    internal fun hendelseIder(hendelseIder: Set<UUID>) = apply { this.hendelseIder.addAll(hendelseIder) }
     private lateinit var skjæringstidspunkt: LocalDate
     internal fun skjæringstidspunkt(skjæringstidspunkt: LocalDate) = apply {
         this.skjæringstidspunkt = skjæringstidspunkt
@@ -194,7 +190,7 @@ internal class UtkastTilVedtakBuilder(
     private val build by lazy { Build() }
     internal fun buildGodkjenningsbehov() = build.godkjenningsbehov
     internal fun buildUtkastTilVedtak() = build.utkastTilVedtak
-    internal fun buildAvsluttedMedVedtak() = build.avsluttetMedVedtak(vedtakFattet!!, historiskeHendelseIder)
+    internal fun buildAvsluttedMedVedtak() = build.avsluttetMedVedtak(vedtakFattet!!)
     private inner class Build {
         private val skjønnsfastsatt = arbeidsgiverinntekter.any { it.skjønnsfastsatt != null }.also {
             if (it) check(arbeidsgiverinntekter.all { arbeidsgiver -> arbeidsgiver.skjønnsfastsatt != null }) { "Enten må ingen eller alle arbeidsgivere i sykepengegrunnlaget være skjønnsmessig fastsatt." }
@@ -254,7 +250,6 @@ internal class UtkastTilVedtakBuilder(
             "tags" to tags.utgående,
             "kanAvvises" to kanForkastes,
             "behandlingId" to "$behandlingId",
-            "hendelser" to hendelseIder,
             "relevanteSøknader" to relevanteSøknader,
             "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt.map {
                 mapOf(
@@ -346,13 +341,12 @@ internal class UtkastTilVedtakBuilder(
             yrkesaktivitetssporing = yrkesaktivitetssporing
         )
 
-        fun avsluttetMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<MeldingsreferanseId>) = EventSubscription.AvsluttetMedVedtakEvent(
+        fun avsluttetMedVedtak(vedtakFattet: LocalDateTime) = EventSubscription.AvsluttetMedVedtakEvent(
             yrkesaktivitetssporing = yrkesaktivitetssporing,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             periode = periode,
-            // Til ettertanke: AvsluttetMedVedtak har alle hendelseId'er ever på vedtaksperioden, mens godkjenningsbehov/utkast_til_vedtak har kun behandlingens
-            hendelseIder = hendelseIder + historiskeHendelseIder.map { it.id }, // TODO: 10.12.24: Enten klaske på historiske på godkjenningsbehovet (eget felt) eller fjerne "dokumenter" i vedtak_fattet
+            hendelseIder = relevanteSøknader,
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = sykepengegrunnlag, // TODO: 10.12.24: Legge til for skjønnsmessig og infotrygd i tillegg til hovedregel
             utbetalingId = utbetalingId,

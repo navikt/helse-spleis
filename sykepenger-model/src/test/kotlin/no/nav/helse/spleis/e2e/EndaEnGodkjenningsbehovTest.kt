@@ -924,7 +924,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterSykmelding(januar)
             val søknadId = UUID.randomUUID()
             håndterSøknad(januar, søknadId = søknadId)
-            val inntektsmeldingId = håndterArbeidsgiveropplysninger(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
@@ -933,7 +933,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
 
             assertGodkjenningsbehov(
-                hendelser = setOf(søknadId!!, inntektsmeldingId),
                 relevanteSøknader = setOf(søknadId),
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon")
             )
@@ -1015,11 +1014,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         assertEquals(sykepengegrunnlagsfakta, actualSykepengegrunnlagsfakta)
     }
 
-    private fun assertHendelser(hendelser: Set<UUID>, vedtaksperiodeId: UUID) {
-        val actualHendelser = hentFelt<Set<UUID>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "hendelser")!!
-        assertEquals(hendelser, actualHendelser)
-    }
-
     private fun assertRelevanteSøknader(hendelser: Set<UUID>, vedtaksperiodeId: UUID) {
         val actualHendelser = hentFelt<Set<UUID>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "relevanteSøknader")!!
         assertEquals(hendelser, actualHendelser)
@@ -1031,7 +1025,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         periodeFom: LocalDate = 1.januar,
         periodeTom: LocalDate = 31.januar,
         vedtaksperiodeId: UUID = 1.vedtaksperiode(a1),
-        hendelser: Set<UUID>? = null,
         relevanteSøknader: Set<UUID>? = null,
         orgnummere: Set<String> = setOf(a1),
         kanAvvises: Boolean = true,
@@ -1080,7 +1073,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         val actualUtbetalingsdager = hentFelt<List<Map<String, Any>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "utbetalingsdager")!!
         val actualArbeidssituasjon = hentFelt<Arbeidssituasjon>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "arbeidssituasjon")!!
 
-        hendelser?.let { assertHendelser(it, vedtaksperiodeId) }
         relevanteSøknader?.let { assertRelevanteSøknader(it, vedtaksperiodeId) }
         assertSykepengegrunnlagsfakta(vedtaksperiodeId, sykepengegrunnlagsfakta)
         assertEquals(tags, actualtags)

@@ -21,7 +21,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         val søknadId = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        val (inntektsmeldingId, _) = sendInntektsmelding(
+        sendInntektsmelding(
             listOf(Periode(fom = 3.januar, tom = 18.januar)),
             førsteFraværsdag = 3.januar
         )
@@ -44,10 +44,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
   "tom": "2018-01-26",
   "skjæringstidspunkt": "2018-01-03",
   "sykepengegrunnlag": 372000.0,
-  "hendelser": [
-    "$søknadId",
-    "$inntektsmeldingId"
-  ],
+  "hendelser": [ "$søknadId" ],
   "sykepengegrunnlagsfakta": {
     "fastsatt": "EtterHovedregel",
     "omregnetÅrsinntekt": 372000.0,
@@ -73,7 +70,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         val søknadId = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        val (inntektsmeldingId, _) = sendInntektsmelding(
+        sendInntektsmelding(
             listOf(Periode(fom = 3.januar, tom = 18.januar)),
             førsteFraværsdag = 3.januar,
             beregnetInntekt = 45000.00
@@ -98,10 +95,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
   "tom": "2018-01-26",
   "skjæringstidspunkt": "2018-01-03",
   "sykepengegrunnlag": 561804.0,
-  "hendelser": [
-    "$søknadId",
-    "$inntektsmeldingId"
-  ],
+  "hendelser": [ "$søknadId" ],
   "sykepengegrunnlagsfakta": {
     "fastsatt": "EtterSkjønn",
     "omregnetÅrsinntekt": 540000.0,
