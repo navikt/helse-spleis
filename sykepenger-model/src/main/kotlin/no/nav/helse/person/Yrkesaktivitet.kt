@@ -588,7 +588,7 @@ internal class Yrkesaktivitet private constructor(
         }
 
         val inntektPåPeriode = vedtaksperioder.firstNotNullOfOrNull {
-            it.håndterInntektFraInntektsmeldingPåPerioden(eventBus, inntektsmelding, aktivitetslogg)
+            it.håndterInntektFraInntektsmeldingPåPerioden(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst)
         }
 
         // 5. ferdigstiller håndtering av inntektsmelding
