@@ -2611,18 +2611,9 @@ internal class Vedtaksperiode private constructor(
         return alleForSammeArbeidsgiver.mapNotNull { it.behandlinger.korrigertInntekt }.maxByOrNull { it.inntektsdata.tidsstempel }
     }
 
-    private fun inntektssituasjon(alleForSammeArbeidsgiver: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): Inntektssituasjon {
+    private fun inntektssituasjon(alleForSammeArbeidsgiver: List<Vedtaksperiode>): Inntektssituasjon {
         val fraInntektshistorikk = yrkesaktivitet.avklarInntektFraInntektshistorikk(skjæringstidspunkt, alleForSammeArbeidsgiver)?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }?.let { Inntektssituasjon.HarInntektFraArbeidsgiver(it) }
         val fraPerioder = alleForSammeArbeidsgiver.arbeidstakerFaktaavklarteInntekter()?.let { Inntektssituasjon.HarInntektFraArbeidsgiver.fraArbeidstakerFaktaavklarteInntekter(it) }
-        val beløpFraInntekshistorikk = fraInntektshistorikk?.inntektFraArbeidsgiver?.inntektsdata?.beløp
-        val beløpFraPerioder = fraPerioder?.inntektFraArbeidsgiver?.inntektsdata?.beløp
-        val tidligereVilkårsprøvd by lazy { alleForSammeArbeidsgiver.any { it.behandlinger.erTidligereVilkårspørvd() } }
-
-        if (beløpFraInntekshistorikk != beløpFraPerioder && !tidligereVilkårsprøvd) {
-            // Hvorfor sjekker vi !tidligereVilkårsprøvd her? Jo nå skal du høre: Dagens gjenbruk lagrer den forrige inntekten tilbake i historikken på ny dato, så vi opplever det som at vi fant, men i realiteten er det bare et hack
-            // ..derfor er det bare interessant/mulig å logge i disse casene
-            aktivitetslogg.info("Fant ulik inntekt for ${yrkesaktivitet.organisasjonsnummer} på skjæringstidspunkt ${skjæringstidspunkt}. Inntektshistorikk=${beløpFraInntekshistorikk?.årlig}. Perioder=${beløpFraPerioder?.årlig}")
-        }
 
         val inntektFraArbeidsgiver = when (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
             true -> fraPerioder
@@ -2633,7 +2624,7 @@ internal class Vedtaksperiode private constructor(
             inntektFraArbeidsgiver != null -> inntektFraArbeidsgiver
             alleForSammeArbeidsgiver.none { it.skalArbeidstakerBehandlesISpeil() } -> Inntektssituasjon.TrengerIkkeInntektFraArbeidsgiver
             alleForSammeArbeidsgiver.any { it.behandlinger.børBrukeSkatteinntekterDirekte() } -> Inntektssituasjon.KanBehandlesUtenInntektFraArbeidsgiver
-            tidligereVilkårsprøvd -> Inntektssituasjon.TidligereVilkårsprøvd
+            alleForSammeArbeidsgiver.any { it.behandlinger.erTidligereVilkårsprøvd() } -> Inntektssituasjon.TidligereVilkårsprøvd
             else -> {
                 // Vi vet at vi skal "Behandles i speil", at vi ikke er tidligere vilkårsprøvd (så ikke noe revurderingscase) - så da er vi enten den som vilkårsprøver eller en annen arbeidsgiver som venter på vilkårsprøvingen
                 val periodenSomGaOpp = alleForSammeArbeidsgiver.first { it.tilstand in setOf(AvventerVilkårsprøving, AvventerBlokkerendePeriode) }
@@ -2655,7 +2646,7 @@ internal class Vedtaksperiode private constructor(
         alleForSammeArbeidsgiver: List<Vedtaksperiode>,
         flereArbeidsgivere: Boolean
     ): ArbeidstakerFaktaavklartInntekt {
-        val inntektssituasjon = inntektssituasjon(alleForSammeArbeidsgiver, aktivitetsloggTilDenSomVilkårsprøver)
+        val inntektssituasjon = inntektssituasjon(alleForSammeArbeidsgiver)
         aktivitetsloggTilDenSomVilkårsprøver.info("Arbeidsgiver ${yrkesaktivitet.organisasjonsnummer} har inntektssituasjon ${inntektssituasjon::class.simpleName} på skjæringstidspunktet $skjæringstidspunkt")
 
         val benyttetFaktaavklartInntekt = when (inntektssituasjon) {

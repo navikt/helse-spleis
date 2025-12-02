@@ -121,7 +121,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal val utbetaling get() = sisteBehandling.utbetaling()
 
     internal fun harFattetVedtak() = tidligereBehandlinger.lastOrNull()?.erFattetVedtak() == true
-    internal fun erTidligereVilkårspørvd() = åpenBehandling?.erTidligereVilkårsprøvd() == true || tidligereBehandlinger.any { it.erTidligereVilkårsprøvd() }
+    internal fun erTidligereVilkårsprøvd() = åpenBehandling?.erTidligereVilkårsprøvd() == true || tidligereBehandlinger.any { it.erTidligereVilkårsprøvd() }
 
     internal fun åpenForEndring() = åpenBehandling != null
 
