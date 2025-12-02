@@ -1519,9 +1519,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 return VurderbarArbeidstakerFaktaavklartInntekt(
                     faktaavklartInntekt = faktaavklartInntekt,
                     skjæringstidspunkt = skjæringstidspunkt,
+                    tidligereSkjæringstidspunkt = førsteEndringMedInntekten.skjæringstidspunkt,
                     periode = periode,
-                    skjæringstidspunktVedMottattInntekt = førsteEndringMedInntekten.skjæringstidspunkt,
-                    nyArbeidsgiverperiodeEtterMottattInntekt = dagerUtenNavAnsvar != førsteEndringMedInntekten.dagerUtenNavAnsvar,
+                    endretArbeidsgiverperiode = !dagerUtenNavAnsvar.samme(førsteEndringMedInntekten.dagerUtenNavAnsvar),
                     harFlereFaktaavklarteInntekter = harFlereFaktaavklarteInntekter
                 )
             }

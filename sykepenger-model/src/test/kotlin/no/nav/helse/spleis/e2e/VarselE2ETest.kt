@@ -140,12 +140,17 @@ internal class VarselE2ETest : AbstractDslTest() {
             håndterInntektsmelding(listOf(10.januar til 25.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             nullstillTilstandsendringer()
+            assertEquals(listOf(10.januar til 25.januar), inspektør.venteperiode(1.vedtaksperiode))
             håndterUtbetalingshistorikkEtterInfotrygdendring(
                 utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 9.januar))
             )
+            assertEquals(emptyList<Periode>(), inspektør.venteperiode(1.vedtaksperiode))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsler(listOf(RV_IT_14), 1.vedtaksperiode.filter())
+
+            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) assertVarsler(listOf(RV_IT_14, RV_IV_7), 1.vedtaksperiode.filter())
+            else assertVarsler(listOf(RV_IT_14), 1.vedtaksperiode.filter())
+
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)

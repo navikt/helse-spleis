@@ -1,24 +1,28 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 
 internal data class ArbeidstakerFaktaavklarteInntekter(
     val førsteFraværsdag: LocalDate,
-    private val vurderbareArbeidstakerFaktavklateInntekter: List<VurderbarArbeidstakerFaktaavklartInntekt>
+    private val vurderbareArbeidstakerFaktaavklarteInntekter: List<VurderbarArbeidstakerFaktaavklartInntekt>
 ) {
-    init { check(vurderbareArbeidstakerFaktavklateInntekter.isNotEmpty()) }
+    init { check(vurderbareArbeidstakerFaktaavklarteInntekter.isNotEmpty()) }
 
     fun besteInntekt(): VurderbarArbeidstakerFaktaavklartInntekt {
-        val sortert = vurderbareArbeidstakerFaktavklateInntekter.sortedBy { it.periode.start }
-        val valgt = sortert.firstOrNull { førsteFraværsdag in it.periode || førsteFraværsdag > it.periode.endInclusive } ?: sortert.first()
+        val sortert = vurderbareArbeidstakerFaktaavklarteInntekter.sortedBy { it.periode.start }
+
+        val besteInntekt = sortert.firstOrNull { førsteFraværsdag in it.periode || førsteFraværsdag > it.periode.endInclusive } ?: sortert.first()
+
         val harFlereFaktaavklarteInntekter = when {
-            vurderbareArbeidstakerFaktavklateInntekter.any { it.harFlereFaktaavklarteInntekter } -> true
-            vurderbareArbeidstakerFaktavklateInntekter.any { it.faktaavklartInntekt.id != valgt.faktaavklartInntekt.id } -> true
+            sortert.any { it.harFlereFaktaavklarteInntekter } -> true
+            sortert.any { it.faktaavklartInntekt.id != besteInntekt.faktaavklartInntekt.id } -> true
             else -> false
         }
-        return valgt.copy(harFlereFaktaavklarteInntekter = harFlereFaktaavklarteInntekter)
+        return besteInntekt.copy(harFlereFaktaavklarteInntekter = harFlereFaktaavklarteInntekter)
     }
 }
 
@@ -27,16 +31,25 @@ internal data class VurderbarArbeidstakerFaktaavklartInntekt(
     val periode: Periode,
     val harFlereFaktaavklarteInntekter: Boolean,
     private val skjæringstidspunkt: LocalDate,
-    private val skjæringstidspunktVedMottattInntekt: LocalDate,
-    private val nyArbeidsgiverperiodeEtterMottattInntekt: Boolean
+    private val tidligereSkjæringstidspunkt: LocalDate,
+    private val endretArbeidsgiverperiode: Boolean
 )  {
     fun vurder(aktivitetslogg: IAktivitetslogg) {
-        faktaavklartInntekt.medInnteksdato(skjæringstidspunkt).vurderVarselForGjenbrukAvInntekt(
-            forrigeDato = skjæringstidspunktVedMottattInntekt,
-            harNyArbeidsgiverperiode = nyArbeidsgiverperiodeEtterMottattInntekt,
-            aktivitetslogg = aktivitetslogg
-        )
+        vurderVarselForGjenbrukAvInntekt(aktivitetslogg)
         // TODO: if (harFlereFaktaavklarteInntekter) aktivitetslogg.varsel(Varselkode.RV_IM_4)
+    }
+
+    private fun vurderVarselForGjenbrukAvInntekt(aktivitetslogg: IAktivitetslogg) {
+        if (tidligereSkjæringstidspunkt == skjæringstidspunkt) return
+        val dagerMellom = ChronoUnit.DAYS.between(tidligereSkjæringstidspunkt, skjæringstidspunkt)
+
+        if (dagerMellom >= 60) {
+            aktivitetslogg.info("Det er $dagerMellom dager mellom tidligere skjæringstidspunkt ($tidligereSkjæringstidspunkt) og nytt skjæringstidspunkt (${skjæringstidspunkt}), dette utløser varsel om gjenbruk.")
+            aktivitetslogg.varsel(RV_IV_7)
+        } else if (endretArbeidsgiverperiode) {
+            aktivitetslogg.info("Det er endret arbeidsgiverperiode, og dette utløser varsel om gjenbruk")
+            aktivitetslogg.varsel(RV_IV_7)
+        }
     }
 }
 
