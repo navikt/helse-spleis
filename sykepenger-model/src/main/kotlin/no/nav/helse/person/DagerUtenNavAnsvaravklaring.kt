@@ -10,6 +10,18 @@ data class DagerUtenNavAnsvaravklaring(
 ) {
     val periode = dager.periode()
 
+    fun samme(other: DagerUtenNavAnsvaravklaring): Boolean {
+        if (this == other) return true
+        if (this.datoer.isEmpty() || other.datoer.isEmpty()) return false
+        if (this.avklartIInfotrygd || other.avklartIInfotrygd) return false
+        return if (this.datoer.size < other.datoer.size) other.datoer.containsAll(this.datoer)
+        else this.datoer.containsAll(other.datoer)
+    }
+
+    private val datoer by lazy { dager.flatten() }
+    private val avklartIInfotrygd by lazy { ferdigAvklart && datoer.size < 16 }
+
+
     fun dto() = DagerUtenNavAnsvaravklaringDto(
         ferdigAvklart = ferdigAvklart,
         dager = dager.map { it.dto() }
