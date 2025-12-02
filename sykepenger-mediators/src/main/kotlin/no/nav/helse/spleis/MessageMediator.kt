@@ -10,7 +10,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.SentMessage
 import io.micrometer.core.instrument.MeterRegistry
 import java.sql.SQLException
-import java.time.LocalDateTime.now
 import kotlin.time.DurationUnit
 import kotlin.time.measureTime
 import no.nav.helse.serde.DeserializationException
@@ -292,8 +291,8 @@ internal class MessageMediator(
     }
 
     private fun MessageContext.sendPåSlack(message: HendelseMessage) {
-        val kibanaurl = "<https://logs.adeo.no/app/kibana#/discover?_a=(index:'tjenestekall-*',query:(language:lucene,query:'%22${message.meldingsporing.id.id}%22'))&_g=(time:(from:'${now().minusDays(1)}',mode:absolute,to:now))|${message.navn}>"
-        val melding = "\n\nEn $kibanaurl får Spleis til å gå ned!!"
+        val googleUrl = "<https://console.cloud.google.com/logs/query;query=resource.labels.container_name:%22spleis%22%0AjsonPayload.message:%22${message.meldingsporing.id.id}%22;duration=P1D?project=tbd-prod-eacd|${message.navn}>"
+        val melding = "\n\nEn $googleUrl får Spleis til å gå ned!!"
         val slackmelding = JsonMessage.newMessage("slackmelding", mapOf(
             "melding" to "$melding\n\n - Deres erbødig SPleis :spleis-realistisk:",
             "level" to "ERROR"
