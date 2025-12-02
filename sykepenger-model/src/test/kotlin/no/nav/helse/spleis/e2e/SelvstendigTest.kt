@@ -58,10 +58,24 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
 internal class SelvstendigTest : AbstractDslTest() {
+
+    @Test
+    fun `selvstendig løper videre til vilkårsprøving selv om vi har en arbeidstaker-periode som ikke er klar til vilkårsprøving`() {
+        a1 {
+            håndterSøknad(1.mars til 14.mars)
+            håndterSøknad(15.mars til 31.mars)
+        }
+
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(14.mars til 31.mars)
+            assertThrows<NoSuchElementException> { håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode) }
+        }
+    }
 
     @Test
     fun `revurdere flere fattet vedtak`() {
