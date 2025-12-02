@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
@@ -603,9 +604,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         nyPeriode(20.februar til 15.mars, a1)
 
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         assertEquals(20.februar til 31.mars, inspektør.periode(1.vedtaksperiode))
         assertVarsler(listOf(Varselkode.RV_IV_7, RV_SØ_13), 1.vedtaksperiode.filter())
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
@@ -1044,11 +1046,19 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(10.februar til 2.mars, a2)
         observatør.assertEtterspurt(2.vedtaksperiode.id(a2), EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
 
-
-        assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter(orgnummer = a2))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, a1)
+
+        håndterInntektsmelding(listOf(10.februar til 25.februar), orgnummer = a2)
+        håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        assertVarsel(RV_VV_2, 2.vedtaksperiode.filter(a2))
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter(orgnummer = a2)) // <-- Her er det ikke gjenbruk, inntekt fra ny inntektsmelding brukes jo
     }
 
     @Test
@@ -1061,7 +1071,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         val februarId = 2.vedtaksperiode
 
-        assertVarsel(Varselkode.RV_IV_7, marsId.filter())
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) assertVarsel(Varselkode.RV_IV_7, marsId.filter())
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))
         håndterVilkårsgrunnlag(februarId)
@@ -1079,7 +1089,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(januar)
         val januarId = 3.vedtaksperiode
 
-        assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) assertVarsel(Varselkode.RV_IV_7, februarId.filter())
 
         assertSisteTilstand(januarId, AVVENTER_VILKÅRSPRØVING)
 
@@ -1103,11 +1113,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         val februarId = 1.vedtaksperiode
         val januarId = 2.vedtaksperiode
 
-        assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
         assertSisteTilstand(februarId, AVVENTER_REVURDERING)
         assertSisteTilstand(januarId, AVVENTER_VILKÅRSPRØVING)
 
         håndterVilkårsgrunnlag(januarId)
+        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) assertVarsel(Varselkode.RV_IV_7, januarId.filter())
+        else assertVarsel(Varselkode.RV_IV_7, februarId.filter())
+
         håndterYtelser(januarId)
         håndterSimulering(januarId)
         håndterUtbetalingsgodkjenning(januarId)
@@ -1139,10 +1151,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(februar)
         nullstillTilstandsendringer()
         nyPeriode(20.januar til 31.januar)
-
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test
