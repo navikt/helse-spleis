@@ -1957,7 +1957,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         assertFalse(inspektør.sykdomstidslinje[30.januar] is Dag.Arbeidsdag)
         assertFalse(inspektør.sykdomstidslinje[31.januar] is Dag.Arbeidsdag)
-        assertInntektshistorikkForDato(INNTEKT, 30.januar, inspektør = inspektør)
+        assertInntektshistorikkForDato(INNTEKT, 1.februar, inspektør = inspektør)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

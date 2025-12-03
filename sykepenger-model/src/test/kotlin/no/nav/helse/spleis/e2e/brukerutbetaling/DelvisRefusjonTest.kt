@@ -675,7 +675,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             førsteFraværsdag = 17.januar
         )
 
-        assertInntektshistorikkForDato(INNTEKT, 1.januar, inspektør)
+        assertInntektshistorikkForDato(INNTEKT, 17.januar, inspektør)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

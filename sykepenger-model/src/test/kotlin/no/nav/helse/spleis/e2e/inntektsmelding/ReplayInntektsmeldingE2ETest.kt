@@ -68,7 +68,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(1, observatør.inntektsmeldingIkkeHåndtert.size)
         assertEquals(emptyList<Any>(), inspektør.inntektInspektør.inntektsdatoer) // inntekten er ikke lagret fordi inntekten ikke blir håndtert
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
-        assertEquals(listOf(1.januar, 21.januar), inspektør.inntektInspektør.inntektsdatoer) // Replayer IM. Nå som personen er syk 21.januar lagres den både på 21.januar og alternativ inntektsdato (1.januar)
+        assertEquals(listOf(21.januar), inspektør.inntektInspektør.inntektsdatoer)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
@@ -101,7 +101,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(listOf(1.januar), inspektør.inntektInspektør.inntektsdatoer)
         håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
 
-        assertEquals(listOf(12.februar, 13.februar, 1.januar), inspektør.inntektInspektør.inntektsdatoer) // Lagrer nå på alternativ inntektsdato nå som vi har søknad
+        assertEquals(listOf(13.februar, 1.januar), inspektør.inntektInspektør.inntektsdatoer)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 
