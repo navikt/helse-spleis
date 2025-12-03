@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.Year
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -30,7 +31,13 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
@@ -65,16 +72,113 @@ import org.junit.jupiter.params.provider.CsvSource
 internal class SelvstendigTest : AbstractDslTest() {
 
     @Test
-    fun `selvstendig løper videre til vilkårsprøving selv om vi har en arbeidstaker-periode som ikke er klar til vilkårsprøving`() {
+    fun `selvstendig løper videre til vilkårsprøving selv om vi har en arbeidstaker-periode som ikke har inntektsopplysninger`() {
         a1 {
-            håndterSøknad(1.mars til 14.mars)
-            håndterSøknad(15.mars til 31.mars)
+            håndterSøknad(1.januar til 14.januar)
+            håndterSøknad(15.januar til 31.januar)
         }
 
         selvstendig {
-            håndterFørstegangssøknadSelvstendig(14.mars til 31.mars)
-            assertThrows<NoSuchElementException> { håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode) }
+            håndterFørstegangssøknadSelvstendig(14.januar til 31.januar)
         }
+
+        assertForventetFeil(
+            forklaring = "Selvstendig venter ikke på tur!",
+            nå = {
+                selvstendig {
+                    assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
+                    assertThrows<NoSuchElementException> { håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode) }
+                }
+            },
+            ønsket = {
+                selvstendig {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
+                }
+
+                a1 {
+                    håndterInntektsmelding(listOf(1.januar til 16.januar))
+                }
+
+                selvstendig {
+                    assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
+                }
+            }
+        )
+    }
+
+    @Test
+    fun `selvstendig løper videre til vilkårsprøving selv om vi har en arbeidstaker-periode som ikke har refusjonsopplysninger`() {
+
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(14.januar til 31.januar)
+        }
+
+        a1 {
+            håndterSøknad(1.januar til 14.januar)
+            håndterSøknad(15.januar til 20.januar)
+            håndterSøknad(25.januar til 31.januar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        }
+
+
+        assertForventetFeil(
+            forklaring = "Selvstendig venter ikke på tur!",
+            nå = {
+                selvstendig {
+                    assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
+                }
+            },
+            ønsket = {
+                selvstendig {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE)
+                }
+
+                a1 {
+                    håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar)
+                }
+
+                selvstendig {
+                    assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
+                }
+            }
+        )
+    }
+
+    @Test
+    fun `selvstendig løper videre til vilkårsprøving selv om det er en overlappende søknad som arbeidstaker`() {
+        a1 {
+            håndterSykmelding(januar)
+        }
+
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+        }
+
+        assertForventetFeil(
+            forklaring = "Selvstendig venter ikke på tur!",
+            nå = {
+                selvstendig {
+                    assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
+                }
+            },
+            ønsket = {
+                selvstendig {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
+                }
+
+                a1 {
+                    håndterSøknad(januar)
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+                }
+
+                selvstendig {
+                    assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
+                }
+            }
+        )
     }
 
     @Test
