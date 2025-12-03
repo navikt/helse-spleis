@@ -137,7 +137,6 @@ import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.Inntektssituasjon
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
@@ -637,18 +636,14 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.forkasting(anmodningOmForkasting, skjæringstidspunkt, periode)
     }
 
-    internal fun håndterInntektFraInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, inntektshistorikk: Inntektshistorikk): Revurderingseventyr? {
+    internal fun håndterInntektFraInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         // håndterer kun inntekt hvis inntektsdato treffer perioden
         if (inntektsmelding.datoForHåndteringAvInntekt !in periode) return null
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
-        val faktaavklartInntekt = inntektsmelding.faktaavklartInntekt
-
-        inntektshistorikk.leggTil(Inntektsmeldinginntekt(faktaavklartInntekt.id, faktaavklartInntekt.inntektsdata))
-
         inntektsmeldingHåndtert(eventBus, inntektsmelding)
 
-        if (!oppdaterVilkårsgrunnlagMedInntekt(faktaavklartInntekt)) {
+        if (!oppdaterVilkårsgrunnlagMedInntekt(inntektsmelding.faktaavklartInntekt)) {
             // har ikke laget nytt vilkårsgrunnlag for beløpet var det samme som det var
             return null
         }
@@ -1051,6 +1046,7 @@ internal class Vedtaksperiode private constructor(
         )
 
         val faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt(id = UUID.randomUUID(), inntektsdata = inntektsdata, inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver)
+        inntektshistorikk.leggTil(faktaavklartInntekt)
 
         when (tilstand) {
             AvsluttetUtenUtbetaling,
@@ -1111,7 +1107,6 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg = aktivitetslogg,
             dokumentsporing = inntektsmeldingInntekt(hendelse.metadata.meldingsreferanseId)
         )
-        inntektshistorikk.leggTil(Inntektsmeldinginntekt(id = faktaavklartInntekt.id, inntektsdata = inntektsdata))
 
         val grunnlag = vilkårsgrunnlag ?: return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
 

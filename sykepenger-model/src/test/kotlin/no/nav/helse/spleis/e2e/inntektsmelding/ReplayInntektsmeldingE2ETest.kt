@@ -66,9 +66,8 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 21.januar
         )
         assertEquals(1, observatør.inntektsmeldingIkkeHåndtert.size)
-        assertEquals(emptyList<Any>(), inspektør.inntektInspektør.inntektsdatoer) // inntekten er ikke lagret fordi inntekten ikke blir håndtert
-        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
         assertEquals(listOf(21.januar), inspektør.inntektInspektør.inntektsdatoer)
+        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
@@ -82,9 +81,8 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 25.januar
         )
         assertEquals(1, observatør.inntektsmeldingIkkeHåndtert.size)
-        assertEquals(emptyList<Any>(), inspektør.inntektInspektør.inntektsdatoer) // inntekten er ikke lagret fordi inntekten ikke blir håndtert
-        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
         assertEquals(listOf(25.januar), inspektør.inntektInspektør.inntektsdatoer)
+        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
@@ -93,15 +91,15 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Når arbeidsgiver bommer med første fraværsdag, og IM kommer før søknad er vi avhengig av replay-sjekk mot første fraværsdag for å gå videre når søknaden kommer`() {
         nyttVedtak(januar)
+        assertEquals(listOf(1.januar), inspektør.inntektInspektør.inntektsdatoer)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             førsteFraværsdag = 13.februar
         )
         assertEquals(1, observatør.inntektsmeldingIkkeHåndtert.size)
-        assertEquals(listOf(1.januar), inspektør.inntektInspektør.inntektsdatoer)
+        assertEquals(listOf(13.februar, 1.januar), inspektør.inntektInspektør.inntektsdatoer)
         håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
 
-        assertEquals(listOf(13.februar, 1.januar), inspektør.inntektInspektør.inntektsdatoer)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 

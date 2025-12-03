@@ -565,12 +565,15 @@ internal class Yrkesaktivitet private constructor(
         val refusjonsoverstyring = håndterRefusjonsopplysninger(eventBus, inntektsmelding, inntektsmeldingRefusjon(inntektsmelding.metadata.meldingsreferanseId), aktivitetsloggMedArbeidsgiverkontekst, inntektsmelding.refusjonsservitør)
 
         // 4. håndterer inntekten fra inntektsmeldingen
-        val inntektoverstyring = vedtaksperioder.firstNotNullOfOrNull {
-            it.håndterInntektFraInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst, inntektshistorikk)
-        }
-
+        // 4.1. Lagrer det i historikken enn så lenge (men bruker det jo aldri..)
+        inntektshistorikk.leggTil(inntektsmelding.faktaavklartInntekt)
+        // 4.2 Legger til inntekt på perioden
         val inntektPåPeriode = vedtaksperioder.firstNotNullOfOrNull {
             it.håndterInntektFraInntektsmeldingPåPerioden(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst)
+        }
+        // 4.3 Dette er litt på vei til å dø, men #noe med å sende ut inntektsmelding_håndtert
+        val inntektoverstyring = vedtaksperioder.firstNotNullOfOrNull {
+            it.håndterInntektFraInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst)
         }
 
         // 5. ferdigstiller håndtering av inntektsmelding

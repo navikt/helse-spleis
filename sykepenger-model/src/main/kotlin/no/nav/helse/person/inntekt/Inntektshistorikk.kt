@@ -21,7 +21,10 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         inntekter = historikk.map { it.view() }
     )
 
-    internal fun leggTil(inntekt: Inntektsmeldinginntekt): Boolean {
+    internal fun leggTil(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt)=
+        leggTil(Inntektsmeldinginntekt(id = arbeidstakerFaktaavklartInntekt.id, inntektsdata = arbeidstakerFaktaavklartInntekt.inntektsdata))
+
+    private fun leggTil(inntekt: Inntektsmeldinginntekt): Boolean {
         check(inntekt.kilde == Inntektsmeldinginntekt.Kilde.Arbeidsgiver) { "Hei! Slutt opp med det der!! Kilden må være Arbeidsgiver" }
         if (historikk.any { !it.kanLagres(inntekt) }) return false
         historikk.add(0, inntekt)
