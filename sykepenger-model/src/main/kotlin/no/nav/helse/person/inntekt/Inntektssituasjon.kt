@@ -7,11 +7,10 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.yearMonth
 
 internal sealed interface Inntektssituasjon {
-    data class HarInntektFraArbeidsgiver(
-        val inntektFraArbeidsgiver: ArbeidstakerFaktaavklartInntekt,
-        private val førsteFraværsdag: LocalDate = inntektFraArbeidsgiver.inntektsdata.dato,
-        private val vurderbarArbeidstakerFaktaavklartInntekt: VurderbarArbeidstakerFaktaavklartInntekt? = null
-    ) : Inntektssituasjon {
+    data class HarInntektFraArbeidsgiver(private val arbeidstakerFaktaavklarteInntekter: ArbeidstakerFaktaavklarteInntekter) : Inntektssituasjon {
+        private val vurderbarArbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklarteInntekter.besteInntekt()
+        private val førsteFraværsdag = arbeidstakerFaktaavklarteInntekter.førsteFraværsdag
+        private val inntektFraArbeidsgiver = vurderbarArbeidstakerFaktaavklartInntekt.faktaavklartInntekt
 
         init { check(inntektFraArbeidsgiver.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) }
 
@@ -30,20 +29,11 @@ internal sealed interface Inntektssituasjon {
         }
 
         private fun brukInntektFraArbeidsgiver(aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt {
-            vurderbarArbeidstakerFaktaavklartInntekt?.vurder(aktivitetslogg)
+            vurderbarArbeidstakerFaktaavklartInntekt.vurder(aktivitetslogg)
             return inntektFraArbeidsgiver
         }
-
-        internal companion object {
-            internal fun fraArbeidstakerFaktaavklarteInntekter(arbeidstakerFaktaavklarteInntekter: ArbeidstakerFaktaavklarteInntekter) = arbeidstakerFaktaavklarteInntekter.besteInntekt().let { besteInntekt ->
-                HarInntektFraArbeidsgiver(
-                    inntektFraArbeidsgiver = besteInntekt.faktaavklartInntekt,
-                    førsteFraværsdag = arbeidstakerFaktaavklarteInntekter.førsteFraværsdag,
-                    vurderbarArbeidstakerFaktaavklartInntekt = besteInntekt
-                )
-            }
-        }
     }
+
     data class GaOppÅVentePåArbeidsgiver(val periodenSomGaOpp: Vedtaksperiode): Inntektssituasjon
 
     data object TidligereVilkårsprøvd: Inntektssituasjon

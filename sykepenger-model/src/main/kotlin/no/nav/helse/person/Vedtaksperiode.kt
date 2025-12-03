@@ -2595,7 +2595,7 @@ internal class Vedtaksperiode private constructor(
     private fun korrigertInntektForArbeidsgiver(alleForSammeArbeidsgiver: List<Vedtaksperiode>) = alleForSammeArbeidsgiver.mapNotNull { it.behandlinger.korrigertInntekt }.maxByOrNull { it.inntektsdata.tidsstempel }
 
     private fun inntektssituasjon(alleForSammeArbeidsgiver: List<Vedtaksperiode>): Inntektssituasjon {
-        val inntektFraArbeidsgiver = alleForSammeArbeidsgiver.arbeidstakerFaktaavklarteInntekter()?.let { Inntektssituasjon.HarInntektFraArbeidsgiver.fraArbeidstakerFaktaavklarteInntekter(it) }
+        val inntektFraArbeidsgiver = alleForSammeArbeidsgiver.arbeidstakerFaktaavklarteInntekter()?.let { Inntektssituasjon.HarInntektFraArbeidsgiver(it) }
 
         return when {
             inntektFraArbeidsgiver != null -> inntektFraArbeidsgiver
