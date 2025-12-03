@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
 import java.time.YearMonth
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -42,7 +41,7 @@ import org.junit.jupiter.api.Test
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
-    fun `friskmelding etter at perioden er vilkårsprøvd tidligere, ønsker ikke å forelegge opplysninger til den sykmeldte eller legge på varsel`() = Toggle.BrukFaktaavklartInntektFraBehandling.enable {
+    fun `friskmelding etter at perioden er vilkårsprøvd tidligere, ønsker ikke å forelegge opplysninger til den sykmeldte eller legge på varsel`() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(februar)

@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -182,8 +181,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         assertEquals(listOf(1.januar til 15.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         assertEquals(listOf(20.januar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
 
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-        else assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
         assertEquals("SSSSSHH SSSSSHH SU???HH SSSSSHH SS", inspektør.sykdomstidslinje.toShortString())

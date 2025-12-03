@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -100,10 +99,7 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
             assertEquals(listOf(3.april til 18.april), inspektør.venteperiode(3.vedtaksperiode))
 
             håndterVilkårsgrunnlag(3.vedtaksperiode)
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
-                assertVarsel(RV_IV_7, 3.vedtaksperiode.filter())
-            }
+            assertVarsel(RV_IV_7, 3.vedtaksperiode.filter())
 
             håndterYtelser(3.vedtaksperiode)
 

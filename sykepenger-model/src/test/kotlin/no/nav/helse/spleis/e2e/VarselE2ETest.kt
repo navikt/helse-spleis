@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.forlengVedtak
@@ -148,8 +147,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) assertVarsler(listOf(RV_IT_14, RV_IV_7), 1.vedtaksperiode.filter())
-            else assertVarsler(listOf(RV_IT_14), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IT_14, RV_IV_7), 1.vedtaksperiode.filter())
 
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
@@ -171,10 +169,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             assertEquals(emptyList<Periode>(), inspektør.venteperiode(1.vedtaksperiode))
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
-                assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
 
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())

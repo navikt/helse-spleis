@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.refusjon
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -235,10 +234,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                // Det er ny arbeidsgiverperiode, så her fikses en bug
-                assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
 
             håndterYtelser(1.vedtaksperiode)
             assertBeløpstidslinje(SAKSBEHANDLER.beløpstidslinje(2.januar til 25.januar, INGEN) + ARBEIDSGIVER.beløpstidslinje(26.januar til 31.januar, INNTEKT), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
@@ -835,11 +831,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             nyPeriode(februar)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
 
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                assertVarsler(2.vedtaksperiode, Varselkode.RV_IV_7)
-            } else {
-                assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
-            }
+            assertVarsler(2.vedtaksperiode, Varselkode.RV_IV_7)
 
             assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isNotEmpty())
             assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
@@ -870,11 +862,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(vedtaksperiodeJanuar)
             håndterUtbetalt()
 
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                assertVarsler(vedtaksperiodeJanuar, Varselkode.RV_IV_7)
-            } else {
-                assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
-            }
+            assertVarsler(vedtaksperiodeJanuar, Varselkode.RV_IV_7)
 
             assertSisteTilstand(vedtaksperiodeFebruar, AVVENTER_HISTORIKK)
             assertTrue(inspektør.vedtaksperioder(vedtaksperiodeFebruar).refusjonstidslinje.isNotEmpty())
@@ -889,11 +877,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             nyPeriode(januar)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
 
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                assertVarsler(2.vedtaksperiode, Varselkode.RV_IV_7)
-            } else {
-                assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
-            }
+            assertVarsler(2.vedtaksperiode, Varselkode.RV_IV_7)
 
             assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
         }

@@ -2606,19 +2606,10 @@ internal class Vedtaksperiode private constructor(
         if (aktivitetslogg.harFunksjonelleFeil()) return forkast(eventBus, dager.hendelse, aktivitetslogg)
     }
 
-    private fun korrigertInntektForArbeidsgiver(alleForSammeArbeidsgiver: List<Vedtaksperiode>): Saksbehandler? {
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return null
-        return alleForSammeArbeidsgiver.mapNotNull { it.behandlinger.korrigertInntekt }.maxByOrNull { it.inntektsdata.tidsstempel }
-    }
+    private fun korrigertInntektForArbeidsgiver(alleForSammeArbeidsgiver: List<Vedtaksperiode>) = alleForSammeArbeidsgiver.mapNotNull { it.behandlinger.korrigertInntekt }.maxByOrNull { it.inntektsdata.tidsstempel }
 
     private fun inntektssituasjon(alleForSammeArbeidsgiver: List<Vedtaksperiode>): Inntektssituasjon {
-        val fraInntektshistorikk = yrkesaktivitet.avklarInntektFraInntektshistorikk(skjæringstidspunkt, alleForSammeArbeidsgiver)?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }?.let { Inntektssituasjon.HarInntektFraArbeidsgiver(it) }
-        val fraPerioder = alleForSammeArbeidsgiver.arbeidstakerFaktaavklarteInntekter()?.let { Inntektssituasjon.HarInntektFraArbeidsgiver.fraArbeidstakerFaktaavklarteInntekter(it) }
-
-        val inntektFraArbeidsgiver = when (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-            true -> fraPerioder
-            false -> fraInntektshistorikk ?: fraPerioder
-        }
+        val inntektFraArbeidsgiver = alleForSammeArbeidsgiver.arbeidstakerFaktaavklarteInntekter()?.let { Inntektssituasjon.HarInntektFraArbeidsgiver.fraArbeidstakerFaktaavklarteInntekter(it) }
 
         return when {
             inntektFraArbeidsgiver != null -> inntektFraArbeidsgiver
@@ -3300,14 +3291,11 @@ internal class Vedtaksperiode private constructor(
             return startdatoer.values.toSet()
         }
 
-        internal fun List<Vedtaksperiode>.harFaktaavklartInntekt(): Boolean {
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) return false
-            return any { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
-        }
+        internal fun List<Vedtaksperiode>.harFaktaavklartInntekt() = any { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
 
         internal fun List<Vedtaksperiode>.arbeidstakerFaktaavklarteInntekter(): ArbeidstakerFaktaavklarteInntekter? {
             val førsteFraværsdag = firstNotNullOfOrNull { it.førsteFraværsdag } ?: first().periode.start
-            val vurderbareInntekter = mapNotNull { it.behandlinger.vurderbarArbeidstakerFaktaavklartInntekt() }.takeUnless { it.isEmpty() } ?: return null // Når toggle er på kan ikke den bli tom
+            val vurderbareInntekter = mapNotNull { it.behandlinger.vurderbarArbeidstakerFaktaavklartInntekt() }.takeUnless { it.isEmpty() } ?: return null
             return ArbeidstakerFaktaavklarteInntekter(førsteFraværsdag, vurderbareInntekter)
         }
 

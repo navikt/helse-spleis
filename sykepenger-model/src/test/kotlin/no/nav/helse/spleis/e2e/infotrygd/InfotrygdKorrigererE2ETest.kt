@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
@@ -74,10 +73,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         assertEquals(listOf(1.januar.somPeriode()), inspektør.venteperiode(2.vedtaksperiode))
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-            // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
-            assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
-        }
+        assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
 
         håndterYtelser(2.vedtaksperiode)
         assertVarsel(Varselkode.RV_IT_14, 2.vedtaksperiode.filter())

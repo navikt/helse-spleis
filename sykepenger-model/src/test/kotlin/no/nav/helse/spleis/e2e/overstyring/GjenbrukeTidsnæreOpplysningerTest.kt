@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.reflect.KClass
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
@@ -123,9 +122,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
             håndterInntektsmelding(listOf(mandag(22.januar) til 6.februar))
             assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) {
-                assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
-            }
             assertEquals("AAAAARR AAAAARR AAAAARR SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
         }
         a2 {
@@ -337,8 +333,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
 
-            // Her har ko arbeidsgiverperioden flyttet seg
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) assertVarsler(2.vedtaksperiode, RV_IV_7)
+            assertVarsler(2.vedtaksperiode, RV_IV_7)
         }
     }
 
@@ -374,11 +369,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
-                assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
-            }
-
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
         }
         val sykepengegrunnlagEtter = a2 {
@@ -1002,11 +993,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a1, INNTEKT, INNTEKT - 500.daglig, forventetKorrigertInntekt = INNTEKT - 500.daglig)
             }
             assertInntektsgrunnlag(1.februar, forventetAntallArbeidsgivere = 1) {
-                if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                    assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.Arbeidsgiver, forventetFastsattÅrsinntekt = INNTEKT - 500.daglig, forventetOmregnetÅrsinntekt = INNTEKT - 500.daglig, forventetKorrigertInntekt = INNTEKT - 500.daglig)
-                } else {
-                    assertInntektsgrunnlag(a1, INNTEKT - 500.daglig, forventetFastsattÅrsinntekt = INNTEKT - 500.daglig)
-                }
+                assertInntektsgrunnlag(a1, INNTEKT, forventetkilde = Arbeidstakerkilde.Arbeidsgiver, forventetFastsattÅrsinntekt = INNTEKT - 500.daglig, forventetOmregnetÅrsinntekt = INNTEKT - 500.daglig, forventetKorrigertInntekt = INNTEKT - 500.daglig)
             }
         }
     }
@@ -1177,11 +1164,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
-                if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                    assertInntektsgrunnlag(a1, INNTEKT, forventetKildeId = inntektsmeldingId, forventetKorrigertInntekt = overstyring2Inntekt, forventetOmregnetÅrsinntekt = overstyring2Inntekt)
-                } else {
-                    assertInntektsgrunnlag(a1, overstyring2Inntekt, forventetKildeId = inntektsmeldingId)
-                }
+                assertInntektsgrunnlag(a1, INNTEKT, forventetKildeId = inntektsmeldingId, forventetKorrigertInntekt = overstyring2Inntekt, forventetOmregnetÅrsinntekt = overstyring2Inntekt)
             }
         }
     }

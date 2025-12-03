@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -293,7 +292,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
 
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -315,7 +314,6 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertFalse(kanAvvises(1.vedtaksperiode))
     }

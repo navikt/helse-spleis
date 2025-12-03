@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -76,10 +75,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-            // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
-            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
-        }
+        assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
 
         håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)

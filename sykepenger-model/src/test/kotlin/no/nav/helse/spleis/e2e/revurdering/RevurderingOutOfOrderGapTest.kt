@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
@@ -1058,7 +1057,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         assertVarsel(RV_VV_2, 2.vedtaksperiode.filter(a2))
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter(orgnummer = a2)) // <-- Her er det ikke gjenbruk, inntekt fra ny inntektsmelding brukes jo
     }
 
     @Test
@@ -1070,8 +1068,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(februar)
 
         val februarId = 2.vedtaksperiode
-
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) assertVarsel(Varselkode.RV_IV_7, marsId.filter())
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))
         håndterVilkårsgrunnlag(februarId)
@@ -1088,8 +1084,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         nyPeriode(januar)
         val januarId = 3.vedtaksperiode
-
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) assertVarsel(Varselkode.RV_IV_7, februarId.filter())
 
         assertSisteTilstand(januarId, AVVENTER_VILKÅRSPRØVING)
 
@@ -1117,8 +1111,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(januarId, AVVENTER_VILKÅRSPRØVING)
 
         håndterVilkårsgrunnlag(januarId)
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) assertVarsel(Varselkode.RV_IV_7, januarId.filter())
-        else assertVarsel(Varselkode.RV_IV_7, februarId.filter())
+        assertVarsel(Varselkode.RV_IV_7, januarId.filter())
 
         håndterYtelser(januarId)
         håndterSimulering(januarId)

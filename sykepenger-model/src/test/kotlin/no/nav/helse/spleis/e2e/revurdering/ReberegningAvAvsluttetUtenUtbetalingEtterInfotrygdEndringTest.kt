@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.hendelser.Periode
@@ -57,10 +56,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertEquals(emptyList<Periode>(), inspektør.venteperiode(1.vedtaksperiode))
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-            // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
-            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
-        }
+        assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
         assertIngenOverlappendeInfotrygdutbetaling()
@@ -165,13 +161,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
             ArbeidsgiverUtbetalingsperiode(a1, 1.mai, 5.mai)
         )
 
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
-        } else {
-            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
-        }
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
     }
 
     private fun assertOverlappendeInfotrygdutbetalingIAUU(vedtaksperiode: IdInnhenter, tilstand: String) {

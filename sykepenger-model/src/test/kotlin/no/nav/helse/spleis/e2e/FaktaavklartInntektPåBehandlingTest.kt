@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.Year
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -39,7 +38,7 @@ import org.junit.jupiter.api.assertNull
 internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
 
     @Test
-    fun `Ny vilkårsprøving etter bruk av inntekter fra aordningen`() = Toggle.BrukFaktaavklartInntektFraBehandling.enable {
+    fun `Ny vilkårsprøving etter bruk av inntekter fra aordningen`() {
         a1 {
             håndterSøknad(2.januar til 31.januar)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
@@ -55,7 +54,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `korrigert inntekt blir med når skjæringstidspunktet flyttes`() = Toggle.BrukFaktaavklartInntektFraBehandling.enable {
+    fun `korrigert inntekt blir med når skjæringstidspunktet flyttes`() {
         a1 {
             nyttVedtak(2.januar til 31.januar)
             håndterOverstyrArbeidsgiveropplysninger(2.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = "a1", inntekt = INNTEKT*1.1)))

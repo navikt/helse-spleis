@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -92,11 +91,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                assertVarsler(listOf(Varselkode.RV_IT_14, Varselkode.RV_IV_7), 1.vedtaksperiode.filter())
-            } else {
-                assertVarsler(listOf(Varselkode.RV_IT_14), 1.vedtaksperiode.filter())
-            }
+            assertVarsler(listOf(Varselkode.RV_IT_14, Varselkode.RV_IV_7), 1.vedtaksperiode.filter())
 
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)

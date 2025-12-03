@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime.MIN
 import java.util.*
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -124,19 +123,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(februar, a2)
 
         val imJanuar = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = INNTEKT * 1.1)
-        val imFebruar = håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.februar, orgnummer = a1, beregnetInntekt = INNTEKT * 1.2)
+        håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.februar, orgnummer = a1, beregnetInntekt = INNTEKT * 1.2)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
 
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
         assertInntektsgrunnlag(1.januar, 2) {
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                // Her velger vi inntekten som er nærmest første fraværsdag
-                assertInntektsgrunnlag(a1, INNTEKT * 1.1, forventetKildeId = imJanuar)
-            } else {
-                // Her velger vi sist ankomne inntektsmelding på a1 på tross av at første fraværsdag er i en annen måned
-                assertInntektsgrunnlag(a1, INNTEKT * 1.2, forventetKildeId = imFebruar)
-            }
+            assertInntektsgrunnlag(a1, INNTEKT * 1.1, forventetKildeId = imJanuar)
             assertInntektsgrunnlag(a2, INNTEKT)
         }
 
@@ -165,12 +158,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         // HÆÆ? Ved første vilkårsprøving velger vi siste ankonme uavhhengig av måned, men når det kommer en korrigerende med samme første fraværsdag, da blir det plutselig ikke brukt
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertInntektsgrunnlag(1.januar, 2) {
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                assertInntektsgrunnlag(a1, INNTEKT * 1.1, forventetKildeId = imJanuar)
-            } else {
-                // Her velger vi sist ankomne inntektsmelding på a1
-                assertInntektsgrunnlag(a1, INNTEKT * 1.2, forventetKildeId = imFebruar)
-            }
+            assertInntektsgrunnlag(a1, INNTEKT * 1.1, forventetKildeId = imJanuar)
             assertInntektsgrunnlag(a2, INNTEKT)
         }
     }
@@ -957,8 +945,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             orgnummer = a1
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2, orgnummer = a1)
-        
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter(orgnummer = a1))
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
@@ -2645,12 +2631,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
 
-        if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-            // Her er det jo ny arbeidsgiverperiode, så vi fikser en bug
-            assertVarsel(RV_IV_7, 3.vedtaksperiode.filter())
-        } else {
-            assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
-        }
+        assertVarsel(RV_IV_7, 3.vedtaksperiode.filter())
+
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -2692,12 +2674,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertInntektsgrunnlag(25.januar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT)
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                // TODO ved å skru på denne toggelen ødelegger vi featuren med at HAG har hensyntatt ulik startmåned og vi alltid skal velge inntekten HAG sender oss
-                // Hvis det er veldig viktig å opprettholde den oppførselen, må vi kode det mer eksplisitt inn, feks. ved at opplysninger fra HAG har en egen kilde slik at man kan se forskjell på IM og arbeidsgiveropplysninger fra HAG
-                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
-                assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode(a1).filter())
-            } else assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.Arbeidsgiver)
+            assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode(a1).filter())
         }
     }
 }

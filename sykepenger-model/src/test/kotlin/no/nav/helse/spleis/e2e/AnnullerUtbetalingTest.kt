@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
@@ -163,7 +162,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Saksbehandler avviser auu under omgjøring og annullerer etterfulgt utbetalt periode`() = Toggle.BrukFaktaavklartInntektFraBehandling.enable {
+    fun `Saksbehandler avviser auu under omgjøring og annullerer etterfulgt utbetalt periode`() {
         a1 {
             håndterSøknad(1.januar til 10.januar)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)

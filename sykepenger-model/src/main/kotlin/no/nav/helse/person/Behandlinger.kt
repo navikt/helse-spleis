@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.Toggle
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
@@ -1010,10 +1009,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 maksdatoresultat = beregning.maksdatoresultat,
                 inntektjusteringer = beregning.alleInntektjusteringer,
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
-                faktaavklartInntekt = when (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                    true -> faktaavklartInntekt ?: this.faktaavklartInntekt
-                    false -> this.faktaavklartInntekt
-                }
+                faktaavklartInntekt = faktaavklartInntekt ?: this.faktaavklartInntekt
             )
 
             internal fun kopierMedUtbetaling(utbetaling: Utbetaling) = kopierMed(utbetaling = utbetaling)

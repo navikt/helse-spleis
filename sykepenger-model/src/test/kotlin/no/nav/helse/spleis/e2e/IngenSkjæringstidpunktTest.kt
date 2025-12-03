@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.*
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -19,7 +18,6 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -133,7 +131,6 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.disabled) assertVarsel(RV_IV_7, 3.vedtaksperiode.filter()) // <-- her brukes jo ny inntekt
             assertVarsel(RV_IM_24, 3.vedtaksperiode.filter())
             assertEquals(12.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
 

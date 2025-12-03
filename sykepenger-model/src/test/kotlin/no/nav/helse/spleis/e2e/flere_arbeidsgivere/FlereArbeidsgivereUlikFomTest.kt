@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -79,7 +78,7 @@ import org.junit.jupiter.api.Test
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     @Test
-    fun `får varsel om ulik startdato selv om vi velger en inntekt i samme måned som skjæringstidspunktet`() = Toggle.BrukFaktaavklartInntektFraBehandling.enable {
+    fun `får varsel om ulik startdato selv om vi velger en inntekt i samme måned som skjæringstidspunktet`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, beregnetInntekt = INNTEKT * 1.1, førsteFraværsdag = 1.februar)

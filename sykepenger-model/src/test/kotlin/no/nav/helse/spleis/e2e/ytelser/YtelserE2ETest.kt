@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.ytelser
 
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -69,7 +68,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             nyttVedtak(mars)
             nyttVedtak(mai)
             val korrelasjonsIdMars = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
-            val korrelasjonsIdMai = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
+            inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
 
             håndterSøknad(juli)
             håndterArbeidsgiveropplysninger(listOf(1.juli til 16.juli), vedtaksperiodeId = 3.vedtaksperiode)
@@ -209,10 +208,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
         }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            if (Toggle.BrukFaktaavklartInntektFraBehandling.enabled) {
-                // De HAG-greiene, se mer utfyllende kommentar og TOOD i annen test
-                assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         }
         a2 {
