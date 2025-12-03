@@ -3182,7 +3182,7 @@ internal class Vedtaksperiode private constructor(
             .vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .filter { it.yrkesaktivitet === this.yrkesaktivitet }
 
-        return yrkesaktivitet.kanBeregneSykepengegrunnlag(skjæringstidspunkt, perioderMedSammeSkjæringstidspunkt)
+        return perioderMedSammeSkjæringstidspunkt.harArbeidstakerFaktaavklartInntekt()
     }
 
     internal fun førstePeriodeSomVenterPåRefusjonsopplysninger(): Vedtaksperiode? {
@@ -3291,7 +3291,7 @@ internal class Vedtaksperiode private constructor(
             return startdatoer.values.toSet()
         }
 
-        internal fun List<Vedtaksperiode>.harFaktaavklartInntekt() = any { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
+        internal fun List<Vedtaksperiode>.harArbeidstakerFaktaavklartInntekt() = any { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
 
         internal fun List<Vedtaksperiode>.arbeidstakerFaktaavklarteInntekter(): ArbeidstakerFaktaavklarteInntekter? {
             val førsteFraværsdag = firstNotNullOfOrNull { it.førsteFraværsdag } ?: first().periode.start

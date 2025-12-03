@@ -65,7 +65,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.aktiv
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
-import no.nav.helse.person.Vedtaksperiode.Companion.harFaktaavklartInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.igangsettOverstyring
 import no.nav.helse.person.Vedtaksperiode.Companion.medSammeUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
@@ -84,9 +83,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsgiveroppl
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
-import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.view.ArbeidsgiverView
@@ -358,29 +355,6 @@ internal class Yrkesaktivitet private constructor(
             })
             return yrkesaktivitetType
         }
-    }
-
-    internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): Boolean {
-        return vedtaksperioder.harFaktaavklartInntekt() || (avklarInntektFraInntektshistorikk(skjæringstidspunkt, vedtaksperioder) != null)
-    }
-
-    internal fun avklarInntektFraInntektshistorikk(skjæringstidspunkt: LocalDate, vedtaksperioder: List<Vedtaksperiode>): ArbeidstakerFaktaavklartInntekt? {
-        // finner inntektsmelding for en av første fraværsdagene.
-        // håndterer det som en liste i tilfelle arbeidsgiveren har auu'er i forkant, og at inntekt kan ha blitt malplassert
-        // (og at det er vrient å avgjøre én riktig første fraværsdag i forkant)
-        val inntektsmeldinginntekt = vedtaksperioder.firstNotNullOfOrNull {
-            val førsteFraværsdag = it.førsteFraværsdag
-            inntektshistorikk.avklarInntektsgrunnlag(skjæringstidspunkt = skjæringstidspunkt, førsteFraværsdag = førsteFraværsdag)
-        } ?: return null
-
-        return ArbeidstakerFaktaavklartInntekt(
-            id = inntektsmeldinginntekt.id,
-            inntektsdata = inntektsmeldinginntekt.inntektsdata,
-            inntektsopplysningskilde = when (inntektsmeldinginntekt.kilde) {
-                Inntektsmeldinginntekt.Kilde.Arbeidsgiver -> Arbeidstakerinntektskilde.Arbeidsgiver
-                Inntektsmeldinginntekt.Kilde.AOrdningen -> Arbeidstakerinntektskilde.AOrdningen(emptyList())
-            }
-        )
     }
 
     internal fun organisasjonsnummer() = organisasjonsnummer
