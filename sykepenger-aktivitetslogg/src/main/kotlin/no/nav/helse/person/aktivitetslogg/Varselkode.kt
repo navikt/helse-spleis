@@ -75,6 +75,9 @@ enum class Varselkode(
     RV_SØ_51("Selvstendigsøknad hvor bruker har oppgitt at de har opprettholdt inntekt"),
     RV_SØ_52("Selvstendigsøknad hvor bruker har oppgitt at de har opphold i utlandet"),
 
+    // Kombinerte søknader
+    RV_SØ_53("Søknaden overlapper med en periode som har en annen yrkesaktivitetstype"),
+
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne.", avviklet = true),
     RV_OO_2("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", avviklet = true),

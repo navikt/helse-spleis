@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -53,6 +53,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.erLik
+import no.nav.helse.hendelser.erSammeYrkesaktivtetstype
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsgiveropplysninger
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.blokkererBehandlingAv
@@ -456,6 +457,14 @@ internal class Yrkesaktivitet private constructor(
         // Også alle etterpå
         yrkesaktiviteter.any { arbeidsgiver ->
             arbeidsgiver.forkastede.blokkererBehandlingAv(nyPeriode, organisasjonsnummer, aktivitetslogg)
+        }
+
+        val overlappendeYrkesaktivitet = yrkesaktiviteter.any {
+            !it.yrkesaktivitetstype.erSammeYrkesaktivtetstype(this.yrkesaktivitetstype) && it.vedtaksperioder.any { vedtaksperiode -> nyPeriode.overlapperMed(vedtaksperiode.periode) }
+        }
+
+        if (overlappendeYrkesaktivitet) {
+            aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_53)
         }
     }
 

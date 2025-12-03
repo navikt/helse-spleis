@@ -63,6 +63,15 @@ fun Behandlingsporing.erLik(other: Behandlingsporing) = when (this) {
     Behandlingsporing.Yrkesaktivitet.Jordbruker -> other is Behandlingsporing.Yrkesaktivitet.Jordbruker
 }
 
+fun Behandlingsporing.erSammeYrkesaktivtetstype(other: Behandlingsporing) = when (this) {
+    Behandlingsporing.IngenYrkesaktivitet -> other is Behandlingsporing.IngenYrkesaktivitet
+    Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> other is Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+    is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> other is Behandlingsporing.Yrkesaktivitet.Arbeidstaker
+    Behandlingsporing.Yrkesaktivitet.Frilans -> other is Behandlingsporing.Yrkesaktivitet.Frilans
+    Behandlingsporing.Yrkesaktivitet.Selvstendig -> other is Behandlingsporing.Yrkesaktivitet.Selvstendig
+    Behandlingsporing.Yrkesaktivitet.Jordbruker -> other is Behandlingsporing.Yrkesaktivitet.Jordbruker
+}
+
 // en value-class for uuid-er som representerer @id til en melding fra kafka
 @JvmInline
 value class MeldingsreferanseId(val id: UUID) {

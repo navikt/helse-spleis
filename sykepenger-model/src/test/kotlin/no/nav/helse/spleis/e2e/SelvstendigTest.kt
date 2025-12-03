@@ -11,9 +11,6 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -31,7 +28,25 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
-import no.nav.helse.person.tilstandsmaskin.TilstandType.*
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_HISTORIKK
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_SIMULERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -43,14 +58,13 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
 internal class SelvstendigTest : AbstractDslTest() {
 
     @Test
-    fun `selvstendig løper videre til vilkårsprøving selv om vi har en arbeidstaker-periode som ikke har inntektsopplysninger`() {
+    fun `Kaster ut overlappenden vedtaksperiode på tvers av yrkesaktivitetstype`() {
         a1 {
             håndterSøknad(1.januar til 14.januar)
             håndterSøknad(15.januar til 31.januar)
@@ -58,30 +72,12 @@ internal class SelvstendigTest : AbstractDslTest() {
 
         selvstendig {
             håndterFørstegangssøknadSelvstendig(14.januar til 31.januar)
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
 
-        assertForventetFeil(
-            forklaring = "Selvstendig venter ikke på tur!",
-            nå = {
-                selvstendig {
-                    assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
-                    assertThrows<NoSuchElementException> { håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode) }
-                }
-            },
-            ønsket = {
-                selvstendig {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
-                }
-
-                a1 {
-                    håndterInntektsmelding(listOf(1.januar til 16.januar))
-                }
-
-                selvstendig {
-                    assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
-                }
-            }
-        )
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
     }
 
     @Test
@@ -96,33 +92,18 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterSøknad(15.januar til 20.januar)
             håndterSøknad(25.januar til 31.januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE)
-            assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
         }
 
+        selvstendig {
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
 
-        assertForventetFeil(
-            forklaring = "Selvstendig venter ikke på tur!",
-            nå = {
-                selvstendig {
-                    assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
-                }
-            },
-            ønsket = {
-                selvstendig {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE)
-                }
-
-                a1 {
-                    håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar)
-                }
-
-                selvstendig {
-                    assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
-                }
-            }
-        )
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
     }
 
     @Test
@@ -953,33 +934,6 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `kombinert arbeidstaker og selvstendig`() {
-        a1 {
-            håndterSøknad(januar)
-        }
-
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar)
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
-        }
-
-        a1 {
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)), OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()))
-            håndterVilkårsgrunnlag(
-                vedtaksperiodeId = 1.vedtaksperiode,
-                skatteinntekter = listOf(this.orgnummer to INNTEKT),
-                arbeidsforhold = listOf(Triple(a1, LocalDate.EPOCH, null))
-            )
-
-            assertFunksjonellFeil(Varselkode.RV_IV_13, 1.vedtaksperiode.filter())
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        }
-        selvstendig {
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        }
-    }
-
-    @Test
     fun `kombinert arbeidstaker og selvstendig, men bare innenfor tid uten nav-ansvar`() {
         selvstendig {
             håndterSykmelding(1.januar til 16.januar)
@@ -995,18 +949,10 @@ internal class SelvstendigTest : AbstractDslTest() {
         a1 {
             håndterSøknad(1.januar til 16.januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertForventetFeil("Uklart om dette burde vært kastet ut eller AUUet", nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
-            }, ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            })
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
         selvstendig {
-            assertForventetFeil("Uklart om dette burde vært kastet ut eller AUUet", nå = {
-                assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_HISTORIKK)
-            }, ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            })
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 
