@@ -87,7 +87,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     }
 
     private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse): Boolean {
-        vedtaksperiode.videreførEksisterendeOpplysninger(eventBus, aktivitetslogg)
+        vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(eventBus, null, aktivitetslogg)
 
         if (!vedtaksperiode.skalArbeidstakerBehandlesISpeil()) {
             vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAvsluttetUtenUtbetaling)

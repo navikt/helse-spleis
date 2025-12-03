@@ -82,7 +82,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsgiveroppl
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsgiveropplysninger for periode som allerede har opplysninger`
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.refusjon.Refusjonsservitør
@@ -815,19 +814,6 @@ internal class Yrkesaktivitet private constructor(
     internal fun startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) =
         finnSammenhengendeVedtaksperioder(vedtaksperiode).first().periode.start
 
-    internal fun lagreTidsnærInntektsmelding(
-        skjæringstidspunkt: LocalDate,
-        orgnummer: String,
-        arbeidsgiverinntekt: ArbeidstakerFaktaavklartInntekt,
-        aktivitetslogg: IAktivitetslogg,
-        nyArbeidsgiverperiode: Boolean
-    ) {
-        if (this.organisasjonsnummer != orgnummer) return
-        setOfNotNull(finnFørsteFraværsdag(skjæringstidspunkt), skjæringstidspunkt).forEach { dato ->
-            arbeidsgiverinntekt.kopierTidsnærOpplysning(dato, aktivitetslogg, nyArbeidsgiverperiode, inntektshistorikk)
-        }
-    }
-
     private fun søppelbøtte(
         eventBus: EventBus,
         hendelse: Hendelse,
@@ -910,13 +896,6 @@ internal class Yrkesaktivitet private constructor(
     private fun sjekkForUgyldigeSituasjoner(hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         utbetalinger.kunEnIkkeUtbetalt()
         vedtaksperioder.validerTilstand(hendelse, aktivitetslogg)
-    }
-
-    private fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
-        return vedtaksperioder
-            .filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-            .asReversed()
-            .firstNotNullOfOrNull { it.førsteFraværsdag }
     }
 
     internal fun finnFørsteFraværsdag(vedtaksperiode: Periode): LocalDate? {

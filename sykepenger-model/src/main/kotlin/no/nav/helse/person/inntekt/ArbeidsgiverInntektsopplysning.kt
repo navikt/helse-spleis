@@ -1,6 +1,5 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
 import java.util.*
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
@@ -10,7 +9,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.KorrigertArbeidsg
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
-import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
@@ -232,35 +230,6 @@ internal data class ArbeidsgiverInntektsopplysning(
             if (this.skjønnsmessigFastsatt != other.skjønnsmessigFastsatt) return true
             if (!this.faktaavklartInntekt.funksjoneltLik(other.faktaavklartInntekt)) return true
             return this.korrigertInntekt != other.korrigertInntekt
-        }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.harGjenbrukbarInntekt(organisasjonsnummer: String) =
-            singleOrNull { it.orgnummer == organisasjonsnummer }
-                ?.faktaavklartInntekt
-                ?.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(
-            skjæringstidspunkt: LocalDate,
-            yrkesaktivitet: Yrkesaktivitet,
-            aktivitetslogg: IAktivitetslogg,
-            nyArbeidsgiverperiode: Boolean
-        ) {
-            this.forEach {
-                val tidsnær = it.faktaavklartInntekt.inntektsopplysningskilde as? Arbeidstakerinntektskilde.Arbeidsgiver
-                if (tidsnær != null) {
-                    yrkesaktivitet.lagreTidsnærInntektsmelding(
-                        skjæringstidspunkt = skjæringstidspunkt,
-                        orgnummer = it.orgnummer,
-                        arbeidsgiverinntekt = ArbeidstakerFaktaavklartInntekt(
-                            id = UUID.randomUUID(),
-                            inntektsdata = it.faktaavklartInntekt.inntektsdata.copy(beløp = it.omregnetÅrsinntekt.beløp),
-                            inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver
-                        ),
-                        aktivitetslogg = aktivitetslogg,
-                        nyArbeidsgiverperiode = nyArbeidsgiverperiode
-                    )
-                }
-            }
         }
 
         internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningInnDto): ArbeidsgiverInntektsopplysning {

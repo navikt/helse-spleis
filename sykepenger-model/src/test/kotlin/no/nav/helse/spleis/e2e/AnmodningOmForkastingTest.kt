@@ -170,7 +170,6 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
 
             håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
 
-            assertVarsler(listOf(Varselkode.RV_IV_7), 2.vedtaksperiode.filter())
             inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
                 assertEquals(1, utbetalinger.size)
                 assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.single().status)

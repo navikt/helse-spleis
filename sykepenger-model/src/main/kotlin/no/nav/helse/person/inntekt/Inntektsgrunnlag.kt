@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.ArbeidstakerOpptjening
-import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
@@ -20,8 +19,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.beri
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harFunksjonellEndring
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harGjenbrukbarInntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedInntektsmelding
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedSaksbehandler
@@ -264,13 +261,6 @@ internal class Inntektsgrunnlag(
 
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
     internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
-
-    fun harGjenbrukbarInntekt(organisasjonsnummer: String) =
-        arbeidsgiverInntektsopplysninger.harGjenbrukbarInntekt(organisasjonsnummer)
-
-    fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg, nyArbeidsgiverperiode: Boolean) {
-        arbeidsgiverInntektsopplysninger.lagreTidsnæreInntekter(skjæringstidspunkt, yrkesaktivitet, aktivitetslogg, nyArbeidsgiverperiode)
-    }
 
     enum class Begrensning {
         ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD

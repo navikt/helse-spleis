@@ -171,18 +171,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         protected abstract fun vilkårsgrunnlagtype(): String
 
-        internal fun harGjenbrukbarInntekt(organisasjonsnummer: String) =
-            inntektsgrunnlag.harGjenbrukbarInntekt(organisasjonsnummer)
-
-        internal fun lagreTidsnæreInntekter(
-            skjæringstidspunkt: LocalDate,
-            yrkesaktivitet: Yrkesaktivitet,
-            aktivitetslogg: IAktivitetslogg,
-            nyArbeidsgiverperiode: Boolean
-        ) {
-            inntektsgrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, yrkesaktivitet, aktivitetslogg, nyArbeidsgiverperiode)
-        }
-
         internal fun berik(builder: UtkastTilVedtakBuilder) {
             builder.vilkårsgrunnlagId(vilkårsgrunnlagId)
             inntektsgrunnlag.berik(builder)

@@ -31,7 +31,6 @@ import no.nav.helse.hendelser.vurdering
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
-import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbarInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Companion.vurderbarArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
@@ -390,9 +389,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             dagerUtenNavAnsvar = sisteBehandling.dagerUtenNavAnsvar
         )
     }
-
-    internal fun lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
-        behandlinger.lagreGjenbrukbarInntekt(skjæringstidspunkt, organisasjonsnummer, yrkesaktivitet, aktivitetslogg)
 
     internal fun endretRefusjonstidslinje(refusjonstidslinje: Beløpstidslinje) =
         sisteBehandling.endretRefusjonstidslinje(refusjonstidslinje)
@@ -931,9 +927,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     )
                 }
             }
-
-            internal fun arbeidsgiverperiodeEndret(other: Endring) =
-                this.dagerUtenNavAnsvar != other.dagerUtenNavAnsvar
 
             internal fun erRettFør(neste: Endring): Boolean {
                 return this.sykdomstidslinje.erRettFør(neste.sykdomstidslinje)
@@ -1521,16 +1514,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     harFlereFaktaavklarteInntekter = harFlereFaktaavklarteInntekter
                 )
             }
-
-            internal fun List<Behandling>.lagreGjenbrukbarInntekt(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) {
-                val (forrigeEndring, vilkårsgrunnlag) = forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer) ?: return
-                val nyArbeidsgiverperiode = forrigeEndring.arbeidsgiverperiodeEndret(gjeldendeEndring())
-                // Herfra bruker vi "gammel" løype - kanskje noe kan skrus på fra det punktet her om en skulle skru på dette
-                vilkårsgrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, yrkesaktivitet, aktivitetslogg, nyArbeidsgiverperiode)
-            }
-
-            private fun List<Behandling>.forrigeEndringMedGjenbrukbarInntekt(organisasjonsnummer: String): Pair<Endring, VilkårsgrunnlagElement>? =
-                forrigeEndringMed { it.grunnlagsdata?.harGjenbrukbarInntekt(organisasjonsnummer) == true }?.let { it to it.grunnlagsdata!! }
 
             private fun List<Behandling>.gjeldendeEndring() = this.last().gjeldende
             private fun List<Behandling>.forrigeEndringMed(predikat: (endring: Endring) -> Boolean) =

@@ -2996,7 +2996,7 @@ internal class Vedtaksperiode private constructor(
         }
         behandlinger.oppdaterSkjæringstidspunkt(person.skjæringstidspunkter, yrkesaktivitet.perioderUtenNavAnsvar)
         behandlinger.forkastBeregning(eventBus.behandlingEventBus, aktivitetsloggMedVedtaksperiodekontekst)
-        videreførEksisterendeOpplysninger(eventBus, aktivitetsloggMedVedtaksperiodekontekst)
+        videreførEksisterendeRefusjonsopplysninger(eventBus, null, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
     private fun igangsettOverstyringEndreTilstand(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
@@ -3165,7 +3165,6 @@ internal class Vedtaksperiode private constructor(
         return refusjonstidslinje.isEmpty() || !harEksisterendeInntekt()
     }
 
-    // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
     internal fun harEksisterendeInntekt(): Boolean {
         // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
         // hvis det finnes et vilkårsgrunnlag så antas det at inntekten er representert der (vil vi slå ut på tilkommen inntekt-error senere hvis ikke)
@@ -3230,29 +3229,6 @@ internal class Vedtaksperiode private constructor(
             dokumentsporing,
             aktivitetslogg,
             benyttetRefusjonstidslinje
-        )
-    }
-
-    internal fun videreførEksisterendeOpplysninger(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        lagreGjenbrukbarInntekt(aktivitetslogg)
-        videreførEksisterendeRefusjonsopplysninger(
-            eventBus = eventBus,
-            dokumentsporing = null,
-            aktivitetslogg = aktivitetslogg
-        )
-    }
-
-    private fun lagreGjenbrukbarInntekt(aktivitetslogg: IAktivitetslogg) {
-        if (harEksisterendeInntekt()) return // Trenger ikke lagre gjenbrukbare inntekter om vi har det vi trenger allerede
-        // Ikke 100% at dette lagrer noe. F.eks.
-        //  - det er en periode som aldri er vilkårsprøvd før
-        //  - revurderinger med Infotryfd-vilkårsgrunnlag har ikke noe å gjenbruke
-        //  - inntekten i vilkårsgrunnlaget er skatteopplysninger
-        behandlinger.lagreGjenbrukbarInntekt(
-            skjæringstidspunkt = skjæringstidspunkt,
-            organisasjonsnummer = yrkesaktivitet.organisasjonsnummer,
-            yrkesaktivitet = yrkesaktivitet,
-            aktivitetslogg = aktivitetslogg
         )
     }
 
