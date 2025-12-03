@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -54,7 +53,6 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
@@ -651,11 +649,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittRefusjon(INGEN, emptyList()),
                 OppgittArbeidgiverperiode(listOf(10.oktober(2025) til 16.oktober(2025)))
             )
-            assertForventetFeil(
-                "Skjæringstidspunktet flytter seg pga egenmeldingsdagene, så da treffer ikke inntekten vi har lagret på gammelt skjæringstidspunkt for første periode",
-                nå = { assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_INNTEKTSMELDING) },
-                ønsket = { assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING) }
-            )
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         }
     }
 
