@@ -26,7 +26,7 @@ internal data class ArbeidstakerFaktaavklartInntekt(
         inntektshistorikk: Inntektshistorikk
     ) {
         vurderVarselForGjenbrukAvInntekt(forrigeDato, nyArbeidsgiverperiode, aktivitetslogg)
-        inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), this.inntektsdata, Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
+        inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), this.inntektsdata))
         aktivitetslogg.info("Kopierte inntekt som lå lagret på $forrigeDato til ${this.inntektsdata.dato}")
     }
 

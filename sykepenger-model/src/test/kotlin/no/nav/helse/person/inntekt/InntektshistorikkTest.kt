@@ -72,7 +72,7 @@ internal class InntektshistorikkTest {
     }
 
     private fun Inntektsmelding.addInntekt(historikk: Inntektshistorikk) {
-        val inntektsmeldinginntekt = Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata, Inntektsmeldinginntekt.Kilde.Arbeidsgiver)
+        val inntektsmeldinginntekt = Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata)
         historikk.leggTil(inntektsmeldinginntekt)
     }
 

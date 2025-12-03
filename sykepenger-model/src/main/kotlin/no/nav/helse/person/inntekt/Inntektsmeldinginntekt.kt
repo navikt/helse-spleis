@@ -4,17 +4,13 @@ import java.time.LocalDate
 import java.util.*
 import no.nav.helse.dto.deserialisering.InntektsmeldingInnDto
 import no.nav.helse.dto.serialisering.InntektsmeldingUtDto
-import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 
-internal data class Inntektsmeldinginntekt(
+internal data class Inntektsmeldinginntekt private constructor(
     val id: UUID,
     val inntektsdata: Inntektsdata,
     val kilde: Kilde
 ) {
-    internal fun inntektskilde(): Inntektskilde = when (kilde) {
-        Kilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
-        Kilde.AOrdningen -> Inntektskilde.AOrdningen
-    }
+    internal constructor(id: UUID, inntektsdata: Inntektsdata) : this(id, inntektsdata, Kilde.Arbeidsgiver)
 
     internal fun view() = InntektsmeldinginntektView(
         id = id,
@@ -32,6 +28,10 @@ internal data class Inntektsmeldinginntekt(
 
     internal enum class Kilde {
         Arbeidsgiver,
+        // Denne ble brukt da vi hadde tilstanden AvventeAordningen som lagret skatteopplysninger tilbake i inntektshistorikken, det gjør vi ikke lengre!
+        // Kanskje vi bare burde migrert dem bort fra inntektshistorikken slik at den var pure Arbeidsgiver (og sånn sett ikke trengte noen kilde..)
+        // .. nå bruker vi jo ikke inntektshistorikken til noe funksjonelt lengre, men sparer litt på den + legger til data der i en periode om det skulle være noe data der
+        // som burde vært migrert inn et annet sted..
         AOrdningen;
 
         fun dto() = when (this) {

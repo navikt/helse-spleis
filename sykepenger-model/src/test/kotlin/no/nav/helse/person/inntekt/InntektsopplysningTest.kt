@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.januar
-import no.nav.helse.person.inntekt.Inntektsmeldinginntekt.Kilde
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -36,6 +35,6 @@ internal class InntektsopplysningTest {
     }
 
     private fun inntektsmeldinginntekt(dato: LocalDate, hendelseId: UUID) =
-        Inntektsmeldinginntekt(UUID.randomUUID(), Inntektsdata(MeldingsreferanseId(hendelseId), dato, INNTEKT, LocalDateTime.now()), Kilde.Arbeidsgiver)
+        Inntektsmeldinginntekt(UUID.randomUUID(), Inntektsdata(MeldingsreferanseId(hendelseId), dato, INNTEKT, LocalDateTime.now()))
 
 }

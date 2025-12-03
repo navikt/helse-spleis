@@ -646,12 +646,12 @@ internal class Vedtaksperiode private constructor(
 
         // 1. legger til inntekten sånn at den kanskje kan brukes i forbindelse med faktaavklaring av inntekt
         // 1.1 lagrer på den datoen inntektsmeldingen mener
-        val inntektsmeldinginntekt = Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata, Inntektsmeldinginntekt.Kilde.Arbeidsgiver)
+        val inntektsmeldinginntekt = Inntektsmeldinginntekt(faktaavklartInntekt.id, faktaavklartInntekt.inntektsdata)
         inntektshistorikk.leggTil(inntektsmeldinginntekt)
         // 1.2 lagrer på vedtaksperioden også..
 
         this.førsteFraværsdag?.takeUnless { it == inntektsmeldinginntekt.inntektsdata.dato }?.also { alternativDato ->
-            inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata.copy(dato = alternativDato), Inntektsmeldinginntekt.Kilde.Arbeidsgiver))
+            inntektshistorikk.leggTil(Inntektsmeldinginntekt(UUID.randomUUID(), faktaavklartInntekt.inntektsdata.copy(dato = alternativDato)))
         }
 
         inntektsmeldingHåndtert(eventBus, inntektsmelding)
@@ -1120,11 +1120,7 @@ internal class Vedtaksperiode private constructor(
             dokumentsporing = inntektsmeldingInntekt(hendelse.metadata.meldingsreferanseId)
         )
         inntektshistorikk.leggTil(
-            Inntektsmeldinginntekt(
-                id = faktaavklartInntekt.id,
-                inntektsdata = inntektsdata,
-                kilde = Inntektsmeldinginntekt.Kilde.Arbeidsgiver
-            )
+            Inntektsmeldinginntekt(id = faktaavklartInntekt.id, inntektsdata = inntektsdata)
         )
 
         val grunnlag = vilkårsgrunnlag ?: return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
