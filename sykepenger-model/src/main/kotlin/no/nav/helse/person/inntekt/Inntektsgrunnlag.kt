@@ -160,7 +160,7 @@ internal class Inntektsgrunnlag(
         if (arbeidsgiverInntektsopplysninger.any { it.gjelder(orgnummer) }) return this // Unngår å aktivere om det allerede er aktivt ettersom det ruller tilbake eventuell skjønnsmessig fastsettelse
         return deaktiverteArbeidsforhold.aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonslogg)
             .let { (deaktiverte, aktiverte) ->
-                kopierSykepengegrunnlag(
+                kopierInntektsgrunnlag(
                     arbeidsgiverInntektsopplysninger = aktiverte,
                     selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
                     deaktiverteArbeidsforhold = deaktiverte
@@ -172,7 +172,7 @@ internal class Inntektsgrunnlag(
         if (deaktiverteArbeidsforhold.any { it.gjelder(orgnummer) }) return this // Unngår å deaktivere om det allerede er deaktivert ettersom det ruller tilbake eventuell skjønnsmessig fastsettelse
         return arbeidsgiverInntektsopplysninger.deaktiver(deaktiverteArbeidsforhold, orgnummer, forklaring, subsumsjonslogg)
             .let { (aktiverte, deaktiverte) ->
-                kopierSykepengegrunnlag(
+                kopierInntektsgrunnlag(
                     arbeidsgiverInntektsopplysninger = aktiverte,
                     selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
                     deaktiverteArbeidsforhold = deaktiverte
@@ -189,7 +189,7 @@ internal class Inntektsgrunnlag(
         return lagEndring(resultat)
     }
 
-    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse) = kopierSykepengegrunnlag(
+    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse) = kopierInntektsgrunnlag(
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.skjønnsfastsett(hendelse.arbeidsgiveropplysninger),
         selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
@@ -209,7 +209,7 @@ internal class Inntektsgrunnlag(
     ): Utfall {
         val arbeidsgiverInntektsopplysningerUtfall = arbeidsgiverInntektsopplysninger.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt)
         return Utfall.bestem(arbeidsgiverInntektsopplysningerUtfall) { nyeArbeidsgiverInntektsopplysninger ->
-            kopierSykepengegrunnlag(
+            kopierInntektsgrunnlag(
                 arbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger,
                 selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
@@ -222,7 +222,7 @@ internal class Inntektsgrunnlag(
     ): Utfall {
         val arbeidsgiverInntektsopplysningerUtfall = arbeidsgiverInntektsopplysninger.håndterKorrigerteInntekter(hendelse.arbeidsgiveropplysninger)
         return Utfall.bestem(arbeidsgiverInntektsopplysningerUtfall) { nyeArbeidsgiverInntektsopplysninger ->
-            kopierSykepengegrunnlag(
+            kopierInntektsgrunnlag(
                 arbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger,
                 selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
@@ -253,10 +253,10 @@ internal class Inntektsgrunnlag(
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>
     ): Inntektsgrunnlag? {
         if (!arbeidsgiverInntektsopplysninger.harFunksjonellEndring(this.arbeidsgiverInntektsopplysninger)) return null
-        return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, selvstendigInntektsopplysning, deaktiverteArbeidsforhold)
+        return kopierInntektsgrunnlag(arbeidsgiverInntektsopplysninger, selvstendigInntektsopplysning, deaktiverteArbeidsforhold)
     }
 
-    private fun kopierSykepengegrunnlag(
+    private fun kopierInntektsgrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
@@ -270,7 +270,7 @@ internal class Inntektsgrunnlag(
     )
 
     internal fun grunnbeløpsregulering(): Inntektsgrunnlag? {
-        val nyttInntektsgrunnlag = kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, selvstendigInntektsopplysning, deaktiverteArbeidsforhold)
+        val nyttInntektsgrunnlag = kopierInntektsgrunnlag(arbeidsgiverInntektsopplysninger, selvstendigInntektsopplysning, deaktiverteArbeidsforhold)
         if (this.`6G` == nyttInntektsgrunnlag.`6G`) return null
         return nyttInntektsgrunnlag
     }
