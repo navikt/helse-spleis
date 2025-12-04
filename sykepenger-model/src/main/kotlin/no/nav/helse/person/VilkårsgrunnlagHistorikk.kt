@@ -170,12 +170,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
 
-        internal fun nyArbeidstakerFaktaavklartInntekt(
+        internal fun håndterArbeidstakerFaktaavklartInntekt(
             organisasjonsnummer: String,
-            inntekt: ArbeidstakerFaktaavklartInntekt
+            arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
         ): VilkårsgrunnlagElement? {
-            val endretInntektsgrunnlag = inntektsgrunnlag.nyArbeidstakerFaktaavklartInntekt(organisasjonsnummer, inntekt) ?: return null
-            return kopierMed(endretInntektsgrunnlag, opptjening, EmptyLog)
+            val nyttInntektsgrunnlag = inntektsgrunnlag.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt) ?: return null
+            return kopierMed(nyttInntektsgrunnlag, opptjening, EmptyLog)
         }
 
         protected abstract fun vilkårsgrunnlagtype(): String

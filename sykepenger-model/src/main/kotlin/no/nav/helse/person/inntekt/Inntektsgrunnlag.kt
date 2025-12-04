@@ -21,7 +21,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fast
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harFunksjonellEndring
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedInntektsmelding
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedNyArbeidstakerFaktaavklartInntekt
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.håndterArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedSaksbehandler
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vurderArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.skjønnsfastsett
@@ -30,7 +30,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vali
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
-import no.nav.helse.person.inntekt.Overstringsutfall.Companion.uendret
+import no.nav.helse.person.inntekt.Håndteringsutfall.Companion.uendret
 import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning.Companion.berik
 import no.nav.helse.økonomi.Inntekt
 
@@ -201,20 +201,20 @@ internal class Inntektsgrunnlag(
         return lagEndring(resultat)
     }
 
-    private fun nyttInntektsgrunnlag(overstyringsutfall: List<Overstringsutfall>): Inntektsgrunnlag? {
-        if (overstyringsutfall.uendret()) return null
+    private fun nyttInntektsgrunnlag(håndteringsutfall: List<Håndteringsutfall>): Inntektsgrunnlag? {
+        if (håndteringsutfall.uendret()) return null
         return kopierSykepengegrunnlag(
-            arbeidsgiverInntektsopplysninger = overstyringsutfall.map { it.arbeidsgiverInntektsopplysning },
+            arbeidsgiverInntektsopplysninger = håndteringsutfall.map { it.arbeidsgiverInntektsopplysning },
             selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
             deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
         )
     }
-    internal fun nyArbeidstakerFaktaavklartInntekt(
+    internal fun håndterArbeidstakerFaktaavklartInntekt(
         organisasjonsnummer: String,
-        inntekt: ArbeidstakerFaktaavklartInntekt
+        arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
     ): Inntektsgrunnlag? {
-        val overstyringsutfall = arbeidsgiverInntektsopplysninger.overstyrMedNyArbeidstakerFaktaavklartInntekt(organisasjonsnummer, inntekt)
-        return nyttInntektsgrunnlag(overstyringsutfall)
+        val håndteringsutfall = arbeidsgiverInntektsopplysninger.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt)
+        return nyttInntektsgrunnlag(håndteringsutfall)
     }
 
     private fun lagEndring(nyeInntekter: List<ArbeidsgiverInntektsopplysning>): EndretInntektsgrunnlag? {
