@@ -76,7 +76,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             val korrigertIm = håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(),
                 førsteFraværsdag = 10.januar,
-                beregnetInntekt = INNTEKT,
+                beregnetInntekt = INNTEKT * 1.1,
                 refusjon = Inntektsmelding.Refusjon(INGEN, null)
             )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())

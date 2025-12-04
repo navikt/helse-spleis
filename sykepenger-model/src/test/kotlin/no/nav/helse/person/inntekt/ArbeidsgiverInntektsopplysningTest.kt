@@ -237,7 +237,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
                 )
             )
         )
-        assertFalse(
+        assertTrue(
             inntektsopplysning1.funksjoneltLik(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "orgnummer",
@@ -264,5 +264,5 @@ internal fun List<ArbeidsgiverInntektsopplysning>.funksjoneltLik(other: List<Arb
 }
 
 internal fun ArbeidsgiverInntektsopplysning.funksjoneltLik(other: ArbeidsgiverInntektsopplysning): Boolean {
-    return this.orgnummer == other.orgnummer && this.faktaavklartInntekt.funksjoneltLik(other.faktaavklartInntekt)
+    return this.orgnummer == other.orgnummer && this.faktaavklartInntekt.sammeBeløpOgKilde(other.faktaavklartInntekt)
 }

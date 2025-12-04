@@ -228,7 +228,7 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         private fun ArbeidsgiverInntektsopplysning.harFunksjonellEndring(other: ArbeidsgiverInntektsopplysning): Boolean {
             if (this.skjønnsmessigFastsatt != other.skjønnsmessigFastsatt) return true
-            if (!this.faktaavklartInntekt.funksjoneltLik(other.faktaavklartInntekt)) return true
+            if (!this.faktaavklartInntekt.sammeBeløpOgKilde(other.faktaavklartInntekt)) return true
             return this.korrigertInntekt != other.korrigertInntekt
         }
 

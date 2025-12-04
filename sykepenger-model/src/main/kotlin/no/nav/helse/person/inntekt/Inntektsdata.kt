@@ -14,9 +14,6 @@ data class Inntektsdata(
     val tidsstempel: LocalDateTime
 ) {
 
-    fun funksjoneltLik(other: Inntektsdata) =
-        this.dato == other.dato && this.beløp == other.beløp
-
     fun dto() = InntektsdataUtDto(
         hendelseId = hendelseId.dto(),
         dato = dato,

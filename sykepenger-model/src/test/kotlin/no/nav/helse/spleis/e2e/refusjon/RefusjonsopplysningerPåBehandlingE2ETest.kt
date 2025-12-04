@@ -1173,7 +1173,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 20.januar,
             refusjon = Refusjon(INNTEKT / 2, null),
-            beregnetInntekt = INNTEKT
+            beregnetInntekt = INNTEKT * 1.1
         )
         assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         assertEquals(INNTEKT, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[19.januar].beløp)

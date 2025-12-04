@@ -38,11 +38,6 @@ internal data class SelvstendigFaktaavklartInntekt(
     val normalinntekt = normalinntekt(anvendtGrunnbeløp)
     val beregningsgrunnlag = beregningsgrunnlag(anvendtGrunnbeløp)
 
-    internal fun funksjoneltLik(other: SelvstendigFaktaavklartInntekt): Boolean {
-        if (!this.inntektsdata.funksjoneltLik(other.inntektsdata)) return false
-        return this.pensjonsgivendeInntekter == other.pensjonsgivendeInntekter
-    }
-
     internal fun dto() = SelvstendigFaktaavklartInntektUtDto(
         id = this.id,
         inntektsdata = this.inntektsdata.dto(),
