@@ -8,6 +8,7 @@ import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSi
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -62,6 +63,16 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class AnnullerUtbetalingTest : AbstractDslTest() {
+
+    @Test
+    fun `tjolahopp`() {
+        medJSONPerson("/personer/to_vedtak_samme_fagsystem_id_hashd.json", 320)
+        a1 {
+            håndterAnnullering(1.vedtaksperiode)
+            val annulleringskandidater = inspektør.yrkesaktivitet.view().aktiveVedtaksperioder.first().annulleringskandidater.map { it.id }.toSet()
+            assertEquals(setOf(3.vedtaksperiode, 2.vedtaksperiode, 1.vedtaksperiode), annulleringskandidater)
+        }
+    }
 
     @Test
     fun `Vedtaksperioden skal være med i annulleringskandidater`() {
