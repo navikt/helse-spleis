@@ -12,9 +12,29 @@ import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
+import no.nav.helse.person.inntekt.Overstringsutfall.Companion.håndterEventuellTilbakestillingAvSkjønnsmessigFastsettelse
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+
+internal sealed interface Overstringsutfall {
+    val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning
+    data class Uendret(override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): Overstringsutfall
+    data class EndretBeløp(override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): Overstringsutfall
+    data class EndretKilde(override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): Overstringsutfall
+
+    private fun rullTilbakeEventuellSkjønnsmessigFastsettelse() = when (arbeidsgiverInntektsopplysning.skjønnsmessigFastsatt) {
+        null -> this
+        else -> EndretBeløp(arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning.copy(skjønnsmessigFastsatt = null))
+    }
+    companion object {
+        fun List<Overstringsutfall>.håndterEventuellTilbakestillingAvSkjønnsmessigFastsettelse(): List<Overstringsutfall> {
+            if (none { it is EndretBeløp }) return this
+            return map { it.rullTilbakeEventuellSkjønnsmessigFastsettelse() }
+        }
+        fun List<Overstringsutfall>.uendret() = all { it is Uendret }
+    }
+}
 
 internal data class ArbeidsgiverInntektsopplysning(
     val orgnummer: String,
@@ -35,6 +55,30 @@ internal data class ArbeidsgiverInntektsopplysning(
             faktaavklartInntekt = nyInntekt,
             korrigertInntekt = null
         )
+    }
+
+    private fun overstyrMedNyArbeidstakerFaktaavklartInntekt(organisasjonsnummer: String, nyInntekt: ArbeidstakerFaktaavklartInntekt): Overstringsutfall {
+        if (this.orgnummer != organisasjonsnummer) return Overstringsutfall.Uendret(this)
+
+        if (this.faktaavklartInntekt.id == nyInntekt.id) return Overstringsutfall.Uendret(this)
+
+        if (nyInntekt.inntektsdata.dato.yearMonth != this.omregnetÅrsinntekt.dato.yearMonth) return Overstringsutfall.Uendret(this)
+
+        // Q: Hvorfor sjekker vi mot omregnetÅrsinntekt istedenfor faktaavklartInntekt her?
+        // A: Får Inntekt A fra Arbeidsgiver -> Saksbehandler endrer til inntekt B -> Får på nytt inntekt A fra Arbeidsgiver -> Dette skal tydligvis "rulle tilbake" Saksbehandlers syn på saken
+        // Q2: Hvorfor det?
+        // A2: Aner ikke, det var sånn det var
+        if (omregnetÅrsinntekt.beløp == nyInntekt.inntektsdata.beløp && faktaavklartInntekt.inntektsopplysningskilde::class == nyInntekt.inntektsopplysningskilde::class) return Overstringsutfall.Uendret(this)
+
+        if (omregnetÅrsinntekt.beløp == nyInntekt.inntektsdata.beløp) return Overstringsutfall.EndretKilde(copy(
+            faktaavklartInntekt = nyInntekt,
+            korrigertInntekt = null
+        ))
+
+        return Overstringsutfall.EndretBeløp(copy(
+            faktaavklartInntekt = nyInntekt,
+            korrigertInntekt = null
+        ))
     }
 
     private fun overstyrMedSaksbehandler(overstyringer: List<KorrigertArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
@@ -140,6 +184,14 @@ internal data class ArbeidsgiverInntektsopplysning(
                 return endringen.rullTilbakeEventuellSkjønnsmessigFastsettelse()
             }
             return endringen
+        }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrMedNyArbeidstakerFaktaavklartInntekt(
+            organisasjonsnummer: String,
+            nyInntekt: ArbeidstakerFaktaavklartInntekt
+        ): List<Overstringsutfall> {
+            val overstyringsutfall = this.map { inntekt -> inntekt.overstyrMedNyArbeidstakerFaktaavklartInntekt(organisasjonsnummer, nyInntekt) }
+            return overstyringsutfall.håndterEventuellTilbakestillingAvSkjønnsmessigFastsettelse()
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.overstyrMedSaksbehandler(

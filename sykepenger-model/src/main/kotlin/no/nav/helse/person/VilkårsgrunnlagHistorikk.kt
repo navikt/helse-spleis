@@ -169,6 +169,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return grunnlag to endretInntektsgrunnlag
         }
 
+
+        internal fun nyArbeidstakerFaktaavklartInntekt(
+            organisasjonsnummer: String,
+            inntekt: ArbeidstakerFaktaavklartInntekt
+        ): VilkårsgrunnlagElement? {
+            val endretInntektsgrunnlag = inntektsgrunnlag.nyArbeidstakerFaktaavklartInntekt(organisasjonsnummer, inntekt) ?: return null
+            return kopierMed(endretInntektsgrunnlag, opptjening, EmptyLog)
+        }
+
         protected abstract fun vilkårsgrunnlagtype(): String
 
         internal fun berik(builder: UtkastTilVedtakBuilder) {
