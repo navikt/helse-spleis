@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -38,6 +37,26 @@ import org.junit.jupiter.api.assertThrows
 import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
+
+    @Test
+    fun `Samme skjønnsmessig fastsettelse mange ganger`() {
+        a1 {
+            tilGodkjenning(januar)
+            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+
+            val skjønnsmessigFastsettelse1 = UUID.randomUUID()
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning("a1", INNTEKT * 2)), meldingsreferanseId = skjønnsmessigFastsettelse1)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+
+            // Samme ID
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning("a1", INNTEKT * 2)), meldingsreferanseId = skjønnsmessigFastsettelse1)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+
+            // Ny ID
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning("a1", INNTEKT * 2)), meldingsreferanseId = UUID.randomUUID())
+            assertEquals(4, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        }
+    }
 
     @Test
     fun `Når inntekt skjønnsfastsettes til 0 og det finnes andre arbeidsgivere i økonomi-lista`() {
