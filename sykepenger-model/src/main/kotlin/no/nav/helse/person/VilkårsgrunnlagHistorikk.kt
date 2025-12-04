@@ -137,8 +137,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement? {
             if (this is InfotrygdVilkårsgrunnlag) return null
-            val endretInntektsgrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse) ?: return null
-            return kopierMed(endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, subsumsjonslogg)
+            val nyttInntektsgrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse)
+            return kopierMed(nyttInntektsgrunnlag, opptjening, subsumsjonslogg)
         }
 
         protected abstract fun kopierMed(

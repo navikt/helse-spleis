@@ -189,10 +189,11 @@ internal class Inntektsgrunnlag(
         return lagEndring(resultat)
     }
 
-    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse): EndretInntektsgrunnlag? {
-        val resultat = this.arbeidsgiverInntektsopplysninger.skjønnsfastsett(hendelse.arbeidsgiveropplysninger)
-        return lagEndring(resultat)
-    }
+    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse) = kopierSykepengegrunnlag(
+        arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.skjønnsfastsett(hendelse.arbeidsgiveropplysninger),
+        selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
+        deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
+    )
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
         organisasjonsnummer: String,
