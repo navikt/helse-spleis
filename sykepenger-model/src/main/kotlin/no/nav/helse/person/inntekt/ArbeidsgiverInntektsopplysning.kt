@@ -12,29 +12,9 @@ import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
-import no.nav.helse.person.inntekt.Håndteringsutfall.Companion.håndterEventuellTilbakestillingAvSkjønnsmessigFastsettelse
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-
-internal sealed interface Håndteringsutfall {
-    val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning
-    data class Uendret(override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): Håndteringsutfall
-    data class EndretBeløp(override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): Håndteringsutfall
-    data class EndretKilde(override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): Håndteringsutfall
-
-    private fun rullTilbakeEventuellSkjønnsmessigFastsettelse() = when (arbeidsgiverInntektsopplysning.skjønnsmessigFastsatt) {
-        null -> this
-        else -> EndretBeløp(arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning.copy(skjønnsmessigFastsatt = null))
-    }
-    companion object {
-        fun List<Håndteringsutfall>.håndterEventuellTilbakestillingAvSkjønnsmessigFastsettelse(): List<Håndteringsutfall> {
-            if (none { it is EndretBeløp }) return this
-            return map { it.rullTilbakeEventuellSkjønnsmessigFastsettelse() }
-        }
-        fun List<Håndteringsutfall>.uendret() = all { it is Uendret }
-    }
-}
 
 internal data class ArbeidsgiverInntektsopplysning(
     val orgnummer: String,
@@ -57,25 +37,25 @@ internal data class ArbeidsgiverInntektsopplysning(
         )
     }
 
-    private fun håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer: String, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt): Håndteringsutfall {
-        if (this.orgnummer != organisasjonsnummer) return Håndteringsutfall.Uendret(this)
+    private fun håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer: String, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt): Utfall {
+        if (this.orgnummer != organisasjonsnummer) return Utfall.Uendret(this)
 
-        if (this.faktaavklartInntekt.id == arbeidstakerFaktaavklartInntekt.id) return Håndteringsutfall.Uendret(this)
+        if (this.faktaavklartInntekt.id == arbeidstakerFaktaavklartInntekt.id) return Utfall.Uendret(this)
 
-        if (arbeidstakerFaktaavklartInntekt.inntektsdata.dato.yearMonth != this.omregnetÅrsinntekt.dato.yearMonth) return Håndteringsutfall.Uendret(this)
+        if (arbeidstakerFaktaavklartInntekt.inntektsdata.dato.yearMonth != this.omregnetÅrsinntekt.dato.yearMonth) return Utfall.Uendret(this)
 
         // Q: Hvorfor sjekker vi mot omregnetÅrsinntekt istedenfor faktaavklartInntekt her?
         // A: Får Inntekt A fra Arbeidsgiver -> Saksbehandler endrer til inntekt B -> Får på nytt inntekt A fra Arbeidsgiver -> Dette skal tydligvis "rulle tilbake" Saksbehandlers syn på saken
         // Q2: Hvorfor det?
         // A2: Aner ikke, det var sånn det var
-        if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp && faktaavklartInntekt.inntektsopplysningskilde::class == arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class) return Håndteringsutfall.Uendret(this)
+        if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp && faktaavklartInntekt.inntektsopplysningskilde::class == arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class) return Utfall.Uendret(this)
 
-        if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp) return Håndteringsutfall.EndretKilde(copy(
+        if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp) return Utfall.EndretKilde(copy(
             faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
             korrigertInntekt = null
         ))
 
-        return Håndteringsutfall.EndretBeløp(copy(
+        return Utfall.EndretBeløp(copy(
             faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
             korrigertInntekt = null
         ))
@@ -126,7 +106,7 @@ internal data class ArbeidsgiverInntektsopplysning(
     }
 
     internal companion object {
-        private fun List<ArbeidsgiverInntektsopplysning>.rullTilbakeEventuellSkjønnsmessigFastsettelse() =
+        internal fun List<ArbeidsgiverInntektsopplysning>.rullTilbakeEventuellSkjønnsmessigFastsettelse() =
             map { it.copy(skjønnsmessigFastsatt = null) }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.validerSkjønnsmessigAltEllerIntet() {
@@ -189,10 +169,7 @@ internal data class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.håndterArbeidstakerFaktaavklartInntekt(
             organisasjonsnummer: String,
             arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
-        ): List<Håndteringsutfall> {
-            val håndteringsutfall = this.map { arbeidsgiverInntektsopplysning -> arbeidsgiverInntektsopplysning.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt) }
-            return håndteringsutfall.håndterEventuellTilbakestillingAvSkjønnsmessigFastsettelse()
-        }
+        ) = this.map { arbeidsgiverInntektsopplysning -> arbeidsgiverInntektsopplysning.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt) }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.overstyrMedSaksbehandler(
             other: List<KorrigertArbeidsgiverInntektsopplysning>
@@ -300,4 +277,12 @@ internal data class ArbeidsgiverInntektsopplysning(
         korrigertInntekt = this.korrigertInntekt?.dto(),
         skjønnsmessigFastsatt = skjønnsmessigFastsatt?.dto()
     )
+
+    internal sealed interface Utfall {
+        val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning
+        data class Uendret(override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): Utfall
+        data class EndretBeløp(override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): Utfall
+        data class EndretKilde(override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): Utfall
+    }
 }
+

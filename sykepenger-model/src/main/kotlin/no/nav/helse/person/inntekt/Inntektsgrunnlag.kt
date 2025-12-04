@@ -23,6 +23,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måH
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedInntektsmelding
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.håndterArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedSaksbehandler
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.rullTilbakeEventuellSkjønnsmessigFastsettelse
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vurderArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.skjønnsfastsett
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.totalOmregnetÅrsinntekt
@@ -30,7 +31,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vali
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
-import no.nav.helse.person.inntekt.Håndteringsutfall.Companion.uendret
 import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning.Companion.berik
 import no.nav.helse.økonomi.Inntekt
 
@@ -201,20 +201,18 @@ internal class Inntektsgrunnlag(
         return lagEndring(resultat)
     }
 
-    private fun nyttInntektsgrunnlag(håndteringsutfall: List<Håndteringsutfall>): Inntektsgrunnlag? {
-        if (håndteringsutfall.uendret()) return null
-        return kopierSykepengegrunnlag(
-            arbeidsgiverInntektsopplysninger = håndteringsutfall.map { it.arbeidsgiverInntektsopplysning },
-            selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
-            deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
-        )
-    }
     internal fun håndterArbeidstakerFaktaavklartInntekt(
         organisasjonsnummer: String,
         arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
-    ): Inntektsgrunnlag? {
-        val håndteringsutfall = arbeidsgiverInntektsopplysninger.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt)
-        return nyttInntektsgrunnlag(håndteringsutfall)
+    ): Utfall {
+        val arbeidsgiverInntektsopplysningerUtfall = arbeidsgiverInntektsopplysninger.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt)
+        return Utfall.bestem(arbeidsgiverInntektsopplysningerUtfall) { nyeArbeidsgiverInntektsopplysninger ->
+            kopierSykepengegrunnlag(
+                arbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger,
+                selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
+                deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
+            )
+        }
     }
 
     private fun lagEndring(nyeInntekter: List<ArbeidsgiverInntektsopplysning>): EndretInntektsgrunnlag? {
@@ -295,6 +293,34 @@ internal class Inntektsgrunnlag(
         beregningsgrunnlag = this.beregningsgrunnlag.dto(),
         er6GBegrenset = beregningsgrunnlag > this.`6G`
     )
+
+    internal sealed interface Utfall {
+        data object Uendret: Utfall
+        data class Endret(val arbeidsgivereMedEndretBeløp: List<String>, val nyttInntektsgrunnlag: Inntektsgrunnlag): Utfall
+
+        companion object {
+            fun bestem(arbeidsgiverInntektsopplysningerUtfall: List<ArbeidsgiverInntektsopplysning.Utfall>, lagNyttInnteksgrunnlag: (arbeidsgiverInntektsopplysning: List<ArbeidsgiverInntektsopplysning>) -> Inntektsgrunnlag) = when {
+                // Alt er som før
+                arbeidsgiverInntektsopplysningerUtfall.all { it is ArbeidsgiverInntektsopplysning.Utfall.Uendret } -> Uendret
+                // Kun endret kilde til beløpet
+                arbeidsgiverInntektsopplysningerUtfall.none { it is ArbeidsgiverInntektsopplysning.Utfall.EndretBeløp } -> Endret(
+                    arbeidsgivereMedEndretBeløp = emptyList(),
+                    nyttInntektsgrunnlag = lagNyttInnteksgrunnlag(arbeidsgiverInntektsopplysningerUtfall.map { it.arbeidsgiverInntektsopplysning })
+                )
+                // Reel endring i beløp hos minst én arbeidsgiver
+                else -> {
+                    val arbeidsgivereMedEndretBeløp = arbeidsgiverInntektsopplysningerUtfall.filter { it is ArbeidsgiverInntektsopplysning.Utfall.EndretBeløp }.map { it.arbeidsgiverInntektsopplysning.orgnummer }
+                    check(arbeidsgivereMedEndretBeløp.isNotEmpty()) { "Hei! Hva skjer her da??" }
+                    // Når vi endrer en inntekt så må alle eventuelle skjønnsmessig fastesettelser rulles tilbake
+                    val nyeArbeidsgiveropplysninger = arbeidsgiverInntektsopplysningerUtfall.map { it.arbeidsgiverInntektsopplysning }.rullTilbakeEventuellSkjønnsmessigFastsettelse()
+                    Endret(
+                        arbeidsgivereMedEndretBeløp = arbeidsgivereMedEndretBeløp,
+                        nyttInntektsgrunnlag = lagNyttInnteksgrunnlag(nyeArbeidsgiveropplysninger)
+                    )
+                }
+            }
+        }
+    }
 }
 
 internal data class EndretInntektsgrunnlag(
