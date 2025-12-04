@@ -28,7 +28,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
-import no.nav.helse.person.inntekt.EndretInntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
@@ -129,18 +128,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         )
 
-        internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonslogg: Subsumsjonslogg): Pair<VilkårsgrunnlagElement, EndretInntektsgrunnlag>? {
-            if (this is InfotrygdVilkårsgrunnlag) return null
-            val endretInntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsgiveropplysninger(hendelse) ?: return null
-            return kopierMed(endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, subsumsjonslogg) to endretInntektsgrunnlag
-        }
-
-        internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement? {
-            if (this is InfotrygdVilkårsgrunnlag) return null
-            val nyttInntektsgrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse)
-            return kopierMed(nyttInntektsgrunnlag, opptjening, subsumsjonslogg)
-        }
-
         protected abstract fun kopierMed(
             inntektsgrunnlag: Inntektsgrunnlag,
             opptjening: ArbeidstakerOpptjening?,
@@ -160,13 +147,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return kopierMed(nyttSykepengegrunnlag, opptjening, subsumsjonslogg)
         }
 
-        internal fun nyeArbeidsgiverInntektsopplysninger(
-            organisasjonsnummer: String,
-            inntekt: ArbeidstakerFaktaavklartInntekt
-        ): Pair<VilkårsgrunnlagElement, EndretInntektsgrunnlag>? {
-            val endretInntektsgrunnlag = inntektsgrunnlag.nyeArbeidsgiverInntektsopplysninger(organisasjonsnummer, inntekt) ?: return null
-            val grunnlag = kopierMed(endretInntektsgrunnlag.inntektsgrunnlagEtter, opptjening, EmptyLog)
-            return grunnlag to endretInntektsgrunnlag
+        internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement? {
+            if (this is InfotrygdVilkårsgrunnlag) return null
+            val nyttInntektsgrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse)
+            return kopierMed(nyttInntektsgrunnlag, opptjening, subsumsjonslogg)
         }
 
         internal fun håndterArbeidstakerFaktaavklartInntekt(

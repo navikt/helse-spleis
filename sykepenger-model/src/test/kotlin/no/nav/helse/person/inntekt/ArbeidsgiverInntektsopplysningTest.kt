@@ -9,12 +9,13 @@ import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.januar
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedInntektsmelding
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedSaksbehandler
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.håndterArbeidstakerFaktaavklartInntekt
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.håndterKorrigerteInntekter
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Arbeidsgiver
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.testhelpers.assertInstanceOf
@@ -37,16 +38,16 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val skjæringstidspunkt = 1.januar
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", arbeidsgiverinntekt(skjæringstidspunkt, 1000.månedlig), null, null)
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", arbeidsgiverinntekt(skjæringstidspunkt, 2000.månedlig), null, null)
-        val a1Overstyrt = OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning("a1", Inntektsdata(MeldingsreferanseId(UUID.randomUUID()), skjæringstidspunkt, 3000.månedlig, LocalDateTime.now()), OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse("", null))
-        val a3Overstyrt = OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning("a3", Inntektsdata(MeldingsreferanseId(UUID.randomUUID()), skjæringstidspunkt, 4000.månedlig, LocalDateTime.now()), OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse("", null))
+        val a1Overstyrt = KorrigertArbeidsgiverInntektsopplysning("a1", Inntektsdata(MeldingsreferanseId(UUID.randomUUID()), skjæringstidspunkt, 3000.månedlig, LocalDateTime.now()), OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse("", null))
+        val a3Overstyrt = KorrigertArbeidsgiverInntektsopplysning("a3", Inntektsdata(MeldingsreferanseId(UUID.randomUUID()), skjæringstidspunkt, 4000.månedlig, LocalDateTime.now()), OverstyrArbeidsgiveropplysninger.Overstyringbegrunnelse("", null))
 
         val original = listOf(a1Opplysning, a2Opplysning)
         val expected = listOf(a1Opplysning, a2Opplysning)
         val new = listOf(a1Overstyrt)
 
-        assertEquals(expected, original.overstyrMedSaksbehandler(listOf(a1Overstyrt, a1Overstyrt)))
+        assertEquals(expected, original.håndterKorrigerteInntekterITest(listOf(a1Overstyrt, a1Overstyrt)))
 
-        original.overstyrMedSaksbehandler(new).also {
+        original.håndterKorrigerteInntekterITest(new).also {
             assertEquals(2, it.size)
             assertEquals(3000.månedlig, it[0].fastsattÅrsinntekt)
             assertEquals(2000.månedlig, it[1].fastsattÅrsinntekt)
@@ -55,7 +56,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             assertInstanceOf<Arbeidsgiver>(inntektsopplysningskilde)
         }
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
-        original.overstyrMedSaksbehandler(forMange).also {
+        original.håndterKorrigerteInntekterITest(forMange).also {
             assertEquals(2, it.size)
             assertEquals(3000.månedlig, it[0].fastsattÅrsinntekt)
             assertEquals(2000.månedlig, it[1].fastsattÅrsinntekt)
@@ -83,7 +84,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
         val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
 
-        val actual = original.overstyrMedInntektsmelding("a1", overstyrtA1Opplysning)
+        val actual = original.håndterArbeidstakerFaktaavklartInntektITest("a1", overstyrtA1Opplysning)
         assertTrue(expected.funksjoneltLik(actual)) { "kan ikke velge mellom inntekter for samme orgnr" }
     }
 
@@ -111,7 +112,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
         val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
 
-        val actual = original.overstyrMedInntektsmelding("a1", overstyrtA1Opplysning)
+        val actual = original.håndterArbeidstakerFaktaavklartInntektITest("a1", overstyrtA1Opplysning)
         assertTrue(expected.funksjoneltLik(actual))
     }
 
@@ -255,6 +256,12 @@ internal class ArbeidsgiverInntektsopplysningTest {
         )
     }
 }
+
+private fun List<ArbeidsgiverInntektsopplysning>.håndterKorrigerteInntekterITest(korrigerteInntekter: List<KorrigertArbeidsgiverInntektsopplysning>) =
+    håndterKorrigerteInntekter(korrigerteInntekter).map { it.arbeidsgiverInntektsopplysning }
+
+private fun List<ArbeidsgiverInntektsopplysning>.håndterArbeidstakerFaktaavklartInntektITest(orgnr: String, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt) =
+    håndterArbeidstakerFaktaavklartInntekt(orgnr, arbeidstakerFaktaavklartInntekt).map { it.arbeidsgiverInntektsopplysning }
 
 internal fun List<ArbeidsgiverInntektsopplysning>.funksjoneltLik(other: List<ArbeidsgiverInntektsopplysning>): Boolean {
     if (this.size != other.size) return false

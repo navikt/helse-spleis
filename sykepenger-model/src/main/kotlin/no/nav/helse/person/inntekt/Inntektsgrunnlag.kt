@@ -18,12 +18,9 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.akti
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harFunksjonellEndring
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedInntektsmelding
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.håndterArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.håndterKorrigerteInntekter
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedSaksbehandler
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.rullTilbakeEventuellSkjønnsmessigFastsettelse
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vurderArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.skjønnsfastsett
@@ -184,24 +181,11 @@ internal class Inntektsgrunnlag(
         return hendelse.overstyr(this, subsumsjonslogg)
     }
 
-    internal fun overstyrArbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger): EndretInntektsgrunnlag? {
-        val resultat = this.arbeidsgiverInntektsopplysninger.overstyrMedSaksbehandler(hendelse.arbeidsgiveropplysninger)
-        return lagEndring(resultat)
-    }
-
     internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse) = kopierInntektsgrunnlag(
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.skjønnsfastsett(hendelse.arbeidsgiveropplysninger),
         selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
     )
-
-    internal fun nyeArbeidsgiverInntektsopplysninger(
-        organisasjonsnummer: String,
-        inntekt: ArbeidstakerFaktaavklartInntekt
-    ): EndretInntektsgrunnlag? {
-        val resultat = arbeidsgiverInntektsopplysninger.overstyrMedInntektsmelding(organisasjonsnummer, inntekt)
-        return lagEndring(resultat)
-    }
 
     internal fun håndterArbeidstakerFaktaavklartInntekt(
         organisasjonsnummer: String,
@@ -228,32 +212,6 @@ internal class Inntektsgrunnlag(
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
             )
         }
-    }
-
-    private fun lagEndring(nyeInntekter: List<ArbeidsgiverInntektsopplysning>): EndretInntektsgrunnlag? {
-        val nyttInntektsgrunnlag = kopierSykepengegrunnlagHvisFunksjonellEndring(nyeInntekter, this.selvstendigInntektsopplysning, deaktiverteArbeidsforhold) ?: return null
-        return EndretInntektsgrunnlag(
-            inntekter = nyeInntekter.mapNotNull { potensiellEndret ->
-                val eksisterende = arbeidsgiverInntektsopplysninger.single { eksisterende -> potensiellEndret.orgnummer == eksisterende.orgnummer }
-
-                if (eksisterende.faktaavklartInntekt.id == potensiellEndret.faktaavklartInntekt.id && eksisterende.korrigertInntekt == potensiellEndret.korrigertInntekt) null
-                else EndretInntektsgrunnlag.EndretInntekt(
-                    inntektFør = eksisterende,
-                    inntektEtter = potensiellEndret
-                )
-            },
-            inntektsgrunnlagFør = this,
-            inntektsgrunnlagEtter = nyttInntektsgrunnlag
-        )
-    }
-
-    private fun kopierSykepengegrunnlagHvisFunksjonellEndring(
-        arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-        selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
-        deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>
-    ): Inntektsgrunnlag? {
-        if (!arbeidsgiverInntektsopplysninger.harFunksjonellEndring(this.arbeidsgiverInntektsopplysninger)) return null
-        return kopierInntektsgrunnlag(arbeidsgiverInntektsopplysninger, selvstendigInntektsopplysning, deaktiverteArbeidsforhold)
     }
 
     private fun kopierInntektsgrunnlag(
@@ -336,17 +294,6 @@ internal class Inntektsgrunnlag(
             }
         }
     }
-}
-
-internal data class EndretInntektsgrunnlag(
-    val inntekter: List<EndretInntekt>,
-    val inntektsgrunnlagFør: Inntektsgrunnlag,
-    val inntektsgrunnlagEtter: Inntektsgrunnlag
-) {
-    data class EndretInntekt(
-        val inntektFør: ArbeidsgiverInntektsopplysning,
-        val inntektEtter: ArbeidsgiverInntektsopplysning,
-    )
 }
 
 internal data class InntektsgrunnlagView(

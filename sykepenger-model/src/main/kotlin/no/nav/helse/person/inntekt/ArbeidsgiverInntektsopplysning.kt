@@ -28,15 +28,6 @@ internal data class ArbeidsgiverInntektsopplysning(
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
-    private fun overstyrMedInntektsmelding(organisasjonsnummer: String, nyInntekt: ArbeidstakerFaktaavklartInntekt): ArbeidsgiverInntektsopplysning {
-        if (this.orgnummer != organisasjonsnummer) return this
-        if (nyInntekt.inntektsdata.dato.yearMonth != this.omregnetÅrsinntekt.dato.yearMonth) return this
-        return copy(
-            faktaavklartInntekt = nyInntekt,
-            korrigertInntekt = null
-        )
-    }
-
     private fun håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer: String, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt): Utfall {
         if (this.orgnummer != organisasjonsnummer) return Utfall.Uendret(this)
 
@@ -45,9 +36,8 @@ internal data class ArbeidsgiverInntektsopplysning(
         if (arbeidstakerFaktaavklartInntekt.inntektsdata.dato.yearMonth != this.omregnetÅrsinntekt.dato.yearMonth) return Utfall.Uendret(this)
 
         // Q: Hvorfor sjekker vi mot omregnetÅrsinntekt istedenfor faktaavklartInntekt her?
-        // A: Får Inntekt A fra Arbeidsgiver -> Saksbehandler endrer til inntekt B -> Får på nytt inntekt A fra Arbeidsgiver -> Dette skal tydligvis "rulle tilbake" Saksbehandlers syn på saken
-        // Q2: Hvorfor det?
-        // A2: Aner ikke, det var sånn det var
+        // - Får Inntekt A fra Arbeidsgiver -> Saksbehandler endrer til inntekt B -> Får på nytt inntekt A fra Arbeidsgiver -> Dette skal tydligvis "rulle tilbake" Saksbehandlers syn på saken
+        // - I tillegg er det viktig at EndretBeløp == endret omregnet årsinntekt, for det vil også være triggeren for å rulle tilbake skjønnsmessig fastsettelse på alle inntektene
         if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp && faktaavklartInntekt.inntektsopplysningskilde::class == arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class) return Utfall.Uendret(this)
 
         if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp) return Utfall.EndretKilde(copy(
@@ -70,16 +60,6 @@ internal data class ArbeidsgiverInntektsopplysning(
             korrigertInntekt = korrigertInntekt,
             skjønnsmessigFastsatt = null
         ))
-    }
-
-    private fun overstyrMedSaksbehandler(overstyringer: List<KorrigertArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
-        val korrigering = overstyringer.singleOrNull { it.organisasjonsnummer == this.orgnummer } ?: return this
-        // bare sett inn ny inntekt hvis beløp er ulikt (speil sender inntekt- og refusjonoverstyring i samme melding)
-        if (korrigering.inntektsdata.beløp == omregnetÅrsinntekt.beløp) return this
-        return copy(
-            korrigertInntekt = korrigering.korrigertInntekt,
-            skjønnsmessigFastsatt = null
-        )
     }
 
     private fun skjønnsfastsett(fastsettelser: List<SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt>): ArbeidsgiverInntektsopplysning {
@@ -166,17 +146,6 @@ internal data class ArbeidsgiverInntektsopplysning(
             return aktive to (deaktiverte + listOfNotNull(inntektsopplysning))
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrMedInntektsmelding(
-            organisasjonsnummer: String,
-            nyInntekt: ArbeidstakerFaktaavklartInntekt
-        ): List<ArbeidsgiverInntektsopplysning> {
-            val endringen = this.map { inntekt -> inntekt.overstyrMedInntektsmelding(organisasjonsnummer, nyInntekt) }
-            if (skalSkjønnsmessigFastsattRullesTilbake(endringen)) {
-                return endringen.rullTilbakeEventuellSkjønnsmessigFastsettelse()
-            }
-            return endringen
-        }
-
         internal fun List<ArbeidsgiverInntektsopplysning>.håndterArbeidstakerFaktaavklartInntekt(
             organisasjonsnummer: String,
             arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
@@ -186,25 +155,10 @@ internal data class ArbeidsgiverInntektsopplysning(
             korrigerteInntekter: List<KorrigertArbeidsgiverInntektsopplysning>
         ) = this.map { arbeidsgiverInntektsopplysning -> arbeidsgiverInntektsopplysning.håndterKorrigerteInntekter(korrigerteInntekter) }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrMedSaksbehandler(
-            other: List<KorrigertArbeidsgiverInntektsopplysning>
-        ): List<ArbeidsgiverInntektsopplysning> {
-            val endringen = this.map { inntekt -> inntekt.overstyrMedSaksbehandler(other) }
-            if (skalSkjønnsmessigFastsattRullesTilbake(endringen)) {
-                return endringen.rullTilbakeEventuellSkjønnsmessigFastsettelse()
-            }
-            return endringen
-        }
-
         internal fun List<ArbeidsgiverInntektsopplysning>.skjønnsfastsett(other: List<SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt>): List<ArbeidsgiverInntektsopplysning> {
             check(this.size == other.size) { "alle inntektene må skjønnsfastsettes" }
             return this.map { inntekt -> inntekt.skjønnsfastsett(other) }
         }
-
-        private fun List<ArbeidsgiverInntektsopplysning>.skalSkjønnsmessigFastsattRullesTilbake(etter: List<ArbeidsgiverInntektsopplysning>) =
-            this.zip(etter) { gammelOpplysning, nyOpplysning ->
-                gammelOpplysning.omregnetÅrsinntekt.beløp != nyOpplysning.omregnetÅrsinntekt.beløp
-            }.any { it }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.vurderArbeidsgivere(
             aktivitetslogg: IAktivitetslogg,
@@ -259,22 +213,6 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.totalOmregnetÅrsinntekt() =
             fold(INGEN) { acc, item -> acc + item.omregnetÅrsinntekt.beløp }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.harFunksjonellEndring(
-            other: List<ArbeidsgiverInntektsopplysning>
-        ): Boolean {
-            return this.any { ny ->
-                val gammel = other.singleOrNull { it.orgnummer == ny.orgnummer }
-                val harEndring = gammel == null || gammel.harFunksjonellEndring(ny)
-                harEndring
-            }
-        }
-
-        private fun ArbeidsgiverInntektsopplysning.harFunksjonellEndring(other: ArbeidsgiverInntektsopplysning): Boolean {
-            if (this.skjønnsmessigFastsatt != other.skjønnsmessigFastsatt) return true
-            if (!this.faktaavklartInntekt.sammeBeløpOgKilde(other.faktaavklartInntekt)) return true
-            return this.korrigertInntekt != other.korrigertInntekt
-        }
 
         internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningInnDto): ArbeidsgiverInntektsopplysning {
             return ArbeidsgiverInntektsopplysning(
