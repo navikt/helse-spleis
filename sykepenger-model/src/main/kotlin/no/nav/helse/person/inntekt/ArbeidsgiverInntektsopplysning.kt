@@ -57,7 +57,18 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         return Utfall.EndretBeløp(copy(
             faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
-            korrigertInntekt = null
+            korrigertInntekt = null,
+            skjønnsmessigFastsatt = null
+        ))
+    }
+
+    private fun håndterKorrigerteInntekter(korrigerteInntekter: List<KorrigertArbeidsgiverInntektsopplysning>): Utfall {
+        val korrigertInntekt = korrigerteInntekter.singleOrNull { it.organisasjonsnummer == this.orgnummer }?.korrigertInntekt ?: return Utfall.Uendret(this)
+        // bare sett inn ny inntekt hvis beløp er ulikt (speil sender inntekt- og refusjonoverstyring i samme melding)
+        if (korrigertInntekt.inntektsdata.beløp == omregnetÅrsinntekt.beløp) return Utfall.Uendret(this)
+        return Utfall.EndretBeløp(copy(
+            korrigertInntekt = korrigertInntekt,
+            skjønnsmessigFastsatt = null
         ))
     }
 
@@ -170,6 +181,10 @@ internal data class ArbeidsgiverInntektsopplysning(
             organisasjonsnummer: String,
             arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
         ) = this.map { arbeidsgiverInntektsopplysning -> arbeidsgiverInntektsopplysning.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt) }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.håndterKorrigerteInntekter(
+            korrigerteInntekter: List<KorrigertArbeidsgiverInntektsopplysning>
+        ) = this.map { arbeidsgiverInntektsopplysning -> arbeidsgiverInntektsopplysning.håndterKorrigerteInntekter(korrigerteInntekter) }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.overstyrMedSaksbehandler(
             other: List<KorrigertArbeidsgiverInntektsopplysning>

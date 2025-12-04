@@ -22,6 +22,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harF
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedInntektsmelding
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.håndterArbeidstakerFaktaavklartInntekt
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.håndterKorrigerteInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrMedSaksbehandler
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.rullTilbakeEventuellSkjønnsmessigFastsettelse
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vurderArbeidsgivere
@@ -206,6 +207,19 @@ internal class Inntektsgrunnlag(
         arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
     ): Utfall {
         val arbeidsgiverInntektsopplysningerUtfall = arbeidsgiverInntektsopplysninger.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt)
+        return Utfall.bestem(arbeidsgiverInntektsopplysningerUtfall) { nyeArbeidsgiverInntektsopplysninger ->
+            kopierSykepengegrunnlag(
+                arbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger,
+                selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
+                deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
+            )
+        }
+    }
+
+    internal fun håndterKorrigerteInntekter(
+        hendelse: OverstyrArbeidsgiveropplysninger
+    ): Utfall {
+        val arbeidsgiverInntektsopplysningerUtfall = arbeidsgiverInntektsopplysninger.håndterKorrigerteInntekter(hendelse.arbeidsgiveropplysninger)
         return Utfall.bestem(arbeidsgiverInntektsopplysningerUtfall) { nyeArbeidsgiverInntektsopplysninger ->
             kopierSykepengegrunnlag(
                 arbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger,

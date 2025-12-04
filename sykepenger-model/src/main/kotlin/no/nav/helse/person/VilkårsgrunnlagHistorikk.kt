@@ -169,13 +169,33 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return grunnlag to endretInntektsgrunnlag
         }
 
-
         internal fun håndterArbeidstakerFaktaavklartInntekt(
             organisasjonsnummer: String,
             arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
         ) = when (val utfall = inntektsgrunnlag.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt)) {
             Inntektsgrunnlag.Utfall.Uendret -> null
             is Inntektsgrunnlag.Utfall.Endret -> kopierMed(utfall.nyttInntektsgrunnlag, opptjening, EmptyLog)
+        }
+
+        internal fun håndterKorrigerteInntekter(
+            hendelse: OverstyrArbeidsgiveropplysninger,
+            subsumsjonslogg: Subsumsjonslogg
+        ): Pair<Grunnlagsdata, List<EndretArbeidsgiver>>? {
+            if (this is InfotrygdVilkårsgrunnlag) return null
+            return when (val utfall = inntektsgrunnlag.håndterKorrigerteInntekter(hendelse)) {
+                Inntektsgrunnlag.Utfall.Uendret -> null
+                is Inntektsgrunnlag.Utfall.Endret -> {
+                    val nyttGrunnlag = kopierMed(utfall.nyttInntektsgrunnlag, opptjening, subsumsjonslogg)
+                    val arbeidstakerOpptjening = nyttGrunnlag.opptjening as ArbeidstakerOpptjening
+                    val endredeArbeidsgivere = utfall.arbeidsgivereMedEndretBeløp.map { orgnr ->
+                        EndretArbeidsgiver(
+                            organisasjonsnummer = orgnr,
+                            startdato = arbeidstakerOpptjening.startdatoFor(orgnr)
+                        )
+                    }
+                    nyttGrunnlag to endredeArbeidsgivere
+                }
+            }
         }
 
         protected abstract fun vilkårsgrunnlagtype(): String
@@ -382,6 +402,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         historikk = this.historikk.map { it.dto() }
     )
 }
+
+internal data class EndretArbeidsgiver(val organisasjonsnummer: String, val startdato: LocalDate?)
 
 internal data class VilkårsgrunnlagHistorikkView(val innslag: List<VilkårsgrunnlagInnslagView>)
 internal data class VilkårsgrunnlagInnslagView(val vilkårsgrunnlag: List<VilkårsgrunnlagView>)
