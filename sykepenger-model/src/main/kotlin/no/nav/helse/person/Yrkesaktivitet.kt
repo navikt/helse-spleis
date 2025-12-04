@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -466,6 +467,20 @@ internal class Yrkesaktivitet private constructor(
         if (overlappendeYrkesaktivitet) {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_53)
         }
+
+        val opptjeningsdager = 90
+
+        val harPotensiellSelvstendigGhost = yrkesaktiviteter.any {
+            this.yrkesaktivitetstype is Arbeidstaker &&
+                it.yrkesaktivitetstype is Selvstendig &&
+                it.vedtaksperioder.any { vedtaksperiode ->
+                    vedtaksperiode.periode.endInclusive.isBefore(nyPeriode.start) &&
+                        (ChronoUnit.DAYS.between(vedtaksperiode.periode.endInclusive, nyPeriode.start)) < opptjeningsdager
+                }
+        }
+
+        if (harPotensiellSelvstendigGhost)
+            aktivitetslogg.varsel(Varselkode.RV_SØ_54)
     }
 
     internal fun håndterSøknad(

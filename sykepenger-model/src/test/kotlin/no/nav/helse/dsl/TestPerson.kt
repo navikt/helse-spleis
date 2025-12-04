@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.time.temporal.Temporal
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.SimuleringResultatDto
@@ -487,8 +487,8 @@ internal class TestPerson(
             )
         }
 
-        internal fun håndterVilkårsgrunnlagSelvstendig(vedtaksperiodeId: UUID = 1.vedtaksperiode) {
-            håndterVilkårsgrunnlag(vedtaksperiodeId, skatteinntekter = emptyList())
+        internal fun håndterVilkårsgrunnlagSelvstendig(vedtaksperiodeId: UUID = 1.vedtaksperiode, skatteInntekter: List<Pair<String, Inntekt>> = emptyList()) {
+            håndterVilkårsgrunnlag(vedtaksperiodeId, skatteinntekter = skatteInntekter)
         }
 
         /**

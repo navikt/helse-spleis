@@ -77,6 +77,7 @@ enum class Varselkode(
 
     // Kombinerte søknader
     RV_SØ_53("Søknaden overlapper med en periode som har en annen yrkesaktivitetstype"),
+    RV_SØ_54("Arbeidstakersøknad har en potensiell selvstendigghost"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne.", avviklet = true),

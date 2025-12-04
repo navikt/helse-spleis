@@ -3,12 +3,14 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.Year
 import no.nav.helse.Toggle
+import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -22,6 +24,7 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -62,6 +65,56 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
 internal class SelvstendigTest : AbstractDslTest() {
+
+    @Test
+    fun `Legger ikke på varsel for potensiell selvstendigghost når søknaden kommer mer enn 90 dager etter`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelserSelvstendig(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a1 {
+            nyttVedtak(mai)
+        }
+    }
+
+    @Test
+    fun `Legger på varsel for potensiell selvstendigghost hvis arbeidstakersøknad kommer inom 90 dager`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelserSelvstendig(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a1 {
+            håndterSøknad(april)
+
+            assertVarsel(Varselkode.RV_SØ_54, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `Kaster ut søknader som ikke overlapper men har kort gap`() {
+        a1 {
+            nyttVedtak(januar)
+        }
+
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(2.februar til 28.februar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode, listOf(a1 to INNTEKT))
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+            assertFunksjonellFeil(Varselkode.RV_IV_13, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        }
+    }
+
 
     @Test
     fun `Kaster ut overlappenden vedtaksperiode på tvers av yrkesaktivitetstype`() {
