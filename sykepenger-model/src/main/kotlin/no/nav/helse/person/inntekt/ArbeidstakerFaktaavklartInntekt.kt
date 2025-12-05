@@ -11,9 +11,6 @@ internal data class ArbeidstakerFaktaavklartInntekt(
     val inntektsopplysningskilde: Arbeidstakerinntektskilde
 ) : FaktaavklartInntekt {
 
-    internal fun sammeBeløpOgKilde(other: ArbeidstakerFaktaavklartInntekt) =
-        this.inntektsdata.beløp == other.inntektsdata.beløp && this.inntektsopplysningskilde::class == other.inntektsopplysningskilde::class
-
     internal fun dto() = ArbeidstakerFaktaavklartInntektUtDto(
         id = this.id,
         inntektsdata = this.inntektsdata.dto(),

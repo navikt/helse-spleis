@@ -271,5 +271,5 @@ internal fun List<ArbeidsgiverInntektsopplysning>.funksjoneltLik(other: List<Arb
 }
 
 internal fun ArbeidsgiverInntektsopplysning.funksjoneltLik(other: ArbeidsgiverInntektsopplysning): Boolean {
-    return this.orgnummer == other.orgnummer && this.faktaavklartInntekt.sammeBeløpOgKilde(other.faktaavklartInntekt)
+    return this.orgnummer == other.orgnummer && this.faktaavklartInntekt.inntektsdata.beløp == other.faktaavklartInntekt.inntektsdata.beløp && this.faktaavklartInntekt.inntektsopplysningskilde::class == other.faktaavklartInntekt.inntektsopplysningskilde::class
 }
