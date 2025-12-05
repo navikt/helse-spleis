@@ -636,12 +636,10 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.forkasting(anmodningOmForkasting, skjæringstidspunkt, periode)
     }
 
-    internal fun håndterInntektFraInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        // håndterer kun inntekt hvis inntektsdato treffer perioden
-        if (inntektsmelding.datoForHåndteringAvInntekt !in periode) return null
+    internal fun håndterInntektFraInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, skalSendeInntektsmeldingHåndtert: Boolean): Revurderingseventyr? {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
-        inntektsmeldingHåndtert(eventBus, inntektsmelding)
+        if (skalSendeInntektsmeldingHåndtert) inntektsmeldingHåndtert(eventBus, inntektsmelding)
 
         if (!oppdaterVilkårsgrunnlagMedInntekt(inntektsmelding.faktaavklartInntekt)) {
             // har ikke laget nytt vilkårsgrunnlag for beløpet var det samme som det var
@@ -781,7 +779,7 @@ internal class Vedtaksperiode private constructor(
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering,
             AvventerAnnullering,
-                AvventerAnnulleringTilUtbetaling,
+            AvventerAnnulleringTilUtbetaling,
             TilAnnullering,
             TilUtbetaling -> {
                 aktivitetsloggMedVedtaksperiodekontekst.info("Replayer ikke inntektsmelding fordi tilstanden er $tilstand.")

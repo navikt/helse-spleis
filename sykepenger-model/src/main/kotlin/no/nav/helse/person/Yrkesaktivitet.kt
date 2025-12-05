@@ -87,6 +87,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.refusjon.Refusjonsservitør
+import no.nav.helse.person.tilstandsmaskin.AvventerInntektsmelding
 import no.nav.helse.person.view.ArbeidsgiverView
 import no.nav.helse.sykdomstidslinje.Dag.Companion.bareNyeDager
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
@@ -566,6 +567,21 @@ internal class Yrkesaktivitet private constructor(
         return null
     }
 
+    /**
+     * Returnerer perioden som skal håndtere inntekt, samt et flagg som indikerer om vi skal fortelle til omverden om inntektsmeldingen er håndtert.
+     * Selv om vi har lagret den ned på en periode så har vi hvert fall tidligere sjelden sendt inntektsmelding håndtert på f.eks. AUU-perioder,
+     * men først når en evenutell forlengelse kommer
+     **/
+    private fun periodeSomSkalHåndtereInntektFraInntektsmelding(inntektsmelding: Inntektsmelding): Pair<Vedtaksperiode, Boolean>? {
+        val truffetPeriode = vedtaksperioder.firstOrNull { inntektsmelding.faktaavklartInntekt.inntektsdata.dato in it.periode } ?: return null
+        val førsteFraværsdag = truffetPeriode.førsteFraværsdag ?: return truffetPeriode to false
+        val alleSomSkalBehandlesISpeilMedSammeFørsteFraværsdag = vedtaksperioder.filter { it.skalArbeidstakerBehandlesISpeil() }.filter { it.førsteFraværsdag == førsteFraværsdag }
+        alleSomSkalBehandlesISpeilMedSammeFørsteFraværsdag.firstOrNull { it.tilstand is AvventerInntektsmelding }?.let { return it to true }
+        alleSomSkalBehandlesISpeilMedSammeFørsteFraværsdag.firstOrNull { it.periode.start >= inntektsmelding.faktaavklartInntekt.inntektsdata.dato }?.let { return it to true }
+        alleSomSkalBehandlesISpeilMedSammeFørsteFraværsdag.firstOrNull()?.let { return it to true }
+        return truffetPeriode to false
+    }
+
     internal fun håndterInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         val dager = inntektsmelding.dager()
@@ -587,9 +603,9 @@ internal class Yrkesaktivitet private constructor(
             it.håndterInntektFraInntektsmeldingPåPerioden(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst)
         }
         // 4.3 Dette er litt på vei til å dø, men #noe med å sende ut inntektsmelding_håndtert
-        val inntektoverstyring = vedtaksperioder.firstNotNullOfOrNull {
-            it.håndterInntektFraInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst)
-        }
+        val inntektoverstyring = vedtaksperioder
+            .firstOrNull { inntektsmelding.datoForHåndteringAvInntekt in it.periode }
+            ?.håndterInntektFraInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst, true)
 
         // 5. ferdigstiller håndtering av inntektsmelding
         inntektsmelding.ferdigstill(eventBus, aktivitetsloggMedArbeidsgiverkontekst, person, forkastede.perioder(), sykmeldingsperioder)
