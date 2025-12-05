@@ -603,9 +603,9 @@ internal class Yrkesaktivitet private constructor(
             it.håndterInntektFraInntektsmeldingPåPerioden(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst)
         }
         // 4.3 Dette er litt på vei til å dø, men #noe med å sende ut inntektsmelding_håndtert
-        val inntektoverstyring = vedtaksperioder
-            .firstOrNull { inntektsmelding.datoForHåndteringAvInntekt in it.periode }
-            ?.håndterInntektFraInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst, true)
+        val inntektoverstyring = periodeSomSkalHåndtereInntektFraInntektsmelding(inntektsmelding)?.let { (periodeSomSkalHåndtereInntekt, sendInntektsmeldingHåndtert) ->
+            periodeSomSkalHåndtereInntekt.håndterInntektFraInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedArbeidsgiverkontekst, sendInntektsmeldingHåndtert)
+        }
 
         // 5. ferdigstiller håndtering av inntektsmelding
         inntektsmelding.ferdigstill(eventBus, aktivitetsloggMedArbeidsgiverkontekst, person, forkastede.perioder(), sykmeldingsperioder)

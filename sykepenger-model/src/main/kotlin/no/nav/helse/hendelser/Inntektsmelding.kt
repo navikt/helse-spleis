@@ -78,13 +78,6 @@ class Inntektsmelding(
         }
     }
 
-    // dagen inntekten gjelder for er "dag nr 17", slik at ikke en auu-periode håndterer inntekten
-    internal val datoForHåndteringAvInntekt = if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) {
-        listOfNotNull(grupperteArbeidsgiverperioder.lastOrNull()?.endInclusive?.nesteDag, førsteFraværsdag).max()
-    } else {
-        faktaavklartInntekt.inntektsdata.dato
-    }
-
     private val refusjonsdato: LocalDate by lazy {
         if (førsteFraværsdag == null) grupperteArbeidsgiverperioder.maxOf { it.start }
         else grupperteArbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()

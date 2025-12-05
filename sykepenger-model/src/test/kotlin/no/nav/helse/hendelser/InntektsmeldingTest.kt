@@ -50,14 +50,6 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `datoForHåndteringAvInntekt ved begrunnelseForReduksjonEllerIkkeUtbetalt`() {
-        inntektsmelding(listOf(Periode(1.januar, 16.januar)), begrunnelseForReduksjonEllerIkkeUtbetalt = "")
-        assertEquals(17.januar, inntektsmelding.datoForHåndteringAvInntekt)
-        inntektsmelding(listOf(Periode(1.januar, 16.januar)), begrunnelseForReduksjonEllerIkkeUtbetalt = null)
-        assertEquals(17.januar, inntektsmelding.datoForHåndteringAvInntekt)
-    }
-
-    @Test
     fun `periode dersom første fraværsdag er kant i kant med arbeidsgiverperioden`() {
         inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 17.januar)
         assertEquals(1.januar til 16.januar, dager.inspektør.periode)
