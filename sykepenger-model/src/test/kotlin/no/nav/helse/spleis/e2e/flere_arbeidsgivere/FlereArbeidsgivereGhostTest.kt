@@ -27,7 +27,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Venteårsak.Companion.INNTEKTSMELDING
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -216,7 +215,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         // Så kjem søknaden på ghosten læll
         val ghostSøknad = MeldingsreferanseId(håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ghost))
 
-        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(orgnummer = ghost))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = ghost)

@@ -783,7 +783,7 @@ internal class Vedtaksperiode private constructor(
             TilAnnullering,
             TilUtbetaling -> {
                 aktivitetsloggMedVedtaksperiodekontekst.info("Replayer ikke inntektsmelding fordi tilstanden er $tilstand.")
-                aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
+                if (inntektsmeldinger.size > 1) aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
             }
 
             Avsluttet,
