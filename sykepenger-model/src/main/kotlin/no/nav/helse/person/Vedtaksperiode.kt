@@ -1097,7 +1097,7 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerSimuleringRevurdering,
             ArbeidstakerStart,
             TilAnnullering,
-            TilInfotrygd -> error("Forventer ikke å håndtere refusjon i tilstand $tilstand")
+            TilInfotrygd -> error("Forventer ikke å håndtere inntekt i tilstand $tilstand")
         }
 
         behandlinger.håndterFaktaavklartInntekt(
