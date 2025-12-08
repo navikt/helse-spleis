@@ -91,7 +91,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(eksisterendeUtbetaling, nyUtbetaling)
 
         assertEquals(20.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(emptyList<VedtaksperiodeVenterEvent>(), observatør.vedtaksperiodeVenter)
+        assertEquals("VILKÅRSPRØVING", observatør.vedtaksperiodeVenter.single().venterPå.venteårsak.hva)
         nullstillTilstandsendringer()
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)

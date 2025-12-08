@@ -25,7 +25,7 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Venteårsak.Companion.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.Companion.VILKÅRSPRØVING
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
@@ -157,7 +157,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         // IM replayes, og ettersom 27. og 28 blir friskedager pga. IM beregnes skjæringstidspunktet til 29.januar. Når A1 sin søknad kommer dekker den "hullet" med sykdom slik at skjæringstidspunktet blir 1.januar
         observatør.vedtaksperiodeVenter.clear()
         håndterSøknad(Sykdom(lørdag den 27.januar, 20.februar, 100.prosent), orgnummer = a2)
-        observatør.assertVenter(2.vedtaksperiode.id(a2), venterPåHva = INNTEKTSMELDING)
+        observatør.assertVenter(2.vedtaksperiode.id(a2), venterPåHva = VILKÅRSPRØVING)
 
         assertEquals(29.januar, inspektør(a2).vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
         håndterSøknad(Sykdom(lørdag den 27.januar, 20.februar, 100.prosent), orgnummer = a1)

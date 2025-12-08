@@ -23,7 +23,6 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.EventSubscription.VedtaksperiodeVenterEvent
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -128,7 +127,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Arbeidsdag)), orgnummer = a2)
-        assertEquals(emptyList<VedtaksperiodeVenterEvent>(), observatør.vedtaksperiodeVenter)
+        assertEquals("VILKÅRSPRØVING", observatør.vedtaksperiodeVenter.single().venterPå.venteårsak.hva)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)

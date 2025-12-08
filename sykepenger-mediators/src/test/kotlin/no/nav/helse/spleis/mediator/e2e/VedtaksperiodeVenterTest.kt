@@ -19,17 +19,17 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         assertAntallOgSisteÅrsak(2, "INNTEKTSMELDING")
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        assertAntallOgSisteÅrsak(2)
+        assertAntallOgSisteÅrsak(3, "VILKÅRSPRØVING")
         sendVilkårsgrunnlag(0)
-        assertAntallOgSisteÅrsak(3, "BEREGNING")
+        assertAntallOgSisteÅrsak(4, "BEREGNING")
         sendYtelser(0)
-        assertAntallOgSisteÅrsak(4, "UTBETALING")
+        assertAntallOgSisteÅrsak(5, "UTBETALING")
         sendSimulering(0, OK)
-        assertAntallOgSisteÅrsak(5, "GODKJENNING")
+        assertAntallOgSisteÅrsak(6, "GODKJENNING")
         sendUtbetalingsgodkjenning(0)
-        assertAntallOgSisteÅrsak(6, "UTBETALING")
+        assertAntallOgSisteÅrsak(7, "UTBETALING")
         sendUtbetaling()
-        assertAntallOgSisteÅrsak(6)
+        assertAntallOgSisteÅrsak(7)
     }
 
     @Test
@@ -39,9 +39,9 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
         sendInntektsmelding(listOf(Periode(fom = 1.mars, tom = 16.mars)), førsteFraværsdag = 3.januar)
         assertAntallOgSisteÅrsak(0)
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)))
-        assertAntallOgSisteÅrsak(1) // Står i AVVENTER_VILKÅRSPRØVING som ikke implementerer venter
+        assertAntallOgSisteÅrsak(2, "VILKÅRSPRØVING")
         sendVilkårsgrunnlag(0)
-        assertAntallOgSisteÅrsak(2, "BEREGNING")
+        assertAntallOgSisteÅrsak(3, "BEREGNING")
     }
 
     @Test

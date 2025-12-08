@@ -3049,9 +3049,9 @@ internal class Vedtaksperiode private constructor(
 
             // TODO: Disse kunne jo vært en egen venteting
             AvventerVilkårsprøving,
-            SelvstendigAvventerVilkårsprøving -> null
+            SelvstendigAvventerVilkårsprøving -> VenterPå.SegSelv(Venteårsak.VILKÅRSPRØVING)
             AvventerVilkårsprøvingRevurdering,
-            SelvstendigAvventerVilkårsprøvingRevurdering -> null
+            SelvstendigAvventerVilkårsprøvingRevurdering -> VenterPå.SegSelv(Venteårsak.VILKÅRSPRØVING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
 
             // TODO: Disse kunne jo vært en egen venteting
             ArbeidsledigAvventerInfotrygdHistorikk,

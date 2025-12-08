@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -42,16 +41,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             val sisteVedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last()
-
-            assertForventetFeil(
-                forklaring = "Vi har visst ingen venteårsak på Vilkårsprøving",
-                nå = {
-                    assertEquals("INNTEKTSMELDING", sisteVedtaksperiodeVenter.venterPå.venteårsak.hva)
-                },
-                ønsket = {
-                    assertEquals("VILKÅRSPRØVING", sisteVedtaksperiodeVenter.venterPå.venteårsak.hva)
-                }
-            )
+            assertEquals("VILKÅRSPRØVING", sisteVedtaksperiodeVenter.venterPå.venteårsak.hva)
         }
     }
 
