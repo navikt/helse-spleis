@@ -2997,13 +2997,16 @@ internal class Vedtaksperiode private constructor(
             AvventerGodkjenning,
             SelvstendigAvventerGodkjenning -> VenterPå.SegSelv(Venteårsak.GODKJENNING)
 
-            AvventerGodkjenningRevurdering -> when (behandlinger.erAvvist()) {
+            AvventerGodkjenningRevurdering,
+            SelvstendigAvventerGodkjenningRevurdering -> when (behandlinger.erAvvist()) {
                 true -> VenterPå.SegSelv(Venteårsak.HJELP)
                 false -> VenterPå.SegSelv(Venteårsak.GODKJENNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
             }
 
             // denne er litt spesiell, fordi tilstanden er både en ventetilstand og en "det er min tur"-tilstand
             is AvventerRevurdering -> t.venterpå(this)
+            // TODO: HMM, man skulle jo tro det var noe lignende arbeidstaker-versjonen, men så lenge det ikke er det så venter den vel bare på nestemann
+            SelvstendigAvventerRevurdering -> VenterPå.Nestemann
 
             AvventerInntektsopplysningerForAnnenArbeidsgiver -> when (val annenPeriode = førstePeriodeSomVenterPåInntekt()) {
                 null -> VenterPå.Nestemann
@@ -3015,47 +3018,48 @@ internal class Vedtaksperiode private constructor(
                 else -> VenterPå.AnnenPeriode(annenPeriode.venter(), Venteårsak.INNTEKTSMELDING)
             }
 
-            AvventerBlokkerendePeriode -> VenterPå.Nestemann
             AvventerSøknadForOverlappendePeriode -> VenterPå.SegSelv(Venteårsak.SØKNAD)
-            AvventerAvsluttetUtenUtbetaling -> VenterPå.Nestemann
 
-            FrilansAvventerBlokkerendePeriode -> VenterPå.Nestemann
-
-            ArbeidsledigAvventerBlokkerendePeriode -> VenterPå.Nestemann
-
-            AvventerAnnullering,
-            SelvstendigAvventerBlokkerendePeriode -> VenterPå.Nestemann
+            AvventerBlokkerendePeriode,
+            AvventerAvsluttetUtenUtbetaling,
+            FrilansAvventerBlokkerendePeriode,
+            ArbeidsledigAvventerBlokkerendePeriode,
+            SelvstendigAvventerBlokkerendePeriode,
+            AvventerAnnullering -> VenterPå.Nestemann
 
             AvventerInntektsmelding -> VenterPå.SegSelv(Venteårsak.INNTEKTSMELDING)
 
             AvventerHistorikk,
             SelvstendigAvventerHistorikk -> VenterPå.SegSelv(Venteårsak.BEREGNING)
 
-            AvventerHistorikkRevurdering -> VenterPå.SegSelv(Venteårsak.BEREGNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
-            AvventerSimuleringRevurdering -> VenterPå.SegSelv(Venteårsak.UTBETALING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+            AvventerHistorikkRevurdering,
+            SelvstendigAvventerHistorikkRevurdering -> VenterPå.SegSelv(Venteårsak.BEREGNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+
+            TilAnnullering,
+            AvventerAnnulleringTilUtbetaling,
+            SelvstendigAvventerRevurderingTilUtbetaling,
+            AvventerRevurderingTilUtbetaling,
+            AvventerSimuleringRevurdering,
+            SelvstendigAvventerSimuleringRevurdering -> VenterPå.SegSelv(Venteårsak.UTBETALING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
 
             AvventerSimulering,
             SelvstendigAvventerSimulering,
             SelvstendigTilUtbetaling,
-            TilAnnullering,
-            AvventerAnnulleringTilUtbetaling,
-            TilUtbetaling,
-            AvventerRevurderingTilUtbetaling -> VenterPå.SegSelv(Venteårsak.UTBETALING)
+            TilUtbetaling -> VenterPå.SegSelv(Venteårsak.UTBETALING)
 
-            SelvstendigAvventerRevurdering,
-            SelvstendigAvventerGodkjenningRevurdering,
-            SelvstendigAvventerHistorikkRevurdering,
-            SelvstendigAvventerSimuleringRevurdering,
-            SelvstendigAvventerRevurderingTilUtbetaling,
-            SelvstendigAvventerVilkårsprøvingRevurdering,
+            // TODO: Disse kunne jo vært en egen venteting
+            AvventerVilkårsprøving,
+            SelvstendigAvventerVilkårsprøving -> null
+            AvventerVilkårsprøvingRevurdering,
+            SelvstendigAvventerVilkårsprøvingRevurdering -> null
 
+            // TODO: Disse kunne jo vært en egen venteting
             ArbeidsledigAvventerInfotrygdHistorikk,
             FrilansAvventerInfotrygdHistorikk,
             AvventerInfotrygdHistorikk,
-            AvventerVilkårsprøving,
-            AvventerVilkårsprøvingRevurdering,
-            SelvstendigAvventerInfotrygdHistorikk,
-            SelvstendigAvventerVilkårsprøving,
+            SelvstendigAvventerInfotrygdHistorikk -> null
+
+            // Dissa er klink tøysete å ha venteårsak på
             ArbeidstakerStart,
             ArbeidsledigStart,
             FrilansStart,
