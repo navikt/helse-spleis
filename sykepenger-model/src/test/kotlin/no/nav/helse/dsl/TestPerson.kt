@@ -652,8 +652,14 @@ internal class TestPerson(
         }
 
         internal fun håndterUtbetalingshistorikkEtterInfotrygdendring(vararg utbetalinger: Infotrygdperiode) {
-            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger.toList())
-                .håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
+            behovsamler.fangInntektsmeldingReplay({
+                arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger.toList())
+                    .håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
+            }) { vedtaksperioderSomHarBedtOmReplay ->
+                vedtaksperioderSomHarBedtOmReplay.forEach { forespørsel ->
+                    håndterInntektsmeldingReplay(forespørsel)
+                }
+            }
         }
 
         internal fun håndterVedtakFattet(vedtaksperiodeId: UUID, automatisert: Boolean = true, vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()) {

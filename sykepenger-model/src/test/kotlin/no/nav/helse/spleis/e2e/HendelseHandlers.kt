@@ -396,7 +396,7 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     permittert: Boolean = false,
     egenmeldinger: List<Periode> = emptyList()
 ): UUID {
-    håndterOgReplayInntektsmeldinger(orgnummer) {
+    håndterOgReplayInntektsmeldinger {
         søknad(
             id,
             *perioder,
@@ -419,26 +419,28 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     }
     return id
 }
-
-private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: String, block: () -> Unit) {
-    observatør.replayInntektsmeldinger { block() }.forEach { forespørsel ->
-        val imReplays = inntektsmeldinger
-            .entries
-            .sortedBy { it.value.tidspunkt }
-            .filter { forespørsel.erInntektsmeldingRelevant(it.value.inntektsmeldingkontrakt) }
-            .map { it.value.generator() }
-            .filter { im -> im.metadata.meldingsreferanseId.id !in observatør.inntektsmeldingHåndtert.map(Pair<*, *>::first) }
-            .filter { im -> im.behandlingsporing.organisasjonsnummer == orgnummer }
-        InntektsmeldingerReplay(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                organisasjonsnummer = orgnummer
-            ),
-            vedtaksperiodeId = forespørsel.vedtaksperiodeId,
-            inntektsmeldinger = imReplays
-        ).håndter(Person::håndterInntektsmeldingerReplay)
-        observatør.kvitterInntektsmeldingReplay(forespørsel.vedtaksperiodeId)
+private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(block: () -> Unit) {
+    observatør.replayInntektsmeldinger { block() }.groupBy { it.orgnr }.forEach { (orgnummer, forespørsler) ->
+        forespørsler.forEach { forespørsel ->
+            val imReplays = inntektsmeldinger
+                .entries
+                .sortedBy { it.value.tidspunkt }
+                .filter { forespørsel.erInntektsmeldingRelevant(it.value.inntektsmeldingkontrakt) }
+                .map { it.value.generator() }
+                .filter { im -> im.metadata.meldingsreferanseId.id !in observatør.inntektsmeldingHåndtert.map(Pair<*, *>::first) }
+                .filter { im -> im.behandlingsporing.organisasjonsnummer == orgnummer }
+            InntektsmeldingerReplay(
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                    organisasjonsnummer = orgnummer
+                ),
+                vedtaksperiodeId = forespørsel.vedtaksperiodeId,
+                inntektsmeldinger = imReplays
+            ).håndter(Person::håndterInntektsmeldingerReplay)
+            observatør.kvitterInntektsmeldingReplay(forespørsel.vedtaksperiodeId)
+        }
     }
+
 }
 
 internal fun AbstractEndToEndTest.håndterArbeidsgiveropplysninger(
@@ -501,7 +503,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
         mottatt = mottatt
     )
-    håndterOgReplayInntektsmeldinger(inntektsmelding.behandlingsporing.organisasjonsnummer) {
+    håndterOgReplayInntektsmeldinger {
         inntektsmelding.håndter(Person::håndterInntektsmelding)
     }
     return id
@@ -760,11 +762,14 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkEtterInfotrygdendr
     besvart: LocalDateTime = LocalDateTime.now(),
     meldingsreferanseId: UUID = UUID.randomUUID()
 ): UUID {
-    utbetalingshistorikkEtterInfotrygdEndring(
-        meldingsreferanseId = meldingsreferanseId,
-        utbetalinger = utbetalinger.toList(),
-        besvart = besvart
-    ).håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
+    håndterOgReplayInntektsmeldinger {
+        utbetalingshistorikkEtterInfotrygdEndring(
+            meldingsreferanseId = meldingsreferanseId,
+            utbetalinger = utbetalinger.toList(),
+            besvart = besvart
+        ).håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
+    }
+
     return meldingsreferanseId
 }
 
@@ -1060,7 +1065,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrTidslinje(
         dager = overstyringsdager,
         opprettet = LocalDateTime.now()
     )
-    håndterOgReplayInntektsmeldinger(orgnummer) {
+    håndterOgReplayInntektsmeldinger {
         hendelse.also { it.håndter(Person::håndterOverstyrTidslinje) }
     }
     return hendelse
