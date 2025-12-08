@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -23,6 +24,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -32,6 +34,26 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeVenterTest : AbstractDslTest() {
+
+    @Test
+    fun `Venteårsak når vi venter på å få gjennomført vilkårsprøving`() {
+        a1 {
+            håndterSøknad(januar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            val sisteVedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last()
+
+            assertForventetFeil(
+                forklaring = "Vi har visst ingen venteårsak på Vilkårsprøving",
+                nå = {
+                    assertEquals("INNTEKTSMELDING", sisteVedtaksperiodeVenter.venterPå.venteårsak.hva)
+                },
+                ønsket = {
+                    assertEquals("VILKÅRSPRØVING", sisteVedtaksperiodeVenter.venterPå.venteårsak.hva)
+                }
+            )
+        }
+    }
 
     @Test
     fun `Korrigerte søknader kommer i vedtaksperiode_venter`() {
