@@ -3018,8 +3018,7 @@ internal class Vedtaksperiode private constructor(
                 else -> VenterPå.AnnenPeriode(annenPeriode.venter(), Venteårsak.INNTEKTSMELDING)
             }
 
-            AvventerSøknadForOverlappendePeriode -> VenterPå.SegSelv(Venteårsak.SØKNAD)
-
+            // Perioder hvor det ikke er hens tur til å gjenoppta behandling, man står bare i kø
             AvventerBlokkerendePeriode,
             AvventerAvsluttetUtenUtbetaling,
             FrilansAvventerBlokkerendePeriode,
@@ -3027,14 +3026,25 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerBlokkerendePeriode,
             AvventerAnnullering -> VenterPå.Nestemann
 
+            // Disse er ganske forståelige da!
             AvventerInntektsmelding -> VenterPå.SegSelv(Venteårsak.INNTEKTSMELDING)
+            AvventerSøknadForOverlappendePeriode -> VenterPå.SegSelv(Venteårsak.SØKNAD)
 
+            // *AvventerHistorikk* -familien venter på beregning.
+            //  Blir man stående her skyldes det som oftes at det er enkelte behov som ikke er besvart,
+            //  men kan også være feil i hånderingen av beregningen i Spleis
             AvventerHistorikk,
             SelvstendigAvventerHistorikk -> VenterPå.SegSelv(Venteårsak.BEREGNING)
-
             AvventerHistorikkRevurdering,
             SelvstendigAvventerHistorikkRevurdering -> VenterPå.SegSelv(Venteårsak.BEREGNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
 
+            // *AvventerSimulering- og *TilUtbetaling- venter perioden selv på svar fra utbetalingssystemet
+            AvventerSimulering,
+            SelvstendigAvventerSimulering,
+            SelvstendigTilUtbetaling,
+            TilUtbetaling -> VenterPå.SegSelv(Venteårsak.UTBETALING)
+
+            // Denne brokete familen venter på svar fra utbetalingssystemet i en revurdering
             TilAnnullering,
             AvventerAnnulleringTilUtbetaling,
             SelvstendigAvventerRevurderingTilUtbetaling,
@@ -3042,28 +3052,27 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             SelvstendigAvventerSimuleringRevurdering -> VenterPå.SegSelv(Venteårsak.UTBETALING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
 
-            AvventerSimulering,
-            SelvstendigAvventerSimulering,
-            SelvstendigTilUtbetaling,
-            TilUtbetaling -> VenterPå.SegSelv(Venteårsak.UTBETALING)
-
-            // TODO: Disse kunne jo vært en egen venteting
+            // *AvventerVilkårsprøving* -familien venter på at vilkårsprøving.
+            //  Blir man stående her skyldes det som oftes at det er enkelte behov som ikke er besvart,
+            //  men kan også være feil i hånderingen av vilkårsgrunnlaget i Spleis
             AvventerVilkårsprøving,
             SelvstendigAvventerVilkårsprøving -> VenterPå.SegSelv(Venteårsak.VILKÅRSPRØVING)
             AvventerVilkårsprøvingRevurdering,
             SelvstendigAvventerVilkårsprøvingRevurdering -> VenterPå.SegSelv(Venteårsak.VILKÅRSPRØVING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
 
-            // TODO: Disse kunne jo vært en egen venteting
-            ArbeidsledigAvventerInfotrygdHistorikk,
-            FrilansAvventerInfotrygdHistorikk,
+            // *AvventerInfotrygdHistorikk -familien venter på at infotrygd-historikken skal bli hentet første gang
             AvventerInfotrygdHistorikk,
-            SelvstendigAvventerInfotrygdHistorikk -> null
+            SelvstendigAvventerInfotrygdHistorikk,
+            ArbeidsledigAvventerInfotrygdHistorikk,
+            FrilansAvventerInfotrygdHistorikk -> VenterPå.SegSelv(Venteårsak.INFOTRYGDHISTORIKK)
 
-            // Dissa er klink tøysete å ha venteårsak på
+            // *Start -familien venter ikke på noe som helst
             ArbeidstakerStart,
-            ArbeidsledigStart,
-            FrilansStart,
             SelvstendigStart,
+            ArbeidsledigStart,
+            FrilansStart -> null
+
+            // Ferdigstilte tilstander (herunder forkastede) venter ikke på noe
             Avsluttet,
             SelvstendigAvsluttet,
             TilInfotrygd -> null

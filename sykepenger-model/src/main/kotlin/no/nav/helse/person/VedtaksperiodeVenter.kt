@@ -115,6 +115,7 @@ internal data class Venteårsak(
         val BEREGNING = Venteårsak("BEREGNING", null)
         val UTBETALING = Venteårsak("UTBETALING", null)
         val VILKÅRSPRØVING = Venteårsak("VILKÅRSPRØVING", null)
+        val INFOTRYGDHISTORIKK = Venteårsak("INFOTRYGDHISTORIKK", null)
         val HJELP = Venteårsak("HJELP", null)
 
         internal infix fun Venteårsak.fordi(hvorfor: Hvorfor) = copy(hvorfor = hvorfor.name)

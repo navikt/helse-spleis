@@ -14,6 +14,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Venteårsak
+import no.nav.helse.person.Venteårsak.Companion.INFOTRYGDHISTORIKK
 import no.nav.helse.person.Venteårsak.Companion.INNTEKTSMELDING
 import no.nav.helse.person.Venteårsak.Companion.SØKNAD
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -148,6 +149,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
 
             assertVenterPå(
                 listOf(
+                    1.vedtaksperiode to INFOTRYGDHISTORIKK,
                     1.vedtaksperiode to INNTEKTSMELDING,
                     1.vedtaksperiode to INNTEKTSMELDING
                 )
@@ -156,6 +158,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             nyPeriode(mars, søknadId = søknadIdMars)
             assertVenterPå(
                 listOf(
+                    1.vedtaksperiode to INFOTRYGDHISTORIKK,
                     1.vedtaksperiode to INNTEKTSMELDING,
                     1.vedtaksperiode to INNTEKTSMELDING,
                     1.vedtaksperiode to INNTEKTSMELDING,
@@ -168,6 +171,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             val inntektsmeldingIdMars = håndterInntektsmelding(listOf(1.mars til 16.mars))
             assertVenterPå(
                 listOf(
+                    1.vedtaksperiode to INFOTRYGDHISTORIKK,
                     1.vedtaksperiode to INNTEKTSMELDING,
                     1.vedtaksperiode to INNTEKTSMELDING,
                     1.vedtaksperiode to INNTEKTSMELDING,
@@ -236,6 +240,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             nyPeriode(januar, søknadId = søknadId)
             assertVenterPå(
                 listOf(
+                    1.vedtaksperiode to INFOTRYGDHISTORIKK,
                     1.vedtaksperiode to INNTEKTSMELDING,
                     1.vedtaksperiode to INNTEKTSMELDING
                 )
@@ -245,6 +250,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
             assertVenterPå(
                 listOf(
+                    1.vedtaksperiode to INFOTRYGDHISTORIKK,
                     1.vedtaksperiode to INNTEKTSMELDING,
                     1.vedtaksperiode to INNTEKTSMELDING,
                     1.vedtaksperiode to SØKNAD
