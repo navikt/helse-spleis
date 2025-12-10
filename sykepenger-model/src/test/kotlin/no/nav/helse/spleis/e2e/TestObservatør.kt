@@ -14,7 +14,7 @@ import org.junit.jupiter.api.fail
 internal typealias InntektsmeldingId = UUID
 internal typealias VedtaksperiodeId = UUID
 
-internal class TestObservatør(person: Person? = null) : EventSubscription {
+internal class TestObservatør(person: Person? = null, other: TestObservatør? = null) : EventSubscription {
 
     internal val tilstandsendringer = person?.inspektør?.sisteVedtaksperiodeTilstander()?.mapValues { mutableListOf(it.value) }?.toMutableMap() ?: mutableMapOf()
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
@@ -34,7 +34,7 @@ internal class TestObservatør(person: Person? = null) : EventSubscription {
     val vedtaksperiodeVenter = mutableListOf<EventSubscription.VedtaksperiodeVenterEvent>()
     val inntektsmeldingFørSøknad = mutableListOf<EventSubscription.InntektsmeldingFørSøknadEvent>()
     val inntektsmeldingIkkeHåndtert = mutableListOf<InntektsmeldingId>()
-    val inntektsmeldingHåndtert = mutableListOf<Pair<InntektsmeldingId, VedtaksperiodeId>>()
+    val inntektsmeldingHåndtert: MutableList<Pair<InntektsmeldingId, VedtaksperiodeId>> = other?.inntektsmeldingHåndtert ?: mutableListOf()
     val skatteinntekterLagtTilGrunnEventer = mutableListOf<EventSubscription.SkatteinntekterLagtTilGrunnEvent>()
     val søknadHåndtert = mutableListOf<Pair<UUID, UUID>>()
     val vedtaksperiodeAnnullertEventer = mutableListOf<EventSubscription.VedtaksperiodeAnnullertEvent>()

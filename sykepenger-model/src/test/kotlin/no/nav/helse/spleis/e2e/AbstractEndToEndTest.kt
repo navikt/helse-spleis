@@ -137,10 +137,10 @@ internal abstract class AbstractEndToEndTest {
         ).håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
     }
 
-    protected fun createTestPerson(block: (regelverkslogg: Regelverkslogg) -> Person): Person {
+    protected fun createTestPerson(testObservatør: TestObservatør? = null, block: (regelverkslogg: Regelverkslogg) -> Person): Person {
         regelverkslogg = SubsumsjonsListLog()
         person = block(regelverkslogg)
-        observatør = TestObservatør(person)
+        observatør = TestObservatør(person, testObservatør)
         personlogg = Aktivitetslogg()
         ugyldigeSituasjoner = UgyldigeSituasjonerObservatør(person)
 
@@ -161,7 +161,7 @@ internal abstract class AbstractEndToEndTest {
     }
 
     internal fun reserialiser() {
-        createTestPerson {
+        createTestPerson(observatør) {
             val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
             gjenopprettFraJSONtekst(serialisertPerson.json, serialisertPerson.skjemaVersjon)
         }
