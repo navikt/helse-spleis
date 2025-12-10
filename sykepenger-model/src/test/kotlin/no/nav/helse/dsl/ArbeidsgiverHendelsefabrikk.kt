@@ -26,6 +26,7 @@ import no.nav.helse.hendelser.Inntektsendringer
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.fraInnteksmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
@@ -152,6 +153,24 @@ internal class ArbeidsgiverHendelsefabrikk(
 
     fun lagAvbruttSøknad(sykmeldingsperiode: Periode): AvbruttSøknad =
         AvbruttSøknad(sykmeldingsperiode, MeldingsreferanseId(UUID.randomUUID()), behandlingsporing)
+
+    internal fun lagInntektsopplysningerFraLagretInnteksmelding(
+        meldingsreferanseId: MeldingsreferanseId,
+        vedtaksperiodeId: UUID,
+        inntektsmeldingMeldingsreferanseId: MeldingsreferanseId,
+        inntektsmeldingMottatt: LocalDateTime,
+        inntekt: Inntekt,
+        refusjon: Inntekt
+    ) =
+        InntektsopplysningerFraLagretInnteksmelding(
+            meldingsreferanseId = meldingsreferanseId,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+            vedtaksperiodeId = vedtaksperiodeId,
+            inntetksmeldingMeldingsreferanseId = inntektsmeldingMeldingsreferanseId,
+            inntektsmeldingMottatt = inntektsmeldingMottatt,
+            inntekt = inntekt,
+            refusjon = refusjon
+    )
 
     internal fun lagInntektsmelding(
         arbeidsgiverperioder: List<Periode>,

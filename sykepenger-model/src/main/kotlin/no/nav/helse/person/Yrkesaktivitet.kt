@@ -35,6 +35,7 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -614,6 +615,11 @@ internal class Yrkesaktivitet private constructor(
         val tidligsteOverstyring = listOfNotNull(egenmeldingsoverstyring, inntektoverstyring, dagoverstyring, refusjonsoverstyring, inntektPåPeriode).tidligsteEventyr()
         // hvis tidligsteOverstyring er null så er verken egenmeldingsdager, dager, refusjon eller inntekt håndtert
         return tidligsteOverstyring
+    }
+
+    internal fun håndterInntektsopplysningerFraLagretInntektsmelding(eventBus: EventBus, inntektsopplysningerFraLagretInnteksmelding: InntektsopplysningerFraLagretInnteksmelding, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
+        vedtaksperioder.firstOrNull { it.id == inntektsopplysningerFraLagretInnteksmelding.vedtaksperiodeId }?.håndterInntektsopplysningerFraLagretInntektsmelding(eventBus, inntektsopplysningerFraLagretInnteksmelding, aktivitetsloggMedArbeidsgiverkontekst)
     }
 
     private fun håndterReplayAvInntektsmelding(eventBus: EventBus, inntektsmeldinger: List<Inntektsmelding>, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID): Revurderingseventyr? {

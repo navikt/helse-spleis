@@ -346,6 +346,26 @@ internal class TestPerson(
             harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet
         )
 
+        internal fun håndterInntektsopplysningerFraLagretInnteksmelding(
+            meldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+            inntektssmeldingMeldingsreferanseId: MeldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+            inntektsmeldingMottatt: LocalDateTime = LocalDateTime.now(),
+            vedtaksperiodeId: UUID,
+            inntekt: Inntekt,
+            refusjon: Inntekt
+        ): MeldingsreferanseId {
+            arbeidsgiverHendelsefabrikk.lagInntektsopplysningerFraLagretInnteksmelding(
+                meldingsreferanseId = meldingsreferanseId,
+                inntektsmeldingMeldingsreferanseId = inntektssmeldingMeldingsreferanseId,
+                inntektsmeldingMottatt = inntektsmeldingMottatt,
+                vedtaksperiodeId = vedtaksperiodeId,
+                inntekt = inntekt,
+                refusjon = refusjon
+            )
+            .håndter(Person::håndterInntektsopplysningerFraLagretInntektsmelding)
+            return meldingsreferanseId
+        }
+
         internal fun håndterInntektsmelding(
             arbeidsgiverperioder: List<Periode>,
             beregnetInntekt: Inntekt = INNTEKT,

@@ -27,6 +27,7 @@ import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsendringer
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
@@ -227,6 +228,13 @@ class Person private constructor(
         arbeidsgiver.inntektsmeldingFerdigbehandlet(eventBus, inntektsmelding, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, inntektsmelding, aktivitetsloggMedPersonkontekst)
+    }
+
+    fun håndterInntektsopplysningerFraLagretInntektsmelding(eventBus: EventBus, inntektsopplysningerFraLagretInnteksmelding: InntektsopplysningerFraLagretInnteksmelding, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler inntektsopplysninger fra lagret inntektmelding")
+        val arbeidsgiver = finnYrkesaktivitet(inntektsopplysningerFraLagretInnteksmelding.behandlingsporing)
+        arbeidsgiver.håndterInntektsopplysningerFraLagretInntektsmelding(eventBus, inntektsopplysningerFraLagretInnteksmelding, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(eventBus, inntektsopplysningerFraLagretInnteksmelding, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndterInntektsmeldingerReplay(eventBus: EventBus, replays: InntektsmeldingerReplay, aktivitetslogg: IAktivitetslogg) {
