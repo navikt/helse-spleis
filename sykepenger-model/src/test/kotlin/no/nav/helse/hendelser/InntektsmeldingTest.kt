@@ -21,6 +21,7 @@ import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -102,8 +103,8 @@ internal class InntektsmeldingTest {
     @Test
     fun `padder ikke med arbeidsdager i forkant av første fraværsdag uten arbeidsgiverperiode`() {
         inntektsmelding(emptyList(), førsteFraværsdag = 3.januar)
-        val tidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), januar)?.sykdomstidslinje
-        assertNull(tidslinje)
+        val tidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), januar).sykdomstidslinje
+        assertEquals(Sykdomstidslinje(), tidslinje)
     }
 
     @Test
@@ -211,11 +212,11 @@ internal class InntektsmeldingTest {
         inntektsmelding(emptyList(), førsteFraværsdag = 1.januar)
         assertNull(dager.inspektør.periode)
         assertEquals(emptySet<LocalDate>(), dager.inspektør.gjenståendeDager)
-        val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), januar)?.sykdomstidslinje
+        val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), januar).sykdomstidslinje
         dager.validerArbeidsgiverperiode(aktivitetslogg, januar, null)
         aktivitetslogg.assertVarsler(emptyList())
         aktivitetslogg.assertIngenFunksjonelleFeil()
-        assertNull(nyTidslinje)
+        assertEquals(Sykdomstidslinje(), nyTidslinje)
     }
 
     @Test
@@ -269,7 +270,7 @@ internal class InntektsmeldingTest {
     fun `arbeidsgiverperioden i inntektsmelding kan være tom`() {
         inntektsmelding(emptyList())
         val sykdomstidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), januar)?.sykdomstidslinje
-        assertNull(sykdomstidslinje)
+        assertEquals(Sykdomstidslinje(), sykdomstidslinje)
     }
 
     @Test
@@ -301,8 +302,8 @@ internal class InntektsmeldingTest {
         inntektsmelding(emptyList(), førsteFraværsdag = 2.januar)
         assertNull(dager.inspektør.periode)
         assertEquals(emptySet<LocalDate>(), dager.inspektør.gjenståendeDager)
-        val sykdomstidslinje = dager.bitAvInntektsmelding(aktivitetslogg, 2.januar til 31.januar)?.sykdomstidslinje
-        assertNull(sykdomstidslinje)
+        val sykdomstidslinje = dager.bitAvInntektsmelding(aktivitetslogg, 2.januar til 31.januar).sykdomstidslinje
+        assertEquals(Sykdomstidslinje(), sykdomstidslinje)
     }
 
     @Test

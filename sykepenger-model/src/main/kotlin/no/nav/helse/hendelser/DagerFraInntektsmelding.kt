@@ -149,13 +149,17 @@ internal class DagerFraInntektsmelding(
 
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 
-    internal fun bitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvArbeidsgiverperiode? {
-        val dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
-            .filter { it.overlapperMed(vedtaksperiode) }
-            .map { it.subset(vedtaksperiode) }
+    internal fun bitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, periodeÅVurdereDagerUtenNavAnsvar: Periode? = vedtaksperiode): BitAvArbeidsgiverperiode {
+        val nyeDagerNavOvertarAnsvar = periodeÅVurdereDagerUtenNavAnsvar?.let { vurderbarPeriode ->
+            dagerNavOvertarAnsvar
+                .filter { fraIm -> fraIm.overlapperMed(vurderbarPeriode) }
+                .map { fraIm -> fraIm.subset(vurderbarPeriode) }
+                .takeUnless { it.isEmpty() }
+        }
+
         val sykdomstidslinje = håndterDager(aktivitetslogg, vedtaksperiode)
-        if (sykdomstidslinje == null && dagerNavOvertarAnsvar.isEmpty()) return null
-        return BitAvArbeidsgiverperiode(hendelse.metadata, sykdomstidslinje ?: Sykdomstidslinje(), dagerNavOvertarAnsvar)
+        if (sykdomstidslinje == null && nyeDagerNavOvertarAnsvar == null) return tomBitAvInntektsmelding(aktivitetslogg, vedtaksperiode)
+        return BitAvArbeidsgiverperiode(hendelse.metadata, sykdomstidslinje ?: Sykdomstidslinje(), nyeDagerNavOvertarAnsvar)
     }
 
     internal fun tomBitAvInntektsmelding(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode): BitAvArbeidsgiverperiode {

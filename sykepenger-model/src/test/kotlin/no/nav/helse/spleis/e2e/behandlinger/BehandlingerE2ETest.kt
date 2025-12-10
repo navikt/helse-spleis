@@ -500,6 +500,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a2 {
             håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
             håndterInntektsmelding(emptyList(), førsteFraværsdag = 2.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeOpptjening")
+            assertEquals(listOf(2.januar.somPeriode()), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
         }
         a1 {
@@ -509,8 +510,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
         }
         a2 {
-            håndterInntektsmelding(listOf(2.januar til 17.januar))
-            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+            håndterOverstyrTidslinje((2.januar til 17.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+            assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)

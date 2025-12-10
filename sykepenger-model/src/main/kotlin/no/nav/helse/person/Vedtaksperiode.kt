@@ -1353,10 +1353,17 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndterDager(eventBus: EventBus, dager: DagerFraInntektsmelding, aktivitetslogg: IAktivitetslogg) {
-        val bit = dager.bitAvInntektsmelding(aktivitetslogg, periode) ?: dager.tomBitAvInntektsmelding(
-            aktivitetslogg,
-            periode
+        val periodeÅVurdereDagerUtenNavAnsvar = when (behandlinger.dagerNavOvertarAnsvar.isEmpty()) {
+            true -> periode
+            false -> null
+        }
+
+        val bit = dager.bitAvInntektsmelding(
+            aktivitetslogg = aktivitetslogg,
+            vedtaksperiode = periode,
+            periodeÅVurdereDagerUtenNavAnsvar = periodeÅVurdereDagerUtenNavAnsvar
         )
+
         håndterDager(eventBus, dager.hendelse, bit, aktivitetslogg) {
             dager.valider(aktivitetslogg, vedtaksperiodeId = id)
             dager.validerArbeidsgiverperiode(aktivitetslogg, periode, behandlinger.ventedager().dagerUtenNavAnsvar.dager)
