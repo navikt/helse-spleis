@@ -515,8 +515,54 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            håndterFørstegangssøknadSelvstendig(
+                februar,
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, 1.årlig, 2.årlig, 3.årlig, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true)
+                )
+            )
+
+            håndterYtelser(2.vedtaksperiode)
         }
     }
+
+    @Test
+    fun `Varsel om flere pensjonsgivende inntekter i en forlengelse når begge søknader kommer før vi vilkårsvurderer den første`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(
+                januar,
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, 1.årlig, 2.årlig, 3.årlig, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true)
+                )
+            )
+
+            håndterFørstegangssøknadSelvstendig(
+                februar,
+                pensjonsgivendeInntekter = listOf(
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, 1.årlig, 2.årlig, 3.årlig, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true)
+                )
+            )
+
+            assertVarsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`, 1.vedtaksperiode.filter())
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+
+
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertVarsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`, 2.vedtaksperiode.filter())
+            håndterYtelser(2.vedtaksperiode)
+        }
+    }
+
+
 
     @ParameterizedTest
     @CsvSource(
