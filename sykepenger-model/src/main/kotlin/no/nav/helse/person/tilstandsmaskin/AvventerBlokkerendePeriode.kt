@@ -36,7 +36,7 @@ internal fun <T> Vedtaksperiodetilstand.vurderÅGåVidereHvisOmAtOgDersomAt(vedt
     if (ChronoUnit.DAYS.between(vedtaksperiode.opprettet, LocalDateTime.now()) >= 90) return vurderÅGåVidere(vedtaksperiode)
     if (vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte()) return vurderÅGåVidere(vedtaksperiode)
 
-    if (!vedtaksperiode.kanAvklareInntekt() && Toggle.HoldIgjenPerioderUtenInntekt.enabled) {
+    if (!vedtaksperiode.harEksisterendeInntekt() && Toggle.HoldIgjenPerioderUtenInntekt.enabled) {
         aktivitetslogg.info("Hei, hei, hold litt på hesten! Vi står i ${this::class.simpleName} uten inntekt, dette var snodig..")
         return null
     }
