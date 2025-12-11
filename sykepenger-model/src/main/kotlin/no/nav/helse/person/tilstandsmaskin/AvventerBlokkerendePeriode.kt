@@ -1,8 +1,5 @@
 package no.nav.helse.person.tilstandsmaskin
 
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
@@ -31,22 +28,6 @@ internal fun Vedtaksperiodetilstand.bekreftAtPeriodenSkalBehandlesISpeilOgHarNok
     check(vedtaksperiode.refusjonstidslinje.isNotEmpty()) { "Periode i $this har ikke tilstrekkelige refusjonsopplysninger til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}." }
 }
 
-// Hei hei, jeg er bare skikkelig sprø funksjon som hjelper til å rydde opp i noen perioder som ikke har det helt som de bør
-internal fun Vedtaksperiodetilstand.vurderÅGåVidereHvisOmAtOgDersomAt(
-    vedtaksperiode: Vedtaksperiode,
-    aktivitetslogg: IAktivitetslogg,
-    vurderÅGåVidere: (vedtaksperiode: Vedtaksperiode) -> Unit
-) {
-    check(this in setOf(AvventerBlokkerendePeriode, AvventerInntektsopplysningerForAnnenArbeidsgiver, AvventerRefusjonsopplysningerAnnenPeriode, AvventerSøknadForOverlappendePeriode)) { "Hei! hva holder du på med??" }
-    if (ChronoUnit.DAYS.between(vedtaksperiode.opprettet, LocalDateTime.now()) >= 90) return vurderÅGåVidere(vedtaksperiode)
-    if (vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte()) return vurderÅGåVidere(vedtaksperiode)
-
-    if (!vedtaksperiode.harEksisterendeInntekt() && Toggle.HoldIgjenPerioderUtenInntekt.enabled) {
-        return aktivitetslogg.info("Hei, hei, hold litt på hesten! Vi står i ${this::class.simpleName} uten inntekt, dette var snodig..")
-    }
-    return vurderÅGåVidere(vedtaksperiode)
-}
-
 internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_BLOKKERENDE_PERIODE
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
@@ -64,24 +45,20 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vurderÅGåVidereHvisOmAtOgDersomAt(vedtaksperiode, aktivitetslogg) {
-            val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
-            when {
-                nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
-                vedtaksperiode.vilkårsgrunnlag == null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøving)
-                else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
-            }
+        val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
+        when {
+            nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
+            vedtaksperiode.vilkårsgrunnlag == null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøving)
+            else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
         }
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         vedtaksperiode.lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg)
-        vurderÅGåVidereHvisOmAtOgDersomAt(vedtaksperiode, aktivitetslogg) {
-            val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
-            when {
-                nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
-                else -> vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
-            }
+        val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
+        when {
+            nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
+            else -> vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
         return null
     }

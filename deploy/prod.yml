@@ -92,5 +92,3 @@ spec:
     value: NONE
   - name: JAVA_TOOL_OPTIONS
     value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-prod-eacd,-logtostderr,-minloglevel=1"
-  - name: HOLD_IGJEN_PERIODER_UTEN_INNTEKT
-    value: "true"
