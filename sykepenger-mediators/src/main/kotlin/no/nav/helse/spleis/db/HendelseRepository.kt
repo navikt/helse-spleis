@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
 import com.github.navikt.tbd_libs.sql_dsl.offsetDateTime
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.single
+import com.github.navikt.tbd_libs.sql_dsl.singleOrNull
 import com.github.navikt.tbd_libs.sql_dsl.string
 import java.util.UUID
 import javax.sql.DataSource
@@ -22,6 +23,7 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GRUNNBELØPSREGULE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.IDENT_OPPHØRT
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDINGER_REPLAY
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSOPPLYSNINGER_FRA_LAGRET_INNTEKTSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.KANSELLER_UTBETALING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.MINIMUM_SYKDOMSGRAD_VURDERT
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NAV_NO_INNTEKTSMELDING
@@ -68,6 +70,7 @@ import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsendringerMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
+import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
@@ -189,6 +192,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is AvbruttSøknadMessage -> AVBRUTT_SØKNAD
         is InntektsmeldingerReplayMessage -> INNTEKTSMELDINGER_REPLAY
         is MinimumSykdomsgradVurdertMessage -> MINIMUM_SYKDOMSGRAD_VURDERT
+        is InntektsopplysningerFraLagretInntektsmeldingMessage -> INNTEKTSOPPLYSNINGER_FRA_LAGRET_INNTEKTSMELDING
 
         is MigrateMessage,
         is AvstemmingMessage,
@@ -198,7 +202,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is UtbetalingshistorikkMessage,
         is InfotrygdendringMessage,
         is InntektsendringerMessage -> null // Disse trenger vi ikke å lagre
-
     }
 
     internal fun hentAlleHendelser(personidentifikator: Personidentifikator): Map<UUID, Hendelse> {
@@ -215,6 +218,19 @@ internal class HendelseRepository(private val dataSource: DataSource) {
                 )
             }
         }.associateBy { it.meldingsreferanseId }
+    }
+
+    internal fun hentInntektsmelding(personidentifikator: Personidentifikator, meldingId: MeldingsreferanseId): String? {
+        @Language("PostgreSQL")
+        val sql = "SELECT data FROM melding WHERE fnr = :fnr AND melding_id = :meldingId AND melding_type='INNTEKTSMELDING'"
+        return dataSource.connection {
+            prepareStatementWithNamedParameters(sql) {
+                withParameter("fnr", personidentifikator.toLong())
+                withParameter("meldingId", meldingId.id.toString())
+            }.singleOrNull { row ->
+                row.string("data")
+            }
+        }
     }
 
     private enum class Meldingstype {
@@ -267,6 +283,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         AVBRUTT_SØKNAD,
         INNTEKTSMELDINGER_REPLAY,
         MINIMUM_SYKDOMSGRAD_VURDERT,
-        SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
+        SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER,
+        INNTEKTSOPPLYSNINGER_FRA_LAGRET_INNTEKTSMELDING
     }
 }

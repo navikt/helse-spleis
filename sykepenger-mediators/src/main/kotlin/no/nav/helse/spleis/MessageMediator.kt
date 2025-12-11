@@ -30,6 +30,7 @@ import no.nav.helse.spleis.meldinger.IdentOpphørtRiver
 import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
 import no.nav.helse.spleis.meldinger.InntektsendringerRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
+import no.nav.helse.spleis.meldinger.InntektsopplysningerFraLagretInntektsmeldingRiver
 import no.nav.helse.spleis.meldinger.LpsOgAltinnInntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.MigrateRiver
 import no.nav.helse.spleis.meldinger.MinimumSykdomsgradVurdertRiver
@@ -79,6 +80,7 @@ import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsendringerMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
+import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
@@ -145,6 +147,7 @@ internal class MessageMediator(
             NavNoKorrigerteInntektsmeldingerRiver(it, this)
             NavNoSelvbestemtInntektsmeldingerRiver(it, this)
             InntektsmeldingerReplayRiver(it, this)
+            InntektsopplysningerFraLagretInntektsmeldingRiver(it, this)
             UtbetalingshistorikkRiver(it, this)
             UtbetalingshistorikkForFeriepengerRiver(it, this)
             YtelserRiver(it, this)
@@ -251,7 +254,8 @@ internal class MessageMediator(
         is PåminnelseMessage,
         is SkjønnsmessigFastsettelseMessage,
         is InntektsendringerMessage,
-        is GjenopptaBehandlingMessage -> false
+        is GjenopptaBehandlingMessage,
+        is InntektsopplysningerFraLagretInntektsmeldingMessage -> false
 
         // meldinger som må replayes/sendes på nytt ved feil får
         // en feilhåndtering som medfører at podden går ned
