@@ -3192,9 +3192,9 @@ internal class Vedtaksperiode private constructor(
         return behandlinger.ventedager().skalFatteVedtak
     }
 
-    internal fun måInnhenteInntektEllerRefusjon(): Boolean {
+    internal fun harInntektOgRefusjon(): Boolean {
         check(yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker) { "gir bare mening å kalle denne funksjonen for arbeidstakere" }
-        return refusjonstidslinje.isEmpty() || !harEksisterendeInntekt()
+        return refusjonstidslinje.isNotEmpty() && harEksisterendeInntekt()
     }
 
     internal fun harEksisterendeInntekt(): Boolean {
@@ -3853,10 +3853,9 @@ private fun nesteTilstandEtterIgangsattOverstyring(
     AvsluttetUtenUtbetaling,
     AvventerInntektsmelding -> when {
         vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> when {
-            vedtaksperiode.måInnhenteInntektEllerRefusjon() -> AvventerInntektsmelding
-            else -> nesteTilstandEtterInntekt(vedtaksperiode)
+            vedtaksperiode.harInntektOgRefusjon() -> nesteTilstandEtterInntekt(vedtaksperiode)
+            else -> AvventerInntektsmelding
         }
-
         else -> AvventerAvsluttetUtenUtbetaling
     }
 

@@ -258,7 +258,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
             håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
-            assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)

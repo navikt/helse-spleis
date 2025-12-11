@@ -22,7 +22,6 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
 
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         check(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) { "Forventer kun arbeidstakere her" }
-        //check(!vedtaksperiode.behandlinger.erTidligereVilkårspørvd()) { "En tidligere vilkårsprøvd periode skal ikke tilbake til AvventerInntektsmelding!" }
         trengerInntektsmeldingReplay(vedtaksperiode, eventBus)
     }
 
@@ -67,8 +66,8 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     }
 
     override fun replayUtført(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, hendelse)) return
         sendTrengerArbeidsgiveropplysninger(vedtaksperiode, eventBus)
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, hendelse)
     }
 
     override fun inntektsmeldingFerdigbehandlet(
@@ -88,21 +87,21 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
 
     private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse): Boolean {
         vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(eventBus, null, aktivitetslogg)
+        vedtaksperiode.lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg)
 
         if (!vedtaksperiode.skalArbeidstakerBehandlesISpeil()) {
             vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerAvsluttetUtenUtbetaling)
             return true
         }
 
-        // Litt special cases 🤏
-        if (vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte()) {
-            gåVidereMedInntekterFraAOrdningen(vedtaksperiode, aktivitetslogg, hendelse, eventBus)
+        if (vedtaksperiode.harInntektOgRefusjon()) {
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
             return true
         }
 
-        // Mer normalt 😊
-        if (!vedtaksperiode.måInnhenteInntektEllerRefusjon()) {
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
+        // Litt special cases 🤏
+        if (vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte()) {
+            gåVidereMedInntekterFraAOrdningen(vedtaksperiode, aktivitetslogg, hendelse, eventBus)
             return true
         }
 
