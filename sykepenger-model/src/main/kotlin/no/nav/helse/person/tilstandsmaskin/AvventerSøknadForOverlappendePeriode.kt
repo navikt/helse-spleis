@@ -18,7 +18,9 @@ internal data object AvventerSøknadForOverlappendePeriode : Vedtaksperiodetilst
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode)
         check(vedtaksperiode.avventerSøknad()) { "forventer å vente annen søknad" }
-        vedtaksperiode.sikreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg)
+        vedtaksperiode.lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg) {
+            aktivitetslogg.info("Denne perioden har ikke faktaavklart inntekt, så håper det er med overlegg at den skal bruke skatt!")
+        }
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 

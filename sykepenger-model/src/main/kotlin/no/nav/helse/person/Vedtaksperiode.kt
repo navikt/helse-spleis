@@ -3212,26 +3212,38 @@ internal class Vedtaksperiode private constructor(
         return perioderMedSammeSkjæringstidspunkt.harArbeidstakerFaktaavklartInntekt()
     }
 
-    internal fun sikreArbeidstakerFaktaavklartInntektPåPeriode(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+    internal fun lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, skalBrukeSkatt: () -> Unit = {}) {
+        check(yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker) { "gir bare mening å kalle denne funksjonen for arbeidstakere" }
         if ((behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null) return
 
         check(behandlinger.åpenForEndring()) { "Hva holder du på med? Denne funksjonen skal ikke brukes av på lukkede perioder" }
 
-        val perioderMedSammeSkjæringstidspunkt = person
-            .vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-            .filter { it.yrkesaktivitet === this.yrkesaktivitet }
+        val grunnlag = vilkårsgrunnlag
 
-        val faktaavklartInntekt =
-            perioderMedSammeSkjæringstidspunkt.arbeidstakerFaktaavklarteInntekter()
-                ?.besteInntekt()
-                ?.faktaavklartInntekt
-                ?: return aktivitetslogg.info("Denne perioden har ikke faktaavklart inntekt, så håper det er overlegg at den skal bruke skatt!")
+        val faktaavklartInntektFraVilkårsgrunnlag = grunnlag
+            ?.inntektsgrunnlag
+            ?.arbeidsgiverInntektsopplysninger
+            ?.firstOrNull { it.orgnummer == yrkesaktivitet.organisasjonsnummer }
+            ?.faktaavklartInntekt
+            ?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }
+
+        val faktaavklartInntektFraPerioderMedSammeSkjæringstidspunkt by lazy {
+            val perioderMedSammeSkjæringstidspunkt = person
+                .vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+                .filter { it.yrkesaktivitet === this.yrkesaktivitet }
+            perioderMedSammeSkjæringstidspunkt.arbeidstakerFaktaavklarteInntekter()?.besteInntekt()?.faktaavklartInntekt
+        }
+
+        val benyttetFaktaavklartInntekt = faktaavklartInntektFraVilkårsgrunnlag ?: faktaavklartInntektFraPerioderMedSammeSkjæringstidspunkt
+
+        if (benyttetFaktaavklartInntekt == null && grunnlag == null) return skalBrukeSkatt()
+        if (benyttetFaktaavklartInntekt == null) return // Her har vi allerede lagt skatt til grunn/RV_SV_2-situasjon, så sånn er det med den saken..
 
         behandlinger.håndterFaktaavklartInntekt(
             behandlingEventBus = eventBus.behandlingEventBus,
-            arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
+            arbeidstakerFaktaavklartInntekt = benyttetFaktaavklartInntekt,
             aktivitetslogg = aktivitetslogg,
-            dokumentsporing = inntektsmeldingInntekt(faktaavklartInntekt.inntektsdata.hendelseId)
+            dokumentsporing = inntektsmeldingInntekt(benyttetFaktaavklartInntekt.inntektsdata.hendelseId)
         )
     }
 

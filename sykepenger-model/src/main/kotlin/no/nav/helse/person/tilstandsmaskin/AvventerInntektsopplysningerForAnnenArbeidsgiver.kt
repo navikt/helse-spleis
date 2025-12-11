@@ -10,7 +10,9 @@ internal data object AvventerInntektsopplysningerForAnnenArbeidsgiver : Vedtaksp
 
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode)
-        vedtaksperiode.sikreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg)
+        vedtaksperiode.lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg) {
+            aktivitetslogg.info("Denne perioden har ikke faktaavklart inntekt, så håper det er med overlegg at den skal bruke skatt!")
+        }
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
