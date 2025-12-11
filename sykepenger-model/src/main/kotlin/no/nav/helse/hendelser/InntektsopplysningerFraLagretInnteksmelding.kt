@@ -12,7 +12,7 @@ import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.økonomi.Inntekt
 
-class InntektsopplysningerFraLagretInnteksmelding(
+class InntektsopplysningerFraLagretInnteksmelding private constructor(
     meldingsreferanseId: MeldingsreferanseId,
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     internal val vedtaksperiodeId: UUID,
@@ -50,4 +50,21 @@ class InntektsopplysningerFraLagretInnteksmelding(
         avsender = ARBEIDSGIVER,
         tidsstempel = inntektsmeldingMottatt
     ))
+
+    class Builder(
+        private val meldingsreferanseId: MeldingsreferanseId,
+        private val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
+        private val vedtaksperiodeId: UUID,
+        val inntektsmeldingMeldingsreferanseId: MeldingsreferanseId,
+    ) {
+        fun build(inntekt: Inntekt, refusjon: Inntekt, mottatt: LocalDateTime) = InntektsopplysningerFraLagretInnteksmelding(
+            meldingsreferanseId = meldingsreferanseId,
+            behandlingsporing = behandlingsporing,
+            vedtaksperiodeId = vedtaksperiodeId,
+            inntetksmeldingMeldingsreferanseId = inntektsmeldingMeldingsreferanseId,
+            inntekt = inntekt,
+            refusjon = refusjon,
+            inntektsmeldingMottatt = mottatt
+        )
+    }
 }

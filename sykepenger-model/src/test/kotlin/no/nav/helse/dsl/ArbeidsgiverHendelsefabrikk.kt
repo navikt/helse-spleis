@@ -162,15 +162,12 @@ internal class ArbeidsgiverHendelsefabrikk(
         inntekt: Inntekt,
         refusjon: Inntekt
     ) =
-        InntektsopplysningerFraLagretInnteksmelding(
+        InntektsopplysningerFraLagretInnteksmelding.Builder(
             meldingsreferanseId = meldingsreferanseId,
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             vedtaksperiodeId = vedtaksperiodeId,
-            inntetksmeldingMeldingsreferanseId = inntektsmeldingMeldingsreferanseId,
-            inntektsmeldingMottatt = inntektsmeldingMottatt,
-            inntekt = inntekt,
-            refusjon = refusjon
-    )
+            inntektsmeldingMeldingsreferanseId = inntektsmeldingMeldingsreferanseId
+        ).build(inntekt, refusjon, inntektsmeldingMottatt)
 
     internal fun lagInntektsmelding(
         arbeidsgiverperioder: List<Periode>,

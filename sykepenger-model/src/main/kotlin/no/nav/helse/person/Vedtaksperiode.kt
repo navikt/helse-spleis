@@ -730,23 +730,19 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (tilstand !is AvventerInntektsmelding) return aktivitetsloggMedVedtaksperiodekontekst.info("Håndterer ikke inntektsopplysninger fra lagret inntektsmelding i tilstand ${tilstand::class.simpleName}")
 
-        if (behandlinger.faktaavklartInntekt == null) {
-            behandlinger.håndterFaktaavklartInntekt(
-                behandlingEventBus = eventBus.behandlingEventBus,
-                arbeidstakerFaktaavklartInntekt = inntektsopplysningerFraLagretInnteksmelding.faktaavklartInntekt(skjæringstidspunkt),
-                aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst,
-                dokumentsporing = inntektsmeldingInntekt(inntektsopplysningerFraLagretInnteksmelding.metadata.meldingsreferanseId)
-            )
-        }
+        behandlinger.håndterFaktaavklartInntekt(
+            behandlingEventBus = eventBus.behandlingEventBus,
+            arbeidstakerFaktaavklartInntekt = inntektsopplysningerFraLagretInnteksmelding.faktaavklartInntekt(skjæringstidspunkt),
+            aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst,
+            dokumentsporing = inntektsmeldingInntekt(inntektsopplysningerFraLagretInnteksmelding.metadata.meldingsreferanseId)
+        )
 
-        if (behandlinger.refusjonstidslinje().isEmpty()) {
-            behandlinger.håndterRefusjonstidslinje(
-                behandlingEventBus = eventBus.behandlingEventBus,
-                dokumentsporing = inntektsmeldingRefusjon(inntektsopplysningerFraLagretInnteksmelding.inntetksmeldingMeldingsreferanseId),
-                aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst,
-                benyttetRefusjonsopplysninger = inntektsopplysningerFraLagretInnteksmelding.refusjonstidslinkje(periode)
-            )
-        }
+        behandlinger.håndterRefusjonstidslinje(
+            behandlingEventBus = eventBus.behandlingEventBus,
+            dokumentsporing = inntektsmeldingRefusjon(inntektsopplysningerFraLagretInnteksmelding.inntetksmeldingMeldingsreferanseId),
+            aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst,
+            benyttetRefusjonsopplysninger = inntektsopplysningerFraLagretInnteksmelding.refusjonstidslinkje(periode)
+        )
 
         // En mer eller mindre tilfeldig IM-varsel for å sikre at perioden ikke blir automatisert
         aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
