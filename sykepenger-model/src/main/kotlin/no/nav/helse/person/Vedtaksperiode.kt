@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 import java.util.*
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
@@ -2944,16 +2943,7 @@ internal class Vedtaksperiode private constructor(
             return overstyring
         }
 
-        sjekkInntekt(aktivitetslogg)
-
         return håndterPåminnelse(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)
-    }
-
-    private fun sjekkInntekt(aktivitetslogg: IAktivitetslogg) {
-        if (tilstand !in setOf(AvventerSøknadForOverlappendePeriode, AvventerInntektsopplysningerForAnnenArbeidsgiver, AvventerRefusjonsopplysningerAnnenPeriode, AvventerBlokkerendePeriode)) return
-        if (ChronoUnit.DAYS.between(opprettet, oppdatert) >= 90) return
-        if (kanAvklareInntekt()) return
-        aktivitetslogg.info("Mangler inntekt i tilstand ${tilstand::class.simpleName}")
     }
 
     override fun toString() =

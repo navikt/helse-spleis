@@ -34,6 +34,7 @@ internal data object AvventerSøknadForOverlappendePeriode : Vedtaksperiodetilst
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val ventetMinstTreMåneder = påminnelse.når(Påminnelse.Predikat.VentetMinst(Period.ofMonths(3)))
         val forkasteOverlappendeSykmeldingsperidoer = påminnelse.når(Påminnelse.Predikat.Flagg("forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"))
+        vedtaksperiode.lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg)
         if (ventetMinstTreMåneder || forkasteOverlappendeSykmeldingsperidoer) {
             aktivitetslogg.varsel(Varselkode.RV_SY_4)
             vedtaksperiode.person.fjernSykmeldingsperiode(vedtaksperiode.periode)
