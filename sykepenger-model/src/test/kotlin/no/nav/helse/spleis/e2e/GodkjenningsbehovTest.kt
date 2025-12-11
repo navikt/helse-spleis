@@ -292,7 +292,6 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
 
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

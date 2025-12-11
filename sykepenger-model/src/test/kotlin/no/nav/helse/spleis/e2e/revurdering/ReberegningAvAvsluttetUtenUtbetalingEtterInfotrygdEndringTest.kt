@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -21,7 +20,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
@@ -56,7 +54,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertEquals(emptyList<Periode>(), inspektør.venteperiode(1.vedtaksperiode))
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
         assertIngenOverlappendeInfotrygdutbetaling()

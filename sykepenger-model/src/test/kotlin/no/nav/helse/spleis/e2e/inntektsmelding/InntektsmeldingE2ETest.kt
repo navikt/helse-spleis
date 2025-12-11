@@ -48,7 +48,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -2630,8 +2629,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(3.vedtaksperiode)
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-
-        assertVarsel(RV_IV_7, 3.vedtaksperiode.filter())
 
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)

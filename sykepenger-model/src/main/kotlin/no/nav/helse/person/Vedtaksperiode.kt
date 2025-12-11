@@ -3216,6 +3216,29 @@ internal class Vedtaksperiode private constructor(
         return perioderMedSammeSkjæringstidspunkt.harArbeidstakerFaktaavklartInntekt()
     }
 
+    internal fun sikreArbeidstakerFaktaavklartInntektPåPeriode(eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+        if ((behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null) return
+
+        check(behandlinger.åpenForEndring()) { "Hva holder du på med? Denne funksjonen skal ikke brukes av på lukkede perioder" }
+
+        val perioderMedSammeSkjæringstidspunkt = person
+            .vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+            .filter { it.yrkesaktivitet === this.yrkesaktivitet }
+
+        val faktaavklartInntekt =
+            perioderMedSammeSkjæringstidspunkt.arbeidstakerFaktaavklarteInntekter()
+                ?.besteInntekt()
+                ?.faktaavklartInntekt
+                ?: return aktivitetslogg.info("Denne perioden har ikke faktaavklart inntekt, så håper det er overlegg at den skal bruke skatt!")
+
+        behandlinger.håndterFaktaavklartInntekt(
+            behandlingEventBus = eventBus.behandlingEventBus,
+            arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
+            aktivitetslogg = aktivitetslogg,
+            dokumentsporing = inntektsmeldingInntekt(faktaavklartInntekt.inntektsdata.hendelseId)
+        )
+    }
+
     internal fun førstePeriodeSomVenterPåRefusjonsopplysninger(): Vedtaksperiode? {
         return perioderSomMåHensyntasVedBeregning()
             .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }

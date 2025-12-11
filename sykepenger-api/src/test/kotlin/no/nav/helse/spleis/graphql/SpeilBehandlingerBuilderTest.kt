@@ -468,12 +468,12 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) medHendelser setOf(søknadA1Forlengelse, skjønnsfastsettelse)
+                beregnetPeriode(0) medHendelser setOf(søknadA1Forlengelse, imA1, skjønnsfastsettelse)
                 beregnetPeriode(1) medHendelser setOf(søknadA1, imA1, skjønnsfastsettelse)
             }
             1.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) medHendelser setOf(søknadA1Forlengelse)
+                beregnetPeriode(0) medHendelser setOf(søknadA1Forlengelse, imA1)
                 beregnetPeriode(1) medHendelser setOf(søknadA1, imA1)
             }
         }
@@ -481,12 +481,12 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) medHendelser setOf(søknadA2Forlengelse, skjønnsfastsettelse)
+                beregnetPeriode(0) medHendelser setOf(søknadA2Forlengelse, imA2, skjønnsfastsettelse)
                 beregnetPeriode(1) medHendelser setOf(søknadA2, imA2, skjønnsfastsettelse)
             }
             1.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) medHendelser setOf(søknadA2Forlengelse)
+                beregnetPeriode(0) medHendelser setOf(søknadA2Forlengelse, imA2)
                 beregnetPeriode(1) medHendelser setOf(søknadA2, imA2)
             }
         }

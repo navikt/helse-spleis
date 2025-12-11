@@ -10,6 +10,7 @@ internal data object AvventerRefusjonsopplysningerAnnenPeriode : Vedtaksperiodet
 
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode)
+        vedtaksperiode.sikreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 

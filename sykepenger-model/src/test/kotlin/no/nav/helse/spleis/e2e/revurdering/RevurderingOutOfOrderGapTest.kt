@@ -1111,7 +1111,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(januarId, AVVENTER_VILKÅRSPRØVING)
 
         håndterVilkårsgrunnlag(januarId)
-        assertVarsel(Varselkode.RV_IV_7, januarId.filter())
 
         håndterYtelser(januarId)
         håndterSimulering(januarId)

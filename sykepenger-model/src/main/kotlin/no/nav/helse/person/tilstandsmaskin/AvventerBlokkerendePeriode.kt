@@ -33,6 +33,7 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode)
         check(!vedtaksperiode.avventerSøknad()) { "forventer ikke å vente annen søknad" }
+        vedtaksperiode.sikreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 

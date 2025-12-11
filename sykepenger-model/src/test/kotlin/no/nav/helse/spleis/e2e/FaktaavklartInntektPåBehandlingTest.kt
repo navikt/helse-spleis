@@ -21,13 +21,11 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt.ArbeistakerFaktaavklartInntektView
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -45,25 +43,32 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterSøknad(februar)
             nullstillTilstandsendringer()
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Arbeidsdag)))
             assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
-            assertNotNull(inspektør.faktaavklartInntekt(1.vedtaksperiode))
+            val inntekten = inspektør.faktaavklartInntekt(1.vedtaksperiode)
+            assertNotNull(inntekten)
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertNull(inspektør.faktaavklartInntekt(2.vedtaksperiode))
+
+            assertEquals(inntekten, inspektør.faktaavklartInntekt(2.vedtaksperiode))
             assertEquals(2.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(orgnummer = a1, forventetFaktaavklartInntekt = INNTEKT, forventetKildeId = im)
+            }
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)
-            assertVarsel(RV_IV_10, 2.vedtaksperiode.filter())
-            assertEquals(1, observatør.skatteinntekterLagtTilGrunnEventer.size)
+            assertInntektsgrunnlag(2.februar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(orgnummer = a1, forventetFaktaavklartInntekt = INNTEKT, forventetKildeId = im)
+            }
+            assertEquals(0, observatør.skatteinntekterLagtTilGrunnEventer.size)
         }
     }
 

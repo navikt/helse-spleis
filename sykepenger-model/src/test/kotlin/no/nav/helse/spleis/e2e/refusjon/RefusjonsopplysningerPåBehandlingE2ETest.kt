@@ -831,8 +831,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             nyPeriode(februar)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
 
-            assertVarsler(2.vedtaksperiode, Varselkode.RV_IV_7)
-
             assertTrue(inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje.isNotEmpty())
             assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
         }
@@ -862,8 +860,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(vedtaksperiodeJanuar)
             håndterUtbetalt()
 
-            assertVarsler(vedtaksperiodeJanuar, Varselkode.RV_IV_7)
-
             assertSisteTilstand(vedtaksperiodeFebruar, AVVENTER_HISTORIKK)
             assertTrue(inspektør.vedtaksperioder(vedtaksperiodeFebruar).refusjonstidslinje.isNotEmpty())
 
@@ -876,8 +872,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             nyttVedtak(februar)
             nyPeriode(januar)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
-
-            assertVarsler(2.vedtaksperiode, Varselkode.RV_IV_7)
 
             assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje.isNotEmpty())
         }

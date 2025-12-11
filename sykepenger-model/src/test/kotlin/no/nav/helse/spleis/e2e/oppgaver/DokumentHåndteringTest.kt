@@ -321,13 +321,15 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertEquals(
             setOf(
                 Dokumentsporing.søknad(søknad3),
-                Dokumentsporing.inntektsmeldingRefusjon(im)
+                Dokumentsporing.inntektsmeldingRefusjon(im),
+                Dokumentsporing.inntektsmeldingInntekt(im)
             ), inspektør.hendelser(3.vedtaksperiode)
         )
         assertEquals(
             setOf(
                 Dokumentsporing.søknad(søknad4),
-                Dokumentsporing.inntektsmeldingRefusjon(im)
+                Dokumentsporing.inntektsmeldingRefusjon(im),
+                Dokumentsporing.inntektsmeldingInntekt(im)
             ), inspektør.hendelser(4.vedtaksperiode)
         )
 
