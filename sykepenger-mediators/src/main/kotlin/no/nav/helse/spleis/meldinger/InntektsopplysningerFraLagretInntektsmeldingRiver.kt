@@ -21,6 +21,7 @@ internal class InntektsopplysningerFraLagretInntektsmeldingRiver(
 
     override fun validate(message: JsonMessage) {
         message.requireKey( "vedtaksperiodeId", "organisasjonsnummer", "fødselsnummer", "inntektsmeldingMeldingsreferanseId")
+        message.interestedIn("inntektsmeldingOrganisasjonsnummer")
     }
 
     override fun createMessage(packet: JsonMessage) = InntektsopplysningerFraLagretInntektsmeldingMessage(

@@ -741,7 +741,7 @@ internal class Vedtaksperiode private constructor(
             behandlingEventBus = eventBus.behandlingEventBus,
             dokumentsporing = inntektsmeldingRefusjon(inntektsopplysningerFraLagretInnteksmelding.inntetksmeldingMeldingsreferanseId),
             aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst,
-            benyttetRefusjonsopplysninger = inntektsopplysningerFraLagretInnteksmelding.refusjonstidslinkje(periode)
+            benyttetRefusjonsopplysninger = inntektsopplysningerFraLagretInnteksmelding.refusjonstidslinje(periode)
         )
 
         // En mer eller mindre tilfeldig IM-varsel for å sikre at perioden ikke blir automatisert

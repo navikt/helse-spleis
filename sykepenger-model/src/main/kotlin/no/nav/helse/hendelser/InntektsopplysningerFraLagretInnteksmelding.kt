@@ -45,7 +45,7 @@ class InntektsopplysningerFraLagretInnteksmelding private constructor(
         )
     )
 
-    internal fun refusjonstidslinkje(periode: Periode) = Beløpstidslinje.fra(periode, refusjon, Kilde(
+    internal fun refusjonstidslinje(periode: Periode) = Beløpstidslinje.fra(periode, refusjon, Kilde(
         meldingsreferanseId = inntetksmeldingMeldingsreferanseId,
         avsender = ARBEIDSGIVER,
         tidsstempel = inntektsmeldingMottatt
@@ -56,6 +56,7 @@ class InntektsopplysningerFraLagretInnteksmelding private constructor(
         private val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         private val vedtaksperiodeId: UUID,
         val inntektsmeldingMeldingsreferanseId: MeldingsreferanseId,
+        val inntektsmeldingOrganisasjonsnummer: String
     ) {
         fun build(inntekt: Inntekt, refusjon: Inntekt, mottatt: LocalDateTime) = InntektsopplysningerFraLagretInnteksmelding(
             meldingsreferanseId = meldingsreferanseId,

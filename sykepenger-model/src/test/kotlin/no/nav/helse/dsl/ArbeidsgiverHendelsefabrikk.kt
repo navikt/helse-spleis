@@ -166,7 +166,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             meldingsreferanseId = meldingsreferanseId,
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
             vedtaksperiodeId = vedtaksperiodeId,
-            inntektsmeldingMeldingsreferanseId = inntektsmeldingMeldingsreferanseId
+            inntektsmeldingMeldingsreferanseId = inntektsmeldingMeldingsreferanseId,
+            inntektsmeldingOrganisasjonsnummer = organisasjonsnummer
         ).build(inntekt, refusjon, inntektsmeldingMottatt)
 
     internal fun lagInntektsmelding(

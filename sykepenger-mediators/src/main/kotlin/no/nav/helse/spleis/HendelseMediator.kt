@@ -311,7 +311,7 @@ internal class HendelseMediator(
         val inntektsmelding = hendelseRepository.hentInntektsmelding(
             personidentifikator = Personidentifikator(message.meldingsporing.fødselsnummer),
             meldingId = inntektsopplysningerFraLagretInnteksmeldingBuilder.inntektsmeldingMeldingsreferanseId
-        )?.let { objectmapper.readTree(it) } ?: return
+        )?.let { objectmapper.readTree(it).takeIf { json -> json.path("virksomhetsnummer").asText() == inntektsopplysningerFraLagretInnteksmeldingBuilder.inntektsmeldingOrganisasjonsnummer } } ?: return
 
         val inntektsopplysningerFraLagretInnteksmelding = inntektsopplysningerFraLagretInnteksmeldingBuilder.build(
             inntekt = inntektsmelding.path("beregnetInntekt").asDouble().månedlig,
