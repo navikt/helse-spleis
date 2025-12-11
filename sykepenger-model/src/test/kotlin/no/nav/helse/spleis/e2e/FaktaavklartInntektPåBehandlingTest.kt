@@ -23,9 +23,11 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt.ArbeistakerFaktaavklartInntektView
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -38,12 +40,40 @@ import org.junit.jupiter.api.assertNull
 internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
 
     @Test
+    fun `Om skjæringstidspunktet flytter på seg mens man står i en tilstand man antar man har inntekt så ender vi opp med å bruke skatt`() {
+        a1 {
+            håndterSøknad(januar)
+            håndterSøknad(februar)
+            nullstillTilstandsendringer()
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Arbeidsdag)))
+            assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+
+            assertNotNull(inspektør.faktaavklartInntekt(1.vedtaksperiode))
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertNull(inspektør.faktaavklartInntekt(2.vedtaksperiode))
+            assertEquals(2.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            assertVarsel(RV_IV_10, 2.vedtaksperiode.filter())
+            assertEquals(1, observatør.skatteinntekterLagtTilGrunnEventer.size)
+        }
+    }
+
+    @Test
     fun `Ny vilkårsprøving etter bruk av inntekter fra aordningen`() {
         a1 {
             håndterSøknad(2.januar til 31.januar)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsler(1.vedtaksperiode, Varselkode.RV_IV_10)
+            assertVarsler(1.vedtaksperiode, RV_IV_10)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
@@ -309,7 +339,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertNull(inspektør.faktaavklartInntekt(1.vedtaksperiode))
-            assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
         }
     }
 
