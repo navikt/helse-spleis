@@ -225,7 +225,7 @@ internal class Vedtaksperiode private constructor(
     internal val id: UUID,
     tilstand: Vedtaksperiodetilstand,
     internal val behandlinger: Behandlinger,
-    private val opprettet: LocalDateTime,
+    internal val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime = opprettet,
     private val regelverkslogg: Regelverkslogg
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {

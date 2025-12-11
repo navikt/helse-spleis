@@ -41,6 +41,8 @@ internal data object AvventerSøknadForOverlappendePeriode : Vedtaksperiodetilst
     }
 
     private fun gåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
+        vurderÅGåVidereHvisOmAtOgDersomAt(vedtaksperiode, aktivitetslogg) {
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
+        }
     }
 }
