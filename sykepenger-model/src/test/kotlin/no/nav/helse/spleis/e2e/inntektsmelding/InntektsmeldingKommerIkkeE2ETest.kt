@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
 import java.time.YearMonth
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -51,6 +52,15 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
             assertEquals(0, observatør.skatteinntekterLagtTilGrunnEventer.size)
+            assertForventetFeil(
+                "Det hadde vært mye bedre om vi kunne brukt forrige sykdomstilfelle sitt skjæringstidspunkt enn å finne på nye, falske skjæringstidspunkt i tilfelle friskmeldingsperioder",
+                nå = {
+                    assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.februar, listOf(1.januar til 16.januar))
+                },
+                ønsket = {
+                    assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+                })
+
         }
     }
 
