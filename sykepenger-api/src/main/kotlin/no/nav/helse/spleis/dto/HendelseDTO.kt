@@ -11,7 +11,6 @@ enum class HendelsetypeDto {
     SENDT_SØKNAD_NAV,
     SENDT_SØKNAD_FRILANS,
     SENDT_SØKNAD_SELVSTENDIG,
-    SENDT_SØKNAD_JORDBRUKER,
     SENDT_SØKNAD_ARBEIDSGIVER,
     SENDT_SØKNAD_ARBEIDSLEDIG,
     INNTEKTSMELDING,
@@ -101,17 +100,7 @@ data class HendelseDTO(
             rapportertdato = rapportertdato,
             sendtNav = sendtNav,
         )
-
-        fun sendtSøknadJordbruker(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtNav: LocalDateTime) = HendelseDTO(
-            type = HendelsetypeDto.SENDT_SØKNAD_JORDBRUKER,
-            id = id,
-            eksternDokumentId = eksternDokumentId,
-            fom = fom,
-            tom = tom,
-            rapportertdato = rapportertdato,
-            sendtNav = sendtNav,
-        )
-
+        
         fun sendtSøknadArbeidsledig(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtNav: LocalDateTime) = HendelseDTO(
             type = HendelsetypeDto.SENDT_SØKNAD_ARBEIDSLEDIG,
             id = id,

@@ -60,7 +60,6 @@ internal abstract class AbstractSpeilBuilderTest {
         const val a2 = "a2"
         const val a3 = "a3"
         const val selvstendig = "SELVSTENDIG"
-        const val jordbruker = "JORDBRUKER"
         val INNTEKT = 48000.månedlig
 
         private val personfabrikk = PersonHendelsefabrikk()
@@ -68,13 +67,11 @@ internal abstract class AbstractSpeilBuilderTest {
         private val a2fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2))
         private val a3fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a3))
         private val selvstendigFabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Selvstendig)
-        private val jordbrukerfabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Jordbruker)
         private val fabrikker = mapOf(
             a1 to a1fabrikk,
             a2 to a2fabrikk,
             a3 to a3fabrikk,
-            "SELVSTENDIG" to selvstendigFabrikk,
-            "JORDBRUKER" to jordbrukerfabrikk
+            "SELVSTENDIG" to selvstendigFabrikk
         )
     }
 
@@ -168,8 +165,8 @@ internal abstract class AbstractSpeilBuilderTest {
     ): UUID {
         val søknadId = UUID.randomUUID()
         val fabrikk = when (arbeidssituasjon) {
-            Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> selvstendigFabrikk
-            Søknad.Arbeidssituasjon.JORDBRUKER -> jordbrukerfabrikk
+            Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
+            Søknad.Arbeidssituasjon.JORDBRUKER -> selvstendigFabrikk
             Søknad.Arbeidssituasjon.ARBEIDSTAKER,
             Søknad.Arbeidssituasjon.ARBEIDSLEDIG,
             Søknad.Arbeidssituasjon.FRILANSER,

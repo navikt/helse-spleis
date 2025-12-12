@@ -1,0 +1,12 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "SELVSTENDIG",
+      "yrkesaktivitetstype": "SELVSTENDIG"
+    },
+    {
+      "organisasjonsnummer": "123456789",
+      "yrkesaktivitetstype": "ARBEIDSTAKER"
+    }
+  ]
+}

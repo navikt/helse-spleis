@@ -110,7 +110,6 @@ private val HendelseMessage.kontekstnavn
         is NyArbeidsledigSøknadMessage,
         is NyArbeidsledigTidligereArbeidstakerSøknadMessage,
         is NyFrilansSøknadMessage,
-        is NyJordbrukerSøknadMessage,
         is NySelvstendigSøknadMessage,
         is NySøknadMessage -> "Sykmelding"
 
@@ -120,7 +119,6 @@ private val HendelseMessage.kontekstnavn
         is SendtSøknadFrilansMessage,
         is SendtSøknadNavMessage,
         is SendtSøknadFiskerMessage,
-        is SendtSøknadJordbrukerMessage,
         is SendtSøknadAnnetMessage,
         is SendtSøknadSelvstendigMessage -> "Søknad"
 

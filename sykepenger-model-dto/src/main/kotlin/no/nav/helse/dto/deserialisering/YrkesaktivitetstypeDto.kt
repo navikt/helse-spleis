@@ -4,6 +4,5 @@ enum class YrkesaktivitetstypeDto {
   ARBEIDSLEDIG,
   ARBEIDSTAKER,
   FRILANS,
-  SELVSTENDIG,
-  JORDBRUKER
+  SELVSTENDIG
 }

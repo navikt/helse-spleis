@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.jordbruker
+import no.nav.helse.dsl.selvstendig
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 internal class JordbrukerTest : AbstractDslTest() {
     @Test
     fun `tar inn jordbruker, men forkaster perioden`() = Toggle.Jordbruker.disable {
-        jordbruker {
+        selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
             assertInfo("Har ikke støtte for søknadstypen JORDBRUKER", 1.vedtaksperiode.filter())
             assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
@@ -29,7 +29,7 @@ internal class JordbrukerTest : AbstractDslTest() {
 
     @Test
     fun `jordbruker har 100 prosent dekningsgrad og egen klassekode`() = Toggle.Jordbruker.enable {
-        jordbruker {
+        selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)

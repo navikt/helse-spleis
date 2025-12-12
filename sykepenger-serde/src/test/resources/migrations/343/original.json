@@ -1,0 +1,12 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "JORDBRUKER",
+      "yrkesaktivitetstype": "JORDBRUKER"
+    },
+    {
+      "organisasjonsnummer": "123456789",
+      "yrkesaktivitetstype": "ARBEIDSTAKER"
+    }
+  ]
+}

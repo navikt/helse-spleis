@@ -513,7 +513,6 @@ class Person private constructor(
                 is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> aktivitetslogg.info("Ny yrkesaktivitet som Arbeidstaker med organisasjonsnummer ${behandlingsporing.organisasjonsnummer} for denne personen")
                 Behandlingsporing.Yrkesaktivitet.Frilans -> aktivitetslogg.info("Ny yrkesaktivitet som Frilans for denne personen")
                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> aktivitetslogg.info("Ny yrkesaktivitet som Selvstendig for denne personen")
-                Behandlingsporing.Yrkesaktivitet.Jordbruker -> aktivitetslogg.info("Ny yrkesaktivitet som Jordbruker for denne personen")
             }
             add(yrkesaktivitet)
         }

@@ -241,7 +241,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
 
-        generasjoner(organisasjonsnummer = jordbruker) {
+        generasjoner(organisasjonsnummer = selvstendig) {
             assertEquals(1, size)
             0.generasjon {
                 beregnetPeriode(0) medTilstand Utbetalt

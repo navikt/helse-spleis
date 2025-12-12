@@ -39,7 +39,6 @@ import no.nav.helse.spleis.meldinger.NavNoKorrigerteInntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.NavNoSelvbestemtInntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.NyeArbeidsledigSøknaderRiver
 import no.nav.helse.spleis.meldinger.NyeFrilansSøknaderRiver
-import no.nav.helse.spleis.meldinger.NyeJordbrukerSøknaderRiver
 import no.nav.helse.spleis.meldinger.NyeSelvstendigSøknaderRiver
 import no.nav.helse.spleis.meldinger.NyeSøknaderRiver
 import no.nav.helse.spleis.meldinger.OverstyrArbeidsforholdRiver
@@ -53,7 +52,6 @@ import no.nav.helse.spleis.meldinger.SendtArbeidsgiverSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtArbeidsledigSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtFiskerSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtFrilansSøknaderRiver
-import no.nav.helse.spleis.meldinger.SendtJordbrukerSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtSelvstendigSøknaderRiver
 import no.nav.helse.spleis.meldinger.SimuleringerRiver
@@ -89,7 +87,6 @@ import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessag
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigTidligereArbeidstakerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NyJordbrukerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
@@ -103,7 +100,6 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFiskerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadJordbrukerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -132,13 +128,11 @@ internal class MessageMediator(
             NyeSøknaderRiver(it, this)
             NyeFrilansSøknaderRiver(it, this)
             NyeSelvstendigSøknaderRiver(it, this)
-            NyeJordbrukerSøknaderRiver(it, this)
             NyeArbeidsledigSøknaderRiver(it, this)
             SendtArbeidsgiverSøknaderRiver(it, this)
             SendtNavSøknaderRiver(it, this)
             SendtFrilansSøknaderRiver(it, this)
             SendtSelvstendigSøknaderRiver(it, this)
-            SendtJordbrukerSøknaderRiver(it, this)
             SendtFiskerSøknaderRiver(it, this)
             SendtAnnetSøknaderRiver(it, this)
             SendtArbeidsledigSøknaderRiver(it, this)
@@ -271,7 +265,6 @@ internal class MessageMediator(
         is NyArbeidsledigSøknadMessage,
         is NyArbeidsledigTidligereArbeidstakerSøknadMessage,
         is NyFrilansSøknadMessage,
-        is NyJordbrukerSøknadMessage,
         is NySelvstendigSøknadMessage,
         is NySøknadMessage,
         is SendtSøknadArbeidsgiverMessage,
@@ -281,7 +274,6 @@ internal class MessageMediator(
         is SendtSøknadNavMessage,
         is SendtSøknadFiskerMessage,
         is SendtSøknadAnnetMessage,
-        is SendtSøknadJordbrukerMessage,
         is SendtSøknadSelvstendigMessage -> true
     }
 

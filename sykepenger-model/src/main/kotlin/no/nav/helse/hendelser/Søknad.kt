@@ -227,8 +227,7 @@ class Søknad(
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
             Behandlingsporing.Yrkesaktivitet.Frilans -> null
 
-            Behandlingsporing.Yrkesaktivitet.Selvstendig,
-            Behandlingsporing.Yrkesaktivitet.Jordbruker -> {
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
                 val anvendtGrunnbeløp = `1G`.beløp(sykdomsperiode.start)
                 val avklartePensjonsgivendeInntekter = pensjonsgivendeInntekter?.map {
                     SelvstendigFaktaavklartInntekt.PensjonsgivendeInntekt(

@@ -26,7 +26,6 @@ internal abstract class SøknadBuilder {
 
     internal fun arbeidstaker(organisasjonsnummer: String) = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer) }
     internal fun selvstendig() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Selvstendig }
-    internal fun jordbruker() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Jordbruker }
     internal fun arbeidsledig() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidsledig }
     internal fun frilans() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Frilans }
 

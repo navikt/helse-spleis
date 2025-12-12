@@ -26,7 +26,6 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Jordbruker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
@@ -144,7 +143,6 @@ internal class Yrkesaktivitet private constructor(
         is Arbeidstaker -> yrkesaktivitetstype.organisasjonsnummer
         Frilans -> "FRILANS"
         Selvstendig -> "SELVSTENDIG"
-        Jordbruker -> "JORDBRUKER"
     }
 
     internal var perioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar> = perioderUtenNavAnsvar
@@ -321,7 +319,6 @@ internal class Yrkesaktivitet private constructor(
                     YrkesaktivitetstypeDto.ARBEIDSTAKER -> Arbeidstaker(dto.organisasjonsnummer)
                     YrkesaktivitetstypeDto.FRILANS -> Frilans
                     YrkesaktivitetstypeDto.SELVSTENDIG -> Selvstendig
-                    YrkesaktivitetstypeDto.JORDBRUKER -> Jordbruker
                 },
                 inntektshistorikk = Inntektshistorikk.gjenopprett(dto.inntektshistorikk),
                 sykdomshistorikk = Sykdomshistorikk.gjenopprett(dto.sykdomshistorikk),
@@ -417,8 +414,7 @@ internal class Yrkesaktivitet private constructor(
             Arbeidsledig -> aktivitetsloggMedYrkesaktivitetkontekst.info("Lagrer _ikke_ sykmeldingsperiode ${sykmelding.periode()} ettersom det er en sykmelding som arbeidsledig.")
             is Arbeidstaker,
             Frilans,
-            Selvstendig,
-            Jordbruker -> sykmeldingsperioder.lagre(sykmelding, aktivitetsloggMedYrkesaktivitetkontekst)
+            Selvstendig -> sykmeldingsperioder.lagre(sykmelding, aktivitetsloggMedYrkesaktivitetkontekst)
         }
     }
 
@@ -448,10 +444,6 @@ internal class Yrkesaktivitet private constructor(
         when (yrkesaktivitetstype) {
             is Arbeidstaker,
             Selvstendig -> {} // :)
-
-            Jordbruker -> {
-                if (Toggle.Jordbruker.disabled) return aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
-            }
 
             Arbeidsledig,
             Frilans -> return aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_39)
@@ -790,8 +782,7 @@ internal class Yrkesaktivitet private constructor(
             is Arbeidstaker -> {
                 perioderUtenNavAnsvar = arbeidsgiverperiodeFor(egenmeldingsperioder)
             }
-            Selvstendig,
-            Jordbruker -> {
+            Selvstendig -> {
                 val beregner = Ventetidberegner()
                 perioderUtenNavAnsvar = beregner.result(sykdomstidslinje())
             }
@@ -920,7 +911,6 @@ internal class Yrkesaktivitet private constructor(
                     is Arbeidstaker -> "ARBEIDSTAKER"
                     Frilans -> "FRILANS"
                     Selvstendig -> "SELVSTENDIG"
-                    Jordbruker -> "JORDBRUKER"
                 }
             )
         )
@@ -1012,7 +1002,6 @@ internal class Yrkesaktivitet private constructor(
                 is Arbeidstaker -> YrkesaktivitetstypeDto.ARBEIDSTAKER
                 Frilans -> YrkesaktivitetstypeDto.FRILANS
                 Selvstendig -> YrkesaktivitetstypeDto.SELVSTENDIG
-                Jordbruker -> YrkesaktivitetstypeDto.JORDBRUKER
             },
             inntektshistorikk = inntektshistorikk.dto(),
             sykdomshistorikk = sykdomshistorikk.dto(),

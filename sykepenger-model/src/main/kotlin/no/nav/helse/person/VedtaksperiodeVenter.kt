@@ -77,7 +77,6 @@ internal data class VedtaksperiodeVenter(
                     is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> it.venterPå.yrkesaktivitetssporing.organisasjonsnummer
                     Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANDS"
                     Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
-                    Behandlingsporing.Yrkesaktivitet.Jordbruker -> "JORDBRUKER"
                 },
                 venteårsak = VenteårsakDto(it.venterPå.venteårsak.hva, it.venterPå.venteårsak.hvorfor)
             )

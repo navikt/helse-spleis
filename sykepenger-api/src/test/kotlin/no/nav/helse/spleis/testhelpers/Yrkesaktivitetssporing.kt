@@ -8,5 +8,4 @@ internal val Behandlingsporing.Yrkesaktivitet.somOrganisasjonsnummer
         is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> organisasjonsnummer
         Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
-        Behandlingsporing.Yrkesaktivitet.Jordbruker -> "JORDBRUKER"
     }

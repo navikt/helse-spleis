@@ -88,7 +88,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
 
 
     private val selvstendigForsikring = when(yrkesaktivitetssporing) {
-        Behandlingsporing.Yrkesaktivitet.Jordbruker,
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> packet["@løsning.${Behovtype.SelvstendigForsikring.name}"].firstOrNull()?.let {
             SelvstendigForsikring(
                 virkningsdato = it.path("startdato").asLocalDate(),

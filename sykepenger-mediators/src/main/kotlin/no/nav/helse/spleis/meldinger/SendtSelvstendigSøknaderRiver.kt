@@ -17,7 +17,7 @@ internal class SendtSelvstendigSøknaderRiver(
     override val riverName = "Sendt søknad Selvstendig"
 
     override fun precondition(packet: JsonMessage) {
-        packet.requireAny("arbeidssituasjon", listOf("SELVSTENDIG_NARINGSDRIVENDE", "BARNEPASSER"))
+        packet.requireAny("arbeidssituasjon", listOf("SELVSTENDIG_NARINGSDRIVENDE", "BARNEPASSER", "JORDBRUKER"))
     }
 
     override fun validate(message: JsonMessage) {

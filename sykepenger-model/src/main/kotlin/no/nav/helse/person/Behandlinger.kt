@@ -1254,7 +1254,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 is Arbeidstaker,
                 Behandlingsporing.Yrkesaktivitet.Frilans -> null
 
-                Behandlingsporing.Yrkesaktivitet.Jordbruker,
                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (beregning.selvstendigForsikring?.type) {
                     Forsikringstype.HundreProsentFraDagEn,
                     Forsikringstype.ÅttiProsentFraDagEn -> dagerUtenNavAnsvar.dager
@@ -1268,7 +1267,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 is Arbeidstaker -> beregning.grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.firstOrNull { it.orgnummer == yrkesaktivitet.organisasjonsnummer }?.faktaavklartInntekt?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }
                 Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
                 Behandlingsporing.Yrkesaktivitet.Frilans,
-                Behandlingsporing.Yrkesaktivitet.Jordbruker,
                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> null
             }
 

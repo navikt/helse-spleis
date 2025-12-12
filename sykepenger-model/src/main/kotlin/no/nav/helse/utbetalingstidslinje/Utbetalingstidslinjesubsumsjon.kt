@@ -109,7 +109,7 @@ internal class Utbetalingstidslinjesubsumsjon(
     fun subsummer(vedtaksperiode: Periode, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) {
         when (yrkesaktivitet) {
             is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> subsummerArbeidstaker(vedtaksperiode)
-            Behandlingsporing.Yrkesaktivitet.Selvstendig, Behandlingsporing.Yrkesaktivitet.Jordbruker -> subsummerSelvstendig(vedtaksperiode)
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> subsummerSelvstendig(vedtaksperiode)
 
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
             Behandlingsporing.Yrkesaktivitet.Frilans -> error("Ikke implementert subsumsjon for abrbeidsledig eller frilans")

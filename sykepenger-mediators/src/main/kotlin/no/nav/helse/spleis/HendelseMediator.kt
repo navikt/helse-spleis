@@ -70,7 +70,6 @@ import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessag
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigTidligereArbeidstakerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NyJordbrukerSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
@@ -84,7 +83,6 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFiskerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadJordbrukerMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -150,13 +148,6 @@ internal class HendelseMediator(
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
-        opprettPersonOgHåndter(personopplysninger, message, context, historiskeFolkeregisteridenter) { eventBus, person, aktivitetslogg ->
-            HendelseProbe.onSykmelding()
-            person.håndterSykmelding(eventBus, sykmelding, aktivitetslogg)
-        }
-    }
-
-    override fun behandle(personopplysninger: Personopplysninger, message: NyJordbrukerSøknadMessage, sykmelding: Sykmelding, context: MessageContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {
         opprettPersonOgHåndter(personopplysninger, message, context, historiskeFolkeregisteridenter) { eventBus, person, aktivitetslogg ->
             HendelseProbe.onSykmelding()
             person.håndterSykmelding(eventBus, sykmelding, aktivitetslogg)
@@ -237,13 +228,6 @@ internal class HendelseMediator(
     ) {
         opprettPersonOgHåndter(personopplysninger, message, context, historiskeFolkeregisteridenter) { eventBus, person, aktivitetslogg ->
             HendelseProbe.onSøknadFrilans()
-            person.håndterSøknad(eventBus, søknad, aktivitetslogg)
-        }
-    }
-
-    override fun behandle(personopplysninger: Personopplysninger, message: SendtSøknadJordbrukerMessage, søknad: Søknad, context: MessageContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {
-        opprettPersonOgHåndter(personopplysninger, message, context, historiskeFolkeregisteridenter) { eventBus, person, aktivitetslogg ->
-            HendelseProbe.onSøknadJordbruker()
             person.håndterSøknad(eventBus, søknad, aktivitetslogg)
         }
     }
@@ -690,15 +674,7 @@ internal interface IHendelseMediator {
         context: MessageContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
-
-    fun behandle(
-        personopplysninger: Personopplysninger,
-        message: NyJordbrukerSøknadMessage,
-        sykmelding: Sykmelding,
-        context: MessageContext,
-        historiskeFolkeregisteridenter: Set<Personidentifikator>
-    )
-
+    
     fun behandle(
         personopplysninger: Personopplysninger,
         message: NyArbeidsledigSøknadMessage,
@@ -739,14 +715,6 @@ internal interface IHendelseMediator {
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
 
-    fun behandle(
-        personopplysninger: Personopplysninger,
-        message: SendtSøknadJordbrukerMessage,
-        søknad: Søknad,
-        context: MessageContext,
-        historiskeFolkeregisteridenter: Set<Personidentifikator>
-    )
-    
     fun behandle(
         personopplysninger: Personopplysninger,
         message: SendtSøknadFiskerMessage,

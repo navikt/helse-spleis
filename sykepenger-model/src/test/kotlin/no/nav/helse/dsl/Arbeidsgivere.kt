@@ -7,7 +7,6 @@ val a4 = "a4"
 
 val frilans = "FRILANS"
 val selvstendig = "SELVSTENDIG"
-val jordbruker = "JORDBRUKER"
 val arbeidsledig = "ARBEIDSLEDIG"
 
 @Deprecated("erstatte med a1", replaceWith = ReplaceWith("a1"))
