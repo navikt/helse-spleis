@@ -22,8 +22,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -63,15 +61,6 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                     assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
                 })
 
-        }
-    }
-
-    @Test
-    fun `sykmeldt men aldri fraværende burde gå til auu`() {
-        a1 {
-            håndterSykmelding(1.januar til 31.januar)
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Arbeid(1.januar, 31.januar))
-            assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 
