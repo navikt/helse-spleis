@@ -109,6 +109,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad 
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_27
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
@@ -741,8 +742,7 @@ internal class Vedtaksperiode private constructor(
             benyttetRefusjonsopplysninger = inntektsopplysningerFraLagretInnteksmelding.refusjonstidslinje(periode)
         )
 
-        // En mer eller mindre tilfeldig IM-varsel for å sikre at perioden ikke blir automatisert
-        aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
+        aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_27)
 
         eventBus.emitInntektsmeldingHåndtert(
             meldingsreferanseId = inntektsopplysningerFraLagretInnteksmelding.inntektsmeldingMeldingsreferanseId.id,

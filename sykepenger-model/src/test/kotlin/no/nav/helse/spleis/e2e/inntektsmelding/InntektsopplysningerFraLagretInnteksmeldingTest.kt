@@ -9,7 +9,7 @@ import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_27
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -40,7 +40,7 @@ internal class InntektsopplysningerFraLagretInnteksmeldingTest: AbstractDslTest(
                 inntektsmeldingMottatt = inntektsmeldingMottatt
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-            assertVarsler(1.vedtaksperiode, RV_IM_4)
+            assertVarsler(1.vedtaksperiode, RV_IM_27)
 
             inspektør.faktaavklartInntekt(1.vedtaksperiode).apply {
                 assertEquals(this?.beløp, INNTEKT)
