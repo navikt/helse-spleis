@@ -878,11 +878,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                     // trimmer friskmelding/ferie i halen bort
                     val søkeperiode = sisteSykedag?.let { periode.start til sisteSykedag } ?: periode
-                    val skjæringstidspunkter = beregnetSkjæringstidspunkter
-                        .alle(søkeperiode)
+                    val skjæringstidspunkter = if (erFriskmeldt(sykdomstidslinje)) {
+                        beregnetSkjæringstidspunkter.skjæringstidspunkter.map { it.start }.filter { it.isBefore(periode.endInclusive) }
+                    } else {
+                        beregnetSkjæringstidspunkter.alle(søkeperiode)
+                    }
                     val fastsattSkjæringstidspunkt = skjæringstidspunkter.maxOrNull() ?: periode.start
                     return fastsattSkjæringstidspunkt to skjæringstidspunkter
                 }
+
+                private fun erFriskmeldt(sykdomstidslinje: Sykdomstidslinje) = sykdomstidslinje.all { it is Arbeidsdag || it.erHelg() }
 
                 fun gjenopprett(dto: BehandlingendringInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Endring {
                     val periode = Periode.gjenopprett(dto.periode)
