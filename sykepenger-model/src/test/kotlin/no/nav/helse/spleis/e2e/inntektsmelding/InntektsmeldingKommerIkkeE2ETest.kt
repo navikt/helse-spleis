@@ -22,6 +22,9 @@ import no.nav.helse.oktober
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -52,6 +55,27 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
             assertEquals(0, observatør.skatteinntekterLagtTilGrunnEventer.size)
+            assertForventetFeil(
+                "Det hadde vært mye bedre om vi kunne brukt forrige sykdomstilfelle sitt skjæringstidspunkt enn å finne på nye, falske skjæringstidspunkt i tilfelle friskmeldingsperioder",
+                nå = {
+                    assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.februar, listOf(1.januar til 16.januar))
+                },
+                ønsket = {
+                    assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+                })
+
+        }
+    }
+
+    @Test
+    fun `friskmelding skal ikke få eget skjæringstidspunk`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Arbeid(1.februar, 28.februar))
+            håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            håndterYtelser(2.vedtaksperiode)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             assertForventetFeil(
                 "Det hadde vært mye bedre om vi kunne brukt forrige sykdomstilfelle sitt skjæringstidspunkt enn å finne på nye, falske skjæringstidspunkt i tilfelle friskmeldingsperioder",
                 nå = {
