@@ -1,8 +1,6 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg
@@ -20,8 +18,8 @@ import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsendringer
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -94,7 +92,6 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMes
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.slf4j.LoggerFactory
 
 // Understands how to communicate messages to other objects
@@ -109,7 +106,6 @@ internal class HendelseMediator(
 ) : IHendelseMediator {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val behovMediator = BehovMediator(sikkerLogg)
-    private val objectmapper = jacksonObjectMapper()
 
     override fun behandle(message: HendelseMessage, context: MessageContext) {
         message.behandle(this, context)
@@ -291,20 +287,16 @@ internal class HendelseMediator(
         }
     }
 
-    override fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsopplysningerFraLagretInnteksmeldingBuilder: InntektsopplysningerFraLagretInnteksmelding.Builder, context: MessageContext) {
-        val inntektsmelding = hendelseRepository.hentInntektsmelding(
+    override fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsmeldingMeldingsreferanseId: MeldingsreferanseId, context: MessageContext) {
+        val inntektsmeldingJson = hendelseRepository.hentInntektsmelding(
             personidentifikator = Personidentifikator(message.meldingsporing.fødselsnummer),
-            meldingId = inntektsopplysningerFraLagretInnteksmeldingBuilder.inntektsmeldingMeldingsreferanseId
-        )?.let { objectmapper.readTree(it).takeIf { json -> json.path("virksomhetsnummer").asText() == inntektsopplysningerFraLagretInnteksmeldingBuilder.inntektsmeldingOrganisasjonsnummer } } ?: return
+            meldingId = inntektsmeldingMeldingsreferanseId
+        ) ?: return
 
-        val inntektsopplysningerFraLagretInnteksmelding = inntektsopplysningerFraLagretInnteksmeldingBuilder.build(
-            inntekt = inntektsmelding.path("beregnetInntekt").asDouble().månedlig,
-            refusjon = inntektsmelding.path("refusjon").path("beloepPrMnd").asDouble().månedlig,
-            mottatt = inntektsmelding.path("mottattDato").asLocalDateTime()
-        )
+        val inntektsopplysningerFraLagretInntektsmelding = message.inntektsopplysningerFraLagretInntektsmelding(inntektsmeldingJson) ?: return
 
         hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
-            person.håndterInntektsopplysningerFraLagretInntektsmelding(eventBus, inntektsopplysningerFraLagretInnteksmelding, aktivitetslogg)
+            person.håndterInntektsopplysningerFraLagretInntektsmelding(eventBus, inntektsopplysningerFraLagretInntektsmelding, aktivitetslogg)
         }
     }
 
@@ -756,7 +748,7 @@ internal interface IHendelseMediator {
     )
 
     fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
-    fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsopplysningerFraLagretInnteksmeldingBuilder: InntektsopplysningerFraLagretInnteksmelding.Builder, context: MessageContext)
+    fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsmeldingMeldingsreferanseId: MeldingsreferanseId, context: MessageContext)
     fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext)
     fun behandle(message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: MessageContext)
     fun behandle(message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext)

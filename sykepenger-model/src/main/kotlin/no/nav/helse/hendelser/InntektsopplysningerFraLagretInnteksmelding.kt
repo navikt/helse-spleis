@@ -12,12 +12,12 @@ import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.økonomi.Inntekt
 
-class InntektsopplysningerFraLagretInnteksmelding private constructor(
+class InntektsopplysningerFraLagretInnteksmelding(
     meldingsreferanseId: MeldingsreferanseId,
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     internal val vedtaksperiodeId: UUID,
-    internal val inntetksmeldingMeldingsreferanseId: MeldingsreferanseId,
-    internal val inntektsmeldingMottatt: LocalDateTime,
+    internal val inntektsmeldingMeldingsreferanseId: MeldingsreferanseId,
+    private val inntektsmeldingMottatt: LocalDateTime,
     private val inntekt: Inntekt,
     // Det finnes jo utallige måter å opplyse om endringer i refusjon osv, men bruker "hovedopplysaningen", så kan heller saksbehandler ordne ev. endringer i refusjon i Speil
     private val refusjon: Inntekt
@@ -36,7 +36,7 @@ class InntektsopplysningerFraLagretInnteksmelding private constructor(
         id = UUID.randomUUID(),
         inntektsopplysningskilde = Arbeidstakerinntektskilde.Arbeidsgiver,
         inntektsdata = Inntektsdata(
-            hendelseId = inntetksmeldingMeldingsreferanseId,
+            hendelseId = inntektsmeldingMeldingsreferanseId,
             // Datoen er ikke så fryktelig viktig lenger, eneste den brukes til i dag er å matche mot rett periode, men her har vi jo spisset det til vedtaksperiodeId
             // I tilleggg er det veldig kjedelig å finne ut av inntektsdato. Kjedelig sjekk med FF og AGP
             dato = skjæringstidspunkt,
@@ -46,26 +46,8 @@ class InntektsopplysningerFraLagretInnteksmelding private constructor(
     )
 
     internal fun refusjonstidslinje(periode: Periode) = Beløpstidslinje.fra(periode, refusjon, Kilde(
-        meldingsreferanseId = inntetksmeldingMeldingsreferanseId,
+        meldingsreferanseId = inntektsmeldingMeldingsreferanseId,
         avsender = ARBEIDSGIVER,
         tidsstempel = inntektsmeldingMottatt
     ))
-
-    class Builder(
-        private val meldingsreferanseId: MeldingsreferanseId,
-        private val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
-        private val vedtaksperiodeId: UUID,
-        val inntektsmeldingMeldingsreferanseId: MeldingsreferanseId,
-        val inntektsmeldingOrganisasjonsnummer: String
-    ) {
-        fun build(inntekt: Inntekt, refusjon: Inntekt, mottatt: LocalDateTime) = InntektsopplysningerFraLagretInnteksmelding(
-            meldingsreferanseId = meldingsreferanseId,
-            behandlingsporing = behandlingsporing,
-            vedtaksperiodeId = vedtaksperiodeId,
-            inntetksmeldingMeldingsreferanseId = inntektsmeldingMeldingsreferanseId,
-            inntekt = inntekt,
-            refusjon = refusjon,
-            inntektsmeldingMottatt = mottatt
-        )
-    }
 }

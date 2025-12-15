@@ -736,7 +736,7 @@ internal class Vedtaksperiode private constructor(
 
         behandlinger.håndterRefusjonstidslinje(
             behandlingEventBus = eventBus.behandlingEventBus,
-            dokumentsporing = inntektsmeldingRefusjon(inntektsopplysningerFraLagretInnteksmelding.inntetksmeldingMeldingsreferanseId),
+            dokumentsporing = inntektsmeldingRefusjon(inntektsopplysningerFraLagretInnteksmelding.inntektsmeldingMeldingsreferanseId),
             aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst,
             benyttetRefusjonsopplysninger = inntektsopplysningerFraLagretInnteksmelding.refusjonstidslinje(periode)
         )

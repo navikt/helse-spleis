@@ -16,8 +16,8 @@ import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsendringer
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -337,7 +337,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsopplysningerFraLagretInnteksmeldingBuilder: InntektsopplysningerFraLagretInnteksmelding.Builder, context: MessageContext) {}
+    override fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsmeldingMeldingsreferanseId: MeldingsreferanseId, context: MessageContext) {}
 
     override fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext) {
         lestNavNoSelvbestemtInntektsmeldingVerdi.set(true)
