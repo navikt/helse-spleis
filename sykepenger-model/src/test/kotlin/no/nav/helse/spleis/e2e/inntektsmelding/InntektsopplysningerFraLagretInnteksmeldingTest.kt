@@ -54,6 +54,8 @@ internal class InntektsopplysningerFraLagretInnteksmeldingTest: AbstractDslTest(
             )
 
             assertEquals(forventetRefusjonstidslinje, inspektør.refusjon(1.vedtaksperiode))
+
+            assertEquals(inntektssmeldingMeldingsreferanseId.id to 1.vedtaksperiode, observatør.inntektsmeldingHåndtert.single())
         }
     }
 

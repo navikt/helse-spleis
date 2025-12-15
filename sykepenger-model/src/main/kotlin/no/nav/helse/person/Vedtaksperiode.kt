@@ -743,6 +743,12 @@ internal class Vedtaksperiode private constructor(
 
         // En mer eller mindre tilfeldig IM-varsel for å sikre at perioden ikke blir automatisert
         aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
+
+        eventBus.emitInntektsmeldingHåndtert(
+            meldingsreferanseId = inntektsopplysningerFraLagretInnteksmelding.inntektsmeldingMeldingsreferanseId.id,
+            vedtaksperiodeId = id,
+            organisasjonsnummer = yrkesaktivitet.organisasjonsnummer
+        )
         person.gjenopptaBehandling(aktivitetslogg)
     }
 
