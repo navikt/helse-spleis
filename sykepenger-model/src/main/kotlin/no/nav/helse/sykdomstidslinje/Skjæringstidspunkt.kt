@@ -127,10 +127,10 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
                 is Dag.ArbeidIkkeGjenopptattDag,
                 is Dag.Arbeidsdag,
                 is Dag.FriskHelgedag,
-                is Dag.Permisjonsdag,
                 is Dag.ProblemDag -> forrigeDag.ikkeSyk(dagen.dato, skjæringstidspunkter)
 
                 // Ferie
+                is Dag.Permisjonsdag,
                 is Dag.Feriedag -> forrigeDag.ferie(dagen.dato, skjæringstidspunkter)
 
                 // Hull i tidslinjen
