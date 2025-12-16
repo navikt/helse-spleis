@@ -258,7 +258,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         sisteBehandling.forventerUtbetaling(periodeSomBeregner, skjæringstidspunkt, skalBehandlesISpeil)
 
     internal fun harFlereSkjæringstidspunkt() = sisteBehandling.harFlereSkjæringstidspunkt()
-    internal fun børBrukeSkatteinntekterDirekte() = sisteBehandling.skjæringstidspunkter.isEmpty()
 
     internal fun validerFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = sisteBehandling.validerFerdigBehandlet(meldingsreferanseId, aktivitetslogg)
     internal fun validerIkkeFerdigBehandlet(meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) = sisteBehandling.validerIkkeFerdigBehandlet(meldingsreferanseId, aktivitetslogg)

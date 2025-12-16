@@ -99,12 +99,6 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
             return true
         }
 
-        // Litt special cases 🤏
-        if (vedtaksperiode.behandlinger.børBrukeSkatteinntekterDirekte()) {
-            gåVidereMedInntekterFraAOrdningen(vedtaksperiode, aktivitetslogg, hendelse, eventBus)
-            return true
-        }
-
         return false
     }
 

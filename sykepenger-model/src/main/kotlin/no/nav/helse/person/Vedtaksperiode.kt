@@ -2621,7 +2621,6 @@ internal class Vedtaksperiode private constructor(
         return when {
             inntektFraArbeidsgiver != null -> inntektFraArbeidsgiver
             alleForSammeArbeidsgiver.none { it.skalArbeidstakerBehandlesISpeil() } -> Inntektssituasjon.TrengerIkkeInntektFraArbeidsgiver
-            alleForSammeArbeidsgiver.any { it.behandlinger.børBrukeSkatteinntekterDirekte() } -> Inntektssituasjon.KanBehandlesUtenInntektFraArbeidsgiver
             alleForSammeArbeidsgiver.any { it.behandlinger.erTidligereVilkårsprøvd() } -> Inntektssituasjon.TidligereVilkårsprøvd
             else -> {
                 // Vi vet at vi skal "Behandles i speil", at vi ikke er tidligere vilkårsprøvd (så ikke noe revurderingscase) - så da er vi enten den som vilkårsprøver eller en annen arbeidsgiver som venter på vilkårsprøvingen
@@ -2650,8 +2649,7 @@ internal class Vedtaksperiode private constructor(
         val benyttetFaktaavklartInntekt = when (inntektssituasjon) {
             is Inntektssituasjon.HarInntektFraArbeidsgiver -> inntektssituasjon.avklarInntekt(skjæringstidspunkt, skatteopplysning.somFaktaavklartInntekt(hendelse), flereArbeidsgivere, aktivitetsloggTilDenSomVilkårsprøver)
 
-            Inntektssituasjon.TrengerIkkeInntektFraArbeidsgiver,
-            Inntektssituasjon.KanBehandlesUtenInntektFraArbeidsgiver -> skatteopplysning.somFaktaavklartInntekt(hendelse)
+            Inntektssituasjon.TrengerIkkeInntektFraArbeidsgiver -> skatteopplysning.somFaktaavklartInntekt(hendelse)
 
             Inntektssituasjon.TidligereVilkårsprøvd -> {
                 // Her legger vi også skatt til grunn, men for å unngå at sykmeldte får gjentatte meldinger om skatteinntekter lagt til grunn blir det her kun varsel til saksbehandler

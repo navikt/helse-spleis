@@ -38,7 +38,5 @@ internal sealed interface Inntektssituasjon {
 
     data object TidligereVilkårsprøvd: Inntektssituasjon
 
-    data object KanBehandlesUtenInntektFraArbeidsgiver: Inntektssituasjon
-
     data object TrengerIkkeInntektFraArbeidsgiver: Inntektssituasjon
 }
