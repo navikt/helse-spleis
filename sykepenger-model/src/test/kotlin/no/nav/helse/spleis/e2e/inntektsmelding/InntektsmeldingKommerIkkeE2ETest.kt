@@ -49,18 +49,10 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Arbeid(1.februar, 28.februar))
-            håndterVilkårsgrunnlag(2.vedtaksperiode)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
-            assertEquals(0, observatør.skatteinntekterLagtTilGrunnEventer.size)
-            assertForventetFeil(
-                "Det hadde vært mye bedre om vi kunne brukt forrige sykdomstilfelle sitt skjæringstidspunkt enn å finne på nye, falske skjæringstidspunkt i tilfelle friskmeldingsperioder",
-                nå = {
-                    assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.februar, listOf(1.januar til 16.januar))
-                },
-                ønsket = {
-                    assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
-                })
 
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            assertEquals(0, observatør.skatteinntekterLagtTilGrunnEventer.size)
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         }
     }
 

@@ -88,7 +88,7 @@ internal class SkjæringstidspunktTest {
         resetSeed { 10.S + 10.A + 10.S }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    1.januar til 10.januar,
+                    1.januar til 20.januar,
                     21.januar til 30.januar
                 ),
                 beregnSkjæringstidspunkter(tidslinjer)
@@ -99,7 +99,7 @@ internal class SkjæringstidspunktTest {
         resetSeed { 10.S + 10.A + 10.YF + 10.S }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    1.januar til 10.januar,
+                    1.januar til 30.januar,
                     31.januar til 9.februar
                 ),
                 beregnSkjæringstidspunkter(tidslinjer)
@@ -181,7 +181,7 @@ internal class SkjæringstidspunktTest {
         resetSeed { 5.S + 2.F + 10.AIG }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    1.januar til 7.januar
+                    1.januar til 17.januar
                 ),
                 beregnSkjæringstidspunkter(tidslinjer)
             )
@@ -270,7 +270,7 @@ internal class SkjæringstidspunktTest {
 
         // periode med 100 % friskmelding
         resetSeed()
-        assertNull(beregnSkjæringstidspunkt(16.S + 15.A, 17.januar til 31.januar))
+        assertEquals(1.januar, beregnSkjæringstidspunkt(16.S + 15.A, 17.januar til 31.januar))
 
         // periode friskmelding i halen og snuten
         resetSeed()

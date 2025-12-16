@@ -2308,7 +2308,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterUtbetalingsgodkjenning()
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Arbeid(1.februar, 28.februar))
-        håndterVilkårsgrunnlagTilGodkjenning()
+        håndterYtelser()
         håndterUtbetalingsgodkjenning()
 
         nyttVedtak(2.mars, 31.mars, vedtaksperiode = 3)

@@ -143,7 +143,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             observatør.vedtaksperiodeVenter.clear()
 
             håndterSøknad(10.januar til 26.januar)
-            assertEquals(listOf(31.januar, 10.januar), inspektør.skjæringstidspunkter(2.vedtaksperiode))
+            assertEquals(listOf(31.januar, 10.januar, 1.januar), inspektør.skjæringstidspunkter(2.vedtaksperiode))
             assertVarsel(Varselkode.RV_IV_11, 2.vedtaksperiode.filter())
 
             inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->

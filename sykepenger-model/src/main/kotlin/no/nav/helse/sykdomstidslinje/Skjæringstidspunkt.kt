@@ -41,15 +41,10 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
 
         personsykdomstidslinje.forEach { dagen ->
             when (dagen) {
-                is Dag.AndreYtelser -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvidMedAndreYtelser(dagen.dato)
-                is Dag.Feriedag -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvid(dagen.dato)
-
+                is Dag.AndreYtelser,
                 is Dag.ArbeidIkkeGjenopptattDag,
                 is Dag.Arbeidsdag,
-                is Dag.FriskHelgedag -> {
-                    aktivtSkjæringspunkt?.also { resultater.add(it) }
-                    aktivtSkjæringspunkt = null
-                }
+                is Dag.FriskHelgedag -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvidEtterFerdigSykdom(dagen.dato)
 
                 is Dag.ArbeidsgiverHelgedag,
                 is Dag.Arbeidsgiverdag,
@@ -62,20 +57,22 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
                         null -> Søkekontekst(dagen.dato)
                         else -> when {
                             // det er alltid nytt skjæringstidspunkt etter en periode med andre ytelser
-                            aktivtSkjæringspunkt.erYtelseperiode -> {
+                            aktivtSkjæringspunkt.sykdomErFerdig -> {
                                 resultater.add(aktivtSkjæringspunkt)
                                 Søkekontekst(dagen.dato)
                             }
-                            else -> aktivtSkjæringspunkt.utvid(dagen.dato)
+
+                            else -> aktivtSkjæringspunkt.utvidLøpendeSykdom(dagen.dato)
                         }
                     }
                 }
 
                 is Dag.Permisjonsdag,
-                is Dag.ProblemDag -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvid(dagen.dato)
+                is Dag.Feriedag,
+                is Dag.ProblemDag -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvidLøpendeSykdom(dagen.dato)
 
                 is Dag.UkjentDag -> when (dagen.dato.erHelg()) {
-                    true -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvid(dagen.dato)
+                    true -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvidLøpendeSykdom(dagen.dato)
                     false -> {
                         aktivtSkjæringspunkt?.also { resultater.add(it) }
                         aktivtSkjæringspunkt = null
@@ -90,17 +87,17 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
     private data class Søkekontekst(
         val skjæringstidspunkt: LocalDate,
         val tom: LocalDate = skjæringstidspunkt,
-        val erYtelseperiode: Boolean = false
+        val sykdomErFerdig: Boolean = false
     ) {
         val periode = skjæringstidspunkt til tom
 
-        fun utvid(dato: LocalDate): Søkekontekst {
+        fun utvidLøpendeSykdom(dato: LocalDate): Søkekontekst {
             return copy(tom = dato)
         }
 
-        fun utvidMedAndreYtelser(dato: LocalDate): Søkekontekst {
+        fun utvidEtterFerdigSykdom(dato: LocalDate): Søkekontekst {
             return copy(
-                erYtelseperiode = true,
+                sykdomErFerdig = true,
                 tom = dato
             )
         }

@@ -18,6 +18,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -59,35 +60,35 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Bruker skatteinntekter ved forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding`() {
+    fun `Bruker ikke skatteinntekter ved forlengelse utenfor arbeidsgiverperioden selv om det kun er friskmelding`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar))
             håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), Arbeid(17.januar, 25.januar))
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
     }
 
     @Test
-    fun `Bruker skatteinntekter ved forlengelse utenfor arbeidsgiverperioden dersom det kun er ferie og friskmelding`() {
+    fun `Bruker ikke skatteinntekter ved forlengelse utenfor arbeidsgiverperioden selv om det kun er ferie og friskmelding`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(16.januar, 20.januar))
             håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar))
             håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent), Arbeid(21.januar, 25.januar))
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
     }
 
     @Test
-    fun `Bruker skatteinntekter ved forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding - etter utbetaling`() {
+    fun `Bruker ikke skatteinntekter ved forlengelse utenfor arbeidsgiverperioden selv om det kun er friskmelding - etter utbetaling`() {
         a1 {
             nyttVedtak(1.januar til 23.januar)
             håndterSykmelding(Sykmeldingsperiode(24.januar, 25.januar))
             håndterSøknad(Sykdom(24.januar, 25.januar, 100.prosent), Arbeid(24.januar, 25.januar))
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
     }
 
@@ -104,10 +105,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
                 listOf(5.februar til 20.februar)
             )
 
-            håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, 1.januar.atStartOfDay(), 1.januar.plusDays(90).atStartOfDay())
-            håndterVilkårsgrunnlag(2.vedtaksperiode, skatteinntekt = 0.daglig)
             håndterYtelser(2.vedtaksperiode)
-            assertVarsel(Varselkode.RV_SV_1, 2.vedtaksperiode.filter())
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
             håndterVilkårsgrunnlag(3.vedtaksperiode)
