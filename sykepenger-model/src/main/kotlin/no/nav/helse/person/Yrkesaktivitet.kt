@@ -1022,4 +1022,9 @@ internal class Yrkesaktivitet private constructor(
     internal fun trengerArbeidsgiveropplysninger(periode: Periode): List<Periode> {
         return forkastede.trengerArbeidsgiveropplysninger(periode, vedtaksperioder.map { it.periode })
     }
+
+    internal fun refusjonsopplysningerForFørsteFraværsdag(førsteFraværsdag: LocalDate, periode: Periode): Beløpstidslinje? {
+        val (før, etter) = vedtaksperioder.filter { it.førsteFraværsdag == førsteFraværsdag }.partition { it.periode.endInclusive < periode.start }
+        return før.lastOrNull { it.refusjonstidslinje.isNotEmpty() }?.refusjonstidslinje ?: etter.firstOrNull { it.refusjonstidslinje.isNotEmpty() }?.refusjonstidslinje
+    }
 }

@@ -2576,8 +2576,8 @@ internal class Vedtaksperiode private constructor(
         søknad: Søknad,
         aktivitetslogg: IAktivitetslogg
     ) {
-        videreførEksisterendeRefusjonsopplysninger(eventBus, søknad(søknad.metadata.meldingsreferanseId), aktivitetslogg)
         oppdaterHistorikk(eventBus, søknad(søknad.metadata.meldingsreferanseId), søknad.sykdomstidslinje, aktivitetslogg) {
+            videreførEksisterendeRefusjonsopplysninger(eventBus, søknad(søknad.metadata.meldingsreferanseId), aktivitetslogg)
             søknad.valider(aktivitetslogg, vilkårsgrunnlag, refusjonstidslinje, subsumsjonslogg, skjæringstidspunkt)
         }
     }
@@ -3255,30 +3255,21 @@ internal class Vedtaksperiode private constructor(
 
     private fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode) = behandlinger.harSammeUtbetalingSom(annenVedtaksperiode)
 
-    private fun prioritertNabolag(): List<Vedtaksperiode> {
-        val (nabolagFør, nabolagEtter) = this.yrkesaktivitet.finnSammenhengendeVedtaksperioder(this)
-            .partition { it.periode.endInclusive < this.periode.start }
-        // Vi prioriterer refusjonsopplysninger fra perioder før oss før vi sjekker forlengelsene
-        // Når vi ser på periodene før oss starter vi med den nærmeste
-        return (nabolagFør.asReversed() + nabolagEtter)
-    }
-
     internal fun videreførEksisterendeRefusjonsopplysninger(
         eventBus: EventBus,
         dokumentsporing: Dokumentsporing?,
         aktivitetslogg: IAktivitetslogg
     ) {
         if (refusjonstidslinje.isNotEmpty()) return
-        val refusjonstidslinjeFraNabolaget =
-            prioritertNabolag().firstOrNull { it.refusjonstidslinje.isNotEmpty() }?.let { nabo ->
-                aktivitetslogg.info("Fant refusjonsopplysninger for $periode hos nabo-vedtaksperiode ${nabo.periode} (${nabo.id})")
-                nabo.refusjonstidslinje
-            } ?: Beløpstidslinje()
+
+        val refusjonstidslinjeFraNabolaget = yrkesaktivitet.refusjonsopplysningerForFørsteFraværsdag(førsteFraværsdag ?: periode.start, periode) ?: Beløpstidslinje()
+
         val refusjonstidslinjeFraArbeidsgiver =
             yrkesaktivitet.refusjonstidslinje(this).takeUnless { it.isEmpty() }?.also { ubrukte ->
                 val unikeKilder = ubrukte.filterIsInstance<Beløpsdag>().map { it.kilde.meldingsreferanseId }.toSet()
                 aktivitetslogg.info("Fant ubrukte refusjonsopplysninger for $periode fra kildene ${unikeKilder.joinToString()}")
             } ?: Beløpstidslinje()
+
         val benyttetRefusjonstidslinje = (refusjonstidslinjeFraArbeidsgiver + refusjonstidslinjeFraNabolaget).fyll(periode)
         if (benyttetRefusjonstidslinje.isEmpty()) return
         this.behandlinger.håndterRefusjonstidslinje(
