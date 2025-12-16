@@ -45,6 +45,7 @@ internal class JordbrukerTest : AbstractDslTest() {
                     assertEquals(Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk, linje.klassekode)
                 }
             }
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_55)
         }
     }
 }

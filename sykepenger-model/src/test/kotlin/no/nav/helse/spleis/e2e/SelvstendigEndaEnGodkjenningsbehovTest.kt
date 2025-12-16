@@ -325,6 +325,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 inntektskilde = "EN_ARBEIDSGIVER",
                 arbeidssituasjon = Arbeidssituasjon.JORDBRUKER
             )
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_55)
         }
     }
 

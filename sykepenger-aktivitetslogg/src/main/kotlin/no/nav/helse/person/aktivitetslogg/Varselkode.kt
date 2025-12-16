@@ -79,6 +79,8 @@ enum class Varselkode(
     RV_SØ_53("Søknaden overlapper med en periode som har en annen yrkesaktivitetstype"),
     RV_SØ_54("Arbeidstakersøknad har en potensiell selvstendigghost"),
 
+    RV_SØ_55("Selvstendigsøknad hvor bruker har oppgitt arbeidssituasjon jordbruker"),
+
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne.", avviklet = true),
     RV_OO_2("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", avviklet = true),

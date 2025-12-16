@@ -127,7 +127,10 @@ class Søknad(
             Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> validerSelvstendig(aktivitetslogg, skjæringstidspunkt, vilkårsgrunnlag)
 
             Arbeidssituasjon.JORDBRUKER -> {
-                if (Toggle.Jordbruker.enabled) validerSelvstendig(aktivitetslogg, skjæringstidspunkt, vilkårsgrunnlag)
+                if (Toggle.Jordbruker.enabled) {
+                    aktivitetslogg.varsel(Varselkode.RV_SØ_55)
+                    validerSelvstendig(aktivitetslogg, skjæringstidspunkt, vilkårsgrunnlag)
+                }
                 else {
                     aktivitetslogg.info("Har ikke støtte for søknadstypen $arbeidssituasjon")
                     aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
