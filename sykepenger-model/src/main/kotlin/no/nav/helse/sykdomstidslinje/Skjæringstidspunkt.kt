@@ -41,15 +41,12 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
 
         personsykdomstidslinje.forEach { dagen ->
             when (dagen) {
-                is Dag.AndreYtelser -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvidMedAndreYtelser(dagen.dato)
-                is Dag.Feriedag -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvid(dagen.dato)
-
+                is Dag.AndreYtelser,
                 is Dag.ArbeidIkkeGjenopptattDag,
                 is Dag.Arbeidsdag,
-                is Dag.FriskHelgedag -> {
-                    aktivtSkjæringspunkt?.also { resultater.add(it) }
-                    aktivtSkjæringspunkt = null
-                }
+                is Dag.FriskHelgedag -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvidMedAndreYtelser(dagen.dato)
+
+                is Dag.Feriedag -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvid(dagen.dato)
 
                 is Dag.ArbeidsgiverHelgedag,
                 is Dag.Arbeidsgiverdag,
@@ -74,11 +71,10 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
                 is Dag.Permisjonsdag,
                 is Dag.ProblemDag -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvid(dagen.dato)
 
-                is Dag.UkjentDag -> when (dagen.dato.erHelg()) {
-                    true -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvid(dagen.dato)
+                is Dag.UkjentDag -> aktivtSkjæringspunkt = when (dagen.dato.erHelg()) {
+                    true -> aktivtSkjæringspunkt?.utvid(dagen.dato)
                     false -> {
-                        aktivtSkjæringspunkt?.also { resultater.add(it) }
-                        aktivtSkjæringspunkt = null
+                        aktivtSkjæringspunkt?.utvidMedAndreYtelser(dagen.dato)
                     }
                 }
             }
