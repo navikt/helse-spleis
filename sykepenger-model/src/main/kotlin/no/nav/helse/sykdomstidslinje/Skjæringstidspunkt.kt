@@ -69,11 +69,12 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
                 is Dag.Feriedag,
                 is Dag.ProblemDag -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvidLøpendeSykdom(dagen.dato)
 
-                is Dag.UkjentDag -> when (dagen.dato.erHelg()) {
-                    true -> aktivtSkjæringspunkt = aktivtSkjæringspunkt?.utvidLøpendeSykdom(dagen.dato)
-                    false -> {
-                        aktivtSkjæringspunkt?.also { resultater.add(it) }
-                        aktivtSkjæringspunkt = null
+                is Dag.UkjentDag -> aktivtSkjæringspunkt = when (val før = aktivtSkjæringspunkt) {
+                    null -> null
+                    else -> {
+                        val etter = før.utvidMedUkjentDag(dagen.dato)
+                        if (etter == null) resultater.add(før) // Om vi får null tilbake betyr det at vi skal avslutte tellingen
+                        etter
                     }
                 }
             }
@@ -85,20 +86,25 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
     private data class Søkekontekst(
         val skjæringstidspunkt: LocalDate,
         val tom: LocalDate = skjæringstidspunkt,
-        val sykdomErFerdig: Boolean = false
+        val sykdomErFerdig: Boolean = false,
+        val antallTrailingUkjentdager: Int = 0
     ) {
         val periode = skjæringstidspunkt til tom
 
-        fun utvidLøpendeSykdom(dato: LocalDate): Søkekontekst {
-            return copy(tom = dato)
+        fun utvidMedUkjentDag(dato: LocalDate): Søkekontekst? {
+            if (antallTrailingUkjentdager >= 18) return null
+            return when (dato.erHelg()) {
+                true -> utvidLøpendeSykdom(dato, antallTrailingUkjentdager = antallTrailingUkjentdager + 1)
+                false -> utvidEtterFerdigSykdom(dato, antallTrailingUkjentdager = antallTrailingUkjentdager + 1)
+            }
         }
 
-        fun utvidEtterFerdigSykdom(dato: LocalDate): Søkekontekst {
-            return copy(
-                sykdomErFerdig = true,
-                tom = dato
-            )
+        fun utvidLøpendeSykdom(dato: LocalDate, antallTrailingUkjentdager: Int = 0): Søkekontekst {
+            return copy(tom = dato, antallTrailingUkjentdager = antallTrailingUkjentdager)
+        }
+
+        fun utvidEtterFerdigSykdom(dato: LocalDate, antallTrailingUkjentdager: Int = 0): Søkekontekst {
+            return copy(sykdomErFerdig = true, tom = dato, antallTrailingUkjentdager = antallTrailingUkjentdager)
         }
     }
-
 }
