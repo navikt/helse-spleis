@@ -200,6 +200,25 @@ internal class Inntektsgrunnlag(
             )
         }
     }
+    internal fun håndterArbeidstakerFaktaavklartInntekt(
+        organisasjonsnummer: String,
+        førsteFraværsdag: LocalDate,
+        arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
+    ): Utfall {
+        val arbeidsgiverInntektsopplysningerUtfall = arbeidsgiverInntektsopplysninger.håndterArbeidstakerFaktaavklartInntekt(
+            organisasjonsnummer = organisasjonsnummer,
+            førsteFraværsdag = førsteFraværsdag,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklartInntekt
+        )
+        return Utfall.bestem(arbeidsgiverInntektsopplysningerUtfall) { nyeArbeidsgiverInntektsopplysninger ->
+            kopierInntektsgrunnlag(
+                arbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger,
+                selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
+                deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
+            )
+        }
+    }
 
     internal fun håndterKorrigerteInntekter(
         hendelse: OverstyrArbeidsgiveropplysninger

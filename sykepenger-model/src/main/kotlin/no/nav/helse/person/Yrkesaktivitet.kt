@@ -65,6 +65,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SAMME_ARBEIDSGIVERPERIODE
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiv
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
+import no.nav.helse.person.Vedtaksperiode.Companion.arbeidstakerFaktaavklarteInntekter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.igangsettOverstyring
@@ -1027,4 +1028,6 @@ internal class Yrkesaktivitet private constructor(
         val (før, etter) = vedtaksperioder.filter { it.førsteFraværsdag == førsteFraværsdag }.partition { it.periode.endInclusive < periode.start }
         return før.lastOrNull { it.refusjonstidslinje.isNotEmpty() }?.refusjonstidslinje ?: etter.firstOrNull { it.refusjonstidslinje.isNotEmpty() }?.refusjonstidslinje
     }
+
+    internal fun arbeidstakerFaktaavklarteInntekter(skjæringstidspunkt: LocalDate) = vedtaksperioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }.arbeidstakerFaktaavklarteInntekter()
 }

@@ -1,5 +1,6 @@
 package no.nav.helse.person.inntekt
 
+import java.time.LocalDate
 import java.util.*
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
@@ -44,6 +45,35 @@ internal data class ArbeidsgiverInntektsopplysning(
             faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
             korrigertInntekt = null
         ))
+
+        return Utfall.EndretBeløp(copy(
+            faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
+            korrigertInntekt = null,
+            skjønnsmessigFastsatt = null
+        ))
+    }
+
+    private fun håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer: String, førsteFraværsdag: LocalDate, skjæringstidspunkt: LocalDate, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt): Utfall {
+        check(arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) { "Hva holder du på med? Du skal ikke sende inntekter med kilde ${arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class.simpleName} hit!" }
+
+        if (this.orgnummer != organisasjonsnummer) return Utfall.Uendret(this)
+
+        // Samme inntekt vi allerede har lagt til grunn
+        if (this.faktaavklartInntekt.id == arbeidstakerFaktaavklartInntekt.id) return Utfall.Uendret(this)
+
+        val liggerSkattTilGrunnNå = this.faktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.AOrdningen
+
+        // Om arbeeidsgiver er syk i annen måned enn skjæringstidspunktet og det ligger skatt til grunn skal vi beholde skatt.
+        if (førsteFraværsdag.yearMonth != skjæringstidspunkt.yearMonth && liggerSkattTilGrunnNå) return Utfall.Uendret(this)
+
+        // Samme beløp som vi allerede har, men vå går fra å ha lagt skatt til grunn til å ha lagt arbeidsgivers inntekt til grunn
+        if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp && liggerSkattTilGrunnNå) return Utfall.EndretKilde(copy(
+            faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
+            korrigertInntekt = null
+        ))
+
+        // En ny arbeidstakerFaktaavklartInntekt som sier det samme som før
+        if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp) return Utfall.Uendret(this)
 
         return Utfall.EndretBeløp(copy(
             faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
@@ -150,6 +180,19 @@ internal data class ArbeidsgiverInntektsopplysning(
             organisasjonsnummer: String,
             arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
         ) = this.map { arbeidsgiverInntektsopplysning -> arbeidsgiverInntektsopplysning.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt) }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.håndterArbeidstakerFaktaavklartInntekt(
+            organisasjonsnummer: String,
+            førsteFraværsdag: LocalDate,
+            skjæringstidspunkt: LocalDate,
+            arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
+        ) = this.map { arbeidsgiverInntektsopplysning -> arbeidsgiverInntektsopplysning.håndterArbeidstakerFaktaavklartInntekt(
+            organisasjonsnummer = organisasjonsnummer,
+            førsteFraværsdag = førsteFraværsdag,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklartInntekt
+        ) }
+
 
         internal fun List<ArbeidsgiverInntektsopplysning>.håndterKorrigerteInntekter(
             korrigerteInntekter: List<KorrigertArbeidsgiverInntektsopplysning>

@@ -3215,14 +3215,11 @@ internal class Vedtaksperiode private constructor(
             ?.faktaavklartInntekt
             ?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }
 
-        val faktaavklartInntektFraPerioderMedSammeSkjæringstidspunkt by lazy {
-            val perioderMedSammeSkjæringstidspunkt = person
-                .vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-                .filter { it.yrkesaktivitet === this.yrkesaktivitet }
-            perioderMedSammeSkjæringstidspunkt.arbeidstakerFaktaavklarteInntekter()?.besteInntekt()?.faktaavklartInntekt
+        val faktaavklartInntektFraArbeidsgiver by lazy {
+            yrkesaktivitet.arbeidstakerFaktaavklarteInntekter(skjæringstidspunkt)?.besteInntekt()?.faktaavklartInntekt
         }
 
-        val benyttetFaktaavklartInntekt = faktaavklartInntektFraVilkårsgrunnlag ?: faktaavklartInntektFraPerioderMedSammeSkjæringstidspunkt
+        val benyttetFaktaavklartInntekt = faktaavklartInntektFraVilkårsgrunnlag ?: faktaavklartInntektFraArbeidsgiver
 
         if (benyttetFaktaavklartInntekt == null && grunnlag == null) return skalBrukeSkatt()
         if (benyttetFaktaavklartInntekt == null) return // Her har vi allerede lagt skatt til grunn/RV_SV_2-situasjon, så sånn er det med den saken..
