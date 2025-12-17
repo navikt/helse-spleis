@@ -859,8 +859,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             is ArbeidsgiverHelgedag,
                             is Arbeidsgiverdag,
                             is Dag.MeldingTilNavDag,
-                        is Dag.MeldingTilNavHelgedag,
-                        is ForeldetSykedag,
+                            is Dag.MeldingTilNavHelgedag,
+                            is ForeldetSykedag,
                             is SykHelgedag,
                             is Sykedag -> true
 
