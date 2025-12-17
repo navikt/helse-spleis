@@ -150,8 +150,8 @@ internal class UtkastTilVedtakBuilder(
             val navDag = any { it is Utbetalingsdag.NavDag }
 
             return when {
-                !navDag -> Tag.Avslag
                 navDag && avvistDag -> Tag.DelvisInnvilget
+                !navDag && avvistDag -> Tag.Avslag
                 else -> Tag.Innvilget
             }
         }

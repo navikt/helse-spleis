@@ -542,7 +542,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
             håndterYtelser(2.vedtaksperiode)
             assertGodkjenningsbehov(
-                tags = setOf("Forlengelse", "Avslag", "IngenUtbetaling", "Ferie", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+                tags = setOf("Forlengelse", "Innvilget", "IngenUtbetaling", "Ferie", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
                 vedtaksperiodeId = 2.vedtaksperiode,
                 periodeFom = 1.februar,
                 periodeTom = 28.februar,
@@ -868,13 +868,13 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Periode uten navdager og avslagsdager får Avslag-tag`() {
+    fun `Periode uten navdager eller avslagsdager får Innvilget-tag`() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
         håndterYtelser(2.vedtaksperiode)
         assertGodkjenningsbehov(
-            tags = setOf("Forlengelse", "Avslag", "IngenUtbetaling", "Ferie", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+            tags = setOf("Forlengelse", "Innvilget", "IngenUtbetaling", "Ferie", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
             vedtaksperiodeId = 2.vedtaksperiode,
             periodeType = "FORLENGELSE",
             periodeFom = 1.februar,
