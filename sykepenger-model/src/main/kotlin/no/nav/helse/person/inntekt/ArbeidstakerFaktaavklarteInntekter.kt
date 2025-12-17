@@ -14,32 +14,18 @@ internal data class ArbeidstakerFaktaavklarteInntekter(
 
     fun besteInntekt(): VurderbarArbeidstakerFaktaavklartInntekt {
         val sortert = vurderbareArbeidstakerFaktaavklarteInntekter.sortedBy { it.periode.start }
-
-        val besteInntekt = sortert.firstOrNull { førsteFraværsdag in it.periode || førsteFraværsdag > it.periode.endInclusive } ?: sortert.first()
-
-        val harFlereFaktaavklarteInntekter = when {
-            sortert.any { it.harFlereFaktaavklarteInntekter } -> true
-            sortert.any { it.faktaavklartInntekt.id != besteInntekt.faktaavklartInntekt.id } -> true
-            else -> false
-        }
-        return besteInntekt.copy(harFlereFaktaavklarteInntekter = harFlereFaktaavklarteInntekter)
+        return sortert.firstOrNull { førsteFraværsdag in it.periode || førsteFraværsdag > it.periode.endInclusive } ?: sortert.first()
     }
 }
 
 internal data class VurderbarArbeidstakerFaktaavklartInntekt(
     val faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
     val periode: Periode,
-    val harFlereFaktaavklarteInntekter: Boolean,
     private val skjæringstidspunkt: LocalDate,
     private val tidligereSkjæringstidspunkt: LocalDate,
     private val endretArbeidsgiverperiode: Boolean
 )  {
     fun vurder(aktivitetslogg: IAktivitetslogg) {
-        vurderVarselForGjenbrukAvInntekt(aktivitetslogg)
-        // TODO: if (harFlereFaktaavklarteInntekter) aktivitetslogg.varsel(Varselkode.RV_IM_4)
-    }
-
-    private fun vurderVarselForGjenbrukAvInntekt(aktivitetslogg: IAktivitetslogg) {
         if (tidligereSkjæringstidspunkt == skjæringstidspunkt) return
         val dagerMellom = ChronoUnit.DAYS.between(tidligereSkjæringstidspunkt, skjæringstidspunkt)
 

@@ -1496,19 +1496,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             ): VurderbarArbeidstakerFaktaavklartInntekt {
                 val førsteEndringMedInntekten = firstNotNullOf { behandling -> behandling.endringer.firstOrNull { endring -> endring.faktaavklartInntekt == faktaavklartInntekt } }
 
-                val harFlereFaktaavklarteInntekter = this
-                    .any { behandling -> behandling.endringer
-                    .any { endring ->
-                        endring.faktaavklartInntekt != null && endring.faktaavklartInntekt.id != faktaavklartInntekt.id
-                    }}
-
                 return VurderbarArbeidstakerFaktaavklartInntekt(
                     faktaavklartInntekt = faktaavklartInntekt,
                     skjæringstidspunkt = skjæringstidspunkt,
                     tidligereSkjæringstidspunkt = førsteEndringMedInntekten.skjæringstidspunkt,
                     periode = periode,
-                    endretArbeidsgiverperiode = !dagerUtenNavAnsvar.samme(førsteEndringMedInntekten.dagerUtenNavAnsvar),
-                    harFlereFaktaavklarteInntekter = harFlereFaktaavklarteInntekter
+                    endretArbeidsgiverperiode = !dagerUtenNavAnsvar.samme(førsteEndringMedInntekten.dagerUtenNavAnsvar)
                 )
             }
 
