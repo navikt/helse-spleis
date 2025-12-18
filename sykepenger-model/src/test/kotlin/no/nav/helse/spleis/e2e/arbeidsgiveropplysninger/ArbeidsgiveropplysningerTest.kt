@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -35,6 +36,7 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mandag
+import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.DokumentType
@@ -68,6 +70,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
+import no.nav.helse.spleis.e2e.manuellForeldrepengedag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -80,6 +83,40 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
+
+    @Test
+    fun `Skal sende ut forespørsel om arbeidsgiveropplysninger når det har blitt nytt skjæringstidspunkt etter overstyring til andre ytelser i forrige periode`() {
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(februar)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterOverstyrTidslinje((februar).map { manuellForeldrepengedag(it) })
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+            håndterSøknad(mars)
+            assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, forventetSkjæringstidspunkt = 1.mars, forventetVenteperiode = listOf(1.januar til 16.januar))
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertForventetFeil(
+                forklaring = "Skal sende ut forespørsel om arbeidsgiveropplysninger når det har blitt nytt skjæringstidspunkt etter overstyring til andre ytelser i forrige periode",
+                nå = {
+                    assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+                },
+                ønsket = {
+                    assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+                }
+            )
+        }
+    }
 
     @Test
     fun `to arbeidsgivere sender arbeidsgiveropplysninger - den første flytter sin egen første fraværsdag - den andre flytter skjæringstidspunktet`() {
