@@ -84,7 +84,7 @@ import org.junit.jupiter.api.Test
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
 
     @Test
-    fun `Skal sende ut forespørsel om arbeidsgiveropplysninger når det har blitt nytt skjæringstidspunkt etter overstyring til andre ytelser i forrige periode`() {
+    fun `Sender ut forespørsel om arbeidsgiveropplysninger når det har blitt nytt skjæringstidspunkt etter overstyring til andre ytelser i forrige periode`() {
         a1 {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 16.januar))
@@ -109,6 +109,9 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 assertEquals(2, size)
                 assertEquals(3.vedtaksperiode, last().opplysninger.vedtaksperiodeId)
             }
+
+            håndterArbeidsgiveropplysninger(3.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INGEN, emptyList()))
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         }
     }
 
