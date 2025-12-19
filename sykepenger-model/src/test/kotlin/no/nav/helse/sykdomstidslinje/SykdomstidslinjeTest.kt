@@ -15,7 +15,6 @@ import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
-import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.K
@@ -26,7 +25,6 @@ import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.U
 import no.nav.helse.testhelpers.UK
 import no.nav.helse.testhelpers.YF
-import no.nav.helse.testhelpers.YP
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.tirsdag
 import no.nav.helse.torsdag
@@ -88,23 +86,6 @@ internal class SykdomstidslinjeTest {
         assertNull(10.S.subset(11.januar til 11.januar).periode())
         resetSeed()
         assertNull(10.S.subset(31.desember(2017) til 31.desember(2017)).periode())
-    }
-
-    @Test
-    fun `sykdomstidslinje er rett før når det ikke er arbeidsdag mellom`() {
-        assertTrue(1.S.erRettFør(1.S))
-        assertTrue(1.F.erRettFør(1.F))
-        assertTrue((1.S + 1.UK).erRettFør(2.UK + 1.F))
-        assertFalse(1.S.erRettFør(1.A + 5.S))
-        assertFalse((1.S + 1.A).erRettFør(1.S))
-    }
-
-    @Test
-    fun `er rett før for andre ytelser`() {
-        assertTrue(1.S.erRettFør(1.YF))
-        assertTrue(1.YF.erRettFør(1.YF))
-        assertTrue(1.YF.erRettFør(1.YF + 1.S))
-        assertTrue(1.YF.erRettFør(1.S))
     }
 
     @Test

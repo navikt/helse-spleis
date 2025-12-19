@@ -8,7 +8,6 @@ import java.util.TreeMap
 import java.util.stream.Collectors.toMap
 import no.nav.helse.dto.SykdomstidslinjeDto
 import no.nav.helse.erHelg
-import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SykdomstidslinjeBuilder
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.Hendelseskilde
@@ -122,21 +121,6 @@ class Sykdomstidslinje private constructor(
             override fun hasNext() = periodeIterator.hasNext()
             override fun next() = this@Sykdomstidslinje[periodeIterator.next()]
         }
-    }
-
-    internal fun erRettFør(other: Sykdomstidslinje): Boolean {
-        if (this.dager.isEmpty() || other.dager.isEmpty()) return false
-        return this.sisteDag().erRettFør(other.førsteDag()) && !this.erSisteDagOppholdsdag() && !other.erFørsteDagOppholdsdag()
-    }
-
-    private fun erFørsteDagOppholdsdag() = erOppholdsdagtype(this.førsteDag())
-    private fun erSisteDagOppholdsdag() = erOppholdsdagtype(this.sisteDag())
-    private fun erOppholdsdagtype(dato: LocalDate) = when (this[dato]) {
-        is Arbeidsdag,
-        is FriskHelgedag,
-        is ArbeidIkkeGjenopptattDag -> true
-
-        else -> false
     }
 
     override fun equals(other: Any?): Boolean {

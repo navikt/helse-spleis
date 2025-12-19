@@ -927,10 +927,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 }
             }
 
-            internal fun erRettFør(neste: Endring): Boolean {
-                return this.sykdomstidslinje.erRettFør(neste.sykdomstidslinje)
-            }
-
             override fun toString() = "$periode - $dokumentsporing - ${sykdomstidslinje.toShortString()}${utbetaling?.let { " - $it" } ?: ""}"
 
             /* kopierer dataklassen og lager ny, men sørger for at den nye endringen får ny id og tidsstempel (!!) */
