@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -106,15 +105,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSøknad(mars)
             assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, forventetSkjæringstidspunkt = 1.mars, forventetVenteperiode = listOf(1.januar til 16.januar))
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertForventetFeil(
-                forklaring = "Skal sende ut forespørsel om arbeidsgiveropplysninger når det har blitt nytt skjæringstidspunkt etter overstyring til andre ytelser i forrige periode",
-                nå = {
-                    assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-                },
-                ønsket = {
-                    assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-                }
-            )
+            with(observatør.trengerArbeidsgiveropplysningerVedtaksperioder) {
+                assertEquals(2, size)
+                assertEquals(3.vedtaksperiode, last().opplysninger.vedtaksperiodeId)
+            }
         }
     }
 
