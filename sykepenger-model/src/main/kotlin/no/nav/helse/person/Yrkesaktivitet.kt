@@ -833,25 +833,6 @@ internal class Yrkesaktivitet private constructor(
         return sykdomstidslinje().merge(egenmeldingstidslinje, bareNyeDager)
     }
 
-    /**
-     * Finner alle vedtaksperioder som tilstøter vedtaksperioden
-     * @param vedtaksperiode Perioden vi skal finne alle sammenhengende perioder for. Vi henter alle perioder som
-     * tilstøter både foran og bak.
-     */
-    internal fun finnSammenhengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
-        val (perioderFør, perioderEtter) = vedtaksperioder.sorted().partition { it før vedtaksperiode }
-        val sammenhengendePerioder = mutableListOf(vedtaksperiode)
-        perioderFør.reversed().forEach {
-            if (it.erVedtaksperiodeRettFør(sammenhengendePerioder.first()))
-                sammenhengendePerioder.add(0, it)
-        }
-        perioderEtter.forEach {
-            if (sammenhengendePerioder.last().erVedtaksperiodeRettFør(it))
-                sammenhengendePerioder.add(it)
-        }
-        return sammenhengendePerioder
-    }
-
     private fun søppelbøtte(
         eventBus: EventBus,
         hendelse: Hendelse,
