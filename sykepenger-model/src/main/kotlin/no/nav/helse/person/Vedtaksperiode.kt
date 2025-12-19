@@ -3257,7 +3257,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         if (refusjonstidslinje.isNotEmpty()) return
 
-        val refusjonstidslinjeFraNabolaget = yrkesaktivitet.refusjonsopplysningerForFørsteFraværsdag(førsteFraværsdag ?: periode.start, periode) ?: Beløpstidslinje()
+        val refusjonstidslinjeFraNabolaget = yrkesaktivitet.refusjonsopplysningerFraNabolaget(this)
 
         val refusjonstidslinjeFraArbeidsgiver =
             yrkesaktivitet.refusjonstidslinje(this).takeUnless { it.isEmpty() }?.also { ubrukte ->

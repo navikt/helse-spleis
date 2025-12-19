@@ -1024,10 +1024,11 @@ internal class Yrkesaktivitet private constructor(
         return forkastede.trengerArbeidsgiveropplysninger(periode, vedtaksperioder.map { it.periode })
     }
 
-    internal fun refusjonsopplysningerForFørsteFraværsdag(førsteFraværsdag: LocalDate, periode: Periode): Beløpstidslinje? {
-        val (før, etter) = vedtaksperioder.filter { it.førsteFraværsdag == førsteFraværsdag }.partition { it.periode.endInclusive < periode.start }
-        return før.lastOrNull { it.refusjonstidslinje.isNotEmpty() }?.refusjonstidslinje ?: etter.firstOrNull { it.refusjonstidslinje.isNotEmpty() }?.refusjonstidslinje
+    internal fun refusjonsopplysningerFraNabolaget(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {
+        val (før, _, etter) = vedtaksperiodeMedSammeFørsteFraværsdag(vedtaksperiode)
+        return (før.lastOrNull { it.refusjonstidslinje.isNotEmpty() }?.refusjonstidslinje ?: etter.firstOrNull { it.refusjonstidslinje.isNotEmpty() }?.refusjonstidslinje) ?: Beløpstidslinje()
     }
 
     internal fun arbeidstakerFaktaavklarteInntekter(skjæringstidspunkt: LocalDate) = vedtaksperioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }.arbeidstakerFaktaavklarteInntekter()
+    internal fun vedtaksperiodeMedSammeFørsteFraværsdag(vedtaksperiode: Vedtaksperiode) = VedtaksperioderMedSammeFørsteFraværsdag.finn(vedtaksperiode, vedtaksperioder)
 }
