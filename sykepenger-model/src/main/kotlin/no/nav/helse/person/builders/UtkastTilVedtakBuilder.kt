@@ -32,7 +32,7 @@ internal class UtkastTilVedtakBuilder(
     private val vedtaksperiodeId: UUID,
     private val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
     private val kanForkastes: Boolean,
-    erForlengelse: Boolean,
+    forlengerVedtak: Boolean,
     private val harPeriodeRettFør: Boolean,
     overlapperMedInfotrygd: Boolean
 ) {
@@ -44,7 +44,7 @@ internal class UtkastTilVedtakBuilder(
     private val pensjonsgivendeInntekter = mutableListOf<SelvstendigFaktaavklartInntekt.PensjonsgivendeInntekt>()
 
     init {
-        if (erForlengelse) tags.add(Tag.Forlengelse)
+        if (forlengerVedtak) tags.add(Tag.Forlengelse)
         else tags.add(Tag.Førstegangsbehandling)
 
         if (overlapperMedInfotrygd) tags.add(Tag.OverlapperMedInfotrygd)

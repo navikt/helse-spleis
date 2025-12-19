@@ -1711,7 +1711,7 @@ internal class Vedtaksperiode private constructor(
 
         infotrygdhistorikk.validerMedVarsel(aktivitetslogg, periode)
         infotrygdhistorikk.validerNyereOpplysninger(aktivitetslogg, periode)
-        ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, behandlinger.maksdato.maksdato, erForlengelse())
+        ytelser.valider(aktivitetslogg, periode, skjæringstidspunkt, behandlinger.maksdato.maksdato, forlengerVedtak())
     }
 
     private fun subsummering(
@@ -2300,8 +2300,8 @@ internal class Vedtaksperiode private constructor(
     internal fun erVedtaksperiodeRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
 
-    private fun erForlengelse(): Boolean = yrkesaktivitet
-        .finnVedtaksperiodeRettFør(this)
+    private fun forlengerVedtak(): Boolean = yrkesaktivitet
+        .vedtaksperiodeMedSammeFørsteFraværsdag(this).før.lastOrNull()
         ?.behandlinger?.harFattetVedtak() == true
 
     internal fun forkast(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, tvingForkasting: Boolean = false) {
@@ -2956,7 +2956,7 @@ internal class Vedtaksperiode private constructor(
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
             vedtaksperiodeId = id,
             kanForkastes = kanForkastes(),
-            erForlengelse = erForlengelse(),
+            forlengerVedtak = forlengerVedtak(),
             harPeriodeRettFør = yrkesaktivitet.finnVedtaksperiodeRettFør(this) != null,
             overlapperMedInfotrygd = person.erBehandletIInfotrygd(periode)
         )
