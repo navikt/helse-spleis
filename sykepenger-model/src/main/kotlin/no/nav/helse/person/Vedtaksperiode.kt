@@ -1320,10 +1320,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun skalHåndtereDagerFraInntektsmelding(dager: DagerFraInntektsmelding): Boolean {
-        val sammenhengende = yrkesaktivitet.finnSammenhengendeVedtaksperioder(this)
-            .map { it.periode }
-            .periode()
-            ?: periode
+        val sammenhengende = yrkesaktivitet.vedtaksperiodeMedSammeFørsteFraværsdag(this).periode
 
         return when (tilstand) {
             Avsluttet,

@@ -1,10 +1,13 @@
 package no.nav.helse.person
 
+import no.nav.helse.hendelser.til
+
 internal data class VedtaksperioderMedSammeFørsteFraværsdag private constructor(
     val før: List<Vedtaksperiode>,
     val vedtaksperiode: Vedtaksperiode,
     val etter: List<Vedtaksperiode>
 ): Iterable<Vedtaksperiode> by listOf(før, listOf(vedtaksperiode), etter).flatten() {
+    val periode get() = first().periode.start til last().periode.endInclusive
 
     companion object {
         fun finn(vedtaksperiode: Vedtaksperiode, alleVedtaksperioderPåYrkesaktivitet: List<Vedtaksperiode>): VedtaksperioderMedSammeFørsteFraværsdag {
