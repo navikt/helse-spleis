@@ -38,7 +38,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
@@ -270,11 +269,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter(orgnummer = a1))
         assertVarsler(emptyList(), 1.vedtaksperiode.filter(orgnummer = a2))
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -406,13 +402,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT)
-            assertInntektsgrunnlag(a2, INNTEKT)
+            assertInntektsgrunnlag(a2, INNTEKT, INNTEKT * 1.1, forventetKorrigertInntekt = INNTEKT * 1.1, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -428,7 +419,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
-        // Arbeidsgiver har fylt inn inntekt for skjæringstidspunktet 1.januar så da vinner det over skatteopplysningene
         val inntektsmelding = håndterArbeidsgiveropplysninger(
             listOf(1.februar til 16.februar),
             orgnummer = a2,
@@ -441,7 +431,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT)
-            assertInntektsgrunnlag(a2, INNTEKT)
+            assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
 
         assertBeløpstidslinje(Beløpstidslinje.fra(februar, INNTEKT, inntektsmelding.arbeidsgiver), inspektør(a2).refusjon(1.vedtaksperiode))
@@ -454,7 +444,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT)
-            assertInntektsgrunnlag(a2, INNTEKT)
+            assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
         assertBeløpstidslinje(
             Beløpstidslinje.fra(1.februar til 19.februar, INNTEKT, inntektsmelding.arbeidsgiver) + Beløpstidslinje.fra(20.februar til 28.februar, INNTEKT, korrigerendeInntektsmelding.arbeidsgiver),
@@ -930,7 +920,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
 
-        // IM for tidligere ghost a2 sparker igang revurdering på a1
+        // IM for tidligere ghost a2 sparker _ikke_ igang revurdering på a1 fordi vi beholder inntektene som de var i sykepengegrunnlaget
         håndterArbeidsgiveropplysninger(
             listOf(16.mars til 31.mars),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
@@ -938,13 +928,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
             assertInntektsgrunnlag(a1, INNTEKT)
-            assertInntektsgrunnlag(a2, INNTEKT)
+            assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
         }
     }
 

@@ -1133,11 +1133,14 @@ internal class Vedtaksperiode private constructor(
 
         val grunnlag = vilkårsgrunnlag ?: return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
 
-        // Skjæringstidspunktet er _ikke_ vilkårsprøvd før (det mest normale - står typisk i AvventerInntektsmelding)
+        // Skjæringstidspunktet har vært vilkårsprøvd før (revurdering)
+
+        val arbeidstakerFaktaavklarteInntekter = checkNotNull(yrkesaktivitet.arbeidstakerFaktaavklarteInntekter(skjæringstidspunkt)) { "La akkurat til inntekt på skjæringstidspunktet, jo" }
 
         val nyttGrunnlag = grunnlag.håndterArbeidstakerFaktaavklartInntekt(
             organisasjonsnummer = yrkesaktivitet.organisasjonsnummer,
-            arbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklartInntekt
+            arbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklarteInntekter.besteInntekt().faktaavklartInntekt,
+            førsteFraværsdag = arbeidstakerFaktaavklarteInntekter.førsteFraværsdag
         ) ?: return emptyList() // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
 
 

@@ -1305,13 +1305,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode
         )
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
 
         nullstillTilstandsendringer()
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
@@ -1320,9 +1318,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET, orgnummer = a1)
 
         val revurderingen = inspektør(a1).sisteUtbetaling()
         assertEquals(1, revurderingen.arbeidsgiverOppdrag.size)

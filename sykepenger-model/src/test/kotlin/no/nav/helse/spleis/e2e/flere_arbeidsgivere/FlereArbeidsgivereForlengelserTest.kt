@@ -120,8 +120,6 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), orgnummer = a2, vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)

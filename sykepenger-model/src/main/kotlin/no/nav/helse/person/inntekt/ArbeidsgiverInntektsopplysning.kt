@@ -63,10 +63,10 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         val liggerSkattTilGrunnNå = this.faktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.AOrdningen
 
-        // Om arbeeidsgiver er syk i annen måned enn skjæringstidspunktet og det ligger skatt til grunn skal vi beholde skatt.
+        // Om arbeidsgiver er syk i annen måned enn skjæringstidspunktet og det ligger skatt til grunn skal vi beholde skatt.
         if (førsteFraværsdag.yearMonth != skjæringstidspunkt.yearMonth && liggerSkattTilGrunnNå) return Utfall.Uendret(this)
 
-        // Samme beløp som vi allerede har, men vå går fra å ha lagt skatt til grunn til å ha lagt arbeidsgivers inntekt til grunn
+        // Samme beløp som vi allerede har, men nå går fra å ha lagt skatt til grunn til å ha lagt arbeidsgivers inntekt til grunn
         if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp && liggerSkattTilGrunnNå) return Utfall.EndretKilde(copy(
             faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
             korrigertInntekt = null

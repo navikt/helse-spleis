@@ -380,17 +380,11 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             }
             håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(25_000.månedlig), OppgittRefusjon(25_000.månedlig, emptyList()))
         }
-        a1 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-        }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, 20_000.månedlig)
-                assertInntektsgrunnlag(a2, 25_000.månedlig, 25_000.månedlig)
+                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(februar, 25_000.månedlig), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
         }
