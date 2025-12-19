@@ -852,9 +852,6 @@ internal class Yrkesaktivitet private constructor(
         return sammenhengendePerioder
     }
 
-    internal fun startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) =
-        finnSammenhengendeVedtaksperioder(vedtaksperiode).first().periode.start
-
     private fun søppelbøtte(
         eventBus: EventBus,
         hendelse: Hendelse,
@@ -1031,4 +1028,5 @@ internal class Yrkesaktivitet private constructor(
 
     internal fun arbeidstakerFaktaavklarteInntekter(skjæringstidspunkt: LocalDate) = vedtaksperioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }.arbeidstakerFaktaavklarteInntekter()
     internal fun vedtaksperiodeMedSammeFørsteFraværsdag(vedtaksperiode: Vedtaksperiode) = VedtaksperioderMedSammeFørsteFraværsdag.finn(vedtaksperiode, vedtaksperioder)
+    internal fun startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) = vedtaksperiodeMedSammeFørsteFraværsdag(vedtaksperiode).first().periode.start
 }

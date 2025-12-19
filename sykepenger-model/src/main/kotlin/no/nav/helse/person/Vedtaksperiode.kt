@@ -282,9 +282,7 @@ internal class Vedtaksperiode private constructor(
     // 💡Må ikke forveksles med `førsteFraværsdag` 💡
     // F.eks. januar med agp 1-10 & 16-21 så er `førsteFraværsdag` 16.januar, mens `startdatoPåSammenhengendeVedtaksperioder` er 1.januar
     private val startdatoPåSammenhengendeVedtaksperioder
-        get() = yrkesaktivitet.startdatoPåSammenhengendeVedtaksperioder(
-            this
-        )
+        get() = yrkesaktivitet.startdatoPåSammenhengendeVedtaksperioder(this)
     internal val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
     private val eksterneIderSet get() = behandlinger.eksterneIderUUID()
     internal val refusjonstidslinje get() = behandlinger.refusjonstidslinje()
@@ -3293,17 +3291,16 @@ internal class Vedtaksperiode private constructor(
             }
 
         internal fun List<Vedtaksperiode>.startdatoerPåSammenhengendeVedtaksperioder(): Set<LocalDate> {
-            val startdatoer = mutableMapOf<UUID, LocalDate>()
+            val (utenFørsteFraværsdag, medFørsteFraværsdag) = partition { it.førsteFraværsdag == null }
 
-            this.forEach { vedtaksperiode ->
-                if (vedtaksperiode.id in startdatoer) return@forEach
-                val sammenhendeVedtaksperioder =
-                    vedtaksperiode.yrkesaktivitet.finnSammenhengendeVedtaksperioder(vedtaksperiode)
-                val startdatoPåSammenhengendeVedtaksperioder = sammenhendeVedtaksperioder.first().periode.start
-                startdatoer.putAll(sammenhendeVedtaksperioder.associate { it.id to startdatoPåSammenhengendeVedtaksperioder })
-            }
+            val startdatoerPåPerioderUtenFørsteFraværsdag = utenFørsteFraværsdag.map { it.periode.start }
 
-            return startdatoer.values.toSet()
+            val startdatoerPåPerioderMedFørsteFraværsdag = medFørsteFraværsdag
+                .groupBy { it.førsteFraværsdag!! }
+                .mapValues { (_, perioder) -> perioder.minOf { it.periode.start } }
+                .values
+
+            return (startdatoerPåPerioderUtenFørsteFraværsdag + startdatoerPåPerioderMedFørsteFraværsdag).toSet()
         }
 
         internal fun List<Vedtaksperiode>.harArbeidstakerFaktaavklartInntekt() = any { (it.behandlinger.faktaavklartInntekt as? ArbeidstakerFaktaavklartInntekt) != null }
