@@ -875,11 +875,6 @@ internal class Yrkesaktivitet private constructor(
             other.erVedtaksperiodeRettFør(vedtaksperiode)
         }
 
-    internal fun finnVedtaksperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.firstOrNull { other ->
-            vedtaksperiode.erVedtaksperiodeRettFør(other)
-        }
-
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst(
             kontekstType = "Arbeidsgiver",

@@ -130,7 +130,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         eventBus.trengerArbeidsgiveropplysninger(trengerArbeidsgiveropplysninger(vedtaksperiode, forespurteOpplysninger))
 
         // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
-        vedtaksperiode.yrkesaktivitet.finnVedtaksperiodeRettEtter(vedtaksperiode)?.trengerIkkeArbeidsgiveropplysninger(eventBus)
+        vedtaksperiode.yrkesaktivitet.vedtaksperiodeMedSammeFørsteFraværsdag(vedtaksperiode).etter.firstOrNull()?.trengerIkkeArbeidsgiveropplysninger(eventBus)
     }
 
     private fun trengerArbeidsgiveropplysninger(
