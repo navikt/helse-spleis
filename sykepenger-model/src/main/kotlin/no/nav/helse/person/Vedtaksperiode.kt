@@ -1124,6 +1124,8 @@ internal class Vedtaksperiode private constructor(
             TilInfotrygd -> error("Forventer ikke å håndtere inntekt i tilstand $tilstand")
         }
 
+        if (hendelse is KorrigerteArbeidsgiveropplysninger) aktivitetslogg.varsel(RV_IM_4)
+
         behandlinger.håndterFaktaavklartInntekt(
             behandlingEventBus = eventBus.behandlingEventBus,
             arbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
@@ -1134,18 +1136,15 @@ internal class Vedtaksperiode private constructor(
         val grunnlag = vilkårsgrunnlag ?: return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
 
         // Skjæringstidspunktet har vært vilkårsprøvd før (revurdering)
-
         val arbeidstakerFaktaavklarteInntekter = checkNotNull(yrkesaktivitet.arbeidstakerFaktaavklarteInntekter(skjæringstidspunkt)) { "La akkurat til inntekt på skjæringstidspunktet, jo" }
 
         val nyttGrunnlag = grunnlag.håndterArbeidstakerFaktaavklartInntekt(
             organisasjonsnummer = yrkesaktivitet.organisasjonsnummer,
             arbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklarteInntekter.besteInntekt().faktaavklartInntekt,
             førsteFraværsdag = arbeidstakerFaktaavklarteInntekter.førsteFraværsdag
-        ) ?: return emptyList() // todo: per 10. januar 2025 så sender alltid Hag inntekt i portal-inntektsmeldinger selv om vi ikke har bedt om det, derfor må vi ta høyde for at det ikke nødvendigvis er endringer
-
+        ) ?: return emptyList()
 
         person.lagreVilkårsgrunnlag(nyttGrunnlag)
-        // Skjæringstidspunktet er allerede vilkårsprøvd, men inntekten for arbeidsgiveren er byttet ut med denne oppgitte inntekten
         return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
     }
 

@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -44,6 +45,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a1, INNTEKT * 1.25)
             }
             assertEquals(refusjonFørKorrigering, inspektør.refusjon(1.vedtaksperiode))
+            assertVarsler(1.vedtaksperiode, RV_IM_4)
         }
     }
 
@@ -77,6 +79,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a1, INNTEKT * 1.25)
             }
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT * 1.25, korrigerteArbeidsgiveropplysninger.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+            assertVarsler(1.vedtaksperiode, RV_IM_4)
         }
     }
 
@@ -105,6 +108,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             }
             // Burde vi unngått en overstyring her?
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, korrigerteArbeidsgiveropplysninger.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+            assertVarsler(1.vedtaksperiode, RV_IM_4)
         }
     }
 

@@ -265,6 +265,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 assertEquals(INNTEKT * 1.1, faktaavklartInntekt.beløp)
                 assertEquals(hendelseIdKorrigerendeArbeidsgiveropplysninger, faktaavklartInntekt.hendelseId)
             }
+            assertVarsler(1.vedtaksperiode, RV_IM_4)
         }
     }
 

@@ -559,6 +559,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(korrigertId to 2.vedtaksperiode.id(a1) in observatør.inntektsmeldingHåndtert)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
     }
 
     @Test

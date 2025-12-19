@@ -47,6 +47,7 @@ import no.nav.helse.person.EventSubscription.Refusjon
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -661,6 +662,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 Dokumentsporing.inntektsmeldingRefusjon(id),
                 Dokumentsporing.inntektsmeldingInntekt(idKorrigert)
             )
+            assertVarsler(1.vedtaksperiode, RV_IM_4)
         }
     }
 
