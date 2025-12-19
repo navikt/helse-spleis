@@ -106,7 +106,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     private fun opplysningerViTrenger(vedtaksperiode: Vedtaksperiode): Set<EventSubscription.ForespurtOpplysning> {
         if (!vedtaksperiode.skalArbeidstakerBehandlesISpeil()) return emptySet() // perioden er AUU ✋
 
-        if (vedtaksperiode.yrkesaktivitet.vedtaksperiodeMedSammeFørsteFraværsdag(vedtaksperiode).før.any { it.skalArbeidstakerBehandlesISpeil() }) return emptySet() // Da har en periode foran oss spurt for oss/ vi har det vi trenger ✋
+        if (vedtaksperiode.yrkesaktivitet.vedtaksperioderMedSammeFørsteFraværsdag(vedtaksperiode).før.any { it.skalArbeidstakerBehandlesISpeil() }) return emptySet() // Da har en periode foran oss spurt for oss/ vi har det vi trenger ✋
 
         val opplysninger = mutableSetOf<EventSubscription.ForespurtOpplysning>().apply {
             if (!vedtaksperiode.harEksisterendeInntekt()) addAll(setOf(EventSubscription.Inntekt, EventSubscription.Refusjon)) // HAG støtter ikke skjema uten refusjon, så når vi først spør om inntekt _må_ vi også spørre om refusjon
@@ -130,7 +130,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         eventBus.trengerArbeidsgiveropplysninger(trengerArbeidsgiveropplysninger(vedtaksperiode, forespurteOpplysninger))
 
         // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
-        vedtaksperiode.yrkesaktivitet.vedtaksperiodeMedSammeFørsteFraværsdag(vedtaksperiode).etter.firstOrNull()?.trengerIkkeArbeidsgiveropplysninger(eventBus)
+        vedtaksperiode.yrkesaktivitet.vedtaksperioderMedSammeFørsteFraværsdag(vedtaksperiode).etter.firstOrNull()?.trengerIkkeArbeidsgiveropplysninger(eventBus)
     }
 
     private fun trengerArbeidsgiveropplysninger(

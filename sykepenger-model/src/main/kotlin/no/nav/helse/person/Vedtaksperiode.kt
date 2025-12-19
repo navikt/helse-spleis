@@ -1320,7 +1320,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun skalHåndtereDagerFraInntektsmelding(dager: DagerFraInntektsmelding): Boolean {
-        val sammenhengende = yrkesaktivitet.vedtaksperiodeMedSammeFørsteFraværsdag(this).periode
+        val sammenhengende = yrkesaktivitet.vedtaksperioderMedSammeFørsteFraværsdag(this).periode
 
         return when (tilstand) {
             Avsluttet,
@@ -2299,7 +2299,7 @@ internal class Vedtaksperiode private constructor(
     internal infix fun etter(other: Vedtaksperiode) = this > other
 
     private fun forlengerVedtak(): Boolean = yrkesaktivitet
-        .vedtaksperiodeMedSammeFørsteFraværsdag(this).før.lastOrNull()
+        .vedtaksperioderMedSammeFørsteFraværsdag(this).før.lastOrNull()
         ?.behandlinger?.harFattetVedtak() == true
 
     internal fun forkast(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, tvingForkasting: Boolean = false) {
@@ -2955,7 +2955,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             kanForkastes = kanForkastes(),
             forlengerVedtak = forlengerVedtak(),
-            harPeriodeRettFør = yrkesaktivitet.vedtaksperiodeMedSammeFørsteFraværsdag(this).før.lastOrNull() != null,
+            harPeriodeRettFør = yrkesaktivitet.vedtaksperioderMedSammeFørsteFraværsdag(this).før.lastOrNull() != null,
             overlapperMedInfotrygd = person.erBehandletIInfotrygd(periode)
         )
         person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))

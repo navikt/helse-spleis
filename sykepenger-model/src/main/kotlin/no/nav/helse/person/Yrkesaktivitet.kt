@@ -993,11 +993,11 @@ internal class Yrkesaktivitet private constructor(
     }
 
     internal fun refusjonsopplysningerFraNabolaget(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {
-        val (før, _, etter) = vedtaksperiodeMedSammeFørsteFraværsdag(vedtaksperiode)
+        val (før, _, etter) = vedtaksperioderMedSammeFørsteFraværsdag(vedtaksperiode)
         return (før.lastOrNull { it.refusjonstidslinje.isNotEmpty() }?.refusjonstidslinje ?: etter.firstOrNull { it.refusjonstidslinje.isNotEmpty() }?.refusjonstidslinje) ?: Beløpstidslinje()
     }
 
     internal fun arbeidstakerFaktaavklarteInntekter(skjæringstidspunkt: LocalDate) = vedtaksperioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }.arbeidstakerFaktaavklarteInntekter()
-    internal fun vedtaksperiodeMedSammeFørsteFraværsdag(vedtaksperiode: Vedtaksperiode) = VedtaksperioderMedSammeFørsteFraværsdag.finn(vedtaksperiode, vedtaksperioder)
-    internal fun startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) = vedtaksperiodeMedSammeFørsteFraværsdag(vedtaksperiode).first().periode.start
+    internal fun vedtaksperioderMedSammeFørsteFraværsdag(vedtaksperiode: Vedtaksperiode) = VedtaksperioderMedSammeFørsteFraværsdag.finn(vedtaksperiode, vedtaksperioder)
+    internal fun startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode) = vedtaksperioderMedSammeFørsteFraværsdag(vedtaksperiode).first().periode.start
 }
