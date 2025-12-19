@@ -2297,8 +2297,6 @@ internal class Vedtaksperiode private constructor(
 
     internal infix fun før(other: Vedtaksperiode) = this < other
     internal infix fun etter(other: Vedtaksperiode) = this > other
-    internal fun erVedtaksperiodeRettFør(other: Vedtaksperiode) =
-        this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
 
     private fun forlengerVedtak(): Boolean = yrkesaktivitet
         .vedtaksperiodeMedSammeFørsteFraværsdag(this).før.lastOrNull()
@@ -2957,7 +2955,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             kanForkastes = kanForkastes(),
             forlengerVedtak = forlengerVedtak(),
-            harPeriodeRettFør = yrkesaktivitet.finnVedtaksperiodeRettFør(this) != null,
+            harPeriodeRettFør = yrkesaktivitet.vedtaksperiodeMedSammeFørsteFraværsdag(this).før.lastOrNull() != null,
             overlapperMedInfotrygd = person.erBehandletIInfotrygd(periode)
         )
         person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))

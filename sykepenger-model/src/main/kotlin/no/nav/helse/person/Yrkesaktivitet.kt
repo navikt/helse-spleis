@@ -870,11 +870,6 @@ internal class Yrkesaktivitet private constructor(
         forkastede.add(ForkastetVedtaksperiode(vedtaksperiode, organisasjonsnummer, vedtaksperiode.periode))
     }
 
-    internal fun finnVedtaksperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.firstOrNull { other ->
-            other.erVedtaksperiodeRettFør(vedtaksperiode)
-        }
-
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst(
             kontekstType = "Arbeidsgiver",
