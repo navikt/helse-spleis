@@ -2,11 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.Død
-import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.ForGammel
-import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.Karantene
-import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.KaranteneOver67
-import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.Syk
+import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.State.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 
@@ -27,7 +23,7 @@ class Maksdatoberegning(
         private set
     internal val maksdatosaker get() = _maksdatosaker.plusElement(sisteVurdering)
 
-    private var state: State = State.Initiell
+    private var state: State = Initiell
 
     fun beregnMaksdatoBegrensetTilPeriode(periode: Periode): BeregnetMaksdato {
         return sisteVurdering
@@ -37,12 +33,12 @@ class Maksdatoberegning(
 
     private fun vurderStopp(dato: LocalDate) {
         when (state) {
-            State.Initiell,
+            Initiell,
             Karantene,
             KaranteneOver67,
-            State.KaranteneTilstrekkeligOppholdNådd,
-            State.Opphold,
-            State.OppholdFri,
+            KaranteneTilstrekkeligOppholdNådd,
+            Opphold,
+            OppholdFri,
             Syk -> when {
                 syttiårsdagen <= dato -> state(ForGammel)
                 dødsdato != null && dødsdato < dato -> state(Død)
@@ -110,14 +106,14 @@ class Maksdatoberegning(
 
     private fun håndterBetalbarDagEtterMaksdato(dag: LocalDate) {
         val begrunnelse = when (state) {
-            State.Død -> Begrunnelse.EtterDødsdato
-            State.ForGammel -> Begrunnelse.Over70
+            Død -> Begrunnelse.EtterDødsdato
+            ForGammel -> Begrunnelse.Over70
             Karantene -> Begrunnelse.SykepengedagerOppbrukt
             KaranteneOver67 -> Begrunnelse.SykepengedagerOppbruktOver67
-            State.KaranteneTilstrekkeligOppholdNådd -> Begrunnelse.NyVilkårsprøvingNødvendig
-            State.Initiell,
-            State.Opphold,
-            State.OppholdFri,
+            KaranteneTilstrekkeligOppholdNådd -> Begrunnelse.NyVilkårsprøvingNødvendig
+            Initiell,
+            Opphold,
+            OppholdFri,
             Syk -> error("Forventer ikke avslag i tilstand $state")
         }
         sisteVurdering = sisteVurdering.medAvslåttDag(dag, begrunnelse)
