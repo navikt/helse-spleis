@@ -657,6 +657,10 @@ internal class Vedtaksperiode private constructor(
 
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
+        return lagreInntektsmeldingInntektPåBehandling(eventBus, inntektsmelding, aktivitetsloggMedVedtaksperiodekontekst)
+    }
+
+    private fun lagreInntektsmeldingInntektPåBehandling(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr {
         when (tilstand) {
             AvsluttetUtenUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, inntektsmelding)
 
@@ -711,11 +715,10 @@ internal class Vedtaksperiode private constructor(
             TilInfotrygd -> error("Forventer ikke å håndtere inntekt i tilstand $tilstand")
         }
 
-        // lagrer ALLTID inntekt på behandling
         behandlinger.håndterFaktaavklartInntekt(
             behandlingEventBus = eventBus.behandlingEventBus,
-            arbeidstakerFaktaavklartInntekt = faktaavklartInntekt,
-            aktivitetslogg = aktivitetsloggMedVedtaksperiodekontekst,
+            arbeidstakerFaktaavklartInntekt = inntektsmelding.faktaavklartInntekt,
+            aktivitetslogg = aktivitetslogg,
             dokumentsporing = inntektsmeldingInntekt(inntektsmelding.metadata.meldingsreferanseId)
         )
 
