@@ -22,6 +22,7 @@ import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -65,7 +66,12 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertThrows<NoSuchElementException> { håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode) }
-            assertVarsler(1.vedtaksperiode, RV_IV_10)
+
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, flagg = setOf("allePerioderForSammeArbeidsgiverMedSammeSkjæringstidspunktSomAvventerInntektsmeldingMåKommeSegVidere"))
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            assertVarsler(1.vedtaksperiode, RV_VV_1, RV_IV_10)
         }
     }
 

@@ -3329,6 +3329,10 @@ internal class Vedtaksperiode private constructor(
                 .onEach { it.igangsettOverstyringEndreTilstand(eventBus, aktivitetslogg) }
         }
 
+        internal fun List<Vedtaksperiode>.medAktivitetslogg(aktivitetslogg: IAktivitetslogg, block: (vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) -> Unit) = forEach {
+            block(it, it.registrerKontekst(aktivitetslogg))
+        }
+
         // Fredet funksjonsnavn
         internal val OVERLAPPENDE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             return fun(other: Vedtaksperiode): Boolean {
