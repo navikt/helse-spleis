@@ -660,6 +660,26 @@ internal class Vedtaksperiode private constructor(
         return lagreInntektsmeldingInntektPåBehandling(eventBus, inntektsmelding, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
+    internal fun håndterInntektFraInntektsmeldingV2(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr {
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+
+        inntektsmeldingHåndtert(eventBus, inntektsmelding)
+
+        val inntektPåBehandling = lagreInntektsmeldingInntektPåBehandling(eventBus, inntektsmelding, aktivitetsloggMedVedtaksperiodekontekst)
+
+        val gammeltGrunnlag = vilkårsgrunnlag ?: return inntektPåBehandling
+
+        val nyttGrunnlag = gammeltGrunnlag.håndterArbeidstakerFaktaavklartInntekt(
+            organisasjonsnummer = yrkesaktivitet.organisasjonsnummer,
+            arbeidstakerFaktaavklartInntekt = inntektsmelding.faktaavklartInntekt
+        ) ?: return inntektPåBehandling
+
+        person.lagreVilkårsgrunnlag(nyttGrunnlag)
+        aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
+        return Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(inntektsmelding, skjæringstidspunkt, skjæringstidspunkt)
+    }
+
+
     private fun lagreInntektsmeldingInntektPåBehandling(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr {
         when (tilstand) {
             AvsluttetUtenUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, inntektsmelding)
