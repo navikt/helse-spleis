@@ -10,6 +10,7 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
@@ -48,10 +49,15 @@ private fun overførUtbetaling(aktivitetslogg: IAktivitetslogg, forrigeBehandlin
 }
 
 private fun utbetalingsbehov(aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag, saksbehandler: String, maksdato: LocalDate?) {
+    val utbetalingstype = when (oppdrag.fagområde) {
+        Fagområde.SykepengerRefusjon -> "arbeidsgiverutbetaling"
+        Fagområde.Sykepenger -> "personutbetaling"
+    }
+
     utbetalingsbehovdetaljer(oppdrag, saksbehandler, maksdato)?.also {
         aktivitetslogg
             .kontekst(oppdrag)
-            .behov(Behovtype.Utbetaling, "Trenger å sende brukerutbetaling til Oppdrag", it)
+            .behov(Behovtype.Utbetaling, "Trenger å sende $utbetalingstype til Oppdrag", it)
     }
 }
 
