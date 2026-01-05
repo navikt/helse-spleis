@@ -3033,7 +3033,7 @@ internal class Vedtaksperiode private constructor(
             // TODO: HMM, man skulle jo tro det var noe lignende arbeidstaker-versjonen, men så lenge det ikke er det så venter den vel bare på nestemann
             SelvstendigAvventerRevurdering -> VenterPå.Nestemann
 
-            AvventerInntektsopplysningerForAnnenArbeidsgiver -> when (val annenPeriode = førstePeriodeSomVenterPåInntekt()) {
+            AvventerInntektsopplysningerForAnnenArbeidsgiver -> when (val annenPeriode = førstePeriodeSomVenterPåInntektAnnenArbeidsgiver()) {
                 null -> VenterPå.Nestemann
                 else -> VenterPå.AnnenPeriode(annenPeriode.venter(), Venteårsak.INNTEKTSMELDING)
             }
@@ -3235,7 +3235,7 @@ internal class Vedtaksperiode private constructor(
             .minOrNull()
     }
 
-    internal fun førstePeriodeSomVenterPåInntekt(): Vedtaksperiode? {
+    internal fun førstePeriodeSomVenterPåInntektAnnenArbeidsgiver(): Vedtaksperiode? {
         return person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
             .filter { it.yrkesaktivitet !== this.yrkesaktivitet }

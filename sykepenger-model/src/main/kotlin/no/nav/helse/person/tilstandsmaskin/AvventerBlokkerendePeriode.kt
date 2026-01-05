@@ -12,7 +12,7 @@ internal fun nesteTilstandEtterInntekt(vedtaksperiode: Vedtaksperiode): Vedtaksp
 }
 
 private fun tilstandHvisBlokkeresAvAndre(vedtaksperiode: Vedtaksperiode): Vedtaksperiodetilstand? {
-    val førstePeriodeAnnenArbeidsgiverSomTrengerInntekt = vedtaksperiode.førstePeriodeSomVenterPåInntekt()
+    val førstePeriodeAnnenArbeidsgiverSomTrengerInntekt = vedtaksperiode.førstePeriodeSomVenterPåInntektAnnenArbeidsgiver()
     val førstePeriodeSomTrengerRefusjonsopplysninger = vedtaksperiode.førstePeriodeSomVenterPåRefusjonsopplysninger()
 
     return when {

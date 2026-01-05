@@ -38,7 +38,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
 
     private fun tilstand(vedtaksperiode: Vedtaksperiode): Tilstand {
         return when (vedtaksperiode.vilkårsgrunnlag) {
-            null -> when (val førstePeriodeSomTrengerInntekt = vedtaksperiode.førstePeriodeSomVenterPåInntekt()) {
+            null -> when (val førstePeriodeSomTrengerInntekt = vedtaksperiode.førstePeriodeSomVenterPåInntektAnnenArbeidsgiver()) {
                 null -> KlarForVilkårsprøving
                 else -> TrengerInntektsopplysningerAnnenArbeidsgiver(førstePeriodeSomTrengerInntekt)
             }
