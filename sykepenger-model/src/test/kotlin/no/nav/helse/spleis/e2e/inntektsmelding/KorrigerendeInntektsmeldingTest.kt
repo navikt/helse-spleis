@@ -321,7 +321,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
-        assertEquals(listOf("NY_PERIODE", "ARBEIDSGIVERPERIODE", "ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
+        assertEquals(listOf("NY_PERIODE", "ARBEIDSGIVERPERIODE", "INNTEKT_FRA_INNTEKTSMELDING"), overstyringerIgangsatt)
         assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
         assertInntektsgrunnlag(15.januar, forventetAntallArbeidsgivere = 1) {
             assertInntektsgrunnlag(a1, INNTEKT * 1.1)

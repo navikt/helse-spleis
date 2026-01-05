@@ -127,7 +127,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         overstyringerIgangsatt[8].also { event ->
             assertEquals(
                 EventSubscription.OverstyringIgangsatt(
-                    årsak = "ARBEIDSGIVERPERIODE",
+                    årsak = "INNTEKT_FRA_INNTEKTSMELDING",
                     skjæringstidspunkt = 1.mars,
                     periodeForEndring = 1.mars til 20.mars,
                     berørtePerioder = listOf(
