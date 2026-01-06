@@ -1,7 +1,10 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
+import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.TestPerson
@@ -14,6 +17,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.juli
@@ -26,10 +30,101 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class MaksdatoE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `Feil maksdato ved mursteinspølser og lave inntekter`() {
+        val seks6 = Grunnbeløp.`6G`.beløp(1.januar)
+        val a1Inntekt = seks6 * 0.5
+        val a2Inntekt = seks6 * 0.2
+
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 60.prosent))
+        }
+
+        a2 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 60.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = a2Inntekt)
+        }
+
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = a1Inntekt)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = listOf(a1 to a1Inntekt, a2 to a2Inntekt))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a1 {
+            håndterSøknad(Sykdom(1.februar, 18.februar, 60.prosent))
+            håndterSøknad(Sykdom(19.februar, 19.februar, 90.prosent))
+            håndterSøknad(Sykdom(20.februar, 28.februar, 60.prosent))
+        }
+
+        a2 {
+            håndterSøknad(Sykdom(1.februar, 28.februar, 60.prosent))
+        }
+
+        a1 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a2 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            inspektør(a2).sisteMaksdato(2.vedtaksperiode).also {
+                assertEquals(31, it.antallForbrukteDager)
+                assertEquals(217, it.gjenståendeDager)
+                assertEquals(28.desember, it.maksdato)
+            }
+        }
+
+        a1 {
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a1 {
+            håndterYtelser(4.vedtaksperiode)
+            håndterSimulering(4.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(4.vedtaksperiode)
+            håndterUtbetalt()
+            inspektør(a1).sisteMaksdato(4.vedtaksperiode).also {
+                assertForventetFeil(
+                    forklaring = "Feil maksdato ved mursteinspølser og lave inntekter",
+                    nå = {
+                        assertEquals(18, it.antallForbrukteDager)
+                        assertEquals(230, it.gjenståendeDager)
+                        assertEquals(16.januar(2019), it.maksdato)
+                    },
+                    ønsket = {
+                        assertEquals(31, it.antallForbrukteDager)
+                        assertEquals(217, it.gjenståendeDager)
+                        assertEquals(28.desember, it.maksdato)
+                    }
+                )
+            }
+        }
+    }
 
     @Test
     fun `hensyntar tidligere arbeidsgivere fra IT`() {
