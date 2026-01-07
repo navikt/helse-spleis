@@ -31,7 +31,7 @@ fun filtrerUtbetalingstidslinjer(
         syttiårsdagen = syttiårsdagen,
         dødsdato = dødsdato,
         regler = regler,
-        infotrygdtidslinje = historisktidslinje
+        historisktidslinje = historisktidslinje
     )
 
     val beregnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver

@@ -1213,7 +1213,7 @@ internal class MaksdatoberegningTest {
             syttiårsdagen = syttiårsdagen,
             dødsdato = dødsdato,
             regler = regler,
-            infotrygdtidslinje = personTidslinje
+            historisktidslinje = personTidslinje
         )
 
         val tidslinjer = this.mapIndexed { index, it ->

@@ -830,7 +830,7 @@ internal class MaksimumSykepengedagerfilterTest {
             syttiårsdagen = syttiårsdagen,
             dødsdato = dødsdato,
             regler = NormalArbeidstaker,
-            infotrygdtidslinje = personTidslinje
+            historisktidslinje = personTidslinje
         )
 
         val tidslinjer = this.mapIndexed { index, it ->

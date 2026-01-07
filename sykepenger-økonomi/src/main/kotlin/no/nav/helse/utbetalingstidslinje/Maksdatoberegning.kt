@@ -11,7 +11,7 @@ class Maksdatoberegning(
     private val syttiårsdagen: LocalDate,
     private val dødsdato: LocalDate?,
     regler: MaksimumSykepengedagerregler,
-    private val infotrygdtidslinje: Utbetalingstidslinje
+    private val historisktidslinje: Utbetalingstidslinje
 ) {
     companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26 * 7
@@ -51,7 +51,7 @@ class Maksdatoberegning(
     }
 
     internal fun beregn(arbeidsgivere: List<Arbeidsgiverberegning>): List<Maksdatokontekst> {
-        val tidslinjegrunnlag = arbeidsgivere.map { it.samletVedtaksperiodetidslinje }.plusElement(infotrygdtidslinje)
+        val tidslinjegrunnlag = arbeidsgivere.map { it.samletVedtaksperiodetidslinje }.plusElement(historisktidslinje)
         val beregnetTidslinje = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus)
 
         Utbetalingstidslinje.periode(tidslinjegrunnlag)
