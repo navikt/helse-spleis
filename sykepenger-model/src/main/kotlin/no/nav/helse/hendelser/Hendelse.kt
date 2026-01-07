@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.MeldingsreferanseDto
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 
 enum class Avsender {
     SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM;
@@ -48,6 +49,13 @@ sealed interface Behandlingsporing {
                 Frilans -> "FRILANS"
                 Selvstendig -> "SELVSTENDIG"
             }
+
+        val Yrkesaktivitet.somInntektskilde get() = when (this) {
+            Arbeidsledig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig
+            is Arbeidstaker -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer)
+            Frilans -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Frilans
+            Selvstendig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Selvstendig
+        }
     }
 }
 

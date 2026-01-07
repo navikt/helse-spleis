@@ -37,6 +37,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somInntektskilde
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
@@ -1577,7 +1578,7 @@ internal class Vedtaksperiode private constructor(
         val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
         val inntektsperioder = ytelser.inntektsendringer()
         val selvstendigForsikring = ytelser.selvstendigForsikring()
-        val (uberegnetTidslinjePerArbeidsgiver, inntektsperioderMedBeløpstidslinjer)  = lagArbeidsgiverberegning(perioderSomMåHensyntasVedBeregning, grunnlagsdata, inntektsperioder, selvstendigForsikring)
+        val (uberegnetTidslinjePerArbeidsgiver, inntektsperioderMedBeløpstidslinjer)  = lagArbeidsgiverberegning(this, perioderSomMåHensyntasVedBeregning, grunnlagsdata, inntektsperioder, selvstendigForsikring)
         // steg 3: beregn alle utbetalingstidslinjer (avslå dager, beregne maksdato og utbetalingsbeløp)
         val harOpptjening = harOpptjening(grunnlagsdata)
         val sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag
@@ -3734,6 +3735,7 @@ private fun maksdatosubsummering(
 }
 
 internal fun lagArbeidsgiverberegning(
+    vedtaksperiodenSomBeregner: Vedtaksperiode,
     vedtaksperioder: List<Vedtaksperiode>,
     vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
     inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, InntekterForBeregning.Inntektsperioder> = emptyMap(),
@@ -3756,17 +3758,25 @@ internal fun lagArbeidsgiverberegning(
             inntektsjusteringer(inntektskilde, inntektsperioder)
         }
         vedtaksperioder.forEach { it.medVedtaksperiode(this, selvstendigForsikring) }
+
+        val beregningsperiode = checkNotNull(vedtaksperioder.map { it.periode }.periode())
+        beregningsperiode.beholdDagerTil(vedtaksperiodenSomBeregner.periode.endInclusive.forrigeDag)?.let { mursteinssnute ->
+            vedtaksperioder.groupBy { it.yrkesaktivitet }.forEach { (yrkesaktivitet, vedtaksperioderForYrkesaktivitet) ->
+                val utbetalingstidslinjesnute = vedtaksperiodenSomBeregner.person.vedtaksperioder { it.yrkesaktivitet == yrkesaktivitet }
+                    .filterNot { it in vedtaksperioderForYrkesaktivitet }
+                    .filter { it.periode.overlapperMed(mursteinssnute) }
+                    .map { it.behandlinger.utbetalingstidslinje().subset(mursteinssnute) }
+                    .fold(Utbetalingstidslinje()) { acc, utbetalingstidslinje -> acc + utbetalingstidslinje }
+
+                utbetalingstidslinjesnute(yrkesaktivitet.yrkesaktivitetstype.somInntektskilde, utbetalingstidslinjesnute)
+            }
+        }
+
         build() to inntektsendringer()
     }
 }
 
 private fun Vedtaksperiode.medVedtaksperiode(builder: ArbeidsgiverberegningBuilder, selvstendigForsikring: SelvstendigForsikring?) {
-    val yrkesaktivitetstype = when (yrkesaktivitet.yrkesaktivitetstype) {
-        Arbeidsledig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig
-        is Arbeidstaker -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(yrkesaktivitet.yrkesaktivitetstype.organisasjonsnummer)
-        Frilans -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Frilans
-        Selvstendig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Selvstendig
-    }
     val utbetalingstidslinjeBuilder = when (yrkesaktivitet.yrkesaktivitetstype) {
         is Arbeidstaker -> behandlinger.utbetalingstidslinjeBuilderForArbeidstaker()
         Selvstendig -> behandlinger.utbetalingstidslinjeBuilderForSelvstendig(selvstendigForsikring)
@@ -3774,7 +3784,7 @@ private fun Vedtaksperiode.medVedtaksperiode(builder: ArbeidsgiverberegningBuild
         Arbeidsledig,
         Frilans -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitet.yrkesaktivitetstype::class.simpleName}")
     }
-    builder.vedtaksperiode(yrkesaktivitetstype, id, sykdomstidslinje, utbetalingstidslinjeBuilder)
+    builder.vedtaksperiode(yrkesaktivitet.yrkesaktivitetstype.somInntektskilde, id, sykdomstidslinje, utbetalingstidslinjeBuilder)
 }
 
 private fun nesteTilstandEtterIgangsattOverstyring(

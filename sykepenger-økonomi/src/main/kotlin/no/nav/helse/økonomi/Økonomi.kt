@@ -31,8 +31,8 @@ data class Økonomi(
                 dekningsgrad = dekningsgrad
             )
 
-        fun ikkeBetalt(aktuellDagsinntekt: Inntekt = INGEN, inntektjustering: Inntekt = INGEN) = inntekt(
-            sykdomsgrad = NullProsent,
+        fun ikkeBetalt(aktuellDagsinntekt: Inntekt = INGEN, inntektjustering: Inntekt = INGEN, sykdomsgrad: Prosentdel = NullProsent) = inntekt(
+            sykdomsgrad = sykdomsgrad,
             aktuellDagsinntekt = aktuellDagsinntekt,
             refusjonsbeløp = INGEN,
             dekningsgrad = DekningsgradArbeidstaker,

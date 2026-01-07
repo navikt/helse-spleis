@@ -11,14 +11,20 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel.Companion.NullProsent
 import no.nav.helse.økonomi.Økonomi
 
 internal class ArbeidsgiverberegningBuilder {
-    private val inntektskilder = mutableSetOf<Arbeidsgiverberegning.Inntektskilde>()
+    private val inntektskilder = mutableSetOf<Inntektskilde>()
     private val inntekter: MutableMap<Yrkesaktivitet, Inntekt> = mutableMapOf()
     private val inntektsjusteringer: MutableMap<Inntektskilde, Beløpstidslinje> = mutableMapOf()
     private val vedtaksperioder: MutableMap<Yrkesaktivitet, MutableList<UberegnetVedtaksperiode>> = mutableMapOf()
     private var sykepengegrunnlag: Inntekt = Inntekt.INGEN
+    private val utbetalingstidslinjesnuter: MutableMap<Yrkesaktivitet, Utbetalingstidslinje> = mutableMapOf()
+
+    fun utbetalingstidslinjesnute(yrkesaktivitet: Yrkesaktivitet, utbetalingstidslinjesnute: Utbetalingstidslinje) = apply {
+        utbetalingstidslinjesnuter[yrkesaktivitet] = utbetalingstidslinjesnute
+    }
 
     fun fastsattÅrsinntekt(yrkesaktivitet: Yrkesaktivitet.Arbeidstaker, inntekt: Inntekt) = apply {
         leggTilInntekt(yrkesaktivitet, inntekt)
@@ -74,6 +80,7 @@ internal class ArbeidsgiverberegningBuilder {
         val resultat = inntektskilder.map { inntektskilde ->
             val inntektsjusteringer = inntektsjusteringer[inntektskilde] ?: Beløpstidslinje()
             val inntekt = inntekter[inntektskilde]
+            val utbetalingstidslinjesnute = utbetalingstidslinjesnuter[inntektskilde] ?: Utbetalingstidslinje()
             val vedtaksperioder = when (inntektskilde) {
                 is Yrkesaktivitet -> vedtaksperioder(inntektskilde, inntekt, inntektsjusteringer)
                 else -> emptyList()
@@ -90,9 +97,9 @@ internal class ArbeidsgiverberegningBuilder {
                 .map { (periode, inntektsjustering) ->
                     when (inntekt) {
                         // tilkommet
-                        null -> arbeidsdager(periode, inntektsjustering)
+                        null -> arbeidsdager(periode, inntektsjustering, null, utbetalingstidslinjesnute)
                         // ghost
-                        else -> arbeidsdager(periode, inntektsjustering, inntekt)
+                        else -> arbeidsdager(periode, inntektsjustering, inntekt, utbetalingstidslinjesnute)
                     }
                 }
 
@@ -123,7 +130,7 @@ internal class ArbeidsgiverberegningBuilder {
         return ghostperiode.uten(vedtaksperioder.map { it.periode })
     }
 
-    private fun arbeidsdager(periodeMedArbeid: Periode, inntektsjusteringer: Beløpstidslinje, inntekt: Inntekt? = null): Utbetalingstidslinje {
+    private fun arbeidsdager(periodeMedArbeid: Periode, inntektsjusteringer: Beløpstidslinje, inntekt: Inntekt?, utbetalingstidslinjesnute: Utbetalingstidslinje): Utbetalingstidslinje {
         return with(Utbetalingstidslinje.Builder()) {
             periodeMedArbeid.forEach { dato ->
                 if (dato.erHelg()) addFridag(dato, Økonomi.ikkeBetalt())
@@ -131,8 +138,9 @@ internal class ArbeidsgiverberegningBuilder {
                     dato = dato,
                     økonomi = Økonomi.ikkeBetalt(
                         aktuellDagsinntekt = inntekt ?: Inntekt.INGEN,
-                        inntektjustering = (inntektsjusteringer[dato] as? Beløpsdag)?.beløp ?: Inntekt.INGEN
-                    ),
+                        inntektjustering = (inntektsjusteringer[dato] as? Beløpsdag)?.beløp ?: Inntekt.INGEN,
+                        sykdomsgrad = utbetalingstidslinjesnute[dato].takeUnless { it is Utbetalingsdag.UkjentDag }?.økonomi?.sykdomsgrad ?: NullProsent
+                    )
                 )
             }
             build()
