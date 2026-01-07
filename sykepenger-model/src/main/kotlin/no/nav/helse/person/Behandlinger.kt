@@ -1096,12 +1096,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return this.dokumentsporing.hashCode()
         }
 
-        internal fun forventerUtbetaling(periodeSomBeregner: Periode, skjæringstidspunkt: LocalDate, skalBehandlesISpeil: Boolean): Boolean {
-            val skjæringstidspunktetErLikt = this.skjæringstidspunkt == skjæringstidspunkt
-            val overlapperMedDenBeregnedePerioden = this.periode.overlapperMed(periodeSomBeregner)
-            val relevantForBeregning = skjæringstidspunktetErLikt && overlapperMedDenBeregnedePerioden
+        internal fun forventerUtbetaling(periodeSomBeregner: Periode, skjæringstidspunktSomBeregner: LocalDate, skalBehandlesISpeil: Boolean): Boolean {
+            if (this.skjæringstidspunkt != skjæringstidspunktSomBeregner) return false
+            if (!this.periode.overlapperMed(periodeSomBeregner)) return false
 
-            if (!relevantForBeregning) return false
+            check(this.periode.start >= periodeSomBeregner.start) { """
+                Hva i huleste heita har skjedd her??
+                Perioden som beregner er $periodeSomBeregner,
+                og hen skal beregne utbetaling for ${this.periode}??
+                At vi kun beregner utbetalinger fra og med ${periodeSomBeregner.start}
+                er et premiss for at resten skal henge sammen
+            """ }
+
             return when (this.tilstand) {
                 Tilstand.UberegnetRevurdering -> true
 
