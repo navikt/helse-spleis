@@ -53,6 +53,9 @@ spec:
           application: spare
           access: readwrite
         - team: tbd
+          application: sparkel-aap
+          access: readwrite
+        - team: tbd
           application: sparker-alt
           access: write
         - team: tbd
