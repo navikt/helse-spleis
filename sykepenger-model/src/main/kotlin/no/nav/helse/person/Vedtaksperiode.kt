@@ -1584,12 +1584,15 @@ internal class Vedtaksperiode private constructor(
         val beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag
         val medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus
         val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, sykepengegrunnlag)
-        // grunnlaget for maksdatoberegning er alt som har skjedd før,
-        // frem til og med vedtaksperioden som beregnes
-        val historisktidslinje = person.vedtaksperioder { it.periode.endInclusive < periode.start }
+        // grunnlaget for maksdatoberegning er alt som har skjedd før
+        // - alle vedtaksperioder som slutter før vedtaksperioden som beregnes
+        // - pluss alle som overlapper: Dette er bare for å få med "mursteinssnutene" (f.eks 10.-31.jan på A1 beregener, og 1.-31.jan på A2, så må vi vå med oss 1-9.jan)
+        // ettersom vi etterpå kun beholder det som gjelder frem til dagen før vedtaksperioden som beregnes
+        // .. også klaskes alt fra Infotrygd inn også da
+        val historisktidslinje = person.vedtaksperioder { it.periode.endInclusive < periode.start || it.periode.overlapperMed(periode) }
             .map { it.behandlinger.utbetalingstidslinje() }
             .fold(person.infotrygdhistorikk.utbetalingstidslinje(), Utbetalingstidslinje::plus)
-            .fremTilOgMed(periode.endInclusive)
+            .fremTilOgMed(periode.start.forrigeDag)
 
         val beregnetTidslinjePerVedtaksperiode = filtrerUtbetalingstidslinjer(
             uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
