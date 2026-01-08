@@ -13,8 +13,8 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
 
-internal class ArbeidsgiverberegningBuilder {
-    private val inntektskilder = mutableSetOf<Arbeidsgiverberegning.Inntektskilde>()
+internal class ArbeidsgiverberegningBuilder(private val beregningsperiode: Periode) {
+    private val inntektskilder = mutableSetOf<Inntektskilde>()
     private val inntekter: MutableMap<Yrkesaktivitet, Inntekt> = mutableMapOf()
     private val inntektsjusteringer: MutableMap<Inntektskilde, Beløpstidslinje> = mutableMapOf()
     private val vedtaksperioder: MutableMap<Yrkesaktivitet, MutableList<UberegnetVedtaksperiode>> = mutableMapOf()
@@ -38,9 +38,11 @@ internal class ArbeidsgiverberegningBuilder {
     }
 
     private fun InntekterForBeregning.Inntektsperioder.beløpstidslinje() = inntektsperioder.fold(Beløpstidslinje()) { resultat, inntektsperiode ->
+        val aktuellPeriode = inntektsperiode.periode.subset(beregningsperiode)
+
         val beløpstidslinje = when (inntektsperiode) {
-            is InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag -> Beløpstidslinje.fra(inntektsperiode.periode, (sykepengegrunnlag * inntektsperiode.andel), kilde)
-            is InntekterForBeregning.Inntektsperiode.Beløp -> Beløpstidslinje.fra(inntektsperiode.periode, inntektsperiode.beløp, kilde)
+            is InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag -> Beløpstidslinje.fra(aktuellPeriode, (sykepengegrunnlag * inntektsperiode.andel), kilde)
+            is InntekterForBeregning.Inntektsperiode.Beløp -> Beløpstidslinje.fra(aktuellPeriode, inntektsperiode.beløp, kilde)
         }
         resultat + beløpstidslinje
     }
@@ -51,9 +53,11 @@ internal class ArbeidsgiverberegningBuilder {
     }
 
     fun vedtaksperiode(yrkesaktivitet: Yrkesaktivitet, vedtaksperiodeId: UUID, sykdomstidslinje: Sykdomstidslinje, builder: UtbetalingstidslinjeBuilder) = apply {
-        val periode = checkNotNull(sykdomstidslinje.periode()) { "Sykdomstidslinjen kan ikke være tom" }
+        val aktuellSykdomstidslinje = sykdomstidslinje.subset(beregningsperiode)
+        val aktuellPeriode = checkNotNull(aktuellSykdomstidslinje.periode()) { "Sykdomstidslinjen kan ikke være tom" }
+
         inntektskilder.add(yrkesaktivitet)
-        vedtaksperioder.getOrPut(yrkesaktivitet) { mutableListOf() }.add(UberegnetVedtaksperiode(vedtaksperiodeId, yrkesaktivitet, periode, sykdomstidslinje, builder))
+        vedtaksperioder.getOrPut(yrkesaktivitet) { mutableListOf() }.add(UberegnetVedtaksperiode(vedtaksperiodeId, yrkesaktivitet, aktuellPeriode, aktuellSykdomstidslinje, builder))
     }
 
     private fun perioderMedInntektjustring(inntektskilde: Inntektskilde): List<Periode> {
@@ -66,11 +70,6 @@ internal class ArbeidsgiverberegningBuilder {
      * de har vedtaksperioder, er i sykepengegrunnlaget eller har inntektsjusteringer.
      */
     fun build(): List<Arbeidsgiverberegning> {
-        val beregningsperiode = vedtaksperioder
-            .flatMap { it.value }
-            .map { it.periode }
-            .reduce(Periode::plus)
-
         val resultat = inntektskilder.map { inntektskilde ->
             val inntektsjusteringer = inntektsjusteringer[inntektskilde] ?: Beløpstidslinje()
             val inntekt = inntekter[inntektskilde]

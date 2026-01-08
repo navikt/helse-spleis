@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -37,7 +36,7 @@ import org.junit.jupiter.api.Test
 internal class MaksdatoE2ETest : AbstractDslTest() {
 
     @Test
-    fun `Feil maksdato ved mursteinspølser og lave inntekter`() {
+    fun `Korrekt maksdato ved mursteinspølser og lave inntekter`() {
         val seks6 = Grunnbeløp.`6G`.beløp(1.januar)
         val a1Inntekt = seks6 * 0.5
         val a2Inntekt = seks6 * 0.2
@@ -109,19 +108,9 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(4.vedtaksperiode)
             håndterUtbetalt()
             inspektør(a1).sisteMaksdato(4.vedtaksperiode).also {
-                assertForventetFeil(
-                    forklaring = "Feil maksdato ved mursteinspølser og lave inntekter",
-                    nå = {
-                        assertEquals(18, it.antallForbrukteDager)
-                        assertEquals(230, it.gjenståendeDager)
-                        assertEquals(16.januar(2019), it.maksdato)
-                    },
-                    ønsket = {
-                        assertEquals(31, it.antallForbrukteDager)
-                        assertEquals(217, it.gjenståendeDager)
-                        assertEquals(28.desember, it.maksdato)
-                    }
-                )
+                assertEquals(31, it.antallForbrukteDager)
+                assertEquals(217, it.gjenståendeDager)
+                assertEquals(28.desember, it.maksdato)
             }
         }
     }

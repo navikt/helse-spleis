@@ -1577,7 +1577,13 @@ internal class Vedtaksperiode private constructor(
         val (beregningsperiode, perioderSomMåHensyntasVedBeregning) = perioderSomMåHensyntasVedBeregning()
         val inntektsperioder = ytelser.inntektsendringer()
         val selvstendigForsikring = ytelser.selvstendigForsikring()
-        val (uberegnetTidslinjePerArbeidsgiver, inntektsperioderMedBeløpstidslinjer)  = lagArbeidsgiverberegning(perioderSomMåHensyntasVedBeregning, grunnlagsdata, inntektsperioder, selvstendigForsikring)
+        val (uberegnetTidslinjePerArbeidsgiver, inntektsperioderMedBeløpstidslinjer)  = lagArbeidsgiverberegning(
+            beregningsperiode = beregningsperiode,
+            vedtaksperioder = perioderSomMåHensyntasVedBeregning,
+            vilkårsgrunnlag = grunnlagsdata,
+            inntektsperioder = inntektsperioder,
+            selvstendigForsikring = selvstendigForsikring
+        )
         // steg 3: beregn alle utbetalingstidslinjer (avslå dager, beregne maksdato og utbetalingsbeløp)
         val harOpptjening = harOpptjening(grunnlagsdata)
         val sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag
@@ -3741,12 +3747,13 @@ private fun maksdatosubsummering(
 }
 
 internal fun lagArbeidsgiverberegning(
+    beregningsperiode: Periode,
     vedtaksperioder: List<Vedtaksperiode>,
     vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
     inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, InntekterForBeregning.Inntektsperioder> = emptyMap(),
     selvstendigForsikring: SelvstendigForsikring? = null,
 ): Pair<List<Arbeidsgiverberegning>, Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje>> {
-    return with(ArbeidsgiverberegningBuilder()) {
+    return with(ArbeidsgiverberegningBuilder(beregningsperiode)) {
         vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.forEach {
             fastsattÅrsinntekt(Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
         }

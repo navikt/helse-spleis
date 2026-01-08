@@ -37,7 +37,7 @@ internal class ArbeidsgiverberegningTest {
 
     @Test
     fun `en arbeidsgiver - inngår i sykengegrunnlag`() {
-        val yrkesaktiviteter = ArbeidsgiverberegningBuilder()
+        val yrkesaktiviteter = ArbeidsgiverberegningBuilder(januar)
             .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
             .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(januar), arbeidstaker())
             .build()
@@ -55,7 +55,7 @@ internal class ArbeidsgiverberegningTest {
 
     @Test
     fun `en arbeidsgiver - inngår ikke i sykepengegrunnag`() {
-        val yrkesaktiviteter = ArbeidsgiverberegningBuilder()
+        val yrkesaktiviteter = ArbeidsgiverberegningBuilder(januar)
             .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(januar), arbeidstaker())
             .build()
 
@@ -72,7 +72,7 @@ internal class ArbeidsgiverberegningTest {
 
     @Test
     fun `flere arbeidsgiver - med ghostperioder og tilkommet inntekt`() {
-        val yrkesaktiviteter = ArbeidsgiverberegningBuilder()
+        val yrkesaktiviteter = ArbeidsgiverberegningBuilder(1.januar til 31.januar)
             .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
             .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a2), INNTEKT * 2)
             .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a3), 10.januar, 14.januar, 1500.daglig)
@@ -157,7 +157,7 @@ internal class ArbeidsgiverberegningTest {
 
     @Test
     fun `tilkommet inntekt uten vedtaksperioder`() {
-        val yrkesaktiviteter = ArbeidsgiverberegningBuilder()
+        val yrkesaktiviteter = ArbeidsgiverberegningBuilder(1.januar til 20.januar)
             .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
             .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a3), 1.januar, 10.januar, 1500.daglig)
             .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a3), 15.januar, 20.januar, 1500.daglig)
@@ -192,7 +192,7 @@ internal class ArbeidsgiverberegningTest {
 
     @Test
     fun `tilkommet inntekt med vedtaksperioder`() {
-        val yrkesaktiviteter = ArbeidsgiverberegningBuilder()
+        val yrkesaktiviteter = ArbeidsgiverberegningBuilder(1.januar til 20.januar)
             .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
             .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), 1.januar, 20.januar, 1500.daglig)
             .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
@@ -213,7 +213,7 @@ internal class ArbeidsgiverberegningTest {
 
     @Test
     fun `tilkommet inntekt med egne vedtaksperioder`() {
-        val yrkesaktiviteter = ArbeidsgiverberegningBuilder()
+        val yrkesaktiviteter = ArbeidsgiverberegningBuilder(1.januar til 20.januar)
             .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
             .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a3), 1.januar, 20.januar, 1500.daglig)
             .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
