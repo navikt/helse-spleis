@@ -1574,7 +1574,7 @@ internal class Vedtaksperiode private constructor(
         }
         // steg 1: sett sammen alle inntekter som skal brukes i beregning
         // steg 2: lag utbetalingstidslinjer for alle vedtaksperiodene
-        val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning()
+        val (beregningsperiode, perioderSomMåHensyntasVedBeregning) = perioderSomMåHensyntasVedBeregning()
         val inntektsperioder = ytelser.inntektsendringer()
         val selvstendigForsikring = ytelser.selvstendigForsikring()
         val (uberegnetTidslinjePerArbeidsgiver, inntektsperioderMedBeløpstidslinjer)  = lagArbeidsgiverberegning(perioderSomMåHensyntasVedBeregning, grunnlagsdata, inntektsperioder, selvstendigForsikring)
@@ -2891,7 +2891,8 @@ internal class Vedtaksperiode private constructor(
         institusjonsopphold(aktivitetslogg, periode)
         arbeidsavklaringspenger(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
         dagpenger(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
-        inntekterForBeregning(aktivitetslogg, perioderSomMåHensyntasVedBeregning().map { it.periode }.reduce(Periode::plus))
+        val (beregningsperiode, _) = perioderSomMåHensyntasVedBeregning()
+        inntekterForBeregning(aktivitetslogg, beregningsperiode)
 
         when (yrkesaktivitet.yrkesaktivitetstype) {
             Arbeidsledig,
@@ -3191,9 +3192,12 @@ internal class Vedtaksperiode private constructor(
      * For eksempel kan listen returnere senere perioder som ikke overlapper med this i det hele tatt,
      * men som overlapper med en periode som overlapper med this
      */
-    private fun perioderSomMåHensyntasVedBeregning(): List<Vedtaksperiode> {
-        return mursteinsperioderMedSammeSkjæringstidspunkt()
+    private fun perioderSomMåHensyntasVedBeregning(): Pair<Periode, List<Vedtaksperiode>> {
+        val perioderSomMåHensyntasVedBeregning = mursteinsperioderMedSammeSkjæringstidspunkt()
             .filterNot { it.periode.endInclusive < this.periode.start }
+        val tom = perioderSomMåHensyntasVedBeregning.maxOf { it.periode.endInclusive }
+        val beregningsperiode = periode.start til tom
+        return beregningsperiode to perioderSomMåHensyntasVedBeregning
     }
 
     internal fun skalArbeidstakerBehandlesISpeil(): Boolean {
@@ -3254,7 +3258,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun førstePeriodeSomVenterPåRefusjonsopplysninger(): Vedtaksperiode? {
-        return perioderSomMåHensyntasVedBeregning()
+        return perioderSomMåHensyntasVedBeregning().second
             .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
             .filter { it.tilstand in setOf(ArbeidstakerStart, AvventerInntektsmelding) }
             .filterNot { it === this }
