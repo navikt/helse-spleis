@@ -52,6 +52,9 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal) : Compara
 
     internal operator fun div(other: Prosentdel) = Prosentdel(this.brøkdel.divide(other.brøkdel, mc))
 
+    operator fun minus(other: Prosentdel) = Prosentdel((this.brøkdel - other.brøkdel).coerceAtLeast(BigDecimal.ZERO))
+    operator fun plus(other: Prosentdel) = Prosentdel((this.brøkdel + other.brøkdel).coerceAtMost(BigDecimal.ONE))
+
     override fun compareTo(other: Prosentdel) = if (this.equals(other)) 0 else this.brøkdel.compareTo(other.brøkdel)
 
     override fun toString(): String {
