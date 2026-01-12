@@ -40,7 +40,14 @@ abstract class Tidslinje<T, SELF: Tidslinje<T, SELF>> private constructor(
     protected open fun erLike(a: T, b: T): Boolean = a == b
     protected abstract fun opprett(vararg perioder: Pair<Periode, T>): SELF
 
-    fun gruppér(): Map<Periode, T> {
+    internal fun subset(periode: Periode): SELF {
+        if (this.periode == null || !this.periode.overlapperMed(periode)) return opprett()
+        return opprett(*dager.subMap(periode.start, periode.endInclusive.nesteDag).somArray)
+    }
+    internal fun fraOgMed(dato: LocalDate) = opprett(*dager.tailMap(dato).somArray)
+    internal fun tilOgMed(dato: LocalDate) = opprett(*dager.headMap(dato.nesteDag).somArray)
+
+    internal fun gruppér(): Map<Periode, T> {
         val grupperte = mutableMapOf<Periode, T>()
         var aktiv: Pair<Periode, T>? = null
         dager.forEach { (dato, nyVerdi) ->
@@ -58,11 +65,6 @@ abstract class Tidslinje<T, SELF: Tidslinje<T, SELF>> private constructor(
         }
         aktiv?.let { (aktivPeriode, aktivVerdi) -> grupperte[aktivPeriode] = aktivVerdi }
         return grupperte.toMap()
-    }
-
-    fun subset(periode: Periode): SELF {
-        if (this.periode == null || !this.periode.overlapperMed(periode)) return opprett()
-        return opprett(*dager.subMap(periode.start, periode.endInclusive.nesteDag).somArray)
     }
 
     override operator fun iterator(): Iterator<Tidslinjedag<T>> {

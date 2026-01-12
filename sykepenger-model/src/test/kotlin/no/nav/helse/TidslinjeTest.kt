@@ -114,6 +114,13 @@ internal class TidslinjeTest {
     }
 
     @Test
+    fun `fraOgMed & tilOgMed`() {
+        val tidslinje = TestTidslinje(januar to 1) + TestTidslinje(mars to 3)
+        assertEquals(TestTidslinje(5.januar til 31.januar to 1, mars to 3), tidslinje.fraOgMed(5.januar))
+        assertEquals(TestTidslinje(januar to 1) + TestTidslinje(1.mars til 25.mars to 3), tidslinje.tilOgMed(25.mars))
+    }
+
+    @Test
     fun `ugyldig initialisering av tidslinje`() {
         val exception = assertThrows<IllegalArgumentException> { TestTidslinje(januar to 5, 10.januar.somPeriode() to 7) }
         assertEquals("Datoen 2018-01-10 er oppgitt fler ganger i samme tidslinje.", exception.message)
