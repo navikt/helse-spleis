@@ -35,8 +35,6 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
         else champion
     }
 
-    internal fun erstatt(other: Beløpstidslinje) = merge(other) { _, challenger -> challenger }
-
     private fun merge(other: Beløpstidslinje, strategy: (champion: Beløpsdag, challenger: Beløpsdag) -> Beløpsdag): Beløpstidslinje {
         val results = this.dager.toMutableMap()
         other.dager.forEach { (key, dag) ->
@@ -49,8 +47,6 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
 
     internal fun medBeløp() = Beløpstidslinje(dager.filterValues { it.beløp != INGEN })
 
-    internal operator fun minus(datoer: Iterable<LocalDate>) = Beløpstidslinje(this.dager.filterKeys { it !in datoer })
-    internal operator fun minus(dato: LocalDate) = Beløpstidslinje(this.dager.filterKeys { it != dato })
     internal operator fun minus(other: Beløpstidslinje) = Beløpstidslinje(this.dager.filterValues { it.beløp != other.dager[it.dato]?.beløp })
     internal fun subset(periode: Periode): Beløpstidslinje {
         if (this.periode == null || !this.periode.overlapperMed(periode)) return Beløpstidslinje()
@@ -79,16 +75,8 @@ data class Beløpstidslinje(private val dager: SortedMap<LocalDate, Beløpsdag>)
     internal fun fyll(periode: Periode) = fyll().strekk(periode).subset(periode)
     internal fun fyll(til: LocalDate) = fyll().strekkFrem(til).tilOgMed(til)
 
-    // Det motsatte av fyll, begrenser den til så liten som mulig, men bevarer nok til at den senere kan fylles tilbake
-    internal fun forkort() = Beløpstidslinje(dager.values.distinctBy { it.beløp to it.kilde })
-
     internal fun strekk(periode: Periode) = snute(periode.start) + this + hale(periode.endInclusive)
     private fun strekkFrem(til: LocalDate) = this + hale(til)
-    internal fun førsteDagMedUliktBeløp(other: Beløpstidslinje): LocalDate? {
-        val fom = setOfNotNull(periode?.start, other.periode?.start).minOrNull() ?: return null
-        val tom = setOfNotNull(periode?.endInclusive, other.periode?.endInclusive).max()
-        return (fom til tom).firstOrNull { this.dager[it]?.beløp != other.dager[it]?.beløp }
-    }
 
     internal fun kunIngenRefusjon() =
         filterIsInstance<Beløpsdag>().let { beløpsdager ->

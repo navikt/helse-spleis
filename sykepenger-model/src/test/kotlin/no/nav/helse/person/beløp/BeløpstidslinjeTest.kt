@@ -33,41 +33,11 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 internal class BeløpstidslinjeTest {
-
-    @Test
-    fun `fyll og forkort kant i kant`() {
-        val beløpstidslinje =
-            (Arbeidsgiver oppgir 1000.daglig hele januar) og (Arbeidsgiver oppgir 2000.daglig hele februar)
-
-        val forventetForkortet =
-            (Arbeidsgiver oppgir 1000.daglig kun 1.januar) og (Arbeidsgiver oppgir 2000.daglig kun 1.februar)
-
-        assertEquals(forventetForkortet, beløpstidslinje.forkort())
-        assertEquals(beløpstidslinje, forventetForkortet.fyll(28.februar))
-    }
-
-    @Test
-    fun `fyll og forkort med gap`() {
-        val beløpstidslinje =
-            (Arbeidsgiver oppgir 1000.daglig hele januar) og (Saksbehandler oppgir 2000.daglig hele mars)
-
-        val forventetForkortet =
-            (Arbeidsgiver oppgir 1000.daglig kun 1.januar) og (Saksbehandler oppgir 2000.daglig kun 1.mars)
-
-        assertEquals(forventetForkortet, beløpstidslinje.forkort())
-
-        // Nå fylles også gapet med opplysningene i forkant
-        val forventetFylt =
-            (Arbeidsgiver oppgir 1000.daglig fra 1.januar til 28.februar) og (Saksbehandler oppgir 2000.daglig hele mars)
-
-        assertEquals(forventetFylt, forventetForkortet.fyll(31.mars))
-    }
 
     @Test
     fun `trekke fra en beløpstidslinje`() {
@@ -218,23 +188,6 @@ internal class BeløpstidslinjeTest {
     }
 
     @Test
-    fun `Trekke dager fra på en beløpstidslinje`() {
-        val tidslinje = (1.daglig fra 1.januar til 2.januar) og (2.daglig fra 4.januar til 5.januar)
-        assertEquals(1.daglig, tidslinje[1.januar].beløp)
-        assertEquals(UkjentDag, tidslinje[3.januar])
-        assertEquals(2.daglig, tidslinje[4.januar].beløp)
-
-        val forventet = (1.daglig kun 2.januar) og (2.daglig kun 5.januar)
-
-        val fratrukket = tidslinje - 4.januar - setOf(1.januar)
-
-        assertEquals(forventet, fratrukket)
-
-        assertEquals(UkjentDag, fratrukket[1.januar])
-        assertEquals(UkjentDag, fratrukket[4.januar])
-    }
-
-    @Test
     fun `Strekker en beløpstidslinje i snuten`() {
         assertEquals(Beløpstidslinje(), Beløpstidslinje().strekk(januar))
         val tidslinje = Arbeidsgiver oppgir 1000.daglig hele februar
@@ -260,21 +213,6 @@ internal class BeløpstidslinjeTest {
         assertEquals(UkjentDag, forventet[27.februar])
 
         assertEquals(Systemet oppgir 100.daglig fra 5.januar til 7.januar, (Systemet oppgir 100.daglig kun 6.januar).strekk(5.januar til 7.januar))
-    }
-
-    @Test
-    fun `Finne første endring i beløp`() {
-        assertNull(Beløpstidslinje().førsteDagMedUliktBeløp(Beløpstidslinje()))
-        assertNull((Saksbehandler oppgir 100.daglig hele januar).førsteDagMedUliktBeløp(Arbeidsgiver oppgir 100.daglig hele januar))
-        assertEquals(1.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteDagMedUliktBeløp(Arbeidsgiver oppgir 101.daglig hele januar))
-        assertEquals(15.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteDagMedUliktBeløp((Arbeidsgiver oppgir 100.daglig fra 1.januar til 14.januar) og (Arbeidsgiver oppgir 101.daglig kun 15.januar)))
-
-        assertEquals(1.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteDagMedUliktBeløp(Arbeidsgiver oppgir 100.daglig fra 2.januar til 31.januar))
-        assertEquals(31.januar, (Saksbehandler oppgir 100.daglig hele januar).førsteDagMedUliktBeløp(Arbeidsgiver oppgir 100.daglig fra 1.januar til 30.januar))
-        val hulleteSaksbehandler = (Saksbehandler oppgir 100.daglig kun 1.januar) og (Saksbehandler oppgir 100.daglig kun 31.januar)
-        val hulleteArbeidsgiver = (Saksbehandler oppgir 100.daglig kun 1.januar) og (Saksbehandler oppgir 100.daglig kun 30.januar)
-        assertEquals(30.januar, hulleteSaksbehandler.førsteDagMedUliktBeløp(hulleteArbeidsgiver))
-        assertEquals(30.januar, hulleteArbeidsgiver.førsteDagMedUliktBeløp(hulleteSaksbehandler))
     }
 
     @Test
