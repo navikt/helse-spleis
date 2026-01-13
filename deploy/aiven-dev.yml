@@ -230,9 +230,6 @@ spec:
           application: speaker
           access: readwrite
         - team: tbd
-          application: sondre-halvorsen
-          access: read
-        - team: tbd
           application: spre-styringsinfo
           access: readwrite
         - team: tbd
