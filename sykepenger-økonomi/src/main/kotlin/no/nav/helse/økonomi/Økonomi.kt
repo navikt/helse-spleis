@@ -42,7 +42,7 @@ data class Økonomi(
         private fun List<Økonomi>.aktuellDagsinntekt() = map { it.aktuellDagsinntekt }.summer()
         private fun List<Økonomi>.inntektjustering() = map { it.inntektjustering }.summer()
 
-        private fun totalSykdomsgrad(økonomiList: List<Økonomi>, gradStrategi: (Økonomi) -> Prosentdel): Prosentdel {
+        private fun totalGrad(økonomiList: List<Økonomi>, gradStrategi: (Økonomi) -> Prosentdel): Prosentdel {
             val aktuellDagsinntekt = økonomiList.aktuellDagsinntekt()
             if (aktuellDagsinntekt == INGEN) return NullProsent
             val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { gradStrategi(it) to it.aktuellDagsinntekt }, økonomiList.inntektjustering())
@@ -50,7 +50,7 @@ data class Økonomi(
         }
 
         fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
-            val totalgrad = totalSykdomsgrad(økonomiList, Økonomi::sykdomsgrad)
+            val totalgrad = totalGrad(økonomiList, Økonomi::sykdomsgrad)
             return økonomiList.map { økonomi: Økonomi ->
                 økonomi.copy(totalSykdomsgrad = totalgrad)
             }
@@ -58,7 +58,7 @@ data class Økonomi(
 
         fun List<Økonomi>.erUnderGrensen() = none { !it.totalSykdomsgrad.erUnderGrensen() }
 
-        private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) = totalSykdomsgrad(økonomiList, Økonomi::utbetalingsgrad)
+        private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) = totalGrad(økonomiList, Økonomi::utbetalingsgrad)
 
         fun betal(sykepengegrunnlagBegrenset6G: Inntekt, økonomiList: List<Økonomi>): List<Økonomi> {
             val utbetalingsgrad = totalUtbetalingsgrad(økonomiList)
