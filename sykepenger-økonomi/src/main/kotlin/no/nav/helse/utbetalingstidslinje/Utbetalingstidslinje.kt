@@ -59,16 +59,18 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             ?.reduce(Periode::plus)
 
         fun betale(sykepengegrunnlagBegrenset6G: Inntekt, tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
-            return beregnDagForDag(tidslinjer) {
-                it.betal(sykepengegrunnlagBegrenset6G)
+            return beregnDagForDag(tidslinjer) { _, økonomiList ->
+                økonomiList.betal(sykepengegrunnlagBegrenset6G)
             }
         }
 
         fun totalSykdomsgrad(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
-            return beregnDagForDag(tidslinjer, Økonomi::totalSykdomsgrad)
+            return beregnDagForDag(tidslinjer) { _ , økonomiList ->
+                Økonomi.totalSykdomsgrad(økonomiList)
+            }
         }
 
-        fun beregnDagForDag(tidslinjer: List<Utbetalingstidslinje>, operasjon: (List<Økonomi>) -> List<Økonomi>): List<Utbetalingstidslinje> {
+        fun beregnDagForDag(tidslinjer: List<Utbetalingstidslinje>, operasjon: (dato: LocalDate, List<Økonomi>) -> List<Økonomi>): List<Utbetalingstidslinje> {
             /**
              * beregn dag-for-dag, lagre resultatet tilbake i listen
              */
@@ -78,7 +80,7 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             val result = tidslinjer.map { it.utbetalingsdager.toSortedMap() }
             samletPeriode.forEach { dato ->
                 val uberegnet = tidslinjer.map { it[dato].økonomi }
-                val beregnet = operasjon(uberegnet)
+                val beregnet = operasjon(dato, uberegnet)
                 // modifiserer kopien
                 result.forEachIndexed { index, utbetalingsdager ->
                     val økonomi = beregnet[index]
