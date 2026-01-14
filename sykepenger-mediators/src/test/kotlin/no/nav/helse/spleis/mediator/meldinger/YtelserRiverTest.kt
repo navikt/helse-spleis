@@ -71,6 +71,7 @@ private val json = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
       ],
@@ -212,6 +213,7 @@ private val ukjentPeriode = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
       ],
@@ -306,6 +308,7 @@ private val ugyldigPeriode = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
       ],
@@ -392,6 +395,7 @@ private val utenPleiepenger = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
       ],
@@ -466,6 +470,7 @@ private val utenOmsorgspenger = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
       ],
@@ -540,6 +545,7 @@ private val utenOpplæringspenger = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
       ],
@@ -614,6 +620,7 @@ private val utenInstitusjonsopphold = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "ArbeidsavklaringspengerV2",
         "InntekterForBeregning"
         "Dagpenger"
       ],
@@ -689,6 +696,7 @@ private val utenArbeidsavklaringspenger = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
       ],
@@ -783,6 +791,7 @@ private val utenDagpenger = """
         "Opplæringspenger",
         "Institusjonsopphold",
         "Arbeidsavklaringspenger",
+        "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
       ],

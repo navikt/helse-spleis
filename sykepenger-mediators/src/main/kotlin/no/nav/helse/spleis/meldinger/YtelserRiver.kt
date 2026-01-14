@@ -26,24 +26,17 @@ internal class YtelserRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
-    override val behov = buildList {
-        if (Toggle.ArbeidsavklaringspengerV2.enabled) {
-            add(ArbeidsavklaringspengerV2)
-        }
-
-        addAll(
-            listOf(
-                Foreldrepenger,
-                Pleiepenger,
-                Omsorgspenger,
-                Opplæringspenger,
-                Institusjonsopphold,
-                Arbeidsavklaringspenger,
-                InntekterForBeregning,
-                Dagpenger
-            )
-        )
-    }
+    override val behov = listOf(
+        Foreldrepenger,
+        Pleiepenger,
+        Omsorgspenger,
+        Opplæringspenger,
+        Institusjonsopphold,
+        Arbeidsavklaringspenger,
+        ArbeidsavklaringspengerV2,
+        InntekterForBeregning,
+        Dagpenger
+    )
 
     override val riverName = "Ytelser"
 
@@ -103,6 +96,7 @@ internal class YtelserRiver(
             interestedIn("måndelig", JsonNode::asDouble)
             interestedIn("årlig", JsonNode::asDouble)
         }
+
         if (Toggle.ArbeidsavklaringspengerV2.enabled) {
             message.requireArray("@løsning.${ArbeidsavklaringspengerV2.name}.utbetalingsperioder") {
                 require("fom", JsonNode::asLocalDate)

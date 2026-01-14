@@ -961,15 +961,12 @@ internal class TestMessageFactory(
             "Opplæringspenger",
             "Institusjonsopphold",
             "Arbeidsavklaringspenger",
+            "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
             "Dagpenger"
         )
         if (yrkesaktivitetstype == "SELVSTENDIG") {
             behovliste.add("SelvstendigForsikring")
-        }
-
-        if (Toggle.ArbeidsavklaringspengerV2.enabled) {
-            behovliste.add("ArbeidsavklaringspengerV2")
         }
 
         return lagBehovMedLøsning(
