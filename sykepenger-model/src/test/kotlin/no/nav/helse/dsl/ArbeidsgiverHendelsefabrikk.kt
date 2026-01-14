@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.Temporal
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
@@ -337,6 +338,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         opplæringspenger: List<GradertPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
+        arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
         inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
         selvstendigForsikring: SelvstendigForsikring? = null
@@ -364,7 +366,10 @@ internal class ArbeidsgiverHendelsefabrikk(
             institusjonsopphold = Institusjonsopphold(
                 perioder = institusjonsoppholdsperioder
             ),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(
+                if (Toggle.ArbeidsavklaringspengerV2.enabled) arbeidsavklaringspengerV2
+                else arbeidsavklaringspenger
+            ),
             dagpenger = Dagpenger(dagpenger),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             selvstendigForsikring = selvstendigForsikring

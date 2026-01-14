@@ -7,7 +7,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import no.nav.helse.Toggle
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
@@ -24,16 +26,25 @@ internal class YtelserRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
-    override val behov = listOf(
-        Foreldrepenger,
-        Pleiepenger,
-        Omsorgspenger,
-        Opplæringspenger,
-        Institusjonsopphold,
-        Arbeidsavklaringspenger,
-        InntekterForBeregning,
-        Dagpenger
-    )
+    override val behov = buildList {
+        if (Toggle.ArbeidsavklaringspengerV2.enabled) {
+            add(ArbeidsavklaringspengerV2)
+        }
+
+        addAll(
+            listOf(
+                Foreldrepenger,
+                Pleiepenger,
+                Omsorgspenger,
+                Opplæringspenger,
+                Institusjonsopphold,
+                Arbeidsavklaringspenger,
+                InntekterForBeregning,
+                Dagpenger
+            )
+        )
+    }
+
     override val riverName = "Ytelser"
 
     override fun validate(message: JsonMessage) {
@@ -92,6 +103,12 @@ internal class YtelserRiver(
             interestedIn("måndelig", JsonNode::asDouble)
             interestedIn("årlig", JsonNode::asDouble)
         }
+        if (Toggle.ArbeidsavklaringspengerV2.enabled) {
+            message.requireArray("@løsning.${ArbeidsavklaringspengerV2.name}.utbetalingsperioder") {
+                require("fom", JsonNode::asLocalDate)
+                require("tom", JsonNode::asLocalDate)
+            }
+        }
 
         message.interestedIn("@løsning.${SelvstendigForsikring.name}") { forsikringer ->
             forsikringer as ArrayNode
@@ -104,7 +121,6 @@ internal class YtelserRiver(
                 it.path("sluttdato").asOptionalLocalDate()
             }
         }
-
     }
 
     override fun createMessage(packet: JsonMessage) = YtelserMessage(

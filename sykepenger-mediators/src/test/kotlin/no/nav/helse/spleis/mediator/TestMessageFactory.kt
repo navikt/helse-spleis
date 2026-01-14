@@ -10,6 +10,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
@@ -27,12 +28,14 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SporsmalDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SvarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.VentetidDTO
+import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as HendelsePeriode
 import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
@@ -947,6 +950,7 @@ internal class TestMessageFactory(
         dagpenger: List<DagpengerTestdata> = emptyList(),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
         selvstendigForsikring: List<SelvstendigForsikring> = emptyList(),
+        arbeidsavklaringspengerV2: Arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         orgnummer: String = organisasjonsnummer,
         yrkesaktivitetstype: String = "ARBEIDSTAKER"
     ): Pair<String, String> {
@@ -962,6 +966,10 @@ internal class TestMessageFactory(
         )
         if (yrkesaktivitetstype == "SELVSTENDIG") {
             behovliste.add("SelvstendigForsikring")
+        }
+
+        if (Toggle.ArbeidsavklaringspengerV2.enabled) {
+            behovliste.add("ArbeidsavklaringspengerV2")
         }
 
         return lagBehovMedLøsning(
@@ -1030,11 +1038,26 @@ internal class TestMessageFactory(
                         )
                     }
                 )
-            ).plus(selvstendigForsikringer(selvstendigForsikring, yrkesaktivitetstype))
+            )
+                .plus(selvstendigForsikringer(selvstendigForsikring, yrkesaktivitetstype))
+                .plus(arbeidsavklaringspengerV2(arbeidsavklaringspengerV2))
         )
     }
 
-    fun selvstendigForsikringer(selvstendigForsikringer: List<SelvstendigForsikring>, yrkesaktivitetstype: String) : Map<String, Any> {
+    fun arbeidsavklaringspengerV2(arbeidsavklaringspengerV2: Arbeidsavklaringspenger) =
+        if (Toggle.ArbeidsavklaringspengerV2.enabled) {
+            mapOf(
+                ArbeidsavklaringspengerV2.name to mapOf(
+                    "utbetalingsperioder" to arbeidsavklaringspengerV2.perioder.map { periode ->
+                        mapOf(
+                            "fom" to periode.start,
+                            "tom" to periode.endInclusive
+                        )
+                    }
+                ))
+        } else emptyMap()
+
+    fun selvstendigForsikringer(selvstendigForsikringer: List<SelvstendigForsikring>, yrkesaktivitetstype: String): Map<String, Any> {
         if (yrkesaktivitetstype != "SELVSTENDIG") return emptyMap()
         return mapOf(
             SelvstendigForsikring.name to selvstendigForsikringer.map { forsikring ->

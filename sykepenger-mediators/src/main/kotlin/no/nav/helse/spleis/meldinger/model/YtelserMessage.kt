@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
+import no.nav.helse.Toggle.Companion.ArbeidsavklaringspengerV2
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
@@ -70,6 +71,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
         )
 
     })
+
     private val inntekterForBeregning = InntekterForBeregning(packet["@løsning.${Behovtype.InntekterForBeregning.name}.inntekter"].map {
         InntekterForBeregning.Inntektsperiode.Beløp(
             inntektskilde = it.path("inntektskilde").asText(),
@@ -86,8 +88,12 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
         )
     })
 
+    private val arbeidsavklaringspengerV2 = if (ArbeidsavklaringspengerV2.enabled) Arbeidsavklaringspenger(
+        packet["@løsning.${Behovtype.ArbeidsavklaringspengerV2.name}.utbetalingsperioder"]
+            .map { Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) })
+    else Arbeidsavklaringspenger(emptyList())
 
-    private val selvstendigForsikring = when(yrkesaktivitetssporing) {
+    private val selvstendigForsikring = when (yrkesaktivitetssporing) {
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> packet["@løsning.${Behovtype.SelvstendigForsikring.name}"].firstOrNull()?.let {
             SelvstendigForsikring(
                 virkningsdato = it.path("startdato").asLocalDate(),
@@ -132,7 +138,9 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             omsorgspenger = omsorgspenger,
             opplæringspenger = opplæringspenger,
             institusjonsopphold = institusjonsopphold,
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) }),
+            arbeidsavklaringspenger = if (ArbeidsavklaringspengerV2.enabled) arbeidsavklaringspengerV2
+            else
+                Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) }),
             dagpenger = Dagpenger(dagpenger.map { Periode(it.first, it.second) }),
             inntekterForBeregning = inntekterForBeregning,
             selvstendigForsikring = selvstendigForsikring
