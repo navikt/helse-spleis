@@ -6,7 +6,6 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
-import no.nav.helse.Toggle.Companion.ArbeidsavklaringspengerV2
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
@@ -2898,7 +2897,7 @@ internal class Vedtaksperiode private constructor(
         opplæringspenger(aktivitetslogg, søkevinduFamilieytelser)
         institusjonsopphold(aktivitetslogg, periode)
         arbeidsavklaringspenger(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
-        if (ArbeidsavklaringspengerV2.enabled) arbeidsavklaringspengerV2(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
+        arbeidsavklaringspengerV2(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
         dagpenger(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
         val (beregningsperiode, _) = perioderSomMåHensyntasVedBeregning()
         inntekterForBeregning(aktivitetslogg, beregningsperiode)
