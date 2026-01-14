@@ -4,6 +4,7 @@ import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
+import no.nav.helse.økonomi.Prosentdel.Companion.HundreProsent
 import no.nav.helse.økonomi.Prosentdel.Companion.NullProsent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
@@ -42,10 +43,10 @@ data class Økonomi(
         private fun List<Økonomi>.aktuellDagsinntekt() = map { it.aktuellDagsinntekt }.summer()
         private fun List<Økonomi>.inntektjustering() = map { it.inntektjustering }.summer()
 
-        private fun totalGrad(økonomiList: List<Økonomi>, gradStrategi: (Økonomi) -> Prosentdel): Prosentdel {
+        private fun totalGrad(økonomiList: List<Økonomi>, gradStrategi: (Økonomi) -> Prosentdel, inntektjustering: Inntekt = økonomiList.inntektjustering()): Prosentdel {
             val aktuellDagsinntekt = økonomiList.aktuellDagsinntekt()
             if (aktuellDagsinntekt == INGEN) return NullProsent
-            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { gradStrategi(it) to it.aktuellDagsinntekt }, økonomiList.inntektjustering())
+            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { gradStrategi(it) to it.aktuellDagsinntekt }, inntektjustering)
             return totalgrad
         }
 
@@ -59,6 +60,14 @@ data class Økonomi(
         fun List<Økonomi>.erUnderGrensen() = none { !it.totalSykdomsgrad.erUnderGrensen() }
 
         private fun totalUtbetalingsgrad(økonomiList: List<Økonomi>) = totalGrad(økonomiList, Økonomi::utbetalingsgrad)
+
+        internal fun totalUtbetalingsgrad(økonomiList: List<Økonomi>, andreYtelser: Prosentdel): Prosentdel {
+            val utbetalingsgrad = totalGrad(økonomiList, Økonomi::utbetalingsgrad)
+            if (andreYtelser == NullProsent) return utbetalingsgrad
+            val utbetalingsgradUtenInntektjustering = totalGrad(økonomiList, Økonomi::utbetalingsgrad, INGEN)
+            val romForAndreYtelser = HundreProsent - utbetalingsgradUtenInntektjustering
+            return utbetalingsgrad - (andreYtelser - romForAndreYtelser)
+        }
 
         fun betal(sykepengegrunnlagBegrenset6G: Inntekt, økonomiList: List<Økonomi>): List<Økonomi> {
             val utbetalingsgrad = totalUtbetalingsgrad(økonomiList)

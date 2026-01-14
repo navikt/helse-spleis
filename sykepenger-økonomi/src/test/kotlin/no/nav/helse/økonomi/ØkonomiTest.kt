@@ -20,6 +20,66 @@ import org.junit.jupiter.api.assertThrows
 internal class ØkonomiTest {
 
     @Test
+    fun `50 prosent sykepenger og 50 prosent foreldrepenger`() {
+        val økonomiEnArbeidsgiver = listOf(50.prosent.inntekt(2000.daglig))
+        assertEquals(50.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver, 0.prosent))
+        assertEquals(50.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver, 50.prosent))
+    }
+
+    @Test
+    fun `total utbetalingsgrad hensyntatt andre ytelser`() {
+        val økonomiEnArbeidsgiver = listOf(100.prosent.inntekt(30000.månedlig))
+        assertEquals(100.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver, 0.prosent))
+        assertEquals(45.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver, 55.prosent))
+
+        val økonomiToArbeidsgivere = listOf(
+            100.prosent.inntekt(2000.daglig),
+            50.prosent.inntekt(2000.daglig)
+        )
+        assertEquals(75.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere, 0.prosent))
+        assertEquals(75.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere, 25.prosent))
+        assertEquals(74.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere, 26.prosent))
+        // Hvorfor 45%? Nav dekker opp til 100% av inntektstapet opp til 6G
+        // Hen har kun søkt 75% sykepenger, så 25% av foreldrepenger kan utbetales uten at det påvirker utbetalingen av sykepenger
+        // Men alt utover 25% trekkes fra vår utbetalingsgrad for å unngå at Nav utbetaler mer enn 100% av inntektstapet opp til 6G
+        // -> 75% - (55% - 25%) = 45%
+        assertEquals(45.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere, 55.prosent))
+    }
+
+    @Test
+    fun `total utbetalingsgrad hensyntatt andre ytelser og tilkommen inntekt hos kjent arbeidsgiver`() {
+        val økonomiEnArbeidsgiver = listOf(100.prosent.inntekt(2000.daglig, inntektjustering = 250.daglig))
+        assertEquals(87.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver, 0.prosent))
+        assertEquals(37.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver, 50.prosent))
+
+        val økonomiToArbeidsgivere = listOf(
+            100.prosent.inntekt(2000.daglig),
+            50.prosent.inntekt(2000.daglig, inntektjustering = 500.daglig)
+        )
+        // Den første er bare for å tydliggjøre hvor 75% kommer fra i kommentaren under
+        assertEquals(75.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere.map { it.copy(inntektjustering = INGEN) }, 0.prosent))
+        assertEquals(62.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere, 0.prosent))
+        assertEquals(62.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere, 25.prosent))
+        assertEquals(61.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere, 26.prosent))
+        // Hvorfor 32,5%? Nav dekker opp til 100% av inntektstapet opp til 6G
+        // Hen har kun søkt 75% sykepenger (62,5% utbetalingsgrad pga inntektjustering på 500.daglig),
+        // så 25% av foreldrepenger kan utbetales uten at det påvirker utbetalingen av sykepenger
+        // Men alt utover 25% trekkes fra vår utbetalingsgrad for å unngå at Nav utbetaler mer enn 100% av inntektstapet opp til 6G
+        // -> 62,5% - (55% - 25%) = 32,5%
+        assertEquals(32.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere, 55.prosent))
+    }
+
+    @Test
+    fun `total utbetalingsgrad hensyntatt andre ytelser og tilkommen inntekt hos ukjent arbeidsgiver`() {
+        val økonomi = listOf(
+            100.prosent.inntekt(2000.daglig),
+            Økonomi.ikkeBetalt(0.daglig, inntektjustering = 250.daglig)
+        )
+        assertEquals(87.5.prosent, Økonomi.totalUtbetalingsgrad(økonomi, 0.prosent))
+        assertEquals(37.5.prosent, Økonomi.totalUtbetalingsgrad(økonomi, 50.prosent))
+    }
+
+    @Test
     fun `akkurat under 20-prosent-grensen`() {
         val økonomi = listOf(
             8.prosent.inntekt(30000.månedlig),
@@ -411,9 +471,10 @@ internal class ØkonomiTest {
 
     private fun Prosentdel.inntekt(
         aktuellDagsinntekt: Inntekt,
-        refusjonsbeløp: Inntekt = aktuellDagsinntekt
+        refusjonsbeløp: Inntekt = aktuellDagsinntekt,
+        inntektjustering: Inntekt = INGEN
     ) =
-        Økonomi.inntekt(this, aktuellDagsinntekt, 100.prosent, refusjonsbeløp, INGEN)
+        Økonomi.inntekt(this, aktuellDagsinntekt, 100.prosent, refusjonsbeløp, inntektjustering)
 }
 
 private const val ØnsketOppførsel =
