@@ -15,8 +15,6 @@ spec:
       cpu: 4000m
   kafka:
     pool: {{pool}}
-  secureLogs:
-    enabled: true
   envFrom:
     - secret: "{{avstemming-secret}}"
     - secret: "{{migrate-secret}}"

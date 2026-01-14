@@ -11,8 +11,6 @@ spec:
   schedule: "0 2 * * SAT"
   kafka:
     pool: nav-prod
-  secureLogs:
-    enabled: true
   envFrom:
     - secret: google-sql-spleis
   accessPolicy:

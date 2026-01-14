@@ -12,8 +12,6 @@ spec:
   timeZone: Europe/Oslo
   kafka:
     pool: nav-dev
-  secureLogs:
-    enabled: true
   envFrom:
     - secret: google-sql-helse-spleis-spleis-spleis-avstemming-038f9535
   accessPolicy:

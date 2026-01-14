@@ -79,8 +79,6 @@ spec:
           apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
           kind: Project
         role: roles/cloudprofiler.agent
-  secureLogs:
-    enabled: true
   env:
   - name: KAFKA_RAPID_TOPIC
     value: tbd.rapid.v1

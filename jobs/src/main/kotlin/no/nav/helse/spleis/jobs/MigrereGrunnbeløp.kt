@@ -48,6 +48,7 @@ fun migrereGrunnbeløp(factory: ConsumerProducerFactory, arbeidId: String) {
         producer.flush()
     }
     runBlocking {
+        // FIXME: dette kan da umulig være sant lenger, gitt at securelogs-sidecaren ikke finnes
         log.info("Venter med å skru av i ett minutt for at securelogs-sidecar forhåpentligvis skal synce loggene")
         delay(60000L)
     }

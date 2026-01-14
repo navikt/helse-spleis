@@ -44,8 +44,6 @@ spec:
   webproxy: true
   kafka:
     pool: nav-dev
-  secureLogs:
-    enabled: true
   filesFrom:
     - secret: google-sql-helse-spleis-spleis-spleis-opprydding-dev-fe3a79a6
       mountPath: /var/run/secrets/spleis_sql
