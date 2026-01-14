@@ -245,4 +245,6 @@ spec:
         - team: tbd
           application: sparkel-forsikring
           access: readwrite
-
+        - team: tbd
+          application: sparkel-aap
+          access: readwrite
