@@ -103,7 +103,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     utbetalingsdag(28.januar, "NavHelgDag", 0, 0, 100, 100),
                     utbetalingsdag(29.januar, "NavDag", 1431, 0, 100, 100),
                     utbetalingsdag(30.januar, "NavDag", 1431, 0, 100, 100),
-                    utbetalingsdag(31.januar, "AvvistDag", 0, 0, 0, 100,listOf("MinimumSykdomsgrad"))
+                    utbetalingsdag(31.januar, "AvvistDag", 0, 0, 19, 100,listOf("MinimumSykdomsgrad"))
                 )
             )
             assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
@@ -146,21 +146,21 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     utbetalingsdag(14.januar, "ArbeidsgiverperiodeDag", 0, 0, 19, 100),
                     utbetalingsdag(15.januar, "ArbeidsgiverperiodeDag", 0, 0, 19, 100),
                     utbetalingsdag(16.januar, "ArbeidsgiverperiodeDag", 0, 0, 19, 100),
-                    utbetalingsdag(17.januar, "AvvistDag", 0, 0, 0, 100, listOf("MinimumSykdomsgrad")),
-                    utbetalingsdag(18.januar, "AvvistDag", 0, 0, 0, 100, listOf("MinimumSykdomsgrad")),
-                    utbetalingsdag(19.januar, "AvvistDag", 0, 0, 0, 100, listOf("MinimumSykdomsgrad")),
+                    utbetalingsdag(17.januar, "AvvistDag", 0, 0, 19, 100, listOf("MinimumSykdomsgrad")),
+                    utbetalingsdag(18.januar, "AvvistDag", 0, 0, 19, 100, listOf("MinimumSykdomsgrad")),
+                    utbetalingsdag(19.januar, "AvvistDag", 0, 0, 19, 100, listOf("MinimumSykdomsgrad")),
                     utbetalingsdag(20.januar, "NavHelgDag", 0, 0, 19, 100),
                     utbetalingsdag(21.januar, "NavHelgDag", 0, 0, 19, 100),
-                    utbetalingsdag(22.januar, "AvvistDag", 0, 0, 0, 100, listOf("MinimumSykdomsgrad")),
-                    utbetalingsdag(23.januar, "AvvistDag", 0, 0, 0, 100, listOf("MinimumSykdomsgrad")),
-                    utbetalingsdag(24.januar, "AvvistDag", 0, 0, 0, 100, listOf("MinimumSykdomsgrad")),
-                    utbetalingsdag(25.januar, "AvvistDag", 0, 0, 0, 100,listOf("MinimumSykdomsgrad")),
-                    utbetalingsdag(26.januar, "AvvistDag", 0, 0, 0, 100, listOf("MinimumSykdomsgrad")),
+                    utbetalingsdag(22.januar, "AvvistDag", 0, 0, 19, 100, listOf("MinimumSykdomsgrad")),
+                    utbetalingsdag(23.januar, "AvvistDag", 0, 0, 19, 100, listOf("MinimumSykdomsgrad")),
+                    utbetalingsdag(24.januar, "AvvistDag", 0, 0, 19, 100, listOf("MinimumSykdomsgrad")),
+                    utbetalingsdag(25.januar, "AvvistDag", 0, 0, 19, 100,listOf("MinimumSykdomsgrad")),
+                    utbetalingsdag(26.januar, "AvvistDag", 0, 0, 19, 100, listOf("MinimumSykdomsgrad")),
                     utbetalingsdag(27.januar, "NavHelgDag", 0, 0, 19, 100),
                     utbetalingsdag(28.januar, "NavHelgDag", 0, 0, 19, 100),
-                    utbetalingsdag(29.januar, "AvvistDag", 0, 0, 0, 100, listOf("MinimumSykdomsgrad")),
-                    utbetalingsdag(30.januar, "AvvistDag", 0, 0, 0, 100, listOf("MinimumSykdomsgrad")),
-                    utbetalingsdag(31.januar, "AvvistDag", 0, 0, 0, 100, listOf("MinimumSykdomsgrad"))
+                    utbetalingsdag(29.januar, "AvvistDag", 0, 0, 19, 100, listOf("MinimumSykdomsgrad")),
+                    utbetalingsdag(30.januar, "AvvistDag", 0, 0, 19, 100, listOf("MinimumSykdomsgrad")),
+                    utbetalingsdag(31.januar, "AvvistDag", 0, 0, 19, 100, listOf("MinimumSykdomsgrad"))
                 )
             )
             assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
@@ -740,20 +740,20 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     utbetalingsdag(15.januar, "ArbeidsgiverperiodeDag", 0, 0, 100, 100),
                     utbetalingsdag(16.januar, "ArbeidsgiverperiodeDag", 0, 0, 100, 100),
                     utbetalingsdag(17.januar, "NavDag", 1431, 0, 100, 100),
-                    utbetalingsdag(18.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(19.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
+                    utbetalingsdag(18.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(19.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
                     utbetalingsdag(20.januar, "NavHelgDag", 0, 0, 100, 100),
                     utbetalingsdag(21.januar, "NavHelgDag", 0, 0, 100, 100),
-                    utbetalingsdag(22.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(23.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(24.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(25.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(26.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
+                    utbetalingsdag(22.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(23.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(24.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(25.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(26.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
                     utbetalingsdag(27.januar, "NavHelgDag", 0, 0, 100, 100),
                     utbetalingsdag(28.januar, "NavHelgDag", 0, 0, 100, 100),
-                    utbetalingsdag(29.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(30.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(31.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70"))
+                    utbetalingsdag(29.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(30.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(31.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70"))
                 )
             )
         }
@@ -793,21 +793,21 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     utbetalingsdag(14.januar, "ArbeidsgiverperiodeDag", 0, 0, 100, 100),
                     utbetalingsdag(15.januar, "ArbeidsgiverperiodeDag", 0, 0, 100, 100),
                     utbetalingsdag(16.januar, "ArbeidsgiverperiodeDag", 0, 0, 100, 100),
-                    utbetalingsdag(17.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(18.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(19.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
+                    utbetalingsdag(17.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(18.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(19.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
                     utbetalingsdag(20.januar, "NavHelgDag", 0, 0, 100, 100),
                     utbetalingsdag(21.januar, "NavHelgDag", 0, 0, 100, 100),
-                    utbetalingsdag(22.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(23.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(24.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(25.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(26.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
+                    utbetalingsdag(22.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(23.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(24.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(25.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(26.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
                     utbetalingsdag(27.januar, "NavHelgDag", 0, 0, 100, 100),
                     utbetalingsdag(28.januar, "NavHelgDag", 0, 0, 100, 100),
-                    utbetalingsdag(29.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(30.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(31.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70"))
+                    utbetalingsdag(29.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(30.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(31.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70"))
                 )
             )
         }
@@ -847,21 +847,21 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     utbetalingsdag(14.januar, "ArbeidsgiverperiodeDag", 0, 0, 100, 100),
                     utbetalingsdag(15.januar, "ArbeidsgiverperiodeDag", 0, 0, 100, 100),
                     utbetalingsdag(16.januar, "ArbeidsgiverperiodeDag", 0, 0, 100, 100),
-                    utbetalingsdag(17.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(18.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(19.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
+                    utbetalingsdag(17.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(18.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(19.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
                     utbetalingsdag(20.januar, "NavHelgDag", 0, 0, 100, 100),
                     utbetalingsdag(21.januar, "NavHelgDag", 0, 0, 100, 100),
-                    utbetalingsdag(22.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(23.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(24.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(25.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(26.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
+                    utbetalingsdag(22.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(23.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(24.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(25.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(26.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
                     utbetalingsdag(27.januar, "NavHelgDag", 0, 0, 100, 100),
                     utbetalingsdag(28.januar, "NavHelgDag", 0, 0, 100, 100),
-                    utbetalingsdag(29.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(30.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70")),
-                    utbetalingsdag(31.januar, "AvvistDag", 0, 0, 0, 100, listOf("Over70"))
+                    utbetalingsdag(29.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(30.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70")),
+                    utbetalingsdag(31.januar, "AvvistDag", 0, 0, 100, 100, listOf("Over70"))
                 )
             )
         }

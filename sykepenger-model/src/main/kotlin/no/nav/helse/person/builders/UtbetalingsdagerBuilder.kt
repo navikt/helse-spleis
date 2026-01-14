@@ -29,8 +29,8 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                 )
 
                 is Utbetalingsdag.Ventetidsdag -> EventSubscription.Utbetalingsdag(
-                    dag.dato,
-                    EventSubscription.Utbetalingsdag.Dagtype.Ventetidsdag,
+                    dato = dag.dato,
+                    type = EventSubscription.Utbetalingsdag.Dagtype.Ventetidsdag,
                     beløpTilArbeidsgiver = 0,
                     beløpTilBruker = dag.økonomi.personbeløp?.dagligInt ?: 0,
                     sykdomsgrad = dag.økonomi.sykdomsgrad.toDouble().toInt(),
@@ -93,7 +93,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
                     type = EventSubscription.Utbetalingsdag.Dagtype.AvvistDag,
                     beløpTilArbeidsgiver = 0,
                     beløpTilBruker = 0,
-                    sykdomsgrad = 0,
+                    sykdomsgrad = dag.økonomi.sykdomsgrad.toDouble().toInt(),
                     dekningsgrad = dag.økonomi.dekningsgrad.toDouble().toInt(),
                     begrunnelser = dag.begrunnelser.map {
                         EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.fraBegrunnelse(it)
