@@ -3,14 +3,34 @@ Jobs
 
 # Hvordan kjøre feriepenger
 1. Skalerer opp [sykepengeperioder](https://github.com/navikt/helse-sparkelapper/commit/08e07c375ceb57f87f9f2d380456b3f9536cb08b)
-2. Skaler opp [databasen til spleis](https://github.com/navikt/helse-spleis/commit/a38fea8749076bc566da3ca837bfbba80d9dabea)
-3. Skru på [toggle i spleis](https://github.com/navikt/helse-spleis/commit/9b97446caa7648fb31f017d73733029c8605d62a)
-4. Kjør dry run av jobben under før du kjører på ekte. Bruk en ny unik ArbeidId. Se [starte feriepenger](#starte-feriepenger) for guide. Ved problemer kan det hende du kan finne hjelp i [fallgruver](#fallgruver).
-5. Kjør på ekte. Bruk en annen unik ArbeidId enn den du brukte i steg 4. Følg [starte feriepenger](#starte-feriepenger) igjen. Ved flere problemer kan det hende du finner hjelp i [fallgruvene](#fallgruver).
-6. Vent til jobben er ferdig. Dette kan du se ved at Kafka consumer lag [her](https://grafana.nav.cloud.nais.io/d/ayeT9XyGk/kafka-aiven?orgId=1&from=now-1h&to=now&timezone=browser&var-datasource=000000011&var-apps=$__all&var-Persentil=0.90&var-event_name=$__all) for både Spleis og sparkel-sykepengeperioder har gått til normalt nivå.
-7. Slett naisjob `spleis-migrate`
-8. Skaler ned sykepengeperioder og spleis, og skru av toggle, ved å reverte det du gjorde i steg 1, 2 og 3.
-9. Gratulerer, du har kjørt feriepenger! 🎉
+1.Skaler opp [databasen til spleis](https://github.com/navikt/helse-spleis/commit/a38fea8749076bc566da3ca837bfbba80d9dabea)
+1. Skru på [toggle i spleis](https://github.com/navikt/helse-spleis/commit/9b97446caa7648fb31f017d73733029c8605d62a)
+1. Kjør dry run av jobben under før du kjører på ekte. Bruk en ny unik ArbeidId. Se [starte feriepenger](#starte-feriepenger) for guide.
+   1. Nå kommer du til å få en jobb som heter `spleis-migrate-1` som feiler med feilmeldingen `Something unusual has occurred` - og det er helt OK 🙆‍
+      1. Dette er bare fordi etter at du slettet jobben forrige gang du kjørte feriepenger forsvant også tilgangene jobben trenger for å kjøre. Denne første kjøringen får på plass tilgangene jobben trenger til neste punkt.
+1. ️Kjør dry run av jobben på ny med samme parametre (SAMME ArbeidId!!!)
+   1. Nå kommer du til å få en jobb som heter `spleis-migrate-2` som ikke feiler.
+1. Kjør på ekte. Samme som over, bare ikke dry run.
+1. Vent til jobben er ferdig. 
+   1. Dette kan du se ved at Kafka consumer lag [her](https://grafana.nav.cloud.nais.io/d/ayeT9XyGk/kafka-aiven?orgId=1&from=now-1h&to=now&timezone=browser&var-datasource=000000011&var-apps=$__all&var-Persentil=0.90&var-event_name=$__all) for både Spleis og sparkel-sykepengeperioder har gått til normalt nivå. Den kan gå opp og ned som en jojo.
+   1. For å finne de vi reelt sender til oppdrag kan du søke på dette:
+    ```
+    jsonPayload.message:"Skal sende arbeidsgiveroppdrag til OS: true" OR jsonPayload.message:"Skal sende personoppdrag til OS: true"
+    resource.labels.container_name="spleis"
+    ```
+   1. For å finne alle spleis har begynt å håndtere:
+    ```
+    jsonPayload.message:""Behandler utbetalingshistorikk for feriepenger""
+    resource.labels.container_name="spleis"
+    ```
+   1. For å se hvor mange behov jobben har sendt ut
+   ```
+    jsonPayload.message:"sender behov om SykepengehistorikkForFeriepenger for fødselsnummer"
+    resource.labels.container_name="spleis-migrate"
+   ```
+1. Slett naisjob `spleis-migrate`
+1. Skaler ned sykepengeperioder og spleis, og skru av toggle, ved å reverte det du gjorde i steg 1, 2 og 3.
+1. Gratulerer, du har kjørt feriepenger! 🎉
 
 ## Starte feriepenger
 
