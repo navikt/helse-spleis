@@ -33,6 +33,7 @@ internal class YtelserRiver(
         Opplæringspenger,
         Institusjonsopphold,
         Arbeidsavklaringspenger,
+        ArbeidsavklaringspengerV2,
         InntekterForBeregning,
         Dagpenger
     )
