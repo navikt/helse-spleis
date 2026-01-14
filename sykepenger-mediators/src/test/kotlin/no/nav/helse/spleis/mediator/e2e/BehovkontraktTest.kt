@@ -9,8 +9,9 @@ import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
@@ -73,6 +74,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertVedtaksperiodeBehov(
             behov,
             Arbeidsavklaringspenger,
+            ArbeidsavklaringspengerV2,
             Dagpenger,
             Foreldrepenger,
             Institusjonsopphold,
@@ -171,17 +173,17 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingdetaljer(behov, true)
     }
 
-    private fun assertVedtaksperiodeBehov(behov: JsonNode, vararg typer: Aktivitet.Behov.Behovtype) {
+    private fun assertVedtaksperiodeBehov(behov: JsonNode, vararg typer: Behovtype) {
         assertBehov(behov, *typer)
         assertTrue(behov.path("vedtaksperiodeId").asText().isNotEmpty())
     }
 
-    private fun assertUtbetalingBehov(behov: JsonNode, vararg typer: Aktivitet.Behov.Behovtype) {
+    private fun assertUtbetalingBehov(behov: JsonNode, vararg typer: Behovtype) {
         assertBehov(behov, *typer)
         assertTrue(behov.path("utbetalingId").asText().isNotEmpty())
     }
 
-    private fun assertBehov(behov: JsonNode, vararg typer: Aktivitet.Behov.Behovtype) {
+    private fun assertBehov(behov: JsonNode, vararg typer: Behovtype) {
         val id = behov.path("@id").asText()
         assertEquals("behov", behov.path("@event_name").asText())
         assertTrue(behov.path("fødselsnummer").asText().isNotEmpty())
