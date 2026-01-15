@@ -5,14 +5,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.text.uppercase
+import no.nav.helse.Tidslinje
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.AnnenInntektskilde
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet
+import no.nav.helse.økonomi.Prosentdel
 
 class Ytelser(
     meldingsreferanseId: MeldingsreferanseId,
@@ -70,8 +71,9 @@ class Ytelser(
     internal fun selvstendigForsikring(): SelvstendigForsikring? = selvstendigForsikring
 
     internal fun inntektsendringer(): Map<Arbeidsgiverberegning.Inntektskilde, InntekterForBeregning.Inntektsperioder> {
-        val kilde = Kilde(metadata.meldingsreferanseId, SYSTEM, LocalDateTime.now()) // TODO: TilkommenV4 smak litt på denne
+        val kilde = Kilde(metadata.meldingsreferanseId, SYSTEM, LocalDateTime.now())
         return inntekterForBeregning.inntektsperioder
+            .filterIsInstance<InntekterForBeregning.Inntektsperiode.Beløp>()
             .groupBy { it.inntektskilde }
             .mapKeys { (inntektskilde, _) -> inntektskilde.uppercase().let {
                 when {
@@ -82,8 +84,18 @@ class Ytelser(
                 }
             }}
             .mapValues { (_, inntektsperioder) -> InntekterForBeregning.Inntektsperioder(kilde, inntektsperioder) }
-
     }
+
+    // TODO: Veldig tøysete at vi henter det ut fra inntekterForBeregning nå. Burde være eget behov/løsning for andre ytelser
+    internal fun andreYtelserTidslinje() = inntekterForBeregning.inntektsperioder
+        .filterIsInstance<InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag>()
+        .map { (_, periode, andel) -> AndreYtelserTidslinje(periode to andel) }
+        .fold(AndreYtelserTidslinje()) { sammenslått, ny -> sammenslått + ny }
 }
 
 class GradertPeriode(internal val periode: Periode, internal val grad: Int)
+
+internal class AndreYtelserTidslinje(vararg perioder: Pair<Periode, Prosentdel>): Tidslinje<Prosentdel, AndreYtelserTidslinje>(*perioder) {
+    override fun opprett(vararg perioder: Pair<Periode, Prosentdel>) = AndreYtelserTidslinje(*perioder)
+    override fun pluss(eksisterendeVerdi: Prosentdel, nyVerdi: Prosentdel) = eksisterendeVerdi + nyVerdi
+}

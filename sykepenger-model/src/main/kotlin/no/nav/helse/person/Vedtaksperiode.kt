@@ -1600,6 +1600,7 @@ internal class Vedtaksperiode private constructor(
             .fold(person.infotrygdhistorikk.utbetalingstidslinje(), Utbetalingstidslinje::plus)
             .fremTilOgMed(periode.start.forrigeDag)
 
+        val andreYtelserTidslinje = ytelser.andreYtelserTidslinje()
         val beregnetTidslinjePerVedtaksperiode = filtrerUtbetalingstidslinjer(
             uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
             harOpptjening = harOpptjening,
@@ -1612,7 +1613,8 @@ internal class Vedtaksperiode private constructor(
             erUnderMinsteinntektEtterFylte67 = minsteinntektsvurdering.erSykepengegrunnlagetUnder2G,
             historisktidslinje = historisktidslinje,
             perioderMedMinimumSykdomsgradVurdertOK = person.minimumSykdomsgradsvurdering.perioder,
-            regler = person.regler
+            regler = person.regler,
+            andreYtelser = { dato -> andreYtelserTidslinje[dato] ?: 0.prosent }
         )
         // steg 4.1: lag beregnede behandlinger
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()

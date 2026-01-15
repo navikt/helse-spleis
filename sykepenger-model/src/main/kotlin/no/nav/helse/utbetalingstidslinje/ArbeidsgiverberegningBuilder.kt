@@ -41,7 +41,7 @@ internal class ArbeidsgiverberegningBuilder(private val beregningsperiode: Perio
         val aktuellPeriode = inntektsperiode.periode.subset(beregningsperiode)
 
         val beløpstidslinje = when (inntektsperiode) {
-            is InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag -> Beløpstidslinje.fra(aktuellPeriode, (sykepengegrunnlag * inntektsperiode.andel), kilde)
+            is InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag -> error("TODO: Hvis det viser seg at siste tolkning av andre ytelser fungerer så fjern meg, og slutt at build() retunrerer to ting")
             is InntekterForBeregning.Inntektsperiode.Beløp -> Beløpstidslinje.fra(aktuellPeriode, inntektsperiode.beløp, kilde)
         }
         resultat + beløpstidslinje

@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.til
@@ -17,6 +18,8 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -198,7 +201,8 @@ class FiltrerUtbetalingstidslinjerTest {
         erUnderMinsteinntektskravTilFylte67: Boolean = false,
         erUnderMinsteinntektEtterFylte67: Boolean = false,
         regler: MaksimumSykepengedagerregler = MaksimumSykepengedagerregler.Companion.NormalArbeidstaker,
-        historiskTidslinje: Utbetalingstidslinje = Utbetalingstidslinje()
+        historiskTidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
+        andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }
     ): List<BeregnetPeriode> {
         val result = filtrerUtbetalingstidslinjer(
             uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
@@ -212,7 +216,8 @@ class FiltrerUtbetalingstidslinjerTest {
             erUnderMinsteinntektEtterFylte67 = erUnderMinsteinntektEtterFylte67,
             historisktidslinje = historiskTidslinje,
             perioderMedMinimumSykdomsgradVurdertOK = emptySet(),
-            regler = regler
+            regler = regler,
+            andreYtelser = andreYtelser
         )
         return result
     }

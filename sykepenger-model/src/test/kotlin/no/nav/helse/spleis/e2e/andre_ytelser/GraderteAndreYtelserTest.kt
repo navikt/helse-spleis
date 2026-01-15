@@ -5,18 +5,17 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.hendelser.InntekterForBeregning
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class GraderteAndreYtelserTest: AbstractDslTest() {
@@ -105,9 +104,8 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
         }
     }
 
-
     @Test
-    fun `så mye foreldrepenger at du havner under 20 prosent sykepenger`() {
+    fun `så mye foreldrepenger at du havner under 20 prosent avslås ikke på totalgrad, men utbetalingen reduseres`() {
         a1 {
             nyttVedtak(januar, beregnetInntekt = 520_000.årlig)
             assertInntektsgrunnlag(1.januar, 1) {
@@ -120,14 +118,12 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
                 InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("FORELDREPENGER", januar, 81.prosent),
             ))
 
-            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 2000, subset = 17.januar til 31.januar)
+            // 2000 * 0.19 = 380
+            assertUtbetalingsbeløp(1.vedtaksperiode, 380, 2000, subset = 17.januar til 31.januar)
 
-            with(inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager) {
-                assertEquals(11, size)
-                assertTrue(all { it.begrunnelser == listOf(MinimumSykdomsgrad)})
-            }
+            assertEquals(0, inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
 
-            assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23, Varselkode.RV_VV_4)
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23)
         }
     }
 
@@ -146,7 +142,28 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
                 InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("FORELDREPENGER", 1.juni(2025) til 30.juni(2025), 50.prosent),
             ))
 
-            assertUtbetalingsbeløp(1.vedtaksperiode, 915, 7692, subset = 17.juni(2025) til 30.juni(2025))
+            // Her er det "plass" til 50% foreldrepenger uten at det går utover sykepengene
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1502, 7692, subset = 17.juni(2025) til 30.juni(2025))
+        }
+    }
+
+    @Test
+    fun `mange andre ytelser som overlapper litt om hverandre`() {
+        a1 {
+            nyttVedtak(januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
+            håndterInntektsendringer(1.januar)
+            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(
+                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("FORELDREPENGER", 1.januar til 28.januar, 20.prosent),
+                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("PLEIEPENGER_SYKT_BARN", 17.januar til 22.januar, 20.prosent),
+                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("OMSORGSPENGER", 22.januar.somPeriode(), 15.prosent),
+                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("PLEIEPENGER_NÆRSTÅENDE", 22.januar til 30.januar, 20.prosent),
+            ))
+            assertUtbetalingsbeløp(1.vedtaksperiode, 858, 1431, subset = 17.januar til 21.januar) // 1431 * 0,60 =  858
+            assertUtbetalingsbeløp(1.vedtaksperiode, 358, 1431, subset = 22.januar.somPeriode())  // 1431 * 0,25 =  358
+            assertUtbetalingsbeløp(1.vedtaksperiode, 858, 1431, subset = 23.januar til 28.januar) // 1431 * 0,60 =  858
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1145, 1431, subset = 29.januar til 30.januar)// 1431 * 0,80 = 1145
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 31.januar.somPeriode()) // 1431 * 1,00 = 1431
 
             assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23)
         }

@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 data class Vedtaksperiodeberegning(
     val vedtaksperiodeId: UUID,
@@ -27,7 +26,7 @@ fun filtrerUtbetalingstidslinjer(
     historisktidslinje: Utbetalingstidslinje,
     perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
     regler: MaksimumSykepengedagerregler,
-    andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }
+    andreYtelser: (dato: LocalDate) -> Prosentdel
 ): List<BeregnetPeriode> {
     val maksdatoberegning = Maksdatoberegning(
         sekstisyvårsdagen = sekstisyvårsdagen,
