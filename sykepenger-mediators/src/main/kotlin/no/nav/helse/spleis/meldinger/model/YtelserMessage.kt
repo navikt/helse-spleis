@@ -40,8 +40,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val yrkesaktivitetssporing = packet.yrkesaktivitetssporing
-    private val arbeidsavklaringspenger: List<Pair<LocalDate, LocalDate>>
-    private val ugyldigeArbeidsavklaringspengeperioder: List<Pair<LocalDate, LocalDate>>
     private val dagpenger: List<Pair<LocalDate, LocalDate>>
     private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
@@ -110,12 +108,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     }
 
     init {
-        packet["@løsning.${Behovtype.Arbeidsavklaringspenger.name}.meldekortperioder"].map(::asDatePair)
-            .partition { it.first <= it.second }
-            .also {
-                arbeidsavklaringspenger = it.first
-                ugyldigeArbeidsavklaringspengeperioder = it.second
-            }
         packet["@løsning.${Behovtype.Dagpenger.name}.meldekortperioder"]
             .map(::asDatePair)
             .partition { it.first <= it.second }
@@ -141,7 +133,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             inntekterForBeregning = inntekterForBeregning,
             selvstendigForsikring = selvstendigForsikring
         ).also {
-            if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom for")
             if (ugyldigeDagpengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom for")
         }
 

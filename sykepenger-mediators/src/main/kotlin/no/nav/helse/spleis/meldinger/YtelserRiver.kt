@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
@@ -31,7 +30,6 @@ internal class YtelserRiver(
         Omsorgspenger,
         Opplæringspenger,
         Institusjonsopphold,
-        Arbeidsavklaringspenger,
         ArbeidsavklaringspengerV2,
         InntekterForBeregning,
         Dagpenger
@@ -77,10 +75,7 @@ internal class YtelserRiver(
             interestedIn("startdato") { it.asLocalDate() }
             interestedIn("faktiskSluttdato") { it.asLocalDate() }
         }
-        message.requireArray("@løsning.${Arbeidsavklaringspenger.name}.meldekortperioder") {
-            require("fom", JsonNode::asLocalDate)
-            require("tom", JsonNode::asLocalDate)
-        }
+
         message.requireArray("@løsning.${Dagpenger.name}.meldekortperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
