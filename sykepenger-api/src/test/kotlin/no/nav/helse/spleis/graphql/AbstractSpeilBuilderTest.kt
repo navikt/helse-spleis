@@ -5,7 +5,7 @@ import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedDeque
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
@@ -167,6 +167,7 @@ internal abstract class AbstractSpeilBuilderTest {
         val fabrikk = when (arbeidssituasjon) {
             Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             Søknad.Arbeidssituasjon.JORDBRUKER -> selvstendigFabrikk
+
             Søknad.Arbeidssituasjon.ARBEIDSTAKER,
             Søknad.Arbeidssituasjon.ARBEIDSLEDIG,
             Søknad.Arbeidssituasjon.FRILANSER,
@@ -310,6 +311,7 @@ internal abstract class AbstractSpeilBuilderTest {
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         beregnetInntekt = beregnetInntekt
     )
+
     protected fun håndterLpsInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOfOrNull { it.start },
@@ -339,7 +341,8 @@ internal abstract class AbstractSpeilBuilderTest {
         val behov = hendelselogg.vilkårsgrunnlagbehov() ?: error("Fant ikke vilkårsgrunnlagbehov")
         val inntekterForOpptjeningsvurdering = when (behov.yrkesaktivitetstype) {
             "SELVSTENDIG",
-             "JORDBRUKER" -> InntekterForOpptjeningsvurdering(emptyList())
+            "JORDBRUKER" -> InntekterForOpptjeningsvurdering(emptyList())
+
             "ARBEIDSTAKER" -> InntekterForOpptjeningsvurdering(inntekter = inntekter.map { arbeidsgiverInntekt ->
                 val orgnummer = arbeidsgiverInntekt.first
                 val inntekt = arbeidsgiverInntekt.second
@@ -357,22 +360,27 @@ internal abstract class AbstractSpeilBuilderTest {
                     )
                 )
             })
+
             else -> error("støtter ikke ${behov.yrkesaktivitetstype}")
         }
         val inntektsvurderingForSykepengegrunnlag = when (behov.yrkesaktivitetstype) {
             "SELVSTENDIG",
-             "JORDBRUKER" -> InntektForSykepengegrunnlag(emptyList())
+            "JORDBRUKER" -> InntektForSykepengegrunnlag(emptyList())
+
             "ARBEIDSTAKER" -> InntektForSykepengegrunnlag(
                 inntekter = inntekter.map { (orgnr, inntekt) -> grunnlag(orgnr, behov.skjæringstidspunkt, (1..3).map { inntekt }) }
             )
+
             else -> error("støtter ikke ${behov.yrkesaktivitetstype}")
         }
         val arbeidsforhold = when (behov.yrkesaktivitetstype) {
             "SELVSTENDIG",
-             "JORDBRUKER" -> emptyList()
+            "JORDBRUKER" -> emptyList()
+
             "ARBEIDSTAKER" -> arbeidsforhold.map { (orgnr, oppstart) ->
                 Vilkårsgrunnlag.Arbeidsforhold(orgnr, oppstart, type = Arbeidsforholdtype.ORDINÆRT)
             }
+
             else -> error("støtter ikke ${behov.yrkesaktivitetstype}")
         }
         val vilkårsgrunnlagbehov = fabrikker.getValue(behov.orgnummer).lagVilkårsgrunnlag(
@@ -614,7 +622,7 @@ internal abstract class AbstractSpeilBuilderTest {
             Aktivitet.Behov.Behovtype.Omsorgspenger,
             Aktivitet.Behov.Behovtype.Opplæringspenger,
             Aktivitet.Behov.Behovtype.Institusjonsopphold,
-            Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger,
+            Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2,
             Aktivitet.Behov.Behovtype.Dagpenger
         )
     )
@@ -632,7 +640,7 @@ internal abstract class AbstractSpeilBuilderTest {
         ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Simulering))
             ?.let {
                 ubesvarteBehov.removeAll(it)
-                it.groupBy { UUID.fromString(it.alleKontekster.getValue("utbetalingId")) }.map { (utbetalingId, oppdrag)  ->
+                it.groupBy { UUID.fromString(it.alleKontekster.getValue("utbetalingId")) }.map { (utbetalingId, oppdrag) ->
                     val vedtaksperiodeId = UUID.fromString(oppdrag.first().alleKontekster.getValue("vedtaksperiodeId"))
                     val yrkesaktivitetstype = it.first().alleKontekster.getValue("yrkesaktivitetstype")
                     val orgnummer = oppdrag.first().alleKontekster.getValue("organisasjonsnummer")

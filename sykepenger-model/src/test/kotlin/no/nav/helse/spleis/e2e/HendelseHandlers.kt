@@ -794,7 +794,7 @@ internal fun AbstractEndToEndTest.håndterYtelser(
     assertEtterspurt(Behovtype.Pleiepenger)
     assertEtterspurt(Behovtype.Omsorgspenger)
     assertEtterspurt(Behovtype.Opplæringspenger)
-    assertEtterspurt(Behovtype.Arbeidsavklaringspenger)
+    assertEtterspurt(Behovtype.ArbeidsavklaringspengerV2)
     assertEtterspurt(Behovtype.Dagpenger)
     assertEtterspurt(Behovtype.Institusjonsopphold)
 

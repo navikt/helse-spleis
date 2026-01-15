@@ -336,7 +336,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         omsorgspenger: List<GradertPeriode> = emptyList(),
         opplæringspenger: List<GradertPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
-        arbeidsavklaringspenger: List<Periode> = emptyList(),
         arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
         inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),

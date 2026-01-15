@@ -190,7 +190,7 @@ internal abstract class AbstractObservableTest {
         opplæringspenger: List<GradertPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER,
-        arbeidsavklaringspenger: List<Periode> = emptyList(),
+        arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         inntekterForBeregning: List<Inntektsperiode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
         selvstendigForsikring: SelvstendigForsikring? = null
@@ -214,7 +214,7 @@ internal abstract class AbstractObservableTest {
             institusjonsopphold = Institusjonsopphold(
                 perioder = institusjonsoppholdsperioder
             ),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspengerV2),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             dagpenger = Dagpenger(dagpenger),
             selvstendigForsikring = selvstendigForsikring

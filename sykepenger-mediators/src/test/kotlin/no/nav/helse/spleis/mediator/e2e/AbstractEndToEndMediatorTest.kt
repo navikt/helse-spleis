@@ -29,12 +29,13 @@ import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as Hendelseperiode
 import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
@@ -60,7 +61,6 @@ import no.nav.helse.spleis.Subsumsjonproducer
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.mediator.TestMessageFactory
-import no.nav.helse.spleis.mediator.TestMessageFactory.ArbeidsavklaringspengerTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold
 import no.nav.helse.spleis.mediator.TestMessageFactory.ArbeidsforholdOverstyrt
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsgiveropplysning
@@ -520,7 +520,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
         opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
-        arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
+        arbeidsavklaringspengerV2: Arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         dagpenger: List<DagpengerTestdata> = emptyList(),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
         selvstendigForsikring: List<SelvstendigForsikring> = emptyList(),
@@ -530,7 +530,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Pleiepenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Omsorgspenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opplæringspenger))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Arbeidsavklaringspenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsavklaringspengerV2))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Institusjonsopphold))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForBeregning))
@@ -545,7 +545,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             omsorgspenger = omsorgspenger,
             opplæringspenger = opplæringspenger,
             institusjonsoppholdsperioder = institusjonsoppholdsperioder,
-            arbeidsavklaringspenger = arbeidsavklaringspenger,
+            arbeidsavklaringspengerV2 = arbeidsavklaringspengerV2,
             dagpenger = dagpenger,
             inntekterForBeregning = inntekterForBeregning,
             selvstendigForsikring = selvstendigForsikring,
@@ -561,14 +561,14 @@ internal abstract class AbstractEndToEndMediatorTest {
         omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
         opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
-        arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
+        arbeidsavklaringspengerV2: Arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         dagpenger: List<DagpengerTestdata> = emptyList(),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
         selvstendigForsikring: List<SelvstendigForsikring> = emptyList(),
         orgnummer: String = "SELVSTENDIG"
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, SelvstendigForsikring))
-        sendYtelser(vedtaksperiodeIndeks, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger, inntekterForBeregning, selvstendigForsikring, orgnummer)
+        sendYtelser(vedtaksperiodeIndeks, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, selvstendigForsikring, orgnummer)
     }
 
     private fun sendUtbetalingshistorikk(

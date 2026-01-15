@@ -272,7 +272,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         omsorgspenger: List<GradertPeriode> = emptyList(),
         opplæringspenger: List<GradertPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
-        arbeidsavklaringspenger: List<Periode> = emptyList(),
+        arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         inntekterForBeregning: List<Inntektsperiode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
         selvstendigForsikring: SelvstendigForsikring? = null
@@ -300,7 +300,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             institusjonsopphold = Institusjonsopphold(
                 perioder = institusjonsoppholdsperioder
             ),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspengerV2),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             dagpenger = Dagpenger(dagpenger),
             selvstendigForsikring = selvstendigForsikring

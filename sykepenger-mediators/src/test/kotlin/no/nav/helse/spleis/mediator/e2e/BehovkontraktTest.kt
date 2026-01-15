@@ -10,7 +10,6 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
@@ -73,7 +72,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
         assertVedtaksperiodeBehov(
             behov,
-            Arbeidsavklaringspenger,
             ArbeidsavklaringspengerV2,
             Dagpenger,
             Foreldrepenger,
@@ -196,8 +194,8 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     private fun assertArbeidsavklaringspengerdetaljer(behov: JsonNode) {
-        assertDato(behov.path(Arbeidsavklaringspenger.name).path("periodeFom").asText())
-        assertDato(behov.path(Arbeidsavklaringspenger.name).path("periodeTom").asText())
+        assertDato(behov.path(ArbeidsavklaringspengerV2.name).path("periodeFom").asText())
+        assertDato(behov.path(ArbeidsavklaringspengerV2.name).path("periodeTom").asText())
     }
 
     private fun assertDagpengerdetaljer(behov: JsonNode) {

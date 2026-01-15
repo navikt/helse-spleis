@@ -70,7 +70,6 @@ private val json = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Arbeidsavklaringspenger",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
@@ -156,14 +155,6 @@ private val json = """
             "kategori": "S"
           }
         ],
-        "Arbeidsavklaringspenger": {
-          "meldekortperioder": [
-            {
-              "fom": "2019-03-11",
-              "tom": "2019-04-12"
-            }
-          ]
-        },
         "ArbeidsavklaringspengerV2": {
           "utbetalingsperioder": [
             {
@@ -220,7 +211,6 @@ private val ukjentPeriode = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Arbeidsavklaringspenger",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
@@ -282,9 +272,6 @@ private val ukjentPeriode = """
         "Opplæringspenger": [],
         "Omsorgspenger": [],
         "Institusjonsopphold": [],
-        "Arbeidsavklaringspenger": {
-          "meldekortperioder": []
-        },
         "ArbeidsavklaringspengerV2": {
           "utbetalingsperioder": []
         },
@@ -318,7 +305,6 @@ private val ugyldigPeriode = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Arbeidsavklaringspenger",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
@@ -380,9 +366,6 @@ private val ugyldigPeriode = """
         "Opplæringspenger": [],
         "Omsorgspenger": [],
         "Institusjonsopphold": [],
-        "Arbeidsavklaringspenger": {
-          "meldekortperioder": []
-        },
         "ArbeidsavklaringspengerV2": {
           "utbetalingsperioder": []
         },
@@ -408,7 +391,6 @@ private val utenPleiepenger = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Arbeidsavklaringspenger",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
@@ -458,9 +440,6 @@ private val utenPleiepenger = """
         "Opplæringspenger": [],
         "Omsorgspenger": [],
         "Institusjonsopphold": [],
-        "Arbeidsavklaringspenger": {
-          "meldekortperioder": []
-        },
         "ArbeidsavklaringspengerV2": {
           "utbetalingsperioder": []
         },        
@@ -486,7 +465,6 @@ private val utenOmsorgspenger = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Arbeidsavklaringspenger",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
@@ -536,9 +514,6 @@ private val utenOmsorgspenger = """
         "Pleiepenger": [],
         "Opplæringspenger": [],
         "Institusjonsopphold": [],
-        "Arbeidsavklaringspenger": {
-          "meldekortperioder": []
-        },
         "ArbeidsavklaringspengerV2": {
           "utbetalingsperioder": []
         },        
@@ -564,7 +539,6 @@ private val utenOpplæringspenger = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Arbeidsavklaringspenger",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
@@ -614,9 +588,6 @@ private val utenOpplæringspenger = """
         "Pleiepenger": [],
         "Omsorgspenger": [],
         "Institusjonsopphold": [],
-        "Arbeidsavklaringspenger": {
-          "meldekortperioder": []
-        },
         "ArbeidsavklaringspengerV2": {
           "utbetalingsperioder": []
         },        
@@ -642,7 +613,6 @@ private val utenInstitusjonsopphold = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Arbeidsavklaringspenger",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning"
         "Dagpenger"
@@ -692,9 +662,6 @@ private val utenInstitusjonsopphold = """
         "Pleiepenger": [],
         "Opplæringspenger": [],
         "Omsorgspenger": [],
-        "Arbeidsavklaringspenger": {
-          "meldekortperioder": []
-        },
         "ArbeidsavklaringspengerV2": {
           "utbetalingsperioder": []
         },        
@@ -721,7 +688,6 @@ private val utenArbeidsavklaringspenger = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Arbeidsavklaringspenger",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
@@ -816,7 +782,6 @@ private val utenDagpenger = """
         "Omsorgspenger",
         "Opplæringspenger",
         "Institusjonsopphold",
-        "Arbeidsavklaringspenger",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "Dagpenger"
@@ -893,9 +858,6 @@ private val utenDagpenger = """
           }
         ],
         "InntekterForBeregning": {"inntekter": []},
-        "Arbeidsavklaringspenger": {
-          "meldekortperioder": []
-        },
         "ArbeidsavklaringspengerV2": {
           "utbetalingsperioder": []
         }        

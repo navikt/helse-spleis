@@ -362,7 +362,7 @@ internal abstract class AbstractDslTest {
         arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
     ) =
-        this { håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, arbeidsavklaringspengerV2, dagpenger) }
+        this { håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger) }
 
     protected fun String.håndterSimulering(vedtaksperiodeId: UUID) =
         this { håndterSimulering(vedtaksperiodeId) }

@@ -33,7 +33,6 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as HendelsePeriode
 import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
@@ -961,7 +960,6 @@ internal class TestMessageFactory(
         omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
         opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
-        arbeidsavklaringspenger: List<ArbeidsavklaringspengerTestdata> = emptyList(),
         dagpenger: List<DagpengerTestdata> = emptyList(),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
         selvstendigForsikring: List<SelvstendigForsikring> = emptyList(),
@@ -975,7 +973,6 @@ internal class TestMessageFactory(
             "Omsorgspenger",
             "Opplæringspenger",
             "Institusjonsopphold",
-            "Arbeidsavklaringspenger",
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
             "Dagpenger"
@@ -1021,11 +1018,11 @@ internal class TestMessageFactory(
                         "kategori" to data.kategori
                     )
                 },
-                Arbeidsavklaringspenger.name to mapOf(
-                    "meldekortperioder" to arbeidsavklaringspenger.map { data ->
+                ArbeidsavklaringspengerV2.name to mapOf(
+                    "utbetalingsperioder" to arbeidsavklaringspengerV2.perioder.map { periode ->
                         mapOf(
-                            "fom" to data.fom,
-                            "tom" to data.tom
+                            "fom" to periode.start,
+                            "tom" to periode.endInclusive
                         )
                     }
                 ),
@@ -1052,20 +1049,8 @@ internal class TestMessageFactory(
                 )
             )
                 .plus(selvstendigForsikringer(selvstendigForsikring, yrkesaktivitetstype))
-                .plus(arbeidsavklaringspengerV2(arbeidsavklaringspengerV2))
         )
     }
-
-    fun arbeidsavklaringspengerV2(arbeidsavklaringspengerV2: Arbeidsavklaringspenger) =
-        mapOf(
-            ArbeidsavklaringspengerV2.name to mapOf(
-                "utbetalingsperioder" to arbeidsavklaringspengerV2.perioder.map { periode ->
-                    mapOf(
-                        "fom" to periode.start,
-                        "tom" to periode.endInclusive
-                    )
-                }
-            ))
 
     fun selvstendigForsikringer(selvstendigForsikringer: List<SelvstendigForsikring>, yrkesaktivitetstype: String): Map<String, Any> {
         if (yrkesaktivitetstype != "SELVSTENDIG") return emptyMap()

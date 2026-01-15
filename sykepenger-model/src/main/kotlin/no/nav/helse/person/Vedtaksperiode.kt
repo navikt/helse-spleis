@@ -88,7 +88,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.Venteårsak.Companion.fordi
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -2896,7 +2895,6 @@ internal class Vedtaksperiode private constructor(
         omsorgspenger(aktivitetslogg, søkevinduFamilieytelser)
         opplæringspenger(aktivitetslogg, søkevinduFamilieytelser)
         institusjonsopphold(aktivitetslogg, periode)
-        arbeidsavklaringspenger(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
         arbeidsavklaringspengerV2(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
         dagpenger(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
         val (beregningsperiode, _) = perioderSomMåHensyntasVedBeregning()

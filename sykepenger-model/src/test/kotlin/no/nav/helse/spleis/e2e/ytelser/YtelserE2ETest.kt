@@ -70,7 +70,6 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(
                 1.vedtaksperiode,
-                arbeidsavklaringspenger = emptyList(),
                 arbeidsavklaringspengerV2 = listOf(Periode(1.januar, 31.januar))
             )
 
@@ -362,7 +361,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)), arbeidsavklaringspengerV2 = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
+            håndterYtelser(1.vedtaksperiode, arbeidsavklaringspengerV2 = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
 
             assertVarsler(listOf(Varselkode.RV_AY_3), 1.vedtaksperiode.filter())
             assertIngenFunksjonelleFeil()
@@ -377,7 +376,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.februar til 5.februar))
+            håndterYtelser(1.vedtaksperiode)
 
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
@@ -532,7 +531,6 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterSøknad(februar)
             håndterYtelser(
                 2.vedtaksperiode,
-                arbeidsavklaringspenger = listOf(februar),
                 dagpenger = listOf(februar),
             )
 
@@ -584,7 +582,6 @@ internal class YtelserE2ETest : AbstractDslTest() {
                 omsorgspenger = listOf(GradertPeriode(februar, 100)),
                 opplæringspenger = listOf(GradertPeriode(februar, 100)),
                 institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar)),
-                arbeidsavklaringspenger = listOf(februar),
                 dagpenger = listOf(februar)
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
