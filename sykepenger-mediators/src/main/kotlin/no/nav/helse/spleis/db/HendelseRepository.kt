@@ -216,7 +216,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
 
     internal fun hentInntektsmelding(personidentifikator: Personidentifikator, meldingId: MeldingsreferanseId): String? {
         @Language("PostgreSQL")
-        val sql = "SELECT data FROM melding WHERE fnr = :fnr AND melding_id = :meldingId AND melding_type='INNTEKTSMELDING'"
+        val sql = "SELECT data FROM melding WHERE fnr = :fnr AND melding_id = :meldingId AND (melding_type='INNTEKTSMELDING' OR melding_type = 'NAV_NO_SELVBESTEMT_INNTEKTSMELDING' OR melding_type = 'NAV_NO_KORRIGERT_INNTEKTSMELDING' OR melding_type = 'NAV_NO_INNTEKTSMELDING')"
         return dataSource.connection {
             prepareStatementWithNamedParameters(sql) {
                 withParameter("fnr", personidentifikator.toLong())

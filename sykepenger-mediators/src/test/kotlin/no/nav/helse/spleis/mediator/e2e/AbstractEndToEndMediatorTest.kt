@@ -400,6 +400,17 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(message)
     }
 
+    protected fun sendInntektsopplysningerFraLagretInntektsmelding(vedtaksperiodeId: UUID, inntektsmeldingMeldingsreferanseId: UUID, orgnummer: String = ORGNUMMER) {
+        return meldingsfabrikk.lagInntektsopplysningerFraLagretInntektsmelding(
+            vedtaksperiodeId = vedtaksperiodeId,
+            organisasjonsnummer = orgnummer,
+            inntektsmeldingMeldingsreferanseId = inntektsmeldingMeldingsreferanseId
+        ).let { (id, message) ->
+            testRapid.sendTestMessage(message)
+            id.toUUID() to message
+        }
+    }
+
     protected fun sendInntektsmelding(
         arbeidsgiverperiode: List<Periode>,
         førsteFraværsdag: LocalDate,
@@ -417,6 +428,29 @@ internal abstract class AbstractEndToEndMediatorTest {
             opphørsdatoForRefusjon,
             orgnummer,
             begrunnelseForReduksjonEllerIkkeUtbetalt,
+        ).let { (id, message) ->
+            testRapid.sendTestMessage(message)
+            id.toUUID() to message
+        }
+    }
+
+    protected fun sendNavNoInntektsmelding(
+        arbeidsgiverperiode: List<no.nav.helse.hendelser.Periode>,
+        vedtaksperiodeId: UUID,
+        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
+        beregnetInntekt: Double = INNTEKT,
+        opphørsdatoForRefusjon: LocalDate? = null,
+        orgnummer: String = ORGNUMMER,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
+    ): Pair<UUID, String> {
+        return meldingsfabrikk.lagNavNoInntektsmelding(
+            arbeidsgiverperiode = arbeidsgiverperiode.map { Periode(it.start, it.endInclusive) },
+            opphørAvNaturalytelser = opphørAvNaturalytelser,
+            beregnetInntekt = beregnetInntekt,
+            opphørsdatoForRefusjon = opphørsdatoForRefusjon,
+            orgnummer = orgnummer,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            vedtaksperiodeId = vedtaksperiodeId
         ).let { (id, message) ->
             testRapid.sendTestMessage(message)
             id.toUUID() to message

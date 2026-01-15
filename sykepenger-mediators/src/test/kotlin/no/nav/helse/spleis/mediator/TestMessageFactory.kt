@@ -508,6 +508,22 @@ internal class TestMessageFactory(
         )
     }
 
+    internal fun lagInntektsopplysningerFraLagretInntektsmelding(
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String,
+        fnr: String = fødselsnummer,
+        inntektsmeldingMeldingsreferanseId: UUID
+    ) = nyHendelse(
+        navn = "inntektsopplysninger_fra_lagret_inntektsmelding",
+        hendelse = mapOf(
+            "yrkesaktivitetstype" to "ARBEIDSTAKER",
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "fødselsnummer" to fnr,
+            "inntektsmeldingMeldingsreferanseId" to inntektsmeldingMeldingsreferanseId
+        )
+    )
+
     private fun lagInntektsmelding(
         arbeidsgiverperiode: List<Periode>,
         førsteFraværsdag: LocalDate?,
