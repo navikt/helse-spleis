@@ -179,7 +179,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             1.UKJ
         )
         val dto = Utbetalingstidslinje
-            .betale(sykepengegrunnlag, listOf(utbetalingstidslinje))
+            .betale(sykepengegrunnlag, listOf(utbetalingstidslinje), { 0.prosent })
             .single()
             .dto()
         assertEquals(10, dto.dager.size)

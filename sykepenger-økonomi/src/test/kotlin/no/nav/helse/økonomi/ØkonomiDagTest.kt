@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.testhelpers.ARB
@@ -14,6 +15,7 @@ import no.nav.helse.utbetalingstidslinje.maksimumUtbetalingsberegning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -128,7 +130,7 @@ internal class ØkonomiDagTest {
         }
     }
 
-    private fun List<Utbetalingstidslinje>.betal(sykepengegrunnlagBegrenset6G: Inntekt): List<Utbetalingstidslinje> {
+    private fun List<Utbetalingstidslinje>.betal(sykepengegrunnlagBegrenset6G: Inntekt, andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }): List<Utbetalingstidslinje> {
         val input = mapIndexed { index, it ->
             Arbeidsgiverberegning(
                 inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
@@ -142,6 +144,6 @@ internal class ØkonomiDagTest {
             )
         }
 
-        return input.maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G).map { it.vedtaksperioder.single().utbetalingstidslinje }
+        return input.maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G, andreYtelser).map { it.vedtaksperioder.single().utbetalingstidslinje }
     }
 }

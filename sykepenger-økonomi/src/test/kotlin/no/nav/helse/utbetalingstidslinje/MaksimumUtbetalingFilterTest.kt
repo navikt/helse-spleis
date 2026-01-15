@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.NAV
@@ -7,6 +8,8 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -52,7 +55,7 @@ internal class MaksimumUtbetalingFilterTest {
         assertEquals(6000, tidslinje.inspektør.totalUtbetaling())
     }
 
-    private fun Utbetalingstidslinje.betal(sykepengegrunnlag: Inntekt): Utbetalingstidslinje {
+    private fun Utbetalingstidslinje.betal(sykepengegrunnlag: Inntekt, andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }): Utbetalingstidslinje {
         val input = listOf(
             Arbeidsgiverberegning(
                 inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a1"),
@@ -66,6 +69,6 @@ internal class MaksimumUtbetalingFilterTest {
             )
         )
 
-        return input.maksimumUtbetalingsberegning(sykepengegrunnlag).single().vedtaksperioder.single().utbetalingstidslinje
+        return input.maksimumUtbetalingsberegning(sykepengegrunnlag, andreYtelser).single().vedtaksperioder.single().utbetalingstidslinje
     }
 }

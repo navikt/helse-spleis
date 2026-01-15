@@ -30,6 +30,8 @@ import no.nav.helse.utbetalingslinjer.Utbetalingstatus.UTBETALT
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -436,7 +438,7 @@ internal class UtbetalingTest {
         )
 
     private fun Utbetalingstidslinje.betale(sykepengegrunnlag: Inntekt = 1200.daglig) = beregnUtbetalinger(this, sykepengegrunnlag)
-    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje, sykepengegrunnlag: Inntekt = 1200.daglig) = Utbetalingstidslinje.betale(sykepengegrunnlag, listOf(tidslinje)).single()
+    private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje, sykepengegrunnlag: Inntekt = 1200.daglig, andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }) = Utbetalingstidslinje.betale(sykepengegrunnlag, listOf(tidslinje), andreYtelser).single()
 
     private fun opprettGodkjentUtbetaling(
         tidslinje: Utbetalingstidslinje,

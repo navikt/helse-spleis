@@ -22,6 +22,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Ventetidsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.betal
 import no.nav.helse.økonomi.Økonomi
 
@@ -58,9 +59,9 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             .takeUnless { it.isEmpty() }
             ?.reduce(Periode::plus)
 
-        fun betale(sykepengegrunnlagBegrenset6G: Inntekt, tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
-            return beregnDagForDag(tidslinjer) { _, økonomiList ->
-                økonomiList.betal(sykepengegrunnlagBegrenset6G)
+        fun betale(sykepengegrunnlagBegrenset6G: Inntekt, tidslinjer: List<Utbetalingstidslinje>, andreYtelser: (dato: LocalDate) -> Prosentdel): List<Utbetalingstidslinje> {
+            return beregnDagForDag(tidslinjer) { dato, økonomiList ->
+                økonomiList.betal(sykepengegrunnlagBegrenset6G, andreYtelser(dato))
             }
         }
 

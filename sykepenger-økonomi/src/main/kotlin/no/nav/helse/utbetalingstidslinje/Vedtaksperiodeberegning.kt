@@ -4,6 +4,8 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 data class Vedtaksperiodeberegning(
     val vedtaksperiodeId: UUID,
@@ -24,7 +26,8 @@ fun filtrerUtbetalingstidslinjer(
     erUnderMinsteinntektEtterFylte67: Boolean,
     historisktidslinje: Utbetalingstidslinje,
     perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
-    regler: MaksimumSykepengedagerregler
+    regler: MaksimumSykepengedagerregler,
+    andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }
 ): List<BeregnetPeriode> {
     val maksdatoberegning = Maksdatoberegning(
         sekstisyvårsdagen = sekstisyvårsdagen,
@@ -44,7 +47,7 @@ fun filtrerUtbetalingstidslinjer(
         .avvisMedlemskap(erMedlemAvFolketrygden)
         .avvisOpptjening(harOpptjening)
         .avvisMaksimumSykepengerdager(maksdatoberegning)
-        .maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G)
+        .maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G, andreYtelser)
 
     return beregnetTidslinjePerArbeidsgiver
         .flatMap {

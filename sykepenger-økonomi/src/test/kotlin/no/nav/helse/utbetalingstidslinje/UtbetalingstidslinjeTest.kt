@@ -14,7 +14,11 @@ import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.MathContext
+import java.time.LocalDate
 import no.nav.helse.testhelpers.NAP
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class UtbetalingstidslinjeTest {
@@ -250,3 +254,5 @@ internal class UtbetalingstidslinjeTest {
         }
     }
 }
+
+fun Utbetalingstidslinje.Companion.betale(sykepengegrunnlagBegrenset6G: Inntekt, tidslinjer: List<Utbetalingstidslinje>, andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }) = Utbetalingstidslinje.betale(sykepengegrunnlagBegrenset6G, tidslinjer, andreYtelser)

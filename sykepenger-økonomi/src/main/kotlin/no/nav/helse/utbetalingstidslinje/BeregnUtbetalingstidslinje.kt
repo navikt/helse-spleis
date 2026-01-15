@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Periode.Companion.utenPerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel
 
 internal fun List<Arbeidsgiverberegning>.avvisMaksimumSykepengerdager(maksdatoberegning: Maksdatoberegning): List<Arbeidsgiverberegning> {
     val vurderinger = maksdatoberegning.beregn(this)
@@ -28,9 +29,9 @@ internal fun List<Arbeidsgiverberegning>.avvisMaksimumSykepengerdager(maksdatobe
     return avvisteTidslinjer
 }
 
-internal fun List<Arbeidsgiverberegning>.maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G: Inntekt): List<Arbeidsgiverberegning> {
+internal fun List<Arbeidsgiverberegning>.maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G: Inntekt, andreYtelser: (dato: LocalDate) -> Prosentdel): List<Arbeidsgiverberegning> {
     val betalteTidslinjer = Utbetalingstidslinje
-        .betale(sykepengegrunnlagBegrenset6G, this.map { it.samletTidslinje })
+        .betale(sykepengegrunnlagBegrenset6G, this.map { it.samletTidslinje }, andreYtelser)
         .zip(this) { beregnetTidslinje, arbeidsgiver ->
             arbeidsgiver.copy(
                 vedtaksperioder = arbeidsgiver.vedtaksperioder.map { vedtaksperiode ->

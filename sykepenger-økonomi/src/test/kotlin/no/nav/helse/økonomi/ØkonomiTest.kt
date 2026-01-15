@@ -499,3 +499,6 @@ private fun assertForventetFeil(forklaring: String? = null, nå: () -> Unit, øn
     runCatching(nå).exceptionOrNull()?.håndterNåOppførselFeil(harØnsketOppførsel = runCatching(ønsket).isSuccess)
     assertThrows<Throwable>(ØnsketOppførsel) { ønsket() }.håndterØnsketOppførselFeil(forklaring)
 }
+
+fun List<Økonomi>.betal(sykepengegrunnlagBegrenset6G: Inntekt, andreYtelser: Prosentdel = 0.prosent) = Økonomi.betal(sykepengegrunnlagBegrenset6G, this, andreYtelser)
+
