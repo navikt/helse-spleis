@@ -164,6 +164,14 @@ private val json = """
             }
           ]
         },
+        "ArbeidsavklaringspengerV2": {
+          "utbetalingsperioder": [
+            {
+              "fom": "2019-03-11",
+              "tom": "2019-04-12"
+            }
+          ]
+        },
         "InntekterForBeregning": {
           "inntekter": [
             {
@@ -277,6 +285,9 @@ private val ukjentPeriode = """
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         },
+        "ArbeidsavklaringspengerV2": {
+          "utbetalingsperioder": []
+        },
         "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
@@ -372,6 +383,9 @@ private val ugyldigPeriode = """
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         },
+        "ArbeidsavklaringspengerV2": {
+          "utbetalingsperioder": []
+        },
         "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
@@ -447,6 +461,9 @@ private val utenPleiepenger = """
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         },
+        "ArbeidsavklaringspengerV2": {
+          "utbetalingsperioder": []
+        },        
         "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
@@ -522,6 +539,9 @@ private val utenOmsorgspenger = """
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         },
+        "ArbeidsavklaringspengerV2": {
+          "utbetalingsperioder": []
+        },        
         "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
@@ -597,6 +617,9 @@ private val utenOpplæringspenger = """
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         },
+        "ArbeidsavklaringspengerV2": {
+          "utbetalingsperioder": []
+        },        
         "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
@@ -672,6 +695,9 @@ private val utenInstitusjonsopphold = """
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
         },
+        "ArbeidsavklaringspengerV2": {
+          "utbetalingsperioder": []
+        },        
         "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
@@ -869,7 +895,10 @@ private val utenDagpenger = """
         "InntekterForBeregning": {"inntekter": []},
         "Arbeidsavklaringspenger": {
           "meldekortperioder": []
-        }
+        },
+        "ArbeidsavklaringspengerV2": {
+          "utbetalingsperioder": []
+        }        
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"

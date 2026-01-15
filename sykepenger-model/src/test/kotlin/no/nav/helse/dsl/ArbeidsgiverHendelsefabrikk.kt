@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.Temporal
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
@@ -366,10 +365,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             institusjonsopphold = Institusjonsopphold(
                 perioder = institusjonsoppholdsperioder
             ),
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(
-                if (Toggle.ArbeidsavklaringspengerV2.enabled) arbeidsavklaringspengerV2
-                else arbeidsavklaringspenger
-            ),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspengerV2),
             dagpenger = Dagpenger(dagpenger),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             selvstendigForsikring = selvstendigForsikring

@@ -359,9 +359,10 @@ internal abstract class AbstractDslTest {
         opplæringspenger: List<GradertPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
+        arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
     ) =
-        this { håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger) }
+        this { håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, arbeidsavklaringspengerV2, dagpenger) }
 
     protected fun String.håndterSimulering(vedtaksperiodeId: UUID) =
         this { håndterSimulering(vedtaksperiodeId) }
@@ -501,10 +502,11 @@ internal abstract class AbstractDslTest {
         opplæringspenger: List<GradertPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
+        arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(orgnummer).håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger)
+        bareÈnArbeidsgiver(orgnummer).håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, arbeidsavklaringspengerV2, dagpenger)
 
     internal fun håndterSimulering(vedtaksperiodeId: UUID, orgnummer: String = a1) =
         bareÈnArbeidsgiver(orgnummer).håndterSimulering(vedtaksperiodeId)

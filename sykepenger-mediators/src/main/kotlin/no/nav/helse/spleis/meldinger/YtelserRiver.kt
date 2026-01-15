@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.helse.Toggle
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
@@ -97,11 +96,9 @@ internal class YtelserRiver(
             interestedIn("årlig", JsonNode::asDouble)
         }
 
-        if (Toggle.ArbeidsavklaringspengerV2.enabled) {
-            message.requireArray("@løsning.${ArbeidsavklaringspengerV2.name}.utbetalingsperioder") {
-                require("fom", JsonNode::asLocalDate)
-                require("tom", JsonNode::asLocalDate)
-            }
+        message.requireArray("@løsning.${ArbeidsavklaringspengerV2.name}.utbetalingsperioder") {
+            require("fom", JsonNode::asLocalDate)
+            require("tom", JsonNode::asLocalDate)
         }
 
         message.interestedIn("@løsning.${SelvstendigForsikring.name}") { forsikringer ->

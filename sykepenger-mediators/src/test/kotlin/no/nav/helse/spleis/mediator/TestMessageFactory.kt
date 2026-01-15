@@ -10,7 +10,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
@@ -1042,17 +1041,15 @@ internal class TestMessageFactory(
     }
 
     fun arbeidsavklaringspengerV2(arbeidsavklaringspengerV2: Arbeidsavklaringspenger) =
-        if (Toggle.ArbeidsavklaringspengerV2.enabled) {
-            mapOf(
-                ArbeidsavklaringspengerV2.name to mapOf(
-                    "utbetalingsperioder" to arbeidsavklaringspengerV2.perioder.map { periode ->
-                        mapOf(
-                            "fom" to periode.start,
-                            "tom" to periode.endInclusive
-                        )
-                    }
-                ))
-        } else emptyMap()
+        mapOf(
+            ArbeidsavklaringspengerV2.name to mapOf(
+                "utbetalingsperioder" to arbeidsavklaringspengerV2.perioder.map { periode ->
+                    mapOf(
+                        "fom" to periode.start,
+                        "tom" to periode.endInclusive
+                    )
+                }
+            ))
 
     fun selvstendigForsikringer(selvstendigForsikringer: List<SelvstendigForsikring>, yrkesaktivitetstype: String): Map<String, Any> {
         if (yrkesaktivitetstype != "SELVSTENDIG") return emptyMap()

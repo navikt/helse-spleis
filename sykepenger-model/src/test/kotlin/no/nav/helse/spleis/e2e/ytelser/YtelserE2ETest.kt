@@ -362,7 +362,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(3.januar, 19.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
+            håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)), arbeidsavklaringspengerV2 = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
 
             assertVarsler(listOf(Varselkode.RV_AY_3), 1.vedtaksperiode.filter())
             assertIngenFunksjonelleFeil()

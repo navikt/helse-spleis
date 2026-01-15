@@ -18,8 +18,11 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -29,9 +32,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
@@ -350,7 +350,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         nyttVedtak(1.januar til 20.januar, 100.prosent)
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
-        håndterYtelser(2.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
+        håndterYtelser(2.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)), arbeidsavklaringspengerV2 = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
         assertVarsel(Varselkode.RV_AY_3, 2.vedtaksperiode.filter())
         assertTilstander(
             2.vedtaksperiode,
