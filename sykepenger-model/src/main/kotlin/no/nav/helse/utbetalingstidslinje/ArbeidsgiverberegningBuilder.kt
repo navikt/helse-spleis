@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.util.*
 import no.nav.helse.erHelg
-import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.beløp.Beløpsdag
@@ -37,19 +36,10 @@ internal class ArbeidsgiverberegningBuilder(private val beregningsperiode: Perio
         inntekter[yrkesaktivitet] = inntekt
     }
 
-    private fun InntekterForBeregning.Inntektsperioder.beløpstidslinje() = inntektsperioder.fold(Beløpstidslinje()) { resultat, inntektsperiode ->
-        val aktuellPeriode = inntektsperiode.periode.subset(beregningsperiode)
-
-        val beløpstidslinje = when (inntektsperiode) {
-            is InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag -> error("TODO: Hvis det viser seg at siste tolkning av andre ytelser fungerer så fjern meg, og slutt at build() retunrerer to ting")
-            is InntekterForBeregning.Inntektsperiode.Beløp -> Beløpstidslinje.fra(aktuellPeriode, inntektsperiode.beløp, kilde)
-        }
-        resultat + beløpstidslinje
-    }
-
-    fun inntektsjusteringer(inntektskilde: Inntektskilde, inntektsperioder: InntekterForBeregning.Inntektsperioder) = apply {
+    fun inntektsjusteringer(inntektskilde: Inntektskilde, inntektsjusteringer: Beløpstidslinje) = apply {
         inntektskilder.add(inntektskilde)
-        inntektsjusteringer[inntektskilde] = (inntektsjusteringer[inntektskilde] ?: Beløpstidslinje()) + inntektsperioder.beløpstidslinje()
+        check(this.inntektsjusteringer[inntektskilde] == null) { "Har allerede lagt til inntektsjusteringer for $inntektskilde" }
+        this.inntektsjusteringer[inntektskilde] = inntektsjusteringer
     }
 
     fun vedtaksperiode(yrkesaktivitet: Yrkesaktivitet, vedtaksperiodeId: UUID, sykdomstidslinje: Sykdomstidslinje, builder: UtbetalingstidslinjeBuilder) = apply {
@@ -103,7 +93,6 @@ internal class ArbeidsgiverberegningBuilder(private val beregningsperiode: Perio
         }
         return resultat
     }
-    fun inntektsendringer()= inntektsjusteringer.toMap()
 
     private fun vedtaksperioder(yrkesaktivitet: Yrkesaktivitet, inntekt: Inntekt?, inntektsjusteringer: Beløpstidslinje): List<Vedtaksperiodeberegning> {
         return (vedtaksperioder[yrkesaktivitet]?.toList() ?: emptyList()).map {

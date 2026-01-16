@@ -168,7 +168,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, deaktivert = true, forklaring = "skal ikke inngå i sykepengegrunnlaget"))
             håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(
-                InntekterForBeregning.Inntektsperiode.Beløp(a2, 10.januar til 31.januar, beløp = 5000.månedlig)
+                InntekterForBeregning.Inntektsperiode(a2, 10.januar til 31.januar, beløp = 5000.månedlig)
             ))
             håndterSimulering(1.vedtaksperiode)
 

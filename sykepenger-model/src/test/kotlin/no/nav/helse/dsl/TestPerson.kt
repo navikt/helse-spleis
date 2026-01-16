@@ -10,6 +10,7 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.serialisering.PersonUtDto
+import no.nav.helse.hendelser.AndreYtelser
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
@@ -616,10 +617,11 @@ internal class TestPerson(
             dagpenger: List<Periode> = emptyList(),
             inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
             selvstendigForsikring: SelvstendigForsikring? = null,
+            andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList(),
             orgnummer: String = "aa"
         ) {
             behovsamler.bekreftBehov(vedtaksperiodeId, Dagpenger, ArbeidsavklaringspengerV2, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger, InntekterForBeregning, SelvstendigForsikring)
-            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, selvstendigForsikring)
+            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, selvstendigForsikring, andreYtelser)
                 .håndter(Person::håndterYtelser)
         }
 
@@ -634,10 +636,11 @@ internal class TestPerson(
             arbeidsavklaringspengerV2: List<Periode> = emptyList(),
             dagpenger: List<Periode> = emptyList(),
             inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
+            andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList(),
             orgnummer: String = "aa"
         ) {
             behovsamler.bekreftBehov(vedtaksperiodeId, Dagpenger, ArbeidsavklaringspengerV2, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger, InntekterForBeregning)
-            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning)
+            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, null, andreYtelser)
                 .håndter(Person::håndterYtelser)
         }
 

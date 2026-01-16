@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -9,6 +8,7 @@ import no.nav.helse.Tidslinje
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.AnnenInntektskilde
@@ -28,7 +28,8 @@ class Ytelser(
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger,
     private val inntekterForBeregning: InntekterForBeregning,
-    private val selvstendigForsikring: SelvstendigForsikring?
+    private val selvstendigForsikring: SelvstendigForsikring?,
+    private val andreYtelser: AndreYtelser = AndreYtelser(emptyList())
 ) : Hendelse {
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
@@ -70,10 +71,9 @@ class Ytelser(
 
     internal fun selvstendigForsikring(): SelvstendigForsikring? = selvstendigForsikring
 
-    internal fun inntektsendringer(): Map<Arbeidsgiverberegning.Inntektskilde, InntekterForBeregning.Inntektsperioder> {
+    internal fun inntektsendringer(): Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje> {
         val kilde = Kilde(metadata.meldingsreferanseId, SYSTEM, LocalDateTime.now())
         return inntekterForBeregning.inntektsperioder
-            .filterIsInstance<InntekterForBeregning.Inntektsperiode.Beløp>()
             .groupBy { it.inntektskilde }
             .mapKeys { (inntektskilde, _) -> inntektskilde.uppercase().let {
                 when {
@@ -83,14 +83,16 @@ class Ytelser(
                     else -> AnnenInntektskilde(it)
                 }
             }}
-            .mapValues { (_, inntektsperioder) -> InntekterForBeregning.Inntektsperioder(kilde, inntektsperioder) }
+            .mapValues { (_, inntektsperioder) ->
+                inntektsperioder.fold(Beløpstidslinje()) { sammenslått, ny ->
+                    sammenslått + Beløpstidslinje.fra(ny.periode, ny.beløp, kilde)
+                }
+            }
     }
 
-    // TODO: Veldig tøysete at vi henter det ut fra inntekterForBeregning nå. Burde være eget behov/løsning for andre ytelser
-    internal fun andreYtelserTidslinje() = inntekterForBeregning.inntektsperioder
-        .filterIsInstance<InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag>()
-        .map { (_, periode, andel) -> AndreYtelserTidslinje(periode to andel) }
-        .fold(AndreYtelserTidslinje()) { sammenslått, ny -> sammenslått + ny }
+    internal fun andreYtelser() = andreYtelser.perioder.fold(AndreYtelserTidslinje()) { sammenslått , periode ->
+        sammenslått + AndreYtelserTidslinje(periode.periode to periode.prosent)
+    }
 }
 
 class GradertPeriode(internal val periode: Periode, internal val grad: Int)

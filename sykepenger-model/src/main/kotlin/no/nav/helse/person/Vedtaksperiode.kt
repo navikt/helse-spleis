@@ -47,7 +47,6 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.HendelseMetadata
 import no.nav.helse.hendelser.Hendelseskilde
-import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
@@ -1577,7 +1576,7 @@ internal class Vedtaksperiode private constructor(
         val (beregningsperiode, perioderSomMåHensyntasVedBeregning) = perioderSomMåHensyntasVedBeregning()
         val inntektsperioder = ytelser.inntektsendringer()
         val selvstendigForsikring = ytelser.selvstendigForsikring()
-        val (uberegnetTidslinjePerArbeidsgiver, inntektsperioderMedBeløpstidslinjer)  = lagArbeidsgiverberegning(
+        val uberegnetTidslinjePerArbeidsgiver = lagArbeidsgiverberegning(
             beregningsperiode = beregningsperiode,
             vedtaksperioder = perioderSomMåHensyntasVedBeregning,
             vilkårsgrunnlag = grunnlagsdata,
@@ -1600,7 +1599,7 @@ internal class Vedtaksperiode private constructor(
             .fold(person.infotrygdhistorikk.utbetalingstidslinje(), Utbetalingstidslinje::plus)
             .fremTilOgMed(periode.start.forrigeDag)
 
-        val andreYtelserTidslinje = ytelser.andreYtelserTidslinje()
+        val andreYtelserTidslinje = ytelser.andreYtelser()
         val beregnetTidslinjePerVedtaksperiode = filtrerUtbetalingstidslinjer(
             uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
             harOpptjening = harOpptjening,
@@ -1618,7 +1617,7 @@ internal class Vedtaksperiode private constructor(
         )
         // steg 4.1: lag beregnede behandlinger
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
-        lagBeregnetBehandlinger(perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioderMedBeløpstidslinjer, selvstendigForsikring)
+        lagBeregnetBehandlinger(perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder, selvstendigForsikring)
 
         /* steg 4.2 lag utbetalinger */
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
@@ -3752,9 +3751,9 @@ internal fun lagArbeidsgiverberegning(
     beregningsperiode: Periode,
     vedtaksperioder: List<Vedtaksperiode>,
     vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
-    inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, InntekterForBeregning.Inntektsperioder> = emptyMap(),
+    inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje> = emptyMap(),
     selvstendigForsikring: SelvstendigForsikring? = null,
-): Pair<List<Arbeidsgiverberegning>, Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje>> {
+): List<Arbeidsgiverberegning> {
     return with(ArbeidsgiverberegningBuilder(beregningsperiode)) {
         vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.forEach {
             fastsattÅrsinntekt(Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
@@ -3768,11 +3767,11 @@ internal fun lagArbeidsgiverberegning(
         vilkårsgrunnlag?.inntektsgrunnlag?.sykepengegrunnlag?.also {
             sykepengegrunnlag(it)
         }
-        inntektsperioder.forEach { (inntektskilde, inntektsperioder) ->
-            inntektsjusteringer(inntektskilde, inntektsperioder)
+        inntektsperioder.forEach { (inntektskilde, inntektsjusteringer) ->
+            inntektsjusteringer(inntektskilde, inntektsjusteringer)
         }
         vedtaksperioder.forEach { it.medVedtaksperiode(this, selvstendigForsikring) }
-        build() to inntektsendringer()
+        build()
     }
 }
 

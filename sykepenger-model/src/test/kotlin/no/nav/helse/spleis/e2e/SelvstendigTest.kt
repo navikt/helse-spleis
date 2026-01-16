@@ -988,7 +988,7 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterInntektsendringer(1.januar)
 
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode.Beløp(a2, 20.januar til 31.januar, 1000.daglig)))
+            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 20.januar til 31.januar, 1000.daglig)))
             assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1245,7 +1245,7 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterYtelserSelvstendig(
                 1.vedtaksperiode, inntekterForBeregning = listOf(
-                InntekterForBeregning.Inntektsperiode.Beløp(
+                InntekterForBeregning.Inntektsperiode(
                     inntektskilde = a1,
                     periode = 1.januar til 31.januar,
                     beløp = 1000.daglig
@@ -1271,7 +1271,7 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterYtelserSelvstendig(
                 1.vedtaksperiode, inntekterForBeregning = listOf(
-                InntekterForBeregning.Inntektsperiode.Beløp(
+                InntekterForBeregning.Inntektsperiode(
                     inntektskilde = "SELVSTENDIG",
                     periode = 1.januar til 31.januar,
                     beløp = 1000.daglig

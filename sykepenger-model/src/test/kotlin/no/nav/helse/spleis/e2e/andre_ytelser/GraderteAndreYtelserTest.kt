@@ -4,6 +4,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
+import no.nav.helse.hendelser.AndreYtelser.PeriodeMedAnnenYtelse
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -30,7 +31,7 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
             håndterInntektsendringer(20.januar)
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("PLEIEPENGERSYKTBARN", 20.januar til 30.januar, 30.prosent)))
+            håndterYtelser(1.vedtaksperiode, andreYtelser = listOf(PeriodeMedAnnenYtelse("PLEIEPENGERSYKTBARN", 20.januar til 30.januar, 30.prosent)))
 
             // Jeg er bare et regnestykke for å vise hvorfor det blir 1400,-
             assertEquals(1400.0, (2000 - (520_000 * 0.3) /260))
@@ -52,7 +53,7 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
             håndterInntektsendringer(20.januar)
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("PLEIEPENGERSYKTBARN", 20.januar til 30.januar, 30.prosent)))
+            håndterYtelser(1.vedtaksperiode, andreYtelser = listOf(PeriodeMedAnnenYtelse("PLEIEPENGERSYKTBARN", 20.januar til 30.januar, 30.prosent)))
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 19.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1400, 2000, subset = 20.januar til 30.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 31.januar til 31.januar)
@@ -64,7 +65,7 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
                 assertSykepengegrunnlag(533_000.årlig)
             }
 
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("PLEIEPENGERSYKTBARN", 20.januar til 30.januar, 30.prosent)))
+            håndterYtelser(1.vedtaksperiode, andreYtelser = listOf(PeriodeMedAnnenYtelse("PLEIEPENGERSYKTBARN", 20.januar til 30.januar, 30.prosent)))
 
             // Jeg er bare et regnestykke for å vise hvorfor det blir 1435,-
             assertEquals(1435.0, (2050 - (533_000 * 0.3) /260))
@@ -86,10 +87,10 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
             håndterInntektsendringer(20.januar)
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(
-                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("FORELDREPENGER", 1.januar til 29.januar, 50.prosent),
-                InntekterForBeregning.Inntektsperiode.Beløp(a2, 1.januar til 30.januar, 250.daglig)
-            ))
+            håndterYtelser(1.vedtaksperiode,
+                inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar til 30.januar, 250.daglig)),
+                andreYtelser = listOf(PeriodeMedAnnenYtelse("FORELDREPENGER", 1.januar til 29.januar, 50.prosent),)
+            )
 
             // Jeg er bare et regnestykke for å vise hvorfor det blir 750,-
             assertEquals(750.0, (2000 - (520_000 * 0.5) /260) - 250)
@@ -114,8 +115,8 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
             håndterInntektsendringer(20.januar)
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(
-                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("FORELDREPENGER", januar, 81.prosent),
+            håndterYtelser(1.vedtaksperiode, andreYtelser = listOf(
+                PeriodeMedAnnenYtelse("FORELDREPENGER", januar, 81.prosent),
             ))
 
             // 2000 * 0.19 = 380
@@ -138,8 +139,8 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 1502, 7692, subset = 17.juni(2025) til 30.juni(2025))
 
             håndterInntektsendringer(1.juni(2025))
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(
-                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("FORELDREPENGER", 1.juni(2025) til 30.juni(2025), 50.prosent),
+            håndterYtelser(1.vedtaksperiode, andreYtelser = listOf(
+                PeriodeMedAnnenYtelse("FORELDREPENGER", 1.juni(2025) til 30.juni(2025), 50.prosent),
             ))
 
             // Her er det "plass" til 50% foreldrepenger uten at det går utover sykepengene
@@ -153,11 +154,11 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             nyttVedtak(januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
             håndterInntektsendringer(1.januar)
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(
-                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("FORELDREPENGER", 1.januar til 28.januar, 20.prosent),
-                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("PLEIEPENGER_SYKT_BARN", 17.januar til 22.januar, 20.prosent),
-                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("OMSORGSPENGER", 22.januar.somPeriode(), 15.prosent),
-                InntekterForBeregning.Inntektsperiode.AndelAvSykepengegrunnlag("PLEIEPENGER_NÆRSTÅENDE", 22.januar til 30.januar, 20.prosent),
+            håndterYtelser(1.vedtaksperiode, andreYtelser = listOf(
+                PeriodeMedAnnenYtelse("FORELDREPENGER", 1.januar til 28.januar, 20.prosent),
+                PeriodeMedAnnenYtelse("PLEIEPENGER_SYKT_BARN", 17.januar til 22.januar, 20.prosent),
+                PeriodeMedAnnenYtelse("OMSORGSPENGER", 22.januar.somPeriode(), 15.prosent),
+                PeriodeMedAnnenYtelse("PLEIEPENGER_NÆRSTÅENDE", 22.januar til 30.januar, 20.prosent),
             ))
             assertUtbetalingsbeløp(1.vedtaksperiode, 858, 1431, subset = 17.januar til 21.januar) // 1431 * 0,60 =  858
             assertUtbetalingsbeløp(1.vedtaksperiode, 358, 1431, subset = 22.januar.somPeriode())  // 1431 * 0,25 =  358

@@ -70,7 +70,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     })
 
     private val inntekterForBeregning = InntekterForBeregning(packet["@løsning.${Behovtype.InntekterForBeregning.name}.inntekter"].map {
-        InntekterForBeregning.Inntektsperiode.Beløp(
+        InntekterForBeregning.Inntektsperiode(
             inntektskilde = it.path("inntektskilde").asText(),
             periode = it.path("fom").asLocalDate() til it.path("tom").asLocalDate(),
             beløp = when {

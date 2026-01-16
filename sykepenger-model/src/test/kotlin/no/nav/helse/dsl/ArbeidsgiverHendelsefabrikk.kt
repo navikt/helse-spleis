@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.temporal.Temporal
 import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
+import no.nav.helse.hendelser.AndreYtelser
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
@@ -339,7 +340,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
         inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
-        selvstendigForsikring: SelvstendigForsikring? = null
+        selvstendigForsikring: SelvstendigForsikring? = null,
+        andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList()
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -367,7 +369,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspengerV2),
             dagpenger = Dagpenger(dagpenger),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
-            selvstendigForsikring = selvstendigForsikring
+            selvstendigForsikring = selvstendigForsikring,
+            andreYtelser = AndreYtelser(andreYtelser)
         )
     }
 
