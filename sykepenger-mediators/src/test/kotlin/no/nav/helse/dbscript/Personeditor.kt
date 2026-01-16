@@ -105,7 +105,7 @@ internal object Personeditor: DbScript() {
             }) { "forventet å oppdatere nøyaktig én rad ved oppdatering av person" }
 
             println(" - Endringene dine er live ✅")
-            gaal("Oppdatert person i Spleis på grunn av ${beskrivelse.verdi}. Endringen var\n\n ${diff}‘")
+            gaal("Oppdatert person i Spleis på grunn av ${beskrivelse.verdi}. Endringen var\n\n ${diff}")
         }
     }
 

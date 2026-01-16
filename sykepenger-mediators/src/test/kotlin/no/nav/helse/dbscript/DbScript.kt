@@ -31,12 +31,13 @@ internal abstract class DbScript {
     }
 
     protected fun gaal(begrunnelse: String) {
-        println("""
-            Nå kan du gå inn på https://audit-approval.iap.nav.cloud.nais.io/?team=tbd&timeRange=24h&database=spleis&status=new
-            
-            Legg inn følgende begrunnelse: 
-            
-            $begrunnelse
-        """)
+"""
+ - Nå kan du gå inn på https://audit-approval.iap.nav.cloud.nais.io/?team=tbd&timeRange=24h&database=spleis&status=new
+
+Legg inn følgende begrunnelse:
+----------------------------------------
+$begrunnelse
+----------------------------------------
+""".let { println(it) }
     }
 }
