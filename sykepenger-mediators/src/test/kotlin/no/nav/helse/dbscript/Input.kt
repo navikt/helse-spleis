@@ -6,10 +6,10 @@ import no.nav.helse.dbscript.Input.Epost.Companion.gyldigEpost
 import no.nav.helse.dbscript.Input.Fødselsnummer.Companion.gyldigFødeselsnummer
 
 internal object Input {
-    fun ventPåInput(default: String? = null, valider: (input: String) -> Boolean): String {
+    fun ventPåInput(default: String? = null, lowercaseInput: Boolean = false, valider: (input: String) -> Boolean): String {
         var svar: String?
         do {
-            svar = readlnOrNull()?.lowercase()?.let { input ->
+            svar = readlnOrNull()?.let { if (lowercaseInput) it.lowercase() else it }?.let { input ->
                 if (input == "exit") error("💀 Avslutter prosessen")
                 if (default != null && input.isEmpty()) return@let default
                 if (!valider(input)) {
@@ -28,12 +28,12 @@ internal object Input {
             false -> "n" to "[yN]"
         }
         println("## $hva? $valg")
-        if (ventPåInput(defaultSvar) { it in setOf("y", "n") } == "y") return
+        if (ventPåInput(defaultSvar, lowercaseInput = true) { it in setOf("y", "n") } == "y") return
         error("❌ Avslutter prosessen siden du svarte nei")
     }
 
     fun ventPåFødselsnummer() = Fødselsnummer(ventPåInput { it.gyldigFødeselsnummer() })
-    fun ventPåEpost(default: String?) = Epost(ventPåInput(default) { it.gyldigEpost() })
+    fun ventPåEpost(default: String?) = Epost(ventPåInput(default, lowercaseInput = true) { it.gyldigEpost() })
     fun ventPåBeskrivelse() = Beskrivelse(ventPåInput { it.gyldigBeskrivelse() })
 
     data class Fødselsnummer (val verdi: String) {
