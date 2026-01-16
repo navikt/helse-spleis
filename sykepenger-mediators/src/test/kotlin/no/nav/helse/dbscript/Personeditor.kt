@@ -104,9 +104,8 @@ internal object Personeditor: DbScript() {
                 stmt.executeUpdate()
             }) { "forventet å oppdatere nøyaktig én rad ved oppdatering av person" }
 
-            audit(fødselsnummer, connectionInfo.epost, diff, beskrivelse)
-
             println(" - Endringene dine er live ✅")
+            gaal("Oppdatert person i Spleis på grunn av ${beskrivelse.verdi}. Endringen var\n\n ${diff}‘")
         }
     }
 

@@ -21,7 +21,6 @@ internal object HoppOverMelding: DbScript() {
         val beskrivelse = Input.ventPåBeskrivelse()
         println()
 
-        val diff = "Meldingen med meldingId '$meldingId' har fått 'behandlet_tidspunkt' satt til now() slik at Spleis hopper over meldingen og kan prosessere andre meldinger som står i kø."
 
         databaseTransaksjon(connectionInfo) {
             check(1 == prepareStatement("UPDATE melding SET behandlet_tidspunkt=now() WHERE fnr=? AND melding_id=? AND behandlet_tidspunkt IS NULL").use { stmt ->
@@ -29,9 +28,8 @@ internal object HoppOverMelding: DbScript() {
                 stmt.setString(2, meldingId)
                 stmt.executeUpdate()
             }) { "forventet å oppdatere nøyaktig én rad ved å hoppe over en melding" }
-
-            audit(fødselsnummer, connectionInfo.epost, diff, beskrivelse)
         }
         println(" - Endringene dine er live ✅")
+        gaal("Meldingen med meldingId '$meldingId' har fått 'behandlet_tidspunkt' satt til now() slik at Spleis hopper over meldingen og kan prosessere andre meldinger som står i kø. ${beskrivelse.verdi}")
     }
 }

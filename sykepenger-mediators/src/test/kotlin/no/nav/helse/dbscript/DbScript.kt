@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.sql.Connection
-import kotlin.use
 
 internal abstract class DbScript {
     abstract val beskrivelse: String
@@ -31,14 +30,13 @@ internal abstract class DbScript {
         }
     }
 
-    protected fun Connection.audit(fødselsnummer: Input.Fødselsnummer, epost: Input.Epost, diff: String, beskrivelse: Input.Beskrivelse) {
-        check(!autoCommit) { "Hei, hva søren driver du med, dette må skje i en transaction!"}
-        check(1 == prepareStatement("INSERT INTO auditlog (personidentifikator, epost, diff, beskrivelse) VALUES (?,?,?,?)").use { stmt ->
-            stmt.setString(1, fødselsnummer.verdi)
-            stmt.setString(2, epost.verdi)
-            stmt.setString(3, diff)
-            stmt.setString(4, beskrivelse.verdi)
-            stmt.executeUpdate()
-        }) { "forventet å oppdatere nøyaktig én rad ved auditlogging" }
+    protected fun gaal(begrunnelse: String) {
+        println("""
+            Nå kan du gå inn på https://audit-approval.iap.nav.cloud.nais.io/?team=tbd&timeRange=24h&database=spleis&status=new
+            
+            Legg inn følgende begrunnelse: 
+            
+            $begrunnelse
+        """)
     }
 }
