@@ -36,6 +36,8 @@ abstract class Tidslinje<T, SELF: Tidslinje<T, SELF>> private constructor(
         return true
     }
 
+    override fun toString() = gruppér().entries.joinToString { (periode, verdi) -> "$periode: $verdi" }
+
     protected open fun pluss(eksisterendeVerdi: T, nyVerdi: T): T = nyVerdi
     protected open fun erLike(a: T, b: T): Boolean = a == b
     protected abstract fun opprett(vararg perioder: Pair<Periode, T>): SELF
