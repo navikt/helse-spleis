@@ -44,6 +44,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
            {
               "@event_name": "vedtaksperiode_ny_utbetaling", 
               "fødselsnummer": "12029240045",
+              "yrkesaktivitetstype": "ARBEIDSTAKER",
               "organisasjonsnummer": "987654321",
               "vedtaksperiodeId": "<uuid>",
               "utbetalingId": "<uuid>"

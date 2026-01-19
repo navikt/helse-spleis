@@ -114,8 +114,8 @@ internal class PersonMediator(
             "inntektsmelding_før_søknad",
             mapOf(
                 "inntektsmeldingId" to event.inntektsmeldingId,
-                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype
+                "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
+                "yrkesaktivitetstype" to "ARBEIDSTAKER"
             )
         )
     }
@@ -125,7 +125,8 @@ internal class PersonMediator(
             "inntektsmelding_ikke_håndtert",
             mapOf(
                 "inntektsmeldingId" to event.meldingsreferanseId,
-                "organisasjonsnummer" to event.organisasjonsnummer,
+                "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
+                "yrkesaktivitetstype" to "ARBEIDSTAKER",
                 "speilrelatert" to event.speilrelatert
             )
         )
@@ -135,20 +136,18 @@ internal class PersonMediator(
         return JsonMessage.newMessage(
             "inntektsmelding_håndtert", mapOf(
             "inntektsmeldingId" to event.meldingsreferanseId,
-            "organisasjonsnummer" to event.organisasjonsnummer,
+            "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
+            "yrkesaktivitetstype" to "ARBEIDSTAKER",
             "vedtaksperiodeId" to event.vedtaksperiodeId
         )
         )
     }
 
     private fun mapSøknadHåndtert(event: EventSubscription.SøknadHåndtertEvent): JsonMessage {
-        return JsonMessage.newMessage(
-            "søknad_håndtert", mapOf(
-            "søknadId" to event.meldingsreferanseId,
-            "organisasjonsnummer" to event.organisasjonsnummer,
-            "vedtaksperiodeId" to event.vedtaksperiodeId
-        )
-        )
+        return JsonMessage.newMessage("søknad_håndtert", byggMedYrkesaktivitet(event.yrkesaktivitetssporing) {
+            put("søknadId", event.meldingsreferanseId)
+            put("vedtaksperiodeId", event.vedtaksperiodeId)
+        })
     }
 
     private fun mapVedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent): JsonMessage {
@@ -210,13 +209,10 @@ internal class PersonMediator(
     }
 
     private fun mapVedtaksperiodeIkkePåminnet(event: EventSubscription.VedtaksperiodeIkkePåminnetEvent): JsonMessage {
-        return JsonMessage.newMessage(
-            "vedtaksperiode_ikke_påminnet", mapOf(
-            "organisasjonsnummer" to event.organisasjonsnummer,
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "tilstand" to event.nåværendeTilstand
-        )
-        )
+        return JsonMessage.newMessage("vedtaksperiode_ikke_påminnet", byggMedYrkesaktivitet(event.yrkesaktivitetssporing) {
+            put("vedtaksperiodeId", event.vedtaksperiodeId)
+            put("tilstand", event.nåværendeTilstand)
+        })
     }
 
     private fun mapUtbetalingAnnullert(event: EventSubscription.UtbetalingAnnullertEvent): JsonMessage {
@@ -238,22 +234,16 @@ internal class PersonMediator(
         )
     }
 
+
     private fun mapPlanlagtAnnullering(event: EventSubscription.PlanlagtAnnulleringEvent): JsonMessage {
-        return JsonMessage.newMessage(
-            "planlagt_annullering",
-            buildMap {
-                put("yrkesaktivitetstype", event.yrkesaktivitetssporing.somYrkesaktivitetstype)
-                compute("organisasjonsnummer") { _, _ ->
-                    (event.yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer
-                }
-                put("vedtaksperioder", event.vedtaksperioder)
-                put("fom", event.fom)
-                put("tom", event.tom)
-                put("ident", event.saksbehandlerIdent)
-                put("årsaker", event.årsaker)
-                put("begrunnelse", event.begrunnelse)
-            }
-        )
+        return JsonMessage.newMessage("planlagt_annullering", byggMedYrkesaktivitet(event.yrkesaktivitetssporing) {
+            put("vedtaksperioder", event.vedtaksperioder)
+            put("fom", event.fom)
+            put("tom", event.tom)
+            put("ident", event.saksbehandlerIdent)
+            put("årsaker", event.årsaker)
+            put("begrunnelse", event.begrunnelse)
+        })
     }
 
     private fun mapUtbetalingEndret(event: EventSubscription.UtbetalingEndretEvent): JsonMessage {
@@ -291,13 +281,10 @@ internal class PersonMediator(
         )
 
     private fun mapVedtaksperiodeNyUtbetaling(event: EventSubscription.VedtaksperiodeNyUtbetalingEvent): JsonMessage {
-        return JsonMessage.newMessage(
-            "vedtaksperiode_ny_utbetaling", mapOf(
-            "organisasjonsnummer" to event.organisasjonsnummer,
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "utbetalingId" to event.utbetalingId
-        )
-        )
+        return JsonMessage.newMessage("vedtaksperiode_ny_utbetaling", byggMedYrkesaktivitet(event.yrkesaktivitetssporing) {
+            put("vedtaksperiodeId", event.vedtaksperiodeId)
+            put("utbetalingId", event.utbetalingId)
+        })
     }
 
     private fun mapOverstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt): JsonMessage {
@@ -452,8 +439,8 @@ internal class PersonMediator(
         JsonMessage.newMessage(
             "feriepenger_utbetalt",
             mapOf(
-                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
+                "yrkesaktivitetstype" to "ARBEIDSTAKER",
                 "fom" to event.fom,
                 "tom" to event.tom,
                 "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
@@ -713,8 +700,8 @@ internal class PersonMediator(
         return JsonMessage.newMessage(
             "skatteinntekter_lagt_til_grunn",
             mapOf(
-                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
+                "yrkesaktivitetstype" to "ARBEIDSTAKER",
                 "vedtaksperiodeId" to event.vedtaksperiodeId,
                 "behandlingId" to event.behandlingId,
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
@@ -738,8 +725,8 @@ internal class PersonMediator(
 
     private fun EventSubscription.TrengerArbeidsgiveropplysninger.tilJsonMap(): Map<String, Any> {
         return mapOf(
-            "organisasjonsnummer" to this.yrkesaktivitetssporing.somOrganisasjonsnummer,
-            "yrkesaktivitetstype" to this.yrkesaktivitetssporing.somYrkesaktivitetstype,
+            "organisasjonsnummer" to this.arbeidstaker.organisasjonsnummer,
+            "yrkesaktivitetstype" to "ARBEIDSTAKER",
             "vedtaksperiodeId" to this.vedtaksperiodeId,
             "skjæringstidspunkt" to this.skjæringstidspunkt,
             "sykmeldingsperioder" to this.sykmeldingsperioder.map {
@@ -787,8 +774,8 @@ internal class PersonMediator(
         return JsonMessage.newMessage(
             "trenger_ikke_opplysninger_fra_arbeidsgiver",
             mapOf<String, Any>(
-                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
+                "yrkesaktivitetstype" to "ARBEIDSTAKER",
                 "vedtaksperiodeId" to event.vedtaksperiodeId
             )
         )
@@ -805,6 +792,16 @@ internal class PersonMediator(
         if (event.`6G` != null) utkastTilVedtak["sykepengegrunnlagsfakta"] = mapOf("6G" to event.`6G`)
         return JsonMessage.newMessage("utkast_til_vedtak", utkastTilVedtak.toMap())
     }
+
+    /** Legger alltid til yrkesaktivitetstype, men legger kun til organisasjonsnummer for Arbeidstaker **/
+    private fun byggMedYrkesaktivitet(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, block: MutableMap<String, Any>.() -> Unit) =
+        buildMap {
+            put("yrkesaktivitetstype", yrkesaktivitetssporing.somYrkesaktivitetstype)
+            compute("organisasjonsnummer") { _, _ ->
+                (yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer
+            }
+            this.block()
+        }
 
     private data class Pakke(
         private val fødselsnummer: String,

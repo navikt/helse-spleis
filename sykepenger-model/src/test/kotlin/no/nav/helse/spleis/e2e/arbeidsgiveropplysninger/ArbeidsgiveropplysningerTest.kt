@@ -223,7 +223,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             val forventet = EventSubscription.TrengerArbeidsgiveropplysningerEvent(
                 EventSubscription.TrengerArbeidsgiveropplysninger(
                     personidentifikator = UNG_PERSON_FNR_2018,
-                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                    arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                     vedtaksperiodeId = 2.vedtaksperiode,
                     skjæringstidspunkt = 17.februar,
                     sykmeldingsperioder = listOf(17.februar til 28.februar),

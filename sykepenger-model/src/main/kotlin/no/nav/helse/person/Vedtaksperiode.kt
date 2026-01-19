@@ -37,6 +37,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somArbeidstakerOrThrow
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
@@ -346,7 +347,7 @@ internal class Vedtaksperiode private constructor(
     ): Revurderingseventyr {
         check(tilstand in starttilstander) { "Kan ikke håndtere søknad i tilstand $tilstand" }
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        eventBus.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, yrkesaktivitet.organisasjonsnummer)
+        eventBus.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, yrkesaktivitet.yrkesaktivitetstype)
         søknad.forUng(aktivitetsloggMedVedtaksperiodekontekst, person.alder)
         yrkesaktivitet.vurderOmSøknadIkkeKanHåndteres(aktivitetsloggMedVedtaksperiodekontekst, periode, yrkesaktiviteter)
 
@@ -362,7 +363,7 @@ internal class Vedtaksperiode private constructor(
         if (!søknad.erRelevant(this.periode)) return null
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
-        eventBus.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, yrkesaktivitet.organisasjonsnummer)
+        eventBus.emitSøknadHåndtert(søknad.metadata.meldingsreferanseId.id, id, yrkesaktivitet.yrkesaktivitetstype)
 
         when (tilstand) {
             FrilansAvventerInfotrygdHistorikk,
@@ -1676,7 +1677,7 @@ internal class Vedtaksperiode private constructor(
             mottakerBruker = person.fødselsnummer
         )
         leggTilNyUtbetaling(eventBus, aktivitetslogg, utbetaling)
-        eventBus.nyVedtaksperiodeUtbetaling(yrkesaktivitet.organisasjonsnummer, utbetaling.id, this.id)
+        eventBus.nyVedtaksperiodeUtbetaling(yrkesaktivitet.yrkesaktivitetstype, utbetaling.id, this.id)
     }
 
     internal fun leggTilNyUtbetaling(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling) {
@@ -2691,7 +2692,7 @@ internal class Vedtaksperiode private constructor(
 
                 aktivitetsloggTilDenSomVilkårsprøver.varsel(RV_IV_10)
                 val event = EventSubscription.SkatteinntekterLagtTilGrunnEvent(
-                    yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
+                    arbeidstaker = yrkesaktivitet.yrkesaktivitetstype.somArbeidstakerOrThrow,
                     vedtaksperiodeId = inntektssituasjon.periodenSomGaOpp.id,
                     behandlingId = inntektssituasjon.periodenSomGaOpp.behandlinger.sisteBehandlingId,
                     skjæringstidspunkt = skjæringstidspunkt,
@@ -2942,7 +2943,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg
     ): Revurderingseventyr? {
         if (!påminnelse.gjelderTilstand(aktivitetslogg, type)) {
-            eventBus.vedtaksperiodeIkkePåminnet(id, yrkesaktivitet.organisasjonsnummer, type)
+            eventBus.vedtaksperiodeIkkePåminnet(id, yrkesaktivitet.yrkesaktivitetstype, type)
             return null
         }
         eventBus.vedtaksperiodePåminnet(

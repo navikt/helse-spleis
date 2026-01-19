@@ -236,14 +236,14 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
 
         assertEquals(1, observatør.inntektsmeldingHåndtert.size)
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.yrkesaktivitetssporing.somOrganisasjonsnummer == a1 })
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.arbeidstaker.organisasjonsnummer == a1 })
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.arbeidstaker.organisasjonsnummer == a2 })
 
         håndterArbeidsgiveropplysninger(2.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()), orgnummer = a2)
 
         assertEquals(2, observatør.inntektsmeldingHåndtert.size)
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.yrkesaktivitetssporing.somOrganisasjonsnummer == a1 })
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.arbeidstaker.organisasjonsnummer == a1 })
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.arbeidstaker.organisasjonsnummer == a2 })
     }
 
     @Test
@@ -450,7 +450,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val expectedForespørsel = EventSubscription.TrengerArbeidsgiveropplysningerEvent(
             EventSubscription.TrengerArbeidsgiveropplysninger(
                 personidentifikator = UNG_PERSON_FNR_2018,
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2),
+                arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2),
                 vedtaksperiodeId = 1.vedtaksperiode.id(a2),
                 skjæringstidspunkt = 1.januar,
                 sykmeldingsperioder = listOf(2.januar til 31.januar),

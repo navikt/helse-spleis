@@ -187,7 +187,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             val event = observatør.skatteinntekterLagtTilGrunnEventer.single()
             val forventet = EventSubscription.SkatteinntekterLagtTilGrunnEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().id,
                 skjæringstidspunkt = 1.januar,
@@ -236,7 +236,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
             val event = observatør.skatteinntekterLagtTilGrunnEventer.single()
             val forventet = EventSubscription.SkatteinntekterLagtTilGrunnEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().id,
                 skjæringstidspunkt = 1.januar,

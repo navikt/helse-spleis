@@ -94,7 +94,7 @@ internal class Feriepengeutbetaling private constructor(
 
         eventBus.feriepengerUtbetalt(
             EventSubscription.FeriepengerUtbetaltEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+                arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
                 fom = fom,
                 tom = tom,
                 arbeidsgiverOppdrag = EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(oppdrag),

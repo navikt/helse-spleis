@@ -3,6 +3,7 @@ package no.nav.helse.person.tilstandsmaskin
 import java.time.LocalDateTime
 import java.time.Period
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somArbeidstakerOrThrow
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
@@ -145,7 +146,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         }
         return EventSubscription.TrengerArbeidsgiveropplysninger(
             personidentifikator = vedtaksperiode.person.personidentifikator,
-            yrkesaktivitetssporing = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype,
+            arbeidstaker = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype.somArbeidstakerOrThrow,
             vedtaksperiodeId = vedtaksperiode.id,
             skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
             sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
@@ -160,6 +161,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
             .filterNot { it.yrkesaktivitet === vedtaksperiode.yrkesaktivitet }
             .groupBy { it.yrkesaktivitet }
             .mapNotNull { (arbeidsgiver, perioder) ->
+                // TODO: Bruk førsteFraværsdag fra yrkesaktivitet
                 val førsteFraværsdagForArbeidsgiver = perioder
                     .asReversed()
                     .firstNotNullOfOrNull { it.førsteFraværsdag }
@@ -181,7 +183,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     private fun Vedtaksperiode.trengerIkkeArbeidsgiveropplysninger(eventBus: EventBus) {
         eventBus.trengerIkkeArbeidsgiveropplysninger(
             EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent(
-                yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
+                arbeidstaker = yrkesaktivitet.yrkesaktivitetstype.somArbeidstakerOrThrow,
                 vedtaksperiodeId = id
             )
         )

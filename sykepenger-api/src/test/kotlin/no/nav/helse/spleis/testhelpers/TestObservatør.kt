@@ -4,7 +4,6 @@ import java.util.UUID
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.VedtaksperiodeEndretEvent
 import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.spleis.IdInnhenter
 import org.junit.jupiter.api.fail
 
 internal class TestObservatør : EventSubscription {
@@ -18,7 +17,6 @@ internal class TestObservatør : EventSubscription {
     fun hendelseider(vedtaksperiodeId: UUID) =
         vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
 
-    fun sisteVedtaksperiode() = IdInnhenter { orgnummer -> vedtaksperioder.getValue(orgnummer).last() }
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
 
     fun ventendeReplays() = ventendeReplays.toList().also {
@@ -30,7 +28,7 @@ internal class TestObservatør : EventSubscription {
     }
 
     override fun inntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent) {
-        ventendeReplays.add(event.opplysninger.yrkesaktivitetssporing.somOrganisasjonsnummer to event.opplysninger.vedtaksperiodeId)
+        ventendeReplays.add(event.opplysninger.arbeidstaker.organisasjonsnummer to event.opplysninger.vedtaksperiodeId)
     }
 
     override fun vedtaksperiodeEndret(event: VedtaksperiodeEndretEvent) {

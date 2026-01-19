@@ -50,7 +50,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val expectedForespørsel = EventSubscription.TrengerArbeidsgiveropplysningerEvent(
             EventSubscription.TrengerArbeidsgiveropplysninger(
                 personidentifikator = UNG_PERSON_FNR_2018,
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode.id(a1),
                 skjæringstidspunkt = 1.januar,
                 sykmeldingsperioder = listOf(2.januar til 31.januar),
@@ -109,7 +109,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             val expectedForespørsel = EventSubscription.TrengerArbeidsgiveropplysningerEvent(
                 EventSubscription.TrengerArbeidsgiveropplysninger(
                     personidentifikator = UNG_PERSON_FNR_2018,
-                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                    arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                     vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                     skjæringstidspunkt = 1.januar,
                     sykmeldingsperioder = listOf(mars),
@@ -152,7 +152,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val expectedForespørsel = EventSubscription.TrengerArbeidsgiveropplysningerEvent(
             EventSubscription.TrengerArbeidsgiveropplysninger(
                 personidentifikator = UNG_PERSON_FNR_2018,
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 2.vedtaksperiode.id(a1),
                 skjæringstidspunkt = 10.februar,
                 sykmeldingsperioder = listOf(10.februar til 10.mars),

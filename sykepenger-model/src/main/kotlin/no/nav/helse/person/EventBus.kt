@@ -59,8 +59,8 @@ class EventBus {
         observers.forEach { it.vedtaksperiodePåminnet(event) }
     }
 
-    internal fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, tilstandType: TilstandType) {
-        val event = EventSubscription.VedtaksperiodeIkkePåminnetEvent(vedtaksperiodeId, organisasjonsnummer, tilstandType)
+    internal fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, tilstandType: TilstandType) {
+        val event = EventSubscription.VedtaksperiodeIkkePåminnetEvent(vedtaksperiodeId, yrkesaktivitetssporing, tilstandType)
         _events.add(event)
         observers.forEach { it.vedtaksperiodeIkkePåminnet(event) }
     }
@@ -159,15 +159,15 @@ class EventBus {
 
     internal fun emitInntektsmeldingFørSøknadEvent(
         meldingsreferanseId: UUID,
-        yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
+        arbeidstaker: Behandlingsporing.Yrkesaktivitet.Arbeidstaker
     ) {
-        val event = EventSubscription.InntektsmeldingFørSøknadEvent(meldingsreferanseId, yrkesaktivitetssporing)
+        val event = EventSubscription.InntektsmeldingFørSøknadEvent(meldingsreferanseId, arbeidstaker)
         _events.add(event)
         observers.forEach { it.inntektsmeldingFørSøknad(event) }
     }
 
     internal fun emitInntektsmeldingIkkeHåndtert(meldingsreferanseId: MeldingsreferanseId, organisasjonsnummer: String, speilrelatert: Boolean) {
-        val event = EventSubscription.InntektsmeldingIkkeHåndtertEvent(meldingsreferanseId.id, organisasjonsnummer, speilrelatert)
+        val event = EventSubscription.InntektsmeldingIkkeHåndtertEvent(meldingsreferanseId.id, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer), speilrelatert)
         _events.add(event)
         observers.forEach { it.inntektsmeldingIkkeHåndtert(event) }
     }
@@ -176,7 +176,7 @@ class EventBus {
         emitInntektsmeldingIkkeHåndtert(meldingsreferanseId, organisasjonsnummer, true)
 
     internal fun emitInntektsmeldingHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        val event = EventSubscription.InntektsmeldingHåndtertEvent(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
+        val event = EventSubscription.InntektsmeldingHåndtertEvent(meldingsreferanseId, vedtaksperiodeId, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer))
         _events.add(event)
         observers.forEach { it.inntektsmeldingHåndtert(event) }
     }
@@ -186,8 +186,8 @@ class EventBus {
         observers.forEach { it.skatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent) }
     }
 
-    internal fun emitSøknadHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        val event = EventSubscription.SøknadHåndtertEvent(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
+    internal fun emitSøknadHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet) {
+        val event = EventSubscription.SøknadHåndtertEvent(meldingsreferanseId, vedtaksperiodeId, yrkesaktivitetssporing)
         _events.add(event)
         observers.forEach { it.søknadHåndtert(event) }
     }
@@ -202,8 +202,8 @@ class EventBus {
         observers.forEach { it.behandlingUtført() }
     }
 
-    internal fun nyVedtaksperiodeUtbetaling(organisasjonsnummer: String, utbetalingId: UUID, vedtaksperiodeId: UUID) {
-        val event = EventSubscription.VedtaksperiodeNyUtbetalingEvent(organisasjonsnummer, utbetalingId, vedtaksperiodeId)
+    internal fun nyVedtaksperiodeUtbetaling(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, utbetalingId: UUID, vedtaksperiodeId: UUID) {
+        val event = EventSubscription.VedtaksperiodeNyUtbetalingEvent(yrkesaktivitetssporing, utbetalingId, vedtaksperiodeId)
         _events.add(event)
         observers.forEach { it.nyVedtaksperiodeUtbetaling(event) }
     }

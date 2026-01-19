@@ -44,7 +44,7 @@ interface EventSubscription {
 
     data class VedtaksperiodeIkkePåminnetEvent(
         val vedtaksperiodeId: UUID,
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val nåværendeTilstand: TilstandType
     ) : Event
 
@@ -124,29 +124,29 @@ interface EventSubscription {
 
     data class InntektsmeldingFørSøknadEvent(
         val inntektsmeldingId: UUID,
-        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
+        val arbeidstaker: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     ) : Event
 
     data class InntektsmeldingIkkeHåndtertEvent(
         val meldingsreferanseId: UUID,
-        val organisasjonsnummer: String,
+        val arbeidstaker: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         val speilrelatert: Boolean
     ) : Event
 
     data class InntektsmeldingHåndtertEvent(
         val meldingsreferanseId: UUID,
         val vedtaksperiodeId: UUID,
-        val organisasjonsnummer: String
+        val arbeidstaker: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     ) : Event
 
     data class SøknadHåndtertEvent(
         val meldingsreferanseId: UUID,
         val vedtaksperiodeId: UUID,
-        val organisasjonsnummer: String
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
     ) : Event
 
     data class SkatteinntekterLagtTilGrunnEvent(
-        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val arbeidstaker: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
         val skjæringstidspunkt: LocalDate,
@@ -165,7 +165,7 @@ interface EventSubscription {
 
     data class TrengerArbeidsgiveropplysninger(
         val personidentifikator: Personidentifikator,
-        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val arbeidstaker: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         val vedtaksperiodeId: UUID,
         val skjæringstidspunkt: LocalDate,
         val sykmeldingsperioder: List<Periode>,
@@ -175,12 +175,12 @@ interface EventSubscription {
     )
 
     class TrengerIkkeArbeidsgiveropplysningerEvent(
-        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val arbeidstaker: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         val vedtaksperiodeId: UUID
     ) : Event
 
     data class FørsteFraværsdag(
-        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, // TODO: Man skulle tro dette ikke kunne være noe annet enn arbeidstaker, men koden sier noe annet 🤔
         val førsteFraværsdag: LocalDate
     )
 
@@ -400,7 +400,7 @@ interface EventSubscription {
     }
 
     data class FeriepengerUtbetaltEvent(
-        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val arbeidstaker: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         val fom: LocalDate,
         val tom: LocalDate,
         val arbeidsgiverOppdrag: FeriepengeoppdragEventDetaljer,
@@ -455,7 +455,7 @@ interface EventSubscription {
     ) : Event
 
     data class VedtaksperiodeNyUtbetalingEvent(
-        val organisasjonsnummer: String,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val utbetalingId: UUID,
         val vedtaksperiodeId: UUID
     ) : Event

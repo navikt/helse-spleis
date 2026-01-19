@@ -694,6 +694,7 @@ internal class Yrkesaktivitet private constructor(
     }
 
     internal fun håndterFeriepengeutbetalingHendelse(eventBus: EventBus, utbetalingHendelse: FeriepengeutbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
+        check(yrkesaktivitetstype is Arbeidstaker) { "Feriepenger for ${yrkesaktivitetstype::class.simpleName}??" }
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         feriepengeutbetalinger.forEach { it.håndter(eventBus, utbetalingHendelse, aktivitetsloggMedArbeidsgiverkontekst, organisasjonsnummer) }
     }

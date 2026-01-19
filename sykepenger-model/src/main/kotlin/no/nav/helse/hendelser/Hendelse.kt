@@ -48,6 +48,8 @@ sealed interface Behandlingsporing {
                 Frilans -> "FRILANS"
                 Selvstendig -> "SELVSTENDIG"
             }
+        val Yrkesaktivitet.somArbeidstakerOrThrow
+            get() = (this as? Arbeidstaker) ?: error("Må være Arbeidstaker, var ${this::class.simpleName}")
     }
 }
 

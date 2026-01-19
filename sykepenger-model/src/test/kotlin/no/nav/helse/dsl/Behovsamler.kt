@@ -28,9 +28,6 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription {
     internal fun harBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) =
         harBehov(vedtaksperiodebehov(vedtaksperiodeId), *behovtyper)
 
-    internal fun harBehov(orgnummer: String, vararg behovtyper: Behovtype) =
-        harBehov(orgnummerbehov(orgnummer), *behovtyper)
-
     internal fun harBehov(filter: (Behov) -> Boolean, vararg behovtyper: Behovtype): Boolean {
         val behover = behov.filter(filter).map { it.type }
         return behovtyper.all { behovtype -> behovtype in behover }
@@ -109,7 +106,7 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription {
         replays.add(
             Forespørsel(
                 fnr = event.opplysninger.personidentifikator.toString(),
-                orgnr = event.opplysninger.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                orgnr = event.opplysninger.arbeidstaker.organisasjonsnummer,
                 vedtaksperiodeId = event.opplysninger.vedtaksperiodeId,
                 skjæringstidspunkt = event.opplysninger.skjæringstidspunkt,
                 førsteFraværsdager = event.opplysninger.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.yrkesaktivitetssporing.somOrganisasjonsnummer, it.førsteFraværsdag) },

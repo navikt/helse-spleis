@@ -738,7 +738,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.januar(2016) til 31.januar(2016), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true, orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { event -> event.opplysninger.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 }.size)
+        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { event -> event.opplysninger.arbeidstaker.organisasjonsnummer == a2 }.size)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }

@@ -179,7 +179,7 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
         inntektsmeldingReplayEventer.add(
             Forespørsel(
                 fnr = event.opplysninger.personidentifikator.toString(),
-                orgnr = event.opplysninger.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                orgnr = event.opplysninger.arbeidstaker.organisasjonsnummer,
                 vedtaksperiodeId = event.opplysninger.vedtaksperiodeId,
                 skjæringstidspunkt = event.opplysninger.skjæringstidspunkt,
                 førsteFraværsdager = event.opplysninger.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.yrkesaktivitetssporing.somOrganisasjonsnummer, it.førsteFraværsdag) },
@@ -243,7 +243,7 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
 
     override fun nyVedtaksperiodeUtbetaling(event: EventSubscription.VedtaksperiodeNyUtbetalingEvent) {
         vedtaksperiodeUtbetalinger
-            .getOrPut(event.organisasjonsnummer) { mutableMapOf() }
+            .getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { mutableMapOf() }
             .compute(event.vedtaksperiodeId) { _, eksisterende ->
                 (eksisterende ?: emptyList()).plusElement(event.utbetalingId)
             }
