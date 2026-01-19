@@ -31,7 +31,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -62,7 +61,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
@@ -127,32 +125,6 @@ internal class SelvstendigTest : AbstractDslTest() {
 
         selvstendig {
             håndterFørstegangssøknadSelvstendig(14.januar til 31.januar)
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        }
-
-        a1 {
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        }
-    }
-
-    @Test
-    fun `selvstendig løper videre til vilkårsprøving selv om vi har en arbeidstaker-periode som ikke har refusjonsopplysninger`() {
-
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(14.januar til 31.januar)
-        }
-
-        a1 {
-            håndterSøknad(1.januar til 14.januar)
-            håndterSøknad(15.januar til 20.januar)
-            håndterSøknad(25.januar til 31.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-            assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
-        }
-
-        selvstendig {
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
 
@@ -1289,30 +1261,4 @@ internal class SelvstendigTest : AbstractDslTest() {
         }
     }
 
-    @Test
-    fun `Kobinert Selvstendig og Arbeidstaker med et forsøk på selvstendig vilkårsgrunnlag får IM som gir exception`() {
-        a1 {
-            håndterSøknad(1.januar til 16.januar)
-            assertSisteTilstand(1.vedtaksperiode, tilstand = TilstandType.AVSLUTTET_UTEN_UTBETALING)
-        }
-
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(17.januar til 12.februar)
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), type = Arbeidsforholdtype.ORDINÆRT))
-            )
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        }
-
-        a1 {
-            håndterSøknad(17.januar til 12.februar)
-            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-
-            assertThrows<NullPointerException> {
-                håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-            }
-        }
-    }
 }

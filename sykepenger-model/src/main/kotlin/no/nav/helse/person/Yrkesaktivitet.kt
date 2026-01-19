@@ -436,6 +436,16 @@ internal class Yrkesaktivitet private constructor(
         }
     }
 
+    private fun erPeriodeKantIKantEllerOverlapper(perioder: List<Vedtaksperiode>, nyPeriode: Periode): Boolean {
+        if (perioder.any { it.periode.erRettFør(nyPeriode) }) return true
+
+        if (perioder.any { it.periode.overlapperMed(nyPeriode) }) return true
+
+        if (perioder.any { nyPeriode.erRettFør(it.periode) }) return true
+
+        return false
+    }
+
     internal fun vurderOmSøknadIkkeKanHåndteres(
         aktivitetslogg: IAktivitetslogg,
         nyPeriode: Periode,
@@ -455,8 +465,9 @@ internal class Yrkesaktivitet private constructor(
             arbeidsgiver.forkastede.blokkererBehandlingAv(nyPeriode, organisasjonsnummer, aktivitetslogg)
         }
 
-        val overlappendeYrkesaktivitet = yrkesaktiviteter.any {
-            !it.yrkesaktivitetstype.erSammeYrkesaktivtetstype(this.yrkesaktivitetstype) && it.vedtaksperioder.any { vedtaksperiode -> nyPeriode.overlapperMed(vedtaksperiode.periode) }
+        val overlappendeYrkesaktivitet = yrkesaktiviteter.any { yrkesaktivitet ->
+            !yrkesaktivitet.yrkesaktivitetstype.erSammeYrkesaktivtetstype(this.yrkesaktivitetstype)
+                && erPeriodeKantIKantEllerOverlapper(yrkesaktivitet.vedtaksperioder, nyPeriode)
         }
 
         if (overlappendeYrkesaktivitet) {
@@ -625,7 +636,6 @@ internal class Yrkesaktivitet private constructor(
         val inntektoverstyring = periodeSomSkalHåndtereInntektFraInntektsmelding?.håndterInntektFraInntektsmelding(eventBus, inntektsmelding, aktivitetslogg, sendInntektsmeldingHåndtert)
         return listOfNotNull(inntektoverstyring, inntektPåPeriode).tidligsteEventyr()
     }
-
 
     internal fun håndterInntektsopplysningerFraLagretInntektsmelding(eventBus: EventBus, inntektsopplysningerFraLagretInnteksmelding: InntektsopplysningerFraLagretInnteksmelding, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
@@ -801,10 +811,12 @@ internal class Yrkesaktivitet private constructor(
             is Arbeidstaker -> {
                 perioderUtenNavAnsvar = arbeidsgiverperiodeFor(egenmeldingsperioder)
             }
+
             Selvstendig -> {
                 val beregner = Ventetidberegner()
                 perioderUtenNavAnsvar = beregner.result(sykdomstidslinje())
             }
+
             Arbeidsledig,
             Frilans -> {}
         }

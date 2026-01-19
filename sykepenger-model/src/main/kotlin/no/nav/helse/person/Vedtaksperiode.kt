@@ -679,7 +679,6 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(inntektsmelding, skjæringstidspunkt, skjæringstidspunkt)
     }
 
-
     private fun lagreInntektsmeldingInntektPåBehandling(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr {
         when (tilstand) {
             AvsluttetUtenUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, inntektsmelding)
@@ -2441,7 +2440,7 @@ internal class Vedtaksperiode private constructor(
             SelvstendigAvventerHistorikk,
             SelvstendigAvventerInfotrygdHistorikk,
             SelvstendigAvventerSimulering,
-            SelvstendigAvventerVilkårsprøving ->  {
+            SelvstendigAvventerVilkårsprøving -> {
                 check(!this.behandlinger.harFattetVedtak()) { "kan ikke forkaste en utbetalt vedtaksperiode uten å annullere først" }
                 this.behandlinger.forkastÅpenBehandling(eventBus, eventBus.behandlingEventBus, yrkesaktivitet, hendelse.metadata.behandlingkilde, hendelse.metadata.automatiskBehandling, aktivitetsloggMedVedtaksperiodekontekst)
             }
@@ -2685,6 +2684,7 @@ internal class Vedtaksperiode private constructor(
                 aktivitetsloggTilDenSomVilkårsprøver.varsel(RV_IV_10)
                 skatteopplysning.somFaktaavklartInntekt(hendelse)
             }
+
             is Inntektssituasjon.GaOppÅVentePåArbeidsgiver -> {
                 val faktaavklartSkatteinntekt = skatteopplysning.somFaktaavklartInntekt(hendelse)
                 val skatteinntekter = (faktaavklartSkatteinntekt.inntektsopplysningskilde as Arbeidstakerinntektskilde.AOrdningen).inntektsopplysninger
@@ -3095,6 +3095,7 @@ internal class Vedtaksperiode private constructor(
             //  men kan også være feil i hånderingen av beregningen i Spleis
             AvventerHistorikk,
             SelvstendigAvventerHistorikk -> VenterPå.SegSelv(Venteårsak.BEREGNING)
+
             AvventerHistorikkRevurdering,
             SelvstendigAvventerHistorikkRevurdering -> VenterPå.SegSelv(Venteårsak.BEREGNING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
 
@@ -3117,6 +3118,7 @@ internal class Vedtaksperiode private constructor(
             //  men kan også være feil i hånderingen av vilkårsgrunnlaget i Spleis
             AvventerVilkårsprøving,
             SelvstendigAvventerVilkårsprøving -> VenterPå.SegSelv(Venteårsak.VILKÅRSPRØVING)
+
             AvventerVilkårsprøvingRevurdering,
             SelvstendigAvventerVilkårsprøvingRevurdering -> VenterPå.SegSelv(Venteårsak.VILKÅRSPRØVING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
 
