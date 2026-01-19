@@ -144,10 +144,10 @@ internal class PersonMediator(
     }
 
     private fun mapSøknadHåndtert(event: EventSubscription.SøknadHåndtertEvent): JsonMessage {
-        return JsonMessage.newMessage("søknad_håndtert", byggMedYrkesaktivitet(event.yrkesaktivitetssporing) {
-            put("søknadId", event.meldingsreferanseId)
-            put("vedtaksperiodeId", event.vedtaksperiodeId)
-        })
+        return JsonMessage.newMessage("søknad_håndtert", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, mapOf(
+            "søknadId" to event.meldingsreferanseId,
+            "vedtaksperiodeId" to event.vedtaksperiodeId
+        )))
     }
 
     private fun mapVedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent): JsonMessage {
@@ -209,10 +209,10 @@ internal class PersonMediator(
     }
 
     private fun mapVedtaksperiodeIkkePåminnet(event: EventSubscription.VedtaksperiodeIkkePåminnetEvent): JsonMessage {
-        return JsonMessage.newMessage("vedtaksperiode_ikke_påminnet", byggMedYrkesaktivitet(event.yrkesaktivitetssporing) {
-            put("vedtaksperiodeId", event.vedtaksperiodeId)
-            put("tilstand", event.nåværendeTilstand)
-        })
+        return JsonMessage.newMessage("vedtaksperiode_ikke_påminnet", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, mapOf(
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "tilstand" to event.nåværendeTilstand
+        )))
     }
 
     private fun mapUtbetalingAnnullert(event: EventSubscription.UtbetalingAnnullertEvent): JsonMessage {
@@ -236,14 +236,14 @@ internal class PersonMediator(
 
 
     private fun mapPlanlagtAnnullering(event: EventSubscription.PlanlagtAnnulleringEvent): JsonMessage {
-        return JsonMessage.newMessage("planlagt_annullering", byggMedYrkesaktivitet(event.yrkesaktivitetssporing) {
-            put("vedtaksperioder", event.vedtaksperioder)
-            put("fom", event.fom)
-            put("tom", event.tom)
-            put("ident", event.saksbehandlerIdent)
-            put("årsaker", event.årsaker)
-            put("begrunnelse", event.begrunnelse)
-        })
+        return JsonMessage.newMessage("planlagt_annullering", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, mapOf(
+            "vedtaksperioder" to event.vedtaksperioder,
+            "fom" to event.fom,
+            "tom" to event.tom,
+            "ident" to event.saksbehandlerIdent,
+            "årsaker" to event.årsaker,
+            "begrunnelse" to event.begrunnelse
+        )))
     }
 
     private fun mapUtbetalingEndret(event: EventSubscription.UtbetalingEndretEvent): JsonMessage {
@@ -281,10 +281,10 @@ internal class PersonMediator(
         )
 
     private fun mapVedtaksperiodeNyUtbetaling(event: EventSubscription.VedtaksperiodeNyUtbetalingEvent): JsonMessage {
-        return JsonMessage.newMessage("vedtaksperiode_ny_utbetaling", byggMedYrkesaktivitet(event.yrkesaktivitetssporing) {
-            put("vedtaksperiodeId", event.vedtaksperiodeId)
-            put("utbetalingId", event.utbetalingId)
-        })
+        return JsonMessage.newMessage("vedtaksperiode_ny_utbetaling", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, mapOf(
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "utbetalingId" to event.utbetalingId
+        )))
     }
 
     private fun mapOverstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt): JsonMessage {
@@ -784,13 +784,13 @@ internal class PersonMediator(
     }
 
     /** Legger alltid til yrkesaktivitetstype, men legger kun til organisasjonsnummer for Arbeidstaker **/
-    private fun byggMedYrkesaktivitet(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, block: MutableMap<String, Any>.() -> Unit) =
+    private fun byggMedYrkesaktivitet(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, innhold: Map<String, Any>) =
         buildMap {
             put("yrkesaktivitetstype", yrkesaktivitetssporing.somYrkesaktivitetstype)
             compute("organisasjonsnummer") { _, _ ->
                 (yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer
             }
-            this.block()
+            putAll(innhold)
         }
 
     private data class Pakke(
