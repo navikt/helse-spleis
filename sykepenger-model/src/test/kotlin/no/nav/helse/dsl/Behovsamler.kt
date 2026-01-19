@@ -6,7 +6,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spill_av_im.Forespørsel
 import org.junit.jupiter.api.Assertions.assertTrue
 
@@ -109,7 +108,7 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription {
                 orgnr = event.opplysninger.arbeidstaker.organisasjonsnummer,
                 vedtaksperiodeId = event.opplysninger.vedtaksperiodeId,
                 skjæringstidspunkt = event.opplysninger.skjæringstidspunkt,
-                førsteFraværsdager = event.opplysninger.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.yrkesaktivitetssporing.somOrganisasjonsnummer, it.førsteFraværsdag) },
+                førsteFraværsdager = event.opplysninger.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.arbeidstaker.organisasjonsnummer, it.førsteFraværsdag) },
                 sykmeldingsperioder = event.opplysninger.sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
                 egenmeldinger = event.opplysninger.egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
                 harForespurtArbeidsgiverperiode = EventSubscription.Arbeidsgiverperiode in event.opplysninger.forespurteOpplysninger

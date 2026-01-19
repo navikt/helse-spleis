@@ -743,8 +743,8 @@ internal class PersonMediator(
             },
             "førsteFraværsdager" to this.førsteFraværsdager.map {
                 mapOf<String, Any>(
-                    "organisasjonsnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                    "organisasjonsnummer" to it.arbeidstaker.organisasjonsnummer,
+                    "yrkesaktivitetstype" to "ARBEIDSTAKER",
                     "førsteFraværsdag" to it.førsteFraværsdag
                 )
             },

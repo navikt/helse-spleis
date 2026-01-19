@@ -182,7 +182,7 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
                 orgnr = event.opplysninger.arbeidstaker.organisasjonsnummer,
                 vedtaksperiodeId = event.opplysninger.vedtaksperiodeId,
                 skjæringstidspunkt = event.opplysninger.skjæringstidspunkt,
-                førsteFraværsdager = event.opplysninger.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.yrkesaktivitetssporing.somOrganisasjonsnummer, it.førsteFraværsdag) },
+                førsteFraværsdager = event.opplysninger.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.arbeidstaker.organisasjonsnummer, it.førsteFraværsdag) },
                 sykmeldingsperioder = event.opplysninger.sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
                 egenmeldinger = event.opplysninger.egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
                 harForespurtArbeidsgiverperiode = EventSubscription.Arbeidsgiverperiode in event.opplysninger.forespurteOpplysninger

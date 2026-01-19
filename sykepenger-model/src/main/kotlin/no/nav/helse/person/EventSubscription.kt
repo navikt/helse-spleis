@@ -180,7 +180,7 @@ interface EventSubscription {
     ) : Event
 
     data class FørsteFraværsdag(
-        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, // TODO: Man skulle tro dette ikke kunne være noe annet enn arbeidstaker, men koden sier noe annet 🤔
+        val arbeidstaker: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         val førsteFraværsdag: LocalDate
     )
 

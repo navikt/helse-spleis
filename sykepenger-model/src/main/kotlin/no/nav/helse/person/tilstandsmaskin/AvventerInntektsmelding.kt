@@ -159,18 +159,16 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     private fun førsteFraværsdagerForForespørsel(vedtaksperiode: Vedtaksperiode): List<EventSubscription.FørsteFraværsdag> {
         val deAndre = vedtaksperiode.person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(vedtaksperiode.skjæringstidspunkt))
             .filterNot { it.yrkesaktivitet === vedtaksperiode.yrkesaktivitet }
+            .filter { it.yrkesaktivitet.yrkesaktivitetstype is Behandlingsporing.Yrkesaktivitet.Arbeidstaker }
             .groupBy { it.yrkesaktivitet }
             .mapNotNull { (arbeidsgiver, perioder) ->
-                // TODO: Bruk førsteFraværsdag fra yrkesaktivitet
-                val førsteFraværsdagForArbeidsgiver = perioder
-                    .asReversed()
-                    .firstNotNullOfOrNull { it.førsteFraværsdag }
+                val førsteFraværsdagForArbeidsgiver = perioder.asReversed().firstNotNullOfOrNull { it.førsteFraværsdag }
                 førsteFraværsdagForArbeidsgiver?.let {
-                    EventSubscription.FørsteFraværsdag(arbeidsgiver.yrkesaktivitetstype, it)
+                    EventSubscription.FørsteFraværsdag(arbeidsgiver.yrkesaktivitetstype.somArbeidstakerOrThrow, it)
                 }
             }
         val minEgen = vedtaksperiode.førsteFraværsdag?.let {
-            EventSubscription.FørsteFraværsdag(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype, it)
+            EventSubscription.FørsteFraværsdag(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype.somArbeidstakerOrThrow, it)
         } ?: return deAndre
         return deAndre.plusElement(minEgen)
     }

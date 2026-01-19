@@ -229,7 +229,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                     sykmeldingsperioder = listOf(17.februar til 28.februar),
                     egenmeldingsperioder = listOf(10.februar.somPeriode()),
                     førsteFraværsdager = listOf(EventSubscription.FørsteFraværsdag(
-                        yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                        arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                         førsteFraværsdag = 17.februar
                     )),
                     forespurteOpplysninger = setOf(Inntekt, Refusjon)
