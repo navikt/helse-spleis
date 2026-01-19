@@ -32,6 +32,7 @@ internal class PersonMediator(
         eventBus
             .events
             .map { event ->
+                // ✅ Sier om det er ryddet opp i meldingen når det gjelder å kun sende "organisasjonsnummer" ut for Arbeidstaker
                 when (event) {
                     is EventSubscription.AnalytiskDatapakkeEvent -> mapAnalytiskDatapakke(event)
                     is EventSubscription.AvsluttetMedVedtakEvent -> mapAvsluttetMedVedtak(event)
@@ -39,19 +40,19 @@ internal class PersonMediator(
                     is EventSubscription.BehandlingForkastetEvent -> mapBehandlingForkastet(event)
                     is EventSubscription.BehandlingLukketEvent -> mapBehandlingLukket(event)
                     is EventSubscription.BehandlingOpprettetEvent -> mapBehandlingOpprettet(event)
-                    is EventSubscription.FeriepengerUtbetaltEvent -> mapFeriepengerUtbetalt(event)
-                    is EventSubscription.InntektsmeldingFørSøknadEvent -> mapInntektsmeldingFørSøknad(event)
-                    is EventSubscription.InntektsmeldingHåndtertEvent -> mapInntektsmeldingHåndtert(event)
-                    is EventSubscription.InntektsmeldingIkkeHåndtertEvent -> mapInntektsmeldingIkkeHåndtert(event)
+                    is EventSubscription.FeriepengerUtbetaltEvent -> mapFeriepengerUtbetalt(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.InntektsmeldingFørSøknadEvent -> mapInntektsmeldingFørSøknad(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.InntektsmeldingHåndtertEvent -> mapInntektsmeldingHåndtert(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.InntektsmeldingIkkeHåndtertEvent -> mapInntektsmeldingIkkeHåndtert(event) // ✅ Er arbeidstaker-spesifikk
                     is EventSubscription.OverlappendeInfotrygdperioder -> mapOverlappendeInfotrygdperioder(event)
                     is EventSubscription.OverstyringIgangsatt -> mapOverstyringIgangsatt(event)
-                    is EventSubscription.PlanlagtAnnulleringEvent -> mapPlanlagtAnnullering(event)
-                    is EventSubscription.SkatteinntekterLagtTilGrunnEvent -> mapSkatteinntekterLagtTilGrunn(event)
+                    is EventSubscription.PlanlagtAnnulleringEvent -> mapPlanlagtAnnullering(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.SkatteinntekterLagtTilGrunnEvent -> mapSkatteinntekterLagtTilGrunn(event) // ✅ Er arbeidstaker-spesifikk
                     is EventSubscription.SykefraværstilfelleIkkeFunnet -> mapSykefraværstilfelleIkkeFunnet(event)
-                    is EventSubscription.SøknadHåndtertEvent -> mapSøknadHåndtert(event)
-                    is EventSubscription.TrengerArbeidsgiveropplysningerEvent -> mapTrengerArbeidsgiveropplysninger(event)
-                    is EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent -> mapTrengerIkkeArbeidsgiveropplysninger(event)
-                    is EventSubscription.TrengerInntektsmeldingReplayEvent -> mapTrengerInntektsmeldingReplay(event)
+                    is EventSubscription.SøknadHåndtertEvent -> mapSøknadHåndtert(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.TrengerArbeidsgiveropplysningerEvent -> mapTrengerArbeidsgiveropplysninger(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent -> mapTrengerIkkeArbeidsgiveropplysninger(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.TrengerInntektsmeldingReplayEvent -> mapTrengerInntektsmeldingReplay(event) // ✅ Er arbeidstaker-spesifikk
                     is EventSubscription.UtbetalingAnnullertEvent -> mapUtbetalingAnnullert(event)
                     is EventSubscription.UtbetalingEndretEvent -> mapUtbetalingEndret(event)
                     is EventSubscription.UtbetalingUtbetaltEvent -> mapUtbetalingUtbetalt(event)
@@ -60,8 +61,8 @@ internal class PersonMediator(
                     is EventSubscription.VedtaksperiodeAnnullertEvent -> mapVedtaksperiodeAnnullert(event)
                     is EventSubscription.VedtaksperiodeEndretEvent -> mapVedtaksperiodeEndret(event)
                     is EventSubscription.VedtaksperiodeForkastetEvent -> mapVedtaksperiodeForkastet(event)
-                    is EventSubscription.VedtaksperiodeIkkePåminnetEvent -> mapVedtaksperiodeIkkePåminnet(event)
-                    is EventSubscription.VedtaksperiodeNyUtbetalingEvent -> mapVedtaksperiodeNyUtbetaling(event)
+                    is EventSubscription.VedtaksperiodeIkkePåminnetEvent -> mapVedtaksperiodeIkkePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.VedtaksperiodeNyUtbetalingEvent -> mapVedtaksperiodeNyUtbetaling(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperiodeOpprettet -> mapVedtaksperiodeOpprettet(event)
                     is EventSubscription.VedtaksperiodePåminnetEvent -> mapVedtaksperiodePåminnet(event)
                     is EventSubscription.VedtaksperioderVenterEvent -> mapVedtaksperioderVenter(event)
