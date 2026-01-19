@@ -227,8 +227,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           ],
           "forespurteOpplysninger": [
             {
-              "opplysningstype": "Refusjon",
-              "forslag": []
+              "opplysningstype": "Refusjon"
             },
             {
               "opplysningstype": "Arbeidsgiverperiode"
@@ -265,14 +264,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           ],
           "forespurteOpplysninger": [
             {
-              "opplysningstype": "Inntekt",
-              "forslag": {
-                "forrigeInntekt": null
-              }
+              "opplysningstype": "Inntekt"
             },
             {
-              "opplysningstype": "Refusjon",
-              "forslag": []
+              "opplysningstype": "Refusjon"
             },
             {
               "opplysningstype": "Arbeidsgiverperiode"
@@ -304,14 +299,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           ],
           "forespurteOpplysninger": [
             {
-              "opplysningstype": "Inntekt",
-              "forslag": {
-                "forrigeInntekt": null
-              }
+              "opplysningstype": "Inntekt"
             },
             {
-              "opplysningstype": "Refusjon",
-              "forslag": []
+              "opplysningstype": "Refusjon"
             },
             {
               "opplysningstype": "Arbeidsgiverperiode"
@@ -343,14 +334,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           ],
           "forespurteOpplysninger": [
             {
-              "opplysningstype": "Inntekt",
-              "forslag": {
-                "forrigeInntekt": null
-              }
+              "opplysningstype": "Inntekt"
             },
             {
-              "opplysningstype": "Refusjon",
-              "forslag": []
+              "opplysningstype": "Refusjon"
             },
             {
               "opplysningstype": "Arbeidsgiverperiode"
@@ -383,14 +370,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           ],
           "forespurteOpplysninger": [
             {
-              "opplysningstype": "Inntekt",
-              "forslag": {
-                "forrigeInntekt": null
-              }
+              "opplysningstype": "Inntekt"
             },
             {
-              "opplysningstype": "Refusjon",
-              "forslag": []
+              "opplysningstype": "Refusjon"
             }
           ],
           "fødselsnummer": "12029240045"

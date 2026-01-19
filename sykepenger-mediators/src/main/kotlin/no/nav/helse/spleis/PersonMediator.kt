@@ -749,23 +749,13 @@ internal class PersonMediator(
                 )
             },
             "forespurteOpplysninger" to this.forespurteOpplysninger.map { forespurtOpplysning ->
-                when (forespurtOpplysning) {
-                    is Arbeidsgiverperiode -> mapOf(
-                        "opplysningstype" to "Arbeidsgiverperiode"
-                    )
-
-                    is Inntekt -> mapOf(
-                        "opplysningstype" to "Inntekt",
-                        "forslag" to mapOf(
-                            "forrigeInntekt" to null
-                        )
-                    )
-
-                    is Refusjon -> mapOf(
-                        "opplysningstype" to "Refusjon",
-                        "forslag" to emptyList<Nothing>()
-                    )
-                }
+                mapOf(
+                    "opplysningstype" to when (forespurtOpplysning) {
+                        Arbeidsgiverperiode -> "Arbeidsgiverperiode"
+                        Inntekt -> "Inntekt"
+                        Refusjon -> "Refusjon"
+                    }
+                )
             }
         )
     }
