@@ -29,30 +29,6 @@ internal data class ArbeidsgiverInntektsopplysning(
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
-    private fun håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer: String, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt): Utfall {
-        if (this.orgnummer != organisasjonsnummer) return Utfall.Uendret(this)
-
-        if (this.faktaavklartInntekt.id == arbeidstakerFaktaavklartInntekt.id) return Utfall.Uendret(this)
-
-        if (arbeidstakerFaktaavklartInntekt.inntektsdata.dato.yearMonth != this.omregnetÅrsinntekt.dato.yearMonth) return Utfall.Uendret(this)
-
-        // Q: Hvorfor sjekker vi mot omregnetÅrsinntekt istedenfor faktaavklartInntekt her?
-        // - Får Inntekt A fra Arbeidsgiver -> Saksbehandler endrer til inntekt B -> Får på nytt inntekt A fra Arbeidsgiver -> Dette skal tydligvis "rulle tilbake" Saksbehandlers syn på saken
-        // - I tillegg er det viktig at EndretBeløp == endret omregnet årsinntekt, for det vil også være triggeren for å rulle tilbake skjønnsmessig fastsettelse på alle inntektene
-        if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp && faktaavklartInntekt.inntektsopplysningskilde::class == arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class) return Utfall.Uendret(this)
-
-        if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp) return Utfall.EndretKilde(copy(
-            faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
-            korrigertInntekt = null
-        ))
-
-        return Utfall.EndretBeløp(copy(
-            faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
-            korrigertInntekt = null,
-            skjønnsmessigFastsatt = null
-        ))
-    }
-
     private fun håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer: String, førsteFraværsdag: LocalDate, skjæringstidspunkt: LocalDate, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt): Utfall {
         check(arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) { "Hva holder du på med? Du skal ikke sende inntekter med kilde ${arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class.simpleName} hit!" }
 
@@ -175,11 +151,6 @@ internal data class ArbeidsgiverInntektsopplysning(
             val aktive = this.filterNot { it === inntektsopplysning }
             return aktive to (deaktiverte + listOfNotNull(inntektsopplysning))
         }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.håndterArbeidstakerFaktaavklartInntekt(
-            organisasjonsnummer: String,
-            arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
-        ) = this.map { arbeidsgiverInntektsopplysning -> arbeidsgiverInntektsopplysning.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt) }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.håndterArbeidstakerFaktaavklartInntekt(
             organisasjonsnummer: String,

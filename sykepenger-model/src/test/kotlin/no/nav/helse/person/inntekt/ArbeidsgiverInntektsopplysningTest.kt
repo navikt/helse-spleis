@@ -84,7 +84,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
         val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
 
-        val actual = original.håndterArbeidstakerFaktaavklartInntektITest("a1", overstyrtA1Opplysning)
+        val actual = original.håndterArbeidstakerFaktaavklartInntektITest("a1", overstyrtA1Opplysning, skjæringstidspunkt)
         assertTrue(expected.funksjoneltLik(actual)) { "kan ikke velge mellom inntekter for samme orgnr" }
     }
 
@@ -112,7 +112,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
         val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
 
-        val actual = original.håndterArbeidstakerFaktaavklartInntektITest("a1", overstyrtA1Opplysning)
+        val actual = original.håndterArbeidstakerFaktaavklartInntektITest("a1", overstyrtA1Opplysning, skjæringstidspunkt)
         assertTrue(expected.funksjoneltLik(actual))
     }
 
@@ -260,8 +260,8 @@ internal class ArbeidsgiverInntektsopplysningTest {
 private fun List<ArbeidsgiverInntektsopplysning>.håndterKorrigerteInntekterITest(korrigerteInntekter: List<KorrigertArbeidsgiverInntektsopplysning>) =
     håndterKorrigerteInntekter(korrigerteInntekter).map { it.arbeidsgiverInntektsopplysning }
 
-private fun List<ArbeidsgiverInntektsopplysning>.håndterArbeidstakerFaktaavklartInntektITest(orgnr: String, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt) =
-    håndterArbeidstakerFaktaavklartInntekt(orgnr, arbeidstakerFaktaavklartInntekt).map { it.arbeidsgiverInntektsopplysning }
+private fun List<ArbeidsgiverInntektsopplysning>.håndterArbeidstakerFaktaavklartInntektITest(orgnr: String, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate = skjæringstidspunkt) =
+    håndterArbeidstakerFaktaavklartInntekt(orgnr, skjæringstidspunkt, førsteFraværsdag, arbeidstakerFaktaavklartInntekt).map { it.arbeidsgiverInntektsopplysning }
 
 internal fun List<ArbeidsgiverInntektsopplysning>.funksjoneltLik(other: List<ArbeidsgiverInntektsopplysning>): Boolean {
     if (this.size != other.size) return false

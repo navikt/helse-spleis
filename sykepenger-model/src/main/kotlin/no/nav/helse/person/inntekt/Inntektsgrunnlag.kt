@@ -189,19 +189,6 @@ internal class Inntektsgrunnlag(
 
     internal fun håndterArbeidstakerFaktaavklartInntekt(
         organisasjonsnummer: String,
-        arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
-    ): Utfall {
-        val arbeidsgiverInntektsopplysningerUtfall = arbeidsgiverInntektsopplysninger.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt)
-        return Utfall.bestem(arbeidsgiverInntektsopplysningerUtfall) { nyeArbeidsgiverInntektsopplysninger ->
-            kopierInntektsgrunnlag(
-                arbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger,
-                selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
-                deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
-            )
-        }
-    }
-    internal fun håndterArbeidstakerFaktaavklartInntekt(
-        organisasjonsnummer: String,
         førsteFraværsdag: LocalDate,
         arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
     ): Utfall {

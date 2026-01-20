@@ -643,9 +643,13 @@ internal class Vedtaksperiode private constructor(
 
         val gammeltGrunnlag = vilkårsgrunnlag ?: return inntektPåBehandling
 
+        // Skjæringstidspunktet har vært vilkårsprøvd før (revurdering)
+        val arbeidstakerFaktaavklarteInntekter = checkNotNull(yrkesaktivitet.arbeidstakerFaktaavklarteInntekter(skjæringstidspunkt)) { "La akkurat til inntekt på skjæringstidspunktet, jo" }
+
         val nyttGrunnlag = gammeltGrunnlag.håndterArbeidstakerFaktaavklartInntekt(
             organisasjonsnummer = yrkesaktivitet.organisasjonsnummer,
-            arbeidstakerFaktaavklartInntekt = inntektsmelding.faktaavklartInntekt
+            arbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklarteInntekter.besteInntekt().faktaavklartInntekt,
+            førsteFraværsdag = arbeidstakerFaktaavklarteInntekter.førsteFraværsdag
         ) ?: return inntektPåBehandling
 
         person.lagreVilkårsgrunnlag(nyttGrunnlag)

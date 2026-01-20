@@ -147,10 +147,8 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             assertEquals(INNTEKT * 1.20, faktaavvklartArbeidstakerBeløp(4.vedtaksperiode))
 
             assertInntektsgrunnlag(2.januar, forventetAntallArbeidsgivere = 1) {
-                assertInntektsgrunnlag(a1, INNTEKT * 1.10)
+                assertInntektsgrunnlag(a1, INNTEKT * 1.05)
             }
-
-            assertVarsler(2.vedtaksperiode, RV_IM_4)
 
             assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))

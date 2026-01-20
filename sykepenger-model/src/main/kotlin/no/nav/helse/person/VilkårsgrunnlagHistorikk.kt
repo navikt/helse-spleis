@@ -155,14 +155,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun håndterArbeidstakerFaktaavklartInntekt(
             organisasjonsnummer: String,
-            arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
-        ) = when (val utfall = inntektsgrunnlag.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, arbeidstakerFaktaavklartInntekt)) {
-            Inntektsgrunnlag.Utfall.Uendret -> null
-            is Inntektsgrunnlag.Utfall.Endret -> kopierMed(utfall.nyttInntektsgrunnlag, opptjening, EmptyLog)
-        }
-
-        internal fun håndterArbeidstakerFaktaavklartInntekt(
-            organisasjonsnummer: String,
             førsteFraværsdag: LocalDate,
             arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
         ) = when (val utfall = inntektsgrunnlag.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, førsteFraværsdag, arbeidstakerFaktaavklartInntekt)) {

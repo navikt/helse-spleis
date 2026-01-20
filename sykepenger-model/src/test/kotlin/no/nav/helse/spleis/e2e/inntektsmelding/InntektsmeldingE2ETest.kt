@@ -53,9 +53,7 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.*
-import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertActivities
@@ -115,7 +113,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `inkonsekvente valg av inntekt fra inntektsmeldingen - dette kan vel ikke være meningen?`() {
+    fun `konsekvent valg av inntekt fra inntektsmelding`() {
         håndterSøknad(januar, a1)
         håndterSøknad(februar, a1)
 
@@ -154,13 +152,21 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         nullstillTilstandsendringer()
+        // En im i perioden etter første fraværsdag endres ikke inntekten
         håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.februar, orgnummer = a1, beregnetInntekt = INNTEKT * 1.3)
-        // HÆÆ? Ved første vilkårsprøving velger vi siste ankonme uavhhengig av måned, men når det kommer en korrigerende med samme første fraværsdag, da blir det plutselig ikke brukt
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertInntektsgrunnlag(1.januar, 2) {
             assertInntektsgrunnlag(a1, INNTEKT * 1.1, forventetKildeId = imJanuar)
             assertInntektsgrunnlag(a2, INNTEKT)
         }
+        // En im som treffer periodet første fraværsdag er - da endres inntekten
+        val korrigerendeImJan = håndterInntektsmelding(emptyList(), førsteFraværsdag = 15.januar, orgnummer = a1, beregnetInntekt = INNTEKT * 1.3)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertInntektsgrunnlag(1.januar, 2) {
+            assertInntektsgrunnlag(a1, INNTEKT * 1.3, forventetKildeId = korrigerendeImJan)
+            assertInntektsgrunnlag(a2, INNTEKT)
+        }
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter(a1))
     }
 
     @Test
