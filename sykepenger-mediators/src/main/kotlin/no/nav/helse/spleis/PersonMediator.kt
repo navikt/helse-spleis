@@ -38,7 +38,7 @@ internal class PersonMediator(
                     is EventSubscription.AvsluttetMedVedtakEvent -> mapAvsluttetMedVedtak(event)
                     is EventSubscription.AvsluttetUtenVedtakEvent -> mapAvsluttetUtenVedtak(event)
                     is EventSubscription.BehandlingForkastetEvent -> mapBehandlingForkastet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                    is EventSubscription.BehandlingLukketEvent -> mapBehandlingLukket(event)
+                    is EventSubscription.BehandlingLukketEvent -> mapBehandlingLukket(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.BehandlingOpprettetEvent -> mapBehandlingOpprettet(event)
                     is EventSubscription.FeriepengerUtbetaltEvent -> mapFeriepengerUtbetalt(event) // ✅ Er arbeidstaker-spesifikk
                     is EventSubscription.InntektsmeldingFørSøknadEvent -> mapInntektsmeldingFørSøknad(event) // ✅ Er arbeidstaker-spesifikk
@@ -570,15 +570,10 @@ internal class PersonMediator(
     }
 
     private fun mapBehandlingLukket(event: EventSubscription.BehandlingLukketEvent): JsonMessage {
-        return JsonMessage.newMessage(
-            "behandling_lukket",
-            mapOf(
-                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "behandlingId" to event.behandlingId
-            )
-        )
+        return JsonMessage.newMessage("behandling_lukket", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, mapOf(
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "behandlingId" to event.behandlingId
+        )))
     }
 
     private fun mapAvsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent): JsonMessage {
