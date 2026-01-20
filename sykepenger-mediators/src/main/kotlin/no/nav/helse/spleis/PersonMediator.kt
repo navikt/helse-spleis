@@ -64,7 +64,7 @@ internal class PersonMediator(
                     is EventSubscription.VedtaksperiodeIkkePåminnetEvent -> mapVedtaksperiodeIkkePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperiodeNyUtbetalingEvent -> mapVedtaksperiodeNyUtbetaling(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperiodeOpprettet -> mapVedtaksperiodeOpprettet(event)
-                    is EventSubscription.VedtaksperiodePåminnetEvent -> mapVedtaksperiodePåminnet(event)
+                    is EventSubscription.VedtaksperiodePåminnetEvent -> mapVedtaksperiodePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperioderVenterEvent -> mapVedtaksperioderVenter(event)
                 }
             }
@@ -194,19 +194,14 @@ internal class PersonMediator(
     }
 
     private fun mapVedtaksperiodePåminnet(event: EventSubscription.VedtaksperiodePåminnetEvent): JsonMessage {
-        return JsonMessage.newMessage(
-            "vedtaksperiode_påminnet",
-            mapOf(
-                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "tilstand" to event.tilstand,
-                "antallGangerPåminnet" to event.antallGangerPåminnet,
-                "tilstandsendringstidspunkt" to event.tilstandsendringstidspunkt,
-                "påminnelsestidspunkt" to event.påminnelsestidspunkt,
-                "nestePåminnelsestidspunkt" to event.nestePåminnelsestidspunkt
-            )
-        )
+        return JsonMessage.newMessage("vedtaksperiode_påminnet", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, mapOf(
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "tilstand" to event.tilstand,
+            "antallGangerPåminnet" to event.antallGangerPåminnet,
+            "tilstandsendringstidspunkt" to event.tilstandsendringstidspunkt,
+            "påminnelsestidspunkt" to event.påminnelsestidspunkt,
+            "nestePåminnelsestidspunkt" to event.nestePåminnelsestidspunkt
+        )))
     }
 
     private fun mapVedtaksperiodeIkkePåminnet(event: EventSubscription.VedtaksperiodeIkkePåminnetEvent): JsonMessage {
