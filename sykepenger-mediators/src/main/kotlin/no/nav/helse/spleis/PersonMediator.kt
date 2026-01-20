@@ -58,7 +58,7 @@ internal class PersonMediator(
                     is EventSubscription.UtbetalingUtbetaltEvent -> mapUtbetalingUtbetalt(event)
                     is EventSubscription.UtbetalingUtenUtbetalingEvent -> mapUtbetalingUtenUtbetaling(event)
                     is EventSubscription.UtkastTilVedtakEvent -> mapUtkastTilVedtak(event)
-                    is EventSubscription.VedtaksperiodeAnnullertEvent -> mapVedtaksperiodeAnnullert(event)
+                    is EventSubscription.VedtaksperiodeAnnullertEvent -> mapVedtaksperiodeAnnullert(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperiodeEndretEvent -> mapVedtaksperiodeEndret(event)
                     is EventSubscription.VedtaksperiodeForkastetEvent -> mapVedtaksperiodeForkastet(event)
                     is EventSubscription.VedtaksperiodeIkkePåminnetEvent -> mapVedtaksperiodeIkkePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
@@ -152,17 +152,12 @@ internal class PersonMediator(
     }
 
     private fun mapVedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent): JsonMessage {
-        return JsonMessage.newMessage(
-            "vedtaksperiode_annullert",
-            mapOf(
-                "fom" to vedtaksperiodeAnnullertEvent.fom,
-                "tom" to vedtaksperiodeAnnullertEvent.tom,
-                "vedtaksperiodeId" to vedtaksperiodeAnnullertEvent.vedtaksperiodeId,
-                "behandlingId" to vedtaksperiodeAnnullertEvent.behandlingId,
-                "organisasjonsnummer" to vedtaksperiodeAnnullertEvent.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to vedtaksperiodeAnnullertEvent.yrkesaktivitetssporing.somYrkesaktivitetstype
-            )
-        )
+        return JsonMessage.newMessage("vedtaksperiode_annullert", byggMedYrkesaktivitet(vedtaksperiodeAnnullertEvent.yrkesaktivitetssporing, mapOf(
+            "fom" to vedtaksperiodeAnnullertEvent.fom,
+            "tom" to vedtaksperiodeAnnullertEvent.tom,
+            "vedtaksperiodeId" to vedtaksperiodeAnnullertEvent.vedtaksperiodeId,
+            "behandlingId" to vedtaksperiodeAnnullertEvent.behandlingId,
+        )))
     }
 
     private fun mapOverlappendeInfotrygdperioder(event: EventSubscription.OverlappendeInfotrygdperioder): JsonMessage {
