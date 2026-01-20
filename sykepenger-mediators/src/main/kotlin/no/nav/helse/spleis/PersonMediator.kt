@@ -34,10 +34,10 @@ internal class PersonMediator(
             .map { event ->
                 // ✅ Sier om det er ryddet opp i meldingen når det gjelder å kun sende "organisasjonsnummer" ut for Arbeidstaker
                 when (event) {
-                    is EventSubscription.AnalytiskDatapakkeEvent -> mapAnalytiskDatapakke(event)
+                    is EventSubscription.AnalytiskDatapakkeEvent -> mapAnalytiskDatapakke(event) // ✅ Meldingen inneholder ikke organisasjonsnummer
                     is EventSubscription.AvsluttetMedVedtakEvent -> mapAvsluttetMedVedtak(event)
                     is EventSubscription.AvsluttetUtenVedtakEvent -> mapAvsluttetUtenVedtak(event)
-                    is EventSubscription.BehandlingForkastetEvent -> mapBehandlingForkastet(event)
+                    is EventSubscription.BehandlingForkastetEvent -> mapBehandlingForkastet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.BehandlingLukketEvent -> mapBehandlingLukket(event)
                     is EventSubscription.BehandlingOpprettetEvent -> mapBehandlingOpprettet(event)
                     is EventSubscription.FeriepengerUtbetaltEvent -> mapFeriepengerUtbetalt(event) // ✅ Er arbeidstaker-spesifikk
@@ -48,7 +48,7 @@ internal class PersonMediator(
                     is EventSubscription.OverstyringIgangsatt -> mapOverstyringIgangsatt(event)
                     is EventSubscription.PlanlagtAnnulleringEvent -> mapPlanlagtAnnullering(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.SkatteinntekterLagtTilGrunnEvent -> mapSkatteinntekterLagtTilGrunn(event) // ✅ Er arbeidstaker-spesifikk
-                    is EventSubscription.SykefraværstilfelleIkkeFunnet -> mapSykefraværstilfelleIkkeFunnet(event)
+                    is EventSubscription.SykefraværstilfelleIkkeFunnet -> mapSykefraværstilfelleIkkeFunnet(event) // ✅ Meldingen er på person-nivå, så den er grei
                     is EventSubscription.SøknadHåndtertEvent -> mapSøknadHåndtert(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.TrengerArbeidsgiveropplysningerEvent -> mapTrengerArbeidsgiveropplysninger(event) // ✅ Er arbeidstaker-spesifikk
                     is EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent -> mapTrengerIkkeArbeidsgiveropplysninger(event) // ✅ Er arbeidstaker-spesifikk
@@ -562,16 +562,11 @@ internal class PersonMediator(
     }
 
     private fun mapBehandlingForkastet(event: EventSubscription.BehandlingForkastetEvent): JsonMessage {
-        return JsonMessage.newMessage(
-            "behandling_forkastet",
-            mapOf(
-                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "behandlingId" to event.behandlingId,
-                "automatiskBehandling" to event.automatiskBehandling
-            )
-        )
+        return JsonMessage.newMessage("behandling_forkastet", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, mapOf(
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "behandlingId" to event.behandlingId,
+            "automatiskBehandling" to event.automatiskBehandling
+        )))
     }
 
     private fun mapBehandlingLukket(event: EventSubscription.BehandlingLukketEvent): JsonMessage {
@@ -690,11 +685,9 @@ internal class PersonMediator(
     }
 
     private fun mapSykefraværstilfelleIkkeFunnet(event: EventSubscription.SykefraværstilfelleIkkeFunnet): JsonMessage {
-        return JsonMessage.newMessage(
-            "sykefraværstilfelle_ikke_funnet", mapOf(
+        return JsonMessage.newMessage("sykefraværstilfelle_ikke_funnet", mapOf(
             "skjæringstidspunkt" to event.skjæringstidspunkt,
-        )
-        )
+        ))
     }
 
     private fun mapSkatteinntekterLagtTilGrunn(event: EventSubscription.SkatteinntekterLagtTilGrunnEvent): JsonMessage {
