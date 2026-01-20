@@ -63,7 +63,7 @@ internal class PersonMediator(
                     is EventSubscription.VedtaksperiodeForkastetEvent -> mapVedtaksperiodeForkastet(event)
                     is EventSubscription.VedtaksperiodeIkkePåminnetEvent -> mapVedtaksperiodeIkkePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperiodeNyUtbetalingEvent -> mapVedtaksperiodeNyUtbetaling(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                    is EventSubscription.VedtaksperiodeOpprettet -> mapVedtaksperiodeOpprettet(event)
+                    is EventSubscription.VedtaksperiodeOpprettet -> mapVedtaksperiodeOpprettet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperiodePåminnetEvent -> mapVedtaksperiodePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperioderVenterEvent -> mapVedtaksperioderVenter(event)
                 }
@@ -499,17 +499,12 @@ internal class PersonMediator(
     }
 
     private fun mapVedtaksperiodeOpprettet(event: EventSubscription.VedtaksperiodeOpprettet): JsonMessage {
-        return JsonMessage.newMessage(
-            "vedtaksperiode_opprettet",
-            mapOf(
-                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "fom" to event.periode.start,
-                "tom" to event.periode.endInclusive
-            )
-        )
+        return JsonMessage.newMessage("vedtaksperiode_opprettet", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, mapOf(
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "skjæringstidspunkt" to event.skjæringstidspunkt,
+            "fom" to event.periode.start,
+            "tom" to event.periode.endInclusive
+        )))
     }
 
     private fun mapVedtaksperiodeForkastet(event: EventSubscription.VedtaksperiodeForkastetEvent): JsonMessage {
