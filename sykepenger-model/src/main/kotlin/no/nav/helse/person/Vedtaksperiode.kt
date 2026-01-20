@@ -634,33 +634,7 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.forkasting(anmodningOmForkasting, skjæringstidspunkt, periode)
     }
 
-    internal fun håndterInntektFraInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg, skalSendeInntektsmeldingHåndtert: Boolean): Revurderingseventyr? {
-        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-
-        if (skalSendeInntektsmeldingHåndtert) inntektsmeldingHåndtert(eventBus, inntektsmelding)
-
-        if (!oppdaterVilkårsgrunnlagMedInntekt(inntektsmelding.faktaavklartInntekt)) {
-            // har ikke laget nytt vilkårsgrunnlag for beløpet var det samme som det var
-            return null
-        }
-
-        aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_4)
-        return Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(inntektsmelding, skjæringstidspunkt, skjæringstidspunkt)
-    }
-
-    internal fun håndterInntektFraInntektsmeldingPåPerioden(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        val faktaavklartInntekt = inntektsmelding.faktaavklartInntekt
-        if (faktaavklartInntekt.inntektsdata.dato !in periode) return null
-
-        // Enn så lenge sendes inntektsmelding håndtert ut i funksjonen over 👆. Frem til det flyttes til denne funksjonen må vi ha et ørlite hack for å ikke håndtere IM to ganger som følge av replay
-        if (behandlinger.faktaavklartInntekt?.inntektsdata?.hendelseId == inntektsmelding.metadata.meldingsreferanseId) return null
-
-        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-
-        return lagreInntektsmeldingInntektPåBehandling(eventBus, inntektsmelding, aktivitetsloggMedVedtaksperiodekontekst)
-    }
-
-    internal fun håndterInntektFraInntektsmeldingV2(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr {
+    internal fun håndterInntektFraInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         inntektsmeldingHåndtert(eventBus, inntektsmelding)
@@ -779,18 +753,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             organisasjonsnummer = yrkesaktivitet.organisasjonsnummer
         )
-    }
-
-    private fun oppdaterVilkårsgrunnlagMedInntekt(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt): Boolean {
-        val grunnlag = vilkårsgrunnlag ?: return false
-        /* fest setebeltet. nå skal vi prøve å endre vilkårsgrunnlaget */
-        val nyttGrunnlag = grunnlag.håndterArbeidstakerFaktaavklartInntekt(
-            organisasjonsnummer = yrkesaktivitet.organisasjonsnummer,
-            arbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklartInntekt
-        ) ?: return false
-
-        person.lagreVilkårsgrunnlag(nyttGrunnlag)
-        return true
     }
 
     internal fun håndterReplayAvInntektsmelding(eventBus: EventBus, vedtaksperiodeIdForReplay: UUID, inntektsmeldinger: List<Inntektsmelding>, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {

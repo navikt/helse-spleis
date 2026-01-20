@@ -36,6 +36,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -55,6 +56,7 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsdag
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
+import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -161,7 +163,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `kort periode så gap til neste - korrigert inntektsmelding opplyser om ikke-utbetalt AGP`() {
+    fun `kort periode så gap til neste - korrigert inntektsmelding opplyser om ikke-utbetalt AGP - men er to sykefraværstilfeller`() {
         nyPeriode(1.januar til 15.januar)
         val im1 = håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -181,7 +183,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
         assertEquals(listOf(1.januar til 15.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         assertEquals(listOf(20.januar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
         assertEquals("SSSSSHH SSSSSHH SU???HH SSSSSHH SS", inspektør.sykdomstidslinje.toShortString())

@@ -158,8 +158,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
             ArbeidsgiverUtbetalingsperiode(a1, 1.mai, 5.mai)
         )
 
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
     }
 
     private fun assertOverlappendeInfotrygdutbetalingIAUU(vedtaksperiode: IdInnhenter, tilstand: String) {

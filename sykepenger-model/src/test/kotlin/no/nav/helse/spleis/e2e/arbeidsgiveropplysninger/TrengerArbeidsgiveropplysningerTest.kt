@@ -86,7 +86,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         // Arbeidsgiver svarer ikke på forespørselen, men sender en "gammel" inntektsmelding & opplyser om begrunnelseForReduksjonEllerIkkeUtbetalt
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "En eller annen kul verdi")
         // Da er det periode nummer 1 som håndterer denne inntektsmeldingen
-        assertEquals(inntektsmeldingId to 2.vedtaksperiode.id(a1), observatør.inntektsmeldingHåndtert.single())
+        assertEquals(inntektsmeldingId to 1.vedtaksperiode.id(a1), observatør.inntektsmeldingHåndtert.single())
 
         assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter(a1))
     }

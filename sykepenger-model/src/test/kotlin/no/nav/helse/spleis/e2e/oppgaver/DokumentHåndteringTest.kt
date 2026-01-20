@@ -308,7 +308,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 Dokumentsporing.søknad(søknad1),
                 Dokumentsporing.inntektsmeldingDager(im),
                 Dokumentsporing.inntektsmeldingRefusjon(im),
-                Dokumentsporing.inntektsmeldingInntekt(im)
             ), inspektør.hendelser(1.vedtaksperiode)
         )
         assertEquals(
@@ -601,9 +600,9 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-        assertTrue(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im1)))
-        assertTrue(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im2)))
-        assertFalse(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im2)))
-        assertFalse(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im2)))
+        assertFalse(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im1)))
+        assertTrue(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im1)))
+        assertFalse(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im2)))
+        assertTrue(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im2)))
     }
 }

@@ -144,6 +144,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()

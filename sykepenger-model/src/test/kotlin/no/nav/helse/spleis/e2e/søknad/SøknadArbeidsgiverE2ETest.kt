@@ -359,11 +359,14 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
                 førsteFraværsdag = 3.februar
             )
             håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
+            assertEquals(0, observatør.inntektsmeldingHåndtert.size)
             håndterUtbetalingshistorikkEtterInfotrygdendring(
                 ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar)
             )
             assertVarsler(listOf(Varselkode.RV_IM_3), 1.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertEquals(1, observatør.inntektsmeldingHåndtert.size)
+
         }
     }
 

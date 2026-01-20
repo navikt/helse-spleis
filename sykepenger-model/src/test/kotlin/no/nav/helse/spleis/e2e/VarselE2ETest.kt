@@ -147,7 +147,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
-            assertVarsler(listOf(RV_IT_14, RV_IV_7), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IT_14), 1.vedtaksperiode.filter())
 
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)

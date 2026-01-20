@@ -483,6 +483,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        assertVarsel(Varselkode.RV_IV_7, 3.vedtaksperiode.filter())
     }
 
     @Test
@@ -1205,6 +1206,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertEquals(21.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(2.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
     }
 
     @Test

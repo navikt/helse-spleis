@@ -140,6 +140,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             assertEquals(-4293, utbetalingenSomTrekkerPenger.nettobeløp)
 
             assertVarsel(Varselkode.RV_UT_23, 3.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IV_7, 3.vedtaksperiode.filter())
 
             // Det kommer en forlengelse som skal lage en ny utbetaling som hekter seg på forrige utbetaling
             nullstillTilstandsendringer()
