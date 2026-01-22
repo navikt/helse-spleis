@@ -168,7 +168,7 @@ internal abstract class AbstractDslTest {
         assertSisteTilstand(id, tilstand)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertSisteTilstand(id: UUID, tilstand: TilstandType, errortekst: (() -> String)? = null) {
+    protected fun TestPerson.TestArbeidsgiver.assertSisteTilstand(id: UUID, tilstand: TilstandType, errortekst: () -> String? = { null }) {
         testArbeidsgiverAsserter.assertSisteTilstand(id, tilstand, errortekst)
     }
 

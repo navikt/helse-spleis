@@ -7,9 +7,9 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.ArbeidstakerOpptjeningView
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.TestObservatør
@@ -25,11 +25,11 @@ internal class TestArbeidsgiverAssertions(
     private val personInspektør: PersonInspektør,
     private val aktivitetsloggAsserts: AktivitetsloggAsserts
 ) {
-    internal fun assertSisteTilstand(vedtaksperiodeId: UUID, tilstand: TilstandType, errortekst: (() -> String)? = null) {
+    internal fun assertSisteTilstand(vedtaksperiodeId: UUID, tilstand: TilstandType, errortekst: () -> String? = { null }) {
         assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeId]?.last(), errortekst)
     }
 
-    internal fun assertSisteForkastetTilstand(vedtaksperiodeId: UUID, tilstand: TilstandType, errortekst: (() -> String)? = null) {
+    internal fun assertSisteForkastetTilstand(vedtaksperiodeId: UUID, tilstand: TilstandType, errortekst: () -> String? = { null }) {
         assertTrue(inspektør.periodeErForkastet(vedtaksperiodeId)) { "Perioden er ikke forkastet" }
         assertFalse(inspektør.periodeErIkkeForkastet(vedtaksperiodeId)) { "Perioden er ikke forkastet" }
         assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeId]?.last(), errortekst)

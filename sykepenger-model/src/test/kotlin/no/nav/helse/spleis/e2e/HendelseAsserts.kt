@@ -115,7 +115,7 @@ internal fun AbstractEndToEndTest.assertSkjæringstidspunktOgVenteperiode(
     assertEquals(forventetEgenmeldingsdager, inspektør(orgnummer).egenmeldingsdager(vedtaksperiodeIdInnhenter))
 }
 
-internal fun AbstractEndToEndTest.assertSisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter, tilstand: TilstandType, orgnummer: String = a1, errortekst: (() -> String?)? = null) {
+internal fun AbstractEndToEndTest.assertSisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter, tilstand: TilstandType, orgnummer: String = a1, errortekst: () -> String? = { null }) {
     assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeIdInnhenter.id(orgnummer)]?.last(), errortekst)
 }
 
@@ -161,7 +161,7 @@ internal fun AbstractEndToEndTest.assertFunksjonellFeil(varselkode: Varselkode, 
 internal fun AbstractEndToEndTest.assertFunksjonelleFeil(filter: AktivitetsloggFilter) = personlogg.assertFunksjonelleFeil(filter, assertetVarsler)
 internal fun AbstractEndToEndTest.assertIngenFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = personlogg.assertIngenFunksjonellFeil(varselkode, filter, assertetVarsler)
 internal fun AbstractEndToEndTest.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = personlogg.assertIngenFunksjonelleFeil(filter, assertetVarsler)
-internal fun <T> AbstractEndToEndTest.assertVarsler(filter: AktivitetsloggFilter, før: List<Varselkode> = emptyList(), etter: List<Varselkode>, block: () -> T): T{
+internal fun <T> AbstractEndToEndTest.assertVarsler(filter: AktivitetsloggFilter, før: List<Varselkode> = emptyList(), etter: List<Varselkode>, block: () -> T): T {
     assertVarsler(før, filter)
     val resultat = block()
     assertVarsler(etter, filter)
