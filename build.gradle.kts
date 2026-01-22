@@ -1,11 +1,11 @@
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import java.io.PrintWriter
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
     kotlin("jvm") version "2.2.21" apply false
 }
 
-val junitJupiterVersion = "5.12.1"
+val junitJupiterVersion = "6.0.2"
 
 allprojects {
     group = "no.nav.helse"
