@@ -3333,6 +3333,10 @@ internal class Vedtaksperiode private constructor(
                 )) }
                 .onEach { it.igangsettOverstyringPåBehandlingen(eventBus, revurdering, aktivitetslogg) }
                 .onEach { it.igangsettOverstyringEndreTilstand(eventBus, aktivitetslogg) }
+                // Akkurat disse to tilstandene er litt kilne. Vurderinger på om de kan gå videre sjekker på tilstander
+                // Så derfor er vi først avhengig av at alle perioder har gått til rett tilstand, deretter ta en ny runde
+                .filter { it.tilstand in setOf(AvventerInntektsopplysningerForAnnenArbeidsgiver, AvventerRefusjonsopplysningerAnnenPeriode) }
+                .onEach { it.igangsettOverstyringEndreTilstand(eventBus, aktivitetslogg) }
         }
 
         internal fun List<Vedtaksperiode>.medAktivitetslogg(aktivitetslogg: IAktivitetslogg, block: (vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) -> Unit) = forEach {

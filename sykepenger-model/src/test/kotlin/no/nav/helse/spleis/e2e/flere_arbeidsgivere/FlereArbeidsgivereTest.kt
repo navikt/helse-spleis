@@ -965,7 +965,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
