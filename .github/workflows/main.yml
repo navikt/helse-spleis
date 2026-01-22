@@ -32,8 +32,10 @@ jobs:
           java-version: '21.x'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-disabled: true
       - name: test and build
-        run: ./gradlew clean build -x :jobs:build -x :sykepenger-api:build -x :sykepenger-opprydding-dev:build
+        run: ./gradlew clean build --no-build-cache -Dkotlin.incremental=false -x :jobs:build -x :sykepenger-api:build -x :sykepenger-opprydding-dev:build
         env:
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
       - name: Store reports
