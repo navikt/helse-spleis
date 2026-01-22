@@ -14,6 +14,6 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
     - name: test and build
-      run: ./gradlew test build
+      run: ./gradlew clean test build
     - name: build docker image
       run: docker build . --pull
