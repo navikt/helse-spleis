@@ -10,7 +10,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dto.tilSpannerPersonDto
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -33,12 +33,12 @@ class SpannerEtterTestInterceptor : TestWatcher {
             .registerModule(JavaTimeModule())
     }
 
-    override fun testFailed(context: ExtensionContext?, cause: Throwable?) {
+    override fun testFailed(context: ExtensionContext, cause: Throwable?) {
         val errorMsg = cause.toString()
         openTheSpanner(context, errorMsg)
     }
 
-    override fun testSuccessful(context: ExtensionContext?) {
+    override fun testSuccessful(context: ExtensionContext) {
         openTheSpanner(context)
     }
 

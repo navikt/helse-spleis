@@ -13,7 +13,7 @@ internal annotation class EnableFeriepenger
 
 private class EnableFeriepengerInterceptor : InvocationInterceptor {
     override fun interceptTestMethod(
-        invocation: InvocationInterceptor.Invocation<Void>,
+        invocation: InvocationInterceptor.Invocation<Void?>,
         invocationContext: ReflectiveInvocationContext<Method>,
         extensionContext: ExtensionContext
     ) {
