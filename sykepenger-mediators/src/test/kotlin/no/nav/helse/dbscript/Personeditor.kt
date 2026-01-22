@@ -40,7 +40,7 @@ internal object Personeditor: DbScript() {
         println(" - Legger arbeidsfiler på '${workingDirectory}'")
         println(" - ..og lagrer backups på '${backupDirectory}'")
 
-        Input.gåVidereVedJa("Ønsker du å gå videre å gå videre med å endre på '${fødselsnummer.verdi}'? ⚠️", false)
+        Input.gåVidereVedJa("Ønsker du å gå videre å gå videre med å endre på '${fødselsnummer}'? ⚠️", false)
         println()
 
         println("## Beskriv _hvorfor_ du gjør denne endringen (for auditlog) - minst 15 makreller lang 🤏")
@@ -63,7 +63,7 @@ internal object Personeditor: DbScript() {
 
         databaseTransaksjon(connectionInfo) {
             val data = prepareStatement("SELECT data FROM person where fnr=? FOR UPDATE;").use { stmt ->
-                stmt.setLong(1, fødselsnummer.verdi.toLong())
+                stmt.setLong(1, fødselsnummer.toLong())
                 stmt.executeQuery().use { rs ->
                     rs.firstOrNull { row -> row.getString("data") }
                 }
@@ -100,12 +100,12 @@ internal object Personeditor: DbScript() {
 
             check(1 == prepareStatement("UPDATE person SET data=? WHERE fnr=?").use { stmt ->
                 stmt.setString(1, resultat)
-                stmt.setLong(2, fødselsnummer.verdi.toLong())
+                stmt.setLong(2, fødselsnummer.toLong())
                 stmt.executeUpdate()
             }) { "forventet å oppdatere nøyaktig én rad ved oppdatering av person" }
 
             println(" - Endringene dine er live ✅")
-            gaal("Oppdatert person i Spleis på grunn av ${beskrivelse.verdi}. Endringen var\n\n ${diff}")
+            gaal("Oppdatert person i Spleis på grunn av ${beskrivelse}. Endringen var\n\n ${diff}")
         }
     }
 

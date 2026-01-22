@@ -19,7 +19,7 @@ internal object ManuellOppkobling {
             else -> println("## Fyll inn brukernavn (epost). Defaulten er '$defaultEpost'")
         }
         val epost = Input.ventPåEpost(defaultEpost)
-        val jdbcUrl = "jdbc:postgresql://localhost:$port/spleis?user=${epost.verdi}"
+        val jdbcUrl = "jdbc:postgresql://localhost:$port/spleis?user=${epost}"
         println(" - Bruker JdbcUrl '$jdbcUrl'")
         println()
         return ConnectionInfo(jdbcUrl, epost)

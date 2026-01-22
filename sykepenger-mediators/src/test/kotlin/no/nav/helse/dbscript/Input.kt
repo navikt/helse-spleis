@@ -36,8 +36,10 @@ internal object Input {
     fun ventPåEpost(default: String?) = Epost(ventPåInput(default, lowercaseInput = true) { it.gyldigEpost() })
     fun ventPåBeskrivelse() = Beskrivelse(ventPåInput { it.gyldigBeskrivelse() })
 
-    data class Fødselsnummer (val verdi: String) {
+    data class Fødselsnummer(private val verdi: String) {
         init { check(verdi.gyldigFødeselsnummer()) { "Ugyldig fødselsnummer $verdi"} }
+        override fun toString() = verdi
+        internal fun toLong() = verdi.toLong()
         companion object {
             fun String.gyldigFødeselsnummer() = this.length == 11 && runCatching { this.toLong() }.isSuccess
         }
@@ -45,13 +47,15 @@ internal object Input {
 
     data class Epost (val verdi: String) {
         init { check(verdi.gyldigEpost()) { "Ugyldig epost $verdi"} }
+        override fun toString() = verdi
         companion object {
             fun String.gyldigEpost() = this.endsWith("@nav.no")
         }
     }
 
-    data class Beskrivelse (val verdi: String) {
+    data class Beskrivelse (private val verdi: String) {
         init { check(verdi.gyldigBeskrivelse()) { "Ugyldig beskrivelse $verdi"} }
+        override fun toString() = verdi
         companion object {
             fun String.gyldigBeskrivelse() = this.trim().length >= 15
         }
