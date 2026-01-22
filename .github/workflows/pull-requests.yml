@@ -16,6 +16,6 @@ jobs:
       with:
         cache-disabled: true
     - name: test and build
-      run: ./gradlew clean test build --no-build-cache -Dkotlin.incremental=false
+      run: ./gradlew clean test build --no-daemon --no-build-cache -Dkotlin.incremental=false
     - name: build docker image
       run: docker build . --pull
