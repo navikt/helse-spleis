@@ -3245,8 +3245,16 @@ internal class Vedtaksperiode private constructor(
         return person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .filter { it.yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker }
             .filter { it.yrkesaktivitet !== this.yrkesaktivitet }
-            .filter { it.tilstand in setOf(ArbeidstakerStart, AvventerInntektsmelding) }
-            .minOrNull()
+            .groupBy { it.yrkesaktivitet }
+            .mapValues { (_, perArbeidsgiver) ->
+                val førsteSomVenterPåInntektsmelding = perArbeidsgiver.filter { it.tilstand in setOf(ArbeidstakerStart, AvventerInntektsmelding) }.minOrNull() ?: return@mapValues null
+                // Om en annen periode har kommet seg videre forbi AvventerInntektsmelding så har vi inntekt
+                val harInntekt= perArbeidsgiver.filterNot { it.tilstand in setOf(ArbeidstakerStart, AvventerInfotrygdHistorikk, AvventerInntektsmelding, AvventerAvsluttetUtenUtbetaling, AvsluttetUtenUtbetaling) }.isNotEmpty()
+                if (harInntekt) null
+                else førsteSomVenterPåInntektsmelding
+            }
+            .filter { it.value != null }.mapValues { it.value!! }
+            .values.minOrNull()
     }
 
     private fun harSammeUtbetalingSom(annenVedtaksperiode: Vedtaksperiode) = behandlinger.harSammeUtbetalingSom(annenVedtaksperiode)

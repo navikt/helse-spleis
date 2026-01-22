@@ -22,7 +22,6 @@ import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -39,7 +38,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
@@ -59,21 +57,16 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         a2 {
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
             håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE)
 
         }
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertThrows<NoSuchElementException> { håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode) }
-            assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
-
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, flagg = setOf("allePerioderForSammeArbeidsgiverMedSammeSkjæringstidspunktSomAvventerInntektsmeldingMåKommeSegVidere"))
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            assertVarsler(1.vedtaksperiode, RV_VV_1, RV_IV_10)
+            assertVarsler(1.vedtaksperiode, RV_IV_10)
         }
     }
 
@@ -93,19 +86,15 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         a2 {
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
             håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE)
         }
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertThrows<NoSuchElementException> { håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode) }
-
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, flagg = setOf("allePerioderForSammeArbeidsgiverMedSammeSkjæringstidspunktSomAvventerInntektsmeldingMåKommeSegVidere"))
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            assertVarsler(1.vedtaksperiode, RV_VV_1, RV_IV_10)
+            assertVarsler(1.vedtaksperiode, RV_IV_10)
         }
     }
 
