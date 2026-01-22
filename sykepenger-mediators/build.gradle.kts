@@ -6,7 +6,7 @@ plugins {
 
 val mainClass = "no.nav.helse.AppKt"
 
-val tbdLibsVersion = "2025.11.04-10.12-3a167132"
+val tbdLibsVersion = "2026.01.22-09.16-1d3f6039"
 val tbdSpillAvImMatchingVersion = "2025.04.08-12.41-e519e1f8"
 val syfokafkaVersion = "2025.10.13-11.09-8df3011c"
 val mockkVersion = "1.13.17"

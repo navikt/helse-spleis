@@ -7,7 +7,7 @@ include(
 )
 
 val rapidsAndRiversVersion = "2026011411051768385145.e8ebad1177b4"
-val tbdLibsVersion = "2025.11.04-10.12-3a167132"
+val tbdLibsVersion = "2026.01.22-09.16-1d3f6039"
 
 dependencyResolutionManagement {
     versionCatalogs {
