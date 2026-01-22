@@ -78,7 +78,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `Periode går videre til vilkårsprøving uten inntektsmelding, annen overlappende arbeidsgiver står å venter på forlengelsen til perioden som går videre - samme første fraværsdag`() {
+    fun `Periode går videre til vilkårsprøving uten inntektsmelding, annen overlappende arbeidsgiver står å venter på forlengelsen til perioden som går videre-samme første fraværsdag`() {
         a1 {
             håndterSøknad(januar)
             håndterSøknad(februar)
