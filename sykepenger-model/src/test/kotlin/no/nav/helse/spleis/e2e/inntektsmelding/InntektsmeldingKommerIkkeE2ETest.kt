@@ -44,7 +44,41 @@ import org.junit.jupiter.api.assertThrows
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
 
     @Test
-    fun `Periode går videre til vilkårsprøving uten inntektsmelding, annen overlappende arbeidsgiver står å venter på forlengelsen til perioden som går videre`() {
+    fun `Periode går videre til vilkårsprøving uten inntektsmelding, annen overlappende arbeidsgiver står å venter på forlengelsen til perioden som går videre - ulik første fraværsdag`() {
+        a1 {
+            håndterSøknad(januar)
+            håndterSøknad(10.februar til 28.februar)
+        }
+        a2 {
+            håndterSøknad(januar)
+            håndterSøknad(februar)
+        }
+        a1 {
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+        }
+        a2 {
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+            håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
+
+        }
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertThrows<NoSuchElementException> { håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode) }
+            assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
+
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, flagg = setOf("allePerioderForSammeArbeidsgiverMedSammeSkjæringstidspunktSomAvventerInntektsmeldingMåKommeSegVidere"))
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            assertVarsler(1.vedtaksperiode, RV_VV_1, RV_IV_10)
+        }
+    }
+
+    @Test
+    fun `Periode går videre til vilkårsprøving uten inntektsmelding, annen overlappende arbeidsgiver står å venter på forlengelsen til perioden som går videre - samme første fraværsdag`() {
         a1 {
             håndterSøknad(januar)
             håndterSøknad(februar)
