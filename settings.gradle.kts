@@ -17,7 +17,7 @@ dependencyResolutionManagement {
             version("hikari", "6.3.0")
             version("cloudsql", "1.20.0")
             version("flyway", "11.5.0")
-            version("logback", "1.5.18")
+            version("logback", "1.5.25")
             version("logstash", "8.0")
             version("jackson", "2.18.3")
 
