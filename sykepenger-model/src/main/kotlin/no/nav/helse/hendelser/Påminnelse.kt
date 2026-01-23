@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import java.util.*
@@ -50,11 +49,6 @@ class Påminnelse(
         if (!it) {
             aktivitetslogg.info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         }
-    }
-
-    fun eventyr(skjæringstidspunkt: LocalDate, periode: Periode): Revurderingseventyr? {
-        if (!når(Predikat.Flagg("ønskerReberegning"))) return null
-        return Revurderingseventyr.reberegning(this, skjæringstidspunkt, periode)
     }
 
     internal sealed interface Predikat {

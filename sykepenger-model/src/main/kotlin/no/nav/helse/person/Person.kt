@@ -592,9 +592,14 @@ class Person private constructor(
         ryddOppVilkårsgrunnlag(aktivitetslogg)
     }
 
-    private fun ryddOppVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg) {
-        val skjæringstidspunkter = yrkesaktiviteter.aktiveSkjæringstidspunkter()
+    private fun ryddOppVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg, skjæringstidspunkter: Set<LocalDate> = yrkesaktiviteter.aktiveSkjæringstidspunkter()) {
         vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter)
+    }
+
+    internal fun fjernVilkårsgrunnlagPå(skjæringstidspunkt: LocalDate, aktivitetslogg: IAktivitetslogg) {
+        val skjæringstidspunkter = yrkesaktiviteter.aktiveSkjæringstidspunkter()
+        if (skjæringstidspunkt !in skjæringstidspunkter) return aktivitetslogg.info("Skjæringstidspunktet $skjæringstidspunkt er ikke et aktivt skjæringstidspunkt, så det er ikke noe vilkårsgrunnlag å fjerne.")
+        ryddOppVilkårsgrunnlag(aktivitetslogg, (skjæringstidspunkter - skjæringstidspunkt))
     }
 
     internal fun erBehandletIInfotrygd(vedtaksperiode: Periode): Boolean {

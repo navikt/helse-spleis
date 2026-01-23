@@ -31,6 +31,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.ManglerOpptjening
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -195,6 +196,32 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
                 assertTrue(erNavdag(8.mai))
             }
+        }
+    }
+
+    @Test
+    fun `feil i registeret ved første vilkårsprøving - vi knertert det og prøver på ny`() {
+        setupOpptjeningFraOffentligYtelse(ansattTom = 31.januar)
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertVarsler(1.vedtaksperiode, RV_OV_1)
+            with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
+                assertEquals(11, avvistDagTeller)
+                avvistedager.all { it.begrunnelser == listOf(ManglerOpptjening) }
+            }
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+
+            håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, flagg = setOf("ønskerReberegning", "knertVilkårsgrunnlag"))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
+                assertEquals(0, avvistDagTeller)
+            }
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         }
     }
 

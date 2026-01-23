@@ -2927,9 +2927,14 @@ internal class Vedtaksperiode private constructor(
             return null
         }
 
-        val overstyring = when (påminnelse.når(Flagg("nullstillEgenmeldingsdager"))) {
-            true -> nullstillEgenmeldingsdagerIArbeidsgiverperiode(eventBus, påminnelse, aktivitetslogg, null).tidligsteEventyr()
-            false -> påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+        val overstyring = when {
+            påminnelse.når(Flagg("nullstillEgenmeldingsdager")) -> nullstillEgenmeldingsdagerIArbeidsgiverperiode(eventBus, påminnelse, aktivitetslogg, null).tidligsteEventyr()
+            påminnelse.når(Flagg("ønskerReberegning"), Flagg("knertVilkårsgrunnlag")) -> {
+                vedtaksperiode.person.fjernVilkårsgrunnlagPå(vedtaksperiode.skjæringstidspunkt, aktivitetslogg)
+                Revurderingseventyr.reberegning(påminnelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+            }
+            påminnelse.når(Flagg("ønskerReberegning")) -> Revurderingseventyr.reberegning(påminnelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+            else -> null
         }
 
         if (overstyring != null) {
