@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -29,9 +30,11 @@ import no.nav.helse.oktober
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.ManglerOpptjening
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -225,7 +228,41 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         }
     }
 
-    private fun setupOpptjeningFraOffentligYtelse(ansattTom: LocalDate) {
+    @Test
+    fun `feil i registeret ved første vilkårsprøving når inntektsmelding aldri kommer - vi knertert det og prøver på ny`() {
+        setupOpptjeningFraOffentligYtelse(ansattTom = 31.januar, inntektsmeldingKomAldri = true)
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertVarsler(1.vedtaksperiode, RV_OV_1, RV_IV_10)
+            with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
+                assertEquals(11, avvistDagTeller)
+                avvistedager.all { it.begrunnelser == listOf(ManglerOpptjening) }
+            }
+            assertInntektsgrunnlag(22.april, 1) {
+                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            }
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+
+            håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, flagg = setOf("ønskerReberegning", "knertVilkårsgrunnlag"))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+
+            assertInntektsgrunnlag(22.april, 1) {
+                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            }
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
+                assertEquals(0, avvistDagTeller)
+            }
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        }
+    }
+
+    private fun setupOpptjeningFraOffentligYtelse(ansattTom: LocalDate, inntektsmeldingKomAldri: Boolean = false) {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
@@ -233,7 +270,8 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(22.april til 22.mai)
-            håndterArbeidsgiveropplysninger(listOf(22.april til 7.mai))
+            if (inntektsmeldingKomAldri) håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+            else håndterArbeidsgiveropplysninger(listOf(22.april til 7.mai))
             håndterVilkårsgrunnlag(
                 arbeidsforhold = listOf(
                     Arbeidsforhold(orgnummer = a1, ansattFom = 1.januar, ansattTom = ansattTom, type = ORDINÆRT),
