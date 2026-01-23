@@ -60,6 +60,14 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
             nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
             else -> vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         }
+        loggRareImSomAldriKommerSituasjoner(vedtaksperiode, aktivitetslogg)
         return null
+    }
+
+    private fun loggRareImSomAldriKommerSituasjoner(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+        if (vedtaksperiode.tilstand !is AvventerBlokkerendePeriode) return
+        if (vedtaksperiode.behandlinger.faktaavklartInntekt != null) return
+        val andrePerioderSammeFørsteFraværsdagSomVenterPåSammeInntektsmelding = vedtaksperiode.yrkesaktivitet.vedtaksperioderMedSammeFørsteFraværsdag(vedtaksperiode).filter { it.tilstand is AvventerInntektsmelding }.takeUnless { it.isEmpty() } ?: return
+        aktivitetslogg.info("Det er ${andrePerioderSammeFørsteFraværsdagSomVenterPåSammeInntektsmelding.size} andre perioder på samme første fraværsdag som venter på inntektsmeldingen jeg har gitt opp å vente på!")
     }
 }
