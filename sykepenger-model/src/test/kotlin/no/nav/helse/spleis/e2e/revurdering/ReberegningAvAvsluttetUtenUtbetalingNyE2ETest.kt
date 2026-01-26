@@ -1217,7 +1217,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `omgjøring med funksjonell feil i inntektsmelding fra Altinn eller LPS`() {
+    fun `omgjøring med funksjonell feil, som blir varsel, i inntektsmelding fra Altinn eller LPS`() {
         håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
         nyttVedtak(18.januar til 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar), vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
         nullstillTilstandsendringer()
@@ -1230,7 +1230,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertInntektshistorikkForDato(INNTEKT, 1.januar, inspektør)
         assertTrue(im !in observatør.inntektsmeldingIkkeHåndtert)
-        assertFunksjonellFeil(RV_IM_8, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
             assertEquals(3, it.size)

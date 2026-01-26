@@ -1244,7 +1244,8 @@ internal class Vedtaksperiode private constructor(
 
             AvsluttetUtenUtbetaling -> {
                 sørgForNyBehandlingHvisIkkeÅpen(eventBus, dager.hendelse)
-                håndterDagerFørstegang(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
+                if (this.kanForkastes()) håndterDagerFørstegang(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
+                else håndterDagerFørstegang(eventBus, dager, FunksjonelleFeilTilVarsler(aktivitetsloggMedVedtaksperiodekontekst))
             }
 
             AvventerSøknadForOverlappendePeriode,
@@ -1255,9 +1256,9 @@ internal class Vedtaksperiode private constructor(
             AvventerInfotrygdHistorikk,
             AvventerInntektsmelding,
             AvventerAvsluttetUtenUtbetaling -> {
-                håndterDagerFørstegang(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
+                if (this.kanForkastes()) håndterDagerFørstegang(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
+                else håndterDagerFørstegang(eventBus, dager, FunksjonelleFeilTilVarsler(aktivitetsloggMedVedtaksperiodekontekst))
             }
-
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
             AvventerHistorikk,

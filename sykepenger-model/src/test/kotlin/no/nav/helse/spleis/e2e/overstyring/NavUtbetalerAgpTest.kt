@@ -39,13 +39,16 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -112,15 +115,14 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse",
         )
 
-        assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_8, RV_IM_23), 1.vedtaksperiode.filter())
         assertVarsler(listOf(RV_IM_8, RV_IM_23, RV_IM_24), 2.vedtaksperiode.filter())
-        assertFunksjonellFeil(RV_IM_23, 1.vedtaksperiode.filter())
 
-        assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S", inspektør.sykdomstidslinje.toShortString())
+        assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
         assertEquals(listOf(14.april.somPeriode(), 18.april til 30.april), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         assertTrue(observatør.inntektsmeldingHåndtert.any { it.first == inntektsmeldingId })
         assertFalse(observatør.inntektsmeldingIkkeHåndtert.contains(inntektsmeldingId))
@@ -591,5 +593,77 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertVarsler(listOf(RV_IM_8, Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Revurdering av AUU med påfølgende utbetalt periode, etter IM med begrunnelse for reduksjon` () {
+        håndterSøknad(1.januar til 5.januar)
+        håndterSøknad(6.januar til 16.januar)
+        håndterSøknad(17.januar til 31.januar)
+
+        håndterArbeidsgiveropplysninger(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 3.vedtaksperiode
+        )
+
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 14.januar, 15.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn",
+            beregnetInntekt = INNTEKT,
+        )
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(3.vedtaksperiode)
+
+        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+    }
+
+    @Test
+    fun `Revudering av AUU uten påfølgende utbetalt periode kastes ut på IM med ikke støttet begrunnelse for reduksjon` () {
+        håndterSøknad(1.januar til 5.januar)
+        håndterSøknad(6.januar til 16.januar)
+        håndterSøknad(17.januar til 31.januar)
+
+        håndterArbeidsgiveropplysninger(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            vedtaksperiodeIdInnhenter = 3.vedtaksperiode
+        )
+
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 14.januar, 15.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn",
+            beregnetInntekt = INNTEKT,
+        )
+
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+        assertFunksjonellFeil(RV_IM_8, 1.vedtaksperiode.filter())
+
     }
 }
