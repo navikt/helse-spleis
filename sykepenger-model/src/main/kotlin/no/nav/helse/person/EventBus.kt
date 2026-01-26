@@ -7,6 +7,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.SelvstendigForsikring
 
 class EventBus {
     private val observers = mutableListOf<EventSubscription>()
@@ -217,5 +218,11 @@ class EventBus {
     internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent) {
         _events.add(vedtaksperiodeAnnullertEvent)
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
+    }
+
+    internal fun benyttetGrunnlagsdataForBeregning(behandlingsId: UUID, forsikring: SelvstendigForsikring?) {
+        val event = EventSubscription.BenyttetGrunnlagsdataForBeregningEvent(behandlingsId, forsikring)
+        _events.add(event)
+        observers.forEach { it.benyttetGrunnlagsdataForBeregning(event) }
     }
 }

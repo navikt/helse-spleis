@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 data class SelvstendigForsikring (
     val virkningsdato: LocalDate,
@@ -11,5 +12,18 @@ data class SelvstendigForsikring (
         ÅttiProsentFraDagEn,
         HundreProsentFraDagEn,
         HundreProsentFraDagSytten,
+    }
+
+    fun dekningsgrad() = when (type) {
+        Forsikringstype.ÅttiProsentFraDagEn -> 80.prosent
+        Forsikringstype.HundreProsentFraDagEn,
+        Forsikringstype.HundreProsentFraDagSytten -> 100.prosent
+    }
+
+    fun navOvertarAnsvarForVentetid() = when (type) {
+        Forsikringstype.ÅttiProsentFraDagEn,
+        Forsikringstype.HundreProsentFraDagEn -> true
+
+        Forsikringstype.HundreProsentFraDagSytten -> false
     }
 }

@@ -66,6 +66,7 @@ internal class PersonMediator(
                     is EventSubscription.VedtaksperiodeOpprettet -> mapVedtaksperiodeOpprettet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperiodePåminnetEvent -> mapVedtaksperiodePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperioderVenterEvent -> mapVedtaksperioderVenter(event)
+                    is EventSubscription.BenyttetGrunnlagsdataForBeregningEvent -> mapBenyttetGrunnlagsdataForBeregning(event) // ✅ Meldingen er på person-nivå, no orgnr
                 }
             }
             .map { jsonMessage -> mapTilPakke(jsonMessage) }
@@ -755,6 +756,16 @@ internal class PersonMediator(
         )
         if (event.`6G` != null) utkastTilVedtak["sykepengegrunnlagsfakta"] = mapOf("6G" to event.`6G`)
         return JsonMessage.newMessage("utkast_til_vedtak", utkastTilVedtak.toMap())
+    }
+
+    private fun mapBenyttetGrunnlagsdataForBeregning(event: EventSubscription.BenyttetGrunnlagsdataForBeregningEvent): JsonMessage {
+        val benyttetGrunnlagsdataForBeregning: MutableMap<String, Any> = mutableMapOf("behandlingId" to event.behandlingId)
+
+        if (event.forsikring != null) benyttetGrunnlagsdataForBeregning["forsikring"] = mapOf(
+            "dekningsgrad" to event.forsikring!!.dekningsgrad(),
+            "navOvertarAnsvarForVentetid" to event.forsikring!!.navOvertarAnsvarForVentetid()
+        )
+        return JsonMessage.newMessage("benyttet_grunnlagsdata_for_beregning", benyttetGrunnlagsdataForBeregning.toMap())
     }
 
     /** Legger alltid til yrkesaktivitetstype, men legger kun til organisasjonsnummer for Arbeidstaker **/

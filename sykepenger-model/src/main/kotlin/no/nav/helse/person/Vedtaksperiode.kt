@@ -1587,6 +1587,9 @@ internal class Vedtaksperiode private constructor(
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
         lagBeregnetBehandlinger(perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder, selvstendigForsikring)
 
+        // gir beskjed om hvilken grunnlagsdata som ble brukt i beregningen for behandlingen
+        eventBus.benyttetGrunnlagsdataForBeregning(behandlinger.sisteBehandlingId, selvstendigForsikring)
+
         /* steg 4.2 lag utbetalinger */
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
             other.lagUtbetaling(eventBus, other.registrerKontekst(aktivitetslogg))

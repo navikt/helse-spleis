@@ -9,6 +9,7 @@ import no.nav.helse.feriepenger.Feriepengeoppdrag
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
@@ -587,6 +588,11 @@ interface EventSubscription {
         val behandlingId: UUID
     ) : Event
 
+    data class BenyttetGrunnlagsdataForBeregningEvent(
+        val behandlingId: UUID,
+        val forsikring: SelvstendigForsikring?
+    ) : Event
+
     fun inntektsmeldingReplay(event: TrengerInntektsmeldingReplayEvent) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(event: VedtaksperiodePåminnetEvent) {}
@@ -622,4 +628,5 @@ interface EventSubscription {
     fun behandlingUtført() {}
     fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: VedtaksperiodeAnnullertEvent) {}
     fun utkastTilVedtak(event: UtkastTilVedtakEvent) {}
+    fun benyttetGrunnlagsdataForBeregning(event: BenyttetGrunnlagsdataForBeregningEvent) {}
 }
