@@ -145,6 +145,7 @@ import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
+import no.nav.helse.person.inntekt.harAvklartArbeidstakerinntekt
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerBlokkerendePeriode
 import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerInfotrygdHistorikk
@@ -3253,10 +3254,8 @@ internal class Vedtaksperiode private constructor(
             .groupBy { it.yrkesaktivitet }
             .mapValues { (_, perArbeidsgiver) ->
                 val førsteSomVenterPåInntektsmelding = perArbeidsgiver.filter { it.tilstand in setOf(ArbeidstakerStart, AvventerInntektsmelding) }.minOrNull() ?: return@mapValues null
-                // Om en annen periode har kommet seg videre forbi AvventerInntektsmelding så har vi inntekt
-                val harInntekt= perArbeidsgiver.filterNot { it.tilstand in setOf(ArbeidstakerStart, AvventerInfotrygdHistorikk, AvventerInntektsmelding, AvventerAvsluttetUtenUtbetaling, AvsluttetUtenUtbetaling) }.isNotEmpty()
-                if (harInntekt) null
-                else førsteSomVenterPåInntektsmelding
+                // Om en annen periode på samme skjæringstidspunkt & arbeidsgiver har kommet seg videre forbi AvventerInntektsmelding så har vi avklart inntekt
+                førsteSomVenterPåInntektsmelding.takeUnless { perArbeidsgiver.harAvklartArbeidstakerinntekt() }
             }
             .filter { it.value != null }.mapValues { it.value!! }
             .values.minOrNull()
