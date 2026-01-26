@@ -762,7 +762,7 @@ internal class PersonMediator(
         val benyttetGrunnlagsdataForBeregning: MutableMap<String, Any> = mutableMapOf("behandlingId" to event.behandlingId)
 
         if (event.forsikring != null) benyttetGrunnlagsdataForBeregning["forsikring"] = mapOf(
-            "dekningsgrad" to event.forsikring!!.dekningsgrad(),
+            "dekningsgrad" to event.forsikring!!.dekningsgrad().toDouble(),
             "navOvertarAnsvarForVentetid" to event.forsikring!!.navOvertarAnsvarForVentetid()
         )
         return JsonMessage.newMessage("benyttet_grunnlagsdata_for_beregning", benyttetGrunnlagsdataForBeregning.toMap())
