@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
@@ -36,6 +37,52 @@ import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
 
 internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
+
+    @Test
+    fun `Velger feil inntekt når en AUU først har fått lagret faktaavkalrt inntekt på behandlignen sin`() {
+        a1 {
+            håndterSøknad(1.januar til 20.januar)
+            val im1 = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.05)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
+
+            val im2 = håndterInntektsmelding(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT * 1.10)
+
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertVarsler(1.vedtaksperiode, RV_IM_24)
+
+            håndterSøknad(21.januar til 31.januar)
+            // Før beregning har vi rett inntekt på behandlingene
+            assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
+            assertEquals(im2, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+
+            // Etter beregning har vi rotet det til
+            håndterYtelser(2.vedtaksperiode)
+            assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
+            assertEquals(im1, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
+
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertVarsler(2.vedtaksperiode, RV_IV_7)
+
+            // Så kommer det en korrigert IM
+            val im3 = håndterInntektsmelding(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT * 1.15)
+            // Før beregning har vi rett inntekt på behandlingene
+            assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
+            assertEquals(im3, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
+
+            // Etter beregning har vi rotet det til IGJEN
+            håndterYtelser(2.vedtaksperiode)
+            assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
+            assertEquals(im1, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
+        }
+    }
 
     @Test
     fun `Om skjæringstidspunktet flytter på seg mens man står i en tilstand man antar man har inntekt så ender vi opp med å bruke skatt`() {
