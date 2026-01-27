@@ -40,12 +40,11 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `Replay av en inntektsmelding som feiler`() {
+    fun `En inntektsmelding gjør at en annen nå plutselig er relevant for replay - ingen endring i dager eller refusjon, kun inntekt`() {
         val im1Mottatt = LocalDateTime.now().minusDays(1)
         val im2Mottatt = im1Mottatt.plusHours(1)
 
@@ -65,12 +64,11 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(im1 in observatør.inntektsmeldingIkkeHåndtert)
         assertTrue(im2 to 1.vedtaksperiode.id(a1) in observatør.inntektsmeldingHåndtert)
 
-        assertEquals(
-            "forventer at vedtaksperioden er åpen for endring når inntekt håndteres (tilstand Avsluttet)",
-            assertThrows<IllegalStateException> { håndterSøknad(februar) }.message
-        )
-
+        håndterSøknad(februar)
         assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+        assertTrue(im1 to 1.vedtaksperiode.id(a1) in observatør.inntektsmeldingHåndtert)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test

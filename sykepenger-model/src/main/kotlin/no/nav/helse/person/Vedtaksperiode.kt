@@ -660,7 +660,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun lagreInntektsmeldingInntektPåBehandling(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr {
         when (tilstand) {
-            AvsluttetUtenUtbetaling -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, inntektsmelding)
+            AvsluttetUtenUtbetaling,
+            Avsluttet -> sørgForNyBehandlingHvisIkkeÅpenOgOppdaterSkjæringstidspunktOgDagerUtenNavAnsvar(eventBus, inntektsmelding)
 
             AvventerAnnullering,
             AvventerAnnulleringTilUtbetaling,
@@ -682,7 +683,6 @@ internal class Vedtaksperiode private constructor(
             AvventerVilkårsprøving,
             AvventerVilkårsprøvingRevurdering -> {}
 
-            Avsluttet,
             TilUtbetaling -> check(behandlinger.åpenForEndring()) {
                 "forventer at vedtaksperioden er åpen for endring når inntekt håndteres (tilstand $tilstand)"
             }
