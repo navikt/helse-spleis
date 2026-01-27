@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
+import java.time.LocalDateTime
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
@@ -10,6 +11,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
@@ -36,9 +38,40 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Replay av en inntektsmelding som feiler`() {
+        val im1Mottatt = LocalDateTime.now().minusDays(1)
+        val im2Mottatt = im1Mottatt.plusHours(1)
+
+        val im1 = håndterInntektsmelding(listOf(17.januar til 1.februar), mottatt = im1Mottatt)
+        håndterSøknad(17.januar til 31.januar)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTrue(im1 in observatør.inntektsmeldingIkkeHåndtert)
+
+        val im2 = håndterInntektsmelding(listOf(1.januar til 16.januar), mottatt = im2Mottatt)
+        assertEquals(januar, inspektør.periode(1.vedtaksperiode))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertTrue(im1 in observatør.inntektsmeldingIkkeHåndtert)
+        assertTrue(im2 to 1.vedtaksperiode.id(a1) in observatør.inntektsmeldingHåndtert)
+
+        assertEquals(
+            "forventer at vedtaksperioden er åpen for endring når inntekt håndteres (tilstand Avsluttet)",
+            assertThrows<IllegalStateException> { håndterSøknad(februar) }.message
+        )
+
+        assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+    }
 
     @Test
     fun `Inntektsmelding med begrunnelseForReduksjon & FF kommer før kort søknad`() {
