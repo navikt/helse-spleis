@@ -39,7 +39,7 @@ import org.junit.jupiter.api.assertNull
 internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
 
     @Test
-    fun `Velger feil inntekt når en AUU først har fått lagret faktaavkalrt inntekt på behandlignen sin`() {
+    fun `Velger RIKTIG inntekt når en AUU først har fått lagret faktaavkalrt inntekt på behandlignen sin`() {
         a1 {
             håndterSøknad(1.januar til 20.januar)
             val im1 = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.05)
@@ -61,26 +61,32 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             assertEquals(im2, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
 
-            // Etter beregning har vi rotet det til
+            // Etter beregning har vi IKKE rotet det til
             håndterYtelser(2.vedtaksperiode)
             assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
-            assertEquals(im1, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
+            assertEquals(im2, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
+            assertInntektsgrunnlag(5.januar, 1) {
+                assertInntektsgrunnlag(a1, INNTEKT * 1.10, forventetKildeId = im2)
+            }
 
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertVarsler(2.vedtaksperiode, RV_IV_7)
 
             // Så kommer det en korrigert IM
             val im3 = håndterInntektsmelding(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT * 1.15)
+            assertVarsler(2.vedtaksperiode, RV_IM_4)
             // Før beregning har vi rett inntekt på behandlingene
             assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
             assertEquals(im3, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
 
-            // Etter beregning har vi rotet det til IGJEN
+            // Etter beregning har vi IKKE rotet det til IGJEN
             håndterYtelser(2.vedtaksperiode)
             assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
-            assertEquals(im1, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
+            assertEquals(im3, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
+            assertInntektsgrunnlag(5.januar, 1) {
+                assertInntektsgrunnlag(a1, INNTEKT * 1.15, forventetKildeId = im3)
+            }
         }
     }
 

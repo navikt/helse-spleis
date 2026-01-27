@@ -14,13 +14,27 @@ internal data class ArbeidstakerFaktaavklarteInntekter(
 
     fun besteInntekt(): VurderbarArbeidstakerFaktaavklartInntekt {
         val sortert = vurderbareArbeidstakerFaktaavklarteInntekter.sortedBy { it.periode.start }
-        return sortert.firstOrNull { førsteFraværsdag in it.periode || førsteFraværsdag > it.periode.endInclusive } ?: sortert.first()
+        val perioderDetSkalFattesVedtakPå = sortert.filter { it.skalFattesVedtakPåPerioden }
+
+        // Finner perioden nærmest første fraværsdag som det skal fattes vedtak på
+        val periodeDetSkalFattesVedtakPåNærmestFørsteFraværsdag = perioderDetSkalFattesVedtakPå
+            .firstOrNull { it.periode.start >= førsteFraværsdag }
+            ?: return perioderDetSkalFattesVedtakPå.firstOrNull() ?: sortert.first()
+
+        // Utvalget vi nå skal velge inntekter blandt er alle perioder frem til og med periodeDetSkalFattesVedtakPåNærmestFørsteFraværsdag
+        // Det vil si at vi får med oss alle AUU'er i forkant som eventuelt kan ha inntekt lagret på seg
+        val utvalg = sortert
+            .filter { it.periode.start <= periodeDetSkalFattesVedtakPåNærmestFørsteFraværsdag.periode.start}
+
+        // Av utvalget vi nå sitter igjen med velger vi den sist ankomne
+        return utvalg.maxBy { it.faktaavklartInntekt.inntektsdata.tidsstempel }
     }
 }
 
 internal data class VurderbarArbeidstakerFaktaavklartInntekt(
     val faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
     val periode: Periode,
+    val skalFattesVedtakPåPerioden: Boolean,
     private val skjæringstidspunkt: LocalDate,
     private val tidligereSkjæringstidspunkt: LocalDate,
     private val endretArbeidsgiverperiode: Boolean

@@ -385,7 +385,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             faktaavklartInntekt = inntekten,
             skjæringstidspunkt = sisteBehandling.skjæringstidspunkt,
             periode = sisteBehandling.periode(),
-            dagerUtenNavAnsvar = sisteBehandling.dagerUtenNavAnsvar
+            dagerUtenNavAnsvar = sisteBehandling.dagerUtenNavAnsvar,
+            skalFattesVedtakPåPerioden = ventedager().skalFatteVedtak
         )
     }
 
@@ -1494,7 +1495,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 skjæringstidspunkt: LocalDate,
                 periode: Periode,
                 dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaring,
-                faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
+                faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
+                skalFattesVedtakPåPerioden: Boolean
             ): VurderbarArbeidstakerFaktaavklartInntekt {
                 val førsteEndringMedInntekten = firstNotNullOf { behandling -> behandling.endringer.firstOrNull { endring -> endring.faktaavklartInntekt == faktaavklartInntekt } }
 
@@ -1503,7 +1505,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     skjæringstidspunkt = skjæringstidspunkt,
                     tidligereSkjæringstidspunkt = førsteEndringMedInntekten.skjæringstidspunkt,
                     periode = periode,
-                    endretArbeidsgiverperiode = !dagerUtenNavAnsvar.samme(førsteEndringMedInntekten.dagerUtenNavAnsvar)
+                    endretArbeidsgiverperiode = !dagerUtenNavAnsvar.samme(førsteEndringMedInntekten.dagerUtenNavAnsvar),
+                    skalFattesVedtakPåPerioden = skalFattesVedtakPåPerioden
                 )
             }
 
