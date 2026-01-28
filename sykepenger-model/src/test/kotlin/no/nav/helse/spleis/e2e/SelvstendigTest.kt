@@ -31,6 +31,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -1026,11 +1027,11 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `kaster ut når bruker har oppgitt at hen har opprettholdt inntekt`() {
+    fun `varsel når bruker har oppgitt at hen har opprettholdt inntekt`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, harOppgittOpprettholdtInntekt = true)
-            assertFunksjonellFeil(Varselkode.RV_SØ_51, 1.vedtaksperiode.filter())
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertVarsel(Varselkode.RV_SØ_51, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
         }
     }
 
