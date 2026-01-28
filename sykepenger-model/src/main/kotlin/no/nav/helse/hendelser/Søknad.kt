@@ -166,7 +166,7 @@ class Søknad(
         if (harOppgittNyIArbeidslivet == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_48)
         if (harOppgittVarigEndring == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_49)
 
-        if (harOppgittOpprettholdtInntekt == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_51)
+        if (harOppgittOpprettholdtInntekt == true) aktivitetslogg.varsel(Varselkode.RV_SØ_51)
         if (harOppgittOppholdIUtlandet == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_52)
 
         if (vilkårsgrunnlag == null && pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true) aktivitetslogg.varsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
