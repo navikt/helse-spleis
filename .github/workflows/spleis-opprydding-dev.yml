@@ -10,6 +10,7 @@ on:
       - 'settings.gradle.kts'
       - '.github/workflows/spleis-opprydding-dev.yml'
       - 'deploy/dev-opprydding.yml'
+      - 'Dockerfile'
 
 env:
   ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
