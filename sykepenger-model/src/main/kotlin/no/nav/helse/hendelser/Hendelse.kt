@@ -41,13 +41,6 @@ sealed interface Behandlingsporing {
         data object Frilans : Yrkesaktivitet
         data object Arbeidsledig : Yrkesaktivitet
 
-        val Yrkesaktivitet.somOrganisasjonsnummer
-            get() = when (this) {
-                Arbeidsledig -> "ARBEIDSLEDIG"
-                is Arbeidstaker -> organisasjonsnummer
-                Frilans -> "FRILANS"
-                Selvstendig -> "SELVSTENDIG"
-            }
         val Yrkesaktivitet.somArbeidstakerOrThrow
             get() = (this as? Arbeidstaker) ?: error("Må være Arbeidstaker, var ${this::class.simpleName}")
     }
