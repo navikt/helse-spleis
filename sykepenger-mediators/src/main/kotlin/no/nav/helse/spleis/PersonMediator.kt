@@ -35,7 +35,7 @@ internal class PersonMediator(
                 // ✅ Sier om det er ryddet opp i meldingen når det gjelder å kun sende "organisasjonsnummer" ut for Arbeidstaker
                 when (event) {
                     is EventSubscription.AnalytiskDatapakkeEvent -> mapAnalytiskDatapakke(event) // ✅ Meldingen inneholder ikke organisasjonsnummer
-                    is EventSubscription.AvsluttetMedVedtakEvent -> mapAvsluttetMedVedtak(event)
+                    is EventSubscription.AvsluttetMedVedtakEvent -> mapAvsluttetMedVedtak(event) // spesialist – avsluttet_med_vedtak  ✅ spetakkel  ✅ spre-oppgaver
                     is EventSubscription.AvsluttetUtenVedtakEvent -> mapAvsluttetUtenVedtak(event)
                     is EventSubscription.BehandlingForkastetEvent -> mapBehandlingForkastet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.BehandlingLukketEvent -> mapBehandlingLukket(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
@@ -583,7 +583,6 @@ internal class PersonMediator(
         return JsonMessage.newMessage(
             "avsluttet_med_vedtak",
             mapOf(
-                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
                 "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
                 "vedtaksperiodeId" to event.vedtaksperiodeId,
                 "behandlingId" to event.behandlingId,
