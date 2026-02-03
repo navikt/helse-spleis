@@ -7,8 +7,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.util.UUID
+import kotlin.collections.emptyList
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.erSammeYrkesaktivtetstype
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.Arbeidsgiverperiode
@@ -39,7 +39,7 @@ internal class PersonMediator(
                 // ✅ Sier om det er ryddet opp i meldingen når det gjelder å kun sende "organisasjonsnummer" ut for Arbeidstaker
                 when (event) {
                     is EventSubscription.AnalytiskDatapakkeEvent -> mapAnalytiskDatapakke(event) // ✅ Meldingen inneholder ikke organisasjonsnummer
-                    is EventSubscription.AvsluttetMedVedtakEvent -> mapAvsluttetMedVedtak(event) // spesialist – avsluttet_med_vedtak  ✅ spetakkel  ✅ spre-oppgaver
+                    is EventSubscription.AvsluttetMedVedtakEvent -> mapAvsluttetMedVedtak(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.AvsluttetUtenVedtakEvent -> mapAvsluttetUtenVedtak(event)
                     is EventSubscription.BehandlingForkastetEvent -> mapBehandlingForkastet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.BehandlingLukketEvent -> mapBehandlingLukket(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
@@ -653,23 +653,29 @@ internal class PersonMediator(
                 "utbetalingId" to event.utbetalingId,
                 "sykepengegrunnlagsfakta" to mapOf(
                     "sykepengegrunnlag" to event.sykepengegrunnlag,
-                    "6G" to event.`6G`,
+                    "6G" to event.`6G`
                 ).plus(
-                    when (val fakta = event.sykepengegrunnlagsfakta) {
-                        is FastsattIInfotrygd -> arbeidstakerInfotrygdMap(fakta)
-                        is FastsattEtterHovedregel -> arbeidstakerHovedregelMap(fakta)
-                        is FastsattEtterSkjønn -> arbeidstakerEtterSkjønnMap(fakta)
-                    }
-                ).plus(
-                    if (event.yrkesaktivitetssporing.erSammeYrkesaktivtetstype(Behandlingsporing.Yrkesaktivitet.Selvstendig))
-                        mapOf(
-                            "selvstendig" to mapOf(
-                                "beregningsgrunnlag" to event.beregningsgrunnlag,
-                            ),
-                            "fastsatt" to "EtterHovedregel"
+                    when (event.yrkesaktivitetssporing) {
+                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> when (val fakta = event.sykepengegrunnlagsfakta) {
+                            is FastsattIInfotrygd -> arbeidstakerInfotrygdMap(fakta)
+                            is FastsattEtterHovedregel -> arbeidstakerHovedregelMap(fakta)
+                            is FastsattEtterSkjønn -> arbeidstakerEtterSkjønnMap(fakta)
+                        }.plus(
+                            "selvstendig" to null
                         )
-                    else mapOf("selvstendig" to null)
 
+                        Behandlingsporing.Yrkesaktivitet.Selvstendig ->
+                            mapOf(
+                                "selvstendig" to mapOf(
+                                    "beregningsgrunnlag" to event.beregningsgrunnlag,
+                                ),
+                                "fastsatt" to "EtterHovedregel",
+                                "arbeidsgivere" to emptyList<Map<String, Any>>()
+
+                            )
+                        Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("avsluttet_med_vedtak for frilanser er ikke implementert, og vi burde aldri komme hit.")
+                    }
                 )
             ),
         )

@@ -228,16 +228,9 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
   "hendelser": [ "$søknadId" ],
   "sykepengegrunnlagsfakta": {
     "fastsatt": "EtterHovedregel",
-    "omregnetÅrsinntektTotalt": 0,
     "sykepengegrunnlag": 561804.0,
     "6G": 561804.0,
-    "arbeidsgivere": [
-      {
-        "arbeidsgiver": "SELVSTENDIG",
-        "omregnetÅrsinntekt": 684987.0,
-        "inntektskilde": "Sigrun"
-      }
-    ],
+    "arbeidsgivere": [],
     "selvstendig": {
         "beregningsgrunnlag": 567245.0
     }
