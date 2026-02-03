@@ -543,6 +543,8 @@ interface EventSubscription {
         val periode: Periode,
         val hendelseIder: Set<UUID>,
         val skjæringstidspunkt: LocalDate,
+        val beregningsgrunnlag: Double,
+        val `6G`: Double?,
         val sykepengegrunnlag: Double,
         val utbetalingId: UUID,
         val vedtakFattetTidspunkt: LocalDateTime,

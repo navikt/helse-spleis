@@ -3,7 +3,7 @@ package no.nav.helse.person.builders
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import kotlin.properties.Delegates
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -348,6 +348,8 @@ internal class UtkastTilVedtakBuilder(
             periode = periode,
             hendelseIder = relevanteSøknader,
             skjæringstidspunkt = skjæringstidspunkt,
+            beregningsgrunnlag = beregningsgrunnlag.årlig.toDesimaler,
+            `6G` = seksG,
             sykepengegrunnlag = sykepengegrunnlag, // TODO: 10.12.24: Legge til for skjønnsmessig og infotrygd i tillegg til hovedregel
             utbetalingId = utbetalingId,
             vedtakFattetTidspunkt = vedtakFattet,

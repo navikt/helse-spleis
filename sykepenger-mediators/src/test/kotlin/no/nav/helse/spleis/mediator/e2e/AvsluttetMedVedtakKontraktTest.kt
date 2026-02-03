@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.mediator.e2e
 
+import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertUtgåendeMelding
@@ -56,7 +58,8 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         "omregnetÅrsinntekt": 372000.0,
         "inntektskilde": "Arbeidsgiver"
       }
-    ]
+    ],
+    "selvstendig": null
   }
 }
         """
@@ -108,7 +111,8 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         "skjønnsfastsatt": 570000.0,
         "inntektskilde": "Saksbehandler"
       }
-    ]
+    ],
+    "selvstendig": null
   }
 }
         """
@@ -193,11 +197,62 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         "omregnetÅrsinntekt": 372000.0,
         "inntektskilde": "Arbeidsgiver"
       }
-    ]
+    ],
+    "selvstendig": null
   }
 }
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_uten_utbetaling")
+    }
+
+    @Test
+    fun `vedtak med utbetaling selvstendig`() {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        val søknadId = sendSelvstendigsøknad(
+            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            ventetid = 3.januar til 18.januar
+        )
+
+        sendVilkårsgrunnlagSelvstendig(0)
+        sendYtelserSelvstendig(0)
+        sendSimuleringSelvstendig(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenningSelvstendig(0)
+        sendUtbetaling()
+        @Language("JSON")
+        val forventet = """{
+  "@event_name": "avsluttet_med_vedtak",
+  "vedtakFattetTidspunkt": "<timestamp>",
+  "vedtaksperiodeId": "<uuid>",
+  "behandlingId": "<uuid>",
+  "utbetalingId": "<uuid>",
+  "fødselsnummer": "$UNG_PERSON_FNR_2018",
+  "yrkesaktivitetstype": "SELVSTENDIG",
+  "fom": "2018-01-03",
+  "tom": "2018-01-26",
+  "skjæringstidspunkt": "2018-01-03",
+  "sykepengegrunnlag": 561804.0,
+  "hendelser": [ "$søknadId" ],
+  "sykepengegrunnlagsfakta": {
+    "fastsatt": "EtterHovedregel",
+    "omregnetÅrsinntekt": 0,
+    "omregnetÅrsinntektTotalt": 0,
+    "sykepengegrunnlag": 561804.0,
+    "6G": 561804.0,
+    "arbeidsgivere": [
+      {
+        "arbeidsgiver": "SELVSTENDIG",
+        "omregnetÅrsinntekt": 684987.0,
+        "inntektskilde": "Sigrun"
+      }
+    ],
+    "selvstendig": {
+        "beregningsgrunnlag": 567245.0
+    }
+  }
+}
+        """
+        assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
     }
 
     private fun assertVedtakFattet(forventetMelding: String, forventetUtbetalingEventNavn: String) {
