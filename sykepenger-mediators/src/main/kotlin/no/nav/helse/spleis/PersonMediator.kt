@@ -649,7 +649,6 @@ internal class PersonMediator(
                 "tom" to event.periode.endInclusive,
                 "hendelser" to event.hendelseIder,
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "sykepengegrunnlag" to event.sykepengegrunnlag,
                 "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt,
                 "utbetalingId" to event.utbetalingId,
                 "sykepengegrunnlagsfakta" to mapOf(
@@ -820,7 +819,6 @@ internal class PersonMediator(
 
     private fun arbeidstakerEtterSkjønnMap(sykepengegrunnlagsfakta: FastsattEtterSkjønn): Map<String, Any> = mapOf(
         "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
-        "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
         "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
         "skjønnsfastsatt" to sykepengegrunnlagsfakta.skjønnsfastsatt,
         "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map { arbeidsgiver ->
@@ -835,7 +833,6 @@ internal class PersonMediator(
 
     private fun arbeidstakerHovedregelMap(sykepengegrunnlagsfakta: FastsattEtterHovedregel): Map<String, Any> = mapOf(
         "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
-        "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
         "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
         "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map { arbeidsgiver ->
             mapOf(
@@ -848,7 +845,6 @@ internal class PersonMediator(
 
     private fun arbeidstakerInfotrygdMap(sykepengegrunnlagsfakta: FastsattIInfotrygd): Map<String, Any> = mapOf(
         "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
-        "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
         "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt
     )
 

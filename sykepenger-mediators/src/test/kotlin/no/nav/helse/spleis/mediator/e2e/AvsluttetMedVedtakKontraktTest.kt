@@ -44,11 +44,9 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
   "fom": "2018-01-03",
   "tom": "2018-01-26",
   "skjæringstidspunkt": "2018-01-03",
-  "sykepengegrunnlag": 372000.0,
   "hendelser": [ "$søknadId" ],
   "sykepengegrunnlagsfakta": {
     "fastsatt": "EtterHovedregel",
-    "omregnetÅrsinntekt": 372000.0,
     "omregnetÅrsinntektTotalt": 372000.0,
     "sykepengegrunnlag": 372000.0,
     "6G": 561804.0,
@@ -95,11 +93,9 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
   "fom": "2018-01-03",
   "tom": "2018-01-26",
   "skjæringstidspunkt": "2018-01-03",
-  "sykepengegrunnlag": 561804.0,
   "hendelser": [ "$søknadId" ],
   "sykepengegrunnlagsfakta": {
     "fastsatt": "EtterSkjønn",
-    "omregnetÅrsinntekt": 540000.0,
     "omregnetÅrsinntektTotalt": 540000.0,
     "skjønnsfastsatt": 570000.0,
     "sykepengegrunnlag": 561804.0,
@@ -181,13 +177,11 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
   "fom": "2018-01-27",
   "tom": "2018-01-31",
   "skjæringstidspunkt": "2018-01-03",
-  "sykepengegrunnlag": 372000.0,
   "hendelser": [
     "$søknadId"
   ],
   "sykepengegrunnlagsfakta": {
     "fastsatt": "EtterHovedregel",
-    "omregnetÅrsinntekt": 372000.0,
     "omregnetÅrsinntektTotalt": 372000.0,
     "sykepengegrunnlag": 372000.0,
     "6G": 561804.0,
@@ -231,11 +225,9 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
   "fom": "2018-01-03",
   "tom": "2018-01-26",
   "skjæringstidspunkt": "2018-01-03",
-  "sykepengegrunnlag": 561804.0,
   "hendelser": [ "$søknadId" ],
   "sykepengegrunnlagsfakta": {
     "fastsatt": "EtterHovedregel",
-    "omregnetÅrsinntekt": 0,
     "omregnetÅrsinntektTotalt": 0,
     "sykepengegrunnlag": 561804.0,
     "6G": 561804.0,
