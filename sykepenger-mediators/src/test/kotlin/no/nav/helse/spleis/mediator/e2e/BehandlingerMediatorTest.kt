@@ -2,7 +2,9 @@ package no.nav.helse.spleis.mediator.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
+import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -21,6 +23,33 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+
+        val behandlingOpprettet = testRapid.inspektør.meldinger("behandling_opprettet").single()
+        val behandlingOpprettetIndeks = testRapid.inspektør.indeksFor(behandlingOpprettet)
+        val behandlingLukket = testRapid.inspektør.meldinger("behandling_lukket").single()
+        val behandlingLukketIndeks = testRapid.inspektør.indeksFor(behandlingLukket)
+        val behandlingAvsluttet = testRapid.inspektør.meldinger("avsluttet_med_vedtak").single()
+        val behandlingAvsluttetIndeks = testRapid.inspektør.indeksFor(behandlingAvsluttet)
+
+        assertTrue(behandlingOpprettetIndeks < behandlingLukketIndeks) { "behandling_opprettet må sendes først" }
+        assertTrue(behandlingLukketIndeks < behandlingAvsluttetIndeks) { "behandling_lukket bør sendes før behandling avsluttes" }
+
+        verifiserBehandlingOpprettetKontrakt(behandlingOpprettet)
+        verifiserBehandlingLukketKontrakt(behandlingLukket)
+    }
+
+    @Test
+    fun `vedtak iverksatt selvstendig`() {
+        sendSelvstendigsøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+            ventetid = 1.januar til 16.januar
+        )
+        sendVilkårsgrunnlagSelvstendig(0)
+        sendYtelserSelvstendig(0)
+        sendSimuleringSelvstendig(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenningSelvstendig(0)
         sendUtbetaling()
 
         val behandlingOpprettet = testRapid.inspektør.meldinger("behandling_opprettet").single()
@@ -94,20 +123,21 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
         verifiserBehandlingForkastetKontrakt(behandlingForkastet)
     }
 
-    private fun verifiserBehandlingOpprettetKontrakt(behandlingLukket: JsonNode) {
-        assertEquals("behandling_opprettet", behandlingLukket.path("@event_name").asText())
-        assertTrue(behandlingLukket.path("fødselsnummer").isTextual)
-        assertTrue(behandlingLukket.path("organisasjonsnummer").isTextual)
-        assertTrue(behandlingLukket.path("vedtaksperiodeId").isTextual)
-        assertTrue(behandlingLukket.path("behandlingId").isTextual)
-        assertDato(behandlingLukket.path("fom").asText())
-        assertDato(behandlingLukket.path("tom").asText())
+    private fun verifiserBehandlingOpprettetKontrakt(behandlingOpprettet: JsonNode) {
+        assertEquals("behandling_opprettet", behandlingOpprettet.path("@event_name").asText())
+        assertTrue(behandlingOpprettet.path("fødselsnummer").isTextual)
+        assertTrue(behandlingOpprettet.path("yrkesaktivitetstype").isTextual)
+        assertTrue(behandlingOpprettet.path("organisasjonsnummer").takeIf { behandlingOpprettet.path("yrkesaktivitetstype").asText() == "ARBEDISTAKER" }?.isTextual ?: true)
+        assertTrue(behandlingOpprettet.path("vedtaksperiodeId").isTextual)
+        assertTrue(behandlingOpprettet.path("behandlingId").isTextual)
+        assertDato(behandlingOpprettet.path("fom").asText())
+        assertDato(behandlingOpprettet.path("tom").asText())
     }
 
     private fun verifiserBehandlingLukketKontrakt(behandlingLukket: JsonNode) {
         assertEquals("behandling_lukket", behandlingLukket.path("@event_name").asText())
         assertTrue(behandlingLukket.path("fødselsnummer").isTextual)
-        assertTrue(behandlingLukket.path("organisasjonsnummer").isTextual)
+        assertTrue(behandlingLukket.path("organisasjonsnummer").takeIf { behandlingLukket.path("yrkesaktivitetstype").asText() == "ARBEDISTAKER" }?.isTextual ?: true)
         assertTrue(behandlingLukket.path("vedtaksperiodeId").isTextual)
         assertTrue(behandlingLukket.path("behandlingId").isTextual)
     }

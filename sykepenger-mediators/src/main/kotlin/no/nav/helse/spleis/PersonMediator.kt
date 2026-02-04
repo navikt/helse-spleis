@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.util.UUID
-import kotlin.collections.emptyList
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
@@ -40,10 +39,10 @@ internal class PersonMediator(
                 when (event) {
                     is EventSubscription.AnalytiskDatapakkeEvent -> mapAnalytiskDatapakke(event) // ✅ Meldingen inneholder ikke organisasjonsnummer
                     is EventSubscription.AvsluttetMedVedtakEvent -> mapAvsluttetMedVedtak(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                    is EventSubscription.AvsluttetUtenVedtakEvent -> mapAvsluttetUtenVedtak(event)
+                    is EventSubscription.AvsluttetUtenVedtakEvent -> mapAvsluttetUtenVedtak(event) // ✅ Foreløpig (før Flex sender søknader i venteperioden) er denne arbeidstaker-spesifikk
                     is EventSubscription.BehandlingForkastetEvent -> mapBehandlingForkastet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.BehandlingLukketEvent -> mapBehandlingLukket(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                    is EventSubscription.BehandlingOpprettetEvent -> mapBehandlingOpprettet(event)
+                    is EventSubscription.BehandlingOpprettetEvent -> mapBehandlingOpprettet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.FeriepengerUtbetaltEvent -> mapFeriepengerUtbetalt(event) // ✅ Er arbeidstaker-spesifikk
                     is EventSubscription.InntektsmeldingFørSøknadEvent -> mapInntektsmeldingFørSøknad(event) // ✅ Er arbeidstaker-spesifikk
                     is EventSubscription.InntektsmeldingHåndtertEvent -> mapInntektsmeldingHåndtert(event) // ✅ Er arbeidstaker-spesifikk
@@ -575,20 +574,21 @@ internal class PersonMediator(
     private fun mapBehandlingOpprettet(event: EventSubscription.BehandlingOpprettetEvent): JsonMessage {
         return JsonMessage.newMessage(
             "behandling_opprettet",
-            mutableMapOf(
-                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "behandlingId" to event.behandlingId,
-                "søknadIder" to event.søknadIder,
-                "type" to event.type,
-                "fom" to event.fom,
-                "tom" to event.tom,
-                "kilde" to mapOf(
-                    "meldingsreferanseId" to event.kilde.meldingsreferanseId,
-                    "innsendt" to event.kilde.innsendt,
-                    "registrert" to event.kilde.registert,
-                    "avsender" to event.kilde.avsender
+            byggMedYrkesaktivitet(
+                event.yrkesaktivitetssporing,
+                mutableMapOf(
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                    "søknadIder" to event.søknadIder,
+                    "type" to event.type,
+                    "fom" to event.fom,
+                    "tom" to event.tom,
+                    "kilde" to mapOf(
+                        "meldingsreferanseId" to event.kilde.meldingsreferanseId,
+                        "innsendt" to event.kilde.innsendt,
+                        "registrert" to event.kilde.registert,
+                        "avsender" to event.kilde.avsender
+                    )
                 )
             )
         )
