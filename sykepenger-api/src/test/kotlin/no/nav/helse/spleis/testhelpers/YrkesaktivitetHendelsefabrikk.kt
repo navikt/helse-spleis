@@ -274,7 +274,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         inntekterForBeregning: List<Inntektsperiode> = emptyList(),
-        dagpenger: List<Periode> = emptyList(),
+        dagpengerV2: List<Periode> = emptyList(),
         selvstendigForsikring: SelvstendigForsikring? = null
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
@@ -302,7 +302,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             ),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspengerV2),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
-            dagpenger = Dagpenger(dagpenger),
+            dagpenger = Dagpenger(dagpengerV2),
             selvstendigForsikring = selvstendigForsikring
         )
     }

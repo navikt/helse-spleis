@@ -338,7 +338,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         opplæringspenger: List<GradertPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         arbeidsavklaringspengerV2: List<Periode> = emptyList(),
-        dagpenger: List<Periode> = emptyList(),
+        dagpengerV2: List<Periode> = emptyList(),
         inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
         selvstendigForsikring: SelvstendigForsikring? = null,
         andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList()
@@ -367,7 +367,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 perioder = institusjonsoppholdsperioder
             ),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspengerV2),
-            dagpenger = Dagpenger(dagpenger),
+            dagpenger = Dagpenger(dagpengerV2),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             selvstendigForsikring = selvstendigForsikring,
             andreYtelser = AndreYtelser(andreYtelser)

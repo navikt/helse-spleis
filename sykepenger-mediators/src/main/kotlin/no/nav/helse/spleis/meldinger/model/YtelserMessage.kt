@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.time.LocalDate
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
@@ -40,8 +39,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val yrkesaktivitetssporing = packet.yrkesaktivitetssporing
-    private val dagpenger: List<Pair<LocalDate, LocalDate>>
-    private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
     private val foreldrepengerytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Foreldrepengeytelse"]
         .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asGradertPeriode) ?: emptyList()
@@ -122,16 +119,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             }.first
     )
 
-    init {
-        packet["@løsning.${Behovtype.Dagpenger.name}.meldekortperioder"]
-            .map(::asDatePair)
-            .partition { it.first <= it.second }
-            .also {
-                dagpenger = it.first
-                ugyldigeDagpengeperioder = it.second
-            }
-    }
-
     private val ytelser
         get() = Ytelser(
             meldingsreferanseId = meldingsporing.id,
@@ -144,19 +131,14 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             opplæringspenger = opplæringspenger,
             institusjonsopphold = institusjonsopphold,
             arbeidsavklaringspenger = arbeidsavklaringspengerV2,
-            dagpenger = Dagpenger(dagpenger.map { Periode(it.first, it.second) }),
+            dagpenger = dagpengerV2,
             inntekterForBeregning = inntekterForBeregning,
             selvstendigForsikring = selvstendigForsikring
-        ).also {
-            if (ugyldigeDagpengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom for")
-        }
+        )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         mediator.behandle(this, ytelser, context)
     }
-
-    private fun asDatePair(jsonNode: JsonNode) =
-        jsonNode.path("fom").asLocalDate() to jsonNode.path("tom").asLocalDate()
 
     private fun asGradertPeriode(jsonNode: JsonNode) =
         GradertPeriode(
