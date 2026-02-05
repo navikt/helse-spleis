@@ -91,6 +91,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForBeregning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForOpptjeningsvurdering
@@ -2869,6 +2870,7 @@ internal class Vedtaksperiode private constructor(
         opplæringspenger(aktivitetslogg, søkevinduFamilieytelser)
         institusjonsopphold(aktivitetslogg, periode)
         arbeidsavklaringspengerV2(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
+        dagpengerV2(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
         dagpenger(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
         val (beregningsperiode, _) = perioderSomMåHensyntasVedBeregning()
         inntekterForBeregning(aktivitetslogg, beregningsperiode)

@@ -193,6 +193,15 @@ sealed class Aktivitet(
                 )
             }
 
+            fun dagpengerV2(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
+                aktivitetslogg.behov(
+                    Behovtype.DagpengerV2, "Trenger informasjon om dagpenger", mapOf(
+                    "periodeFom" to fom.toString(),
+                    "periodeTom" to tom.toString()
+                )
+                )
+            }
+
             fun arbeidsavklaringspengerV2(aktivitetslogg: IAktivitetslogg, fom: LocalDate, tom: LocalDate) {
                 aktivitetslogg.behov(
                     Behovtype.ArbeidsavklaringspengerV2, "Trenger informasjon om arbeidsavklaringspenger", mapOf(
@@ -248,6 +257,7 @@ sealed class Aktivitet(
             InntekterForBeregning,
 
             Dagpenger,
+            DagpengerV2,
             ArbeidsavklaringspengerV2,
             Medlemskap,
             Dødsinfo,
