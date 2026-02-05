@@ -1166,7 +1166,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(expected, personlogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Omsorgspenger))
         assertEquals(expected, personlogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Opplæringspenger))
         assertEquals(expected, personlogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2))
-        assertEquals(expected, personlogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Dagpenger))
+        assertEquals(expected, personlogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.DagpengerV2))
         assertEquals(expected, personlogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitet.Behov.Behovtype.Institusjonsopphold))
     }
 }

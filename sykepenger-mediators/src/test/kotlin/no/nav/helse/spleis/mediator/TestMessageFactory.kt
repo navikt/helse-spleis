@@ -36,7 +36,6 @@ import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.DagpengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering
@@ -858,11 +857,6 @@ internal class TestMessageFactory(
         val kategori: String
     )
 
-    class DagpengerTestdata(
-        val fom: LocalDate,
-        val tom: LocalDate
-    )
-
     data class InntektsperiodeTestData(val inntektskilde: String, val fom: LocalDate, val tom: LocalDate, val daglig: Double?, val måndelig: Double?, val årlig: Double?) {}
 
     data class Arbeidsforhold(
@@ -957,7 +951,6 @@ internal class TestMessageFactory(
         omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
         opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
-        dagpenger: List<DagpengerTestdata> = emptyList(),
         dagpengerV2: Dagpenger = Dagpenger(emptyList()),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
         selvstendigForsikring: List<SelvstendigForsikring> = emptyList(),
@@ -973,7 +966,6 @@ internal class TestMessageFactory(
             "Institusjonsopphold",
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
-            "Dagpenger",
             "DagpengerV2"
         )
         if (yrkesaktivitetstype == "SELVSTENDIG") {
@@ -1036,14 +1028,6 @@ internal class TestMessageFactory(
                             "årlig" to data.årlig
                         )
 
-                    }
-                ),
-                Dagpenger.name to mapOf(
-                    "meldekortperioder" to dagpenger.map { data ->
-                        mapOf(
-                            "fom" to data.fom,
-                            "tom" to data.tom
-                        )
                     }
                 ),
                 DagpengerV2.name to mapOf(

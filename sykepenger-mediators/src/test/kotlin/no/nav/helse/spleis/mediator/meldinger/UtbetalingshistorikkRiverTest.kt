@@ -224,7 +224,7 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
           "historikkFom": "2015-12-08",
           "historikkTom": "2019-12-08",
           "@behov": [
-            "Sykepengehistorikk", "Dagpenger"
+            "Sykepengehistorikk", "DagpengerV2"
           ],
           "@id": "${UUID.randomUUID()}",
           "@opprettet": "2020-01-24T11:25:00",

@@ -90,7 +90,6 @@ import no.nav.helse.person.Venteårsak.Companion.fordi
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForBeregning
@@ -289,8 +288,9 @@ internal class Vedtaksperiode private constructor(
     private val eksterneIderSet get() = behandlinger.eksterneIderUUID()
     internal val refusjonstidslinje get() = behandlinger.refusjonstidslinje()
 
-    internal val EventBus.behandlingEventBus get() =
-        BehandlingEventBus(this, yrkesaktivitet.yrkesaktivitetstype, id, behandlinger.søknadIder())
+    internal val EventBus.behandlingEventBus
+        get() =
+            BehandlingEventBus(this, yrkesaktivitet.yrkesaktivitetstype, id, behandlinger.søknadIder())
 
     internal fun view() = VedtaksperiodeView(
         id = id,
@@ -481,7 +481,8 @@ internal class Vedtaksperiode private constructor(
             ArbeidsledigAvventerBlokkerendePeriode,
             TilAnnullering,
             TilInfotrygd,
-            TilUtbetaling -> {}
+            TilUtbetaling -> {
+            }
         }
         behandlinger.håndterKorrigertInntekt(
             behandlingEventBus = eventBus.behandlingEventBus,
@@ -591,7 +592,8 @@ internal class Vedtaksperiode private constructor(
                 ArbeidsledigAvventerBlokkerendePeriode,
                 FrilansAvventerInfotrygdHistorikk,
                 FrilansAvventerBlokkerendePeriode,
-                AvventerInfotrygdHistorikk -> {}
+                AvventerInfotrygdHistorikk -> {
+                }
 
                 Avsluttet,
                 AvventerGodkjenning,
@@ -682,7 +684,8 @@ internal class Vedtaksperiode private constructor(
             AvventerSimulering,
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
-            AvventerVilkårsprøvingRevurdering -> {}
+            AvventerVilkårsprøvingRevurdering -> {
+            }
 
             TilUtbetaling -> check(behandlinger.åpenForEndring()) {
                 "forventer at vedtaksperioden er åpen for endring når inntekt håndteres (tilstand $tilstand)"
@@ -1084,7 +1087,8 @@ internal class Vedtaksperiode private constructor(
             AvventerSimulering,
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
-            AvventerVilkårsprøvingRevurdering -> {}
+            AvventerVilkårsprøvingRevurdering -> {
+            }
 
             ArbeidsledigStart,
             ArbeidsledigAvventerInfotrygdHistorikk,
@@ -1260,6 +1264,7 @@ internal class Vedtaksperiode private constructor(
                 if (this.kanForkastes()) håndterDagerFørstegang(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
                 else håndterDagerFørstegang(eventBus, dager, FunksjonelleFeilTilVarsler(aktivitetsloggMedVedtaksperiodekontekst))
             }
+
             AvventerGodkjenning,
             AvventerGodkjenningRevurdering,
             AvventerHistorikk,
@@ -1702,7 +1707,9 @@ internal class Vedtaksperiode private constructor(
         when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> grunnlagsdata.valider(aktivitetslogg, yrkesaktivitet.organisasjonsnummer)
             Arbeidsledig,
-            Frilans -> {}
+            Frilans -> {
+            }
+
             Selvstendig ->
                 if (selvstendigForsikring != null) {
                     if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
@@ -2259,7 +2266,8 @@ internal class Vedtaksperiode private constructor(
             AvventerSimulering,
             AvventerSimuleringRevurdering,
             AvventerVilkårsprøving,
-            AvventerVilkårsprøvingRevurdering -> {}
+            AvventerVilkårsprøvingRevurdering -> {
+            }
 
             SelvstendigAvsluttet,
             SelvstendigAvventerBlokkerendePeriode,
@@ -2553,7 +2561,8 @@ internal class Vedtaksperiode private constructor(
             ArbeidstakerStart,
             TilAnnullering,
             TilInfotrygd,
-            TilUtbetaling -> {}
+            TilUtbetaling -> {
+            }
         }
 
         behandlinger.nullstillEgenmeldingsdager(
@@ -2871,14 +2880,14 @@ internal class Vedtaksperiode private constructor(
         institusjonsopphold(aktivitetslogg, periode)
         arbeidsavklaringspengerV2(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
         dagpengerV2(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
-        dagpenger(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
         val (beregningsperiode, _) = perioderSomMåHensyntasVedBeregning()
         inntekterForBeregning(aktivitetslogg, beregningsperiode)
 
         when (yrkesaktivitet.yrkesaktivitetstype) {
             Arbeidsledig,
             is Arbeidstaker,
-            Frilans -> {}
+            Frilans -> {
+            }
 
             Selvstendig -> selvstendigForsikring(aktivitetslogg, this.skjæringstidspunkt)
         }
@@ -2940,6 +2949,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.person.fjernVilkårsgrunnlagPå(vedtaksperiode.skjæringstidspunkt, aktivitetslogg)
                 Revurderingseventyr.reberegning(påminnelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             }
+
             påminnelse.når(Flagg("ønskerReberegning")) -> Revurderingseventyr.reberegning(påminnelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             else -> null
         }
@@ -3339,16 +3349,20 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.igangsettOverstyring(eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
             this
                 .filterNot { revurdering.erIkkeRelevantFor(it.periode) }
-                .onEach { revurdering.inngå(EventSubscription.OverstyringIgangsatt.VedtaksperiodeData(
-                    yrkesaktivitetssporing = it.yrkesaktivitet.yrkesaktivitetstype,
-                    vedtaksperiodeId = it.id,
-                    skjæringstidspunkt = it.skjæringstidspunkt,
-                    periode = it.periode,
-                    typeEndring = when {
-                        it.behandlinger.harFattetVedtak() -> EventSubscription.OverstyringIgangsatt.TypeEndring.REVURDERING
-                        else -> EventSubscription.OverstyringIgangsatt.TypeEndring.OVERSTYRING
-                    }
-                )) }
+                .onEach {
+                    revurdering.inngå(
+                        EventSubscription.OverstyringIgangsatt.VedtaksperiodeData(
+                            yrkesaktivitetssporing = it.yrkesaktivitet.yrkesaktivitetstype,
+                            vedtaksperiodeId = it.id,
+                            skjæringstidspunkt = it.skjæringstidspunkt,
+                            periode = it.periode,
+                            typeEndring = when {
+                                it.behandlinger.harFattetVedtak() -> EventSubscription.OverstyringIgangsatt.TypeEndring.REVURDERING
+                                else -> EventSubscription.OverstyringIgangsatt.TypeEndring.OVERSTYRING
+                            }
+                        )
+                    )
+                }
                 .onEach { it.igangsettOverstyringPåBehandlingen(eventBus, revurdering, aktivitetslogg) }
                 .onEach { it.igangsettOverstyringEndreTilstand(eventBus, aktivitetslogg) }
                 // Akkurat disse to tilstandene er litt kilne. Vurderinger på om de kan gå videre sjekker på tilstander
@@ -3855,6 +3869,7 @@ private fun nesteTilstandEtterIgangsattOverstyring(
             vedtaksperiode.harInntektOgRefusjon() -> nesteTilstandEtterInntekt(vedtaksperiode)
             else -> AvventerInntektsmelding
         }
+
         else -> AvventerAvsluttetUtenUtbetaling
     }
 

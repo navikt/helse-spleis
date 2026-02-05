@@ -115,7 +115,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             .partition { it.start <= it.endInclusive }
             .also {
                 if (it.second.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom for")
-                sikkerlogg.info("Har lest in dagpengerV2")
             }.first
     )
 

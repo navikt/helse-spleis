@@ -12,7 +12,6 @@ import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.DagpengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
@@ -47,7 +46,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
         assertVedtaksperiodeBehov(
             behov,
-            Dagpenger,
+            DagpengerV2,
             InntekterForSykepengegrunnlag,
             InntekterForOpptjeningsvurdering,
             Medlemskap,
@@ -74,7 +73,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertVedtaksperiodeBehov(
             behov,
             ArbeidsavklaringspengerV2,
-            Dagpenger,
             DagpengerV2,
             Foreldrepenger,
             Institusjonsopphold,
@@ -85,7 +83,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         )
         assertArbeidsavklaringspengerdetaljer(behov)
         assertDagpengerdetaljer(behov)
-        assertDagpengerV2detaljer(behov)
         assertForeldrepengerdetaljer(behov)
         assertInstitusjonsoppholddetaljer(behov)
         assertOmsorgspengerdetaljer(behov)
@@ -201,14 +198,9 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertDato(behov.path(ArbeidsavklaringspengerV2.name).path("periodeTom").asText())
     }
 
-    private fun assertDagpengerV2detaljer(behov: JsonNode) {
+    private fun assertDagpengerdetaljer(behov: JsonNode) {
         assertDato(behov.path(DagpengerV2.name).path("periodeFom").asText())
         assertDato(behov.path(DagpengerV2.name).path("periodeTom").asText())
-    }
-
-    private fun assertDagpengerdetaljer(behov: JsonNode) {
-        assertDato(behov.path(Dagpenger.name).path("periodeFom").asText())
-        assertDato(behov.path(Dagpenger.name).path("periodeTom").asText())
     }
 
     private fun assertInntekterForSykepengegrunnlagdetaljer(behov: JsonNode) {

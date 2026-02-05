@@ -421,7 +421,7 @@ internal abstract class AbstractSpeilBuilderTest {
     }
 
     protected fun håndterSimulering() {
-        val simuleringer = hendelselogg.simuleringbehov() ?: error("Fant ikke simuleringsbehov")
+        val simuleringer = simuleringbehov() ?: error("Fant ikke simuleringsbehov")
         simuleringer.forEach { behov ->
             behov.oppdrag.forEach {
                 val simulering = fabrikker.getValue(behov.orgnummer).lagSimulering(
@@ -623,7 +623,7 @@ internal abstract class AbstractSpeilBuilderTest {
             Aktivitet.Behov.Behovtype.Opplæringspenger,
             Aktivitet.Behov.Behovtype.Institusjonsopphold,
             Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2,
-            Aktivitet.Behov.Behovtype.Dagpenger
+            Aktivitet.Behov.Behovtype.DagpengerV2
         )
     )
         ?.let {
@@ -636,7 +636,7 @@ internal abstract class AbstractSpeilBuilderTest {
             )
         }
 
-    private fun IAktivitetslogg.simuleringbehov() =
+    private fun simuleringbehov() =
         ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Simulering))
             ?.let {
                 ubesvarteBehov.removeAll(it)

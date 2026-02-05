@@ -72,7 +72,6 @@ private val json = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger",
         "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -223,7 +222,6 @@ private val ukjentPeriode = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger",
         "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -321,7 +319,6 @@ private val ugyldigPeriode = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger",
         "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -411,7 +408,6 @@ private val utenPleiepenger = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger",
         "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -489,7 +485,6 @@ private val utenOmsorgspenger = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger",
         "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -567,7 +562,6 @@ private val utenOpplæringspenger = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger",
         "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -645,7 +639,6 @@ private val utenInstitusjonsopphold = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning"
-        "Dagpenger",
         "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -724,7 +717,6 @@ private val utenArbeidsavklaringspenger = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger",
         "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
@@ -825,7 +817,6 @@ private val utenDagpenger = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger",
         "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
