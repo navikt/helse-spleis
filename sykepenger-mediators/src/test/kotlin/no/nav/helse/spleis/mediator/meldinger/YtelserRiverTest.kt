@@ -72,7 +72,8 @@ private val json = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger"
+        "Dagpenger",
+        "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -192,7 +193,16 @@ private val json = """
               "tom": "2019-04-12"
             }
           ]
+        },
+        "DagpengerV2": {
+          "meldekortperioder": [
+            {
+              "fom": "2019-03-11",
+              "tom": "2019-04-12"
+            }
+          ]
         }
+
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"
@@ -213,7 +223,8 @@ private val ukjentPeriode = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger"
+        "Dagpenger",
+        "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -278,6 +289,9 @@ private val ukjentPeriode = """
         "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
+        },
+        "DagpengerV2": {
+          "meldekortperioder": []
         }
       },
       "@final": true,
@@ -307,7 +321,8 @@ private val ugyldigPeriode = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger"
+        "Dagpenger",
+        "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -372,6 +387,9 @@ private val ugyldigPeriode = """
         "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
+        },
+        "DagpengerV2": {
+          "meldekortperioder": []
         }
       },
       "@final": true,
@@ -393,7 +411,8 @@ private val utenPleiepenger = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger"
+        "Dagpenger",
+        "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -446,7 +465,10 @@ private val utenPleiepenger = """
         "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
           "meldekortperioder": []
-        }
+        },
+        "DagpengerV2": {
+          "meldekortperioder": []
+        } 
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"
@@ -467,7 +489,8 @@ private val utenOmsorgspenger = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger"
+        "Dagpenger",
+        "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -519,6 +542,9 @@ private val utenOmsorgspenger = """
         },        
         "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
+          "meldekortperioder": []
+        }
+        "DagpengerV2": {
           "meldekortperioder": []
         }
       },
@@ -541,7 +567,8 @@ private val utenOpplæringspenger = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger"
+        "Dagpenger",
+        "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -595,6 +622,9 @@ private val utenOpplæringspenger = """
         "Dagpenger": {
           "meldekortperioder": []
         }
+        "DagpengerV2": {
+          "meldekortperioder": []
+        }
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"
@@ -615,7 +645,8 @@ private val utenInstitusjonsopphold = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning"
-        "Dagpenger"
+        "Dagpenger",
+        "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -667,6 +698,9 @@ private val utenInstitusjonsopphold = """
         },        
         "InntekterForBeregning": {"inntekter": []},
         "Dagpenger": {
+          "meldekortperioder": []
+        }
+        "DagpengerV2": {
           "meldekortperioder": []
         }
       },
@@ -690,7 +724,8 @@ private val utenArbeidsavklaringspenger = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger"
+        "Dagpenger",
+        "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -755,6 +790,12 @@ private val utenArbeidsavklaringspenger = """
             "grad": "100"
           }
         ],
+        "Dagpenger": {
+          "meldekortperioder": []
+        }
+        "DagpengerV2": {
+          "meldekortperioder": []
+        }
         "InntekterForBeregning": {"inntekter": []},
         "Institusjonsopphold": [
           {
@@ -784,7 +825,8 @@ private val utenDagpenger = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "Dagpenger"
+        "Dagpenger",
+        "DagpengerV2"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",

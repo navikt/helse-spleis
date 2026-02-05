@@ -107,6 +107,21 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
         Behandlingsporing.Yrkesaktivitet.Frilans -> null
     }
 
+    private val dagpengerV2 = Dagpenger(
+        packet["@løsning.${Behovtype.DagpengerV2.name}.meldekortperioder"]
+            .map {
+                Periode(
+                    it.path("fom").asLocalDate(),
+                    it.path("tom").asLocalDate()
+                )
+            }
+            .partition { it.start <= it.endInclusive }
+            .also {
+                if (it.second.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom for")
+                sikkerlogg.info("Har lest in dagpengerV2")
+            }.first
+    )
+
     init {
         packet["@løsning.${Behovtype.Dagpenger.name}.meldekortperioder"]
             .map(::asDatePair)

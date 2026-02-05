@@ -9,6 +9,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.DagpengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
@@ -32,7 +33,8 @@ internal class YtelserRiver(
         Institusjonsopphold,
         ArbeidsavklaringspengerV2,
         InntekterForBeregning,
-        Dagpenger
+        Dagpenger,
+        DagpengerV2
     )
 
     override val riverName = "Ytelser"
@@ -80,6 +82,12 @@ internal class YtelserRiver(
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
+
+        message.requireArray("@løsning.${DagpengerV2.name}.meldekortperioder") {
+            require("fom", JsonNode::asLocalDate)
+            require("tom", JsonNode::asLocalDate)
+        }
+
         message.requireArray("@løsning.${InntekterForBeregning.name}.inntekter") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)

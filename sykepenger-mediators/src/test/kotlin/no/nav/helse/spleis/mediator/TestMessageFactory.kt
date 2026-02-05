@@ -28,6 +28,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SvarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.VentetidDTO
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as HendelsePeriode
@@ -36,6 +37,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.DagpengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
@@ -856,11 +858,6 @@ internal class TestMessageFactory(
         val kategori: String
     )
 
-    class ArbeidsavklaringspengerTestdata(
-        val fom: LocalDate,
-        val tom: LocalDate
-    )
-
     class DagpengerTestdata(
         val fom: LocalDate,
         val tom: LocalDate
@@ -961,6 +958,7 @@ internal class TestMessageFactory(
         opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
         dagpenger: List<DagpengerTestdata> = emptyList(),
+        dagpengerV2: Dagpenger = Dagpenger(emptyList()),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
         selvstendigForsikring: List<SelvstendigForsikring> = emptyList(),
         arbeidsavklaringspengerV2: Arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
@@ -975,7 +973,8 @@ internal class TestMessageFactory(
             "Institusjonsopphold",
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
-            "Dagpenger"
+            "Dagpenger",
+            "DagpengerV2"
         )
         if (yrkesaktivitetstype == "SELVSTENDIG") {
             behovliste.add("SelvstendigForsikring")
@@ -1046,8 +1045,15 @@ internal class TestMessageFactory(
                             "tom" to data.tom
                         )
                     }
-                )
-            )
+                ),
+                DagpengerV2.name to mapOf(
+                    "meldekortperioder" to dagpengerV2.perioder.map { data ->
+                        mapOf(
+                            "fom" to data.start,
+                            "tom" to data.endInclusive
+                        )
+                    }
+                ))
                 .plus(selvstendigForsikringer(selvstendigForsikring, yrkesaktivitetstype))
         )
     }
