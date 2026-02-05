@@ -286,4 +286,6 @@ spec:
         - team: tbd
           application: sparkel-forsikring
           access: readwrite
-
+        - team: tbd
+          application: spiskammerset-mottak
+          access: readwrite
