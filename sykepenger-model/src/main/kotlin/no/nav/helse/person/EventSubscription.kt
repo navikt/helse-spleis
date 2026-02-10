@@ -592,6 +592,9 @@ interface EventSubscription {
 
     data class BenyttetGrunnlagsdataForBeregningEvent(
         val behandlingId: UUID,
+        val vedtaksperiodeId: UUID,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val periode: Periode,
         val forsikring: SelvstendigForsikring?
     ) : Event
 

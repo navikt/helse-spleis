@@ -1594,7 +1594,7 @@ internal class Vedtaksperiode private constructor(
         lagBeregnetBehandlinger(perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder, selvstendigForsikring)
 
         // gir beskjed om hvilken grunnlagsdata som ble brukt i beregningen for behandlingen
-        eventBus.benyttetGrunnlagsdataForBeregning(behandlinger.sisteBehandlingId, selvstendigForsikring)
+        eventBus.benyttetGrunnlagsdataForBeregning(behandlinger.sisteBehandlingId, id, yrkesaktivitet.yrkesaktivitetstype, periode, selvstendigForsikring)
 
         /* steg 4.2 lag utbetalinger */
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->

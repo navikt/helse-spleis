@@ -220,8 +220,8 @@ class EventBus {
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
     }
 
-    internal fun benyttetGrunnlagsdataForBeregning(behandlingId: UUID, forsikring: SelvstendigForsikring?) {
-        val event = EventSubscription.BenyttetGrunnlagsdataForBeregningEvent(behandlingId, forsikring)
+    internal fun benyttetGrunnlagsdataForBeregning(behandlingId: UUID, vedtaksperiodeId: UUID, yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, periode: Periode, forsikring: SelvstendigForsikring?) {
+        val event = EventSubscription.BenyttetGrunnlagsdataForBeregningEvent(behandlingId, vedtaksperiodeId, yrkesaktivitetssporing, periode, forsikring)
         _events.add(event)
         observers.forEach { it.benyttetGrunnlagsdataForBeregning(event) }
     }

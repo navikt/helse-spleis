@@ -69,7 +69,7 @@ internal class PersonMediator(
                     is EventSubscription.VedtaksperiodeOpprettet -> mapVedtaksperiodeOpprettet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperiodePåminnetEvent -> mapVedtaksperiodePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperioderVenterEvent -> mapVedtaksperioderVenter(event)
-                    is EventSubscription.BenyttetGrunnlagsdataForBeregningEvent -> mapBenyttetGrunnlagsdataForBeregning(event) // ✅ Meldingen er på person-nivå, no orgnr
+                    is EventSubscription.BenyttetGrunnlagsdataForBeregningEvent -> mapBenyttetGrunnlagsdataForBeregning(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                 }
             }
             .map { jsonMessage -> mapTilPakke(jsonMessage) }
@@ -804,13 +804,18 @@ internal class PersonMediator(
     }
 
     private fun mapBenyttetGrunnlagsdataForBeregning(event: EventSubscription.BenyttetGrunnlagsdataForBeregningEvent): JsonMessage {
-        val benyttetGrunnlagsdataForBeregning: MutableMap<String, Any> = mutableMapOf("behandlingId" to event.behandlingId)
+        val benyttetGrunnlagsdataForBeregning: MutableMap<String, Any> = mutableMapOf(
+            "behandlingId" to event.behandlingId,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "fom" to event.periode.start,
+            "tom" to event.periode.endInclusive
+        )
 
         if (event.forsikring != null) benyttetGrunnlagsdataForBeregning["forsikring"] = mapOf(
             "dekningsgrad" to event.forsikring!!.dekningsgrad().toDouble(),
             "navOvertarAnsvarForVentetid" to event.forsikring!!.navOvertarAnsvarForVentetid()
         )
-        return JsonMessage.newMessage("benyttet_grunnlagsdata_for_beregning", benyttetGrunnlagsdataForBeregning.toMap())
+        return JsonMessage.newMessage("benyttet_grunnlagsdata_for_beregning", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, benyttetGrunnlagsdataForBeregning.toMap()))
     }
 
     /** Legger alltid til yrkesaktivitetstype, men legger kun til organisasjonsnummer for Arbeidstaker **/
