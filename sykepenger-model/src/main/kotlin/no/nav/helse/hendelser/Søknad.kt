@@ -401,6 +401,19 @@ class Søknad(
         fun build() = foreldedeDager.grupperSammenhengendePerioder()
     }
 
+    /**
+     * En klasse for å holde på data som kommer fra skattetaten om pensjonsgivende inntekter.
+     * Dette er data som ikke nødvendigvis er ferdiglignet, og som kan ha flere typer inntekter for samme år.
+     *
+     * @param[inntektsår] Året inntekten gjelder for.
+     * @param[næringsinntekt] Inntekt fra næringsvirksomhet for personlig skattepliktig som er medlem i folketrygden.
+     * @param[lønnsinntekt] Lønn, honorar og annen godtgjørelse for arbeid eller oppdrag i eller utenfor tjenesteforhold for skattepliktig som er medlem i folketrygden
+     * @param[lønnsinntektBarePensjonsdel] Lønn, honorar og annen godtgjørelse for arbeid eller oppdrag i eller utenfor tjenesteforhold for skattepliktig som er medlem i folketrygden kun for pensjonsdelen
+     * @param[næringsinntektFraFiskeFangstEllerFamiliebarnehage] Inntekt fra næringsvirksomhet innen fangst, fiske og barnepass i barnepasserens hjem for personlig skattepliktig som er medlem i folketrygden
+     * @param[erFerdigLignet] Om inntekten er ferdiglignet eller ikke. Dette er relevant for å kunne vurdere om inntekten kan brukes som grunnlag for beregning av sykepenger for selvstendig næringsdrivende,
+     * da det er krav om at inntekten skal være ferdiglignet for å kunne brukes som grunnlag for beregning av sykepenger.
+     */
+
     data class PensjonsgivendeInntekt(
         val inntektsår: Year,
         val næringsinntekt: Inntekt,
