@@ -808,7 +808,8 @@ internal class PersonMediator(
             "behandlingId" to event.behandlingId,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "fom" to event.periode.start,
-            "tom" to event.periode.endInclusive
+            "tom" to event.periode.endInclusive,
+            "behandlingOpprettetTidspunkt" to event.behandlingOpprettetTidspunkt
         )
 
         if (event.forsikring != null) benyttetGrunnlagsdataForBeregning["forsikring"] = mapOf(
