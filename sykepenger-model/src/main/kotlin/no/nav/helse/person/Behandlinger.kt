@@ -1401,10 +1401,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             val dagenFørSisteSkjæringstidspunkt = skjæringstidspunkter.max().forrigeDag
 
-            // Første dag vi potensielt skal utbetale er den første dagen Nav over tar ansvar,
+            // Første dag vi potensielt skal utbetale er den første dagen Nav overtar ansvar,
             // .. eller første arbeidsdag etter AGP/Ventetid
             val førstePotensielleUtbetalingsdag = listOfNotNull(
-                dagerNavOvertarAnsvar.flatten().minByOrNull { !it.erHelg() },
+                dagerNavOvertarAnsvar.flatten().filterNot { it.erHelg() }.minOrNull(),
                 dagerUtenNavAnsvar.dager.flatten().maxOrNull()?.førsteArbeidsdagEtter
             ).minOrNull() ?: return false
 
