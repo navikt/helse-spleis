@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.util.*
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.BehandlingkildeDto
@@ -17,8 +16,11 @@ import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
 import no.nav.helse.dto.serialisering.BehandlingerUtDto
+import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Regelverkslogg
+import no.nav.helse.forrigeDag
+import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
@@ -1392,6 +1394,24 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.UberegnetOmgjøring -> hvisAUU()
 
             }
+        }
+
+        fun harFlereSkjæringstidspunktV2(): Boolean {
+            if (skjæringstidspunkter.size <= 1) return false // ett eller færre skjæringstidspunkter er ok
+
+            val dagenFørSisteSkjæringstidspunkt = skjæringstidspunkter.max().forrigeDag
+
+            // Første dag vi potensielt skal utbetale er den første dagen Nav over tar ansvar,
+            // .. eller første arbeidsdag etter AGP/Ventetid
+            val førstePotensielleUtbetalingsdag = listOfNotNull(
+                dagerNavOvertarAnsvar.flatten().minByOrNull { !it.erHelg() },
+                dagerUtenNavAnsvar.dager.flatten().maxOrNull()?.førsteArbeidsdag()
+            ).minOrNull() ?: return false
+
+            return sykdomstidslinje
+                .fremTilOgMed(dagenFørSisteSkjæringstidspunkt)      // Ser kun på dager i denne behandlingen frem til og med dagen før siste skjæringstidspunkt
+                .fraOgMed(førstePotensielleUtbetalingsdag)          // .. og kun fra og med første potensielle utbetalingsdag
+                .any { it is Sykedag }                                     // .. sitter vi nå igjen med noen sykedager så bør det flagges til saksbehandler
         }
 
         fun harFlereSkjæringstidspunkt(): Boolean {
