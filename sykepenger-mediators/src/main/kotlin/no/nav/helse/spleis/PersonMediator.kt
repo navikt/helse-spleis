@@ -8,6 +8,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.Arbeidsgiverperiode
@@ -812,9 +813,10 @@ internal class PersonMediator(
             "behandlingOpprettetTidspunkt" to event.behandlingOpprettetTidspunkt
         )
 
-        if (event.forsikring != null) benyttetGrunnlagsdataForBeregning["forsikring"] = mapOf(
-            "dekningsgrad" to event.forsikring!!.dekningsgrad().toDouble(),
-            "navOvertarAnsvarForVentetid" to event.forsikring!!.navOvertarAnsvarForVentetid(),
+        val forsikring = event.forsikring
+        if (forsikring is SelvstendigForsikring) benyttetGrunnlagsdataForBeregning["forsikring"] = mapOf(
+            "dekningsgrad" to forsikring.dekningsgrad().toDouble(),
+            "navOvertarAnsvarForVentetid" to forsikring.navOvertarAnsvarForVentetid(),
             "premiegrunnlag" to event.forsikring!!.premiegrunnlag.årlig.toInt()
         )
         return JsonMessage.newMessage("benyttet_grunnlagsdata_for_beregning", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, benyttetGrunnlagsdataForBeregning.toMap()))
