@@ -814,7 +814,8 @@ internal class PersonMediator(
 
         if (event.forsikring != null) benyttetGrunnlagsdataForBeregning["forsikring"] = mapOf(
             "dekningsgrad" to event.forsikring!!.dekningsgrad().toDouble(),
-            "navOvertarAnsvarForVentetid" to event.forsikring!!.navOvertarAnsvarForVentetid()
+            "navOvertarAnsvarForVentetid" to event.forsikring!!.navOvertarAnsvarForVentetid(),
+            "premiegrunnlag" to event.forsikring!!.premiegrunnlag.årlig.toInt()
         )
         return JsonMessage.newMessage("benyttet_grunnlagsdata_for_beregning", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, benyttetGrunnlagsdataForBeregning.toMap()))
     }
