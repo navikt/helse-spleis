@@ -96,7 +96,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             // Har flere skjæringstidspunkt, men får ikke varsel pga "reglene" som vurderer om det er problematisk eller ei
-            assertEquals(listOf(1.januar, 20.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
+            assertEquals(listOf(20.januar, 1.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
             assertVarsler(1.vedtaksperiode, RV_IM_8)
         }
     }
