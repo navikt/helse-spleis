@@ -1049,7 +1049,8 @@ internal class TestMessageFactory(
                 mapOf(
                     "forsikringstype" to forsikring.type,
                     "sluttdato" to forsikring.opphørsdato,
-                    "startdato" to forsikring.virkningsdato
+                    "startdato" to forsikring.virkningsdato,
+                    "premiegrunnlag" to forsikring.premiegrunnlag
                 )
             }
         )

@@ -31,7 +31,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -1055,7 +1054,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                 selvstendigForsikring = SelvstendigForsikring(
                     virkningsdato = 10.oktober(2017),
                     opphørsdato = null,
-                    type = SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn
+                    type = SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn,
+                    premiegrunnlag = 450000.årlig
                 )
             )
 
@@ -1093,7 +1093,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                 selvstendigForsikring = SelvstendigForsikring(
                     virkningsdato = 10.oktober(2017),
                     opphørsdato = null,
-                    type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagSytten
+                    type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagSytten,
+                    premiegrunnlag = 450000.årlig
                 )
             )
 
@@ -1128,7 +1129,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                 selvstendigForsikring = SelvstendigForsikring(
                     virkningsdato = 10.oktober(2017),
                     opphørsdato = null,
-                    type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagEn
+                    type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagEn,
+                    premiegrunnlag = 450000.årlig
                 )
             )
 
@@ -1163,7 +1165,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                 selvstendigForsikring = SelvstendigForsikring(
                     virkningsdato = 10.oktober(2017),
                     opphørsdato = null,
-                    type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagEn
+                    type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagEn,
+                    premiegrunnlag = 450000.årlig
                 )
             )
             assertForkastetPeriodeTilstander(

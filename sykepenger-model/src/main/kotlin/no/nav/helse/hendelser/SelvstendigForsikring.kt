@@ -1,12 +1,14 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 data class SelvstendigForsikring (
     val virkningsdato: LocalDate,
     val opphørsdato: LocalDate?,
-    val type: Forsikringstype
+    val type: Forsikringstype,
+    val premiegrunnlag: Inntekt
 ) {
     enum class Forsikringstype {
         ÅttiProsentFraDagEn,

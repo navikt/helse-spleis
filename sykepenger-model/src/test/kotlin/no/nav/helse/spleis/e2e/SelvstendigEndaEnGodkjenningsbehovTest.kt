@@ -17,6 +17,7 @@ import no.nav.helse.oktober
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -103,7 +104,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
-            håndterYtelserSelvstendig(1.vedtaksperiode, selvstendigForsikring = SelvstendigForsikring(14.oktober(2017), null, HundreProsentFraDagEn))
+            håndterYtelserSelvstendig(1.vedtaksperiode, selvstendigForsikring = SelvstendigForsikring(14.oktober(2017), null, HundreProsentFraDagEn, 450000.årlig))
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertGodkjenningsbehov(
@@ -180,7 +181,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
-            håndterYtelserSelvstendig(1.vedtaksperiode, selvstendigForsikring = SelvstendigForsikring(14.oktober(2017), null, HundreProsentFraDagSytten))
+            håndterYtelserSelvstendig(1.vedtaksperiode, selvstendigForsikring = SelvstendigForsikring(14.oktober(2017), null, HundreProsentFraDagSytten, 450000.årlig))
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertGodkjenningsbehov(

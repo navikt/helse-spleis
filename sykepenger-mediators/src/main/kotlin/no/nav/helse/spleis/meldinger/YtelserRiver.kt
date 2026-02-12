@@ -98,14 +98,11 @@ internal class YtelserRiver(
         }
 
         message.interestedIn("@løsning.${SelvstendigForsikring.name}") { forsikringer ->
-            forsikringer as ArrayNode
-            forsikringer.forEach {
-                val feltnavn = it.fieldNames().asSequence().toSet()
-                it as ObjectNode
-                check("forsikringstype" in feltnavn)
-                check("startdato" in feltnavn)
-                it.path("startdato").asLocalDate()
-                it.path("sluttdato").asOptionalLocalDate()
+            message.requireArray("@løsning.${SelvstendigForsikring.name}") {
+                require("startdato", JsonNode::asLocalDate)
+                require("forsikringstype", JsonNode::asText)
+                require("premiegrunnlag", JsonNode::asInt)
+                interestedIn("sluttdato", JsonNode::asLocalDate)
             }
         }
     }

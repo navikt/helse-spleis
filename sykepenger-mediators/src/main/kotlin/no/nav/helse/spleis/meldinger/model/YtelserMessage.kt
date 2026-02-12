@@ -25,6 +25,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -91,7 +92,8 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             SelvstendigForsikring(
                 virkningsdato = it.path("startdato").asLocalDate(),
                 opphørsdato = it.path("sluttdato").asOptionalLocalDate(),
-                type = SelvstendigForsikring.Forsikringstype.valueOf(it.path("forsikringstype").asText())
+                type = SelvstendigForsikring.Forsikringstype.valueOf(it.path("forsikringstype").asText()),
+                premiegrunnlag = it.path("premiegrunnlag").asInt().årlig
             )
         }.also {
             if (packet["@løsning.${Behovtype.SelvstendigForsikring.name}"].size() > 1) {
