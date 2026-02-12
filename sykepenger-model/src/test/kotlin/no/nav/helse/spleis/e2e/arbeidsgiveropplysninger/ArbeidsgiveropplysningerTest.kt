@@ -49,6 +49,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
@@ -95,9 +96,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            // Har flere skjæringstidspunkt, men får ikke varsel pga "reglene" som vurderer om det er problematisk eller ei
             assertEquals(listOf(20.januar, 1.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
-            assertVarsler(1.vedtaksperiode, RV_IM_8)
+            assertVarsler(1.vedtaksperiode, RV_IM_8, RV_IV_11)
         }
     }
 
@@ -522,7 +522,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertEquals(20.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(listOf(20.januar, 10.januar, 1.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-            assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IM_8, RV_IV_11), 1.vedtaksperiode.filter())
         }
     }
 

@@ -2654,7 +2654,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 2.vedtaksperiode
         )
         assertEquals(listOf(20.februar, 8.februar), inspektør.skjæringstidspunkter(2.vedtaksperiode))
-        assertVarsler(listOf(Varselkode.RV_IV_11), 2.vedtaksperiode.filter())
+        assertEquals(8.februar til 20.mars, inspektør.periode(2.vedtaksperiode))
+        assertEquals("UARR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSHH SS", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 

@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -29,7 +28,6 @@ internal class ArbeidIkkeGjenopptattTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(listOf(1.mars, 1.januar), inspektør.skjæringstidspunkter(2.vedtaksperiode))
-            // Her er det ikke varsler pga. reglene for når det blir varsel eller ei
         }
     }
 
@@ -49,8 +47,6 @@ internal class ArbeidIkkeGjenopptattTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(listOf(1.april, 10.februar), inspektør.skjæringstidspunkter(3.vedtaksperiode))
-            // Vi trenger ikke dette varselet her, den har nok kommet som en konsekvens av måten vi nå beregner skjæringstidspunkt
-            assertVarsler(3.vedtaksperiode, RV_IV_11)
         }
     }
 }

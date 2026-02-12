@@ -1396,7 +1396,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
         }
 
-        fun harFlereSkjæringstidspunktV2(): Boolean {
+        fun harFlereSkjæringstidspunkt(): Boolean {
             if (skjæringstidspunkter.size <= 1) return false // ett eller færre skjæringstidspunkter er ok
 
             val dagenFørSisteSkjæringstidspunkt = skjæringstidspunkter.max().forrigeDag
@@ -1412,39 +1412,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 .fremTilOgMed(dagenFørSisteSkjæringstidspunkt)      // Ser kun på dager i denne behandlingen frem til og med dagen før siste skjæringstidspunkt
                 .fraOgMed(førstePotensielleUtbetalingsdag)          // .. og kun fra og med første potensielle utbetalingsdag
                 .any { it is Sykedag }                                     // .. sitter vi nå igjen med noen sykedager så bør det flagges til saksbehandler
-        }
-
-        fun harFlereSkjæringstidspunkt(): Boolean {
-            // ett eller færre skjæringstidspunkter er ok
-            if (skjæringstidspunkter.size <= 1) return false
-            val arbeidsgiverperioden = dagerUtenNavAnsvar.periode
-            if (arbeidsgiverperioden == null) return false
-            val skjæringstidspunkterEtterAgp = skjæringstidspunkter.filter {
-                it > arbeidsgiverperioden.endInclusive
-            }
-
-            // hvis perioden har flere skjæringstidspunkter, men ingen er utenfor agp så er det greit
-            if (skjæringstidspunkterEtterAgp.isEmpty()) return false
-            // hvis perioden har flere skjæringstidspunkter etter agp så er det noe muffins
-            if (skjæringstidspunkterEtterAgp.size > 1) return true
-
-            // hvis perioden har ett skjæringstidspunkt utenfor agp må vi sjekke
-            // om det er sykedager mellom agp og skjæringstidspunktet. Perioden kan jo
-            // ha blitt strukket tilbake for å hensynta agp-dagene, og da vil perioden ha
-            // skjæringstidspunkt utenfor agp (men det er helt ok!)
-            val ekstraSkjæringstidspunkt = skjæringstidspunkterEtterAgp.single()
-            if (ekstraSkjæringstidspunkt == periode.start) return false
-            val mellomliggendePeriode = arbeidsgiverperioden
-                .periodeMellom(ekstraSkjæringstidspunkt)
-                ?.subset(periode)
-                ?: return false
-
-            // sjekker om det finnes en dagtype som gir rett på utbetaling mellom agp og det ekstra skjæringstidspunktet
-            val harSykdomMellomAGPOgSkjæringstidspunktet = sykdomstidslinje
-                .subset(mellomliggendePeriode)
-                .any { dag -> dag is Sykedag }
-
-            return harSykdomMellomAGPOgSkjæringstidspunktet
         }
 
         private fun behandlingLukket(behandlingEventBus: BehandlingEventBus, yrkesaktivitet: Yrkesaktivitet) {
