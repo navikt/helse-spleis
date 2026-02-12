@@ -58,6 +58,7 @@ internal abstract class SøknadBuilder {
 
     internal fun arbeidsgjennopptatt(fom: LocalDate?) = apply {
         if (fom == null) return@apply
+        if (fom > this.tom) return@apply // Bruker har oppgitt at arbeid er gjennopptatt etter søknadsperioden. Det bryr vi oss ikke noe om
         arbeidsgjennopptatt(fom, this.tom)
     }
 }
