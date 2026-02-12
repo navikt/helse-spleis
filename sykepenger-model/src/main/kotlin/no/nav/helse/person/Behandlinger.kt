@@ -20,7 +20,7 @@ import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.forrigeDag
-import no.nav.helse.førsteArbeidsdag
+import no.nav.helse.førsteArbeidsdagEtter
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
@@ -1405,7 +1405,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             // .. eller første arbeidsdag etter AGP/Ventetid
             val førstePotensielleUtbetalingsdag = listOfNotNull(
                 dagerNavOvertarAnsvar.flatten().minByOrNull { !it.erHelg() },
-                dagerUtenNavAnsvar.dager.flatten().maxOrNull()?.førsteArbeidsdag()
+                dagerUtenNavAnsvar.dager.flatten().maxOrNull()?.førsteArbeidsdagEtter
             ).minOrNull() ?: return false
 
             return sykdomstidslinje
