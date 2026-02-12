@@ -85,6 +85,23 @@ import org.junit.jupiter.api.Test
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
 
     @Test
+    fun `Med arbeidsgiveropplysninger kan man opplyse om hullete agp og begrunnelse for reduksjon eller ikke utbetalt`() {
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 10.januar, 20.januar til 25.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
+            assertEquals(listOf(1.januar til 10.januar, 20.januar til 25.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            // Har flere skjæringstidspunkt, men får ikke varsel pga "reglene" som vurderer om det er problematisk eller ei
+            assertEquals(listOf(1.januar, 20.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
+            assertVarsler(1.vedtaksperiode, RV_IM_8)
+        }
+    }
+
+    @Test
     fun `Sender ut forespørsel om arbeidsgiveropplysninger når det har blitt nytt skjæringstidspunkt etter overstyring til andre ytelser i forrige periode`() {
         a1 {
             håndterSøknad(januar)
