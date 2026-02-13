@@ -30,7 +30,6 @@ class Inntektsmelding(
     arbeidsgiverperioder: List<Periode>,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: BegrunnelseForReduksjonEllerIkkeUtbetalt?,
     private val opphørAvNaturalytelser: List<OpphørAvNaturalytelse>,
-    private val harFlereInntektsmeldinger: Boolean,
     private val førsteFraværsdag: LocalDate?,
     mottatt: LocalDateTime
 ) : Hendelse {
@@ -50,7 +49,6 @@ class Inntektsmelding(
             førsteFraværsdag = førsteFraværsdag,
             mottatt = metadata.registrert,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             hendelse = this
         )

@@ -181,7 +181,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
-        harFlereInntektsmeldinger: Boolean = false,
         mottatt: LocalDateTime = LocalDateTime.now()
     ): Inntektsmelding {
         val inntektsmeldinggenerator = {
@@ -193,7 +192,6 @@ internal class ArbeidsgiverHendelsefabrikk(
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
                 opphørAvNaturalytelser = opphørAvNaturalytelser,
-                harFlereInntektsmeldinger = harFlereInntektsmeldinger,
                 førsteFraværsdag = førsteFraværsdag,
                 mottatt = mottatt
             )

@@ -43,7 +43,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
@@ -840,29 +839,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to inntektsmeldinger på rappen`() {
-        nyPeriode(1.januar til 10.januar)
-        nyPeriode(11.januar til 31.januar)
-        nullstillTilstandsendringer()
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            harFlereInntektsmeldinger = true
-        )
-        assertVarsel(RV_IM_22, 1.vedtaksperiode.filter())
-        assertVarsel(RV_IM_22, 2.vedtaksperiode.filter())
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            harFlereInntektsmeldinger = true
-        )
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertTilstander(
-            2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK
-        )
-    }
-
-    @Test
     fun `bestridelse av sykdom`() {
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(11.januar, 25.januar, 100.prosent))
@@ -873,18 +849,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `inntektsmelding med harFlereInntektsmeldinger flagg satt`() {
-        håndterSykmelding(januar)
-        håndterSøknad(januar)
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            harFlereInntektsmeldinger = true
-        )
-        assertVarsel(RV_IM_22, 1.vedtaksperiode.filter())
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test

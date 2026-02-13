@@ -36,7 +36,6 @@ internal class InntektsmeldingMessage(
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
-    private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
 
     private val inntektsmelding get() = Inntektsmelding(
         meldingsreferanseId = meldingsporing.id,
@@ -48,7 +47,6 @@ internal class InntektsmeldingMessage(
         arbeidsgiverperioder = arbeidsgiverperioder,
         begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
         opphørAvNaturalytelser = opphørAvNaturalytelser,
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
         førsteFraværsdag = førsteFraværsdag,
         mottatt = mottatt
     )

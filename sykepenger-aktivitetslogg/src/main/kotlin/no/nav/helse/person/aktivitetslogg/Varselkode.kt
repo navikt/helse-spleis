@@ -107,7 +107,7 @@ enum class Varselkode(
     RV_IM_19("Mottatt flere inntektsmeldinger - den andre inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", avviklet = true),
     RV_IM_20("Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling", avviklet = true),
     RV_IM_21("Inntektsmeldingen mangler ikke arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode", avviklet = true),
-    RV_IM_22("Det er mottatt flere inntektsmeldinger på kort tid for samme arbeidsgiver"),
+    RV_IM_22("Det er mottatt flere inntektsmeldinger på kort tid for samme arbeidsgiver", avviklet = true),
     RV_IM_23("Arbeidsgiver har oppgitt hullete arbeidsgiverperiode og begrunnelse for redusert utbetaling i arbeidsgiverperiode", avviklet = true),
     RV_IM_24("Det har kommet ny inntektsmelding, vurder om arbeidsgiverperiode er riktig"),
     RV_IM_25("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden grunnet ferie eller avspasering"),

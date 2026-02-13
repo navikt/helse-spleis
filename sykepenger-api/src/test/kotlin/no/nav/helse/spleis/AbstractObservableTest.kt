@@ -131,7 +131,6 @@ internal abstract class AbstractObservableTest {
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         orgnummer: String = ORGNUMMER,
         opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-        harFlereInntektsmeldinger: Boolean = false,
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = MeldingsreferanseId(id),
         refusjon = refusjon,
@@ -142,7 +141,6 @@ internal abstract class AbstractObservableTest {
         arbeidsgiverperioder = arbeidsgiverperioder,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null,
         opphørAvNaturalytelser = opphørAvNaturalytelser,
-        harFlereInntektsmeldinger = harFlereInntektsmeldinger,
         førsteFraværsdag = førsteFraværsdag,
         mottatt = LocalDateTime.now()
     )

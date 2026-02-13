@@ -19,7 +19,6 @@ internal class LpsOgAltinnInntektsmeldingerRiver(
     override fun validate(message: JsonMessage) {
         standardInntektsmeldingvalidering(message)
         message.requireKey("beregnetInntekt")
-        message.interestedIn("harFlereInntektsmeldinger")
         message.interestedIn("foersteFravaersdag")
         message.require("arbeidsgiverperioder") { agp ->
             if (agp.size() == 0) {

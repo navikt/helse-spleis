@@ -37,7 +37,6 @@ internal class DagerFraInntektsmelding(
     private val førsteFraværsdag: LocalDate?,
     mottatt: LocalDateTime,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: BegrunnelseForReduksjonEllerIkkeUtbetalt?,
-    private val harFlereInntektsmeldinger: Boolean,
     private val opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse>,
     val hendelse: Hendelse
 ) {
@@ -209,7 +208,6 @@ internal class DagerFraInntektsmelding(
             }
             aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_7)
         }
-        if (harFlereInntektsmeldinger) aktivitetslogg.varsel(Varselkode.RV_IM_22)
         begrunnelseForReduksjonEllerIkkeUtbetalt?.valider(aktivitetslogg)
         validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(aktivitetslogg, gammelAgp)
     }

@@ -115,7 +115,6 @@ internal class RestApiTest {
             beregnetInntekt = 12000.månedlig,
             arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 25))),
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            harFlereInntektsmeldinger = false,
             opphørAvNaturalytelser = emptyList(),
             førsteFraværsdag = LocalDate.of(2018, 9, 10),
             mottatt = LocalDateTime.now()
