@@ -210,12 +210,8 @@ internal class DagerFraInntektsmelding(
             aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_7)
         }
         if (harFlereInntektsmeldinger) aktivitetslogg.varsel(Varselkode.RV_IM_22)
-        begrunnelseForReduksjonEllerIkkeUtbetalt?.valider(aktivitetslogg, hulleteArbeidsgiverperiode())
+        begrunnelseForReduksjonEllerIkkeUtbetalt?.valider(aktivitetslogg)
         validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(aktivitetslogg, gammelAgp)
-    }
-
-    private fun hulleteArbeidsgiverperiode(): Boolean {
-        return arbeidsgiverperioder.size > 1 && (førsteFraværsdag == null || førsteFraværsdag in arbeidsgiverperiode!!)
     }
 
     private fun validerArbeidsgiverperiodeVedGjenståendeDager(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, beregnetArbeidsgiverperiode: List<Periode>?) {

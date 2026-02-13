@@ -768,15 +768,18 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `korrigert inntektsmelding med funksjonell feil`() {
+    fun `korrigert inntektsmelding med hullete agp og begrunnelseForReduksjonEllerIkkeUtbetalt`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
             nyttVedtak(15.januar til 25.januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 20.januar), førsteFraværsdag = 15.januar)
 
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 10.januar, 15.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
 
-            assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_IM_23), 1.vedtaksperiode.filter())
-            assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_IM_23, Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
+            assertEquals(listOf(1.januar til 10.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+            assertEquals(listOf(15.januar til 20.januar), inspektør.dagerNavOvertarAnsvar(2.vedtaksperiode))
+
+            assertVarsler(listOf(Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->

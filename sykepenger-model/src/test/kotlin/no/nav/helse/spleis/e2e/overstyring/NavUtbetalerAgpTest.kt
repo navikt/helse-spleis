@@ -29,7 +29,6 @@ import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_OMGJØRING
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
@@ -48,9 +47,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsdag
@@ -87,7 +84,7 @@ import org.junit.jupiter.api.Test
 internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
 
     @Test
-    fun `skal aldri foreslå sykedag NAV ved en hullete arbedisgiverperiode og begrunnelse for reduksjon satt`() {
+    fun `Foreslår sykedag NAV ved en hullete arbedisgiverperiode og begrunnelse for reduksjon satt`() {
         håndterSøknad(Sykdom(18.april, 30.april, 100.prosent))
         håndterSøknad(Sykdom(1.mai, 14.mai, 100.prosent))
         håndterInntektsmelding(
@@ -112,8 +109,8 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse",
         )
 
-        assertVarsler(listOf(RV_IM_8, RV_IM_23), 1.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_IM_8, RV_IM_23, RV_IM_24), 2.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_8, RV_IM_24), 2.vedtaksperiode.filter())
 
         assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
         assertEquals(listOf(14.april.somPeriode(), 18.april til 30.april), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
@@ -207,20 +204,23 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `hullete AGP sammen med begrunnelse for reduksjon blir kastet ut foreløpig`() {
+    fun `hullete AGP sammen med begrunnelse for reduksjon`() {
         val søknad = MeldingsreferanseId(håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent)))
         val im = MeldingsreferanseId(håndterInntektsmelding(
             listOf(1.januar til 5.januar, 10.januar til 20.januar),
             refusjon = Refusjon(INGEN, null),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "NoeSomUmuligKanVæreIListaViIkkeTillater",
         ))
-        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         assertEquals(listOf(1.januar til 5.januar, 10.januar til 20.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
         assertVarsler(listOf(RV_IM_8, RV_IV_11), 1.vedtaksperiode.filter())
-        assertFunksjonellFeil(RV_IM_23)
-        assertEquals(setOf(Dokumentsporing.søknad(søknad), Dokumentsporing.inntektsmeldingDager(im)), inspektør.hendelser(1.vedtaksperiode).toSet())
-        assertTrue(observatør.inntektsmeldingHåndtert.isEmpty())
-        assertEquals(im.id, observatør.inntektsmeldingIkkeHåndtert.single())
+        assertEquals(setOf(
+            Dokumentsporing.søknad(søknad),
+            Dokumentsporing.inntektsmeldingDager(im),
+            Dokumentsporing.inntektsmeldingRefusjon(im),
+            Dokumentsporing.inntektsmeldingInntekt(im),
+        ), inspektør.hendelser(1.vedtaksperiode).toSet())
+        assertEquals(im.id to 1.vedtaksperiode.id(a1), observatør.inntektsmeldingHåndtert.single())
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -464,7 +464,7 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Inntektsmelding med begrunnelseForReduksjonEllerIkkeUtbetalt må forkaste alle perioder med samme arbeidsgiverperiode`() {
+    fun `Inntektsmelding med begrunnelseForReduksjonEllerIkkeUtbetalt og hullete agp`() {
         håndterSøknad(Sykdom(14.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(8.februar, 11.februar, 100.prosent))
@@ -483,12 +483,16 @@ internal class NavUtbetalerAgpTest : AbstractEndToEndTest() {
             listOf(2.januar til 4.januar, 14.januar til 26.januar),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel"
         )
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        assertEquals(listOf(2.januar til 4.januar, 14.januar til 20.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(listOf(21.januar til 26.januar), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).dagerNavOvertarAnsvar)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
-        assertEquals("Tom tidslinje", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
     }
 
     @Test
