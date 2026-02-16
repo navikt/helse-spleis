@@ -2,8 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.ZoneId
 import java.util.*
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.BehandlingkildeDto
@@ -509,9 +507,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val faktaavklartInntekt get() = endringer.last().faktaavklartInntekt
         val korrigertInntekt get() = endringer.last().korrigertInntekt
         val inntektsjusteringer get() = endringer.last().inntektjusteringer
-
-        private val Oslo = ZoneId.of("Europe/Oslo")
-        val behandlingOpprettetTidspunkt: OffsetDateTime get() = endringer.first().tidsstempel.let { localDateTime -> OffsetDateTime.of(localDateTime, Oslo.rules.getOffset(localDateTime)) }
+        val behandlingOpprettetTidspunkt: LocalDateTime get() = endringer.first().tidsstempel
 
         constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde)
 

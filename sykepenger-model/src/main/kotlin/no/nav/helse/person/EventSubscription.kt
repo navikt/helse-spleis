@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
@@ -596,7 +595,7 @@ interface EventSubscription {
         val vedtaksperiodeId: UUID,
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val periode: Periode,
-        val behandlingOpprettetTidspunkt: OffsetDateTime,
+        val behandlingOpprettetTidspunkt: LocalDateTime,
         val forsikring: SelvstendigForsikring?
     ) : Event
 

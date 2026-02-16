@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
@@ -73,14 +74,13 @@ internal class PersonMediator(
             .sendUtgåendeMeldinger(context)
     }
 
+    private fun LocalDateTime.tilUtc() = atZone(ZoneId.systemDefault()).toInstant()
+
     private fun mapTilPakke(jsonMessage: JsonMessage): Pakke {
         jsonMessage.requireKey("@event_name", "@opprettet")
         val outgoingMessage = jsonMessage.apply {
             this["fødselsnummer"] = message.meldingsporing.fødselsnummer
-            // JsonMessage new'es opp i Spleis-runtime og får da @opprettet satt til LocalDateTime.now() (SystemDefault),
-            // Derfor er det trygt her i samme runtime å bruke SystemDefault når vi oversetter til UTC
-            // .. kanskje burde flyttes til r&r på et eller annet tidsunkt?
-            this["@opprettetUTC"] = jsonMessage["@opprettet"].asLocalDateTime().atZone(ZoneId.systemDefault()).toInstant()
+            this["@opprettetUTC"] = jsonMessage["@opprettet"].asLocalDateTime().tilUtc()
         }.toJson()
         val eventName = jsonMessage["@event_name"].asText()
         return Pakke(message.meldingsporing.fødselsnummer, eventName, outgoingMessage)
@@ -181,7 +181,7 @@ internal class PersonMediator(
     private fun mapOverlappendeInfotrygdperioder(event: EventSubscription.OverlappendeInfotrygdperioder): JsonMessage {
         return JsonMessage.newMessage(
             "overlappende_infotrygdperioder",
-            mutableMapOf(
+            mapOf(
                 "infotrygdhistorikkHendelseId" to event.infotrygdhistorikkHendelseId,
                 "vedtaksperioder" to event.overlappendeInfotrygdperioder.map {
                     mapOf(
@@ -201,7 +201,7 @@ internal class PersonMediator(
                             )
                         }
                     )
-                },
+                }
             )
         )
     }
@@ -239,7 +239,7 @@ internal class PersonMediator(
     private fun mapUtbetalingAnnullert(event: EventSubscription.UtbetalingAnnullertEvent): JsonMessage {
         return JsonMessage.newMessage(
             "utbetaling_annullert",
-            mutableMapOf(
+            mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
                 "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
                 "utbetalingId" to event.utbetalingId,
@@ -578,7 +578,7 @@ internal class PersonMediator(
             "behandling_opprettet",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
-                mutableMapOf(
+                mapOf(
                     "vedtaksperiodeId" to event.vedtaksperiodeId,
                     "behandlingId" to event.behandlingId,
                     "søknadIder" to event.søknadIder,
@@ -811,7 +811,7 @@ internal class PersonMediator(
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "fom" to event.periode.start,
             "tom" to event.periode.endInclusive,
-            "behandlingOpprettetTidspunkt" to event.behandlingOpprettetTidspunkt
+            "behandlingOpprettetTidspunkt" to event.behandlingOpprettetTidspunkt.tilUtc()
         )
 
         val forsikring = event.forsikring
