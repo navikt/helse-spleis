@@ -1,11 +1,10 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
+import java.time.ZoneId
 import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.SelvstendigForsikring
@@ -27,9 +26,6 @@ internal class PersonMediator(
 ) {
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
     fun ferdigstill(context: MessageContext, eventBus: EventBus) {
@@ -78,10 +74,15 @@ internal class PersonMediator(
     }
 
     private fun mapTilPakke(jsonMessage: JsonMessage): Pakke {
+        jsonMessage.requireKey("@event_name", "@opprettet")
         val outgoingMessage = jsonMessage.apply {
             this["fødselsnummer"] = message.meldingsporing.fødselsnummer
+            // JsonMessage new'es opp i Spleis-runtime og får da @opprettet satt til LocalDateTime.now() (SystemDefault),
+            // Derfor er det trygt her i samme runtime å bruke SystemDefault når vi oversetter til UTC
+            // .. kanskje burde flyttes til r&r på et eller annet tidsunkt?
+            this["@opprettetUTC"] = jsonMessage["@opprettet"].asLocalDateTime().atZone(ZoneId.systemDefault()).toInstant()
         }.toJson()
-        val eventName = objectMapper.readTree(outgoingMessage).path("@event_name").asText()
+        val eventName = jsonMessage["@event_name"].asText()
         return Pakke(message.meldingsporing.fødselsnummer, eventName, outgoingMessage)
     }
 

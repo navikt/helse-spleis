@@ -33,14 +33,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         Assertions.assertEquals(1, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
         val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
-        val faktiskResultat = trengerOpplysningerEvent.json(
-            "vedtaksperiodeId",
-            "@id",
-            "@opprettet",
-            "system_read_count",
-            "system_participating_services",
-            "@forårsaket_av"
-        )
+        val faktiskResultat = trengerOpplysningerEvent.json("vedtaksperiodeId")
 
         JSONAssert.assertEquals(forventetResultatTrengerInntekt, faktiskResultat, JSONCompareMode.STRICT)
     }
@@ -62,14 +55,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         Assertions.assertEquals(5, meldinger.size)
         val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
-        val faktiskResultat = trengerOpplysningerEvent.json(
-            "vedtaksperiodeId",
-            "@id",
-            "@opprettet",
-            "system_read_count",
-            "system_participating_services",
-            "@forårsaket_av"
-        )
+        val faktiskResultat = trengerOpplysningerEvent.json("vedtaksperiodeId")
 
         JSONAssert.assertEquals(forventetResultatUtenForespurtInntekt, faktiskResultat, JSONCompareMode.STRICT)
     }
@@ -108,14 +94,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         Assertions.assertEquals(2, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
         val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
-        val faktiskResultat = trengerOpplysningerEvent.json(
-            "vedtaksperiodeId",
-            "@id",
-            "@opprettet",
-            "system_read_count",
-            "system_participating_services",
-            "@forårsaket_av"
-        )
+        val faktiskResultat = trengerOpplysningerEvent.json("vedtaksperiodeId")
 
         JSONAssert.assertEquals(forventetResultatMedInntektFraForrigeSkjæringstidpunkt, faktiskResultat, JSONCompareMode.STRICT)
     }
@@ -142,14 +121,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         Assertions.assertEquals(2, meldinger.size)
         val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
-        val faktiskResultat = trengerOpplysningerEvent.json(
-            "vedtaksperiodeId",
-            "@id",
-            "@opprettet",
-            "system_read_count",
-            "system_participating_services",
-            "@forårsaket_av"
-        )
+        val faktiskResultat = trengerOpplysningerEvent.json("vedtaksperiodeId")
 
         JSONAssert.assertEquals(forventetResultatKortGap, faktiskResultat, JSONCompareMode.STRICT)
     }
@@ -173,14 +145,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         Assertions.assertEquals(2, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
         val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
-        val faktiskResultat = trengerOpplysningerEvent.json(
-            "vedtaksperiodeId",
-            "@id",
-            "@opprettet",
-            "system_read_count",
-            "system_participating_services",
-            "@forårsaket_av"
-        )
+        val faktiskResultat = trengerOpplysningerEvent.json("vedtaksperiodeId")
 
         JSONAssert.assertEquals(forventetResultatOpphørAvRefusjon, faktiskResultat, JSONCompareMode.STRICT)
     }
@@ -441,6 +406,14 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
     }
 
     private companion object {
-        private fun JsonNode.json(vararg dropp: String) = (this as ObjectNode).remove(dropp.toSet()).toString()
+        private fun JsonNode.json(vararg dropp: String) = (this as ObjectNode).remove(DefaultDrop.plus(dropp)).toString()
+        private val DefaultDrop = setOf(
+            "@id",
+            "@opprettet",
+            "@opprettetUTC",
+            "system_read_count",
+            "system_participating_services",
+            "@forårsaket_av"
+        )
     }
 }

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.mediator.e2e
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
@@ -39,6 +40,7 @@ internal object KontraktAssertions {
     private fun ObjectNode.assertOgFjernStandardfelter() {
         assertOgFjernUUID("@id")
         assertOgFjernLocalDateTime("@opprettet")
+        assertOgFjernInstant("@opprettetUTC")
         assertOgFjern("@forårsaket_av") { check(it.isObject) }
         assertOgFjern("system_read_count") { check(it.isInt) }
         assertOgFjern("system_participating_services") { check(it.isArray) }
@@ -63,6 +65,8 @@ internal object KontraktAssertions {
 
     private fun ObjectNode.assertOgFjernUUID(key: String) = assertOgFjern(key) { UUID.fromString(it.asText()) }
     private fun ObjectNode.assertOgFjernLocalDateTime(key: String) = assertOgFjern(key) { LocalDateTime.parse(it.asText()) }
+    private fun ObjectNode.assertOgFjernInstant(key: String) = assertOgFjern(key) { Instant.parse(it.asText()) }
+
     internal fun ObjectNode.assertOgFjern(key: String, validation: (value: JsonNode) -> Unit) {
         if (!key.contains(".")) {
             assertDoesNotThrow({ validation(path(key)) }, "$key er ikke på forventet format!")
