@@ -6,7 +6,7 @@ include(
     "sykepenger-økonomi", "sykepenger-økonomi-dto"
 )
 
-val rapidsAndRiversVersion = "2026011411051768385145.e8ebad1177b4"
+val rapidsAndRiversVersion = "2026021608421771227751.c2529c449f57"
 val tbdLibsVersion = "2026.01.22-09.16-1d3f6039"
 
 dependencyResolutionManagement {
