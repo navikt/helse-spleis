@@ -8,7 +8,9 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.KollektivJordbruksforsikring
 import no.nav.helse.hendelser.SelvstendigForsikring
+import no.nav.helse.hendelser.arbeidssituasjonForsikringstype
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.Arbeidsgiverperiode
@@ -814,12 +816,22 @@ internal class PersonMediator(
             "behandlingOpprettetTidspunkt" to event.behandlingOpprettetTidspunkt.tilUtc()
         )
 
-        val forsikring = event.forsikring
-        if (forsikring is SelvstendigForsikring) benyttetGrunnlagsdataForBeregning["forsikring"] = mapOf(
-            "dekningsgrad" to forsikring.dekningsgrad().toDouble(),
-            "navOvertarAnsvarForVentetid" to forsikring.navOvertarAnsvarForVentetid(),
-            "premiegrunnlag" to event.forsikring!!.premiegrunnlag.årlig.toInt()
-        )
+        when (val forsikring = event.forsikring) {
+            is SelvstendigForsikring -> benyttetGrunnlagsdataForBeregning["forsikring"] = mapOf(
+                "dekningsgrad" to forsikring.dekningsgrad().toDouble(),
+                "navOvertarAnsvarForVentetid" to forsikring.navOvertarAnsvarForVentetid(),
+                "premiegrunnlag" to forsikring.premiegrunnlag.årlig.toInt(),
+                "arbeidssituasjonForsikringstype" to forsikring.arbeidssituasjonForsikringstype()
+            )
+
+            KollektivJordbruksforsikring -> benyttetGrunnlagsdataForBeregning["forsikring"] = mapOf(
+                "dekningsgrad" to forsikring.dekningsgrad().toDouble(),
+                "navOvertarAnsvarForVentetid" to forsikring.navOvertarAnsvarForVentetid(),
+                "arbeidssituasjonForsikringstype" to forsikring.arbeidssituasjonForsikringstype()
+            )
+
+            null -> {}
+        }
         return JsonMessage.newMessage("benyttet_grunnlagsdata_for_beregning", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, benyttetGrunnlagsdataForBeregning.toMap()))
     }
 

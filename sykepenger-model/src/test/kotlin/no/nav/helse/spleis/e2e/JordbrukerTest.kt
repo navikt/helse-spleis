@@ -32,7 +32,7 @@ internal class JordbrukerTest : AbstractDslTest() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
+            håndterYtelserSelvstendig(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
 

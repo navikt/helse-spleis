@@ -8,8 +8,8 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.feriepenger.Feriepengeoppdrag
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Forsikring
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
@@ -596,7 +596,7 @@ interface EventSubscription {
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val periode: Periode,
         val behandlingOpprettetTidspunkt: LocalDateTime,
-        val forsikring: SelvstendigForsikring?
+        val forsikring: Forsikring?
     ) : Event
 
     fun inntektsmeldingReplay(event: TrengerInntektsmeldingReplayEvent) {}
