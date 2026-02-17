@@ -23,11 +23,12 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
+import no.nav.helse.hendelser.Forsikring
+import no.nav.helse.hendelser.KollektivJordbruksforsikring
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SelvstendigForsikring
-import no.nav.helse.hendelser.SelvstendigForsikring.Forsikringstype
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.vurdering
@@ -169,18 +170,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         )
     }
 
-    internal fun utbetalingstidslinjeBuilderForSelvstendig(selvstendigForsikring: SelvstendigForsikring?): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
+    internal fun utbetalingstidslinjeBuilderForSelvstendig(forsikring: Forsikring?): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
         val dekningsgrad = when (val arbeidssituasjon = sisteBehandling.arbeidssituasjon) {
             Arbeidssituasjon.BARNEPASSER,
-            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> when (selvstendigForsikring?.type) {
-                Forsikringstype.HundreProsentFraDagEn,
-                Forsikringstype.HundreProsentFraDagSytten -> 100.prosent
 
-                Forsikringstype.ÅttiProsentFraDagEn,
+            Arbeidssituasjon.JORDBRUKER,
+            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> when (forsikring) {
                 null -> 80.prosent
+                else -> forsikring.dekningsgrad()
             }
-
-            Arbeidssituasjon.JORDBRUKER -> 100.prosent
 
             Arbeidssituasjon.ANNET,
             Arbeidssituasjon.FISKER,
@@ -189,11 +187,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             Arbeidssituasjon.FRILANSER -> error("Har ikke implementert dekningsgrad for $arbeidssituasjon")
         }
 
-        val dagerNavOvertarAnsvar = when (selvstendigForsikring?.type) {
-            Forsikringstype.HundreProsentFraDagEn,
-            Forsikringstype.ÅttiProsentFraDagEn -> behandlinger.last().dagerUtenNavAnsvar.dager
+        val dagerNavOvertarAnsvar = when (forsikring?.navOvertarAnsvarForVentetid()) {
+            true -> behandlinger.last().dagerUtenNavAnsvar.dager
 
-            Forsikringstype.HundreProsentFraDagSytten,
+            false,
             null -> emptyList()
         }
 
@@ -1261,11 +1258,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 is Arbeidstaker,
                 Behandlingsporing.Yrkesaktivitet.Frilans -> null
 
-                Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (beregning.selvstendigForsikring?.type) {
-                    Forsikringstype.HundreProsentFraDagEn,
-                    Forsikringstype.ÅttiProsentFraDagEn -> dagerUtenNavAnsvar.dager
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (val forsikring = beregning.forsikring) {
+                    is SelvstendigForsikring -> when (forsikring.navOvertarAnsvarForVentetid()) {
+                        true -> dagerUtenNavAnsvar.dager
+                        false -> emptyList()
+                    }
 
-                    Forsikringstype.HundreProsentFraDagSytten -> emptyList()
+                    KollektivJordbruksforsikring -> emptyList()
                     null -> null
                 }
             } ?: dagerNavOvertarAnsvar
@@ -1953,7 +1952,7 @@ internal data class BeregnetBehandling(
     val utbetalingstidslinje: Utbetalingstidslinje,
     val grunnlagsdata: VilkårsgrunnlagElement,
     val alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
-    val selvstendigForsikring: SelvstendigForsikring? = null
+    val forsikring: Forsikring? = null
 ) {
     fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,

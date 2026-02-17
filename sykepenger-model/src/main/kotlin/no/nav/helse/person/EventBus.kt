@@ -7,7 +7,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.SelvstendigForsikring
+import no.nav.helse.hendelser.Forsikring
 
 class EventBus {
     private val observers = mutableListOf<EventSubscription>()
@@ -220,7 +220,7 @@ class EventBus {
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
     }
 
-    internal fun benyttetGrunnlagsdataForBeregning(behandlingId: UUID, vedtaksperiodeId: UUID, yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, periode: Periode, behandlingOpprettetTidspunkt: LocalDateTime, forsikring: SelvstendigForsikring?) {
+    internal fun benyttetGrunnlagsdataForBeregning(behandlingId: UUID, vedtaksperiodeId: UUID, yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, periode: Periode, behandlingOpprettetTidspunkt: LocalDateTime, forsikring: Forsikring?) {
         val event = EventSubscription.BenyttetGrunnlagsdataForBeregningEvent(behandlingId, vedtaksperiodeId, yrkesaktivitetssporing, periode, behandlingOpprettetTidspunkt, forsikring)
         _events.add(event)
         observers.forEach { it.benyttetGrunnlagsdataForBeregning(event) }
