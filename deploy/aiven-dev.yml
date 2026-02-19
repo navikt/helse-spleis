@@ -289,3 +289,6 @@ spec:
         - team: tbd
           application: spiskammerset-mottak
           access: readwrite
+        - team: tbd
+          application: spiskammerset-opprydding-dev
+          access: readwrite
