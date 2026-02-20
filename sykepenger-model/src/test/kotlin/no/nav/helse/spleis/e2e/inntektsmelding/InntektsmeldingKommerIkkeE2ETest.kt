@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
 import java.time.YearMonth
+import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -16,6 +17,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.EventSubscription
@@ -38,8 +40,34 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `Mursteinspølser møter periode som har ventet tre måneder på inntektsmelding`() {
+        a1 {
+            håndterSøknad(1.januar til 16.januar)
+            håndterSøknad(25.februar til 25.mars)
+            håndterSøknad(26.mars til 25.april)
+        }
+        a2 {
+            håndterSøknad(januar)
+            håndterSøknad(februar)
+            håndterSøknad(mars)
+            håndterSøknad(april)
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+        }
+        a1 {
+            håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+        }
+        a2 {
+            val feil = assertThrows<NoSuchElementException> {
+                håndterVilkårsgrunnlag(1.vedtaksperiode)
+            }
+            assertEquals("Collection contains no element matching the predicate.", feil.message)
+        }
+    }
 
     @Test
     fun `Periode går videre til vilkårsprøving uten inntektsmelding, annen overlappende arbeidsgiver står å venter på forlengelsen til perioden som går videre - ulik første fraværsdag`() {
