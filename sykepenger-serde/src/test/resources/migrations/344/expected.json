@@ -1,0 +1,1815 @@
+{
+  "fødselsnummer": "12029240045",
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
+      "vedtaksperioder": [
+        {
+          "id": "daec4866-5051-4c65-a139-0b4e4573a8a8",
+          "tilstand": "AVSLUTTET_UTEN_UTBETALING",
+          "behandlinger": [
+            {
+              "id": "1cce3666-59ee-4c74-a51f-63557d4b5b8b",
+              "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+              "endringer": [
+                {
+                  "id": "47fbcb49-509a-4255-915a-ca956b2aa150",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000001",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "99f22962-3b0a-4282-b90c-fc6a8b805eb9",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000001",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "ebe608f5-1304-4afc-b590-f15ef07c4154",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000001",
+                  "utbetalingstidslinje": {
+                    "dager": [
+                      {
+                        "type": "ArbeidsgiverperiodeDag",
+                        "aktuellDagsinntekt": 0.0,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 0.0,
+                        "arbeidsgiverbeløp": null,
+                        "personbeløp": null,
+                        "reservertArbeidsgiverbeløp": null,
+                        "reservertPersonbeløp": null,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          1,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          1,
+                          16
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "1c602266-50bb-4953-9f21-6c47c5d84b04",
+          "tilstand": "AVSLUTTET",
+          "behandlinger": [
+            {
+              "id": "e4cf0cb6-89a2-43fa-b148-b69f8bfb73e4",
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "id": "d0c9d299-e690-4b30-9d0c-28fdb362f952",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000002",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "552445d1-fef4-48b4-86f1-c767b566ac52",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000002",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "8e96e159-e1b2-4e6a-b72f-ce1d1a5989a6",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000002",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "4cb66471-27fb-4611-97c7-4b895d7510ec",
+                  "vilkårsgrunnlagId": "d467a3c3-edc8-4ee5-8e31-2fac479a56e0",
+                  "beregningId": "00000000-0000-0000-0000-000000000002",
+                  "utbetalingstidslinje": {
+                    "dager": [
+                      {
+                        "type": "ArbeidsgiverperiodeDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          16
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          17
+                        ],
+                        "fom": null,
+                        "tom": null
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 923.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 923.0769230769231,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          18
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          22
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          23
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          24
+                        ]
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 923.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 923.0769230769231,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          25
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          29
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          30
+                        ],
+                        "fom": null,
+                        "tom": null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "b4430ddd-b565-461b-b913-628f8fea2a7c",
+                  "vilkårsgrunnlagId": "d467a3c3-edc8-4ee5-8e31-2fac479a56e0",
+                  "beregningId": "00000000-0000-0000-0000-000000000002",
+                  "utbetalingstidslinje": {
+                    "dager": [
+                      {
+                        "type": "ArbeidsgiverperiodeDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          16
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          17
+                        ],
+                        "fom": null,
+                        "tom": null
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 923.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 923.0769230769231,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          18
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          22
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          23
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          24
+                        ]
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 923.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 923.0769230769231,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          25
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          29
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          30
+                        ],
+                        "fom": null,
+                        "tom": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "3e386ae7-2831-4f7f-a391-396a6a051c6d",
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "id": "5d589565-71b1-4755-b253-fa43b31c50c0",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000003",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "4d187785-2d14-4a88-9d61-c5eced1768d3",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000003",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "a1cfc60c-24ee-4525-a72b-6458cc203575",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000003",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "bfaa98a0-eb4f-4373-be71-0d7588f1b2fe",
+                  "vilkårsgrunnlagId": "26a1e209-1b65-4307-b3a8-a82473219a9f",
+                  "beregningId": "00000000-0000-0000-0000-000000000003",
+                  "utbetalingstidslinje": {
+                    "dager": [
+                      {
+                        "type": "ArbeidsgiverperiodeDag",
+                        "aktuellDagsinntekt": 1153.8461538461538,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1153.8461538461538,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          16
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 1153.8461538461538,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1153.8461538461538,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          17
+                        ],
+                        "fom": null,
+                        "tom": null
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 1153.8461538461538,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 1153.8461538461538,
+                        "arbeidsgiverbeløp": 1154.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 1153.8461538461538,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          18
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          22
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 1153.8461538461538,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1153.8461538461538,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          23
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          24
+                        ]
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 1153.8461538461538,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 1153.8461538461538,
+                        "arbeidsgiverbeløp": 1154.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 1153.8461538461538,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          25
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          29
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 1153.8461538461538,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1153.8461538461538,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          30
+                        ],
+                        "fom": null,
+                        "tom": null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "d98fcadf-fd5d-46e8-a62c-9f8f01ae3be9",
+                  "vilkårsgrunnlagId": "26a1e209-1b65-4307-b3a8-a82473219a9f",
+                  "beregningId": "00000000-0000-0000-0000-000000000003",
+                  "utbetalingstidslinje": {
+                    "dager": [
+                      {
+                        "type": "ArbeidsgiverperiodeDag",
+                        "aktuellDagsinntekt": 1153.8461538461538,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1153.8461538461538,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          16
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 1153.8461538461538,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1153.8461538461538,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          17
+                        ],
+                        "fom": null,
+                        "tom": null
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 1153.8461538461538,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 1153.8461538461538,
+                        "arbeidsgiverbeløp": 1154.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 1153.8461538461538,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          18
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          22
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 1153.8461538461538,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1153.8461538461538,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          23
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          24
+                        ]
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 1153.8461538461538,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 1153.8461538461538,
+                        "arbeidsgiverbeløp": 1154.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 1153.8461538461538,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          25
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          29
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 1153.8461538461538,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 1153.8461538461538,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          30
+                        ],
+                        "fom": null,
+                        "tom": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": []
+    },
+    {
+      "organisasjonsnummer": "a2",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
+      "vedtaksperioder": [
+        {
+          "id": "1f2fe56e-2077-42a8-9859-4abd5589f62f",
+          "tilstand": "AVVENTER_HISTORIKK_REVURDERING",
+          "behandlinger": [
+            {
+              "id": "7ef57a9f-90a8-468c-9fea-a87d72f04f8e",
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "id": "38100b8f-1986-4640-b102-f4f2a76cb032",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000004",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "51f696b2-4e5b-4fdd-a9af-b471a899097a",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000004",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "d87025c2-9dae-4ad3-9586-a520ea941c01",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000004",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "fc65665b-702c-4037-b032-2e18c45645ad",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000004",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "80d22b05-b489-4c87-b342-80a869441c67",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000004",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "6de0a32a-8a3a-4bc4-be2a-01d434b9b20e",
+                  "vilkårsgrunnlagId": "d467a3c3-edc8-4ee5-8e31-2fac479a56e0",
+                  "beregningId": "00000000-0000-0000-0000-000000000004",
+                  "utbetalingstidslinje": {
+                    "dager": [
+                      {
+                        "type": "ArbeidsgiverperiodeDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          16
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          17
+                        ],
+                        "fom": null,
+                        "tom": null
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 923.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 923.0769230769231,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          18
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          22
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          23
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          24
+                        ]
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 923.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 923.0769230769231,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          25
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          29
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          30
+                        ],
+                        "fom": null,
+                        "tom": null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "0878e1c7-463e-4b64-9bb3-2c96e8a0421f",
+                  "vilkårsgrunnlagId": "d467a3c3-edc8-4ee5-8e31-2fac479a56e0",
+                  "beregningId": "00000000-0000-0000-0000-000000000004",
+                  "utbetalingstidslinje": {
+                    "dager": [
+                      {
+                        "type": "ArbeidsgiverperiodeDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          16
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          17
+                        ],
+                        "fom": null,
+                        "tom": null
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 923.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 923.0769230769231,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          18
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          22
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          23
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          24
+                        ]
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 923.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 923.0769230769231,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          25
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          29
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          30
+                        ],
+                        "fom": null,
+                        "tom": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "a90834dc-da01-4618-81d5-90174f7f80b9",
+              "tilstand": "BEREGNET_REVURDERING",
+              "endringer": [
+                {
+                  "id": "e39df93a-37bc-470a-a2fb-eade5f556184",
+                  "vilkårsgrunnlagId": null,
+                  "beregningId": "00000000-0000-0000-0000-000000000005",
+                  "utbetalingstidslinje": {
+                    "dager": []
+                  }
+                },
+                {
+                  "id": "db044040-b88c-4a28-beb9-f0f5484fb4f5",
+                  "vilkårsgrunnlagId": "26a1e209-1b65-4307-b3a8-a82473219a9f",
+                  "beregningId": "00000000-0000-0000-0000-000000000005",
+                  "utbetalingstidslinje": {
+                    "dager": [
+                      {
+                        "type": "ArbeidsgiverperiodeDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          16
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          17
+                        ],
+                        "fom": null,
+                        "tom": null
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 923.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 923.0769230769231,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          18
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          22
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          23
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          24
+                        ]
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 923.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 923.0769230769231,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          25
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          29
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          30
+                        ],
+                        "fom": null,
+                        "tom": null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "0d31bf4b-18b8-40b4-a595-d379566233c8",
+                  "vilkårsgrunnlagId": "26a1e209-1b65-4307-b3a8-a82473219a9f",
+                  "beregningId": "00000000-0000-0000-0000-000000000005",
+                  "utbetalingstidslinje": {
+                    "dager": [
+                      {
+                        "type": "ArbeidsgiverperiodeDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          1
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          16
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          17
+                        ],
+                        "fom": null,
+                        "tom": null
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 923.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 923.0769230769231,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          18
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          22
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          23
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          24
+                        ]
+                      },
+                      {
+                        "type": "NavDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 1.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 923.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 923.0769230769231,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": null,
+                        "fom": [
+                          2018,
+                          6,
+                          25
+                        ],
+                        "tom": [
+                          2018,
+                          6,
+                          29
+                        ]
+                      },
+                      {
+                        "type": "NavHelgDag",
+                        "aktuellDagsinntekt": 923.0769230769231,
+                        "inntektjustering": 0.0,
+                        "dekningsgrad": 1.0,
+                        "begrunnelser": null,
+                        "grad": 1.0,
+                        "totalGrad": 1.0,
+                        "utbetalingsgrad": 0.0,
+                        "arbeidsgiverRefusjonsbeløp": 923.0769230769231,
+                        "arbeidsgiverbeløp": 0.0,
+                        "personbeløp": 0.0,
+                        "reservertArbeidsgiverbeløp": 0.0,
+                        "reservertPersonbeløp": 0.0,
+                        "dato": [
+                          2018,
+                          6,
+                          30
+                        ],
+                        "fom": null,
+                        "tom": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "id": "733a4cf7-a80f-45db-ab23-79d53a71be1f",
+            "tilstand": "TIL_INFOTRYGD",
+            "behandlinger": [
+              {
+                "id": "5aa4aa2e-582e-4dc0-988f-3cd8591adcf9",
+                "tilstand": "TIL_INFOTRYGD",
+                "endringer": [
+                  {
+                    "id": "425a5ea3-9142-4ee5-8f5d-b5099f12660c",
+                    "vilkårsgrunnlagId": null,
+                    "beregningId": "00000000-0000-0000-0000-000000000006",
+                    "utbetalingstidslinje": {
+                      "dager": []
+                    }
+                  },
+                  {
+                    "id": "348a17fb-4d82-498d-a3ff-0bc78ce8f4c7",
+                    "vilkårsgrunnlagId": "67701e07-302f-4f0d-8a56-7161d645596f",
+                    "beregningId": "00000000-0000-0000-0000-000000000006",
+                    "utbetalingstidslinje": {
+                      "dager": [
+                        {
+                          "type": "ArbeidsgiverperiodeDag",
+                          "aktuellDagsinntekt": 1430.7692307692307,
+                          "inntektjustering": 0.0,
+                          "dekningsgrad": 1.0,
+                          "begrunnelser": null,
+                          "grad": 1.0,
+                          "totalGrad": 1.0,
+                          "utbetalingsgrad": 0.0,
+                          "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                          "arbeidsgiverbeløp": 0.0,
+                          "personbeløp": 0.0,
+                          "reservertArbeidsgiverbeløp": 0.0,
+                          "reservertPersonbeløp": 0.0,
+                          "dato": null,
+                          "fom": [
+                            2018,
+                            3,
+                            1
+                          ],
+                          "tom": [
+                            2018,
+                            3,
+                            16
+                          ]
+                        },
+                        {
+                          "type": "NavHelgDag",
+                          "aktuellDagsinntekt": 1430.7692307692307,
+                          "inntektjustering": 0.0,
+                          "dekningsgrad": 1.0,
+                          "begrunnelser": null,
+                          "grad": 1.0,
+                          "totalGrad": 1.0,
+                          "utbetalingsgrad": 0.0,
+                          "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                          "arbeidsgiverbeløp": 0.0,
+                          "personbeløp": 0.0,
+                          "reservertArbeidsgiverbeløp": 0.0,
+                          "reservertPersonbeløp": 0.0,
+                          "dato": null,
+                          "fom": [
+                            2018,
+                            3,
+                            17
+                          ],
+                          "tom": [
+                            2018,
+                            3,
+                            18
+                          ]
+                        },
+                        {
+                          "type": "NavDag",
+                          "aktuellDagsinntekt": 1430.7692307692307,
+                          "inntektjustering": 0.0,
+                          "dekningsgrad": 1.0,
+                          "begrunnelser": null,
+                          "grad": 1.0,
+                          "totalGrad": 1.0,
+                          "utbetalingsgrad": 1.0,
+                          "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                          "arbeidsgiverbeløp": 1431.0,
+                          "personbeløp": 0.0,
+                          "reservertArbeidsgiverbeløp": 1430.7692307692307,
+                          "reservertPersonbeløp": 0.0,
+                          "dato": null,
+                          "fom": [
+                            2018,
+                            3,
+                            19
+                          ],
+                          "tom": [
+                            2018,
+                            3,
+                            23
+                          ]
+                        },
+                        {
+                          "type": "NavHelgDag",
+                          "aktuellDagsinntekt": 1430.7692307692307,
+                          "inntektjustering": 0.0,
+                          "dekningsgrad": 1.0,
+                          "begrunnelser": null,
+                          "grad": 1.0,
+                          "totalGrad": 1.0,
+                          "utbetalingsgrad": 0.0,
+                          "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                          "arbeidsgiverbeløp": 0.0,
+                          "personbeløp": 0.0,
+                          "reservertArbeidsgiverbeløp": 0.0,
+                          "reservertPersonbeløp": 0.0,
+                          "dato": null,
+                          "fom": [
+                            2018,
+                            3,
+                            24
+                          ],
+                          "tom": [
+                            2018,
+                            3,
+                            25
+                          ]
+                        },
+                        {
+                          "type": "NavDag",
+                          "aktuellDagsinntekt": 1430.7692307692307,
+                          "inntektjustering": 0.0,
+                          "dekningsgrad": 1.0,
+                          "begrunnelser": null,
+                          "grad": 1.0,
+                          "totalGrad": 1.0,
+                          "utbetalingsgrad": 1.0,
+                          "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                          "arbeidsgiverbeløp": 1431.0,
+                          "personbeløp": 0.0,
+                          "reservertArbeidsgiverbeløp": 1430.7692307692307,
+                          "reservertPersonbeløp": 0.0,
+                          "dato": null,
+                          "fom": [
+                            2018,
+                            3,
+                            26
+                          ],
+                          "tom": [
+                            2018,
+                            3,
+                            30
+                          ]
+                        },
+                        {
+                          "type": "NavHelgDag",
+                          "aktuellDagsinntekt": 1430.7692307692307,
+                          "inntektjustering": 0.0,
+                          "dekningsgrad": 1.0,
+                          "begrunnelser": null,
+                          "grad": 1.0,
+                          "totalGrad": 1.0,
+                          "utbetalingsgrad": 0.0,
+                          "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                          "arbeidsgiverbeløp": 0.0,
+                          "personbeløp": 0.0,
+                          "reservertArbeidsgiverbeløp": 0.0,
+                          "reservertPersonbeløp": 0.0,
+                          "dato": [
+                            2018,
+                            3,
+                            31
+                          ],
+                          "fom": null,
+                          "tom": null
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ae3b0db9-8db3-4d54-8d2d-7dbe19557423",
+                    "vilkårsgrunnlagId": "67701e07-302f-4f0d-8a56-7161d645596f",
+                    "beregningId": "00000000-0000-0000-0000-000000000006",
+                    "utbetalingstidslinje": {
+                      "dager": [
+                        {
+                          "type": "ArbeidsgiverperiodeDag",
+                          "aktuellDagsinntekt": 1430.7692307692307,
+                          "inntektjustering": 0.0,
+                          "dekningsgrad": 1.0,
+                          "begrunnelser": null,
+                          "grad": 1.0,
+                          "totalGrad": 1.0,
+                          "utbetalingsgrad": 0.0,
+                          "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                          "arbeidsgiverbeløp": 0.0,
+                          "personbeløp": 0.0,
+                          "reservertArbeidsgiverbeløp": 0.0,
+                          "reservertPersonbeløp": 0.0,
+                          "dato": null,
+                          "fom": [
+                            2018,
+                            3,
+                            1
+                          ],
+                          "tom": [
+                            2018,
+                            3,
+                            16
+                          ]
+                        },
+                        {
+                          "type": "NavHelgDag",
+                          "aktuellDagsinntekt": 1430.7692307692307,
+                          "inntektjustering": 0.0,
+                          "dekningsgrad": 1.0,
+                          "begrunnelser": null,
+                          "grad": 1.0,
+                          "totalGrad": 1.0,
+                          "utbetalingsgrad": 0.0,
+                          "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                          "arbeidsgiverbeløp": 0.0,
+                          "personbeløp": 0.0,
+                          "reservertArbeidsgiverbeløp": 0.0,
+                          "reservertPersonbeløp": 0.0,
+                          "dato": null,
+                          "fom": [
+                            2018,
+                            3,
+                            17
+                          ],
+                          "tom": [
+                            2018,
+                            3,
+                            18
+                          ]
+                        },
+                        {
+                          "type": "NavDag",
+                          "aktuellDagsinntekt": 1430.7692307692307,
+                          "inntektjustering": 0.0,
+                          "dekningsgrad": 1.0,
+                          "begrunnelser": null,
+                          "grad": 1.0,
+                          "totalGrad": 1.0,
+                          "utbetalingsgrad": 1.0,
+                          "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                          "arbeidsgiverbeløp": 1431.0,
+                          "personbeløp": 0.0,
+                          "reservertArbeidsgiverbeløp": 1430.7692307692307,
+                          "reservertPersonbeløp": 0.0,
+                          "dato": null,
+                          "fom": [
+                            2018,
+                            3,
+                            19
+                          ],
+                          "tom": [
+                            2018,
+                            3,
+                            23
+                          ]
+                        },
+                        {
+                          "type": "NavHelgDag",
+                          "aktuellDagsinntekt": 1430.7692307692307,
+                          "inntektjustering": 0.0,
+                          "dekningsgrad": 1.0,
+                          "begrunnelser": null,
+                          "grad": 1.0,
+                          "totalGrad": 1.0,
+                          "utbetalingsgrad": 0.0,
+                          "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                          "arbeidsgiverbeløp": 0.0,
+                          "personbeløp": 0.0,
+                          "reservertArbeidsgiverbeløp": 0.0,
+                          "reservertPersonbeløp": 0.0,
+                          "dato": null,
+                          "fom": [
+                            2018,
+                            3,
+                            24
+                          ],
+                          "tom": [
+                            2018,
+                            3,
+                            25
+                          ]
+                        },
+                        {
+                          "type": "NavDag",
+                          "aktuellDagsinntekt": 1430.7692307692307,
+                          "inntektjustering": 0.0,
+                          "dekningsgrad": 1.0,
+                          "begrunnelser": null,
+                          "grad": 1.0,
+                          "totalGrad": 1.0,
+                          "utbetalingsgrad": 1.0,
+                          "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                          "arbeidsgiverbeløp": 1431.0,
+                          "personbeløp": 0.0,
+                          "reservertArbeidsgiverbeløp": 1430.7692307692307,
+                          "reservertPersonbeløp": 0.0,
+                          "dato": null,
+                          "fom": [
+                            2018,
+                            3,
+                            26
+                          ],
+                          "tom": [
+                            2018,
+                            3,
+                            30
+                          ]
+                        },
+                        {
+                          "type": "NavHelgDag",
+                          "aktuellDagsinntekt": 1430.7692307692307,
+                          "inntektjustering": 0.0,
+                          "dekningsgrad": 1.0,
+                          "begrunnelser": null,
+                          "grad": 1.0,
+                          "totalGrad": 1.0,
+                          "utbetalingsgrad": 0.0,
+                          "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                          "arbeidsgiverbeløp": 0.0,
+                          "personbeløp": 0.0,
+                          "reservertArbeidsgiverbeløp": 0.0,
+                          "reservertPersonbeløp": 0.0,
+                          "dato": [
+                            2018,
+                            3,
+                            31
+                          ],
+                          "fom": null,
+                          "tom": null
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
