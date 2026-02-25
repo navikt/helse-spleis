@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
@@ -33,6 +34,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -43,6 +45,35 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OpptjeningE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `avslag på opptjening sier 1 dag opptjening når den burde si 0 dager`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(28.desember(2017), 15.januar))
+            håndterSøknad(28.desember(2017) til 15.januar)
+            håndterInntektsmelding(listOf(28.desember(2017) til 12.januar))
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                skatteinntekter = listOf(a1 to INNTEKT),
+                arbeidsforhold = listOf(
+                    Triple(a2, 1.januar(2017), 15.desember(2017)),
+                    Triple(a1, 1.januar, null)
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+
+            assertForventetFeil(
+                nå = { assertAntallOpptjeningsdager(1, skjæringstidspunkt = 28.desember(2017)) },
+                ønsket = { assertAntallOpptjeningsdager(0, skjæringstidspunkt = 28.desember(2017)) },
+                forklaring = "Opptjening.opptjeningsperiode() returnerer 'dagenFør' når det ikke er noen opptjeningsperiode"
+            )
+
+            assertErIkkeOppfylt(skjæringstidspunkt = 28.desember(2017))
+            assertVarsel(RV_VV_1, 1.vedtaksperiode.filter())
+            assertVarsel(RV_OV_1, 1.vedtaksperiode.filter())
+        }
+    }
+
 
     @Test
     fun `lagrer arbeidsforhold brukt til opptjening`() {
