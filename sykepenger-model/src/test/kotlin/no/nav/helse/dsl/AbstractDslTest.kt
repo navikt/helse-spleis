@@ -231,6 +231,9 @@ internal abstract class AbstractDslTest {
     protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) =
         testArbeidsgiverAsserter.assertIngenFunksjonelleFeil(filter)
 
+    protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonellFeil(kode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) =
+        testArbeidsgiverAsserter.assertIngenFunksjonellFeil(kode, filter)
+
     protected fun TestPerson.TestArbeidsgiver.assertFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.person()) =
         testArbeidsgiverAsserter.assertFunksjonelleFeil(filter)
 

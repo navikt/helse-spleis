@@ -145,4 +145,7 @@ internal class TestArbeidsgiverAssertions(
 
     internal fun assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter) =
         aktivitetsloggAsserts.assertIngenFunksjonelleFeil(filter)
+
+    internal fun assertIngenFunksjonellFeil(kode: Varselkode, filter: AktivitetsloggFilter) =
+        aktivitetsloggAsserts.assertIngenFunksjonellFeil(kode, filter)
 }
