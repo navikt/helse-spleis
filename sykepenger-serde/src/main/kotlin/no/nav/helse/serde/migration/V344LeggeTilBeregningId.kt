@@ -20,10 +20,16 @@ internal class V344LeggeTilBeregningId(private val idGenerator:()-> UUID = UUID:
 
     private fun migrerVedtaksperiode(vedtaksperiode: JsonNode) {
         vedtaksperiode.path("behandlinger").forEach { behandling ->
-            val idForDenneBehandlingenSomEgentligKanEndreSeg = idGenerator().toString()
+            var trengerNy = true
+            var nesteBeregningId:String? = null
             behandling.path("endringer").forEach { endring ->
+                val denneUtbetalingId = endring.path("utbetalingId").takeUnless { it.isNull || it.isMissingNode }?.asText()
                 endring as ObjectNode
-                endring.put("beregningId", idForDenneBehandlingenSomEgentligKanEndreSeg)
+                if (trengerNy) {
+                    nesteBeregningId = idGenerator().toString()
+                }
+                endring.put("beregningId", nesteBeregningId!!)
+                trengerNy = denneUtbetalingId != null
             }
         }
     }

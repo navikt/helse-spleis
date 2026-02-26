@@ -5,14 +5,14 @@ import org.junit.jupiter.api.Test
 
 class SekvensiellUUidGenerator() {
     var i = 0
-    fun getIt() : UUID {
+    fun getIt(): UUID {
         i++
         require(i <= 99)
         return UUID.fromString("00000000-0000-0000-0000-0000000000${i.toString().padStart(2, '0')}")
     }
 }
 
-internal class V344LeggeTilBeregningIdTest: MigrationTest(V344LeggeTilBeregningId(idGenerator = SekvensiellUUidGenerator()::getIt)) {
+internal class V344LeggeTilBeregningIdTest : MigrationTest(V344LeggeTilBeregningId(idGenerator = SekvensiellUUidGenerator()::getIt)) {
 
     @Test
     fun `Legger på beregningId`() {
