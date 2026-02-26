@@ -2,7 +2,7 @@ import java.io.PrintWriter
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
-    kotlin("jvm") version "2.2.21" apply false
+    kotlin("jvm") version "2.3.0" apply false
 }
 
 val junitJupiterVersion = "6.0.2"
