@@ -551,6 +551,10 @@ interface EventSubscription {
         val sykepengegrunnlagsfakta: UtkastTilVedtakEvent.Sykepengegrunnlagsfakta
     ) : Event
 
+    data class SelvstendigIngenDagerIgjenEvent(
+        val behandlingId: UUID
+    ) : Event
+
     data class OverstyringIgangsatt(
         val årsak: String,
         val skjæringstidspunkt: LocalDate,
@@ -616,6 +620,7 @@ interface EventSubscription {
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun planlagtAnnullering(event: PlanlagtAnnulleringEvent) {}
     fun avsluttetMedVedtak(event: AvsluttetMedVedtakEvent) {}
+    fun selvstendigIngenDagerIgjen(event: SelvstendigIngenDagerIgjenEvent) {}
     fun analytiskDatapakke(event: AnalytiskDatapakkeEvent) {}
 
     fun behandlingLukket(event: BehandlingLukketEvent) {}

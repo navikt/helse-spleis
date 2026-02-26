@@ -2091,6 +2091,13 @@ internal class Vedtaksperiode private constructor(
         val utkastTilVedtakBuilder = utkastTilVedtakBuilder(behandlinger.forrigeBehandling)
         eventBus.avsluttetMedVedtak(utkastTilVedtakBuilder.buildAvsluttedMedVedtak())
         eventBus.analytiskDatapakke(behandlinger.analytiskDatapakke(yrkesaktivitet.yrkesaktivitetstype, this@Vedtaksperiode.id))
+        if (this.yrkesaktivitet.yrkesaktivitetstype == Selvstendig && behandlinger.maksdato.gjenståendeDager == 0) {
+            eventBus.selvstendigIngenDagerIgjen(
+                EventSubscription.SelvstendigIngenDagerIgjenEvent(
+                    behandlingId = behandlinger.sisteBehandlingId
+                )
+            )
+        }
     }
 
     internal fun håndterAnnullerUtbetaling(

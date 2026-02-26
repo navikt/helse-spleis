@@ -118,6 +118,11 @@ class EventBus {
         observers.forEach { it.avsluttetMedVedtak(avsluttetMedVedtakEvent) }
     }
 
+    internal fun selvstendigIngenDagerIgjen(selvstendigIngenDagerIgjenEvent: EventSubscription.SelvstendigIngenDagerIgjenEvent) {
+        _events.add(selvstendigIngenDagerIgjenEvent)
+        observers.forEach { it.selvstendigIngenDagerIgjen(selvstendigIngenDagerIgjenEvent) }
+    }
+
     internal fun analytiskDatapakke(analytiskDatapakkeEvent: EventSubscription.AnalytiskDatapakkeEvent) {
         _events.add(analytiskDatapakkeEvent)
         observers.forEach { it.analytiskDatapakke(analytiskDatapakkeEvent) }

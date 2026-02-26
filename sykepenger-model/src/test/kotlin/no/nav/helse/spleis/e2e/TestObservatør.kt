@@ -3,9 +3,9 @@ package no.nav.helse.spleis.e2e
 import java.util.UUID
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.Person
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.VedtaksperiodeEndretEvent
+import no.nav.helse.person.Person
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spill_av_im.Forespørsel
@@ -43,6 +43,7 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
     val utkastTilVedtakEventer = mutableListOf<EventSubscription.UtkastTilVedtakEvent>()
     val sykefraværstilfelleIkkeFunnet = mutableListOf<EventSubscription.SykefraværstilfelleIkkeFunnet>()
     val analytiskDatapakkeEventer = mutableListOf<EventSubscription.AnalytiskDatapakkeEvent>()
+    val selvstendigIngenDagerIgjenEventer = mutableListOf<EventSubscription.SelvstendigIngenDagerIgjenEvent>()
 
     val vedtaksperiodeUtbetalinger = mutableMapOf<String, MutableMap<UUID, List<UUID>>>()
 
@@ -104,6 +105,10 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
     override fun avsluttetMedVedtak(event: EventSubscription.AvsluttetMedVedtakEvent) {
         avsluttetMedVedtakEvent[event.vedtaksperiodeId] = event
         avsluttetMedVedtakEventer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
+    }
+
+    override fun selvstendigIngenDagerIgjen(event: EventSubscription.SelvstendigIngenDagerIgjenEvent) {
+        selvstendigIngenDagerIgjenEventer.add(event)
     }
 
     override fun nyBehandling(event: EventSubscription.BehandlingOpprettetEvent) {

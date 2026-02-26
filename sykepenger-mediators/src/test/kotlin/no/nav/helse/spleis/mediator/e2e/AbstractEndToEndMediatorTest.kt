@@ -371,6 +371,13 @@ internal abstract class AbstractEndToEndMediatorTest {
         return id.toUUID()
     }
 
+    protected fun sendDødsmelding(
+        dødsdato: LocalDate
+    ) {
+        val (_, message) = meldingsfabrikk.lagDødsmelding(dødsdato)
+        testRapid.sendTestMessage(message)
+    }
+
     protected fun sendIdentOpphørt(
         fnr: String = UNG_PERSON_FNR_2018,
         nyttFnr: String
