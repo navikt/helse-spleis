@@ -66,6 +66,7 @@ import no.nav.helse.serde.migration.V340KonsekventNavngivningFaktaavklartInntekt
 import no.nav.helse.serde.migration.V341KonsekventNavngivningFaktaavklartInntektPåDeaktiverteArbeidsforhold
 import no.nav.helse.serde.migration.V342RenameAvventersøknadForTidligereEllerOverlappendePeriode
 import no.nav.helse.serde.migration.V343JordbrukerTilSelvstendigYrkesaktivitetstype
+import no.nav.helse.serde.migration.V344LeggeTilBeregningId
 import no.nav.helse.serde.migration.migrate
 
 class SerialisertPerson(
@@ -134,7 +135,8 @@ class SerialisertPerson(
             V340KonsekventNavngivningFaktaavklartInntekt(),
             V341KonsekventNavngivningFaktaavklartInntektPåDeaktiverteArbeidsforhold(),
             V342RenameAvventersøknadForTidligereEllerOverlappendePeriode(),
-            V343JordbrukerTilSelvstendigYrkesaktivitetstype()
+            V343JordbrukerTilSelvstendigYrkesaktivitetstype(),
+            V344LeggeTilBeregningId()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

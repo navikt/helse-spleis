@@ -539,7 +539,8 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
         inntektskilde.id to beløpstidslinje.tilPersonData()
     }.toMap(),
     faktaavklartInntekt = faktaavklartInntekt?.tilPersonData(),
-    korrigertInntekt = korrigertInntekt?.tilPersonData()
+    korrigertInntekt = korrigertInntekt?.tilPersonData(),
+    beregningId = beregningId
 )
 
 private fun DagerUtenNavAnsvaravklaringDto.tilPersonData() = PeriodeUtenNavAnsvarData(
