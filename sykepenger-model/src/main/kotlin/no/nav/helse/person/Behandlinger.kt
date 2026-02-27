@@ -928,7 +928,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             }
                         },
                         korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) },
-                        beregningId = UUID.randomUUID() // TODO not random
+                        beregningId = dto.beregningId
                     )
                 }
             }
