@@ -955,7 +955,8 @@ data class PersonData(
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
                     val faktaavklartInntekt: FaktaavklartInntektData?,
-                    val korrigertInntekt: KorrigertInntektsopplysningData?
+                    val korrigertInntekt: KorrigertInntektsopplysningData?,
+                    val beregningId: UUID
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
                         id = this.id,
@@ -988,7 +989,8 @@ data class PersonData(
                             InntektskildeDto(inntektskilde) to beløpstidslinje.tilDto()
                         }.toMap(),
                         faktaavklartInntekt = faktaavklartInntekt?.tilDto(),
-                        korrigertInntekt = korrigertInntekt?.tilDto()
+                        korrigertInntekt = korrigertInntekt?.tilDto(),
+                        beregningId = beregningId
                     )
 
                     data class PeriodeUtenNavAnsvarData(

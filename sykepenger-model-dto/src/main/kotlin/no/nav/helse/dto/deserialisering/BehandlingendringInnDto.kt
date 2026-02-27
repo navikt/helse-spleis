@@ -31,5 +31,6 @@ data class BehandlingendringInnDto(
     val maksdatoresultat: MaksdatoresultatInnDto,
     val inntektjusteringer: Map<InntektskildeDto, BeløpstidslinjeDto>,
     val faktaavklartInntekt: FaktaavklartInntektInnDto?,
-    val korrigertInntekt: SaksbehandlerInnDto?
+    val korrigertInntekt: SaksbehandlerInnDto?,
+    val beregningId: UUID
 )

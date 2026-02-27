@@ -930,7 +930,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             }
                         },
                         korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) },
-                        beregningId = nyUuidv7() // todo: last den inn fra et bedre sted
+                        beregningId = dto.beregningId
                     )
                 }
             }
