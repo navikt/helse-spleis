@@ -188,6 +188,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         bekreftTilstandPåSisteBehandlingForForkastedePerioder()
         validerRefusjonsopplysningerPåBehandlinger()
         validerUtbetalingOgVilkårsgrunnlagPåBehandlinger()
+        validerBeregningIder()
         IM.bekreftEntydighåndtering()
     }
 
@@ -309,6 +310,44 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
                                 assertEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}" }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun validerBeregningIder() {
+        val oppbrukteBeregningIder = mutableSetOf<UUID>()
+        arbeidsgivere.map { it.view() }.forEach { arbeidsgiver ->
+            arbeidsgiver.aktiveVedtaksperioder.forEach { vedtaksperiode ->
+                vedtaksperiode.behandlinger.behandlinger.forEach { behandling ->
+                    var forrigeBeregningId: UUID? = null
+                    var forrigeUtbetalingId: UUID? = null
+                    behandling.endringer.forEach { endring ->
+                        if (forrigeBeregningId == null) { // første endring
+                            forrigeBeregningId = endring.beregningId
+                            return@forEach
+                        }
+
+                        check(endring.beregningId !in oppbrukteBeregningIder) { "Forventer ikke en gjenoppstått beregningId" }
+
+                        if (endring.utbetaling != null) {
+                            if (endring.utbetaling.id != forrigeUtbetalingId && forrigeUtbetalingId != null) {
+                                check(endring.beregningId != forrigeBeregningId) { "Forventer ulike beregningIder ved ulike utbetalingIder for arbeidsgiver ${arbeidsgiver.organisasjonsnummer} for periode ${endring.periode}" }
+                                oppbrukteBeregningIder.add(forrigeBeregningId)
+                            } else {
+                                check(endring.beregningId == forrigeBeregningId) { "Forventer like beregningIder ved like utbetalingIder for arbeidsgiver ${arbeidsgiver.organisasjonsnummer} for periode ${endring.periode}" }
+                            }
+                        } else {
+                            if (forrigeUtbetalingId != null) {
+                                check(endring.beregningId != forrigeBeregningId) { "Forventer ulike beregningIder når forrige endring hadde utbetaling for arbeidsgiver ${arbeidsgiver.organisasjonsnummer} for periode ${endring.periode}" }
+                                oppbrukteBeregningIder.add(forrigeBeregningId)
+                            } else {
+                                check(endring.beregningId == forrigeBeregningId) { "Forventer like beregningIder når forrige endring ikke hadde utbetaling og gjeldende ikke har utbetaling for arbeidsgiver ${arbeidsgiver.organisasjonsnummer} for periode ${endring.periode}" }
+                            }
+                        }
+                        forrigeBeregningId = endring.beregningId
+                        forrigeUtbetalingId = endring.utbetaling?.id
                     }
                 }
             }
