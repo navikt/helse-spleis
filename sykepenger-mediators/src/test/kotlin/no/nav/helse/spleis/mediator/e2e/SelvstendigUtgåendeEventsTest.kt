@@ -4,14 +4,19 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.november
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -196,5 +201,67 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         assertEquals(1, testRapid.inspektør.meldinger("selvstendig_ingen_dager_igjen").size)
     }
 
+    @Test
+    fun `Sender event SelvstendigUtbetaltEtterVentetid for bruker med forsikring fra dag 1 når vi betaler utover ventetid`() = Toggle.SelvstendigForsikring.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendVilkårsgrunnlagSelvstendig(0)
+        sendYtelserSelvstendig(0, selvstendigForsikring = listOf(SelvstendigForsikring(1.november(2017), null, SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, 450_000.årlig)))
+        sendSimuleringSelvstendig(0)
+        sendUtbetalingsgodkjenningSelvstendig(0)
+        sendUtbetaling()
+        assertEquals(1, testRapid.inspektør.meldinger("selvstendig_utbetalt_etter_ventetid").size)
 
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 2.februar, tom = 1.mars, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 2.februar, tom = 1.mars, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendYtelserSelvstendig(1, selvstendigForsikring = listOf(SelvstendigForsikring(1.november(2017), null, SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, 450_000.årlig)))
+        sendSimuleringSelvstendig(1)
+        sendUtbetalingsgodkjenningSelvstendig(1)
+        sendUtbetaling()
+        assertEquals(1, testRapid.inspektør.meldinger("selvstendig_utbetalt_etter_ventetid").size)
+
+    }
+
+    @Test
+    fun `Sender ikke event SelvstendigUtbetaltEtterVentetid når bruker ikke har forsikring fra dag 1 når vi betaler utover ventetid`() = Toggle.SelvstendigForsikring.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendVilkårsgrunnlagSelvstendig(0)
+        sendYtelserSelvstendig(0)
+        sendSimuleringSelvstendig(0)
+        sendUtbetalingsgodkjenningSelvstendig(0)
+        sendUtbetaling()
+        assertEquals(0, testRapid.inspektør.meldinger("selvstendig_utbetalt_etter_ventetid").size)
+
+
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 2.februar, tom = 1.mars, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 2.februar, tom = 1.mars, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendYtelserSelvstendig(1)
+        sendSimuleringSelvstendig(1)
+        sendUtbetalingsgodkjenningSelvstendig(1)
+        sendUtbetaling()
+        assertEquals(0, testRapid.inspektør.meldinger("selvstendig_utbetalt_etter_ventetid").size)
+
+    }
+
+    @Test
+    fun `Sender event SelvstendigUtbetaltEtterVentetid etter periode med kun ventetid`() = Toggle.SelvstendigForsikring.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 10.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 10.januar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendVilkårsgrunnlagSelvstendig(0)
+        sendYtelserSelvstendig(0, selvstendigForsikring = listOf(SelvstendigForsikring(1.november(2017), null, SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, 450_000.årlig)))
+        sendSimuleringSelvstendig(0)
+        sendUtbetalingsgodkjenningSelvstendig(0)
+        sendUtbetaling()
+        assertEquals(0, testRapid.inspektør.meldinger("selvstendig_utbetalt_etter_ventetid").size)
+
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 11.januar, tom = 31.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 31.januar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendYtelserSelvstendig(1, selvstendigForsikring = listOf(SelvstendigForsikring(1.november(2017), null, SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, 450_000.årlig)))
+        sendSimuleringSelvstendig(1)
+        sendUtbetalingsgodkjenningSelvstendig(1)
+        sendUtbetaling()
+        assertEquals(1, testRapid.inspektør.meldinger("selvstendig_utbetalt_etter_ventetid").size)
+
+    }
 }

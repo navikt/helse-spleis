@@ -123,6 +123,11 @@ class EventBus {
         observers.forEach { it.selvstendigIngenDagerIgjen(selvstendigIngenDagerIgjenEvent) }
     }
 
+    internal fun selvstendigUtbetaltEtterVentetid(selvstendigUtbetaltEtterVentetidEvent: EventSubscription.SelvstendigUtbetaltEtterVentetidEvent) {
+        _events.add(selvstendigUtbetaltEtterVentetidEvent)
+        observers.forEach { it.selvstendigUtbetaltEtterVentetid(selvstendigUtbetaltEtterVentetidEvent) }
+    }
+
     internal fun analytiskDatapakke(analytiskDatapakkeEvent: EventSubscription.AnalytiskDatapakkeEvent) {
         _events.add(analytiskDatapakkeEvent)
         observers.forEach { it.analytiskDatapakke(analytiskDatapakkeEvent) }

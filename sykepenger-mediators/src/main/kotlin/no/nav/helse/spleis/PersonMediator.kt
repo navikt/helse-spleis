@@ -71,6 +71,7 @@ internal class PersonMediator(
                     is EventSubscription.VedtaksperioderVenterEvent -> mapVedtaksperioderVenter(event)
                     is EventSubscription.BenyttetGrunnlagsdataForBeregningEvent -> mapBenyttetGrunnlagsdataForBeregning(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.SelvstendigIngenDagerIgjenEvent -> mapSelvstendigIngenDagerIgjen(event) // ✅ Er selvstendig-spesifikk, så den er grei
+                    is EventSubscription.SelvstendigUtbetaltEtterVentetidEvent -> mapSelvstendigUtbetaltEtterVentetid(event) // ✅ Er selvstendig-spesifikk, så den er grei
                 }
             }
             .map { jsonMessage -> mapTilPakke(jsonMessage) }
@@ -683,6 +684,16 @@ internal class PersonMediator(
                     }
                 )
             ),
+        )
+    }
+
+    private fun mapSelvstendigUtbetaltEtterVentetid(event: EventSubscription.SelvstendigUtbetaltEtterVentetidEvent): JsonMessage {
+        return JsonMessage.newMessage(
+            "selvstendig_utbetalt_etter_ventetid",
+            mapOf(
+                "yrkesaktivitetstype" to Behandlingsporing.Yrkesaktivitet.Selvstendig.somYrkesaktivitetstype,
+                "behandlingId" to event.behandlingId
+            )
         )
     }
 

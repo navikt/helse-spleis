@@ -8,6 +8,7 @@ internal data class VedtaksperioderMedSammeFørsteFraværsdag private constructo
     val etter: List<Vedtaksperiode>
 ): Iterable<Vedtaksperiode> by listOf(før, listOf(vedtaksperiode), etter).flatten() {
     val periode get() = first().periode.start til last().periode.endInclusive
+    val vedtaksperioder get() = før + vedtaksperiode + etter
 
     companion object {
         fun finn(vedtaksperiode: Vedtaksperiode, alleVedtaksperioderPåYrkesaktivitet: List<Vedtaksperiode>): VedtaksperioderMedSammeFørsteFraværsdag {

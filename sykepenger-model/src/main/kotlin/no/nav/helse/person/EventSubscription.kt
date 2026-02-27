@@ -555,6 +555,10 @@ interface EventSubscription {
         val behandlingId: UUID
     ) : Event
 
+    data class SelvstendigUtbetaltEtterVentetidEvent(
+        val behandlingId: UUID
+    ) : Event
+
     data class OverstyringIgangsatt(
         val årsak: String,
         val skjæringstidspunkt: LocalDate,
@@ -621,6 +625,7 @@ interface EventSubscription {
     fun planlagtAnnullering(event: PlanlagtAnnulleringEvent) {}
     fun avsluttetMedVedtak(event: AvsluttetMedVedtakEvent) {}
     fun selvstendigIngenDagerIgjen(event: SelvstendigIngenDagerIgjenEvent) {}
+    fun selvstendigUtbetaltEtterVentetid(event: SelvstendigUtbetaltEtterVentetidEvent) {}
     fun analytiskDatapakke(event: AnalytiskDatapakkeEvent) {}
 
     fun behandlingLukket(event: BehandlingLukketEvent) {}

@@ -2098,6 +2098,19 @@ internal class Vedtaksperiode private constructor(
                 )
             )
         }
+
+        val datoForFørsteNavDag = yrkesaktivitet.vedtaksperioderMedSammeFørsteFraværsdag(this).vedtaksperioder
+            .flatMap { it.behandlinger.utbetalingstidslinje() }
+            .filterIsInstance<NavDag>()
+            .minOfOrNull { it.dato }
+
+        if (this.yrkesaktivitet.yrkesaktivitetstype == Selvstendig && behandlinger.dagerNavOvertarAnsvar.isNotEmpty() && datoForFørsteNavDag in periode) {
+            eventBus.selvstendigUtbetaltEtterVentetid(
+                EventSubscription.SelvstendigUtbetaltEtterVentetidEvent(
+                    behandlingId = behandlinger.sisteBehandlingId
+                )
+            )
+        }
     }
 
     internal fun håndterAnnullerUtbetaling(
