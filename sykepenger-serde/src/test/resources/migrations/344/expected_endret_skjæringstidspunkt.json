@@ -1,0 +1,80 @@
+{
+  "fødselsnummer": "12029240045",
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "a1",
+      "yrkesaktivitetstype": "ARBEIDSTAKER",
+      "vedtaksperioder": [
+        {
+          "id": "e8a216c0-5a52-4b56-9154-20c9330b3a6d",
+          "tilstand": "AVVENTER_SIMULERING",
+          "behandlinger": [
+            {
+              "id": "eaa9ffdf-31a4-4959-85f7-802fbc52eb16",
+              "tilstand": "BEREGNET",
+              "endringer": [
+                {
+                  "id": "bbedb6d3-29c7-4101-97cb-824cc2e38438",
+                  "beregningId": "00000000-0000-0000-0000-000000000009",
+                  "tidsstempel": [
+                    2026,
+                    2,
+                    27,
+                    15,
+                    0,
+                    2,
+                    721775000
+                  ],
+                  "utbetalingId": null
+                },
+                {
+                  "id": "bd597ee8-4c2c-4832-9b7e-9352e335dd97",
+                  "beregningId": "00000000-0000-0000-0000-000000000009",
+                  "tidsstempel": [
+                    2026,
+                    2,
+                    27,
+                    15,
+                    0,
+                    2,
+                    727500000
+                  ],
+                  "utbetalingId": "ffd75612-862f-4403-af39-11b4a3b93a3b"
+                },
+                {
+                  "id": "6977caea-6dbb-4eb0-956c-8933eaa45c6f",
+                  "beregningId": "00000000-0000-0000-0000-000000000009",
+                  "tidsstempel": [
+                    2026,
+                    2,
+                    27,
+                    15,
+                    0,
+                    2,
+                    752015000
+                  ],
+                  "utbetalingId": "ffd75612-862f-4403-af39-11b4a3b93a3b"
+                },
+                {
+                  "id": "70dd4699-760c-4aa9-bcf4-93dd72db6c99",
+                  "beregningId": "00000000-0000-0000-0000-000000000010",
+                  "tidsstempel": [
+                    2026,
+                    2,
+                    27,
+                    15,
+                    0,
+                    2,
+                    752548000
+                  ],
+                  "utbetalingId": null
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": []
+    }
+  ]
+}

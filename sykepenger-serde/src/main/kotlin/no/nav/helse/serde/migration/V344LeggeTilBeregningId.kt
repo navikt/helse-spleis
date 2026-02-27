@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlin.time.toKotlinInstant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -14,10 +15,10 @@ import kotlin.uuid.toJavaUuid
 import no.nav.helse.serde.serdeObjectMapper
 
 internal interface UuidGenerator {
-    fun generate(tidsstempel: kotlin.time.Instant): UUID
+    fun generate(tidsstempel: Instant): UUID
     @OptIn(ExperimentalUuidApi::class, ExperimentalTime::class)
     object UuidV7BasertPåTidsstempelGenerator: UuidGenerator {
-        override fun generate(tidsstempel: kotlin.time.Instant) = Uuid.generateV7NonMonotonicAt(tidsstempel).toJavaUuid()
+        override fun generate(tidsstempel: Instant) = Uuid.generateV7NonMonotonicAt(tidsstempel).toJavaUuid()
     }
 }
 
@@ -38,17 +39,17 @@ internal class V344LeggeTilBeregningId(private val uuidGenerator: UuidGenerator 
 
     private fun migrerVedtaksperiode(vedtaksperiode: JsonNode) {
         vedtaksperiode.path("behandlinger").forEach { behandling ->
-            var trengerNy = true
-            var nesteBeregningId: String? = null
+            var forrigeUtbetalingId: String? = null
+            var gjeldendeBeregningId: String? = null
             behandling.path("endringer").forEach { endring ->
                 val denneUtbetalingId = endring.path("utbetalingId").takeUnless { it.isNull || it.isMissingNode }?.asText()
-                endring as ObjectNode
-                if (trengerNy) {
+                if (gjeldendeBeregningId == null || (forrigeUtbetalingId != null && forrigeUtbetalingId != denneUtbetalingId)) {
                     val tidsstempel = endring.path("tidsstempel").localDateTime().toKotlinInstant()
-                    nesteBeregningId = uuidGenerator.generate(tidsstempel).toString()
+                    gjeldendeBeregningId = uuidGenerator.generate(tidsstempel).toString()
                 }
-                endring.put("beregningId", nesteBeregningId!!)
-                trengerNy = denneUtbetalingId != null
+                endring as ObjectNode
+                endring.put("beregningId", gjeldendeBeregningId)
+                forrigeUtbetalingId = denneUtbetalingId
             }
         }
     }

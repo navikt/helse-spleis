@@ -10,11 +10,11 @@ fun main() {
      * 1. Skriv din setup for migrering som en test i en 'AbstractDslTest'
      * 2. Skriv på slutten av testen `val json = dto().tilPersonData().tilSerialisertPerson().json`
      * 3. Debug testen og kopier innholdet av `json`
-     * 4. CMD + Shift + Space (Åpne JSON scratch fil)
+     * 4. CMD + Shift + N (Åpne JSON scratch fil)
      * 5. Paste innholdet av `json`
      * 6. Høyreklikk på scratch-fil -> Copy Path -> Absolute Path
      * 7. Paste pathen i `path`-varabelen under
-     * 8. Tilpass felter som beholdes etter DITT behov. Defaulten er tilpassen V344
+     * 8. Tilpass felter som beholdes etter DITT behov. Defaulten er tilpasset V344
      * 9. Kjør og du har et bra utgangspunkt for din `original.json`
      */
     val path = "<Du må lese det som står over!>"

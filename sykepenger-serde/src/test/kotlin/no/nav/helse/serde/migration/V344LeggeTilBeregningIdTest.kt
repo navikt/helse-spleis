@@ -25,6 +25,7 @@ internal class V344LeggeTilBeregningIdTest : MigrationTest(V344LeggeTilBeregning
     @Test
     fun `Legger på beregningId`() {
         assertMigration("/migrations/344/expected.json", "/migrations/344/original.json")
+        assertMigration("/migrations/344/expected_endret_skjæringstidspunkt.json", "/migrations/344/original_endret_skjæringstidspunkt.json")
     }
 
     @Test
