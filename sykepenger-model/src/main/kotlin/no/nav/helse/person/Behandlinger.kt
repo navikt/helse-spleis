@@ -1078,7 +1078,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         is ArbeidstakerFaktaavklartInntekt -> fi.dto()
                         null -> null
                     },
-                    korrigertInntekt = korrigertInntekt?.dto()
+                    korrigertInntekt = korrigertInntekt?.dto(),
+                    beregningId = beregningId
                 )
             }
 
