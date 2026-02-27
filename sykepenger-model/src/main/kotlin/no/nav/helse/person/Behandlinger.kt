@@ -1687,7 +1687,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingEventBus: BehandlingEventBus,
                     aktivitetslogg: IAktivitetslogg
                 ): Behandling? {
-                    behandling.nyEndring(behandling.endringer.last().kopierUtenBeregning())
+                    behandling.nyEndring(behandling.endringer.last().kopierUtenBeregning(ønskerNyBeregningId = false))
                     behandling.tilstand(UberegnetAnnullering)
                     return null
                 }
