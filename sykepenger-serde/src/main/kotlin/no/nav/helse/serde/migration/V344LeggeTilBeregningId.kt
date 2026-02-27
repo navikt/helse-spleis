@@ -2,6 +2,7 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
@@ -10,6 +11,7 @@ import kotlin.time.toKotlinInstant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
+import no.nav.helse.serde.serdeObjectMapper
 
 internal interface UuidGenerator {
     fun generate(tidsstempel: kotlin.time.Instant): UUID
@@ -42,7 +44,7 @@ internal class V344LeggeTilBeregningId(private val uuidGenerator: UuidGenerator 
                 val denneUtbetalingId = endring.path("utbetalingId").takeUnless { it.isNull || it.isMissingNode }?.asText()
                 endring as ObjectNode
                 if (trengerNy) {
-                    val tidsstempel = LocalDateTime.parse(endring.path("tidsstempel").asText()).toKotlinInstant()
+                    val tidsstempel = endring.path("tidsstempel").localDateTime().toKotlinInstant()
                     nesteBeregningId = uuidGenerator.generate(tidsstempel).toString()
                 }
                 endring.put("beregningId", nesteBeregningId!!)
@@ -52,6 +54,7 @@ internal class V344LeggeTilBeregningId(private val uuidGenerator: UuidGenerator 
     }
 
     companion object {
+        fun JsonNode.localDateTime() = serdeObjectMapper.readValue<LocalDateTime>(toString())
         fun LocalDateTime.toKotlinInstant() = atZone(ZoneId.systemDefault()).toInstant().toKotlinInstant()
     }
 }
