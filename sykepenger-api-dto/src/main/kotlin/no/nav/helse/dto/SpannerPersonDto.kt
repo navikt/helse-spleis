@@ -553,7 +553,8 @@ data class SpannerPersonDto(
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
                     val faktaavklartInntekt: FaktaavklartInntektData?,
-                    val korrigertInntekt: KorrigertInntektsopplysningData?
+                    val korrigertInntekt: KorrigertInntektsopplysningData?,
+                    val beregningId: UUID
                 )
 
                 data class PeriodeUtenNavAnsvarData(
@@ -1339,7 +1340,8 @@ private fun BehandlingendringUtDto.tilPersonData() =
             inntektskilde.id to beløpstidslinje.tilPersonData()
         }.toMap(),
         faktaavklartInntekt = this.faktaavklartInntekt?.tilPersonData(),
-        korrigertInntekt = this.korrigertInntekt?.tilPersonData()
+        korrigertInntekt = this.korrigertInntekt?.tilPersonData(),
+        beregningId = this.beregningId
     )
 
 private fun DagerUtenNavAnsvaravklaringDto.tilPersonData() = PeriodeUtenNavAnsvarData(
