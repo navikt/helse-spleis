@@ -264,4 +264,19 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         assertEquals(1, testRapid.inspektør.meldinger("selvstendig_utbetalt_etter_ventetid").size)
 
     }
+
+    @Test
+    fun `Sender både SelvstendigIngenDagerIgjenEvent og SelvstendigUtbetaltEtterVentetidEvent når bruker dør iløpet av perioden, men etter ventetiden`() = Toggle.SelvstendigForsikring.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), sendtNav = 1.januar.atStartOfDay(), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendDødsmelding(25.januar)
+        sendVilkårsgrunnlagSelvstendig(0)
+        sendYtelserSelvstendig(0, selvstendigForsikring = listOf(SelvstendigForsikring(1.november(2017), null, SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, 450_000.årlig)))
+        sendSimuleringSelvstendig(0)
+        sendUtbetalingsgodkjenningSelvstendig(0)
+        sendUtbetaling()
+
+        assertEquals(1, testRapid.inspektør.meldinger("selvstendig_ingen_dager_igjen").size)
+        assertEquals(1, testRapid.inspektør.meldinger("selvstendig_utbetalt_etter_ventetid").size)
+    }
 }

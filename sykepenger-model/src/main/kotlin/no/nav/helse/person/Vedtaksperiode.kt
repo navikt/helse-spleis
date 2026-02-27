@@ -2086,12 +2086,10 @@ internal class Vedtaksperiode private constructor(
             }
     }
 
-    private fun vedtakIverksatt(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
-        tilstand(eventBus, aktivitetslogg, nesteTilstand)
-        val utkastTilVedtakBuilder = utkastTilVedtakBuilder(behandlinger.forrigeBehandling)
-        eventBus.avsluttetMedVedtak(utkastTilVedtakBuilder.buildAvsluttedMedVedtak())
-        eventBus.analytiskDatapakke(behandlinger.analytiskDatapakke(yrkesaktivitet.yrkesaktivitetstype, this@Vedtaksperiode.id))
-        if (this.yrkesaktivitet.yrkesaktivitetstype == Selvstendig && behandlinger.maksdato.gjenståendeDager == 0) {
+    private fun selvstendigUtgåendeEventer(eventBus: EventBus) {
+        if (yrkesaktivitet.yrkesaktivitetstype != Selvstendig) return
+
+        if (behandlinger.maksdato.gjenståendeDager == 0) {
             eventBus.selvstendigIngenDagerIgjen(
                 EventSubscription.SelvstendigIngenDagerIgjenEvent(
                     behandlingId = behandlinger.sisteBehandlingId
@@ -2104,13 +2102,21 @@ internal class Vedtaksperiode private constructor(
             .filterIsInstance<NavDag>()
             .minOfOrNull { it.dato }
 
-        if (this.yrkesaktivitet.yrkesaktivitetstype == Selvstendig && behandlinger.dagerNavOvertarAnsvar.isNotEmpty() && datoForFørsteNavDag in periode) {
+        if (behandlinger.dagerNavOvertarAnsvar.isNotEmpty() && datoForFørsteNavDag in periode) {
             eventBus.selvstendigUtbetaltEtterVentetid(
                 EventSubscription.SelvstendigUtbetaltEtterVentetidEvent(
                     behandlingId = behandlinger.sisteBehandlingId
                 )
             )
         }
+    }
+
+    private fun vedtakIverksatt(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
+        tilstand(eventBus, aktivitetslogg, nesteTilstand)
+        val utkastTilVedtakBuilder = utkastTilVedtakBuilder(behandlinger.forrigeBehandling)
+        eventBus.avsluttetMedVedtak(utkastTilVedtakBuilder.buildAvsluttedMedVedtak())
+        eventBus.analytiskDatapakke(behandlinger.analytiskDatapakke(yrkesaktivitet.yrkesaktivitetstype, this@Vedtaksperiode.id))
+        selvstendigUtgåendeEventer(eventBus)
     }
 
     internal fun håndterAnnullerUtbetaling(
