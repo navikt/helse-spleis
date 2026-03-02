@@ -778,8 +778,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             val beregnetBehandling = { uberegnetTilstand: Tilstand ->
                 gjeldende.forkastUtbetaling(behandlingEventBus, aktivitetslogg)
-                nyEndring(endringMedNyFakta)
-                tilstand(uberegnetTilstand)
+                nyEndring(endringMedNyFakta, uberegnetTilstand)
             }
 
             when (this.tilstand) {
@@ -1278,25 +1277,23 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> null
             }
 
-            nyEndring(gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar = dagerNavOvertarAnsvar, faktaavklartInntekt = faktaavklartInntektBruktVedBeregning))
-            tilstand(nesteTilstand)
+            nyEndring(gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar = dagerNavOvertarAnsvar, faktaavklartInntekt = faktaavklartInntektBruktVedBeregning), nesteTilstand)
         }
 
-        private fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
-            nyEndring(gjeldende.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning))
-        }
-
-        private fun utenBeregning(behandlingEventBus: BehandlingEventBus, aktivitetslogg: IAktivitetslogg) {
+        private fun utenBeregning(behandlingEventBus: BehandlingEventBus, aktivitetslogg: IAktivitetslogg, nesteTilstand: Tilstand) {
             gjeldende.utbetaling!!.forkast(behandlingEventBus, aktivitetslogg)
-            nyEndring(gjeldende.kopierUtenBeregning())
+            nyEndring(gjeldende.kopierUtenBeregning(), nesteTilstand)
         }
 
-        private fun nyEndring(endring: Endring?) {
+        private fun nyEndring(endring: Endring?, nesteTilstand: Tilstand = this.tilstand) {
             if (endring == null) return
             check(endringer.none { it.id == endring.id }) { "Endringer må ha unik ID" }
             check(endringer.none { it.tidsstempel == endring.tidsstempel }) { "Endringer må ha unik tidsstempel" }
             check(endringer.none { it.tidsstempel > endring.tidsstempel }) { "Endringer må ha nyere tidsstempel" }
+            // TODO: Avgjør om det skal være ny beregningId før vi legger til endringen i lista
             endringer.add(endring)
+            if (tilstand::class == nesteTilstand::class) return
+            tilstand(nesteTilstand)
         }
 
         fun oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>) {
@@ -1648,8 +1645,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 override fun avsluttUtenVedtak(behandling: Behandling, behandlingEventBus: BehandlingEventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingstidslinje: Utbetalingstidslinje, inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>) {
                     behandling.behandlingLukket(behandlingEventBus, yrkesaktivitet)
-                    behandling.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning)
-                    behandling.tilstand(AvsluttetUtenVedtak)
+                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning), AvsluttetUtenVedtak)
                 }
             }
 
@@ -1681,8 +1677,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingEventBus: BehandlingEventBus,
                     aktivitetslogg: IAktivitetslogg
                 ): Behandling? {
-                    behandling.nyEndring(behandling.endringer.last().kopierUtenBeregning())
-                    behandling.tilstand(UberegnetAnnullering)
+                    behandling.nyEndring(behandling.endringer.last().kopierUtenBeregning(), UberegnetAnnullering)
                     return null
                 }
             }
@@ -1707,8 +1702,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 }
 
                 override fun utenBeregning(behandling: Behandling, behandlingEventBus: BehandlingEventBus, aktivitetslogg: IAktivitetslogg) {
-                    behandling.utenBeregning(behandlingEventBus, aktivitetslogg)
-                    behandling.tilstand(Uberegnet)
+                    behandling.utenBeregning(behandlingEventBus, aktivitetslogg, Uberegnet)
                 }
 
                 override fun vedtakAvvist(behandling: Behandling, behandlingEventBus: BehandlingEventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
@@ -1753,8 +1747,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             data object BeregnetOmgjøring : Tilstand by (Beregnet) {
                 override fun utenBeregning(behandling: Behandling, behandlingEventBus: BehandlingEventBus, aktivitetslogg: IAktivitetslogg) {
-                    behandling.utenBeregning(behandlingEventBus, aktivitetslogg)
-                    behandling.tilstand(UberegnetOmgjøring)
+                    behandling.utenBeregning(behandlingEventBus, aktivitetslogg, UberegnetOmgjøring)
                 }
             }
 
@@ -1764,8 +1757,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 }
 
                 override fun utenBeregning(behandling: Behandling, behandlingEventBus: BehandlingEventBus, aktivitetslogg: IAktivitetslogg) {
-                    behandling.utenBeregning(behandlingEventBus, aktivitetslogg)
-                    behandling.tilstand(UberegnetRevurdering)
+                    behandling.utenBeregning(behandlingEventBus, aktivitetslogg, UberegnetRevurdering)
                 }
 
                 override fun vedtakAvvist(behandling: Behandling, behandlingEventBus: BehandlingEventBus, yrkesaktivitet: Yrkesaktivitet, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg) {
@@ -1779,8 +1771,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     aktivitetslogg: IAktivitetslogg
                 ): Behandling? {
                     behandling.gjeldende.forkastUtbetaling(behandlingEventBus, aktivitetslogg)
-                    behandling.nyEndring(behandling.endringer.last().kopierUtenBeregning())
-                    behandling.tilstand(UberegnetAnnullering)
+                    behandling.nyEndring(behandling.endringer.last().kopierUtenBeregning(), UberegnetAnnullering)
                     return null
                 }
             }
@@ -1864,16 +1855,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             data object UberegnetAnnullering : Tilstand {
                 override fun leggTilAnnullering(behandling: Behandling, behandlingEventBus: BehandlingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, grunnlagsdata: VilkårsgrunnlagElement, aktivitetslogg: IAktivitetslogg) {
-                    behandling.nyEndring(behandling.gjeldende.kopierMedAnnullering(grunnlagsdata, annullering))
-
                     annullering.godkjent(behandlingEventBus, aktivitetslogg, vurdering)
 
-                    if (annullering.erAvsluttet()) {
-                        behandling.tilstand(AnnullertPeriode)
-                        behandlingEventBus.behandlingForkastet(behandling.id, false)
-                    } else {
-                        behandling.tilstand(OverførtAnnullering)
+                    val nesteTilstand = when {
+                        annullering.erAvsluttet() -> AnnullertPeriode
+                        else -> OverførtAnnullering
                     }
+
+                    if (nesteTilstand is AnnullertPeriode) {
+                        behandlingEventBus.behandlingForkastet(behandling.id, false)
+                    }
+
+                    behandling.nyEndring(behandling.gjeldende.kopierMedAnnullering(grunnlagsdata, annullering), nesteTilstand)
                 }
 
                 override fun utenBeregning(behandling: Behandling, behandlingEventBus: BehandlingEventBus, aktivitetslogg: IAktivitetslogg) {}
