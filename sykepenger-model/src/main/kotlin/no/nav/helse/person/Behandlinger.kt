@@ -32,6 +32,7 @@ import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.vurdering
+import no.nav.helse.nyUuidv7
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
@@ -821,7 +822,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val maksdatoresultat: Maksdatoresultat,
             val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
             val faktaavklartInntekt: FaktaavklartInntekt?,
-            val korrigertInntekt: Saksbehandler?
+            val korrigertInntekt: Saksbehandler?,
+            val beregningId: UUID
         ) {
 
             fun view() = BehandlingendringView(
@@ -839,7 +841,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dagerUtenNavAnsvar = dagerUtenNavAnsvar,
                 egenmeldingsdager = egenmeldingsdager,
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
-                maksdatoresultat = maksdatoresultat
+                maksdatoresultat = maksdatoresultat,
+                beregningId = beregningId
             )
 
             companion object {
@@ -926,7 +929,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                                 is ArbeidstakerFaktaavklartInntektInnDto -> ArbeidstakerFaktaavklartInntekt.gjenopprett(it)
                             }
                         },
-                        korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) }
+                        korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) },
+                        beregningId = nyUuidv7() // todo: last den inn fra et bedre sted
                     )
                 }
             }
@@ -1290,10 +1294,36 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             check(endringer.none { it.id == endring.id }) { "Endringer må ha unik ID" }
             check(endringer.none { it.tidsstempel == endring.tidsstempel }) { "Endringer må ha unik tidsstempel" }
             check(endringer.none { it.tidsstempel > endring.tidsstempel }) { "Endringer må ha nyere tidsstempel" }
-            // TODO: Avgjør om det skal være ny beregningId før vi legger til endringen i lista
-            endringer.add(endring)
+            check(endring.beregningId == endringer.last().beregningId) { "Den nye endringen har annen beregningId enn forrige, som ikke burde skje på utsiden av inneværende funksjon" }
+
+            // det skal være ny beregningId når vi går fra Beregnet til en Uberegnet tilstand
+            if (this.tilstand.erBeregnet() && !nesteTilstand.erBeregnet()) {
+                endringer.add(endring.copy(beregningId = nyUuidv7()))
+            } else {
+                endringer.add(endring)
+            }
+
             if (tilstand::class == nesteTilstand::class) return
             tilstand(nesteTilstand)
+        }
+
+        private fun Tilstand.erBeregnet() = when (this) {
+            Tilstand.Beregnet,
+            Tilstand.BeregnetOmgjøring,
+            Tilstand.BeregnetRevurdering -> true
+
+            Tilstand.Uberegnet,
+            Tilstand.UberegnetAnnullering,
+            Tilstand.UberegnetOmgjøring,
+            Tilstand.UberegnetRevurdering -> false
+
+            Tilstand.AnnullertPeriode,
+            Tilstand.AvsluttetUtenVedtak,
+            Tilstand.OverførtAnnullering,
+            Tilstand.RevurdertVedtakAvvist,
+            Tilstand.TilInfotrygd,
+            Tilstand.VedtakIverksatt,
+            Tilstand.VedtakFattet -> error("Forventer ikke å legge til en endring, når vi går hverken inn eller ut av ${this::class.simpleName})")
         }
 
         fun oppdaterSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>) {
@@ -1472,7 +1502,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                             inntektjusteringer = emptyMap(),
                             faktaavklartInntekt = faktaavklartInntekt,
-                            korrigertInntekt = null
+                            korrigertInntekt = null,
+                            beregningId = nyUuidv7()
                         )
                     ),
                     avsluttet = null,
@@ -2045,7 +2076,8 @@ internal data class BehandlingendringView(
     val dagerNavOvertarAnsvar: List<Periode>,
     val dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaring,
     val egenmeldingsdager: List<Periode>,
-    val maksdatoresultat: Maksdatoresultat
+    val maksdatoresultat: Maksdatoresultat,
+    val beregningId: UUID
 )
 
 internal data class BehandlingkildeView(
