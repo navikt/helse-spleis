@@ -2092,7 +2092,9 @@ internal class Vedtaksperiode private constructor(
         if (behandlinger.maksdato.gjenståendeDager == 0) {
             eventBus.selvstendigIngenDagerIgjen(
                 EventSubscription.SelvstendigIngenDagerIgjenEvent(
-                    behandlingId = behandlinger.sisteBehandlingId
+                    behandlingId = behandlinger.sisteBehandlingId,
+                    vedtaksperiodeId = this.id,
+                    skjæringstidspunkt = this.skjæringstidspunkt
                 )
             )
         }
@@ -2105,7 +2107,9 @@ internal class Vedtaksperiode private constructor(
         if (behandlinger.dagerNavOvertarAnsvar.isNotEmpty() && datoForFørsteNavDag in periode) {
             eventBus.selvstendigUtbetaltEtterVentetid(
                 EventSubscription.SelvstendigUtbetaltEtterVentetidEvent(
-                    behandlingId = behandlinger.sisteBehandlingId
+                    behandlingId = behandlinger.sisteBehandlingId,
+                    vedtaksperiodeId = this.id,
+                    skjæringstidspunkt = this.skjæringstidspunkt
                 )
             )
         }

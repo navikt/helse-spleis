@@ -692,7 +692,9 @@ internal class PersonMediator(
             "selvstendig_utbetalt_etter_ventetid",
             mapOf(
                 "yrkesaktivitetstype" to Behandlingsporing.Yrkesaktivitet.Selvstendig.somYrkesaktivitetstype,
-                "behandlingId" to event.behandlingId
+                "behandlingId" to event.behandlingId,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "skjæringstidspunkt" to event.skjæringstidspunkt
             )
         )
     }
@@ -702,7 +704,9 @@ internal class PersonMediator(
             "selvstendig_ingen_dager_igjen",
             mapOf(
                 "yrkesaktivitetstype" to Behandlingsporing.Yrkesaktivitet.Selvstendig.somYrkesaktivitetstype,
-                "behandlingId" to event.behandlingId
+                "behandlingId" to event.behandlingId,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "skjæringstidspunkt" to event.skjæringstidspunkt
             )
         )
     }

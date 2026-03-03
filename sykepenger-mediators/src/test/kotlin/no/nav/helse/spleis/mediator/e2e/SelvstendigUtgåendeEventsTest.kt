@@ -20,6 +20,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNotNull
 
 internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
 
@@ -34,6 +35,13 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
 
         assertEquals(1, testRapid.inspektør.meldinger("selvstendig_ingen_dager_igjen").size)
+
+        val selvstendigIngenDagerIgjenSendtEvent = testRapid.inspektør.meldinger("selvstendig_ingen_dager_igjen").first()
+
+        assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("vedtaksperiodeId").asText().toUUID(), "Eventet skal inneholde vedtaksperiodeId")
+        assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("behandlingId").asText().toUUID(), "Eventet skal inneholde behandlingId")
+        assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("skjæringstidspunkt").asLocalDate(), "Eventet skal inneholde skjæringstidspunkt")
+        assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("yrkesaktivitetstype").asText(), "Eventet skal inneholde yrkesaktivitetstype")
     }
 
     @Test
@@ -203,6 +211,24 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `Sender event SelvstendigUtbetaltEtterVentetid for bruker med forsikring fra dag 1 når vi betaler utover ventetid`() = Toggle.SelvstendigForsikring.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendVilkårsgrunnlagSelvstendig(0)
+        sendYtelserSelvstendig(0, selvstendigForsikring = listOf(SelvstendigForsikring(1.november(2017), null, SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, 450_000.årlig)))
+        sendSimuleringSelvstendig(0)
+        sendUtbetalingsgodkjenningSelvstendig(0)
+        sendUtbetaling()
+        assertEquals(1, testRapid.inspektør.meldinger("selvstendig_utbetalt_etter_ventetid").size)
+
+        val SelvstendigUtbetaltEtterVentetidEvent = testRapid.inspektør.meldinger("selvstendig_utbetalt_etter_ventetid").first()
+        assertNotNull(SelvstendigUtbetaltEtterVentetidEvent.path("vedtaksperiodeId").asText().toUUID(), "Eventet skal inneholde vedtaksperiodeId")
+        assertNotNull(SelvstendigUtbetaltEtterVentetidEvent.path("behandlingId").asText().toUUID(), "Eventet skal inneholde behandlingId")
+        assertNotNull(SelvstendigUtbetaltEtterVentetidEvent.path("skjæringstidspunkt").asLocalDate(), "Eventet skal inneholde skjæringstidspunkt")
+        assertNotNull(SelvstendigUtbetaltEtterVentetidEvent.path("yrkesaktivitetstype").asText(), "Eventet skal inneholde yrkesaktivitetstype")
+    }
+
+    @Test
+    fun `Sender event SelvstendigUtbetaltEtterVentetid bare på første periode når bruker med forsikring fra dag 1 når vi betaler utover ventetid`() = Toggle.SelvstendigForsikring.enable {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendVilkårsgrunnlagSelvstendig(0)
