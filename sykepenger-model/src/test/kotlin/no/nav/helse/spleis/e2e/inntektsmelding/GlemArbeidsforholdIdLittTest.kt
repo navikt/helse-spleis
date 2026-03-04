@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
-import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -15,7 +14,7 @@ import org.junit.jupiter.api.Test
  */
 internal class GlemArbeidsforholdIdLittTest : AbstractDslTest() {
     @Test
-    fun `inntektsmelding med arbeidsforholdId blir ignorert, men plukkes opp på replay`() {
+    fun `inntektsmelding med arbeidsforholdId blir ignorert`() {
         a1 {
             håndterSøknad(1.januar til 31.januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), arbeidsforholdId = "123")

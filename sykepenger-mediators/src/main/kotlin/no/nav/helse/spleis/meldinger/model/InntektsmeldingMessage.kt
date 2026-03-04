@@ -50,7 +50,7 @@ internal class InntektsmeldingMessage(
         opphørAvNaturalytelser = opphørAvNaturalytelser,
         førsteFraværsdag = førsteFraværsdag,
         mottatt = mottatt,
-        arbeidsforholdId = arbeidsforholdId
+        arbeidsforholdId = arbeidsforholdId?.takeIf { it.trim().isNotEmpty() }
     )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
