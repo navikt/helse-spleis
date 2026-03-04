@@ -375,7 +375,8 @@ internal class TestPerson(
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
             id: UUID = UUID.randomUUID(),
             orgnummer: String = "",
-            mottatt: LocalDateTime = LocalDateTime.now()
+            mottatt: LocalDateTime = LocalDateTime.now(),
+            arbeidsforholdId: String? = null,
         ): UUID {
             arbeidsgiverHendelsefabrikk.lagInntektsmelding(
                 arbeidsgiverperioder,
@@ -385,7 +386,8 @@ internal class TestPerson(
                 opphørAvNaturalytelser,
                 begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id,
-                mottatt = mottatt
+                mottatt = mottatt,
+                arbeidsforholdId = arbeidsforholdId
             ).håndter(Person::håndterInntektsmelding)
             return id
         }
@@ -750,8 +752,14 @@ internal class TestPerson(
             nåtidspunkt: LocalDateTime = LocalDateTime.now(),
             flagg: Set<String> = emptySet()
         ) {
-            arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt, nåtidspunkt, flagg = flagg)
-                .håndter(Person::håndterPåminnelse)
+            behovsamler.fangInntektsmeldingReplay({
+                arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt, nåtidspunkt, flagg = flagg)
+                    .håndter(Person::håndterPåminnelse)
+            }) { vedtaksperioderSomHarBedtOmReplay ->
+                vedtaksperioderSomHarBedtOmReplay.forEach { forespørsel ->
+                    håndterInntektsmeldingReplay(forespørsel)
+                }
+            }
         }
 
         internal fun håndterGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) {
