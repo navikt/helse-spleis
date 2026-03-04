@@ -292,3 +292,6 @@ spec:
         - team: tbd
           application: spiskammerset-opprydding-dev
           access: readwrite
+        - team: tbd
+          application: spre-forsikringsoppgaver
+          access: readwrite
