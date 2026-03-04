@@ -140,7 +140,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
-        mottatt: LocalDateTime = LocalDateTime.now()
+        mottatt: LocalDateTime = LocalDateTime.now(),
+        arbeidsforholdId: String? = null,
     ): Inntektsmelding {
         val inntektsmeldinggenerator = {
             Inntektsmelding(
@@ -152,7 +153,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
                 begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
                 opphørAvNaturalytelser = opphørAvNaturalytelser,
                 førsteFraværsdag = førsteFraværsdag,
-                mottatt = mottatt
+                mottatt = mottatt,
+                arbeidsforholdId = arbeidsforholdId
             )
         }
         inntektsmeldinger[id] = inntektsmeldinggenerator

@@ -488,7 +488,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     id: UUID = UUID.randomUUID(),
     opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    mottatt: LocalDateTime? = null
+    mottatt: LocalDateTime? = null,
+    arbeidsforholdId: String? = null,
 ): UUID {
     val inntektsmelding = inntektsmelding(
         id = id,
@@ -499,7 +500,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
         orgnummer = orgnummer,
         opphørAvNaturalytelser = opphørAvNaturalytelser,
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-        mottatt = mottatt
+        mottatt = mottatt,
+        arbeidsforholdId = arbeidsforholdId
     )
     håndterOgReplayInntektsmeldinger {
         inntektsmelding.håndter(Person::håndterInntektsmelding)

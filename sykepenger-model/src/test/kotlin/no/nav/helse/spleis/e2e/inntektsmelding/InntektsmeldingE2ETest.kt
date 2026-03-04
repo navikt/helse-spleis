@@ -112,6 +112,15 @@ import org.junit.jupiter.api.assertDoesNotThrow
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
+    fun `inntektsmelding med arbeidsforholdId blir ignorert`() {
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, arbeidsforholdId = "123")
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        //TODO: også bør vi verifisere at vi likevel takler å håndtere en inntektsmelding med arbeidsforholdId, i en replay-kontekst
+    }
+
+
+    @Test
     fun `konsekvent valg av inntekt fra inntektsmelding`() {
         håndterSøknad(januar, a1)
         håndterSøknad(februar, a1)

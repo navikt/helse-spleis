@@ -67,6 +67,8 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
         val arbeidsgiverperioder = packet.path("arbeidsgiverperioder").map(::asPeriode)
         val begrunnelseForReduksjonEllerIkkeUtbetalt = packet.path("begrunnelseForReduksjonEllerIkkeUtbetalt").takeIf(JsonNode::isTextual)?.asText()
         val opphørAvNaturalytelser = packet.path("opphoerAvNaturalytelser").tilOpphørAvNaturalytelser()
+        val arbeidsforholdId = packet.path("arbeidsforholdId").takeIf(JsonNode::isTextual)?.asText()
+
 
         return Inntektsmelding(
             meldingsreferanseId = internDokumentId,
@@ -79,7 +81,8 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
             begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             førsteFraværsdag = førsteFraværsdag,
-            mottatt = mottatt
+            mottatt = mottatt,
+            arbeidsforholdId = arbeidsforholdId
         )
     }
 }

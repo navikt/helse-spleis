@@ -117,7 +117,8 @@ internal class RestApiTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             opphørAvNaturalytelser = emptyList(),
             førsteFraværsdag = LocalDate.of(2018, 9, 10),
-            mottatt = LocalDateTime.now()
+            mottatt = LocalDateTime.now(),
+            arbeidsforholdId = null
         )
         val person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
         person.håndterSykmelding(eventBus, sykmelding, Aktivitetslogg())

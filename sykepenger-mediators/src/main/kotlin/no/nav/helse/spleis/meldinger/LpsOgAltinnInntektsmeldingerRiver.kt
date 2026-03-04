@@ -20,6 +20,7 @@ internal class LpsOgAltinnInntektsmeldingerRiver(
         standardInntektsmeldingvalidering(message)
         message.requireKey("beregnetInntekt")
         message.interestedIn("foersteFravaersdag")
+        message.interestedIn("arbeidsforholdId")
         message.require("arbeidsgiverperioder") { agp ->
             if (agp.size() == 0) {
                 message.requireKey("foersteFravaersdag")

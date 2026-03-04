@@ -154,7 +154,8 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     orgnummer: String = a1,
     opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    mottatt: LocalDateTime? = null
+    mottatt: LocalDateTime? = null,
+    arbeidsforholdId: String? = null,
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
         ArbeidsgiverHendelsefabrikk(orgnummer, behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer)).lagInntektsmelding(
@@ -165,7 +166,8 @@ internal fun AbstractEndToEndTest.inntektsmelding(
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             id = id,
-            mottatt = mottatt ?: LocalDateTime.now()
+            mottatt = mottatt ?: LocalDateTime.now(),
+            arbeidsforholdId = arbeidsforholdId
         )
     }
     val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(

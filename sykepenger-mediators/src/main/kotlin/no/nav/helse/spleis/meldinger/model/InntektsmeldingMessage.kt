@@ -36,6 +36,7 @@ internal class InntektsmeldingMessage(
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
+    private val arbeidsforholdId = packet["arbeidsforholdId"].takeIf(JsonNode::isTextual)?.asText()
 
     private val inntektsmelding get() = Inntektsmelding(
         meldingsreferanseId = meldingsporing.id,
@@ -48,7 +49,8 @@ internal class InntektsmeldingMessage(
         begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
         opphørAvNaturalytelser = opphørAvNaturalytelser,
         førsteFraværsdag = førsteFraværsdag,
-        mottatt = mottatt
+        mottatt = mottatt,
+        arbeidsforholdId = arbeidsforholdId
     )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
