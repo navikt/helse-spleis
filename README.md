@@ -8,9 +8,24 @@ Tar inn søknader og inntektsmeldinger for en person og foreslår utbetalinger.
 
 ## Regler
 
-Dagturnering: 
+### Dagturnering:
 
 https://github.com/navikt/helse-spleis/blob/main/sykepenger-model/src/main/resources/dagturnering.csv
+
+### Maksdatoberegning
+
+#### 26-ukers opphold
+
+Vi regner ikke forbrukte dager som ligger _før_ et opphold i sykepengeutbetalinger på 26 uker eller mer.
+
+#### Tre-års vindu
+
+Vi skal ikke regne forbrukte dager som er eldre enn tre år, regnet fra skjæringstidspunktet. Det betyr at om en bruker
+er sykmeldt fra og med 1.mai 2026 og har tidligere fått utbetalt sykepenger 30. april 2023 og 1. mai 2023, så skal
+_bare_ 1. mai 2023 regnes som forbrukte dager, og
+ikke 30. april 2023.
+
+Dette forutsetter at det ikke er noen 26 ukers opphold i sykepengeutbetalinger mellom 30. april 2023 og 1. mai 2026.
 
 ## Migrere JSON til siste skjema
 
