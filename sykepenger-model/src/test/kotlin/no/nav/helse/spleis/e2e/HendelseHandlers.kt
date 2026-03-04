@@ -823,15 +823,17 @@ internal fun AbstractEndToEndTest.håndterPåminnelse(
     antallGangerPåminnet: Int = 1,
     flagg: Set<String> = emptySet()
 ) {
-    påminnelse(
-        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer),
-        påminnetTilstand = påminnetTilstand,
-        tilstandsendringstidspunkt = tilstandsendringstidspunkt,
-        nå = nå,
-        orgnummer = orgnummer,
-        antallGangerPåminnet = antallGangerPåminnet,
-        flagg = flagg
-    ).håndter(Person::håndterPåminnelse)
+    håndterOgReplayInntektsmeldinger {
+        påminnelse(
+            vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer),
+            påminnetTilstand = påminnetTilstand,
+            tilstandsendringstidspunkt = tilstandsendringstidspunkt,
+            nå = nå,
+            orgnummer = orgnummer,
+            antallGangerPåminnet = antallGangerPåminnet,
+            flagg = flagg
+        ).håndter(Person::håndterPåminnelse)
+    }
 }
 
 internal fun AbstractEndToEndTest.håndterAnmodningOmForkasting(
