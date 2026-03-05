@@ -16,7 +16,7 @@ on:
     - 'deploy/prod-avstemming-job.yml'
 
 env:
-  ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build:
