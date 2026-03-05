@@ -37,7 +37,7 @@ jobs:
       - name: test and build
         run: ./gradlew clean build --no-build-cache --no-daemon -Dkotlin.incremental=false -x :jobs:build -x :sykepenger-api:build -x :sykepenger-opprydding-dev:build
         env:
-          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Store reports
         if: failure()
         uses: actions/upload-artifact@v4
