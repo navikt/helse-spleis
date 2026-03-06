@@ -223,12 +223,14 @@ class Person private constructor(
 
     fun håndterInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler inntektsmelding")
+        val arbeidsgiver = finnEllerOpprettYrkesaktivitet(inntektsmelding.behandlingsporing, aktivitetsloggMedPersonkontekst)
+
         if (inntektsmelding.arbeidsforholdId != null) {
-            aktivitetsloggMedPersonkontekst.info("Behandler ikke inntektsmelding likevel, da den har satt arbeidsforholdId satt til noe annet enn null")
+            val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(arbeidsgiver)
+            aktivitetsloggMedArbeidsgiverkontekst.info("Behandler ikke inntektsmelding likevel, da den har satt arbeidsforholdId satt til noe annet enn null")
             return
         }
 
-        val arbeidsgiver = finnEllerOpprettYrkesaktivitet(inntektsmelding.behandlingsporing, aktivitetsloggMedPersonkontekst)
         val revurderingseventyr = arbeidsgiver.håndterInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedPersonkontekst)
         arbeidsgiver.inntektsmeldingFerdigbehandlet(eventBus, inntektsmelding, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)

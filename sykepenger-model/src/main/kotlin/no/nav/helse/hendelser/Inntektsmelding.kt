@@ -32,7 +32,7 @@ class Inntektsmelding(
     private val opphørAvNaturalytelser: List<OpphørAvNaturalytelse>,
     private val førsteFraværsdag: LocalDate?,
     mottatt: LocalDateTime,
-    val arbeidsforholdId: String? // tmp-løsning for å prøve å glemme inntektsmeldinger med arbeidsforholdId
+    internal val arbeidsforholdId: String? // tmp-løsning for å prøve å glemme inntektsmeldinger med arbeidsforholdId
 ) : Hendelse {
 
     override val metadata = HendelseMetadata(
