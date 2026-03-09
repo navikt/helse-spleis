@@ -6,7 +6,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Test
 
 /**
@@ -14,13 +16,14 @@ import org.junit.jupiter.api.Test
  * men ta de inn igjen på replay
  */
 internal class GlemArbeidsforholdIdLittTest : AbstractDslTest() {
+
     @Test
     fun `inntektsmelding med arbeidsforholdId blir ignorert`() {
         a1 {
             håndterSøknad(1.januar til 31.januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), arbeidsforholdId = "123")
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("trengerReplay"))
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING)
         }
     }
@@ -32,8 +35,18 @@ internal class GlemArbeidsforholdIdLittTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar), arbeidsforholdId = "123")
             håndterInntektsmelding(listOf(1.januar til 12.januar, 13.januar til 16.januar), arbeidsforholdId = "124")
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("trengerReplay"))
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING)
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_IM_4)
+        }
+    }
+
+    @Test
+    fun `en korrigerende inntektsmelding med arbeidsforholdId må vi håndtere med en gang`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar, arbeidsforholdId = "123", beregnetInntekt = 10_000.månedlig)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(1.vedtaksperiode, Varselkode.RV_IM_4)
         }
     }
