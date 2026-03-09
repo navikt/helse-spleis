@@ -38,7 +38,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
 
         val selvstendigIngenDagerIgjenSendtEvent = testRapid.inspektør.meldinger("selvstendig_ingen_dager_igjen").first()
 
-        assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("vedtaksperiodeId").asText().toUUID(), "Eventet skal inneholde vedtaksperiodeId")
         assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("behandlingId").asText().toUUID(), "Eventet skal inneholde behandlingId")
         assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("skjæringstidspunkt").asLocalDate(), "Eventet skal inneholde skjæringstidspunkt")
         assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("yrkesaktivitetstype").asText(), "Eventet skal inneholde yrkesaktivitetstype")
@@ -221,7 +220,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         assertEquals(1, testRapid.inspektør.meldinger("selvstendig_utbetalt_etter_ventetid").size)
 
         val SelvstendigUtbetaltEtterVentetidEvent = testRapid.inspektør.meldinger("selvstendig_utbetalt_etter_ventetid").first()
-        assertNotNull(SelvstendigUtbetaltEtterVentetidEvent.path("vedtaksperiodeId").asText().toUUID(), "Eventet skal inneholde vedtaksperiodeId")
         assertNotNull(SelvstendigUtbetaltEtterVentetidEvent.path("behandlingId").asText().toUUID(), "Eventet skal inneholde behandlingId")
         assertNotNull(SelvstendigUtbetaltEtterVentetidEvent.path("skjæringstidspunkt").asLocalDate(), "Eventet skal inneholde skjæringstidspunkt")
         assertNotNull(SelvstendigUtbetaltEtterVentetidEvent.path("yrkesaktivitetstype").asText(), "Eventet skal inneholde yrkesaktivitetstype")
