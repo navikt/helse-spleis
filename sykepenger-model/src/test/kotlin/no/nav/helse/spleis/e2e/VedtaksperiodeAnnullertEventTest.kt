@@ -1,7 +1,11 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
+import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -11,109 +15,114 @@ import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
+internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
 
     @Test
     fun `vi sender vedtaksperiode annullert-hendelse når saksbehandler annullerer en vedtaksperiode`() {
-        nyttVedtak(januar)
-        håndterAnnullerUtbetaling()
-        håndterUtbetalt()
-
-        assertTrue(observatør.vedtaksperiodeAnnullertEventer.isNotEmpty())
+        a1 {
+            nyttVedtak(januar)
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTrue(observatør.vedtaksperiodeAnnullertEventer.isNotEmpty())
+        }
     }
 
     @Test
     fun `sender bare vedtaksperiode annullert-hendelse på vedtaksperioden vi faktisk annullerer`() {
-        nyttVedtak(januar)
-        forlengVedtak(februar)
-
-        håndterAnnullerUtbetaling(2.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
-        assertEquals(1.februar til 28.februar, observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom)
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            håndterAnnullering(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
+            assertEquals(1.februar til 28.februar, observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom)
+        }
     }
 
     @Test
     fun `vi sender ikke ut vedtaksperiode annullert-hendelse for vedtaksperioder som ikke er utbetalt`() {
-        tilGodkjenning(januar, organisasjonsnummere = arrayOf(a1))
-        håndterAnnullerUtbetaling()
-
-        assertEquals(0, observatør.vedtaksperiodeAnnullertEventer.size)
+        a1 {
+            tilGodkjenning(januar)
+            håndterAnnullering(1.vedtaksperiode)
+            assertEquals(0, observatør.vedtaksperiodeAnnullertEventer.size)
+        }
     }
 
     @Test
     fun `også langt gap`() {
-        nyttVedtak(januar)
-        forlengVedtak(februar)
-        nyttVedtak(april, vedtaksperiodeIdInnhenter = 3.vedtaksperiode)
-        håndterAnnullerUtbetaling(3.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
-        assertEquals(
-            april,
-            observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom
-        )
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            nyttVedtak(april)
+            håndterAnnullering(3.vedtaksperiode)
+            håndterUtbetalt()
+            assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
+            assertEquals(
+                april,
+                observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom
+            )
+        }
     }
 
     @Test
     fun `arbeid ikke gjenopptatt`() {
-        nyttVedtak(januar)
-
-        håndterSøknad(mars)
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.mars,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
-        )
-        assertVarsler(listOf(RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-
-        nullstillTilstandsendringer()
-
-        håndterOverstyrTidslinje((februar).map {
-            ManuellOverskrivingDag(
-                it,
-                Dagtype.ArbeidIkkeGjenopptattDag
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(mars)
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                førsteFraværsdag = 1.mars,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
             )
-        })
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
+            assertVarsler(listOf(RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
 
-        assertEquals(0, observatør.vedtaksperiodeAnnullertEventer.size)
+            nullstillTilstandsendringer()
+
+            håndterOverstyrTidslinje((februar).map {
+
+                ManuellOverskrivingDag(
+                    it,
+                    Dagtype.ArbeidIkkeGjenopptattDag
+                )
+            })
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertEquals(0, observatør.vedtaksperiodeAnnullertEventer.size)
+        }
     }
 
     @Test
     fun `revurdering uten endring som siden annulleres skal sende melding om annullert`() {
-        nyttVedtak(januar)
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
-        håndterUtbetalt()
-        håndterAnnullerUtbetaling()
-        håndterUtbetalt()
-
-        assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
+        a1 {
+            nyttVedtak(januar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
+        }
     }
 
     @Test
     fun `Pågående revurdering uten endring som siden annulleres skal sende melding om annullert`() {
-        nyttVedtak(januar)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
-        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
-        håndterAnnullerUtbetaling()
-        håndterUtbetalt()
-        assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
+        a1 {
+            nyttVedtak(januar)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
+        }
     }
 }
