@@ -240,8 +240,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal fun analytiskDatapakke(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, vedtaksperiodeId: UUID): AnalytiskDatapakkeEvent {
-        val forrigeBehandling = behandlinger.dropLast(1).lastOrNull()
-        return sisteBehandling.analytiskDatapakke(forrigeBehandling, yrkesaktivitetssporing, vedtaksperiodeId)
+        // Sender analytisk datapakke for siste avsluttet behandling, da det er den vi nødvendigvis må ha fått utbetalingshendelse for.
+        val sisteAvsluttetBehandling = behandlinger.lastOrNull { it.erAvsluttet() } ?: error("Kan ikke lage analytisk datapakke uten at det er fattet vedtak på noen behandling")
+        val forrigeAvsluttetBehandling = behandlinger.filter { it.erAvsluttet() }.dropLast(1).lastOrNull()
+        return sisteAvsluttetBehandling.analytiskDatapakke(forrigeAvsluttetBehandling, yrkesaktivitetssporing, vedtaksperiodeId)
     }
 
     internal fun utbetalingstidslinjeFraForrigeVedtak() = behandlinger.lastOrNull { it.erFattetVedtak() }?.utbetalingstidslinje()

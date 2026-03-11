@@ -2,11 +2,13 @@ package no.nav.helse.spleis.e2e
 
 import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.EventSubscription
@@ -108,6 +110,36 @@ internal class AnalytiskDatapakkeTest : AbstractDslTest() {
 
             assertEquals(expected, event)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `ny opplysning i TIL_UTBETALING gir to analytiske datapakker med forskjellig behandlingId`() {
+        a1 {
+            håndterSøknad(1.januar til 31.januar)
+            håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.5)
+            håndterUtbetalt()
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt()
+
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+
+            val events = observatør.analytiskDatapakkeEventer
+
+            assertEquals(2, events.size)
+            assertEquals(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size, 2)
+            assertEquals(events[0].behandlingId, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.first().id)
+            assertEquals(events[1].behandlingId, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().id)
+
         }
     }
 }
