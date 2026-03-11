@@ -752,7 +752,8 @@ internal class Vedtaksperiode private constructor(
         eventBus.emitInntektsmeldingHåndtert(
             meldingsreferanseId = inntektsopplysningerFraLagretInnteksmelding.inntektsmeldingMeldingsreferanseId.id,
             vedtaksperiodeId = id,
-            organisasjonsnummer = yrkesaktivitet.organisasjonsnummer
+            organisasjonsnummer = yrkesaktivitet.organisasjonsnummer,
+            vedtaksperioderMedSammeFørsteFraværsdag = yrkesaktivitet.vedtaksperioderMedSammeFørsteFraværsdag(this).vedtaksperioder.map { it.id }
         )
         person.gjenopptaBehandling(aktivitetslogg)
     }
@@ -762,7 +763,8 @@ internal class Vedtaksperiode private constructor(
         eventBus.emitInntektsmeldingHåndtert(
             meldingsreferanseId = inntektsmelding.metadata.meldingsreferanseId.id,
             vedtaksperiodeId = id,
-            organisasjonsnummer = yrkesaktivitet.organisasjonsnummer
+            organisasjonsnummer = yrkesaktivitet.organisasjonsnummer,
+            vedtaksperioderMedSammeFørsteFraværsdag = yrkesaktivitet.vedtaksperioderMedSammeFørsteFraværsdag(this).vedtaksperioder.map { it.id }
         )
     }
 
@@ -850,7 +852,12 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterArbeidsgiveropplysninger(eventBus: EventBus, eventyr: List<List<Revurderingseventyr>>, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        eventBus.emitInntektsmeldingHåndtert(hendelse.metadata.meldingsreferanseId.id, id, yrkesaktivitet.organisasjonsnummer)
+        eventBus.emitInntektsmeldingHåndtert(
+            hendelse.metadata.meldingsreferanseId.id,
+            id,
+            yrkesaktivitet.organisasjonsnummer,
+            yrkesaktivitet.vedtaksperioderMedSammeFørsteFraværsdag(this).vedtaksperioder.map { it.id }
+        )
         val tidligsteEventyr = eventyr.flatten().tidligsteEventyr()
         if (aktivitetslogg.harFunksjonelleFeil()) forkast(eventBus, hendelse, aktivitetslogg)
         return tidligsteEventyr

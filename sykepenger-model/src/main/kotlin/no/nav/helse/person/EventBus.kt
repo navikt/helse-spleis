@@ -186,8 +186,8 @@ class EventBus {
     internal fun emitArbeidsgiveropplysningerIkkeHåndtert(meldingsreferanseId: MeldingsreferanseId, organisasjonsnummer: String) =
         emitInntektsmeldingIkkeHåndtert(meldingsreferanseId, organisasjonsnummer, true)
 
-    internal fun emitInntektsmeldingHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        val event = EventSubscription.InntektsmeldingHåndtertEvent(meldingsreferanseId, vedtaksperiodeId, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer))
+    internal fun emitInntektsmeldingHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String, vedtaksperioderMedSammeFørsteFraværsdag: List<UUID>) {
+        val event = EventSubscription.InntektsmeldingHåndtertEvent(meldingsreferanseId, vedtaksperiodeId, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer), vedtaksperioderMedSammeFørsteFraværsdag)
         _events.add(event)
         observers.forEach { it.inntektsmeldingHåndtert(event) }
     }

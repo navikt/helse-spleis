@@ -138,6 +138,7 @@ interface EventSubscription {
         val meldingsreferanseId: UUID,
         val vedtaksperiodeId: UUID,
         val arbeidstaker: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
+        val vedtaksperioderMedSammeFørsteFraværsdag: List<UUID>
     ) : Event
 
     data class SøknadHåndtertEvent(

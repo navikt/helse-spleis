@@ -149,7 +149,8 @@ internal class PersonMediator(
             "inntektsmeldingId" to event.meldingsreferanseId,
             "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
             "yrkesaktivitetstype" to "ARBEIDSTAKER",
-            "vedtaksperiodeId" to event.vedtaksperiodeId
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "vedtaksperioderMedSammeFørsteFraværsdag" to event.vedtaksperioderMedSammeFørsteFraværsdag.map { it }
         )
         )
     }
