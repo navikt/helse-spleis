@@ -184,11 +184,26 @@ internal data class ArbeidsgiverInntektsopplysning(
         }
 
         // Denne funksjonen skjønner jeg ingenting av, ikke spør meg om den, hilsen Maxi
-        private fun List<ArbeidsgiverInntektsopplysning>.vurderSkifteAvArbeidsgiver(
+        /**
+         * Denne ser ut til å prøve å finne ut av om bruker sin opptjening bare tilhører
+         * andre arbeidsgivere enn den som kommer inn i @param orgnummer
+         *
+         * noe sånt:
+         *
+         * liste av ArbeidsgiverInntektsopplysning(a1) får spørsmålet: gitt denne opptjeningen: ArbeidstakerOpptjening(mange arbeidsforhold(a1)), har arbeidstaker kanskje bytta arbeidsgiver fra a1?
+         *
+         * mer konsist, men fortsatt rart:
+         * listOf(ArbeidsgiverInntektsopplysning(a1)).vurderSkifteAvArbeidsgiver?(logg, ArbeidstakerOpptjening(mange arbeidsforhold(a1), a1))
+         *
+         * hvis, og bare hvis, det siste argumentet i vurderSkifteAvArbeidsgiver er noe annet enn _både_ inntektsopplysning og arbeidstakeropptjening, så kommer det et varsel.
+         */
+        internal fun List<ArbeidsgiverInntektsopplysning>.vurderSkifteAvArbeidsgiver(
             aktivitetslogg: IAktivitetslogg,
             opptjening: ArbeidstakerOpptjening,
             orgnummer: String
         ) {
+            // om orgnummer i funksjonskallet ikke finnes i opplysningene i opptjeningen
+            // så gjetter vi på at det er snakk om bytte av arbeidsgiver og varsler saksbehandler,
             val arbeidsforholdAktivePåSkjæringstidspunktet = singleOrNull { opptjening.ansattVedSkjæringstidspunkt(it.orgnummer) } ?: return
             if (arbeidsforholdAktivePåSkjæringstidspunktet.orgnummer == orgnummer) return
             aktivitetslogg.varsel(Varselkode.RV_VV_8)
