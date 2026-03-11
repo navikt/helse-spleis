@@ -704,7 +704,6 @@ internal class PersonMediator(
             mapOf(
                 "yrkesaktivitetstype" to Behandlingsporing.Yrkesaktivitet.Selvstendig.somYrkesaktivitetstype,
                 "behandlingId" to event.behandlingId,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
                 "skjæringstidspunkt" to event.skjæringstidspunkt
             )
         )

@@ -553,13 +553,11 @@ interface EventSubscription {
 
     data class SelvstendigIngenDagerIgjenEvent(
         val behandlingId: UUID,
-        val vedtaksperiodeId: UUID,
         val skjæringstidspunkt: LocalDate
     ) : Event
 
     data class SelvstendigUtbetaltEtterVentetidEvent(
         val behandlingId: UUID,
-        val vedtaksperiodeId: UUID,
         val skjæringstidspunkt: LocalDate
     ) : Event
 
