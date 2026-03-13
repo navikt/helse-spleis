@@ -302,7 +302,6 @@ class Person private constructor(
 
     fun håndterUtbetalingshistorikkEtterInfotrygdendring(eventBus: EventBus, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
-        if (yrkesaktiviteter.vedtaksperioder { it.id == UUID.fromString("9bceab05-605d-42c8-81fd-6458baec853e") }.isNotEmpty()) return aktivitetsloggMedPersonkontekst.info("Venter med å behandle infotrygdhistorikk på grunn av overlappende vedtaksperioder")
         håndterHistorikkFraInfotrygd(eventBus, utbetalingshistorikkEtterInfotrygdendring, aktivitetsloggMedPersonkontekst, utbetalingshistorikkEtterInfotrygdendring.element)
     }
 
