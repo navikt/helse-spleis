@@ -111,7 +111,7 @@ class Vilkårsgrunnlag(
 
     internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }
 
-    class Arbeidsforhold(
+    data class Arbeidsforhold(
         private val orgnummer: String,
         private val ansettelseperiode: Periode,
         private val type: Arbeidsforholdtype

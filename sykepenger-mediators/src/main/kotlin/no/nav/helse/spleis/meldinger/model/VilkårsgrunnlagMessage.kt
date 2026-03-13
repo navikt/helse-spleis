@@ -13,8 +13,8 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
 import no.nav.helse.spleis.IHendelseMediator
@@ -26,31 +26,14 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
+
     private val yrkesaktivitetssporing = packet.yrkesaktivitetssporing
 
-    private val inntekterForSykepengegrunnlag = mapSkatteopplysninger(packet["@løsning.${InntekterForSykepengegrunnlag.name}"])
+    internal val inntekterForSykepengegrunnlag = packet.mapSkatteopplysninger("@løsning.${InntekterForSykepengegrunnlag.name}")
 
-    private val inntekterForOpptjeningsvurdering = mapSkatteopplysninger(packet["@løsning.${Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering.name}"])
-    private val arbeidsforhold = packet["@løsning.${ArbeidsforholdV2.name}"]
-        .filterNot { it["orgnummer"].asText().isBlank() }
-        .filter {
-            val til = it["ansattTil"].asOptionalLocalDate()
-            til == null || it["ansattSiden"].asLocalDate() <= til
-        }
-        .map {
-            Vilkårsgrunnlag.Arbeidsforhold(
-                orgnummer = it["orgnummer"].asText(),
-                ansattFom = it["ansattSiden"].asLocalDate(),
-                ansattTom = it["ansattTil"].asOptionalLocalDate(),
-                type = when (it["type"].asText()) {
-                    "FORENKLET_OPPGJØRSORDNING" -> Arbeidsforholdtype.FORENKLET_OPPGJØRSORDNING
-                    "FRILANSER" -> Arbeidsforholdtype.FRILANSER
-                    "MARITIMT" -> Arbeidsforholdtype.MARITIMT
-                    "ORDINÆRT" -> Arbeidsforholdtype.ORDINÆRT
-                    else -> error("har ikke mappingregel for arbeidsforholdtype: ${it["type"].asText()}")
-                }
-            )
-        }
+    internal val inntekterForOpptjeningsvurdering = packet.mapSkatteopplysninger("@løsning.${InntekterForOpptjeningsvurdering.name}")
+
+    internal val arbeidsforhold = packet.mapArbeidsforhold()
 
     private val medlemskapstatus = when (packet["@løsning.${Medlemskap.name}.resultat.svar"].asText()) {
         "JA" -> Medlemskapsvurdering.Medlemskapstatus.Ja
@@ -61,7 +44,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
 
     private val skjæringstidspunkter = listOfNotNull(
         packet["${InntekterForSykepengegrunnlag.name}.skjæringstidspunkt"].asLocalDate(),
-        packet["${Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering.name}.skjæringstidspunkt"].asLocalDate(),
+        packet["${InntekterForOpptjeningsvurdering.name}.skjæringstidspunkt"].asLocalDate(),
         packet["${ArbeidsforholdV2.name}.skjæringstidspunkt"].asLocalDate(),
         packet["${Medlemskap.name}.skjæringstidspunkt"].asLocalDate(),
     )
@@ -86,6 +69,13 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
         mediator.behandle(this, vilkårsgrunnlag, context)
     }
 
+    private fun JsonMessage.mapArbeidsforhold() =
+        mapArbeidsforhold(getArray("@løsning.${ArbeidsforholdV2.name}", "arbeidsforhold"))
+
+    private fun JsonMessage.mapSkatteopplysninger(key: String) =
+        mapSkatteopplysninger(getArray(key, "inntekter"))
+
+
     internal companion object {
 
         private fun JsonNode.asInntekttype() = when (this.asText()) {
@@ -102,23 +92,44 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
             else -> error("Mangler arbeidsgiver for inntekt i hendelse")
         }
 
-        fun mapSkatteopplysninger(opplysninger: JsonNode) =
+        private fun mapSkatteopplysninger(opplysninger: JsonNode) =
             opplysninger.flatMap { måned ->
                 måned["inntektsliste"].map { opplysning ->
                     (opplysning as ObjectNode).put("årMåned", måned.path("årMåned").asText())
                 }
             }
-                .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
-                    ArbeidsgiverInntekt.MånedligInntekt(
-                        yearMonth = inntekt["årMåned"].asYearMonth(),
-                        inntekt = inntekt["beløp"].asDouble().månedlig,
-                        type = inntekt["inntektstype"].asInntekttype(),
-                        fordel = if (inntekt.path("fordel").isTextual) inntekt["fordel"].asText() else "",
-                        beskrivelse = if (inntekt.path("beskrivelse").isTextual) inntekt["beskrivelse"].asText() else ""
-                    )
-                }
-                .map { (arbeidsgiver, inntekter) ->
-                    ArbeidsgiverInntekt(arbeidsgiver, inntekter)
-                }
+            .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
+                ArbeidsgiverInntekt.MånedligInntekt(
+                    yearMonth = inntekt["årMåned"].asYearMonth(),
+                    inntekt = inntekt["beløp"].asDouble().månedlig,
+                    type = inntekt["inntektstype"].asInntekttype(),
+                    fordel = if (inntekt.path("fordel").isTextual) inntekt["fordel"].asText() else "",
+                    beskrivelse = if (inntekt.path("beskrivelse").isTextual) inntekt["beskrivelse"].asText() else ""
+                )
+            }
+            .map { (arbeidsgiver, inntekter) ->
+                ArbeidsgiverInntekt(arbeidsgiver, inntekter)
+            }
+
+        private fun mapArbeidsforhold(arbeidsforhold: JsonNode) = arbeidsforhold
+            .filterNot { it["orgnummer"].asText().isBlank() }
+            .filter {
+                val til = it["ansattTil"].asOptionalLocalDate()
+                til == null || it["ansattSiden"].asLocalDate() <= til
+            }
+            .map {
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = it["orgnummer"].asText(),
+                    ansattFom = it["ansattSiden"].asLocalDate(),
+                    ansattTom = it["ansattTil"].asOptionalLocalDate(),
+                    type = when (it["type"].asText()) {
+                        "FORENKLET_OPPGJØRSORDNING" -> Arbeidsforholdtype.FORENKLET_OPPGJØRSORDNING
+                        "FRILANSER" -> Arbeidsforholdtype.FRILANSER
+                        "MARITIMT" -> Arbeidsforholdtype.MARITIMT
+                        "ORDINÆRT" -> Arbeidsforholdtype.ORDINÆRT
+                        else -> error("har ikke mappingregel for arbeidsforholdtype: ${it["type"].asText()}")
+                    }
+                )
+            }
     }
 }

@@ -30,7 +30,7 @@ internal class VilkårsgrunnlagRiver(
         message.interestedIn("@løsning.${Medlemskap.name}.resultat.svar") {
             require(it.asText() in listOf("JA", "NEI", "UAVKLART", "UAVKLART_MED_BRUKERSPORSMAAL")) { "svar (${it.asText()}) er ikke JA, NEI, UAVKLART, eller UAVKLART_MED_BRUKERSPORSMAAL" }
         }
-        message.requireArray("@løsning.${InntekterForSykepengegrunnlag.name}") {
+        message.requireArrayEllerObjectMedArray("@løsning.${InntekterForSykepengegrunnlag.name}", "inntekter") {
             require("årMåned", JsonNode::asYearMonth)
             requireArray("inntektsliste") {
                 requireKey("beløp")
@@ -38,7 +38,7 @@ internal class VilkårsgrunnlagRiver(
                 interestedIn("orgnummer", "fødselsnummer", "fordel", "beskrivelse")
             }
         }
-        message.requireArray("@løsning.${InntekterForOpptjeningsvurdering.name}") {
+        message.requireArrayEllerObjectMedArray("@løsning.${InntekterForOpptjeningsvurdering.name}", "inntekter") {
             require("årMåned", JsonNode::asYearMonth)
             requireArray("inntektsliste") {
                 requireKey("beløp")
@@ -46,7 +46,7 @@ internal class VilkårsgrunnlagRiver(
                 interestedIn("orgnummer", "fødselsnummer", "fordel", "beskrivelse")
             }
         }
-        message.requireArray("@løsning.${ArbeidsforholdV2.name}") {
+        message.requireArrayEllerObjectMedArray("@løsning.${ArbeidsforholdV2.name}", "arbeidsforhold") {
             requireKey("orgnummer")
             requireAny("type", listOf("FORENKLET_OPPGJØRSORDNING", "FRILANSER", "MARITIMT", "ORDINÆRT"))
             require("ansattSiden", JsonNode::asLocalDate)
@@ -55,9 +55,10 @@ internal class VilkårsgrunnlagRiver(
     }
 
     override fun createMessage(packet: JsonMessage) = VilkårsgrunnlagMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
+        packet = packet,
+        meldingsporing = Meldingsporing(
+            id = packet.meldingsreferanseId(),
+            fødselsnummer = packet["fødselsnummer"].asText()
+        )
     )
 }
