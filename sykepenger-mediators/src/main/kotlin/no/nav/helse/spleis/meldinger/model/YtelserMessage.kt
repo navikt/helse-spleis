@@ -25,7 +25,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -41,11 +40,10 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val yrkesaktivitetssporing = packet.yrkesaktivitetssporing
 
-    private val foreldrepengerytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Foreldrepengeytelse"]
-        .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asGradertPeriode) ?: emptyList()
-    private val svangerskapsytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Svangerskapsytelse"]
-        .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asGradertPeriode)
-        ?: emptyList()
+    private val foreldrepengerytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Foreldrepengeytelse.perioder"]
+        .takeIf(JsonNode::isArray)?.map(::asGradertPeriode) ?: emptyList()
+    private val svangerskapsytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Svangerskapsytelse.perioder"]
+        .takeIf(JsonNode::isArray)?.map(::asGradertPeriode) ?: emptyList()
 
     private val foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepengerytelse)
     private val svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapsytelse)

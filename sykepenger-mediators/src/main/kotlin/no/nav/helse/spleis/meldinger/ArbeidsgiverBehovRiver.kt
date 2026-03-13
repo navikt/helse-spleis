@@ -17,4 +17,10 @@ internal abstract class ArbeidsgiverBehovRiver(
         packet.requireKey("organisasjonsnummer")
         packet.interestedIn("yrkesaktivitetstype")
     }
+
+    protected fun JsonMessage.interestedInArray(key: String, elementsValidation: (JsonMessage.() -> Unit)? = null) {
+        interestedIn(key) {
+            requireArray(key, elementsValidation)
+        }
+    }
 }
