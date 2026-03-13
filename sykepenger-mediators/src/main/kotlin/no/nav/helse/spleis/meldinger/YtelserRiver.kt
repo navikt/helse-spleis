@@ -85,7 +85,7 @@ internal class YtelserRiver(
             interestedIn("årlig", JsonNode::asDouble)
         }
 
-        message.interestedInArray("@løsning.${SelvstendigForsikring.name}") {
+        message.interestedInArrayEllerObjectMedArray("@løsning.${SelvstendigForsikring.name}", "forsikringer") {
             require("startdato", JsonNode::asLocalDate)
             require("forsikringstype", JsonNode::asText)
             require("premiegrunnlag", JsonNode::asInt)

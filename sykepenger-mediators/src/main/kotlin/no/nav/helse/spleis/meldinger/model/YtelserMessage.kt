@@ -85,19 +85,17 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
         packet["@løsning.${Behovtype.ArbeidsavklaringspengerV2.name}.utbetalingsperioder"]
             .map { Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) })
 
-    private val selvstendigForsikring = when (yrkesaktivitetssporing) {
-        Behandlingsporing.Yrkesaktivitet.Selvstendig -> packet["@løsning.${Behovtype.SelvstendigForsikring.name}"].firstOrNull()?.let {
+    internal val selvstendigForsikring = when (yrkesaktivitetssporing) {
+        Behandlingsporing.Yrkesaktivitet.Selvstendig -> packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovtype.SelvstendigForsikring.name}", "forsikringer") {
             SelvstendigForsikring(
                 virkningsdato = it.path("startdato").asLocalDate(),
                 opphørsdato = it.path("sluttdato").asOptionalLocalDate(),
                 type = SelvstendigForsikring.Forsikringstype.valueOf(it.path("forsikringstype").asText()),
                 premiegrunnlag = it.path("premiegrunnlag").asInt().årlig
             )
-        }.also {
-            if (packet["@løsning.${Behovtype.SelvstendigForsikring.name}"].size() > 1) {
-                sikkerlogg.warn("Mottok mer enn én selvstendig forsikring i melding ${meldingsporing.id}")
-            }
-        }
+        }.also { forsikringer ->
+            if (forsikringer.size > 1) sikkerlogg.warn("Mottok mer enn én selvstendig forsikring i melding ${meldingsporing.id}")
+        }.firstOrNull()
 
         Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
         is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
