@@ -70,7 +70,7 @@ internal class YtelserRiver(
 
         // Ting som ikke har noe med ytelser å gjøre
         message.requireArray("@løsning.${Institusjonsopphold.name}") {
-            interestedIn("startdato") { it.asLocalDate() }
+            require("startdato", JsonNode::asLocalDate)
             interestedIn("faktiskSluttdato") { it.asLocalDate() }
         }
 
