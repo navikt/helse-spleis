@@ -47,13 +47,13 @@ internal class YtelserRiver(
         }
 
         // Kapittel 9 ytelser
-        message.requireArray("@løsning.${Pleiepenger.name}") {
+        message.requireArrayEllerObjectMedArray("@løsning.${Pleiepenger.name}", "perioder") {
             validerGradertPeriode()
         }
-        message.requireArray("@løsning.${Omsorgspenger.name}") {
+        message.requireArrayEllerObjectMedArray("@løsning.${Omsorgspenger.name}", "perioder") {
             validerGradertPeriode()
         }
-        message.requireArray("@løsning.${Opplæringspenger.name}") {
+        message.requireArrayEllerObjectMedArray("@løsning.${Opplæringspenger.name}", "perioder") {
             validerGradertPeriode()
         }
 
@@ -69,7 +69,7 @@ internal class YtelserRiver(
         }
 
         // Ting som ikke har noe med ytelser å gjøre
-        message.requireArray("@løsning.${Institusjonsopphold.name}") {
+        message.requireArrayEllerObjectMedArray("@løsning.${Institusjonsopphold.name}", "perioder") {
             require("startdato", JsonNode::asLocalDate)
             interestedIn("faktiskSluttdato") { it.asLocalDate() }
         }
