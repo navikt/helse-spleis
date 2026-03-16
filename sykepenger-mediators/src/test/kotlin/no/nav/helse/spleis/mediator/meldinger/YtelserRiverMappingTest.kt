@@ -2,9 +2,6 @@ package no.nav.helse.spleis.mediator.meldinger
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
@@ -24,9 +21,7 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.YtelserRiver
-import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -34,46 +29,25 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class YtelserRiverMappingTest {
-
-    private var forrigeHendelseMessage: HendelseMessage? = null
-
-    private val testMessageMediator = object: IMessageMediator {
-        override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
-            forrigeHendelseMessage = message
-        }
-        override fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
-            forrigeHendelseMessage = null
-        }
-    }
-
-    private val rapid = TestRapid().apply {
-        YtelserRiver(this, testMessageMediator)
-    }
+internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
+    hendelse = YtelserMessage::class,
+    registrer = { rapid, mediator -> YtelserRiver(rapid, mediator) }
+) {
 
     @Test
     fun `Mapping ved løsninger som array`() {
-        rapid.sendTestMessage(medArray)
-        checkNotNull(forrigeHendelseMessage) { "Forrige hendelse er null!" }
-        val ytelser = checkNotNull(forrigeHendelseMessage as? YtelserMessage) { "Forrige hendelse er ikke ytelser!" }
-        ytelser.assertForventetInnhold()
+        sendJson(medArray).assertForventetInnhold()
     }
 
     @Test
     fun `Mapping ved løsninger som object`() {
-        rapid.sendTestMessage(medObject)
-        checkNotNull(forrigeHendelseMessage) { "Forrige hendelse er null!" }
-        val ytelser = checkNotNull(forrigeHendelseMessage as? YtelserMessage) { "Forrige hendelse er ikke ytelser!" }
-        ytelser.assertForventetInnhold()
+        sendJson(medObject).assertForventetInnhold()
     }
-
 
     @Test
     fun `Mapping ved løsninger uten løsning på forsikring`() {
-        rapid.sendTestMessage(fjernLøsninger(medObject, "SelvstendigForsikring"))
-        checkNotNull(forrigeHendelseMessage) { "Forrige hendelse er null!" }
-        val ytelser = checkNotNull(forrigeHendelseMessage as? YtelserMessage) { "Forrige hendelse er ikke ytelser!" }
-        ytelser.assertForventetInnhold(forsikring = null)
+        val json = fjernLøsninger(medObject, "SelvstendigForsikring")
+        sendJson(json).assertForventetInnhold(forsikring = null)
     }
 
     private fun YtelserMessage.assertForventetInnhold(forsikring: SelvstendigForsikring? = forventetForsikring) {

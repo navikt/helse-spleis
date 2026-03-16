@@ -1,61 +1,43 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
-import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
-import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class VilkårsgrunlagRiverMappingTest {
-
-    private var forrigeHendelseMessage: HendelseMessage? = null
-
-    private val testMessageMediator = object: IMessageMediator {
-        override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
-            forrigeHendelseMessage = message
-        }
-        override fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
-            forrigeHendelseMessage = null
-        }
-    }
-
-    private val rapid = TestRapid().apply {
-        VilkårsgrunnlagRiver(this, testMessageMediator)
-    }
+internal class VilkårsgrunlagRiverMappingTest: RiverMappingTest<VilkårsgrunnlagMessage>(
+    hendelse = VilkårsgrunnlagMessage::class,
+    registrer = { rapid, mediator -> VilkårsgrunnlagRiver(rapid, mediator) }
+) {
 
     @Test
     fun `Mapping ved løsninger som array`() {
-        rapid.sendTestMessage(medArray)
-        checkNotNull(forrigeHendelseMessage) { "Forrige hendelse er null!" }
-        val vilkårsgrunnlag = checkNotNull(forrigeHendelseMessage as? VilkårsgrunnlagMessage) { "Forrige hendelse er ikke vilkårsgrunnlag!" }
-        assertEquals(forventetInntekterForOpptjening, vilkårsgrunnlag.inntekterForOpptjeningsvurdering)
-        assertEquals(forventetInntekterForSykepengegrunnlag, vilkårsgrunnlag.inntekterForSykepengegrunnlag)
-        assertEquals(forventetArbeidsforhold, vilkårsgrunnlag.arbeidsforhold)
+        sendJson(medArray).assertForventetInnhold()
     }
 
     @Test
     fun `Mapping ved løsninger som object`() {
-        rapid.sendTestMessage(medObject)
-        checkNotNull(forrigeHendelseMessage) { "Forrige hendelse er null!" }
-        val vilkårsgrunnlag = checkNotNull(forrigeHendelseMessage as? VilkårsgrunnlagMessage) { "Forrige hendelse er ikke vilkårsgrunnlag!" }
-        assertEquals(forventetInntekterForOpptjening, vilkårsgrunnlag.inntekterForOpptjeningsvurdering)
-        assertEquals(forventetInntekterForSykepengegrunnlag, vilkårsgrunnlag.inntekterForSykepengegrunnlag)
-        assertEquals(forventetArbeidsforhold, vilkårsgrunnlag.arbeidsforhold)
+        sendJson(medObject).assertForventetInnhold()
+    }
+
+    private fun VilkårsgrunnlagMessage.assertForventetInnhold() {
+        assertEquals(forventetInntekterForOpptjening, this.inntekterForOpptjeningsvurdering)
+        assertEquals(forventetInntekterForSykepengegrunnlag, this.inntekterForSykepengegrunnlag)
+        assertEquals(forventetArbeidsforhold, this.arbeidsforhold)
+        assertEquals(forventetMedlemskap, this.medlemskapstatus)
     }
 
     private companion object {
+
         private val forventetInntekterForOpptjening = listOf(ArbeidsgiverInntekt(
             arbeidsgiver = "987654321",
             inntekter = listOf(ArbeidsgiverInntekt.MånedligInntekt(
@@ -66,7 +48,6 @@ internal class VilkårsgrunlagRiverMappingTest {
                 type = LØNNSINNTEKT
             ))
         ))
-
         private val forventetInntekterForSykepengegrunnlag = listOf(ArbeidsgiverInntekt(
             arbeidsgiver = "987654322",
             inntekter = listOf(ArbeidsgiverInntekt.MånedligInntekt(
@@ -77,13 +58,13 @@ internal class VilkårsgrunlagRiverMappingTest {
                 type = LØNNSINNTEKT
             ))
         ))
-
         private val forventetArbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(
             orgnummer = "987654321",
             ansattFom = LocalDate.EPOCH,
             ansattTom = null,
             type = ORDINÆRT
         ))
+        private val forventetMedlemskap = Medlemskapsvurdering.Medlemskapstatus.Ja
 
         @Language("JSON")
         private val medArray = """

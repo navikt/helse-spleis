@@ -35,7 +35,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
 
     internal val arbeidsforhold = packet.mapArbeidsforhold()
 
-    private val medlemskapstatus = when (packet["@løsning.${Medlemskap.name}.resultat.svar"].asText()) {
+    internal val medlemskapstatus = when (packet["@løsning.${Medlemskap.name}.resultat.svar"].asText()) {
         "JA" -> Medlemskapsvurdering.Medlemskapstatus.Ja
         "NEI" -> Medlemskapsvurdering.Medlemskapstatus.Nei
         "UAVKLART_MED_BRUKERSPORSMAAL" -> Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål
