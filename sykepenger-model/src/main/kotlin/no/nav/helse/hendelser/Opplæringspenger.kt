@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
-class Opplæringspenger(
+data class Opplæringspenger(
     private val perioder: List<GradertPeriode>
 ) {
     internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean): Boolean {

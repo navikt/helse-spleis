@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
-class Svangerskapspenger(
+data class Svangerskapspenger(
     private val svangerskapsytelse: List<GradertPeriode>
 ) {
 

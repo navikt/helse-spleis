@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 
-class Foreldrepenger(private val foreldrepengeytelse: List<GradertPeriode>) {
+data class Foreldrepenger(private val foreldrepengeytelse: List<GradertPeriode>) {
     private val perioder get() = foreldrepengeytelse.map { it.periode }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean) {

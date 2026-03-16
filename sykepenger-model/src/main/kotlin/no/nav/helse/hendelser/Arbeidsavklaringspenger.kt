@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.Periode.Companion.slutterEtter
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 
-class Arbeidsavklaringspenger(val perioder: List<Periode>) {
+data class Arbeidsavklaringspenger(val perioder: List<Periode>) {
     internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, periode: Periode): IAktivitetslogg {
         if (perioder.isEmpty()) {
             aktivitetslogg.info("Bruker har ingen arbeidsavklaringspenger")

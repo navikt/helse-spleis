@@ -45,19 +45,19 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     private val svangerskapsytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Svangerskapsytelse.perioder"]
         .takeIf(JsonNode::isArray)?.map(::asGradertPeriode) ?: emptyList()
 
-    private val foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepengerytelse)
-    private val svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapsytelse)
+    internal val foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepengerytelse)
+    internal val svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapsytelse)
 
-    private val pleiepenger =
+    internal val pleiepenger =
         Pleiepenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovtype.Pleiepenger.name}", "perioder", ::asGradertPeriode))
 
-    private val omsorgspenger =
+    internal val omsorgspenger =
         Omsorgspenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovtype.Omsorgspenger.name}", "perioder", ::asGradertPeriode))
 
-    private val opplæringspenger =
+    internal val opplæringspenger =
         Opplæringspenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovtype.Opplæringspenger.name}", "perioder", ::asGradertPeriode))
 
-    private val institusjonsopphold =
+    internal val institusjonsopphold =
         Institusjonsopphold(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovtype.Institusjonsopphold.name}", "perioder") {
             Institusjonsoppholdsperiode(
                 it.path("startdato").asLocalDate(),
@@ -65,7 +65,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             )
         })
 
-    private val inntekterForBeregning = InntekterForBeregning(packet["@løsning.${Behovtype.InntekterForBeregning.name}.inntekter"].map {
+    internal val inntekterForBeregning = InntekterForBeregning(packet["@løsning.${Behovtype.InntekterForBeregning.name}.inntekter"].map {
         InntekterForBeregning.Inntektsperiode(
             inntektskilde = it.path("inntektskilde").asText(),
             periode = it.path("fom").asLocalDate() til it.path("tom").asLocalDate(),
@@ -81,7 +81,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
         )
     })
 
-    private val arbeidsavklaringspengerV2 = Arbeidsavklaringspenger(
+    internal val arbeidsavklaringspengerV2 = Arbeidsavklaringspenger(
         packet["@løsning.${Behovtype.ArbeidsavklaringspengerV2.name}.utbetalingsperioder"]
             .map { Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) })
 
@@ -102,7 +102,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
         Behandlingsporing.Yrkesaktivitet.Frilans -> null
     }
 
-    private val dagpengerV2 = Dagpenger(
+    internal val dagpengerV2 = Dagpenger(
         packet["@løsning.${Behovtype.DagpengerV2.name}.meldekortperioder"]
             .map {
                 Periode(

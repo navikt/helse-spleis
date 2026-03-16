@@ -95,7 +95,7 @@ class Ytelser(
     }
 }
 
-class GradertPeriode(internal val periode: Periode, internal val grad: Int)
+data class GradertPeriode(internal val periode: Periode, internal val grad: Int)
 
 internal class AndreYtelserTidslinje(vararg perioder: Pair<Periode, Prosentdel>): Tidslinje<Prosentdel, AndreYtelserTidslinje>(*perioder) {
     override fun opprett(vararg perioder: Pair<Periode, Prosentdel>) = AndreYtelserTidslinje(*perioder)
