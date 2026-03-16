@@ -838,6 +838,18 @@ internal class TestMessageFactory(
         val grad: Int
     )
 
+    class ForeldrepengerTestdata(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val grad: Int
+    )
+
+    class SvangerskapspengerTestdata(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val grad: Int
+    )
+
     class OmsorgspengerTestdata(
         val fom: LocalDate,
         val tom: LocalDate,
@@ -948,6 +960,8 @@ internal class TestMessageFactory(
         vedtaksperiodeId: UUID,
         behandlingId: UUID,
         pleiepenger: List<PleiepengerTestdata> = emptyList(),
+        foreldrepenger: List<ForeldrepengerTestdata> = emptyList(),
+        svangerskapspenger: List<SvangerskapspengerTestdata> = emptyList(),
         omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
         opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
@@ -979,7 +993,26 @@ internal class TestMessageFactory(
             yrkesaktivitetstype = yrkesaktivitetstype,
             behov = behovliste,
             løsninger = mapOf(
-                "Foreldrepenger" to emptyMap<String, String>(),
+                "Foreldrepenger" to mapOf(
+                    "Foreldrepengeytelse" to mapOf(
+                        "perioder" to foreldrepenger.map { data ->
+                            mapOf(
+                                "fom" to data.fom,
+                                "tom" to data.tom,
+                                "grad" to data.grad
+                            )
+                        }
+                    ),
+                    "Svangerskapsytelse" to mapOf(
+                        "perioder" to svangerskapspenger.map { data ->
+                            mapOf(
+                                "fom" to data.fom,
+                                "tom" to data.tom,
+                                "grad" to data.grad
+                            )
+                        }
+                    )
+                ),
                 "Pleiepenger" to pleiepenger.map { data ->
                     mapOf(
                         "fom" to data.fom,
@@ -1050,7 +1083,7 @@ internal class TestMessageFactory(
                     "forsikringstype" to forsikring.type,
                     "sluttdato" to forsikring.opphørsdato,
                     "startdato" to forsikring.virkningsdato,
-                    "premiegrunnlag" to forsikring.premiegrunnlag
+                    "premiegrunnlag" to forsikring.premiegrunnlag.årlig
                 )
             }
         )
