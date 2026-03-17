@@ -116,7 +116,7 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
             val behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().id
-            val utbetalingId = inspektør.sisteUtbetalingId { 1.vedtaksperiode }
+            val utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode)
 
             assertThrows<IllegalStateException> {
                 håndterKanIkkeBehandlesHer(1.vedtaksperiode, behandlingId = behandlingId, utbetalingId = utbetalingId)
@@ -134,7 +134,7 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING)
 
             val behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().id
-            val utbetalingId = inspektør.sisteUtbetalingId { 1.vedtaksperiode }
+            val utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode)
             assertThrows<IllegalStateException> {
                 håndterKanIkkeBehandlesHer(1.vedtaksperiode, behandlingId = behandlingId, utbetalingId = utbetalingId)
             }
@@ -150,7 +150,7 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
             assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             val behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().id
-            val utbetalingId = inspektør.sisteUtbetalingId { 1.vedtaksperiode }
+            val utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode)
             assertEquals(IKKE_GODKJENT, inspektør.utbetaling(0).tilstand)
 
             håndterKanIkkeBehandlesHer(1.vedtaksperiode, behandlingId = behandlingId, utbetalingId = utbetalingId)

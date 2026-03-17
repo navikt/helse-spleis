@@ -122,7 +122,6 @@ internal class TestArbeidsgiverInspektør(
     internal fun sisteMaksdato(vedtaksperiodeIdInnhenter: IdInnhenter) = sisteMaksdato(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun sisteMaksdato(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.maksdatoer.last()
 
-    internal fun sisteUtbetalingId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.utbetalinger.last().id
     internal fun sisteUtbetalingId(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.last().id
 
     internal fun vilkårsgrunnlag(vedtaksperiodeIdInnhenter: IdInnhenter) = person.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeIdInnhenter))
