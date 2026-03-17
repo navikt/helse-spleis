@@ -604,17 +604,21 @@ internal abstract class AbstractDslTest {
     }
 
     protected fun medJSONPerson(filsti: String, skjemaversjon: Int) {
+        val person = gjenopprettFraJSON(filsti, skjemaversjon, jurist)
+        observatør = TestObservatør(person)
         testperson = TestPerson(
             observatør = observatør,
-            person = gjenopprettFraJSON(filsti, skjemaversjon, jurist),
+            person = person,
             deferredLog = deferredLog
         )
     }
 
     protected fun medJSONPersonTekst(json: String, skjemaversjon: Int) {
+        val person = gjenopprettFraJSONtekst(json, skjemaversjon, jurist)
+        observatør = TestObservatør(person)
         testperson = TestPerson(
             observatør = observatør,
-            person = gjenopprettFraJSONtekst(json, skjemaversjon, jurist),
+            person = person,
             deferredLog = deferredLog
         )
     }
