@@ -67,6 +67,28 @@ import org.junit.jupiter.params.provider.CsvSource
 internal class SelvstendigTest : AbstractDslTest() {
 
     @Test
+    fun `Kort søknad fulgt at mere søknad skal utbetales som vanlig`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(1.januar til 10.januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelserSelvstendig(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertTilstand(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET)
+
+            håndterFørstegangssøknadSelvstendig(11.januar til 31.januar)
+            håndterYtelserSelvstendig(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstand(2.vedtaksperiode, SELVSTENDIG_AVSLUTTET)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, forventetPersonbeløp = 0, subset = 1.januar til 10.januar)
+            assertUtbetalingsbeløp(2.vedtaksperiode, 0, 0, forventetPersonbeløp = 0, subset = 11.januar til 16.januar)
+            assertUtbetalingsbeløp(2.vedtaksperiode, 0, 0, forventetPersonbeløp = 1417, subset = 17.januar til 31.januar)
+        }
+    }
+
+    @Test
     fun `Legger ikke på varsel for potensiell selvstendigghost når søknaden kommer mer enn 90 dager etter`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
