@@ -777,6 +777,14 @@ internal class TestPerson(
                 .håndter(Person::håndterOverstyrArbeidsforhold)
         }
 
+        internal fun håndterMinimumSykdomsgradVurdert(
+            perioderMedMinimumSykdomsgradVurdertOK: List<Periode>,
+            perioderMedMinimumSykdomsgradVurdertIkkeOK: List<Periode> = emptyList()
+        ) = personHendelsefabrikk.lagMinimumSykdomsgradsvurderingMelding(
+            perioderMedMinimumSykdomsgradVurdertOK.toSet(),
+            perioderMedMinimumSykdomsgradVurdertIkkeOK.toSet()
+        ).håndter(Person::håndterMinimumSykdomsgradsvurderingMelding)
+
         internal fun håndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =
             arbeidsgiverHendelsefabrikk.lagHåndterOverstyrTidslinje(overstyringsdager)
                 .håndter(Person::håndterOverstyrTidslinje)

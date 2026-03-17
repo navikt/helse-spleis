@@ -10,8 +10,10 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidsl
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.MeldingsreferanseId
+import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
@@ -74,6 +76,14 @@ internal class PersonHendelsefabrikk {
             skalBeregnesManuelt = false,
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2025)
         )
+    internal fun lagMinimumSykdomsgradsvurderingMelding(
+        perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
+        perioderMedMinimumSykdomsgradVurdertIkkeOK: Set<Periode> = emptySet()
+    ) = MinimumSykdomsgradsvurderingMelding(
+        perioderMedMinimumSykdomsgradVurdertOK,
+        perioderMedMinimumSykdomsgradVurdertIkkeOK,
+        MeldingsreferanseId(UUID.randomUUID())
+    )
 }
 
 internal class OverstyrtArbeidsgiveropplysning(
