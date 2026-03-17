@@ -2946,7 +2946,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal fun trengerVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg) {
+    internal fun trengerVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg, eventBus: EventBus) {
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntekterForSykepengegrunnlag(aktivitetslogg, skjæringstidspunkt, beregningSlutt.minusMonths(2), beregningSlutt)
         inntekterForOpptjeningsvurdering(aktivitetslogg, skjæringstidspunkt, beregningSlutt, beregningSlutt)
