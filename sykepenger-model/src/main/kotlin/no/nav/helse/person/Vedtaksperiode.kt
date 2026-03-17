@@ -2924,7 +2924,7 @@ internal class Vedtaksperiode private constructor(
         tilstand(eventBus, aktivitetslogg, nesteTilstand)
     }
 
-    internal fun trengerYtelser(aktivitetslogg: IAktivitetslogg) {
+    internal fun trengerYtelser(aktivitetslogg: IAktivitetslogg, eventBus: EventBus) {
         val søkevinduFamilieytelser = periode.familieYtelserPeriode
         foreldrepenger(aktivitetslogg, søkevinduFamilieytelser)
         pleiepenger(aktivitetslogg, søkevinduFamilieytelser)
@@ -2939,9 +2939,7 @@ internal class Vedtaksperiode private constructor(
         when (yrkesaktivitet.yrkesaktivitetstype) {
             Arbeidsledig,
             is Arbeidstaker,
-            Frilans -> {
-            }
-
+            Frilans -> {}
             Selvstendig -> selvstendigForsikring(aktivitetslogg, this.skjæringstidspunkt)
         }
     }
