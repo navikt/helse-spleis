@@ -235,4 +235,9 @@ class EventBus {
         _events.add(event)
         observers.forEach { it.benyttetGrunnlagsdataForBeregning(event) }
     }
+
+    internal fun trengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøving) {
+        _events.add(event)
+        observers.forEach { it.trengerInformasjonTilVilkårsprøving(event) }
+    }
 }

@@ -21,6 +21,7 @@ import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDT
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterHovedregel
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterSkjønn
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattIInfotrygd
+import no.nav.helse.spleis.Behov.Companion.somJsonMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
@@ -72,21 +73,26 @@ internal class PersonMediator(
                     is EventSubscription.BenyttetGrunnlagsdataForBeregningEvent -> mapBenyttetGrunnlagsdataForBeregning(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.SelvstendigIngenDagerIgjenEvent -> mapSelvstendigIngenDagerIgjen(event) // ✅ Er selvstendig-spesifikk, så den er grei
                     is EventSubscription.SelvstendigUtbetaltEtterVentetidEvent -> mapSelvstendigUtbetaltEtterVentetid(event) // ✅ Er selvstendig-spesifikk, så den er grei
+                    is EventSubscription.TrengerInformasjonTilVilkårsprøving -> mapTrengerInformasjonTilVilkårsprøving(event)
                 }
             }
-            .map { jsonMessage -> mapTilPakke(jsonMessage) }
+            .mapNotNull { jsonMessage -> mapTilPakke(jsonMessage) }
             .sendUtgåendeMeldinger(context)
     }
 
     private fun LocalDateTime.tilUtc() = atZone(ZoneId.systemDefault()).toInstant()
 
-    private fun mapTilPakke(jsonMessage: JsonMessage): Pakke {
+    private fun mapTilPakke(jsonMessage: JsonMessage): Pakke? {
         jsonMessage.requireKey("@event_name", "@opprettet")
         val outgoingMessage = jsonMessage.apply {
             this["fødselsnummer"] = message.meldingsporing.fødselsnummer
             this["@opprettetUTC"] = jsonMessage["@opprettet"].asLocalDateTime().tilUtc()
         }.toJson()
         val eventName = jsonMessage["@event_name"].asText()
+        if (eventName == "behov") {
+            sikkerLogg.info("Her hadde vi sendt behov i 'ny løype' og hen hadde sett slik ut:\n\t$outgoingMessage")
+            return null
+        }
         return Pakke(message.meldingsporing.fødselsnummer, eventName, outgoingMessage)
     }
 
@@ -626,6 +632,38 @@ internal class PersonMediator(
                 )
             )
         )
+    }
+
+    private fun mapTrengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøving): JsonMessage {
+        val behov = listOf(
+            Behov(Behov.Behovstype.Medlemskap, mapOf(
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "medlemskapPeriodeFom" to event.periodeForMedlemskapsvurdering.start,
+                "medlemskapPeriodeTom" to event.periodeForMedlemskapsvurdering.endInclusive
+            )),
+            Behov(Behov.Behovstype.Arbeidsforhold, mapOf(
+                "skjæringstidspunkt" to event.skjæringstidspunkt
+            )),
+            Behov(Behov.Behovstype.InntekterForOpptjeningsvurdering, mapOf(
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "beregningStart" to event.beregningsperiodeForOpptjeningsvurdering.start,
+                "beregningSlutt" to event.beregningsperiodeForOpptjeningsvurdering.slutt
+            )),
+            Behov(Behov.Behovstype.InntekterForSykepengegrunnlag, mapOf(
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "beregningStart" to event.beregningsperiodeForSykepengegrunnlagsvurdering.start,
+                "beregningSlutt" to event.beregningsperiodeForSykepengegrunnlagsvurdering.slutt
+            ))
+        )
+
+        // TODO 1: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
+        // TODO 2: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
+        return behov.somJsonMessage(mapOf(
+            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "behandlingId" to event.behandlingId
+        ))
     }
 
     private fun mapAvsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent): JsonMessage {

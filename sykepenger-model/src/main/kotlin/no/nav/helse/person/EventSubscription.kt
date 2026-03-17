@@ -610,6 +610,22 @@ interface EventSubscription {
         val forsikring: Forsikring?
     ) : Event
 
+    data class TrengerInformasjonTilVilkårsprøving(
+        val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val skjæringstidspunkt: LocalDate,
+        val periodeForMedlemskapsvurdering: Periode,
+        val beregningsperiodeForOpptjeningsvurdering: Beregningsperiode,
+        val beregningsperiodeForSykepengegrunnlagsvurdering: Beregningsperiode
+    ) : Event {
+        data class Beregningsperiode(val start: YearMonth, val slutt: YearMonth) {
+            init {
+                check(slutt >= start) { "Hæ? $start til $slutt er jo ikke nesten en gyldig beregningsperiode!" }
+            }
+        }
+    }
+
     fun inntektsmeldingReplay(event: TrengerInntektsmeldingReplayEvent) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(event: VedtaksperiodePåminnetEvent) {}
@@ -648,4 +664,5 @@ interface EventSubscription {
     fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: VedtaksperiodeAnnullertEvent) {}
     fun utkastTilVedtak(event: UtkastTilVedtakEvent) {}
     fun benyttetGrunnlagsdataForBeregning(event: BenyttetGrunnlagsdataForBeregningEvent) {}
+    fun trengerInformasjonTilVilkårsprøving(event: TrengerInformasjonTilVilkårsprøving) {}
 }

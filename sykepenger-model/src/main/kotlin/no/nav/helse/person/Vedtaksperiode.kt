@@ -2952,6 +2952,24 @@ internal class Vedtaksperiode private constructor(
         inntekterForOpptjeningsvurdering(aktivitetslogg, skjæringstidspunkt, beregningSlutt, beregningSlutt)
         arbeidsforhold(aktivitetslogg, skjæringstidspunkt)
         medlemskap(aktivitetslogg, skjæringstidspunkt, periode.start, periode.endInclusive)
+
+        val event = EventSubscription.TrengerInformasjonTilVilkårsprøving(
+            vedtaksperiodeId = id,
+            behandlingId = behandlinger.sisteBehandlingId,
+            yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
+            skjæringstidspunkt = skjæringstidspunkt,
+            periodeForMedlemskapsvurdering = periode,
+            beregningsperiodeForOpptjeningsvurdering = EventSubscription.TrengerInformasjonTilVilkårsprøving.Beregningsperiode(
+                start = beregningSlutt,
+                slutt = beregningSlutt
+            ),
+            beregningsperiodeForSykepengegrunnlagsvurdering = EventSubscription.TrengerInformasjonTilVilkårsprøving.Beregningsperiode(
+                start = beregningSlutt.minusMonths(2),
+                slutt = beregningSlutt
+            )
+        )
+
+        eventBus.trengerInformasjonTilVilkårsprøving(event)
     }
 
     private fun emitVedtaksperiodeEndret(eventBus: EventBus, previousState: Vedtaksperiodetilstand) {
