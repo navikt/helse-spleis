@@ -1183,7 +1183,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Medlding til nav dager flytter skjæringstidspunkt`() {
+    fun `Melding til nav dager flytter skjæringstidspunkt`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(3.januar til 31.januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
