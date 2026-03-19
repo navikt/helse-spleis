@@ -406,7 +406,7 @@ internal class Yrkesaktivitet private constructor(
 
         if (Toggle.SendFeriepengeOppdrag.enabled) {
             feriepengeutbetalinger.add(feriepengeutbetaling)
-            feriepengeutbetaling.overfør(aktivitetsloggMedArbeidsgiverkontekst, eventBus)
+            feriepengeutbetaling.overfør(aktivitetsloggMedArbeidsgiverkontekst, eventBus, checkNotNull(yrkesaktivitetstype as? Arbeidstaker))
         }
     }
 

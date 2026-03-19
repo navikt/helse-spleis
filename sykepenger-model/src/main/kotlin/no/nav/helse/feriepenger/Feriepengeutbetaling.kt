@@ -7,7 +7,7 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
-import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -94,7 +94,7 @@ internal class Feriepengeutbetaling private constructor(
 
         eventBus.feriepengerUtbetalt(
             EventSubscription.FeriepengerUtbetaltEvent(
-                arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+                arbeidstaker = Arbeidstaker(organisasjonsnummer),
                 fom = fom,
                 tom = tom,
                 arbeidsgiverOppdrag = EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(oppdrag),
@@ -112,10 +112,10 @@ internal class Feriepengeutbetaling private constructor(
     override fun toSpesifikkKontekst() =
         SpesifikkKontekst("Feriepengeutbetaling", mapOf("utbetalingId" to "$utbetalingId"))
 
-    internal fun overfør(aktivitetslogg: IAktivitetslogg, eventBus: EventBus) {
+    internal fun overfør(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, arbeidstaker: Arbeidstaker) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        if (sendTilOppdrag) oppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, eventBus,"SPLEIS")
-        if (sendPersonoppdragTilOS) personoppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, eventBus, "SPLEIS")
+        if (sendTilOppdrag) oppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, eventBus, arbeidstaker, utbetalingId)
+        if (sendPersonoppdragTilOS) personoppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, eventBus, arbeidstaker, utbetalingId)
     }
 
     internal fun gjelderForÅr(år: Year) = feriepengegrunnlag.opptjeningsår == år

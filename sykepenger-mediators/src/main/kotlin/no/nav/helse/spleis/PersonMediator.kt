@@ -76,6 +76,7 @@ internal class PersonMediator(
                     is EventSubscription.TrengerInformasjonTilVilkårsprøving -> mapTrengerInformasjonTilVilkårsprøving(event)
                     is EventSubscription.TrengerInformasjonTilBeregning -> mapTrengerInformasjonTilBeregning(event)
                     is EventSubscription.TrengerHistorikkFraInfotrygd -> mapTrengerHistorikkFraInfotrygd(event) // ✅ Meldingen er på person-nivå, så den er grei
+                    is EventSubscription.UtbetalFeriepengerEvent -> mapUtbetalFeriepengerEvent(event) // ✅ Er arbeidstaker-spesifikk
                 }
             }
             .mapNotNull { jsonMessage -> mapTilPakke(jsonMessage) }
@@ -723,6 +724,35 @@ internal class PersonMediator(
             "historikkFom" to event.periode.start,
             "historikkTom" to event.periode.endInclusive
         ))).somJsonMessage()
+    }
+
+    private fun mapUtbetalFeriepengerEvent(event: EventSubscription.UtbetalFeriepengerEvent): JsonMessage {
+        // TODO 2: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
+        return listOf(Behov(Behov.Behovstype.Feriepengeutbetaling, mapOf(
+            "mottaker" to event.mottaker,
+            "fagområde" to event.fagområde,
+            "linjer" to listOf(mapOf(
+                "fom" to "${event.linje.periode.start}",
+                "tom" to "${event.linje.periode.endInclusive}",
+                "satstype" to event.linje.satstype,
+                "sats" to event.linje.sats,
+                "endringskode" to event.linje.endringskode,
+                "delytelseId" to event.linje.delytelseId,
+                "refDelytelseId" to event.linje.refDelytelseId,
+                "refFagsystemId" to event.linje.refFagsystemId,
+                "statuskode" to event.linje.statuskode,
+                "datoStatusFom" to event.linje.datoStatusFom?.toString(),
+                "klassekode" to event.linje.klassekode
+            )),
+            "fagsystemId" to event.fagsystemId,
+            "endringskode" to event.endringskode,
+            "saksbehandler" to event.saksbehandler
+        ))).somJsonMessage(mapOf(
+            "yrkesaktivitetstype" to "ARBEIDSTAKER",
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "utbetalingId" to event.utbetalingId,
+            "fagsystemId" to event.fagsystemId
+        ))
     }
 
     private fun mapAvsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent): JsonMessage {

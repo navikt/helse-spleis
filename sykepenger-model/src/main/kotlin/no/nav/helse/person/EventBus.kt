@@ -251,4 +251,9 @@ class EventBus {
         _events.add(event)
         observers.forEach { it.trengerHistorikkFraInfotrygd(event) }
     }
+
+    internal fun utbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent) {
+        _events.add(event)
+        observers.forEach { it.utbetalFeriepenger(event) }
+    }
 }

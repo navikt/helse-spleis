@@ -1,11 +1,14 @@
 package no.nav.helse.feriepenger
 
 import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.dto.FeriepengerendringskodeDto
 import no.nav.helse.dto.FeriepengerfagområdeDto
 import no.nav.helse.dto.deserialisering.FeriepengeoppdragInnDto
 import no.nav.helse.dto.serialisering.FeriepengeoppdragUtDto
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.person.EventBus
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -39,11 +42,12 @@ data class Feriepengeoppdrag(
     val totalbeløp: Int = if (linje == null || linje.datoStatusFom != null) 0 else linje.beløp
     val skalSendeOppdrag = linje?.endringskode?.let { it != Feriepengerendringskode.UEND } ?: false
 
-    fun overfør(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, saksbehandler: String) {
+    fun overfør(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, arbeidstaker: Arbeidstaker, utbetalingId: UUID) {
         val aktivitetsloggMedOppdragkontekst = aktivitetslogg.kontekst(this)
         if (!skalSendeOppdrag) return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Feriepengerendringskode.UEND)
-        aktivitetsloggMedOppdragkontekst.behov(Behovtype.Feriepengeutbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer(saksbehandler))
+        aktivitetsloggMedOppdragkontekst.behov(Behovtype.Feriepengeutbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer())
+        eventBus.utbetalFeriepenger(utbetalFeriepengerEvent(arbeidstaker, utbetalingId))
     }
 
     // obs: vi setter ikke nye tidsstempel
@@ -95,7 +99,7 @@ data class Feriepengeoppdrag(
 
     override fun toSpesifikkKontekst() = SpesifikkKontekst("Feriepengeoppdrag", mapOf("fagsystemId" to fagsystemId))
 
-    private fun behovdetaljer(saksbehandler: String): Map<String, Any> {
+    private fun behovdetaljer(): Map<String, Any> {
         checkNotNull(linje) { "forventer at oppdraget har en linje" }
         return mapOf(
             "mottaker" to mottaker,
@@ -103,9 +107,19 @@ data class Feriepengeoppdrag(
             "linjer" to listOf(linje.behovdetaljer()),
             "fagsystemId" to fagsystemId,
             "endringskode" to "$endringskode",
-            "saksbehandler" to saksbehandler
+            "saksbehandler" to "SPLEIS"
         )
     }
+
+    private fun utbetalFeriepengerEvent(arbeidstaker: Arbeidstaker, utbetalingId: UUID) = EventSubscription.UtbetalFeriepengerEvent(
+        mottaker = mottaker,
+        fagområde = "$fagområde",
+        fagsystemId = fagsystemId,
+        endringskode = "$endringskode",
+        organisasjonsnummer = arbeidstaker.organisasjonsnummer,
+        utbetalingId = utbetalingId,
+        linje = checkNotNull(linje) { "forventer at oppdraget har en linje" }.utbetalFeriepengerEventLinje()
+    )
 
     fun dto() = FeriepengeoppdragUtDto(
         mottaker = mottaker,

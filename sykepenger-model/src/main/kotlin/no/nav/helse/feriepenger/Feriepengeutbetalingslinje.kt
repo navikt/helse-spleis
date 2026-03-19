@@ -9,6 +9,7 @@ import no.nav.helse.feriepenger.Feriepengerendringskode.ENDR
 import no.nav.helse.feriepenger.Feriepengerendringskode.NY
 import no.nav.helse.feriepenger.Feriepengerendringskode.UEND
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.EventSubscription
 
 data class Feriepengeutbetalingslinje(
     val fom: LocalDate,
@@ -64,6 +65,18 @@ data class Feriepengeutbetalingslinje(
         "statuskode" to statuskode,
         "datoStatusFom" to datoStatusFom?.toString(),
         "klassekode" to klassekode.verdi
+    )
+
+    fun utbetalFeriepengerEventLinje() = EventSubscription.UtbetalFeriepengerEvent.Linje(
+        periode = fom til tom,
+        sats = beløp,
+        endringskode = "$endringskode",
+        delytelseId = delytelseId,
+        refDelytelseId = refDelytelseId,
+        refFagsystemId = refFagsystemId,
+        statuskode = statuskode,
+        datoStatusFom = datoStatusFom,
+        klassekode = klassekode.verdi
     )
 
     fun dto() = FeriepengeutbetalingslinjeUtDto(

@@ -647,6 +647,32 @@ interface EventSubscription {
         val periode: Periode
     ): Event
 
+    data class UtbetalFeriepengerEvent(
+        val mottaker: String,
+        val fagområde: String,
+        val fagsystemId: String,
+        val endringskode: String,
+        val linje: Linje,
+        val organisasjonsnummer: String,
+        val utbetalingId: UUID
+    ): Event {
+        val saksbehandler = "SPLEIS"
+
+        data class Linje(
+            val periode: Periode,
+            val sats: Int,
+            val endringskode: String,
+            val delytelseId: Int,
+            val refDelytelseId: Int?,
+            val refFagsystemId: String?,
+            val statuskode: String?,
+            val datoStatusFom: LocalDate?,
+            val klassekode: String
+        ) {
+            val satstype = "ENG"
+        }
+    }
+
     fun inntektsmeldingReplay(event: TrengerInntektsmeldingReplayEvent) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(event: VedtaksperiodePåminnetEvent) {}
@@ -688,4 +714,5 @@ interface EventSubscription {
     fun trengerInformasjonTilVilkårsprøving(event: TrengerInformasjonTilVilkårsprøving) {}
     fun trengerInformasjonTilBeregning(event: TrengerInformasjonTilBeregning) {}
     fun trengerHistorikkFraInfotrygd(event: TrengerHistorikkFraInfotrygd) {}
+    fun utbetalFeriepenger(event: UtbetalFeriepengerEvent) {}
 }
