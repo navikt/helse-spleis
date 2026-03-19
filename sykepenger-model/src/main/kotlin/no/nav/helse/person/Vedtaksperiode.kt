@@ -2942,6 +2942,24 @@ internal class Vedtaksperiode private constructor(
             Frilans -> {}
             Selvstendig -> selvstendigForsikring(aktivitetslogg, this.skjæringstidspunkt)
         }
+
+        val event = EventSubscription.TrengerInformasjonTilBeregning(
+            vedtaksperiodeId = id,
+            behandlingId = behandlinger.sisteBehandlingId,
+            yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
+            periodeForForeldrepenger = søkevinduFamilieytelser,
+            periodeForPleiepenger = søkevinduFamilieytelser,
+            periodeForOmsorgspenger = søkevinduFamilieytelser,
+            periodeForOpplæringspenger = søkevinduFamilieytelser,
+            periodeForInstitusjonsopphold = periode,
+            periodeForArbeidsavklaringspenger = periode.start.minusMonths(6) til periode.endInclusive,
+            periodeForDagpenger = periode.start.minusMonths(2) til periode.endInclusive,
+            beregningsperiode = beregningsperiode,
+            skjæringstidspunkt = skjæringstidspunkt,
+            trengerInformasjonOmSelvstendigForsikring = yrkesaktivitet.yrkesaktivitetstype is Selvstendig
+        )
+
+        eventBus.trengerInformasjonTilBeregning(event)
     }
 
     internal fun trengerVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg, eventBus: EventBus) {

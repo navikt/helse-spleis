@@ -626,6 +626,23 @@ interface EventSubscription {
         }
     }
 
+    data class TrengerInformasjonTilBeregning(
+        val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val periodeForForeldrepenger: Periode,
+        val periodeForPleiepenger: Periode,
+        val periodeForOmsorgspenger: Periode,
+        val periodeForOpplæringspenger: Periode,
+        val periodeForInstitusjonsopphold: Periode,
+        val periodeForArbeidsavklaringspenger: Periode,
+        val periodeForDagpenger: Periode,
+        val beregningsperiode: Periode,
+        // TODO: Fjern disse feltene, det brukes til selvstendig forsikring som skal flyttes til Vilkårsprøving
+        val trengerInformasjonOmSelvstendigForsikring: Boolean,
+        val skjæringstidspunkt: LocalDate
+    ): Event
+
     fun inntektsmeldingReplay(event: TrengerInntektsmeldingReplayEvent) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(event: VedtaksperiodePåminnetEvent) {}
@@ -665,4 +682,5 @@ interface EventSubscription {
     fun utkastTilVedtak(event: UtkastTilVedtakEvent) {}
     fun benyttetGrunnlagsdataForBeregning(event: BenyttetGrunnlagsdataForBeregningEvent) {}
     fun trengerInformasjonTilVilkårsprøving(event: TrengerInformasjonTilVilkårsprøving) {}
+    fun trengerInformasjonTilBeregning(event: TrengerInformasjonTilBeregning) {}
 }

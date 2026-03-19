@@ -74,6 +74,7 @@ internal class PersonMediator(
                     is EventSubscription.SelvstendigIngenDagerIgjenEvent -> mapSelvstendigIngenDagerIgjen(event) // ✅ Er selvstendig-spesifikk, så den er grei
                     is EventSubscription.SelvstendigUtbetaltEtterVentetidEvent -> mapSelvstendigUtbetaltEtterVentetid(event) // ✅ Er selvstendig-spesifikk, så den er grei
                     is EventSubscription.TrengerInformasjonTilVilkårsprøving -> mapTrengerInformasjonTilVilkårsprøving(event)
+                    is EventSubscription.TrengerInformasjonTilBeregning -> mapTrengerInformasjonTilBeregning(event)
                 }
             }
             .mapNotNull { jsonMessage -> mapTilPakke(jsonMessage) }
@@ -665,6 +666,56 @@ internal class PersonMediator(
             "behandlingId" to event.behandlingId
         ))
     }
+
+    private fun mapTrengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregning): JsonMessage {
+        val behov = listOfNotNull(
+            Behov(Behov.Behovstype.Foreldrepenger, mapOf(
+                "foreldrepengerFom" to event.periodeForForeldrepenger.start,
+                "foreldrepengerTom" to event.periodeForForeldrepenger.endInclusive
+            )),
+            Behov(Behov.Behovstype.Pleiepenger, mapOf(
+                "pleiepengerFom" to event.periodeForPleiepenger.start,
+                "pleiepengerTom" to event.periodeForPleiepenger.endInclusive
+            )),
+            Behov(Behov.Behovstype.Omsorgspenger, mapOf(
+                "omsorgspengerFom" to event.periodeForOmsorgspenger.start,
+                "omsorgspengerTom" to event.periodeForOmsorgspenger.endInclusive
+            )),
+            Behov(Behov.Behovstype.Opplæringspenger, mapOf(
+                "opplæringspengerFom" to event.periodeForOpplæringspenger.start,
+                "opplæringspengerTom" to event.periodeForOpplæringspenger.endInclusive
+            )),
+            Behov(Behov.Behovstype.Institusjonsopphold, mapOf(
+                "institusjonsoppholdFom" to event.periodeForInstitusjonsopphold.start,
+                "institusjonsoppholdTom" to event.periodeForInstitusjonsopphold.endInclusive
+            )),
+            Behov(Behov.Behovstype.Arbeidsavklaringspenger, mapOf(
+                "periodeFom" to event.periodeForArbeidsavklaringspenger.start,
+                "periodeTom" to event.periodeForArbeidsavklaringspenger.endInclusive
+            )),
+            Behov(Behov.Behovstype.Dagpenger, mapOf(
+                "periodeFom" to event.periodeForDagpenger.start,
+                "periodeTom" to event.periodeForDagpenger.endInclusive
+            )),
+            Behov(Behov.Behovstype.InntekterForBeregning, mapOf(
+                "fom" to event.beregningsperiode.start,
+                "tom" to event.beregningsperiode.endInclusive
+            )),
+            Behov(Behov.Behovstype.SelvstendigForsikring, mapOf(
+                "skjæringstidspunkt" to event.skjæringstidspunkt
+            )).takeIf { event.trengerInformasjonOmSelvstendigForsikring }
+        )
+
+        // TODO 1: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
+        // TODO 2: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
+        return behov.somJsonMessage(mapOf(
+            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "behandlingId" to event.behandlingId
+        ))
+    }
+
 
     private fun mapAvsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent): JsonMessage {
         return JsonMessage.newMessage(

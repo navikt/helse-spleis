@@ -240,4 +240,9 @@ class EventBus {
         _events.add(event)
         observers.forEach { it.trengerInformasjonTilVilkårsprøving(event) }
     }
+
+    internal fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregning) {
+        _events.add(event)
+        observers.forEach { it.trengerInformasjonTilBeregning(event) }
+    }
 }
