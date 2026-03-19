@@ -289,7 +289,7 @@ class Person private constructor(
 
     fun håndterInfotrygdendringer(eventBus: EventBus, infotrygdendring: Infotrygdendring, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler infotrygdendring")
-        trengerHistorikkFraInfotrygd(aktivitetsloggMedPersonkontekst)
+        trengerHistorikkFraInfotrygd(aktivitetsloggMedPersonkontekst, eventBus)
         håndterGjenoppta(eventBus, infotrygdendring, aktivitetsloggMedPersonkontekst)
     }
 
@@ -488,8 +488,8 @@ class Person private constructor(
         .map { it.grunnlagForFeriepenger() }
         .fold(Feriepengegrunnlagstidslinje(emptyList()), Feriepengegrunnlagstidslinje::plus)
 
-    internal fun trengerHistorikkFraInfotrygd(aktivitetslogg: IAktivitetslogg) {
-        infotrygdhistorikk.oppfrisk(aktivitetslogg, yrkesaktiviteter.tidligsteDato())
+    internal fun trengerHistorikkFraInfotrygd(aktivitetslogg: IAktivitetslogg, eventBus: EventBus) {
+        infotrygdhistorikk.oppfrisk(aktivitetslogg, eventBus, yrkesaktiviteter.tidligsteDato())
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {

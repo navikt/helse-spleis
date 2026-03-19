@@ -8,7 +8,10 @@ data class Behov(
 ) {
     enum class Behovstype(val utgåendeNavn: String) {
         Sykepengehistorikk("Sykepengehistorikk"),
+        // Denne (SykepengehistorikkForFeriepenger) er litt special. Behovet sendes ut fra
+        // feriepengejobben og vi håndterer bare løsningen i Spleis
         SykepengehistorikkForFeriepenger("SykepengehistorikkForFeriepenger"),
+
         Foreldrepenger("Foreldrepenger"),
         Pleiepenger("Pleiepenger"),
         Omsorgspenger("Omsorgspenger"),
@@ -33,7 +36,7 @@ data class Behov(
     }
 
     companion object {
-        fun List<Behov>.somJsonMessage(extra: Map<String, Any>) = JsonMessage.newNeed(
+        fun List<Behov>.somJsonMessage(extra: Map<String, Any> = emptyMap()) = JsonMessage.newNeed(
             behov = this.map { it.type.utgåendeNavn },
             map = this.associate { it.type.utgåendeNavn to it.input }.plus(extra)
         )

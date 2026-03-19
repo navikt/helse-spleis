@@ -643,6 +643,10 @@ interface EventSubscription {
         val skjæringstidspunkt: LocalDate
     ): Event
 
+    data class TrengerHistorikkFraInfotrygd(
+        val periode: Periode
+    ): Event
+
     fun inntektsmeldingReplay(event: TrengerInntektsmeldingReplayEvent) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(event: VedtaksperiodePåminnetEvent) {}
@@ -683,4 +687,5 @@ interface EventSubscription {
     fun benyttetGrunnlagsdataForBeregning(event: BenyttetGrunnlagsdataForBeregningEvent) {}
     fun trengerInformasjonTilVilkårsprøving(event: TrengerInformasjonTilVilkårsprøving) {}
     fun trengerInformasjonTilBeregning(event: TrengerInformasjonTilBeregning) {}
+    fun trengerHistorikkFraInfotrygd(event: TrengerHistorikkFraInfotrygd) {}
 }

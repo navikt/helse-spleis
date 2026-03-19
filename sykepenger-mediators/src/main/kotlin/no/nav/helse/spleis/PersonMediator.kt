@@ -75,6 +75,7 @@ internal class PersonMediator(
                     is EventSubscription.SelvstendigUtbetaltEtterVentetidEvent -> mapSelvstendigUtbetaltEtterVentetid(event) // ✅ Er selvstendig-spesifikk, så den er grei
                     is EventSubscription.TrengerInformasjonTilVilkårsprøving -> mapTrengerInformasjonTilVilkårsprøving(event)
                     is EventSubscription.TrengerInformasjonTilBeregning -> mapTrengerInformasjonTilBeregning(event)
+                    is EventSubscription.TrengerHistorikkFraInfotrygd -> mapTrengerHistorikkFraInfotrygd(event) // ✅ Meldingen er på person-nivå, så den er grei
                 }
             }
             .mapNotNull { jsonMessage -> mapTilPakke(jsonMessage) }
@@ -716,6 +717,13 @@ internal class PersonMediator(
         ))
     }
 
+    private fun mapTrengerHistorikkFraInfotrygd(event: EventSubscription.TrengerHistorikkFraInfotrygd): JsonMessage {
+        // TODO 2: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
+        return listOf(Behov(Behov.Behovstype.Sykepengehistorikk, mapOf(
+            "historikkFom" to event.periode.start,
+            "historikkTom" to event.periode.endInclusive
+        ))).somJsonMessage()
+    }
 
     private fun mapAvsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent): JsonMessage {
         return JsonMessage.newMessage(

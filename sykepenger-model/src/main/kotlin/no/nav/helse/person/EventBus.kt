@@ -245,4 +245,10 @@ class EventBus {
         _events.add(event)
         observers.forEach { it.trengerInformasjonTilBeregning(event) }
     }
+
+    internal fun trengerHistorikkFraInfotrygd(periode: Periode) {
+        val event = EventSubscription.TrengerHistorikkFraInfotrygd(periode)
+        _events.add(event)
+        observers.forEach { it.trengerHistorikkFraInfotrygd(event) }
+    }
 }

@@ -5,6 +5,7 @@ import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkUtDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
@@ -51,8 +52,10 @@ internal class Infotrygdhistorikk private constructor(
         siste.validerNyereOpplysninger(aktivitetslogg, periode)
     }
 
-    internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
-        utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode(tidligsteDato))
+    internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, tidligsteDato: LocalDate) {
+        val oppfriskningsperiode = oppfriskningsperiode(tidligsteDato)
+        eventBus.trengerHistorikkFraInfotrygd(oppfriskningsperiode)
+        utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode)
     }
 
     private fun oppfriskningsperiode(tidligsteDato: LocalDate): Periode {
