@@ -434,7 +434,8 @@ internal class TestPerson(
         private fun håndterInntektsmeldingReplay(forespørsel: Forespørsel) {
             val håndterteInntektsmeldinger = behovsamler.håndterteInntektsmeldinger()
             behovsamler.bekreftOgKvitterReplay(forespørsel.vedtaksperiodeId)
-            arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplay(forespørsel, håndterteInntektsmeldinger)
+            val fabrikk = arbeidsgivere[forespørsel.orgnr]?.arbeidsgiverHendelsefabrikk ?: arbeidsgiverHendelsefabrikk
+            fabrikk.lagInntektsmeldingReplay(forespørsel, håndterteInntektsmeldinger)
                 .håndter(Person::håndterInntektsmeldingerReplay)
         }
 
