@@ -112,10 +112,10 @@ internal class Feriepengeutbetaling private constructor(
     override fun toSpesifikkKontekst() =
         SpesifikkKontekst("Feriepengeutbetaling", mapOf("utbetalingId" to "$utbetalingId"))
 
-    internal fun overfør(aktivitetslogg: IAktivitetslogg) {
+    internal fun overfør(aktivitetslogg: IAktivitetslogg, eventBus: EventBus) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
-        if (sendTilOppdrag) oppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, "SPLEIS")
-        if (sendPersonoppdragTilOS) personoppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, "SPLEIS")
+        if (sendTilOppdrag) oppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, eventBus,"SPLEIS")
+        if (sendPersonoppdragTilOS) personoppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, eventBus, "SPLEIS")
     }
 
     internal fun gjelderForÅr(år: Year) = feriepengegrunnlag.opptjeningsår == år

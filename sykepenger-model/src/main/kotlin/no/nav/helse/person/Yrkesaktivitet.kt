@@ -252,14 +252,16 @@ internal class Yrkesaktivitet private constructor(
             personidentifikator: Personidentifikator,
             feriepengeberegner: Feriepengeberegner,
             utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
-            aktivitetslogg: IAktivitetslogg
+            aktivitetslogg: IAktivitetslogg,
+            eventBus: EventBus
         ) {
             forEach {
                 it.utbetalFeriepenger(
-                    personidentifikator,
-                    feriepengeberegner,
-                    utbetalingshistorikkForFeriepenger,
-                    aktivitetslogg
+                    personidentifikator = personidentifikator,
+                    feriepengeberegner = feriepengeberegner,
+                    utbetalingshistorikkForFeriepenger = utbetalingshistorikkForFeriepenger,
+                    aktivitetslogg = aktivitetslogg,
+                    eventBus = eventBus
                 )
             }
         }
@@ -389,7 +391,8 @@ internal class Yrkesaktivitet private constructor(
         personidentifikator: Personidentifikator,
         feriepengeberegner: Feriepengeberegner,
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
-        aktivitetslogg: IAktivitetslogg
+        aktivitetslogg: IAktivitetslogg,
+        eventBus: EventBus
     ) {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
 
@@ -403,7 +406,7 @@ internal class Yrkesaktivitet private constructor(
 
         if (Toggle.SendFeriepengeOppdrag.enabled) {
             feriepengeutbetalinger.add(feriepengeutbetaling)
-            feriepengeutbetaling.overfør(aktivitetsloggMedArbeidsgiverkontekst)
+            feriepengeutbetaling.overfør(aktivitetsloggMedArbeidsgiverkontekst, eventBus)
         }
     }
 

@@ -5,6 +5,7 @@ import no.nav.helse.dto.FeriepengerendringskodeDto
 import no.nav.helse.dto.FeriepengerfagområdeDto
 import no.nav.helse.dto.deserialisering.FeriepengeoppdragInnDto
 import no.nav.helse.dto.serialisering.FeriepengeoppdragUtDto
+import no.nav.helse.person.EventBus
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -38,10 +39,9 @@ data class Feriepengeoppdrag(
     val totalbeløp: Int = if (linje == null || linje.datoStatusFom != null) 0 else linje.beløp
     val skalSendeOppdrag = linje?.endringskode?.let { it != Feriepengerendringskode.UEND } ?: false
 
-    fun overfør(aktivitetslogg: IAktivitetslogg, saksbehandler: String) {
+    fun overfør(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, saksbehandler: String) {
         val aktivitetsloggMedOppdragkontekst = aktivitetslogg.kontekst(this)
-        if (!skalSendeOppdrag)
-            return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
+        if (!skalSendeOppdrag) return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Feriepengerendringskode.UEND)
         aktivitetsloggMedOppdragkontekst.behov(Behovtype.Feriepengeutbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer(saksbehandler))
     }

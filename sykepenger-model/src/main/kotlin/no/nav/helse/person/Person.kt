@@ -361,10 +361,11 @@ class Person private constructor(
             _yrkesaktiviteter.finnEllerOpprett(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(it), aktivitetsloggMedPersonkontekst)
         }
         yrkesaktiviteter.beregnFeriepengerForAlleArbeidsgivere(
-            personidentifikator,
-            feriepengeberegner,
-            utbetalingshistorikk,
-            aktivitetsloggMedPersonkontekst
+            personidentifikator = personidentifikator,
+            feriepengeberegner = feriepengeberegner,
+            utbetalingshistorikkForFeriepenger = utbetalingshistorikk,
+            aktivitetslogg = aktivitetsloggMedPersonkontekst,
+            eventBus = eventBus
         )
 
         if (Toggle.SendFeriepengeOppdrag.enabled) {
