@@ -43,7 +43,7 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `må oppfriske tom historikk`() {
-        historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato)
+        historikk.oppfrisk(aktivitetslogg, tidligsteDato)
         assertTrue(aktivitetslogg.behov.isNotEmpty()) { aktivitetslogg.toString() }
         assertEquals(0, historikk.inspektør.elementer())
     }
@@ -51,12 +51,12 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `kan justere perioden for oppfrisk`() {
         Aktivitetslogg().also {
-            historikk.oppfriskNødvendig(it, tidligsteDato)
+            historikk.oppfrisk(it, tidligsteDato)
             assertEquals("${tidligsteDato.minusYears(4)}", it.behov.first().detaljer()["historikkFom"])
             assertEquals("${LocalDate.now()}", it.behov.first().detaljer()["historikkTom"])
         }
         Aktivitetslogg().also {
-            historikk.oppfriskNødvendig(it, 1.februar)
+            historikk.oppfrisk(it, 1.februar)
             assertEquals("${1.februar.minusYears(4)}", it.behov.first().detaljer()["historikkFom"])
             assertEquals("${LocalDate.now()}", it.behov.first().detaljer()["historikkTom"])
         }
@@ -65,7 +65,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `tømme historikk - ingen data`() {
         historikk.tøm()
-        historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato)
+        historikk.oppfrisk(aktivitetslogg, tidligsteDato)
         assertTrue(aktivitetslogg.behov.isNotEmpty()) { aktivitetslogg.toString() }
         assertEquals(0, historikk.inspektør.elementer())
     }
@@ -75,7 +75,7 @@ internal class InfotrygdhistorikkTest {
         val tidsstempel = LocalDateTime.now()
         historikk.oppdaterHistorikk(historikkelement(oppdatert = tidsstempel))
         historikk.tøm()
-        historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato)
+        historikk.oppfrisk(aktivitetslogg, tidligsteDato)
         assertTrue(aktivitetslogg.behov.isNotEmpty()) { aktivitetslogg.toString() }
         assertEquals(1, historikk.inspektør.elementer())
     }
@@ -90,7 +90,7 @@ internal class InfotrygdhistorikkTest {
             )
         )
         historikk.tøm()
-        historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato)
+        historikk.oppfrisk(aktivitetslogg, tidligsteDato)
         assertTrue(aktivitetslogg.behov.isNotEmpty()) { aktivitetslogg.toString() }
         assertEquals(1, historikk.inspektør.elementer())
     }
@@ -112,7 +112,7 @@ internal class InfotrygdhistorikkTest {
             )
         )
         historikk.tøm()
-        historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato)
+        historikk.oppfrisk(aktivitetslogg, tidligsteDato)
         assertTrue(aktivitetslogg.behov.isNotEmpty()) { aktivitetslogg.toString() }
         assertEquals(1, historikk.inspektør.elementer())
         assertTrue(tidsstempel2 < historikk.inspektør.opprettet(0))
@@ -130,7 +130,7 @@ internal class InfotrygdhistorikkTest {
             )
         )
         historikk.tøm()
-        historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato)
+        historikk.oppfrisk(aktivitetslogg, tidligsteDato)
         assertTrue(aktivitetslogg.behov.isNotEmpty()) { aktivitetslogg.toString() }
         assertEquals(1, historikk.inspektør.elementer())
     }
@@ -138,7 +138,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `trenger ikke oppfriske gammel historikk`() {
         historikk.oppdaterHistorikk(historikkelement(oppdatert = LocalDateTime.now().minusHours(24)))
-        historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato)
+        historikk.oppfrisk(aktivitetslogg, tidligsteDato)
         assertTrue(aktivitetslogg.behov.isNotEmpty())
         assertEquals(1, historikk.inspektør.elementer())
     }
@@ -147,7 +147,7 @@ internal class InfotrygdhistorikkTest {
     fun `kan bestemme tidspunkt selv`() {
         val tidsstempel = LocalDateTime.now().minusHours(24)
         historikk.oppdaterHistorikk(historikkelement(oppdatert = tidsstempel))
-        historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato)
+        historikk.oppfrisk(aktivitetslogg, tidligsteDato)
         assertTrue(aktivitetslogg.behov.isNotEmpty())
         assertEquals(1, historikk.inspektør.elementer())
     }
@@ -155,7 +155,7 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `oppfrisker ikke ny historikk`() {
         historikk.oppdaterHistorikk(historikkelement())
-        historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato)
+        historikk.oppfrisk(aktivitetslogg, tidligsteDato)
         assertTrue(aktivitetslogg.behov.isNotEmpty())
     }
 
@@ -168,7 +168,7 @@ internal class InfotrygdhistorikkTest {
         val gammel = nå.minusHours(24)
         assertEquals(1.januar, historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = gammel)))
         assertNull(historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = nå)))
-        historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato)
+        historikk.oppfrisk(aktivitetslogg, tidligsteDato)
         assertEquals(1, historikk.inspektør.elementer())
         assertTrue(nå < historikk.inspektør.opprettet(0))
         assertEquals(nå, historikk.inspektør.oppdatert(0))

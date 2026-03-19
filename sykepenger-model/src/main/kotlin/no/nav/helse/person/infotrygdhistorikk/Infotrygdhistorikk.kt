@@ -51,10 +51,6 @@ internal class Infotrygdhistorikk private constructor(
         siste.validerNyereOpplysninger(aktivitetslogg, periode)
     }
 
-    internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
-        oppfrisk(aktivitetslogg, tidligsteDato)
-    }
-
     internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
         utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode(tidligsteDato))
     }
