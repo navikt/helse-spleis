@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.ytelser
 
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -63,7 +62,7 @@ import org.junit.jupiter.api.Test
 internal class YtelserE2ETest : AbstractDslTest() {
 
     @Test
-    fun `bruker arbeidsavklaringspengerV2 i ytelser`() = Toggle.ArbeidsavklaringspengerV2.enable {
+    fun `bruker arbeidsavklaringspengerV2 i ytelser`() {
         a1 {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
