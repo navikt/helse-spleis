@@ -105,7 +105,6 @@ internal class HendelseMediator(
     private val subsumsjonsproducer: Subsumsjonproducer
 ) : IHendelseMediator {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-    private val behovMediator = BehovMediator(sikkerLogg)
 
     override fun behandle(message: HendelseMessage, context: MessageContext) {
         message.behandle(this, context)
@@ -598,6 +597,7 @@ internal class HendelseMediator(
         val aktivitetslogg = Aktivitetslogg().kontekst(message)
 
         val subsumsjonMediator = SubsumsjonMediator(message, versjonAvKode)
+        val behovMediator = BehovMediator(sikkerLogg)
         val personMediator = PersonMediator(message)
         val datadelingMediator = DatadelingMediator(aktivitetslogg, message)
 
@@ -607,7 +607,7 @@ internal class HendelseMediator(
         person(personidentifikator, message, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person ->
             handler(eventBus, person, aktivitetslogg)
         }
-        ferdigstill(context, eventBus, personMediator, subsumsjonMediator, datadelingMediator, message, aktivitetslogg)
+        ferdigstill(context, eventBus, personMediator, subsumsjonMediator, datadelingMediator, message, aktivitetslogg, behovMediator)
     }
 
     private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, historiskeFolkeregisteridenter: Set<Personidentifikator>, regelverkslogg: Regelverkslogg, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
@@ -629,7 +629,8 @@ internal class HendelseMediator(
         subsumsjonMediator: SubsumsjonMediator,
         datadelingMediator: DatadelingMediator,
         message: HendelseMessage,
-        aktivitetslogg: Aktivitetslogg
+        aktivitetslogg: Aktivitetslogg,
+        behovMediator: BehovMediator
     ) {
         personMediator.ferdigstill(context, eventBus)
         subsumsjonMediator.ferdigstill(subsumsjonsproducer)
