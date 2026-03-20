@@ -26,7 +26,8 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
 internal class PersonMediator(
-    private val message: HendelseMessage
+    private val message: HendelseMessage,
+    private val behovslytter: Behovslytter
 ) {
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -94,6 +95,7 @@ internal class PersonMediator(
         val eventName = jsonMessage["@event_name"].asText()
         if (eventName == "behov") {
             sikkerLogg.info("Her hadde vi sendt behov i 'ny løype' og hen hadde sett slik ut:\n\t$outgoingMessage")
+            behovslytter.behovsmeldingFraEventBus(outgoingMessage)
             return null
         }
         return Pakke(message.meldingsporing.fødselsnummer, eventName, outgoingMessage)

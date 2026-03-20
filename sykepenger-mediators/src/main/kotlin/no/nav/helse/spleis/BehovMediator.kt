@@ -7,7 +7,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.Logger
 
-internal class BehovMediator(private val sikkerLogg: Logger) {
+internal class BehovMediator(private val sikkerLogg: Logger): Behovslytter by EnIkkeAgerendeBehovslytter {
     internal fun håndter(context: MessageContext, message: HendelseMessage, aktivitetslogg: Aktivitetslogg) {
         if (aktivitetslogg.harFunksjonelleFeil()) return
         if (aktivitetslogg.behov.isEmpty()) return
@@ -22,6 +22,7 @@ internal class BehovMediator(private val sikkerLogg: Logger) {
 
                 val meldingMap = kontekstMap + behovMap
                 val behovmelding = JsonMessage.newNeed(behovMap.keys, meldingMap).toJson()
+                behovsmeldingFraAktivitetslogg(behovmelding)
 
                 sikkerLogg.info("sender behov for {}:\n{}", behovMap.keys, behovmelding)
                 context.publish(message.meldingsporing.fødselsnummer, behovmelding)

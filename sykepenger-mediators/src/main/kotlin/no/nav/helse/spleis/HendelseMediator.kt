@@ -598,7 +598,7 @@ internal class HendelseMediator(
 
         val subsumsjonMediator = SubsumsjonMediator(message, versjonAvKode)
         val behovMediator = BehovMediator(sikkerLogg)
-        val personMediator = PersonMediator(message)
+        val personMediator = PersonMediator(message, behovMediator)
         val datadelingMediator = DatadelingMediator(aktivitetslogg, message)
 
         val eventBus = EventBus()
