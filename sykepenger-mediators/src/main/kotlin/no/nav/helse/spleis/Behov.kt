@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import no.nav.helse.hendelser.MeldingsreferanseId
 
 data class Behov(
     val type: Behovstype,
@@ -36,10 +37,12 @@ data class Behov(
     }
 
     companion object {
-        fun List<Behov>.somJsonMessage(extra: Map<String, Any> = emptyMap()) = JsonMessage.newNeed(
-            behov = this.map { it.type.utgåendeNavn },
-            map = this.associate { it.type.utgåendeNavn to it.input }.plus(extra)
-        )
+        fun List<Behov>.somJsonMessage(
+            meldingsreferanseId: MeldingsreferanseId, // TODO: Dette feltet er sendt på alle behov, men tror ingen sparkel-apper bruker det, må sjekkes opp i!
+            extra: Map<String, Any> = emptyMap()) = JsonMessage.newNeed(
+                behov = this.map { it.type.utgåendeNavn },
+                map = this.associate { it.type.utgåendeNavn to it.input }.plus(extra).plus("meldingsreferanseId" to meldingsreferanseId.id)
+            )
     }
 }
 

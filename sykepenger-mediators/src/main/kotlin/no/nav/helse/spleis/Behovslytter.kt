@@ -57,7 +57,6 @@ internal class EnBehovslytterSomSerOmBehovErLike(private val sikkerLogg: Logger)
 
                 json.remove(setOf(
                     "@opprettetUTC",                    // Sendes kun fra EventBus
-                    "meldingsreferanseId",              // Denne legges kun på i aktivitetslogg, og tror det er tilfeldig og ikke i bruk noe sted? TODO
                     "@id",                              // Genererte ID'er/tidsstempl sjekket ovenfor
                     "@behovId",
                     "@opprettet",

@@ -663,7 +663,7 @@ internal class PersonMediator(
 
         // TODO 1: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
         // TODO 2: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
-        return behov.somJsonMessage(mapOf(
+        return behov.somJsonMessage(message.meldingsporing.id,mapOf(
             "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
             "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
@@ -712,7 +712,7 @@ internal class PersonMediator(
 
         // TODO 1: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
         // TODO 2: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
-        return behov.somJsonMessage(mapOf(
+        return behov.somJsonMessage(message.meldingsporing.id,mapOf(
             "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
             "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
@@ -725,7 +725,7 @@ internal class PersonMediator(
         return listOf(Behov(Behov.Behovstype.Sykepengehistorikk, mapOf(
             "historikkFom" to event.periode.start,
             "historikkTom" to event.periode.endInclusive
-        ))).somJsonMessage()
+        ))).somJsonMessage(message.meldingsporing.id)
     }
 
     private fun mapUtbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent): JsonMessage {
@@ -749,7 +749,7 @@ internal class PersonMediator(
             "fagsystemId" to event.fagsystemId,
             "endringskode" to event.endringskode,
             "saksbehandler" to event.saksbehandler
-        ))).somJsonMessage(mapOf(
+        ))).somJsonMessage(message.meldingsporing.id,mapOf(
             "yrkesaktivitetstype" to "ARBEIDSTAKER",
             "organisasjonsnummer" to event.organisasjonsnummer,
             "utbetalingId" to event.utbetalingId,
