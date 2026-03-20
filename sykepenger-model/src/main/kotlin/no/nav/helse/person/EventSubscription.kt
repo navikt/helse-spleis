@@ -610,7 +610,7 @@ interface EventSubscription {
         val forsikring: Forsikring?
     ) : Event
 
-    data class TrengerInformasjonTilVilkårsprøving(
+    data class TrengerInformasjonTilVilkårsprøvingEvent(
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -626,7 +626,7 @@ interface EventSubscription {
         }
     }
 
-    data class TrengerInformasjonTilBeregning(
+    data class TrengerInformasjonTilBeregningEvent(
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -643,7 +643,7 @@ interface EventSubscription {
         val skjæringstidspunkt: LocalDate
     ): Event
 
-    data class TrengerHistorikkFraInfotrygd(
+    data class TrengerHistorikkFraInfotrygdEvent(
         val periode: Periode
     ): Event
 
@@ -711,8 +711,8 @@ interface EventSubscription {
     fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: VedtaksperiodeAnnullertEvent) {}
     fun utkastTilVedtak(event: UtkastTilVedtakEvent) {}
     fun benyttetGrunnlagsdataForBeregning(event: BenyttetGrunnlagsdataForBeregningEvent) {}
-    fun trengerInformasjonTilVilkårsprøving(event: TrengerInformasjonTilVilkårsprøving) {}
-    fun trengerInformasjonTilBeregning(event: TrengerInformasjonTilBeregning) {}
-    fun trengerHistorikkFraInfotrygd(event: TrengerHistorikkFraInfotrygd) {}
+    fun trengerInformasjonTilVilkårsprøving(event: TrengerInformasjonTilVilkårsprøvingEvent) {}
+    fun trengerInformasjonTilBeregning(event: TrengerInformasjonTilBeregningEvent) {}
+    fun trengerHistorikkFraInfotrygd(event: TrengerHistorikkFraInfotrygdEvent) {}
     fun utbetalFeriepenger(event: UtbetalFeriepengerEvent) {}
 }

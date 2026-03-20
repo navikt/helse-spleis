@@ -236,18 +236,18 @@ class EventBus {
         observers.forEach { it.benyttetGrunnlagsdataForBeregning(event) }
     }
 
-    internal fun trengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøving) {
+    internal fun trengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent) {
         _events.add(event)
         observers.forEach { it.trengerInformasjonTilVilkårsprøving(event) }
     }
 
-    internal fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregning) {
+    internal fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) {
         _events.add(event)
         observers.forEach { it.trengerInformasjonTilBeregning(event) }
     }
 
     internal fun trengerHistorikkFraInfotrygd(periode: Periode) {
-        val event = EventSubscription.TrengerHistorikkFraInfotrygd(periode)
+        val event = EventSubscription.TrengerHistorikkFraInfotrygdEvent(periode)
         _events.add(event)
         observers.forEach { it.trengerHistorikkFraInfotrygd(event) }
     }

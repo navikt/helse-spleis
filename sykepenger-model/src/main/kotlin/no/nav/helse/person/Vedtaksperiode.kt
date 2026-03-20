@@ -2943,7 +2943,7 @@ internal class Vedtaksperiode private constructor(
             Selvstendig -> selvstendigForsikring(aktivitetslogg, this.skjæringstidspunkt)
         }
 
-        val event = EventSubscription.TrengerInformasjonTilBeregning(
+        val event = EventSubscription.TrengerInformasjonTilBeregningEvent(
             vedtaksperiodeId = id,
             behandlingId = behandlinger.sisteBehandlingId,
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
@@ -2969,17 +2969,17 @@ internal class Vedtaksperiode private constructor(
         arbeidsforhold(aktivitetslogg, skjæringstidspunkt)
         medlemskap(aktivitetslogg, skjæringstidspunkt, periode.start, periode.endInclusive)
 
-        val event = EventSubscription.TrengerInformasjonTilVilkårsprøving(
+        val event = EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent(
             vedtaksperiodeId = id,
             behandlingId = behandlinger.sisteBehandlingId,
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
             skjæringstidspunkt = skjæringstidspunkt,
             periodeForMedlemskapsvurdering = periode,
-            beregningsperiodeForOpptjeningsvurdering = EventSubscription.TrengerInformasjonTilVilkårsprøving.Beregningsperiode(
+            beregningsperiodeForOpptjeningsvurdering = EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent.Beregningsperiode(
                 start = beregningSlutt,
                 slutt = beregningSlutt
             ),
-            beregningsperiodeForSykepengegrunnlagsvurdering = EventSubscription.TrengerInformasjonTilVilkårsprøving.Beregningsperiode(
+            beregningsperiodeForSykepengegrunnlagsvurdering = EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent.Beregningsperiode(
                 start = beregningSlutt.minusMonths(2),
                 slutt = beregningSlutt
             )

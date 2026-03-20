@@ -73,10 +73,10 @@ internal class PersonMediator(
                     is EventSubscription.BenyttetGrunnlagsdataForBeregningEvent -> mapBenyttetGrunnlagsdataForBeregning(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.SelvstendigIngenDagerIgjenEvent -> mapSelvstendigIngenDagerIgjen(event) // ✅ Er selvstendig-spesifikk, så den er grei
                     is EventSubscription.SelvstendigUtbetaltEtterVentetidEvent -> mapSelvstendigUtbetaltEtterVentetid(event) // ✅ Er selvstendig-spesifikk, så den er grei
-                    is EventSubscription.TrengerInformasjonTilVilkårsprøving -> mapTrengerInformasjonTilVilkårsprøving(event)
-                    is EventSubscription.TrengerInformasjonTilBeregning -> mapTrengerInformasjonTilBeregning(event)
-                    is EventSubscription.TrengerHistorikkFraInfotrygd -> mapTrengerHistorikkFraInfotrygd(event) // ✅ Meldingen er på person-nivå, så den er grei
-                    is EventSubscription.UtbetalFeriepengerEvent -> mapUtbetalFeriepengerEvent(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent -> mapTrengerInformasjonTilVilkårsprøving(event)
+                    is EventSubscription.TrengerInformasjonTilBeregningEvent -> mapTrengerInformasjonTilBeregning(event)
+                    is EventSubscription.TrengerHistorikkFraInfotrygdEvent -> mapTrengerHistorikkFraInfotrygd(event) // ✅ Meldingen er på person-nivå, så den er grei
+                    is EventSubscription.UtbetalFeriepengerEvent -> mapUtbetalFeriepenger(event) // ✅ Er arbeidstaker-spesifikk
                 }
             }
             .mapNotNull { jsonMessage -> mapTilPakke(jsonMessage) }
@@ -637,7 +637,7 @@ internal class PersonMediator(
         )
     }
 
-    private fun mapTrengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøving): JsonMessage {
+    private fun mapTrengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent): JsonMessage {
         val behov = listOf(
             Behov(Behov.Behovstype.Medlemskap, mapOf(
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
@@ -669,7 +669,7 @@ internal class PersonMediator(
         ))
     }
 
-    private fun mapTrengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregning): JsonMessage {
+    private fun mapTrengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent): JsonMessage {
         val behov = listOfNotNull(
             Behov(Behov.Behovstype.Foreldrepenger, mapOf(
                 "foreldrepengerFom" to event.periodeForForeldrepenger.start,
@@ -718,7 +718,7 @@ internal class PersonMediator(
         ))
     }
 
-    private fun mapTrengerHistorikkFraInfotrygd(event: EventSubscription.TrengerHistorikkFraInfotrygd): JsonMessage {
+    private fun mapTrengerHistorikkFraInfotrygd(event: EventSubscription.TrengerHistorikkFraInfotrygdEvent): JsonMessage {
         // TODO 2: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
         return listOf(Behov(Behov.Behovstype.Sykepengehistorikk, mapOf(
             "historikkFom" to event.periode.start,
@@ -726,7 +726,7 @@ internal class PersonMediator(
         ))).somJsonMessage()
     }
 
-    private fun mapUtbetalFeriepengerEvent(event: EventSubscription.UtbetalFeriepengerEvent): JsonMessage {
+    private fun mapUtbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent): JsonMessage {
         // TODO 2: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
         return listOf(Behov(Behov.Behovstype.Feriepengeutbetaling, mapOf(
             "mottaker" to event.mottaker,
