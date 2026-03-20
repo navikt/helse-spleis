@@ -641,23 +641,23 @@ internal class PersonMediator(
 
     private fun mapTrengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent): JsonMessage {
         val behov = listOf(
-            Behov(Behov.Behovstype.Medlemskap, mapOf(
+            Behov(Behov.Behovstype.InntekterForSykepengegrunnlag, mapOf(
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "medlemskapPeriodeFom" to event.periodeForMedlemskapsvurdering.start,
-                "medlemskapPeriodeTom" to event.periodeForMedlemskapsvurdering.endInclusive
-            )),
-            Behov(Behov.Behovstype.Arbeidsforhold, mapOf(
-                "skjæringstidspunkt" to event.skjæringstidspunkt
+                "beregningStart" to event.beregningsperiodeForSykepengegrunnlagsvurdering.start,
+                "beregningSlutt" to event.beregningsperiodeForSykepengegrunnlagsvurdering.slutt
             )),
             Behov(Behov.Behovstype.InntekterForOpptjeningsvurdering, mapOf(
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
                 "beregningStart" to event.beregningsperiodeForOpptjeningsvurdering.start,
                 "beregningSlutt" to event.beregningsperiodeForOpptjeningsvurdering.slutt
             )),
-            Behov(Behov.Behovstype.InntekterForSykepengegrunnlag, mapOf(
+            Behov(Behov.Behovstype.Arbeidsforhold, mapOf(
+                "skjæringstidspunkt" to event.skjæringstidspunkt
+            )),
+            Behov(Behov.Behovstype.Medlemskap, mapOf(
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "beregningStart" to event.beregningsperiodeForSykepengegrunnlagsvurdering.start,
-                "beregningSlutt" to event.beregningsperiodeForSykepengegrunnlagsvurdering.slutt
+                "medlemskapPeriodeFom" to event.periodeForMedlemskapsvurdering.start,
+                "medlemskapPeriodeTom" to event.periodeForMedlemskapsvurdering.endInclusive
             ))
         )
 
