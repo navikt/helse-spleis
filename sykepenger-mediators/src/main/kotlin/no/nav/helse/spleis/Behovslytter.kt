@@ -37,7 +37,6 @@ internal class EnBehovslytterSomSerOmBehovErLike(private val sikkerLogg: Logger)
         try {
             val fraAktivitetslogg = json.utgåendeBehov()
             val fraEventBus = utgåendeBehovsmeldingerFraEventBus[fraAktivitetslogg.identifikator] ?: return sikkerLogg.info("[EnBehovslytterSomSerOmBehovErLike] Behovsmelding med behovene ${fraAktivitetslogg.identifikator} sendes ikke fra EventBus ennå.")
-            if (fraAktivitetslogg.identifikator == setOf("Sykepengehistorikk")) return // TODO: Sendes fra to contexter
             check(fraAktivitetslogg.json == fraEventBus.json) { "Disse beohvene er jo ikke like!\n\t${fraAktivitetslogg.json}\n\t${fraEventBus.json}" }
         } catch (exception: Exception) {
             sikkerLogg.warn("[EnBehovslytterSomSerOmBehovErLike] Feil ved sjekking av om behov sendt fra Aktivitetslogg er like behov sendt fra EventBus", exception)
@@ -65,8 +64,15 @@ internal class EnBehovslytterSomSerOmBehovErLike(private val sikkerLogg: Logger)
                     "system_participating_services",    // R&R-greier
                     "system_read_count"
                 ))
+
+                val etterspurteBehov = json.path("@behov").map { it.asText() }.toSet()
+                if (etterspurteBehov == setOf("Sykepengehistorikk")) {
+                    // Akkurat dette behovet sendes både fra personnivå (kun fødselsnummer), men også fra enkelte tilstander, disse 4 ekstra parameterne bruker ikke sparkel-sykepengeperioder så gjør ikke noe at de ei sendes
+                    json.remove(setOf("organisasjonsnummer", "yrkesaktivitetstype", "vedtaksperiodeId", "behandlingId"))
+                }
+
                 // For utbetalinger så kan det sendes flere like behov, men forskjellig fagområder (vanlig utbetaling) og/eller flere utbetalinger på samme fagområde med forskjellige mottakere (feriepenger)
-                val identifikator = json.path("@behov").map { it.asText() }.toSet() + setOfNotNull(json.fagområdeOrNull(), json.mottakerOrNull())
+                val identifikator = etterspurteBehov + setOfNotNull(json.fagområdeOrNull(), json.mottakerOrNull())
                 return UtgåendeBehovsmelding(identifikator, json)
             }
 
