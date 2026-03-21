@@ -118,7 +118,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
         val skole = a1
         sfo {
             håndterSøknad(29.september(2025) til 26.oktober(2025))
-            håndterSøknad(27.oktober(2025) til 11.november(2025)) // var egentlig fom 26. oktober, men da forkaster vi jo alt? Hvordan dette gikk bra i prod forstår jeg ikke
+            håndterSøknad(27.oktober(2025) til 11.november(2025))
             håndterSøknad(12.november(2025) til 27.november(2025))
         }
         skole {
