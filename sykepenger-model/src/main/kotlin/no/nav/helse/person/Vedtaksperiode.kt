@@ -2686,7 +2686,8 @@ internal class Vedtaksperiode private constructor(
             alleForSammeArbeidsgiver.any { it.behandlinger.erTidligereVilkårsprøvd() } -> Inntektssituasjon.TidligereVilkårsprøvd
             else -> {
                 // Vi vet at vi skal "Behandles i speil", at vi ikke er tidligere vilkårsprøvd (så ikke noe revurderingscase) - så da er vi enten den som vilkårsprøver eller en annen arbeidsgiver som venter på vilkårsprøvingen
-                val periodenSomGaOpp = alleForSammeArbeidsgiver.first { it.tilstand in setOf(AvventerVilkårsprøving, AvventerBlokkerendePeriode, AvventerInntektsopplysningerForAnnenArbeidsgiver) }
+                // FIXME: Én arbeidsgiver med en hel vedtaksperiode før vi får to parallelle vedtaksperioder, og den andre arbeidsgiveren åpner med en AUU = denne logikken dør på NoSuchElementException inne i periodenSomGlapp - mangler vi et case?
+                val periodenSomGaOpp = alleForSammeArbeidsgiver.first { it.tilstand in setOf(AvventerVilkårsprøving, AvventerBlokkerendePeriode, AvventerInntektsopplysningerForAnnenArbeidsgiver/*, AvventerAvsluttetUtenUtbetaling??*/) }
                 Inntektssituasjon.GaOppÅVentePåArbeidsgiver(periodenSomGaOpp)
             }
         }
