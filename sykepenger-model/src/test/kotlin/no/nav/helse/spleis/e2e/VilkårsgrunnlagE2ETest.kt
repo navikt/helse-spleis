@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import OpenInSpanner
+import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -9,12 +11,17 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
@@ -100,6 +107,53 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             assertIngenVilkårsgrunnlagFraSpleis()
+        }
+    }
+
+    @Disabled("Som best jeg klarte gjenskaper dette hendelsesforløp i prod, men det blir en annen tilstand i spannerish enn prod-caset?")
+    @OpenInSpanner
+    @Test
+    fun `Rare ting skjer med korte perioder, out of order søknader, og inntektsmeldinger fra feil arbeidsgiver`() {
+        val sfo = a2
+        val skole = a1
+        sfo {
+            håndterSøknad(29.september(2025) til 26.oktober(2025))
+            håndterSøknad(27.oktober(2025) til 11.november(2025)) // var egentlig fom 26. oktober, men da forkaster vi jo alt? Hvordan dette gikk bra i prod forstår jeg ikke
+            håndterSøknad(12.november(2025) til 27.november(2025))
+        }
+        skole {
+            håndterSøknad(28.november(2025) til 17.desember(2025))
+            håndterSøknad(18.desember(2025) til 5.januar(2026))
+        }
+        sfo {
+            håndterSøknad(5.januar(2026) til 20.januar(2026))
+            håndterSøknad(21.januar(2026) til 5.februar(2026))
+            håndterInntektsmelding(listOf(29.september(2025) til 14.oktober(2025)))
+        }
+        skole {
+            håndterInntektsmelding(listOf(29.september(2025) til 14.oktober(2025))) // denne AGPen treffer jo ikke noen av perioden til skolen, som er mistenkelig
+            håndterSøknad(6.februar(2026) til 25.februar(2026))
+        }
+        sfo {
+            håndterSøknad(6.februar(2026) til 25.februar(2026))
+        }
+        skole {
+            håndterSøknad(27.oktober(2025) til 11.november(2025))
+            håndterSøknad(12.november(2025) til 27.november(2025))
+        }
+        sfo {
+            håndterSøknad(28.november(2025) til 16.desember(2025))
+            håndterSøknad(17.desember(2025) til 4.januar(2026))
+        }
+        skole {
+            håndterSøknad(6.januar(2026) til 5.februar(2026))
+            håndterSøknad(6.februar(2026) til 25.februar(2026))
+        }
+        sfo {
+            håndterSøknad(26.februar(2026) til 17.mars(2026))
+        }
+        skole {
+            håndterSøknad(26.februar(2026) til 17.mars(2026))
         }
     }
 }

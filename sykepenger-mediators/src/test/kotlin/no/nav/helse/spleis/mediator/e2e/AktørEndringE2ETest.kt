@@ -23,6 +23,9 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
 
         meldingsfabrikkFNR2.lagLpsInntektsmelding(listOf(Periode(3.januar, 18.januar)), 3.januar).also { (_, melding) ->
+            // json.utgåendeBehov() gir et behov med gammelt FNR
+            // utgåendeBehovsmeldingerFraEventBus[fraAktivitetslogg.identifikator] gir et behov med nytt FNR
+            // tanken vår var vel at utgående meldinger skal bruke samme fnr som meldingen som trigget den utgående meldingen... som kanskje er lurt, kanskje ikke.
             testRapid.sendTestMessage(melding)
         }
 
