@@ -131,7 +131,12 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             håndterInntektsmelding(listOf(29.september(2025) til 14.oktober(2025)))
         }
         skole {
-            håndterInntektsmelding(listOf(29.september(2025) til 14.oktober(2025))) // denne AGPen treffer jo ikke noen av perioden til skolen, som er mistenkelig
+            /*
+            denne AGPen treffer jo ikke noen av perioden til skolen, som jeg skulle ønske at var mistenkelig,
+            men skole og sfo er underenhet av samme hovedenhet, så egentlig så skal de jo dele AGP, men
+            vi har vel ikke støtte for sånt?
+             */
+            håndterInntektsmelding(listOf(29.september(2025) til 14.oktober(2025)))
             håndterSøknad(6.februar(2026) til 25.februar(2026))
         }
         sfo {
