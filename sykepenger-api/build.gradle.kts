@@ -6,7 +6,7 @@ plugins {
 
 val tbdLibsVersion = "2026.01.22-09.16-1d3f6039"
 val spekematVersion = "2024.03.07-12.49-d2ad6319"
-val ktorVersion = "3.2.3"
+val ktorVersion = "3.4.0"
 val awaitilityVersion = "4.2.2"
 val mockVersion = "1.13.13"
 val jsonassertVersion = "1.5.3"
