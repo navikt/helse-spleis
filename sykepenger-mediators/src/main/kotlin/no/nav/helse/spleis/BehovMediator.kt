@@ -7,7 +7,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.Logger
 
-internal class BehovMediator(private val sikkerLogg: Logger): Behovslytter by EnIkkeAgerendeBehovslytter {
+internal class BehovMediator(private val sikkerLogg: Logger): Behovslytter by EnBehovslytterSomSerOmBehovErLike() {
     internal fun håndter(context: MessageContext, message: HendelseMessage, aktivitetslogg: Aktivitetslogg) {
         if (aktivitetslogg.harFunksjonelleFeil()) return
         if (aktivitetslogg.behov.isEmpty()) return

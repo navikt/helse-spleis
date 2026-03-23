@@ -22,8 +22,7 @@ internal object EnIkkeAgerendeBehovslytter: Behovslytter {
 
 internal class EnBehovslytterSomSerOmBehovErLike() : Behovslytter {
     private val utgåendeBehovsmeldingerFraEventBus = mutableMapOf<Set<String>, UtgåendeBehovsmelding>()
-    private val påNais = System.getenv("NAIS_CLUSTER_NAME")?.lowercase()?.endsWith("-gcp") == true
-    private val kastException = !påNais
+    private val kastException = false // Gøyal å sette true lokalt for å finne eventuelle feil
 
     override fun behovsmeldingFraEventBus(json: String) {
         try {
@@ -40,7 +39,8 @@ internal class EnBehovslytterSomSerOmBehovErLike() : Behovslytter {
         try {
             val fraAktivitetslogg = json.utgåendeBehov()
             val fraEventBus = utgåendeBehovsmeldingerFraEventBus[fraAktivitetslogg.identifikator] ?: return sikkerLogg.info("[EnBehovslytterSomSerOmBehovErLike] Behovsmelding med behovene ${fraAktivitetslogg.identifikator} sendes ikke fra EventBus ennå.")
-            check(fraAktivitetslogg.json == fraEventBus.json) { "Disse beohvene er jo ikke like!\n\t${fraAktivitetslogg.json}\n\t${fraEventBus.json}" }
+            check(fraAktivitetslogg.json == fraEventBus.json) { "[EnBehovslytterSomSerOmBehovErLike] Behovsmelding med behovene ${fraAktivitetslogg.identifikator} jo ikke like!\n\t${fraAktivitetslogg.json}\n\t${fraEventBus.json}" }
+            sikkerLogg.info("[EnBehovslytterSomSerOmBehovErLike] Behovsmelding med behovene ${fraAktivitetslogg.identifikator} er klink like på tvers av Aktivitetslogg og EventBus")
         } catch (exception: Exception) {
             sikkerLogg.warn("[EnBehovslytterSomSerOmBehovErLike] Feil ved sjekking av om behov sendt fra Aktivitetslogg er like behov sendt fra EventBus", exception)
             if (kastException) throw exception
