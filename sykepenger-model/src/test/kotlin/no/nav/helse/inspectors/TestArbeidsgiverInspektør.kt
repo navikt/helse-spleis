@@ -145,13 +145,11 @@ internal class TestArbeidsgiverInspektør(
     internal fun vedtaksperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder.getValue(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun vedtaksperioder(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId)
     internal fun vedtaksperioder(periode: Periode) = vedtaksperioder.values.first { it.periode == periode }
-    internal fun førsteVedtaksperiodeSomOverlapperEllerErEtter(dato: LocalDate) = vedtaksperioder.values.firstOrNull { it.periode.start >= dato } ?: error("Ingen perioder overlapper eller starter etter $dato")
 
     internal fun hendelser(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter.id(orgnummer)).inspektør.hendelser
     internal fun hendelseIder(vedtaksperiodeIdInnhenter: IdInnhenter) = hendelseIder(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun hendelseIder(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.hendelseIder.map { it.id }.toSet()
 
-    internal fun sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.utbetalinger.last().arbeidsgiverOppdrag.fagsystemId
     internal fun sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.last().arbeidsgiverOppdrag.fagsystemId
 
     internal fun vedtaksperiodeId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.id(orgnummer)
