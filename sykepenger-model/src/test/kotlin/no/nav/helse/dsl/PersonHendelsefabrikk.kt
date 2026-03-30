@@ -76,6 +76,29 @@ internal class PersonHendelsefabrikk {
             skalBeregnesManuelt = false,
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2025)
         )
+
+    internal fun lagUtbetalingshistorikkForFeriepenger(
+        opptjeningsår: Year,
+        utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode>,
+        feriepengehistorikk: List<UtbetalingshistorikkForFeriepenger.Feriepenger>,
+        datoForSisteFeriepengekjøringIInfotrygd: LocalDate,
+        skalBeregnesManuelt: Boolean = false
+    ) = UtbetalingshistorikkForFeriepenger(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        utbetalinger = utbetalinger,
+        feriepengehistorikk = feriepengehistorikk,
+        arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
+            listOf(
+                UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode(
+                    LocalDate.MIN til LocalDate.MAX,
+                    UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode.Arbeidstaker
+                )
+            )
+        ),
+        opptjeningsår = opptjeningsår,
+        skalBeregnesManuelt = skalBeregnesManuelt,
+        datoForSisteFeriepengekjøringIInfotrygd = datoForSisteFeriepengekjøringIInfotrygd
+    )
     internal fun lagMinimumSykdomsgradsvurderingMelding(
         perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
         perioderMedMinimumSykdomsgradVurdertIkkeOK: Set<Periode> = emptySet()

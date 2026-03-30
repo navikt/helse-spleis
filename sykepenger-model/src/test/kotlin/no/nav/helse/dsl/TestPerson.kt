@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -31,6 +32,7 @@ import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
@@ -43,6 +45,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.DagpengerV2
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Feriepengeutbetaling
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
@@ -163,6 +166,36 @@ internal class TestPerson(
 
     internal fun håndterDødsmelding(dødsdato: LocalDate) {
         personHendelsefabrikk.lagDødsmelding(dødsdato).håndter(Person::håndterDødsmelding)
+    }
+
+    internal fun håndterUtbetalingshistorikkForFeriepenger(
+        opptjeningsår: Year,
+        utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(),
+        feriepengehistorikk: List<UtbetalingshistorikkForFeriepenger.Feriepenger> = emptyList(),
+        datoForSisteFeriepengekjøringIInfotrygd: LocalDate,
+        skalBeregnesManuelt: Boolean = false
+    ) = personHendelsefabrikk.lagUtbetalingshistorikkForFeriepenger(
+        opptjeningsår, utbetalinger, feriepengehistorikk, datoForSisteFeriepengekjøringIInfotrygd, skalBeregnesManuelt
+    ).håndter(Person::håndterUtbetalingshistorikkForFeriepenger)
+
+    internal fun håndterFeriepengerUtbetalt(
+        fagsystemId: String,
+        orgnummer: String,
+        status: Oppdragstatus = Oppdragstatus.AKSEPTERT
+    ) {
+        val utbetalingId = personlogg.behov
+            .last { it.type == Feriepengeutbetaling }
+            .alleKontekster.getValue("utbetalingId").let { UUID.fromString(it) }
+        FeriepengeutbetalingHendelse(
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
+            fagsystemId = fagsystemId,
+            utbetalingId = utbetalingId,
+            status = status,
+            melding = "hey",
+            avstemmingsnøkkel = 654321L,
+            overføringstidspunkt = LocalDateTime.now()
+        ).håndter(Person::håndterFeriepengeutbetalingHendelse)
     }
 
     operator fun <R> invoke(testblokk: TestPerson.() -> R): R {

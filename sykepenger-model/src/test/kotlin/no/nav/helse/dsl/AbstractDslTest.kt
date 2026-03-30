@@ -2,6 +2,7 @@ package no.nav.helse.dsl
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.Varslersamler.AssertetVarsler
@@ -19,6 +20,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
@@ -583,6 +585,20 @@ internal abstract class AbstractDslTest {
     protected fun håndterDødsmelding(dødsdato: LocalDate) {
         testperson.håndterDødsmelding(dødsdato)
     }
+
+    protected fun håndterUtbetalingshistorikkForFeriepenger(
+        opptjeningsår: Year,
+        utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(),
+        feriepengehistorikk: List<UtbetalingshistorikkForFeriepenger.Feriepenger> = emptyList(),
+        datoForSisteFeriepengekjøringIInfotrygd: LocalDate,
+        skalBeregnesManuelt: Boolean = false
+    ) = testperson { håndterUtbetalingshistorikkForFeriepenger(opptjeningsår, utbetalinger, feriepengehistorikk, datoForSisteFeriepengekjøringIInfotrygd, skalBeregnesManuelt) }
+
+    protected fun håndterFeriepengerUtbetalt(
+        fagsystemId: String,
+        orgnummer: String = a1,
+        status: Oppdragstatus = Oppdragstatus.AKSEPTERT
+    ) = testperson { håndterFeriepengerUtbetalt(fagsystemId, orgnummer, status) }
 
     protected fun nyttVedtak(
         vedtaksperiode: Periode,
