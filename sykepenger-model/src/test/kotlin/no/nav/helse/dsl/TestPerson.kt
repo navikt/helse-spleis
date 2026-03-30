@@ -714,6 +714,19 @@ internal class TestPerson(
                 .håndter(Person::håndterKanIkkeBehandlesHer)
         }
 
+        internal fun håndterUtbetalt(status: Oppdragstatus, fagsystemId: String) {
+            behovsamler.detaljerFor(orgnummer, Utbetaling)
+                .filter { (detaljer, _) -> detaljer.getValue("fagsystemId") as String == fagsystemId }
+                .lastOrNull()
+                ?.also { (_, kontekst) ->
+                    val vedtaksperiodeId = UUID.fromString(kontekst.getValue("vedtaksperiodeId"))
+                    val behandlingId = UUID.fromString(kontekst.getValue("behandlingId"))
+                    val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+                    arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(vedtaksperiodeId, behandlingId, utbetalingId, fagsystemId, status)
+                        .håndter(Person::håndterUtbetalingHendelse)
+                }
+        }
+
         internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT) {
             behovsamler.bekreftBehov(orgnummer, Utbetaling)
             behovsamler.detaljerFor(orgnummer, Utbetaling)
