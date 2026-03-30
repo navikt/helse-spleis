@@ -1,38 +1,33 @@
 package no.nav.helse.person
 
+import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.a1
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 
-internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
+internal class SykmeldingHendelseTest : AbstractDslTest() {
 
     @Test
     fun `Sykmelding skaper Arbeidsgiver og Sykmeldingsperiode`() {
-        val aktivitetslogg = Aktivitetslogg()
-        person.håndterSykmelding(EventBus(), sykmelding(Sykmeldingsperiode(1.januar, 5.januar)), aktivitetslogg)
-        assertFalse(aktivitetslogg.harFunksjonelleFeil())
-        assertFalse(aktivitetslogg.harFunksjonelleFeil())
-        assertEquals(0, inspektør.vedtaksperiodeTeller)
-        assertEquals(1, inspektør.sykmeldingsperioder().size)
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
+            assertIngenFunksjonelleFeil()
+            assertEquals(0, inspektør.vedtaksperiodeTeller)
+            assertEquals(1, inspektør.sykmeldingsperioder().size)
+        }
     }
 
     @Test
     fun `To søknader uten overlapp`() {
-        val aktivitetslogg = Aktivitetslogg()
-        person.håndterSykmelding(EventBus(), sykmelding(Sykmeldingsperiode(1.januar, 5.januar)), aktivitetslogg)
-        person.håndterSykmelding(EventBus(), sykmelding(Sykmeldingsperiode(6.januar, 10.januar)), aktivitetslogg)
-        assertFalse(aktivitetslogg.harFunksjonelleFeil())
-        assertFalse(aktivitetslogg.harFunksjonelleFeil())
-        assertEquals(0, inspektør.vedtaksperiodeTeller)
-        assertEquals(2, inspektør.sykmeldingsperioder().size)
-    }
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
+            håndterSykmelding(Sykmeldingsperiode(6.januar, 10.januar))
 
-    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode) =
-        a1Hendelsefabrikk.lagSykmelding(
-            sykeperioder = sykeperioder
-        )
+            assertIngenFunksjonelleFeil()
+            assertEquals(0, inspektør.vedtaksperiodeTeller)
+            assertEquals(2, inspektør.sykmeldingsperioder().size)
+        }
+    }
 }
