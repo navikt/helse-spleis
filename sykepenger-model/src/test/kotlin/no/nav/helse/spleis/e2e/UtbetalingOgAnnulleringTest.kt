@@ -1,14 +1,15 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDateTime
+import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.nyPeriode
+import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
-import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -32,6 +33,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -44,21 +46,19 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
+internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
 
     @Test
     fun `vedtaksperiode oppretter utbetaling for seg selv og andre`() {
-        nyPeriode(januar, a1)
-        nyPeriode(januar, a2)
-
-        håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
-        håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a2)
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
-        assertEquals(1, observatør.vedtaksperiodeUtbetalinger(1.vedtaksperiode, a1).size)
-        assertEquals(1, observatør.vedtaksperiodeUtbetalinger(1.vedtaksperiode, a2).size)
+        nyPeriode(januar, a1, a2)
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode) }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+        }
+        assertEquals(1, observatør.vedtaksperiodeUtbetalinger(1.vedtaksperiode(a1), a1).size)
+        assertEquals(1, observatør.vedtaksperiodeUtbetalinger(1.vedtaksperiode(a2), a2).size)
     }
 
     @Test
@@ -83,386 +83,417 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
          * siden ingen utbetalinger hadde en 'periode' som overlappet med februar eller mars. Til tross for at
          * utbetalingen hadde oppdragslinjer som strakk seg over februar og mars.
          */
-        createTestPerson { regelverkslogg ->
-            gjenopprettFraJSON("/personer/revurdering-av-flere-vedtak-i-samme-utbetaling.json", 334, regelverkslogg)
+        medJSONPerson("/personer/revurdering-av-flere-vedtak-i-samme-utbetaling.json", 334)
+        a1 {
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            val m = assertThrows<IllegalStateException> {
+                håndterYtelser(2.vedtaksperiode)
+            }
+            assertEquals("Har laget en overlappende utbetaling", m.message)
         }
-
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        val m = assertThrows<IllegalStateException> {
-            håndterYtelser(2.vedtaksperiode)
-        }
-        assertEquals("Har laget en overlappende utbetaling", m.message)
     }
 
     @Test
     fun `utbetaling hopper ut av fagsystemid`() {
-        createPersonMedToVedtakPåSammeFagsystemId()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.februar, Dagtype.Feriedag)))
-        håndterYtelser(2.vedtaksperiode)
-        assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
-        val utbetaling = inspektør.utbetaling(2)
-        assertEquals(1, utbetaling.arbeidsgiverOppdrag.size)
-        assertEquals(19.januar til 19.februar, utbetaling.arbeidsgiverOppdrag[0].periode)
-        assertEquals(3.januar til 20.februar, utbetaling.periode)
+        medJSONPerson("/personer/to_vedtak_samme_fagsystem_id.json", 334)
+        a1 {
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.februar, Dagtype.Feriedag)))
+            håndterYtelser(2.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
+            val utbetaling = inspektør.utbetaling(2)
+            assertEquals(1, utbetaling.arbeidsgiverOppdrag.size)
+            assertEquals(19.januar til 19.februar, utbetaling.arbeidsgiverOppdrag[0].periode)
+            assertEquals(3.januar til 20.februar, utbetaling.periode)
+        }
     }
 
     @Test
     fun `annullere senere periode enn perioden til godkjenning`() {
-        nyttVedtak(mars)
-        tilGodkjenning(januar, a1, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
-        nullstillTilstandsendringer()
-        håndterAnnullerUtbetaling(1.vedtaksperiode)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        a1 {
+            nyttVedtak(mars)
+            tilGodkjenning(januar)
+            nullstillTilstandsendringer()
+            håndterAnnullering(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_ANNULLERING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        }
     }
 
     @Test
     fun `annullere førstegangsbehandling uten utbetaling`() {
-        nyPeriode(1.januar til 20.januar, grad = 19.prosent)
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
+        a1 {
+            nyPeriode(1.januar til 20.januar, 19.prosent)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
 
-        nullstillTilstandsendringer()
+            nullstillTilstandsendringer()
 
-        håndterAnnullerUtbetaling()
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
-        assertEquals(Utbetalingstatus.ANNULLERT, inspektør.utbetaling(1).tilstand)
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+            håndterAnnullering(1.vedtaksperiode)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
+            assertEquals(Utbetalingstatus.ANNULLERT, inspektør.utbetaling(1).tilstand)
+            assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
+        }
     }
 
     @Test
     fun `periode med syk nav strekkes tilbake med foreldrepenger - opphører tidligere utbetaling`() {
-        håndterSøknad(1.februar til 2.februar)
-        håndterInntektsmelding(
-            emptyList(),
-            førsteFraværsdag = 1.februar,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
-        assertVarsler(listOf(Varselkode.RV_AY_5, Varselkode.RV_AY_12, RV_IM_8), 1.vedtaksperiode.filter())
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
+        a1 {
+            håndterSøknad(Sykdom(1.februar, 2.februar, 100.prosent))
+            håndterInntektsmelding(
+                emptyList(),
+                førsteFraværsdag = 1.februar,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
+            assertVarsler(listOf(Varselkode.RV_AY_5, Varselkode.RV_AY_12, RV_IM_8), 1.vedtaksperiode.filter())
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
 
-        håndterOverstyrTidslinje(
-            (januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) } +
-                listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100))
-        )
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
+            håndterOverstyrTidslinje(
+                (januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) } +
+                    listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100))
+            )
+            håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
 
-        val utbetaling = inspektør.utbetaling(0)
-        val revurdering = inspektør.utbetaling(1)
-        assertEquals(utbetaling.korrelasjonsId, revurdering.korrelasjonsId)
-        assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
-        revurdering.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(1.februar til 1.februar, linje.fom til linje.tom)
-            assertEquals(Endringskode.ENDR, linje.endringskode)
-            assertEquals("OPPH", linje.statuskode)
-            assertEquals(1.februar, linje.datoStatusFom)
-            assertEquals(1, linje.delytelseId)
-            Assertions.assertNull(linje.refDelytelseId)
+            val utbetaling = inspektør.utbetaling(0)
+            val revurdering = inspektør.utbetaling(1)
+            assertEquals(utbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+            assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
+            revurdering.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(1.februar til 1.februar, linje.fom til linje.tom)
+                assertEquals(Endringskode.ENDR, linje.endringskode)
+                assertEquals("OPPH", linje.statuskode)
+                assertEquals(1.februar, linje.datoStatusFom)
+                assertEquals(1, linje.delytelseId)
+                Assertions.assertNull(linje.refDelytelseId)
+            }
         }
     }
 
     @Test
     fun `annullerer første periode før andre periode starter i en ikke-sammenhengende utbetaling med mer enn 16 dager gap`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(3.januar til 26.januar)
-        håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        håndterAnnullerUtbetaling()
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(20.februar, 20.mars))
-        håndterSøknad(20.februar til 20.mars)
-        håndterArbeidsgiveropplysninger(
-            listOf(Periode(20.februar, 7.mars)),
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
-        )
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            håndterSykmelding(Sykmeldingsperiode(20.februar, 20.mars))
+            håndterSøknad(Sykdom(20.februar, 20.mars, 100.prosent))
+            håndterArbeidsgiveropplysninger(
+                listOf(20.februar til 7.mars),
+                vedtaksperiodeId = 2.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
 
-        assertEquals(26.januar, observatør.annulleringer[0].tom)
-        assertEquals(20.mars, observatør.utbetalingMedUtbetalingEventer.last().tom)
+            assertEquals(26.januar, observatør.annulleringer[0].tom)
+            assertEquals(20.mars, observatør.utbetalingMedUtbetalingEventer.last().tom)
+        }
     }
 
     @Test
     fun `kan annullere selv om vi har en etterfølgende periode som har gått til infotrygd etter simulering`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(3.januar til 26.januar)
-        håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars))
-        håndterSøknad(3.mars til 26.mars)
-        håndterArbeidsgiveropplysninger(
-            listOf(Periode(3.mars, 18.mars)),
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode
-        )
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
+            håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars))
+            håndterSøknad(Sykdom(3.mars, 26.mars, 100.prosent))
+            håndterArbeidsgiveropplysninger(
+                listOf(3.mars til 18.mars),
+                vedtaksperiodeId = 2.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
 
-        håndterAnnullerUtbetaling()
-        assertEquals(3, inspektør.antallUtbetalinger)
-        assertTrue(inspektør.utbetaling(2).erAnnullering)
+            håndterAnnullering(1.vedtaksperiode)
+            assertEquals(3, inspektør.antallUtbetalinger)
+            assertTrue(inspektør.utbetaling(2).erAnnullering)
+        }
     }
 
     @Test
     fun `kan ikke annullere utbetaling etter sammenhengede periode TIL_UTBETALING`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(3.januar til 26.januar)
-        håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 15.februar))
-        håndterSøknad(27.januar til 15.februar)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterAnnullerUtbetaling(2.vedtaksperiode)
-        assertEquals(2, inspektør.antallUtbetalinger)
-        assertFalse(inspektør.utbetaling(1).erAnnullering)
+            håndterSykmelding(Sykmeldingsperiode(27.januar, 15.februar))
+            håndterSøknad(Sykdom(27.januar, 15.februar, 100.prosent))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterAnnullering(2.vedtaksperiode)
+            assertEquals(2, inspektør.antallUtbetalinger)
+            assertFalse(inspektør.utbetaling(1).erAnnullering)
+        }
     }
 
     @Test
     fun `utbetaling med teknisk feil blir stående i til utbetaling`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(3.januar til 26.januar)
-        håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.FEIL, sendOverførtKvittering = false)
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING
-        )
-        assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt(Oppdragstatus.FEIL)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING
+            )
+            assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
+        }
     }
 
     @Test
     fun `utbetaling med teknisk feil blir stående i til utbetaling og prøver igjen`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(3.januar til 26.januar)
-        håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.FEIL, sendOverførtKvittering = false)
-        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING
-        )
-        assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt(Oppdragstatus.FEIL)
+            håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING
+            )
+            assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
+        }
     }
 
     @Test
     fun `utbetaling med teknisk feil for lenge går til Utbetaling feilet`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(3.januar til 26.januar)
-        håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.FEIL, sendOverførtKvittering = false)
-        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING
-        )
-        assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt(Oppdragstatus.FEIL)
+            håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING
+            )
+            assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
+        }
     }
 
     @Test
     fun `utbetaling som blir avvist går til utbetaling feilet`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(3.januar til 26.januar)
-        håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AVVIST)
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING
-        )
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt(Oppdragstatus.AVVIST)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING
+            )
+        }
     }
 
     @Test
     fun `kan forsøke utbetaling på nytt etter Utbetaling feilet`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(3.januar til 26.januar)
-        håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AVVIST)
-        assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
-        håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
-        assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT, sendOverførtKvittering = false)
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt(Oppdragstatus.AVVIST)
+            assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
+            håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
+            assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+        }
     }
 
     @Test
     fun `utbetaling går videre dersom vi går glipp av Overført-kvittering`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(3.januar til 26.januar)
-        håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT, sendOverførtKvittering = false)
-        assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+        }
     }
 
     @Test
     fun `Kan ikke annullere over en fastlåst annullering`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(3.januar til 26.januar)
-        håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        håndterAnnullerUtbetaling() // Stale
-        håndterAnnullerUtbetaling(opprettet = LocalDateTime.now().plusHours(3))
-        håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterAnnullering(1.vedtaksperiode) // Stale
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
 
-        assertTrue(inspektør.sisteUtbetaling().erAnnullering)
-        assertEquals(1, observatør.annulleringer.size)
-        assertEquals(
-            2,
-            personlogg.behov
-                .filter { it.detaljer()["fagsystemId"] == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
-                .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }
-                .size
-        )
-        assertEquals(2, inspektør.antallUtbetalinger)
+            assertTrue(inspektør.sisteUtbetaling().erAnnullering)
+            assertEquals(1, observatør.annulleringer.size)
+            assertEquals(
+                2,
+                testperson.personlogg.behov
+                    .filter { it.detaljer()["fagsystemId"] == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
+                    .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }
+                    .size
+            )
+            assertEquals(2, inspektør.antallUtbetalinger)
+        }
     }
 
     @Test
     fun `utbetaling med ubetalt periode etterpå inkluderer ikke dager etter perioden`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(3.januar til 26.januar)
-        håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        val utbetalingUtbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
-        assertEquals(3.januar til 26.januar, utbetalingUtbetalingstidslinje.periode())
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            val utbetalingUtbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
+            assertEquals(3.januar til 26.januar, utbetalingUtbetalingstidslinje.periode())
+        }
     }
 
     @Test
     fun `utbetaling_utbetalt tar med begrunnelse på avviste dager`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), Sykmeldingsperiode(21.januar, 30.januar))
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Sykdom(21.januar, 30.januar, 15.prosent))
-        håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt()
-        assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), Sykmeldingsperiode(21.januar, 30.januar))
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Sykdom(21.januar, 30.januar, 15.prosent))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt()
+            assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
 
-        val avvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
-        val ikkeAvvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type != EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+            val avvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+            val ikkeAvvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type != EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
 
-        assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
-        assertEquals(7, avvisteDager.size)
-        assertEquals(23, ikkeAvvisteDager.size)
-        assertTrue(avvisteDager.all { it.begrunnelser == listOf(EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumSykdomsgrad) })
-        assertTrue(ikkeAvvisteDager.all { it.begrunnelser == null })
+            assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
+            assertEquals(7, avvisteDager.size)
+            assertEquals(23, ikkeAvvisteDager.size)
+            assertTrue(avvisteDager.all { it.begrunnelser == listOf(EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumSykdomsgrad) })
+            assertTrue(ikkeAvvisteDager.all { it.begrunnelser == null })
+        }
     }
 }

@@ -254,7 +254,7 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
             }
     }
 
-    fun vedtaksperiodeUtbetalinger(vedtaksperiode: IdInnhenter, orgnummer: String): List<UUID> {
-        return vedtaksperiodeUtbetalinger[orgnummer]?.get(vedtaksperiode.id(orgnummer)) ?: emptyList()
+    fun vedtaksperiodeUtbetalinger(vedtaksperiodeId: UUID, orgnummer: String): List<UUID> {
+        return vedtaksperiodeUtbetalinger[orgnummer]?.get(vedtaksperiodeId) ?: emptyList()
     }
 }
