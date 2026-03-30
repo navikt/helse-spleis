@@ -112,6 +112,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun periode(vedtaksperiodeIdInnhenter: IdInnhenter) = periode(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun periode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.periode
     internal fun vedtaksperiodeSykdomstidslinje(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.sykdomstidslinje
+    internal fun vedtaksperiodeSykdomstidslinje(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.sykdomstidslinje
 
     internal fun periodeErForkastet(vedtaksperiodeIdInnhenter: IdInnhenter) = periodeErForkastet(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun periodeErForkastet(vedtaksperiodeId: UUID) = vedtaksperiodeId in vedtaksperiodeForkastet
