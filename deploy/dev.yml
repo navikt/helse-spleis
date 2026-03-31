@@ -72,6 +72,9 @@ spec:
     - name: JAVA_TOOL_OPTIONS
       value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-dev-7ff9,-logtostderr,-minloglevel=1"
   observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
     logging:
       destinations:
         - id: elastic

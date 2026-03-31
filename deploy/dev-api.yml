@@ -75,6 +75,9 @@ spec:
     - name: SPEED_API_DEV_PROXY_TOKEN_ENDPOINT
       value: http://speed-api-dev-proxy/token
   observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
     logging:
       destinations:
         - id: elastic

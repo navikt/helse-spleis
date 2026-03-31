@@ -74,6 +74,9 @@ spec:
   - name: TOKEN_ENDPOINT_ENV_KEY
     value: AZURE_OPENID_CONFIG_TOKEN_ENDPOINT
   observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
     logging:
       destinations:
         - id: elastic
