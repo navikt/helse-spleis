@@ -147,6 +147,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun vedtaksperioder(periode: Periode) = vedtaksperioder.values.first { it.periode == periode }
 
     internal fun hendelser(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter.id(orgnummer)).inspektør.hendelser
+    internal fun hendelser(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.hendelser
     internal fun hendelseIder(vedtaksperiodeIdInnhenter: IdInnhenter) = hendelseIder(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun hendelseIder(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.hendelseIder.map { it.id }.toSet()
 
