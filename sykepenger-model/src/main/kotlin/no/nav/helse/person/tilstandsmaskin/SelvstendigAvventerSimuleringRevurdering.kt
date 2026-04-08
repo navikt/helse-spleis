@@ -10,11 +10,11 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_SIM
 internal data object SelvstendigAvventerSimuleringRevurdering : Vedtaksperiodetilstand {
     override val type: TilstandType = SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        trengerSimulering(vedtaksperiode, aktivitetslogg)
+        trengerSimulering(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        trengerSimulering(vedtaksperiode, aktivitetslogg)
+        trengerSimulering(vedtaksperiode, eventBus, aktivitetslogg)
         return null
     }
 }

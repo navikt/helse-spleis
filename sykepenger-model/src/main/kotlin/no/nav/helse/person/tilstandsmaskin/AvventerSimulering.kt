@@ -12,17 +12,17 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 internal data object AvventerSimulering : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_SIMULERING
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        trengerSimulering(vedtaksperiode, aktivitetslogg)
+        trengerSimulering(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        trengerSimulering(vedtaksperiode, aktivitetslogg)
+        trengerSimulering(vedtaksperiode, eventBus, aktivitetslogg)
         return null
     }
 }
 
 private const val systemident = "SPLEIS"
-internal fun trengerSimulering(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+internal fun trengerSimulering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
     val utbetaling = checkNotNull(vedtaksperiode.behandlinger.utbetaling)
     val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(utbetaling)
 

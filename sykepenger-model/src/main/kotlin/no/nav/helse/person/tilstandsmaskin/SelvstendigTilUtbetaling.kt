@@ -11,7 +11,7 @@ internal data object SelvstendigTilUtbetaling : Vedtaksperiodetilstand {
     override val type = TilstandType.SELVSTENDIG_TIL_UTBETALING
 
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        trengerUtbetaling(vedtaksperiode, aktivitetslogg)
+        trengerUtbetaling(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
@@ -19,7 +19,7 @@ internal data object SelvstendigTilUtbetaling : Vedtaksperiodetilstand {
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        trengerUtbetaling(vedtaksperiode, aktivitetslogg)
+        trengerUtbetaling(vedtaksperiode, eventBus, aktivitetslogg)
         return null
     }
 }

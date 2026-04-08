@@ -15,7 +15,7 @@ internal data object SelvstendigAvventerRevurderingTilUtbetaling : Vedtaksperiod
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        trengerUtbetaling(vedtaksperiode, aktivitetslogg)
+        trengerUtbetaling(vedtaksperiode, eventBus, aktivitetslogg)
         return null
     }
 }

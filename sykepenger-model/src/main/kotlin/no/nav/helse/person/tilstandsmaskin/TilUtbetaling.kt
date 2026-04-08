@@ -19,7 +19,7 @@ internal data object TilUtbetaling : Vedtaksperiodetilstand {
     override val type = TilstandType.TIL_UTBETALING
 
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        trengerUtbetaling(vedtaksperiode, aktivitetslogg)
+        trengerUtbetaling(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
     override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
@@ -27,18 +27,18 @@ internal data object TilUtbetaling : Vedtaksperiodetilstand {
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        trengerUtbetaling(vedtaksperiode, aktivitetslogg)
+        trengerUtbetaling(vedtaksperiode, eventBus, aktivitetslogg)
         return null
     }
 }
 
-internal fun trengerUtbetaling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, medMaksdato: Boolean = true) {
+internal fun trengerUtbetaling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg, medMaksdato: Boolean = true) {
     val forrigeBehandling = vedtaksperiode.behandlinger.forrigeBehandling
     val aktivitetsloggMedForrigeBehandlingkontekst = aktivitetslogg.kontekst(forrigeBehandling)
-    return overførUtbetaling(aktivitetsloggMedForrigeBehandlingkontekst, forrigeBehandling, forrigeBehandling.maksdato.maksdato.takeIf { medMaksdato })
+    return overførUtbetaling(eventBus, aktivitetsloggMedForrigeBehandlingkontekst, forrigeBehandling, forrigeBehandling.maksdato.maksdato.takeIf { medMaksdato })
 }
 
-private fun overførUtbetaling(aktivitetslogg: IAktivitetslogg, forrigeBehandling: Behandlinger.Behandling, maksdato: LocalDate?) {
+private fun overførUtbetaling(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, forrigeBehandling: Behandlinger.Behandling, maksdato: LocalDate?) {
     val utbetaling = checkNotNull(forrigeBehandling.utbetaling()) { "forventer utbetaling" }
     val saksbehandler = checkNotNull(utbetaling.vurdering) { "forventer vurdering" }.ident
 
