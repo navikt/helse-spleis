@@ -3060,6 +3060,7 @@ internal class Vedtaksperiode private constructor(
         val utbetaling = checkNotNull(behandlinger.utbetaling) { "Forventer å ha en utbetaling når vi skal sende godkjenningsbehov" }
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(utbetaling)
         Aktivitet.Behov.godkjenning(aktivitetsloggMedUtbetalingkontekst, utkastTilVedtakBuilder.buildGodkjenningsbehov())
+        eventBus.trengerGodkjenning(utkastTilVedtakBuilder.buildGodkjenningEvent())
     }
 
     private fun utkastTilVedtakBuilder(behandling: Behandlinger.Behandling? = null): UtkastTilVedtakBuilder {

@@ -80,6 +80,7 @@ internal class PersonMediator(
                     is EventSubscription.UtbetalFeriepengerEvent -> mapUtbetalFeriepenger(event) // ✅ Er arbeidstaker-spesifikk
                     is EventSubscription.SimuleringEvent -> mapSimulering(event)
                     is EventSubscription.UtbetalingEvent -> mapUtbetaling(event)
+                    is EventSubscription.GodkjenningEvent -> mapGodkjenning(event)
                 }
             }
             .mapNotNull { jsonMessage -> mapTilPakke(jsonMessage) }
@@ -805,6 +806,17 @@ internal class PersonMediator(
             "behandlingId" to event.behandlingId,
             "utbetalingId" to event.utbetalingId,
             "fagsystemId" to event.oppdragsdetaljer.fagsystemId
+        ))
+    }
+
+    private fun mapGodkjenning(event: EventSubscription.GodkjenningEvent): JsonMessage {
+        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
+        return listOf(Behov(Behov.Behovstype.Godkjenning, event.behovInput)).somJsonMessage(message.meldingsporing.id,mapOf(
+            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "behandlingId" to event.behandlingId,
+            "utbetalingId" to event.utbetalingId
         ))
     }
 

@@ -268,4 +268,9 @@ class EventBus {
         _events.add(event)
         observers.forEach { it.simuler(event) }
     }
+
+    internal fun trengerGodkjenning(event: EventSubscription.GodkjenningEvent) {
+        _events.add(event)
+        observers.forEach { it.trengerGodkjenning(event) }
+    }
 }

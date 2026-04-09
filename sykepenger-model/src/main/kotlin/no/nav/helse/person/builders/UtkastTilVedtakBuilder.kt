@@ -10,8 +10,7 @@ import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO
+import no.nav.helse.person.EventSubscription.GodkjenningEvent.Companion.tilBehovMap
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterHovedregel
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterSkjønn
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattIInfotrygd
@@ -39,7 +38,7 @@ internal class UtkastTilVedtakBuilder(
     private var forbrukteSykedager by Delegates.notNull<Int>()
     private var gjenståendeSykedager by Delegates.notNull<Int>()
     private lateinit var foreløpigBeregnetSluttPåSykepenger: LocalDate
-    private lateinit var utbetalingsdager: List<Map<String, Any>>
+    private lateinit var utbetalingsdager: List<EventSubscription.Utbetalingsdag>
     private val tags = mutableSetOf<Tag>()
     private val pensjonsgivendeInntekter = mutableListOf<SelvstendigFaktaavklartInntekt.PensjonsgivendeInntekt>()
 
@@ -139,9 +138,7 @@ internal class UtkastTilVedtakBuilder(
         this.refusjonstidslinje(refusjonstidslinje)
 
         tags.add(utbetalingstidslinje.behandlingsresultat)
-        this.utbetalingsdager = UtbetalingsdagerBuilder(sykdomstidslinje)
-            .result(utbetalingstidslinje)
-            .map { dag -> dag.tilBehovMap() }
+        this.utbetalingsdager = UtbetalingsdagerBuilder(sykdomstidslinje).result(utbetalingstidslinje)
     }
 
     private val Utbetalingstidslinje.behandlingsresultat
@@ -189,6 +186,7 @@ internal class UtkastTilVedtakBuilder(
 
     private val build by lazy { Build() }
     internal fun buildGodkjenningsbehov() = build.godkjenningsbehov
+    internal fun buildGodkjenningEvent() = build.godkjenningEvent
     internal fun buildUtkastTilVedtak() = build.utkastTilVedtak
     internal fun buildAvsluttedMedVedtak() = build.avsluttetMedVedtak(vedtakFattet!!)
     private inner class Build {
@@ -236,6 +234,7 @@ internal class UtkastTilVedtakBuilder(
 
         private val periodetypeForGodkjenningsbehov = sykepengegrunnlagsfakta.periodetypeForGodkjenningsbehov(tags)
 
+        // TODO: Bruk godkjenningEvent.behovInput. Bare logge litt for å se at de er helt like først.
         val godkjenningsbehov = mapOf(
             "periodeFom" to "${periode.start}",
             "periodeTom" to "${periode.endInclusive}",
@@ -262,7 +261,7 @@ internal class UtkastTilVedtakBuilder(
             "forbrukteSykedager" to forbrukteSykedager,
             "gjenståendeSykedager" to gjenståendeSykedager,
             "foreløpigBeregnetSluttPåSykepenger" to "$foreløpigBeregnetSluttPåSykepenger",
-            "utbetalingsdager" to utbetalingsdager,
+            "utbetalingsdager" to utbetalingsdager.map { dag -> dag.tilBehovMap() },
             "sykepengegrunnlagsfakta" to mapOf(
                 "sykepengegrunnlag" to sykepengegrunnlag,
                 "6G" to seksG,
@@ -284,6 +283,84 @@ internal class UtkastTilVedtakBuilder(
                 }
             ),
             "arbeidssituasjon" to arbeidssituasjon
+        )
+
+        val godkjenningEvent = EventSubscription.GodkjenningEvent(
+            yrkesaktivitetssporing = yrkesaktivitetssporing,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            periode = periode,
+            skjæringstidspunkt = skjæringstidspunkt,
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            periodetype = periodetypeForGodkjenningsbehov,
+            førstegangsbehandling = tags.contains(Tag.Førstegangsbehandling),
+            utbetalingtype = if (tags.contains(Tag.Revurdering)) "REVURDERING" else "UTBETALING",
+            inntektskilde = if (tags.contains(Tag.EnArbeidsgiver)) "EN_ARBEIDSGIVER" else "FLERE_ARBEIDSGIVERE",
+            // Til ettertanke: Her kan det være orgnummer på tilkomnde arbeidsgivere i tillegg til de som er i "sykepengegrunnlagsfakta". Kanskje finne på noe smartere der?
+            orgnummereMedRelevanteArbeidsforhold = (arbeidsgiverinntekter.map { it.arbeidsgiver }).toSet(),
+            tags = tags.utgående,
+            kanAvvises = kanForkastes,
+            relevanteSøknader = relevanteSøknader,
+            perioderMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt.map {
+                EventSubscription.GodkjenningEvent.PeriodeMedSammeSkjæringstidspunkt(
+                    vedtaksperiodeId = it.vedtaksperiodeId,
+                    behandlingId = it.behandlingId,
+                    periode = it.periode
+                )
+            },
+            forbrukteSykedager = forbrukteSykedager,
+            gjenståendeSykedager = gjenståendeSykedager,
+            foreløpigBeregnetSluttPåSykepenger = foreløpigBeregnetSluttPåSykepenger,
+            utbetalingsdager = utbetalingsdager,
+            arbeidssituasjon = arbeidssituasjon.name,
+            sykepengegrunnlagsfakta = when (yrkesaktivitetssporing) {
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> when (sykepengegrunnlagsfakta) {
+                    is FastsattEtterHovedregel -> EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel(
+                        sykepengegrunnlag = sykepengegrunnlag,
+                        seksG = seksG,
+                        arbeidsgivere = sykepengegrunnlagsfakta.arbeidsgivere.map {
+                            EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel.Arbeidsgiver(
+                                arbeidsgiver = it.arbeidsgiver,
+                                omregnetÅrsinntekt = it.omregnetÅrsinntekt,
+                                inntektskilde = it.inntektskilde.name
+                            )
+                        }
+                    )
+
+                    is FastsattEtterSkjønn -> EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn(
+                        sykepengegrunnlag = sykepengegrunnlag,
+                        seksG = seksG,
+                        arbeidsgivere = sykepengegrunnlagsfakta.arbeidsgivere.map {
+                            EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn.Arbeidsgiver(
+                                arbeidsgiver = it.arbeidsgiver,
+                                omregnetÅrsinntekt = it.omregnetÅrsinntekt,
+                                skjønnsfastsatt = it.skjønnsfastsatt,
+                            )
+                        }
+                    )
+
+                    is FastsattIInfotrygd -> EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerFraInfotrygd(
+                        sykepengegrunnlag = sykepengegrunnlag,
+                        seksG = seksG
+                    )
+                }
+
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel(
+                    sykepengegrunnlag = sykepengegrunnlag,
+                    seksG = seksG,
+                    pensjonsgivendeInntekter = pensjonsgivendeInntekter.map {
+                        EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel.PensjonsgivendeInntekt(
+                            årstall = it.årstall,
+                            beløp = it.beløp.årlig.toDesimaler
+                        )
+                    },
+                    beregningsgrunnlag = beregningsgrunnlag.årlig.toDesimaler
+                )
+
+                Behandlingsporing.Yrkesaktivitet.Frilans -> error("Har ikke implementert sykepengegrunnlag for frilansere ennå.")
+            }
         )
 
         private fun arbeidstakerEtterSkjønnMap(sykepengegrunnlagsfakta: FastsattEtterSkjønn): Map<String, Any> = mapOf(
@@ -409,48 +486,3 @@ internal class UtkastTilVedtakBuilder(
         }
     }
 }
-
-private fun EventSubscription.Utbetalingsdag.tilBehovMap() =
-    mapOf(
-        "dato" to "${this.dato}",
-        "type" to when (this.type) {
-            Dagtype.ArbeidsgiverperiodeDag -> "ArbeidsgiverperiodeDag"
-            Dagtype.NavDag -> "NavDag"
-            Dagtype.NavHelgDag -> "NavHelgDag"
-            Dagtype.Arbeidsdag -> "Arbeidsdag"
-            Dagtype.Fridag -> "Fridag"
-            Dagtype.AvvistDag -> "AvvistDag"
-            Dagtype.UkjentDag -> "UkjentDag"
-            Dagtype.ForeldetDag -> "ForeldetDag"
-            Dagtype.Permisjonsdag -> "Permisjonsdag"
-            Dagtype.Feriedag -> "Feriedag"
-            Dagtype.ArbeidIkkeGjenopptattDag -> "ArbeidIkkeGjenopptattDag"
-            Dagtype.AndreYtelser -> "AndreYtelser"
-            Dagtype.Ventetidsdag -> "Ventetidsdag"
-        },
-        "beløpTilArbeidsgiver" to this.beløpTilArbeidsgiver,
-        "beløpTilBruker" to this.beløpTilBruker,
-        "sykdomsgrad" to this.sykdomsgrad,
-        "dekningsgrad" to this.dekningsgrad,
-        "begrunnelser" to (this.begrunnelser?.map {
-            when (it) {
-                EksternBegrunnelseDTO.SykepengedagerOppbrukt -> "SykepengedagerOppbrukt"
-                EksternBegrunnelseDTO.SykepengedagerOppbruktOver67 -> "SykepengedagerOppbruktOver67"
-                EksternBegrunnelseDTO.MinimumInntekt -> "MinimumInntekt"
-                EksternBegrunnelseDTO.MinimumInntektOver67 -> "MinimumInntektOver67"
-                EksternBegrunnelseDTO.EgenmeldingUtenforArbeidsgiverperiode -> "EgenmeldingUtenforArbeidsgiverperiode"
-                EksternBegrunnelseDTO.AndreYtelserAap -> "AndreYtelserAap"
-                EksternBegrunnelseDTO.AndreYtelserDagpenger -> "AndreYtelserDagpenger"
-                EksternBegrunnelseDTO.AndreYtelserForeldrepenger -> "AndreYtelserForeldrepenger"
-                EksternBegrunnelseDTO.AndreYtelserOmsorgspenger -> "AndreYtelserOmsorgspenger"
-                EksternBegrunnelseDTO.AndreYtelserOpplaringspenger -> "AndreYtelserOpplaringspenger"
-                EksternBegrunnelseDTO.AndreYtelserPleiepenger -> "AndreYtelserPleiepenger"
-                EksternBegrunnelseDTO.AndreYtelserSvangerskapspenger -> "AndreYtelserSvangerskapspenger"
-                EksternBegrunnelseDTO.MinimumSykdomsgrad -> "MinimumSykdomsgrad"
-                EksternBegrunnelseDTO.EtterDødsdato -> "EtterDødsdato"
-                EksternBegrunnelseDTO.ManglerMedlemskap -> "ManglerMedlemskap"
-                EksternBegrunnelseDTO.ManglerOpptjening -> "ManglerOpptjening"
-                EksternBegrunnelseDTO.Over70 -> "Over70"
-            }
-        } ?: emptyList())
-    )
