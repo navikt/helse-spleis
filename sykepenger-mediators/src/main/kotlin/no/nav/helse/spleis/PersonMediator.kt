@@ -78,6 +78,8 @@ internal class PersonMediator(
                     is EventSubscription.TrengerInformasjonTilBeregningEvent -> mapTrengerInformasjonTilBeregning(event)
                     is EventSubscription.TrengerHistorikkFraInfotrygdEvent -> mapTrengerHistorikkFraInfotrygd(event) // ✅ Meldingen er på person-nivå, så den er grei
                     is EventSubscription.UtbetalFeriepengerEvent -> mapUtbetalFeriepenger(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.SimuleringEvent -> mapSimulering(event)
+                    is EventSubscription.UtbetalingEvent -> mapUtbetaling(event)
                 }
             }
             .mapNotNull { jsonMessage -> mapTilPakke(jsonMessage) }
@@ -94,6 +96,7 @@ internal class PersonMediator(
         }.toJson()
         val eventName = jsonMessage["@event_name"].asText()
         if (eventName == "behov") {
+            // TODO: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
             sikkerLogg.info("Her hadde vi sendt behov i 'ny løype' og hen hadde sett slik ut:\n\t$outgoingMessage")
             behovslytter.behovsmeldingFraEventBus(outgoingMessage)
             return null
@@ -661,8 +664,7 @@ internal class PersonMediator(
             ))
         )
 
-        // TODO 1: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
-        // TODO 2: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
+        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
         return behov.somJsonMessage(message.meldingsporing.id,mapOf(
             "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
             "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
@@ -710,8 +712,7 @@ internal class PersonMediator(
             )).takeIf { event.trengerInformasjonOmSelvstendigForsikring }
         )
 
-        // TODO 1: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
-        // TODO 2: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
+        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
         return behov.somJsonMessage(message.meldingsporing.id,mapOf(
             "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
             "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
@@ -721,7 +722,6 @@ internal class PersonMediator(
     }
 
     private fun mapTrengerHistorikkFraInfotrygd(event: EventSubscription.TrengerHistorikkFraInfotrygdEvent): JsonMessage {
-        // TODO 2: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
         return listOf(Behov(Behov.Behovstype.Sykepengehistorikk, mapOf(
             "historikkFom" to event.periode.start,
             "historikkTom" to event.periode.endInclusive
@@ -729,7 +729,6 @@ internal class PersonMediator(
     }
 
     private fun mapUtbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent): JsonMessage {
-        // TODO 2: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
         return listOf(Behov(Behov.Behovstype.Feriepengeutbetaling, mapOf(
             "mottaker" to event.mottaker,
             "fagområde" to event.fagområde,
@@ -754,6 +753,58 @@ internal class PersonMediator(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "utbetalingId" to event.utbetalingId,
             "fagsystemId" to event.fagsystemId
+        ))
+    }
+
+    private fun EventSubscription.Oppdragsdetaljer.somMap(saksbehandler: String): Map<String, Any> = mapOf(
+        "mottaker" to mottaker,
+        "fagområde" to fagområde,
+        "linjer" to linjer.map { linje -> mapOf(
+            "fom" to linje.periode.start,
+            "tom" to linje.periode.endInclusive,
+            "satstype" to linje.satstype,
+            "sats" to linje.sats,
+            "grad" to linje.grad.toDouble(), // backwards-compatibility mot andre systemer som forventer double: må gjennomgås
+            "stønadsdager" to linje.stønadsdager,
+            "totalbeløp" to linje.totalbeløp,
+            "endringskode" to linje.endringskode,
+            "delytelseId" to linje.delytelseId,
+            "refDelytelseId" to linje.refDelytelseId,
+            "refFagsystemId" to linje.refFagsystemId,
+            "statuskode" to linje.statuskode,
+            "datoStatusFom" to linje.datoStatusFom,
+            "klassekode" to linje.klassekode,
+            "datoKlassifikFom" to linje.datoKlassifikFom
+        ) },
+        "fagsystemId" to fagsystemId,
+        "endringskode" to endringskode,
+        "saksbehandler" to saksbehandler
+    ).let { when (val maksdatoen = maksdato) {
+        null -> it
+        else -> it.plus("maksdato" to maksdatoen)
+    } }
+
+    private fun mapUtbetaling(event: EventSubscription.UtbetalingEvent): JsonMessage {
+        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
+        return listOf(Behov(Behov.Behovstype.Utbetaling, event.oppdragsdetaljer.somMap(event.saksbehandler))).somJsonMessage(message.meldingsporing.id,mapOf(
+            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "behandlingId" to event.behandlingId,
+            "utbetalingId" to event.utbetalingId,
+            "fagsystemId" to event.oppdragsdetaljer.fagsystemId
+        ))
+    }
+
+    private fun mapSimulering(event: EventSubscription.SimuleringEvent): JsonMessage {
+        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
+        return listOf(Behov(Behov.Behovstype.Simulering, event.oppdragsdetaljer.somMap(event.saksbehandler))).somJsonMessage(message.meldingsporing.id,mapOf(
+            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "behandlingId" to event.behandlingId,
+            "utbetalingId" to event.utbetalingId,
+            "fagsystemId" to event.oppdragsdetaljer.fagsystemId
         ))
     }
 

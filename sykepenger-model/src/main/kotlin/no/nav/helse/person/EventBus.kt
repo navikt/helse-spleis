@@ -256,4 +256,16 @@ class EventBus {
         _events.add(event)
         observers.forEach { it.utbetalFeriepenger(event) }
     }
+
+    internal fun utbetal(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, vedtaksperiodeId: UUID, behandlingId: UUID, utbetalingId: UUID, oppdragsdetaljer: EventSubscription.Oppdragsdetaljer, saksbehandler: String) {
+        val event = EventSubscription.UtbetalingEvent(yrkesaktivitetssporing, vedtaksperiodeId, behandlingId, utbetalingId, oppdragsdetaljer, saksbehandler)
+        _events.add(event)
+        observers.forEach { it.utbetal(event) }
+    }
+
+    internal fun simuler(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, vedtaksperiodeId: UUID, behandlingId: UUID, utbetalingId: UUID, oppdragsdetaljer: EventSubscription.Oppdragsdetaljer) {
+        val event = EventSubscription.SimuleringEvent(yrkesaktivitetssporing,vedtaksperiodeId, behandlingId, utbetalingId, oppdragsdetaljer)
+        _events.add(event)
+        observers.forEach { it.simuler(event) }
+    }
 }

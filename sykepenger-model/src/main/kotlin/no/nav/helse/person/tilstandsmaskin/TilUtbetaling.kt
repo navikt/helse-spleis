@@ -1,11 +1,15 @@
 package no.nav.helse.person.tilstandsmaskin
 
 import java.time.LocalDate
+import java.util.UUID
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.EventBus
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -33,12 +37,28 @@ internal data object TilUtbetaling : Vedtaksperiodetilstand {
 }
 
 internal fun trengerUtbetaling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg, medMaksdato: Boolean = true) {
+    // Når du står i TilUtbetaling så anses behandlingen som lukket siden vedtaket er fattet (dog ikke avsluttet!)
+    // Derfor er det her __forrigeBehandling__, ikke den åpne behandlignen.
     val forrigeBehandling = vedtaksperiode.behandlinger.forrigeBehandling
-    val aktivitetsloggMedForrigeBehandlingkontekst = aktivitetslogg.kontekst(forrigeBehandling)
-    return overførUtbetaling(eventBus, aktivitetsloggMedForrigeBehandlingkontekst, forrigeBehandling, forrigeBehandling.maksdato.maksdato.takeIf { medMaksdato })
+
+    return trengerUtbetaling(
+        aktivitetslogg = aktivitetslogg.kontekst(forrigeBehandling),
+        eventBus = eventBus,
+        maksdato = forrigeBehandling.maksdato.maksdato.takeIf { medMaksdato },
+        vedtaksperiodeId = vedtaksperiode.id,
+        forrigeBehandling = forrigeBehandling,
+        yrkesaktivitetssporing = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype
+    )
 }
 
-private fun overførUtbetaling(eventBus: EventBus, aktivitetslogg: IAktivitetslogg, forrigeBehandling: Behandlinger.Behandling, maksdato: LocalDate?) {
+private fun trengerUtbetaling(
+    aktivitetslogg: IAktivitetslogg,
+    eventBus: EventBus,
+    maksdato: LocalDate?,
+    vedtaksperiodeId: UUID,
+    forrigeBehandling: Behandlinger.Behandling,
+    yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
+) {
     val utbetaling = checkNotNull(forrigeBehandling.utbetaling()) { "forventer utbetaling" }
     val saksbehandler = checkNotNull(utbetaling.vurdering) { "forventer vurdering" }.ident
 
@@ -46,6 +66,24 @@ private fun overførUtbetaling(eventBus: EventBus, aktivitetslogg: IAktivitetslo
 
     utbetalingsbehov(aktivitetsloggMedUtbetalingkontekst, utbetaling.arbeidsgiverOppdrag, saksbehandler, maksdato)
     utbetalingsbehov(aktivitetsloggMedUtbetalingkontekst, utbetaling.personOppdrag, saksbehandler, maksdato)
+
+    oppdragsdetaljer(utbetaling.arbeidsgiverOppdrag, maksdato)?.let { eventBus.utbetal(
+        yrkesaktivitetssporing = yrkesaktivitetssporing,
+        vedtaksperiodeId = vedtaksperiodeId,
+        behandlingId = forrigeBehandling.id,
+        utbetalingId = utbetaling.id,
+        oppdragsdetaljer = it,
+        saksbehandler = saksbehandler
+    )}
+
+    oppdragsdetaljer(utbetaling.personOppdrag, maksdato)?.let { eventBus.utbetal(
+        yrkesaktivitetssporing = yrkesaktivitetssporing,
+        vedtaksperiodeId = vedtaksperiodeId,
+        behandlingId = forrigeBehandling.id,
+        utbetalingId = utbetaling.id,
+        oppdragsdetaljer = it,
+        saksbehandler = saksbehandler
+    )}
 }
 
 private fun utbetalingsbehov(aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag, saksbehandler: String, maksdato: LocalDate?) {
@@ -88,6 +126,32 @@ internal fun utbetalingsbehovdetaljer(oppdrag: Oppdrag, saksbehandler: String, m
     }
 }
 
+internal fun oppdragsdetaljer(oppdrag: Oppdrag, maksdato: LocalDate?): EventSubscription.Oppdragsdetaljer? {
+    when (oppdrag.endringskode) {
+        Endringskode.UEND -> return null
+        Endringskode.NY,
+        Endringskode.ENDR -> when (oppdrag.status) {
+            Oppdragstatus.AKSEPTERT,
+            Oppdragstatus.AKSEPTERT_MED_FEIL,
+            Oppdragstatus.FEIL -> return null
+
+            Oppdragstatus.AVVIST,
+            Oppdragstatus.OVERFØRT,
+            null -> {
+                val linjerMedEndring = oppdrag.linjerMedEndring().takeIf { it.isNotEmpty() } ?: return null
+                return EventSubscription.Oppdragsdetaljer(
+                    mottaker = oppdrag.mottaker,
+                    fagområde = oppdrag.fagområde.verdi,
+                    linjer = linjerMedEndring.map(Utbetalingslinje::oppdragsdetaljerLinje),
+                    fagsystemId = oppdrag.fagsystemId,
+                    endringskode = oppdrag.endringskode.toString(),
+                    maksdato = maksdato
+                )
+            }
+        }
+    }
+}
+
 private fun Utbetalingslinje.behovdetaljer() = mapOf<String, Any?>(
     "fom" to fom.toString(),
     "tom" to tom.toString(),
@@ -104,4 +168,19 @@ private fun Utbetalingslinje.behovdetaljer() = mapOf<String, Any?>(
     "datoStatusFom" to datoStatusFom?.toString(),
     "klassekode" to klassekode.verdi,
     "datoKlassifikFom" to fom.toString(),
+)
+
+private fun Utbetalingslinje.oppdragsdetaljerLinje() = EventSubscription.Oppdragsdetaljer.Linje(
+    periode = fom til tom,
+    sats = beløp,
+    grad = grad,
+    stønadsdager = stønadsdager(),
+    totalbeløp = totalbeløp(),
+    endringskode = endringskode.toString(),
+    delytelseId = delytelseId,
+    refDelytelseId = refDelytelseId,
+    refFagsystemId = refFagsystemId,
+    statuskode = statuskode,
+    datoStatusFom = datoStatusFom,
+    klassekode = klassekode.verdi
 )

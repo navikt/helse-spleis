@@ -673,6 +673,52 @@ interface EventSubscription {
         }
     }
 
+    data class Oppdragsdetaljer(
+        val mottaker: String,
+        val fagområde: String,
+        val linjer: List<Linje>,
+        val fagsystemId: String,
+        val endringskode: String,
+        val maksdato: LocalDate?
+    ) {
+        data class Linje(
+            val periode: Periode,
+            val sats: Int,
+            val grad: Int,
+            val stønadsdager: Int,
+            val totalbeløp: Int,
+            val endringskode: String,
+            val delytelseId: Int,
+            val refDelytelseId: Int?,
+            val refFagsystemId: String?,
+            val statuskode: String?,
+            val datoStatusFom: LocalDate?,
+            val klassekode: String,
+        ) {
+            val satstype = "DAG"
+            val datoKlassifikFom = periode.start
+        }
+    }
+
+    data class UtbetalingEvent(
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
+        val utbetalingId: UUID,
+        val oppdragsdetaljer: Oppdragsdetaljer,
+        val saksbehandler: String,
+    ): Event
+
+    data class SimuleringEvent(
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
+        val utbetalingId: UUID,
+        val oppdragsdetaljer: Oppdragsdetaljer
+    ): Event {
+        val saksbehandler = "SPLEIS"
+    }
+
     fun inntektsmeldingReplay(event: TrengerInntektsmeldingReplayEvent) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(event: VedtaksperiodePåminnetEvent) {}
@@ -715,4 +761,6 @@ interface EventSubscription {
     fun trengerInformasjonTilBeregning(event: TrengerInformasjonTilBeregningEvent) {}
     fun trengerHistorikkFraInfotrygd(event: TrengerHistorikkFraInfotrygdEvent) {}
     fun utbetalFeriepenger(event: UtbetalFeriepengerEvent) {}
+    fun utbetal(event: UtbetalingEvent) {}
+    fun simuler(event: SimuleringEvent) {}
 }

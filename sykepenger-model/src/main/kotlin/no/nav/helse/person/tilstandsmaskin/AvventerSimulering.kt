@@ -28,6 +28,22 @@ internal fun trengerSimulering(vedtaksperiode: Vedtaksperiode, eventBus: EventBu
 
     simuleringsbehov(aktivitetsloggMedUtbetalingkontekst, utbetaling.arbeidsgiverOppdrag, vedtaksperiode.behandlinger.maksdato.maksdato)
     simuleringsbehov(aktivitetsloggMedUtbetalingkontekst, utbetaling.personOppdrag, vedtaksperiode.behandlinger.maksdato.maksdato)
+
+    oppdragsdetaljer(utbetaling.arbeidsgiverOppdrag, vedtaksperiode.behandlinger.maksdato.maksdato)?.let { eventBus.simuler(
+        yrkesaktivitetssporing = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype,
+        vedtaksperiodeId = vedtaksperiode.id,
+        behandlingId = vedtaksperiode.behandlinger.sisteBehandlingId,
+        utbetalingId = utbetaling.id,
+        oppdragsdetaljer = it
+    )}
+
+    oppdragsdetaljer(utbetaling.personOppdrag, vedtaksperiode.behandlinger.maksdato.maksdato)?.let { eventBus.simuler(
+        yrkesaktivitetssporing = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype,
+        vedtaksperiodeId = vedtaksperiode.id,
+        behandlingId = vedtaksperiode.behandlinger.sisteBehandlingId,
+        utbetalingId = utbetaling.id,
+        oppdragsdetaljer = it
+    )}
 }
 
 private fun simuleringsbehov(aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag, maksdato: LocalDate) {
