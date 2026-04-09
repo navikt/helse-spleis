@@ -74,16 +74,17 @@ internal class EnBehovslytterSomSerOmBehovErLike() : Behovslytter {
                     json.remove(setOf("organisasjonsnummer", "yrkesaktivitetstype", "vedtaksperiodeId", "behandlingId"))
                 }
 
-                // For utbetalinger så kan det sendes flere like behov, men forskjellig fagområder (vanlig utbetaling) og/eller flere utbetalinger på samme fagområde med forskjellige mottakere (feriepenger)
+                // For utbetaling/simulering så kan det sendes flere like behov, men forskjellig fagområder.
+                // For Feriepengeutbetaling kan det i tillegg være fler mottakere på samme fagområde.
                 val identifikator = etterspurteBehov + setOfNotNull(json.fagområdeOrNull(), json.mottakerOrNull())
                 return UtgåendeBehovsmelding(identifikator, json)
             }
 
-            private fun JsonNode.mottakerOrNull() =
-                (path("Utbetaling").path("mottaker").takeUnless { it.isMissingOrNull() } ?: path("Feriepengeutbetaling").path("mottaker").takeUnless { it.isMissingOrNull() })?.asText()
+            private fun JsonNode.mottakerOrNull() = path("Feriepengeutbetaling").path("mottaker").takeUnless { it.isMissingOrNull() }?.asText()
 
-            private fun JsonNode.fagområdeOrNull() =
-                (path("Utbetaling").path("fagområde").takeUnless { it.isMissingOrNull() } ?: path("Feriepengeutbetaling").path("fagområde").takeUnless { it.isMissingOrNull() })?.asText()
+            private fun JsonNode.fagområdeOrNull() = setOf("Utbetaling", "Feriepengeutbetaling", "Simulering").firstNotNullOfOrNull { behov ->
+                path(behov).path("fagområde").takeUnless { it.isMissingOrNull() }?.asText()
+            }
         }
     }
     private companion object {
