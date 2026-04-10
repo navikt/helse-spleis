@@ -2,6 +2,7 @@ package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import no.nav.helse.Toggle
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -23,8 +24,9 @@ internal class BehovMediator(private val sikkerLogg: Logger): Behovslytter by En
                 val meldingMap = kontekstMap + behovMap
                 val behovmelding = JsonMessage.newNeed(behovMap.keys, meldingMap).toJson()
                 behovsmeldingFraAktivitetslogg(behovmelding)
+                if (Toggle.BehovFraEventBus.enabled) return
 
-                sikkerLogg.info("sender behov for {}:\n{}", behovMap.keys, behovmelding)
+                sikkerLogg.info("sender behov fra aktivitetslogg for {}:\n{}", behovMap.keys, behovmelding)
                 context.publish(message.meldingsporing.fødselsnummer, behovmelding)
             }
     }

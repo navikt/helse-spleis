@@ -7,6 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.KollektivJordbruksforsikring
 import no.nav.helse.hendelser.SelvstendigForsikring
@@ -97,10 +98,20 @@ internal class PersonMediator(
         }.toJson()
         val eventName = jsonMessage["@event_name"].asText()
         if (eventName == "behov") {
-            // TODO: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
-            sikkerLogg.info("Her hadde vi sendt behov i 'ny løype' og hen hadde sett slik ut:\n\t$outgoingMessage")
             behovslytter.behovsmeldingFraEventBus(outgoingMessage)
-            return null
+
+            when (Toggle.BehovFraEventBus.enabled) {
+                true -> {
+                    jsonMessage.requireKey("@behov")
+                    val behov = jsonMessage["@behov"].map { it.asText() }
+                    // TODO: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
+                    sikkerLogg.info("sender behov fra eventbus for {}:\n{}", behov, outgoingMessage)
+                }
+                false -> {
+                    sikkerLogg.info("Her hadde vi sendt behov fra eventbus, og hen hadde sett slik ut:\n\t$outgoingMessage")
+                    return null
+                }
+            }
         }
         return Pakke(message.meldingsporing.fødselsnummer, eventName, outgoingMessage)
     }
