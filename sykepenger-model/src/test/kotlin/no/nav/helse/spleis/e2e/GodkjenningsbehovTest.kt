@@ -426,5 +426,5 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             vedtaksperiodeId = vedtaksperiode,
             behov = Aktivitet.Behov.Behovtype.Godkjenning,
             felt = "sykepengegrunnlagsfakta"
-        )!!["arbeidsgivere"]!!.map { it["inntektskilde"] }
+        )!!["arbeidsgivere"]!!.map { it["inntektskilde"]?.toString() }.mapNotNull { it }.map { Inntektskilde.valueOf(it) }
 }

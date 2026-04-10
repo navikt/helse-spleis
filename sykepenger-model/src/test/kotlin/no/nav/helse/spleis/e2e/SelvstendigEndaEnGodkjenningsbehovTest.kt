@@ -370,7 +370,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
         val actualGjenståendeSykedager = hentFelt<Int>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "gjenståendeSykedager")!!
         val actualForeløpigBeregnetSluttPåSykepenger = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "foreløpigBeregnetSluttPåSykepenger")!!
         val actualUtbetalingsdager = hentFelt<List<Map<String, Any>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "utbetalingsdager")!!
-        val actualArbeidssituasjon = hentFelt<Arbeidssituasjon>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "arbeidssituasjon")!!
+        val actualArbeidssituasjon = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "arbeidssituasjon")!!.let { Arbeidssituasjon.valueOf(it) }
 
         hendelser?.let { assertHendelser(it, vedtaksperiodeId) }
         assertSykepengegrunnlagsfakta(vedtaksperiodeId, sykepengegrunnlagsfakta)

@@ -604,7 +604,7 @@ interface EventSubscription {
             "tags" to tags,
             "kanAvvises" to kanAvvises,
             "behandlingId" to "$behandlingId",
-            "relevanteSøknader" to relevanteSøknader.map(UUID::toString),
+            "relevanteSøknader" to relevanteSøknader,
             "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt.map {
                 mapOf(
                     "vedtaksperiodeId" to "${it.vedtaksperiodeId}",
@@ -619,6 +619,8 @@ interface EventSubscription {
             "utbetalingsdager" to utbetalingsdager.map { it.tilBehovMap() },
             "sykepengegrunnlagsfakta" to when (sykepengegrunnlagsfakta) {
                 is Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel -> mapOf(
+                    "sykepengegrunnlag" to sykepengegrunnlagsfakta.sykepengegrunnlag,
+                    "6G" to sykepengegrunnlagsfakta.seksG,
                     "fastsatt" to "EtterHovedregel",
                     "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
                         mapOf(
@@ -630,22 +632,28 @@ interface EventSubscription {
                     "selvstendig" to null
                 )
                 is Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn -> mapOf(
+                    "sykepengegrunnlag" to sykepengegrunnlagsfakta.sykepengegrunnlag,
+                    "6G" to sykepengegrunnlagsfakta.seksG,
                     "fastsatt" to "EtterSkjønn",
                     "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
                         mapOf(
                             "arbeidsgiver" to it.arbeidsgiver,
                             "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
                             "skjønnsfastsatt" to it.skjønnsfastsatt,
-                            "inntektskilde" to UtkastTilVedtakEvent.Inntektskilde.Saksbehandler,
+                            "inntektskilde" to "Saksbehandler",
                         )
                     },
                     "selvstendig" to null
                 )
                 is Sykepengegrunnlagsfakta.ArbeidstakerFraInfotrygd -> mapOf(
+                    "sykepengegrunnlag" to sykepengegrunnlagsfakta.sykepengegrunnlag,
+                    "6G" to sykepengegrunnlagsfakta.seksG,
                     "fastsatt" to "IInfotrygd",
                     "selvstendig" to null
                 )
                 is Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel -> mapOf(
+                    "sykepengegrunnlag" to sykepengegrunnlagsfakta.sykepengegrunnlag,
+                    "6G" to sykepengegrunnlagsfakta.seksG,
                     "fastsatt" to "EtterHovedregel",
                     "selvstendig" to mapOf(
                         "pensjonsgivendeInntekter" to sykepengegrunnlagsfakta.pensjonsgivendeInntekter.map {
@@ -658,10 +666,7 @@ interface EventSubscription {
                     ),
                     "arbeidsgivere" to emptyList<Map<String, Any>>(), // Selvstendig har ingen arbeidsgivere i sykepengegrunnlaget
                 )
-            }.plus(mapOf(
-                "sykepengegrunnlag" to sykepengegrunnlagsfakta.sykepengegrunnlag,
-                "6G" to sykepengegrunnlagsfakta.seksG,
-            )),
+            },
             "arbeidssituasjon" to arbeidssituasjon
         )
 

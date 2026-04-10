@@ -33,7 +33,6 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
-import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -251,11 +250,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     mapOf(
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to 240000.0,
-                        "inntektskilde" to Inntektskilde.Arbeidsgiver
+                        "inntektskilde" to "Arbeidsgiver"
                     ), mapOf(
                     "arbeidsgiver" to a2,
                     "omregnetÅrsinntekt" to 240000.0,
-                    "inntektskilde" to Inntektskilde.Arbeidsgiver
+                    "inntektskilde" to "Arbeidsgiver"
                 )
                 ),
                 "selvstendig" to null
@@ -277,7 +276,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                         mapOf(
                             "arbeidsgiver" to a1,
                             "omregnetÅrsinntekt" to INNTEKT.årlig,
-                            "inntektskilde" to Inntektskilde.Arbeidsgiver
+                            "inntektskilde" to "Arbeidsgiver"
                         )
                     ),
                     "selvstendig" to null
@@ -321,7 +320,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                         mapOf(
                             "arbeidsgiver" to a1,
                             "omregnetÅrsinntekt" to 1200000.0,
-                            "inntektskilde" to Inntektskilde.Arbeidsgiver
+                            "inntektskilde" to "Arbeidsgiver"
                         )
                     ),
                     "selvstendig" to null
@@ -362,7 +361,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                         mapOf(
                             "arbeidsgiver" to a1,
                             "omregnetÅrsinntekt" to 120000.0,
-                            "inntektskilde" to Inntektskilde.Arbeidsgiver
+                            "inntektskilde" to "Arbeidsgiver"
                         )
                     ),
                     "selvstendig" to null
@@ -563,7 +562,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                         mapOf(
                             "arbeidsgiver" to a1,
                             "omregnetÅrsinntekt" to INNTEKT.årlig,
-                            "inntektskilde" to Inntektskilde.Arbeidsgiver,
+                            "inntektskilde" to "Arbeidsgiver",
                         )
                     ),
                     "selvstendig" to null
@@ -599,7 +598,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                         mapOf(
                             "arbeidsgiver" to a1,
                             "omregnetÅrsinntekt" to (INNTEKT / 2).årlig,
-                            "inntektskilde" to Inntektskilde.Saksbehandler,
+                            "inntektskilde" to "Saksbehandler",
                         )
                     ),
                     "selvstendig" to null
@@ -690,12 +689,12 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     mapOf(
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to INNTEKT.årlig,
-                        "inntektskilde" to Inntektskilde.Arbeidsgiver,
+                        "inntektskilde" to "Arbeidsgiver",
                     ),
                     mapOf(
                         "arbeidsgiver" to a2,
                         "omregnetÅrsinntekt" to INNTEKT.årlig,
-                        "inntektskilde" to Inntektskilde.Arbeidsgiver,
+                        "inntektskilde" to "Arbeidsgiver",
                     )
                 ),
                 "selvstendig" to null
@@ -977,13 +976,13 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                             "arbeidsgiver" to a1,
                             "omregnetÅrsinntekt" to 240000.0,
                             "skjønnsfastsatt" to 492000.0,
-                            "inntektskilde" to Inntektskilde.Saksbehandler,
+                            "inntektskilde" to "Saksbehandler",
                         ),
                         mapOf(
                             "arbeidsgiver" to a2,
                             "omregnetÅrsinntekt" to 240000.0,
                             "skjønnsfastsatt" to 360000.0,
-                            "inntektskilde" to Inntektskilde.Saksbehandler,
+                            "inntektskilde" to "Saksbehandler",
                         )
                     ),
                     "selvstendig" to null
@@ -1048,7 +1047,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 mapOf(
                     "arbeidsgiver" to a1,
                     "omregnetÅrsinntekt" to INNTEKT.årlig,
-                    "inntektskilde" to Inntektskilde.Arbeidsgiver
+                    "inntektskilde" to "Arbeidsgiver"
                 )
             ),
             "selvstendig" to null
@@ -1071,7 +1070,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         val actualGjenståendeSykedager = hentFelt<Int>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "gjenståendeSykedager")!!
         val actualForeløpigBeregnetSluttPåSykepenger = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "foreløpigBeregnetSluttPåSykepenger")!!
         val actualUtbetalingsdager = hentFelt<List<Map<String, Any>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "utbetalingsdager")!!
-        val actualArbeidssituasjon = hentFelt<Arbeidssituasjon>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "arbeidssituasjon")!!
+        val actualArbeidssituasjon = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "arbeidssituasjon")!!.let { Arbeidssituasjon.valueOf(it) }
 
         relevanteSøknader?.let { assertRelevanteSøknader(it, vedtaksperiodeId) }
         assertSykepengegrunnlagsfakta(vedtaksperiodeId, sykepengegrunnlagsfakta)

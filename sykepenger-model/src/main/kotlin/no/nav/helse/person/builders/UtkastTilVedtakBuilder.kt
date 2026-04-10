@@ -282,7 +282,7 @@ internal class UtkastTilVedtakBuilder(
                     Behandlingsporing.Yrkesaktivitet.Frilans-> TODO("Har ikke implementert disse yrkesaktivitetstypene enda i sykepengegrunnlagsfakta")
                 }
             ),
-            "arbeidssituasjon" to arbeidssituasjon
+            "arbeidssituasjon" to arbeidssituasjon.name
         )
 
         val godkjenningEvent = EventSubscription.GodkjenningEvent(
@@ -370,7 +370,7 @@ internal class UtkastTilVedtakBuilder(
                     "arbeidsgiver" to it.arbeidsgiver,
                     "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
                     "skjønnsfastsatt" to it.skjønnsfastsatt,
-                    "inntektskilde" to Inntektskilde.Saksbehandler,
+                    "inntektskilde" to "Saksbehandler",
                 )
             }
         )
@@ -381,7 +381,7 @@ internal class UtkastTilVedtakBuilder(
                 mapOf(
                     "arbeidsgiver" to it.arbeidsgiver,
                     "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                    "inntektskilde" to it.inntektskilde
+                    "inntektskilde" to it.inntektskilde.name
                 )
             }
         )
