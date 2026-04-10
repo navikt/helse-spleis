@@ -32,8 +32,6 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription, En
     private val replays = mutableSetOf<Forespørsel>()
     private val hånderteInntektsmeldinger = mutableSetOf<UUID>()
 
-    internal fun håndterteInntektsmeldinger() = hånderteInntektsmeldinger.toSet()
-
     internal fun registrerBehov(aktivitetslogg: Aktivitetslogg) {
         val nyeBehov = aktivitetslogg.behov.takeUnless { it.isEmpty() } ?: return
         log.log("Registrerer ${nyeBehov.size} nye behov (${nyeBehov.joinToString { it.type.toString() }})")
@@ -49,20 +47,9 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription, En
         return behovtyper.all { behovtype -> behovtype in behover }
     }
 
-    internal fun <R> fangInntektsmeldingReplay(block: () -> R, behandleReplays: (Set<Forespørsel>) -> Unit): R {
-        val før = replays.toSet()
-        val retval = block()
-        behandleReplays(replays.toSet() - før)
-        return retval
-    }
-
     internal fun bekreftBehovOppfylt() {
         val ubesvarte = behov.filterNot { it.type == Behovtype.Sykepengehistorikk }.takeUnless { it.isEmpty() } ?: return
         log.log("Etter testen er det ${behov.size} behov uten svar: [${behov.joinToString { it.type.toString() }}]")
-    }
-
-    internal fun bekreftOgKvitterReplay(vedtaksperiodeId: UUID) {
-        assertTrue(replays.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }) { "Vedtaksperioden har ikke bedt om replay. Den står i ${tilstander.getValue(vedtaksperiodeId)}" }
     }
 
     private fun bekreftBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) {
@@ -196,6 +183,21 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription, En
                 utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
             )
         }.also { if (it.isEmpty()) error("Forventet at det skal være spurt om feriepengerutbetaling, men det var det ikke!") }
+    }
+
+    override fun <T> håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
+        operasjon: () -> T?,
+        håndterForespørsel: (forespørsel: Forespørsel, alleredeHåndterteInntektsmeldinger: Set<UUID>) -> Unit
+    ): T? {
+        val forespørslerFør = replays.toSet()
+        val verdi = operasjon()
+        val nyeForespørsler = replays.toSet() - forespørslerFør
+        nyeForespørsler.forEach { forespørsel ->
+            håndterForespørsel(forespørsel, hånderteInntektsmeldinger.toSet())
+            replays.removeAll { it.vedtaksperiodeId == forespørsel.vedtaksperiodeId }
+        }
+
+        return verdi
     }
 
     private companion object {

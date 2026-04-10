@@ -1,6 +1,7 @@
 package no.nav.helse.dsl
 
 import java.util.UUID
+import no.nav.helse.spill_av_im.Forespørsel
 
 interface EnBehovssamler {
 
@@ -12,6 +13,7 @@ interface EnBehovssamler {
     fun bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId: UUID)
     fun harForespurtHistorikkFraInfotrygd(vedtaksperiodeId: UUID): Boolean
     fun feriepengerutbetalingsdetaljer(): List<Feriepengerutbetalingsdetaljer>
+    fun <T> håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(operasjon: () -> T?, håndterForespørsel: (forespørsel: Forespørsel, alleredeHåndterteInntektsmeldinger: Set<UUID>) -> Unit): T?
 
     data class Utbetalingsdetaljer(
         val vedtaksperiodeId: UUID,
@@ -33,7 +35,7 @@ interface EnBehovssamler {
     )
 
     data class Feriepengerutbetalingsdetaljer(
-        val utbetalingId: UUID,
+        val utbetalingId: UUID
     )
 }
 
