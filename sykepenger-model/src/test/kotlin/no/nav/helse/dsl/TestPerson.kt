@@ -58,7 +58,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SelvstendigForsikring
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -748,38 +747,17 @@ internal class TestPerson(
         }
 
         internal fun håndterUtbetalt(status: Oppdragstatus, fagsystemId: String) {
-            behovsamler.detaljerFor(orgnummer, Utbetaling)
-                .filter { (detaljer, _) -> detaljer.getValue("fagsystemId") as String == fagsystemId }
-                .lastOrNull()
-                ?.also { (_, kontekst) ->
-                    val vedtaksperiodeId = UUID.fromString(kontekst.getValue("vedtaksperiodeId"))
-                    val behandlingId = UUID.fromString(kontekst.getValue("behandlingId"))
-                    val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
-                    arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(vedtaksperiodeId, behandlingId, utbetalingId, fagsystemId, status)
-                        .håndter(Person::håndterUtbetalingHendelse)
-                }
+            behovsamler.utbetalingsdetaljer(orgnummer).lastOrNull { it.fagsystemId == fagsystemId }?.also { utbetalingsdetaljer ->
+                arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(utbetalingsdetaljer.vedtaksperiodeId, utbetalingsdetaljer.behandlingId, utbetalingsdetaljer.utbetalingId, fagsystemId, status)
+                    .håndter(Person::håndterUtbetalingHendelse)
+            }
         }
 
         internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT) {
-            behovsamler.bekreftBehov(orgnummer, Utbetaling)
-            behovsamler.detaljerFor(orgnummer, Utbetaling)
-                .groupBy { (detaljer, kontekst) ->
-                    val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
-                    val fagsystemId = detaljer.getValue("fagsystemId") as String
-                    "$$utbetalingId-$fagsystemId"
-                }
-                .forEach { (_, utbetalingsbehov) ->
-                    utbetalingsbehov
-                        .last() // velger bare siste behov per utbetalingId-fagsystemId-kombinasjon for å håndtere at vedtaksperioden kan ha blitt påminnet og produsert behovet flere ganger
-                        .also { (detaljer, kontekst) ->
-                            val vedtaksperiodeId = UUID.fromString(kontekst.getValue("vedtaksperiodeId"))
-                            val behandlingId = UUID.fromString(kontekst.getValue("behandlingId"))
-                            val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
-                            val fagsystemId = detaljer.getValue("fagsystemId") as String
-                            arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(vedtaksperiodeId, behandlingId, utbetalingId, fagsystemId, status)
-                                .håndter(Person::håndterUtbetalingHendelse)
-                        }
-                }
+            behovsamler.utbetalingsdetaljer(orgnummer).forEach { utbetalingsdetaljer ->
+                arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(utbetalingsdetaljer.vedtaksperiodeId, utbetalingsdetaljer.behandlingId, utbetalingsdetaljer.utbetalingId, utbetalingsdetaljer.fagsystemId, status)
+                    .håndter(Person::håndterUtbetalingHendelse)
+            }
         }
 
         internal fun håndterAnnullering(vedtaksperiodeId: UUID) {
@@ -867,11 +845,6 @@ internal class TestPerson(
         ) =
             personHendelsefabrikk.lagUtbetalingshistorikkForFeriepenger(opptjeningsår)
                 .håndter(Person::håndterUtbetalingshistorikkForFeriepenger)
-
-        internal fun antallFeriepengeutbetalingerTilArbeidsgiver() = behovsamler.detaljerFor(orgnummer, Utbetaling)
-            .count { (behov, _) ->
-                behov["linjer"].toString().contains("SPREFAGFER-IOP")
-            }
 
         operator fun <R> invoke(testblokk: TestArbeidsgiver.() -> R): R {
             return testblokk(this)

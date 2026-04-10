@@ -5,11 +5,12 @@ import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spill_av_im.Forespørsel
 import org.junit.jupiter.api.Assertions.assertTrue
 
-internal class Behovsamler(private val log: DeferredLog) : EventSubscription {
+internal class Behovsamler(private val log: DeferredLog) : EventSubscription, EnBehovssamler {
     private val behov = mutableListOf<Behov>()
     private val tilstander = mutableMapOf<UUID, TilstandType>()
     private val replays = mutableSetOf<Forespørsel>()
@@ -44,19 +45,12 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription {
         log.log("Etter testen er det ${behov.size} behov uten svar: [${behov.joinToString { it.type.toString() }}]")
     }
 
-    internal fun harBedtOmReplay(vedtaksperiodeId: UUID) =
-        replays.any { it.vedtaksperiodeId == vedtaksperiodeId }
-
     internal fun bekreftOgKvitterReplay(vedtaksperiodeId: UUID) {
         assertTrue(replays.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }) { "Vedtaksperioden har ikke bedt om replay. Den står i ${tilstander.getValue(vedtaksperiodeId)}" }
     }
 
     internal fun bekreftBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) {
         bekreftBehov(vedtaksperiodebehov(vedtaksperiodeId), *behovtyper) { "Vedtaksperioden står i ${tilstander.getValue(vedtaksperiodeId)}" }
-    }
-
-    internal fun bekreftBehov(orgnummer: String, vararg behovtyper: Behovtype) {
-        bekreftBehov(orgnummerbehov(orgnummer), *behovtyper)
     }
 
     private fun bekreftBehov(filter: (Behov) -> Boolean, vararg behovtyper: Behovtype, melding: () -> String = { "" }) {
@@ -125,6 +119,23 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription {
     ) {
         tilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
         kvitterVedtaksperiode(event.vedtaksperiodeId)
+    }
+
+    override fun utbetalingsdetaljer(orgnummer: String): List<EnBehovssamler.Utbetalingsdetaljer> {
+        return detaljerFor(orgnummer, Utbetaling).map { (detaljer, kontekst) ->
+                EnBehovssamler.Utbetalingsdetaljer(
+                    vedtaksperiodeId = UUID.fromString(kontekst.getValue("vedtaksperiodeId")),
+                    behandlingId = UUID.fromString(kontekst.getValue("behandlingId")),
+                    utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId")),
+                    fagsystemId = detaljer.getValue("fagsystemId") as String
+                )
+            }
+            .groupBy { "${it.utbetalingId}-${it.fagsystemId}" }
+            // velger bare siste behov per utbetalingId-fagsystemId-kombinasjon for å håndtere at vedtaksperioden kan ha blitt påminnet og produsert behovet flere ganger
+            .mapValues { (_, utbetalingsdetaljer) -> utbetalingsdetaljer.last() }
+            .values
+            .toList()
+            .also { if (it.isEmpty()) error("Forventet at det skal være spurt om utbetaling, og det var det ikke!") }
     }
 
     private companion object {
