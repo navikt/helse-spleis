@@ -1,9 +1,11 @@
 package no.nav.helse.bugs_showstoppers
 
 import java.util.UUID
+import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -13,25 +15,16 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.sisteBehov
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.håndterPåminnelse
-import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class UtdatertGodkjenningBugE2ETest : AbstractEndToEndTest() {
+internal class UtdatertGodkjenningBugE2ETest : AbstractDslTest() {
 
     @Test
-    fun `Håndterer løsning på godkjenningsbehov der utbetalingid på løsningen matcher med periodens gjeldende utbetaling`() {
+    fun `Håndterer løsning på godkjenningsbehov der utbetalingid på løsningen matcher med periodens gjeldende utbetaling`() = a1 {
         tilGodkjenning(januar, 100.prosent)
-        håndterUtbetalingsgodkjenning()
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -47,15 +40,16 @@ internal class UtdatertGodkjenningBugE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ignorerer løsning på godkjenningsbehov dersom utbetalingid på løsningen ikke samsvarer med periodens gjeldende utbetaling`() {
+    fun `Ignorerer løsning på godkjenningsbehov dersom utbetalingid på løsningen ikke samsvarer med periodens gjeldende utbetaling`() = a1 {
         tilGodkjenning(januar, 100.prosent)
+
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent)) // reberegner vedtaksperioden
-        håndterYtelser()
-        håndterSimulering()
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
         assertThrows<IllegalStateException> {
-            val behandlingId = UUID.fromString(checkNotNull(personlogg.sisteBehov(Behovtype.Godkjenning).alleKontekster["behandlingId"]))
-            håndterUtbetalingsgodkjenning(behandlingId = behandlingId, utbetalingId = UUID.randomUUID())
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingIdILøsning = UUID.randomUUID())
         }
+
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -74,9 +68,9 @@ internal class UtdatertGodkjenningBugE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Blir stående i TIL_UTBETALING ved påminnelse, dersom utbetalingen er in transit (ikke ubetalt)`() {
+    fun `Blir stående i TIL_UTBETALING ved påminnelse, dersom utbetalingen er in transit (ikke ubetalt)`() = a1 {
         tilGodkjenning(januar, 100.prosent)
-        håndterUtbetalingsgodkjenning()
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
         assertTilstander(
             1.vedtaksperiode,

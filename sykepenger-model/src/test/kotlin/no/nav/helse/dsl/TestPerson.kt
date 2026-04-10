@@ -674,9 +674,9 @@ internal class TestPerson(
             }
         }
 
-        internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true, automatiskBehandling: Boolean = true, godkjenttidspunkt: LocalDateTime = LocalDateTime.now()) {
+        internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true, automatiskBehandling: Boolean = true, godkjenttidspunkt: LocalDateTime = LocalDateTime.now(), utbetalingIdILøsning: UUID? = null) {
             val (behandlingId, utbetalingId) = behovsamler.godkjenningsdetaljer(vedtaksperiodeId)
-            arbeidsgiverHendelsefabrikk.lagUtbetalingsgodkjenning(vedtaksperiodeId, behandlingId, godkjent, automatiskBehandling, utbetalingId, godkjenttidspunkt)
+            arbeidsgiverHendelsefabrikk.lagUtbetalingsgodkjenning(vedtaksperiodeId, behandlingId, godkjent, automatiskBehandling, utbetalingIdILøsning ?: utbetalingId, godkjenttidspunkt)
                 .håndter(Person::håndterUtbetalingsgodkjenning)
         }
 
