@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.EventSubscription.GodkjenningEvent.Companion.tilBehovMap
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterHovedregel
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterSkjønn
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattIInfotrygd
@@ -185,7 +184,7 @@ internal class UtkastTilVedtakBuilder(
     }
 
     private val build by lazy { Build() }
-    internal fun buildGodkjenningsbehov() = build.godkjenningsbehov
+    internal fun buildGodkjenningsbehov() = build.godkjenningEvent.behovInput
     internal fun buildGodkjenningEvent() = build.godkjenningEvent
     internal fun buildUtkastTilVedtak() = build.utkastTilVedtak
     internal fun buildAvsluttedMedVedtak() = build.avsluttetMedVedtak(vedtakFattet!!)
@@ -233,57 +232,6 @@ internal class UtkastTilVedtakBuilder(
         }
 
         private val periodetypeForGodkjenningsbehov = sykepengegrunnlagsfakta.periodetypeForGodkjenningsbehov(tags)
-
-        // TODO: Bruk godkjenningEvent.behovInput. Bare logge litt for å se at de er helt like først.
-        val godkjenningsbehov = mapOf(
-            "periodeFom" to "${periode.start}",
-            "periodeTom" to "${periode.endInclusive}",
-            "skjæringstidspunkt" to "$skjæringstidspunkt",
-            "vilkårsgrunnlagId" to "$vilkårsgrunnlagId",
-            "periodetype" to periodetypeForGodkjenningsbehov,
-            "førstegangsbehandling" to tags.contains(Tag.Førstegangsbehandling),
-            "utbetalingtype" to if (tags.contains(Tag.Revurdering)) "REVURDERING" else "UTBETALING",
-            "inntektskilde" to if (tags.contains(Tag.EnArbeidsgiver)) "EN_ARBEIDSGIVER" else "FLERE_ARBEIDSGIVERE",
-            // Til ettertanke: Her kan det være orgnummer på tilkomnde arbeidsgivere i tillegg til de som er i "sykepengegrunnlagsfakta". Kanskje finne på noe smartere der?
-            "orgnummereMedRelevanteArbeidsforhold" to (arbeidsgiverinntekter.map { it.arbeidsgiver }).toSet(),
-            "tags" to tags.utgående,
-            "kanAvvises" to kanForkastes,
-            "behandlingId" to "$behandlingId",
-            "relevanteSøknader" to relevanteSøknader,
-            "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt.map {
-                mapOf(
-                    "vedtaksperiodeId" to "${it.vedtaksperiodeId}",
-                    "behandlingId" to "${it.behandlingId}",
-                    "fom" to "${it.periode.start}",
-                    "tom" to "${it.periode.endInclusive}"
-                )
-            },
-            "forbrukteSykedager" to forbrukteSykedager,
-            "gjenståendeSykedager" to gjenståendeSykedager,
-            "foreløpigBeregnetSluttPåSykepenger" to "$foreløpigBeregnetSluttPåSykepenger",
-            "utbetalingsdager" to utbetalingsdager.map { dag -> dag.tilBehovMap() },
-            "sykepengegrunnlagsfakta" to mapOf(
-                "sykepengegrunnlag" to sykepengegrunnlag,
-                "6G" to seksG,
-            ).plus(
-                when (yrkesaktivitetssporing) {
-                    Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                    is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> when (sykepengegrunnlagsfakta) {
-                        is FastsattIInfotrygd -> mapOf(
-                            "fastsatt" to sykepengegrunnlagsfakta.fastsatt
-                        )
-
-                        is FastsattEtterHovedregel -> arbeidstakerHovedregelMap(sykepengegrunnlagsfakta)
-                        is FastsattEtterSkjønn -> arbeidstakerEtterSkjønnMap(sykepengegrunnlagsfakta)
-                    }.plus("selvstendig" to null)
-
-                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> selvstendigMap()
-
-                    Behandlingsporing.Yrkesaktivitet.Frilans-> TODO("Har ikke implementert disse yrkesaktivitetstypene enda i sykepengegrunnlagsfakta")
-                }
-            ),
-            "arbeidssituasjon" to arbeidssituasjon.name
-        )
 
         val godkjenningEvent = EventSubscription.GodkjenningEvent(
             yrkesaktivitetssporing = yrkesaktivitetssporing,
@@ -361,43 +309,6 @@ internal class UtkastTilVedtakBuilder(
 
                 Behandlingsporing.Yrkesaktivitet.Frilans -> error("Har ikke implementert sykepengegrunnlag for frilansere ennå.")
             }
-        )
-
-        private fun arbeidstakerEtterSkjønnMap(sykepengegrunnlagsfakta: FastsattEtterSkjønn): Map<String, Any> = mapOf(
-            "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
-            "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
-                mapOf(
-                    "arbeidsgiver" to it.arbeidsgiver,
-                    "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                    "skjønnsfastsatt" to it.skjønnsfastsatt,
-                    "inntektskilde" to "Saksbehandler",
-                )
-            }
-        )
-
-        private fun arbeidstakerHovedregelMap(sykepengegrunnlagsfakta: FastsattEtterHovedregel): Map<String, Any> = mapOf(
-            "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
-            "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
-                mapOf(
-                    "arbeidsgiver" to it.arbeidsgiver,
-                    "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                    "inntektskilde" to it.inntektskilde.name
-                )
-            }
-        )
-
-        private fun selvstendigMap(): Map<String, Any> = mapOf(
-            "selvstendig" to mapOf(
-                "pensjonsgivendeInntekter" to pensjonsgivendeInntekter.map {
-                    mapOf(
-                        "årstall" to it.årstall.value,
-                        "beløp" to it.beløp.årlig.toDesimaler
-                    )
-                },
-                "beregningsgrunnlag" to beregningsgrunnlag.årlig.toDesimaler,
-            ),
-            "arbeidsgivere" to emptyList<Map<String, Any>>(), // Selvstendig har ingen arbeidsgivere i sykepengegrunnlaget
-            "fastsatt" to "EtterHovedregel"
         )
 
         // TODO: 10.12.24 Rename skjønssfastsatt til fastsattÅrsinntekt (som er lik omregnet for hovedregel med forskjellige beløp på skjønn)

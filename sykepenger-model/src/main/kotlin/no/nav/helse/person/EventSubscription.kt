@@ -670,8 +670,8 @@ interface EventSubscription {
             "arbeidssituasjon" to arbeidssituasjon
         )
 
-        internal companion object {
-            internal fun Utbetalingsdag.tilBehovMap() =
+        private companion object {
+            private fun Utbetalingsdag.tilBehovMap() =
                 mapOf(
                     "dato" to "${this.dato}",
                     "type" to when (this.type) {
