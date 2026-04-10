@@ -47,8 +47,7 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription, En
         return behovtyper.all { behovtype -> behovtype in behover }
     }
 
-    internal fun bekreftBehovOppfylt() {
-        val ubesvarte = behov.filterNot { it.type == Behovtype.Sykepengehistorikk }.takeUnless { it.isEmpty() } ?: return
+    internal fun loggUbesvarteBehov() {
         log.log("Etter testen er det ${behov.size} behov uten svar: [${behov.joinToString { it.type.toString() }}]")
     }
 

@@ -126,8 +126,8 @@ internal class TestPerson(
         return this
     }
 
-    internal fun bekreftBehovOppfylt(assertetVarsler: Varslersamler.AssertetVarsler) {
-        behovsamler.bekreftBehovOppfylt()
+    internal fun validerState(assertetVarsler: Varslersamler.AssertetVarsler) {
+        behovsamler.loggUbesvarteBehov()
         varslersamler.bekreftVarslerAssertet(assertetVarsler)
         ugyldigeSituasjoner.bekreftVarselHarKnytningTilVedtaksperiode(personlogg.varsel)
     }
