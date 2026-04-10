@@ -443,9 +443,10 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
                     ManuellOverskrivingDag(25.januar, Dagtype.Feriedag)
                 )
             )
-            assertThrows<AssertionError> {
+            val feil = assertThrows<IllegalStateException> {
                 håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             }
+            assertEquals("Forventet at det skulle være forspurt nøyaktig én godkjenning. Fant 0", feil.message)
             assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
         }
     }

@@ -694,10 +694,7 @@ internal class TestPerson(
         }
 
         internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true, automatiskBehandling: Boolean = true, godkjenttidspunkt: LocalDateTime = LocalDateTime.now()) {
-            behovsamler.bekreftBehov(vedtaksperiodeId, Godkjenning)
-            val (_, kontekst) = behovsamler.detaljerFor(vedtaksperiodeId, Godkjenning).single()
-            val behandlingId = UUID.fromString(kontekst.getValue("behandlingId"))
-            val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+            val (behandlingId, utbetalingId) = behovsamler.godkjenningsdetaljer(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagUtbetalingsgodkjenning(vedtaksperiodeId, behandlingId, godkjent, automatiskBehandling, utbetalingId, godkjenttidspunkt)
                 .håndter(Person::håndterUtbetalingsgodkjenning)
         }
@@ -714,19 +711,13 @@ internal class TestPerson(
         }
 
         internal fun håndterVedtakFattet(vedtaksperiodeId: UUID, automatisert: Boolean = true, vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()) {
-            behovsamler.bekreftBehov(vedtaksperiodeId, Godkjenning)
-            val (_, kontekst) = behovsamler.detaljerFor(vedtaksperiodeId, Godkjenning).single()
-            val behandlingId = UUID.fromString(kontekst.getValue("behandlingId"))
-            val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+            val (behandlingId, utbetalingId) = behovsamler.godkjenningsdetaljer(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagVedtakFattet(vedtaksperiodeId, behandlingId, utbetalingId, automatisert, vedtakFattetTidspunkt)
                 .håndter(Person::håndterVedtakFattet)
         }
 
         internal fun håndterKanIkkeBehandlesHer(vedtaksperiodeId: UUID, automatisert: Boolean = true) {
-            behovsamler.bekreftBehov(vedtaksperiodeId, Godkjenning)
-            val (_, kontekst) = behovsamler.detaljerFor(vedtaksperiodeId, Godkjenning).single()
-            val behandlingId = UUID.fromString(kontekst.getValue("behandlingId"))
-            val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+            val (behandlingId, utbetalingId) = behovsamler.godkjenningsdetaljer(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagKanIkkeBehandlesHer(vedtaksperiodeId, behandlingId, utbetalingId, automatisert)
                 .håndter(Person::håndterKanIkkeBehandlesHer)
         }

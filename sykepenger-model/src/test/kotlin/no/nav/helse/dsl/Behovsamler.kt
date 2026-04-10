@@ -5,6 +5,7 @@ import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -61,13 +62,13 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription, En
         }
     }
 
-    internal fun detaljerFor(orgnummer: String, behovtype: Behovtype) =
+    private fun detaljerFor(orgnummer: String, behovtype: Behovtype) =
         detaljerFor(orgnummerbehov(orgnummer), behovtype)
 
-    internal fun detaljerFor(vedtaksperiodeId: UUID, behovtype: Behovtype) =
+    private fun detaljerFor(vedtaksperiodeId: UUID, behovtype: Behovtype) =
         detaljerFor(vedtaksperiodebehov(vedtaksperiodeId), behovtype)
 
-    internal fun detaljerFor(filter: (Behov) -> Boolean, behovtype: Behovtype) =
+    private fun detaljerFor(filter: (Behov) -> Boolean, behovtype: Behovtype) =
         behov.filter { filter(it) && it.type == behovtype }.map { it.detaljer() to it.alleKontekster }
 
     private fun kvitterVedtaksperiode(vedtaksperiodeId: UUID) {
@@ -148,6 +149,17 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription, En
                 fagområde = detaljer.getValue("fagområde") as String
             )
         }.also { if (it.isEmpty()) error("Forventet at det skal være spurt om simulering, men det var det ikke!") }
+    }
+
+    override fun godkjenningsdetaljer(vedtaksperiodeId: UUID): EnBehovssamler.Godkjenningsdetaljer {
+        val godkjenningsdetaljer = detaljerFor(vedtaksperiodeId, Godkjenning).map { (_, kontekst) ->
+            EnBehovssamler.Godkjenningsdetaljer(
+                behandlingId = UUID.fromString(kontekst.getValue("behandlingId")),
+                utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+            )
+        }
+        check(godkjenningsdetaljer.size == 1) { "Forventet at det skulle være forspurt nøyaktig én godkjenning. Fant ${godkjenningsdetaljer.size}"}
+        return godkjenningsdetaljer.single()
     }
 
     private companion object {

@@ -6,6 +6,7 @@ interface EnBehovssamler {
 
     fun utbetalingsdetaljer(orgnummer: String): List<Utbetalingsdetaljer>
     fun simuleringsdetaljer(vedtaksperiodeId: UUID): List<Simuleringsdetaljer>
+    fun godkjenningsdetaljer(vedtaksperiodeId: UUID): Godkjenningsdetaljer
 
     data class Utbetalingsdetaljer(
         val vedtaksperiodeId: UUID,
@@ -19,6 +20,11 @@ interface EnBehovssamler {
         val utbetalingId: UUID,
         val fagsystemId: String,
         val fagområde: String
+    )
+
+    data class Godkjenningsdetaljer(
+        val behandlingId: UUID,
+        val utbetalingId: UUID
     )
 }
 
