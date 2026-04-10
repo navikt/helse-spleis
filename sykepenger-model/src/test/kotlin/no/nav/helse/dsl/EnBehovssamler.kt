@@ -7,6 +7,9 @@ interface EnBehovssamler {
     fun utbetalingsdetaljer(orgnummer: String): List<Utbetalingsdetaljer>
     fun simuleringsdetaljer(vedtaksperiodeId: UUID): List<Simuleringsdetaljer>
     fun godkjenningsdetaljer(vedtaksperiodeId: UUID): Godkjenningsdetaljer
+    fun bekreftForespurtVilkårsprøving(vedtaksperiodeId: UUID)
+    fun bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId: UUID)
+    fun bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId: UUID)
 
     data class Utbetalingsdetaljer(
         val vedtaksperiodeId: UUID,
