@@ -56,7 +56,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenge
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SelvstendigForsikring
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -688,13 +687,9 @@ internal class TestPerson(
             simuleringOK: Boolean = true,
             simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
         ) {
-            behovsamler.bekreftBehov(vedtaksperiodeId, Simulering)
-            behovsamler.detaljerFor(vedtaksperiodeId, Simulering).forEach { (detaljer, kontekst) ->
-                val fagsystemId = detaljer.getValue("fagsystemId") as String
-                val fagområde = detaljer.getValue("fagområde") as String
-                val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
-
-                arbeidsgiverHendelsefabrikk.lagSimulering(vedtaksperiodeId, utbetalingId, fagsystemId, fagområde, simuleringOK, simuleringsresultat).håndter(Person::håndterSimulering)
+            behovsamler.simuleringsdetaljer(vedtaksperiodeId).forEach { (vedtaksperiodeId, utbetalingId, fagsystemId, fagområde) ->
+                arbeidsgiverHendelsefabrikk.lagSimulering(vedtaksperiodeId, utbetalingId, fagsystemId, fagområde, simuleringOK, simuleringsresultat)
+                    .håndter(Person::håndterSimulering)
             }
         }
 
@@ -747,8 +742,8 @@ internal class TestPerson(
         }
 
         internal fun håndterUtbetalt(status: Oppdragstatus, fagsystemId: String) {
-            behovsamler.utbetalingsdetaljer(orgnummer).lastOrNull { it.fagsystemId == fagsystemId }?.also { utbetalingsdetaljer ->
-                arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(utbetalingsdetaljer.vedtaksperiodeId, utbetalingsdetaljer.behandlingId, utbetalingsdetaljer.utbetalingId, fagsystemId, status)
+            behovsamler.utbetalingsdetaljer(orgnummer).lastOrNull { it.fagsystemId == fagsystemId }?.also { (vedtaksperiodeId, behandlingId, utbetalingId) ->
+                arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(vedtaksperiodeId, behandlingId, utbetalingId, fagsystemId, status)
                     .håndter(Person::håndterUtbetalingHendelse)
             }
         }

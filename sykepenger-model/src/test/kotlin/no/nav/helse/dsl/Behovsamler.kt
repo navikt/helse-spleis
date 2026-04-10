@@ -5,6 +5,7 @@ import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spill_av_im.Forespørsel
@@ -135,7 +136,18 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription, En
             .mapValues { (_, utbetalingsdetaljer) -> utbetalingsdetaljer.last() }
             .values
             .toList()
-            .also { if (it.isEmpty()) error("Forventet at det skal være spurt om utbetaling, og det var det ikke!") }
+            .also { if (it.isEmpty()) error("Forventet at det skal være spurt om utbetaling, men det var det ikke!") }
+    }
+
+    override fun simuleringsdetaljer(vedtaksperiodeId: UUID): List<EnBehovssamler.Simuleringsdetaljer> {
+        return detaljerFor(vedtaksperiodeId, Simulering).map { (detaljer, kontekst) ->
+            EnBehovssamler.Simuleringsdetaljer(
+                vedtaksperiodeId = UUID.fromString(kontekst.getValue("vedtaksperiodeId")),
+                utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId")),
+                fagsystemId = detaljer.getValue("fagsystemId") as String,
+                fagområde = detaljer.getValue("fagområde") as String
+            )
+        }.also { if (it.isEmpty()) error("Forventet at det skal være spurt om simulering, men det var det ikke!") }
     }
 
     private companion object {
