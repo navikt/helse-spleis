@@ -10,6 +10,8 @@ interface EnBehovssamler {
     fun bekreftForespurtVilkårsprøving(vedtaksperiodeId: UUID)
     fun bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId: UUID)
     fun bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId: UUID)
+    fun harForespurtHistorikkFraInfotrygd(vedtaksperiodeId: UUID): Boolean
+    fun feriepengerutbetalingsdetaljer(): List<Feriepengerutbetalingsdetaljer>
 
     data class Utbetalingsdetaljer(
         val vedtaksperiodeId: UUID,
@@ -28,6 +30,10 @@ interface EnBehovssamler {
     data class Godkjenningsdetaljer(
         val behandlingId: UUID,
         val utbetalingId: UUID
+    )
+
+    data class Feriepengerutbetalingsdetaljer(
+        val utbetalingId: UUID,
     )
 }
 

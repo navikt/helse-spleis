@@ -42,8 +42,6 @@ import no.nav.helse.januar
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Person
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Feriepengeutbetaling
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -168,9 +166,8 @@ internal class TestPerson(
         orgnummer: String,
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT
     ) {
-        val utbetalingId = personlogg.behov
-            .last { it.type == Feriepengeutbetaling }
-            .alleKontekster.getValue("utbetalingId").let { UUID.fromString(it) }
+        val (utbetalingId) = behovsamler.feriepengerutbetalingsdetaljer().last()
+
         FeriepengeutbetalingHendelse(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
@@ -298,7 +295,7 @@ internal class TestPerson(
                         harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet
                     ).håndter(Person::håndterSøknad)
                 }?.also {
-                    if (behovsamler.harBehov(it, Sykepengehistorikk)) {
+                    if (behovsamler.harForespurtHistorikkFraInfotrygd(it)) {
                         arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikk(it).håndter(Person::håndterUtbetalingshistorikk)
                     }
                 }

@@ -8,6 +8,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.DagpengerV2
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Feriepengeutbetaling
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
@@ -19,6 +20,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringsp
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SelvstendigForsikring
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spill_av_im.Forespørsel
@@ -39,10 +41,10 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription, En
         log.log(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
     }
 
-    internal fun harBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) =
+    private fun harBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) =
         harBehov(vedtaksperiodebehov(vedtaksperiodeId), *behovtyper)
 
-    internal fun harBehov(filter: (Behov) -> Boolean, vararg behovtyper: Behovtype): Boolean {
+    private fun harBehov(filter: (Behov) -> Boolean, vararg behovtyper: Behovtype): Boolean {
         val behover = behov.filter(filter).map { it.type }
         return behovtyper.all { behovtype -> behovtype in behover }
     }
@@ -63,7 +65,7 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription, En
         assertTrue(replays.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }) { "Vedtaksperioden har ikke bedt om replay. Den står i ${tilstander.getValue(vedtaksperiodeId)}" }
     }
 
-    internal fun bekreftBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) {
+    private fun bekreftBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) {
         bekreftBehov(vedtaksperiodebehov(vedtaksperiodeId), *behovtyper) { "Vedtaksperioden står i ${tilstander.getValue(vedtaksperiodeId)}" }
     }
 
@@ -184,6 +186,16 @@ internal class Behovsamler(private val log: DeferredLog) : EventSubscription, En
 
     override fun bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId: UUID) {
         bekreftBehov(vedtaksperiodeId, DagpengerV2, ArbeidsavklaringspengerV2, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger, InntekterForBeregning)
+    }
+
+    override fun harForespurtHistorikkFraInfotrygd(vedtaksperiodeId: UUID) = harBehov(vedtaksperiodeId, Sykepengehistorikk)
+
+    override fun feriepengerutbetalingsdetaljer(): List<EnBehovssamler.Feriepengerutbetalingsdetaljer> {
+        return detaljerFor({ true }, Feriepengeutbetaling).map { (_, kontekst) ->
+            EnBehovssamler.Feriepengerutbetalingsdetaljer(
+                utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+            )
+        }.also { if (it.isEmpty()) error("Forventet at det skal være spurt om feriepengerutbetaling, men det var det ikke!") }
     }
 
     private companion object {
