@@ -82,7 +82,7 @@ internal class TestPerson(
 
     private lateinit var forrigeAktivitetslogg: Aktivitetslogg
     internal val personlogg = Aktivitetslogg()
-    private val behovsamler = Behovsamler(deferredLog)
+    private val behovsamler: Behovsamler = AktivitetsloggBehovsamler(deferredLog)
     private val varslersamler = Varslersamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk()
     private val vedtaksperiodesamler = Vedtaksperiodesamler(person)

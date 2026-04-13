@@ -1,0 +1,214 @@
+package no.nav.helse.dsl
+
+import java.util.UUID
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.DagpengerV2
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Feriepengeutbetaling
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SelvstendigForsikring
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.spill_av_im.Forespørsel
+import org.junit.jupiter.api.Assertions.assertTrue
+
+internal class AktivitetsloggBehovsamler(private val log: DeferredLog) : EventSubscription, Behovsamler {
+    private val behov = mutableListOf<Behov>()
+    private val tilstander = mutableMapOf<UUID, TilstandType>()
+    private val replays = mutableSetOf<Forespørsel>()
+    private val hånderteInntektsmeldinger = mutableSetOf<UUID>()
+
+    override fun registrerBehov(aktivitetslogg: Aktivitetslogg) {
+        val nyeBehov = aktivitetslogg.behov.takeUnless { it.isEmpty() } ?: return
+        log.log("Registrerer ${nyeBehov.size} nye behov (${nyeBehov.joinToString { it.type.toString() }})")
+        behov.addAll(nyeBehov)
+        log.log(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
+    }
+
+    private fun harBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) =
+        harBehov(vedtaksperiodebehov(vedtaksperiodeId), *behovtyper)
+
+    private fun harBehov(filter: (Behov) -> Boolean, vararg behovtyper: Behovtype): Boolean {
+        val behover = behov.filter(filter).map { it.type }
+        return behovtyper.all { behovtype -> behovtype in behover }
+    }
+
+    override fun loggUbesvarteBehov() {
+        log.log("Etter testen er det ${behov.size} behov uten svar: [${behov.joinToString { it.type.toString() }}]")
+    }
+
+    private fun bekreftBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) {
+        bekreftBehov(vedtaksperiodebehov(vedtaksperiodeId), *behovtyper) { "Vedtaksperioden står i ${tilstander.getValue(vedtaksperiodeId)}" }
+    }
+
+    private fun bekreftBehov(filter: (Behov) -> Boolean, vararg behovtyper: Behovtype, melding: () -> String = { "" }) {
+        assertTrue(harBehov(filter, *behovtyper)) {
+            val behover = behov.filter(filter)
+            "Forventer at [${behovtyper.joinToString { it.toString() }}] skal være etterspurt. Fant bare: [${behover.joinToString { it.type.toString() }}]. ${melding()}"
+        }
+    }
+
+    private fun detaljerFor(orgnummer: String, behovtype: Behovtype) =
+        detaljerFor(orgnummerbehov(orgnummer), behovtype)
+
+    private fun detaljerFor(vedtaksperiodeId: UUID, behovtype: Behovtype) =
+        detaljerFor(vedtaksperiodebehov(vedtaksperiodeId), behovtype)
+
+    private fun detaljerFor(filter: (Behov) -> Boolean, behovtype: Behovtype) =
+        behov.filter { filter(it) && it.type == behovtype }.map { it.detaljer() to it.alleKontekster }
+
+    private fun kvitterVedtaksperiode(vedtaksperiodeId: UUID) {
+        val vedtaksperiodebehov = behov
+            // kvitterer ikke ut utbetalingsbehov som følge av at vedtaksperioden endrer tilstand
+            .filterNot { it.type == Behovtype.Utbetaling }
+            .filter(vedtaksperiodebehov(vedtaksperiodeId))
+            .takeUnless { it.isEmpty() } ?: return
+        log.log("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.type.toString() }})")
+        behov.removeAll(vedtaksperiodebehov)
+        log.log(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
+        if (replays.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }) {
+            log.log("-> Vedtaksperioden ba om replay, men det ble ikke utført")
+        }
+    }
+
+    override fun utbetalingUtbetalt(
+        event: EventSubscription.UtbetalingUtbetaltEvent
+    ) {
+        assertTrue(behov.removeAll { it.utbetalingId == event.utbetalingId }) {
+            "Utbetaling ble utbetalt, men ingen behov om utbetaling er registrert"
+        }
+    }
+
+    override fun annullering(event: EventSubscription.UtbetalingAnnullertEvent) {
+        behov.removeAll { it.utbetalingId == event.utbetalingId }
+    }
+
+    override fun inntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent) {
+        replays.add(
+            Forespørsel(
+                fnr = event.opplysninger.personidentifikator.toString(),
+                orgnr = event.opplysninger.arbeidstaker.organisasjonsnummer,
+                vedtaksperiodeId = event.opplysninger.vedtaksperiodeId,
+                skjæringstidspunkt = event.opplysninger.skjæringstidspunkt,
+                førsteFraværsdager = event.opplysninger.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.arbeidstaker.organisasjonsnummer, it.førsteFraværsdag) },
+                sykmeldingsperioder = event.opplysninger.sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+                egenmeldinger = event.opplysninger.egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+                harForespurtArbeidsgiverperiode = EventSubscription.Arbeidsgiverperiode in event.opplysninger.forespurteOpplysninger
+            )
+        )
+    }
+
+    override fun inntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent) {
+        hånderteInntektsmeldinger.add(event.meldingsreferanseId)
+    }
+
+    override fun vedtaksperiodeEndret(
+        event: EventSubscription.VedtaksperiodeEndretEvent
+    ) {
+        tilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
+        kvitterVedtaksperiode(event.vedtaksperiodeId)
+    }
+
+    override fun utbetalingsdetaljer(orgnummer: String): List<Behovsamler.Utbetalingsdetaljer> {
+        return detaljerFor(orgnummer, Utbetaling).map { (detaljer, kontekst) ->
+                Behovsamler.Utbetalingsdetaljer(
+                    vedtaksperiodeId = UUID.fromString(kontekst.getValue("vedtaksperiodeId")),
+                    behandlingId = UUID.fromString(kontekst.getValue("behandlingId")),
+                    utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId")),
+                    fagsystemId = detaljer.getValue("fagsystemId") as String
+                )
+            }
+            .groupBy { "${it.utbetalingId}-${it.fagsystemId}" }
+            // velger bare siste behov per utbetalingId-fagsystemId-kombinasjon for å håndtere at vedtaksperioden kan ha blitt påminnet og produsert behovet flere ganger
+            .mapValues { (_, utbetalingsdetaljer) -> utbetalingsdetaljer.last() }
+            .values
+            .toList()
+            .also { if (it.isEmpty()) error("Forventet at det skal være spurt om utbetaling, men det var det ikke!") }
+    }
+
+    override fun simuleringsdetaljer(vedtaksperiodeId: UUID): List<Behovsamler.Simuleringsdetaljer> {
+        return detaljerFor(vedtaksperiodeId, Simulering).map { (detaljer, kontekst) ->
+            Behovsamler.Simuleringsdetaljer(
+                vedtaksperiodeId = UUID.fromString(kontekst.getValue("vedtaksperiodeId")),
+                utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId")),
+                fagsystemId = detaljer.getValue("fagsystemId") as String,
+                fagområde = detaljer.getValue("fagområde") as String
+            )
+        }.also { if (it.isEmpty()) error("Forventet at det skal være spurt om simulering, men det var det ikke!") }
+    }
+
+    override fun godkjenningsdetaljer(vedtaksperiodeId: UUID): Behovsamler.Godkjenningsdetaljer {
+        val godkjenningsdetaljer = detaljerFor(vedtaksperiodeId, Godkjenning).map { (_, kontekst) ->
+            Behovsamler.Godkjenningsdetaljer(
+                behandlingId = UUID.fromString(kontekst.getValue("behandlingId")),
+                utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+            )
+        }
+        assert(godkjenningsdetaljer.size == 1) { "Forventet at det skulle være forspurt nøyaktig én godkjenning. Fant ${godkjenningsdetaljer.size}"}
+        return godkjenningsdetaljer.single()
+    }
+
+    override fun bekreftForespurtVilkårsprøving(vedtaksperiodeId: UUID) {
+        bekreftBehov(vedtaksperiodeId, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
+    }
+
+    override fun bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId: UUID) {
+        bekreftBehov(vedtaksperiodeId, DagpengerV2, ArbeidsavklaringspengerV2, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger, InntekterForBeregning, SelvstendigForsikring)
+    }
+
+    override fun bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId: UUID) {
+        bekreftBehov(vedtaksperiodeId, DagpengerV2, ArbeidsavklaringspengerV2, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger, InntekterForBeregning)
+    }
+
+    override fun harForespurtHistorikkFraInfotrygd(vedtaksperiodeId: UUID) = harBehov(vedtaksperiodeId, Sykepengehistorikk)
+
+    override fun feriepengerutbetalingsdetaljer(): List<Behovsamler.Feriepengerutbetalingsdetaljer> {
+        return detaljerFor({ true }, Feriepengeutbetaling).map { (_, kontekst) ->
+            Behovsamler.Feriepengerutbetalingsdetaljer(
+                utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+            )
+        }.also { if (it.isEmpty()) error("Forventet at det skal være spurt om feriepengerutbetaling, men det var det ikke!") }
+    }
+
+    override fun <T> håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
+        operasjon: () -> T?,
+        håndterForespørsel: (forespørsel: Forespørsel, alleredeHåndterteInntektsmeldinger: Set<UUID>) -> Unit
+    ): T? {
+        val forespørslerFør = replays.toSet()
+        val verdi = operasjon()
+        val nyeForespørsler = replays.toSet() - forespørslerFør
+        nyeForespørsler.forEach { forespørsel ->
+            håndterForespørsel(forespørsel, hånderteInntektsmeldinger.toSet())
+            replays.removeAll { it.vedtaksperiodeId == forespørsel.vedtaksperiodeId }
+        }
+
+        return verdi
+    }
+
+    private companion object {
+        private val Behov.utbetalingId
+            get() =
+                alleKontekster["utbetalingId"]?.let { UUID.fromString(it) }
+        private val Behov.vedtaksperiodeId
+            get() =
+                alleKontekster["vedtaksperiodeId"]?.let { UUID.fromString(it) }
+        private val Behov.orgnummer get() = alleKontekster["organisasjonsnummer"]
+
+        private val vedtaksperiodebehov = { vedtaksperiodeId: UUID -> { behov: Behov -> behov.vedtaksperiodeId == vedtaksperiodeId } }
+        private val orgnummerbehov = { orgnummer: String -> { behov: Behov -> behov.orgnummer == orgnummer } }
+    }
+}
