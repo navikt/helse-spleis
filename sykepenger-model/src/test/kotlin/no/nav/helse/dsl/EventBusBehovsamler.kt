@@ -129,7 +129,9 @@ internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
         }
     }
 
-    override fun harForespurtHistorikkFraInfotrygd(vedtaksperiodeId: UUID) = behov.relevantEvent<EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent>().isNotEmpty()
+    override fun harForespurtHistorikkFraInfotrygd(vedtaksperiodeId: UUID) = behov.relevantEvent<EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent> {
+        it.vedtaksperiodeId == vedtaksperiodeId
+    }.isNotEmpty()
 
     override fun feriepengerutbetalingsdetaljer(): List<Behovsamler.Feriepengerutbetalingsdetaljer> {
         return behov.relevantEvent<EventSubscription.UtbetalFeriepengerEvent>().map {
