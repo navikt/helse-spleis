@@ -135,38 +135,19 @@ internal class TestRapid : RapidsConnection() {
         private val tilstanderUtenForkastede
             get() = tilstander.filter { it.key !in forkastedeVedtaksperiodeIder }
 
-        private val behov
-            get() = buildMap<UUID, MutableList<Pair<Aktivitet.Behov.Behovtype, JsonNode>>> {
-                events("behov") { behovEvent ->
-                    val vedtaksperiodeIdString = behovEvent.path("vedtaksperiodeId")
-                        .takeIf { id -> !id.isMissingNode }
-                        ?.asText() ?: return@events
-
-                    val id = UUID.fromString(vedtaksperiodeIdString)
-                    this.getOrPut(id) { mutableListOf() }.apply {
-                        behovEvent.path("@behov").onEach {
-                            add(Aktivitet.Behov.Behovtype.valueOf(it.asText()) to behovEvent)
-                        }
-                    }
-                }
+        private fun alleBehovsmeldingerSomInneholder(behovstype: Aktivitet.Behov.Behovtype, filter: (behovsmelding: JsonNode) -> Boolean = { true }) = mutableListOf<JsonNode>().apply {
+            events("behov") { behovsmelding ->
+                val etterspurteBehov = behovsmelding.path("@behov").map { it.asText() }
+                if (behovstype.name in etterspurteBehov && filter(behovsmelding)) this.add(behovsmelding)
             }
+        }.toList()
 
-        private val behovmeldinger
-            get() = mutableListOf<Pair<Aktivitet.Behov.Behovtype, JsonNode>>().apply {
-                events("behov") { message ->
-                    message.path("@behov").onEach {
-                        add(Aktivitet.Behov.Behovtype.valueOf(it.asText()) to message)
-                    }
-                }
-            }
+        private fun sisteBehovsmeldingSomInneholder(behovstype: Aktivitet.Behov.Behovtype, filter: (behovsmelding: JsonNode) -> Boolean = { true }) = alleBehovsmeldingerSomInneholder(behovstype, filter).lastOrNull() ?: fail("Finner ingen behovsmeldinger som inneholder ${behovstype.name}")
 
         private fun events(name: String, onEach: (JsonNode) -> Unit) = messages.forEachIndexed { indeks, _ ->
             val message = melding(indeks)
             if (name == message.path("@event_name").asText()) onEach(message)
         }
-
-        internal fun behovtypeSisteMelding(behovtype: Aktivitet.Behov.Behovtype) =
-            melding(antall() - 1)["@behov"][0].asText() == behovtype.toString()
 
         val vedtaksperiodeteller get() = vedtaksperiodeIder.size
 
@@ -197,16 +178,20 @@ internal class TestRapid : RapidsConnection() {
         fun forkastedeTilstander(vedtaksperiodeId: UUID) = forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()
 
         fun harEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
-            behov[vedtaksperiodeId(vedtaksperiodeIndeks)]?.any { it.first == behovtype } ?: false
+            alleBehovsmeldingerSomInneholder(behovtype) { behovsmelding ->
+                behovsmelding.path("vedtaksperiodeId").asText() == vedtaksperiodeId(vedtaksperiodeIndeks).toString()
+            }.isNotEmpty()
 
         fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
-            behov[vedtaksperiodeId(vedtaksperiodeIndeks)]!!.last { it.first == behovtype }.second
+            sisteBehovsmeldingSomInneholder(behovtype) { behovsmelding ->
+                behovsmelding.path("vedtaksperiodeId").asText() == vedtaksperiodeId(vedtaksperiodeIndeks).toString()
+            }
 
         fun etterspurteBehov(behovtype: Aktivitet.Behov.Behovtype) =
-            behovmeldinger.last { it.first == behovtype }.second
+            sisteBehovsmeldingSomInneholder(behovtype)
 
         fun alleEtterspurteBehov(behovtype: Aktivitet.Behov.Behovtype) =
-            behovmeldinger.filter { it.first == behovtype }.map { it.second }
+            alleBehovsmeldingerSomInneholder(behovtype)
 
         fun varsel(vedtaksperiodeId: UUID, varselkode: Varselkode) = varsler.finn(vedtaksperiodeId, varselkode)
         fun varsler() = varsler

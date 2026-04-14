@@ -8,7 +8,7 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Feriepengeutbetaling
 import no.nav.helse.september
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -69,10 +69,9 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
             )
         )
 
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val behov = testRapid.inspektør.etterspurteBehov(Feriepengeutbetaling)
         val linjer = behov.path("Feriepengeutbetaling").path("linjer")
 
-        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
         assertEquals(1, linjer.size())
         assertEquals("Feriepengeutbetaling", behov.path("@behov")[0].asText())
         assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
@@ -145,10 +144,9 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
             )
         )
 
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val behov = testRapid.inspektør.etterspurteBehov(Feriepengeutbetaling)
         val linjer = behov.path("Feriepengeutbetaling").path("linjer")
 
-        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
         assertEquals(1, linjer.size())
         assertEquals("Feriepengeutbetaling", behov.path("@behov")[0].asText())
         assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
@@ -221,10 +219,9 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
             )
         )
 
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val behov = testRapid.inspektør.etterspurteBehov(Feriepengeutbetaling)
         val linjer = behov.path("Feriepengeutbetaling").path("linjer")
 
-        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
         assertEquals(1, linjer.size())
         assertEquals("Feriepengeutbetaling", behov.path("@behov")[0].asText())
         assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
@@ -298,10 +295,12 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
             )
         )
 
-        val behov1 = testRapid.inspektør.melding(testRapid.inspektør.antall() - 2)
+        val behovene = testRapid.inspektør.alleEtterspurteBehov(Feriepengeutbetaling)
+        assertEquals(2, behovene.size)
+
+        val behov1 = behovene[0]
         val linjer1 = behov1.path("Feriepengeutbetaling").path("linjer")
 
-        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
         assertEquals(1, linjer1.size())
         assertEquals("Feriepengeutbetaling", behov1.path("@behov")[0].asText())
         assertEquals(ORGNUMMER, behov1.path("organisasjonsnummer").asText())
@@ -311,10 +310,9 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals("ENG", linjer1[0].path("satstype").asText())
         assertEquals(1460, linjer1[0].path("sats").asInt())
 
-        val behov2 = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val behov2 = behovene[1]
         val linjer2 = behov2.path("Feriepengeutbetaling").path("linjer")
 
-        assertTrue(testRapid.inspektør.behovtypeSisteMelding(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
         assertEquals(1, linjer2.size())
         assertEquals("Feriepengeutbetaling", behov2.path("@behov")[0].asText())
         assertEquals("321654987", behov2.path("organisasjonsnummer").asText())

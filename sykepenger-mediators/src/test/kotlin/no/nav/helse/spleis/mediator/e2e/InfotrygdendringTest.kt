@@ -7,6 +7,7 @@ import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,7 +21,7 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
     fun `sender infotrygdendring`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendInfotrygdendring()
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val behov = testRapid.inspektør.etterspurteBehov(Sykepengehistorikk)
         assertBehov(behov)
         assertSykepengehistorikkdetaljer(behov)
     }
@@ -77,8 +78,8 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
     }
 
     private fun assertSykepengehistorikkdetaljer(behov: JsonNode) {
-        assertDato(behov.path(Aktivitet.Behov.Behovtype.Sykepengehistorikk.name).path("historikkFom").asText())
-        assertDato(behov.path(Aktivitet.Behov.Behovtype.Sykepengehistorikk.name).path("historikkTom").asText())
+        assertDato(behov.path(Sykepengehistorikk.name).path("historikkFom").asText())
+        assertDato(behov.path(Sykepengehistorikk.name).path("historikkTom").asText())
     }
 
     private fun assertDato(tekst: String) {
@@ -99,7 +100,7 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
         assertDatotid(behov.path("@opprettet").asText())
         assertTrue(id.isNotEmpty())
         Assertions.assertDoesNotThrow { UUID.fromString(id) }
-        assertEquals(Aktivitet.Behov.Behovtype.Sykepengehistorikk.name, behov.path("@behov").firstOrNull()?.asText())
+        assertEquals(Sykepengehistorikk.name, behov.path("@behov").firstOrNull()?.asText())
     }
 
 }

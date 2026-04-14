@@ -117,11 +117,8 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
 
         // If the mediator asks for sykepengehistorikk first, reply with utbetalingshistorikk so flow continues
         if (testRapid.inspektør.harEtterspurteBehov(0, no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk)) {
-            val sykBehov = testRapid.inspektør.etterspurteBehov(0, no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk)
-            val behandlingIdForSyk = sykBehov.path("behandlingId").asText().toUUID()
             val (_, utbetalingshistorikkMsg) = meldingsfabrikk.lagUtbetalingshistorikk(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(0),
-                behandlingId = behandlingIdForSyk,
                 yrkesaktivitetstype = "SELVSTENDIG",
                 orgnummer = "SELVSTENDIG"
             )

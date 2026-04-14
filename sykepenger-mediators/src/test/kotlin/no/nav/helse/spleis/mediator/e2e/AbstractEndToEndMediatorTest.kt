@@ -241,7 +241,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         if (antallVedtaksperioderFørSøknad < antallVedtaksperioderEtterSøknad) {
             val vedtaksperiodeIndeks = antallVedtaksperioderEtterSøknad - 1
             if (testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk)) {
-                sendUtbetalingshistorikk(vedtaksperiodeIndeks, orgnummer = orgnummer)
+                sendUtbetalingshistorikk(vedtaksperiodeIndeks)
             }
         }
         return id.toUUID()
@@ -580,16 +580,15 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     private fun sendUtbetalingshistorikk(
         vedtaksperiodeIndeks: Int,
-        sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(),
-        orgnummer: String? = null
+        sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
         val behov = testRapid.inspektør.etterspurteBehov(Sykepengehistorikk)
         val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
+        val orgnummer = behov.path("organisasjonsnummer").asText()
 
         val (_, message) = meldingsfabrikk.lagUtbetalingshistorikk(
             testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            behandlingId = behov.path("behandlingId").asText().toUUID(),
             yrkesaktivitetstype = yrkesaktivitetstype,
             sykepengehistorikk = sykepengehistorikk,
             orgnummer = orgnummer,

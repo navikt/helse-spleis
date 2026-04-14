@@ -125,13 +125,13 @@ internal class MessageMediatorTest {
 
     @Test
     fun utbetalingshistorikk() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingshistorikk(UUID.randomUUID(), UUID.randomUUID()))
+        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingshistorikk(UUID.randomUUID()))
         assertTrue(hendelseMediator.lestUtbetalingshistorikk)
     }
 
     @Test
     fun `ignorerer gammel utbetalingshistorikk`() {
-        val message = meldingsfabrikk.lagUtbetalingshistorikk(UUID.randomUUID(), UUID.randomUUID(), besvart = LocalDateTime.now().minusHours(2))
+        val message = meldingsfabrikk.lagUtbetalingshistorikk(UUID.randomUUID(), besvart = LocalDateTime.now().minusHours(2))
         testRapid.sendTestMessage(message)
         assertFalse(hendelseMediator.lestUtbetalingshistorikk)
     }

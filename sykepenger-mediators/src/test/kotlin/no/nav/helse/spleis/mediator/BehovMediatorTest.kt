@@ -13,6 +13,7 @@ import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
@@ -83,7 +84,7 @@ class BehovMediatorTest {
     }
 
     @Test
-    fun `grupperer behov`() {
+    fun `grupperer behov`() = Toggle.BehovFraEventBus.disable {
         val aktivitetslogg = Aktivitetslogg()
             .kontekst(eksempelmelding)
 

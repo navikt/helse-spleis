@@ -43,7 +43,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
         assertVedtaksperiodeBehov(
             behov,
             DagpengerV2,
@@ -69,7 +69,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertSykepengehistorikkdetaljer(utbetalinghistorikkbehov)
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
         assertVedtaksperiodeBehov(
             behov,
             ArbeidsavklaringspengerV2,
@@ -100,7 +100,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val behov = testRapid.inspektør.etterspurteBehov(Simulering)
         assertVedtaksperiodeBehov(behov, Simulering)
         assertSimuleringdetaljer(behov)
     }
@@ -117,7 +117,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlagSelvstendig(0)
         sendYtelserSelvstendig(0)
         sendSimuleringSelvstendig(0, SimuleringMessage.Simuleringstatus.OK)
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val behov = testRapid.inspektør.etterspurteBehov(Godkjenning)
         assertVedtaksperiodeBehov(behov, Godkjenning)
         assertGodkjenningdetaljer(behov, erSelvstendig = true, "SELVSTENDIG_NÆRINGSDRIVENDE")
     }
@@ -132,7 +132,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val behov = testRapid.inspektør.etterspurteBehov(Godkjenning)
         assertVedtaksperiodeBehov(behov, Godkjenning)
         assertGodkjenningdetaljer(behov, erSelvstendig = false, "ARBEIDSTAKER")
     }
@@ -148,7 +148,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val behov = testRapid.inspektør.etterspurteBehov(Utbetaling)
         assertUtbetalingBehov(behov, Utbetaling)
         assertUtbetalingdetaljer(behov)
     }
@@ -166,7 +166,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
         sendAnnullering(0)
-        val behov = testRapid.inspektør.melding(testRapid.inspektør.antall() - 1)
+        val behov = testRapid.inspektør.etterspurteBehov(Utbetaling)
         assertUtbetalingBehov(behov, Utbetaling)
         assertUtbetalingdetaljer(behov, true)
     }

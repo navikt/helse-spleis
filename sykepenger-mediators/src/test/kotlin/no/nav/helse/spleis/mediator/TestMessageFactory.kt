@@ -667,7 +667,6 @@ internal class TestMessageFactory(
 
     fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
-        behandlingId: UUID,
         yrkesaktivitetstype: String = "ARBEIDSTAKER",
         sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(),
         orgnummer: String? = null,
@@ -675,7 +674,7 @@ internal class TestMessageFactory(
     ): Pair<String, String> {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
+            behandlingId = null,
             yrkesaktivitetstype = yrkesaktivitetstype,
             behov = listOf("Sykepengehistorikk"),
             løsninger = sykepengehistorikk.toJson(),
@@ -1597,16 +1596,15 @@ internal class TestMessageFactory(
         "behov", ekstraFelter + mutableMapOf(
         "@behov" to behov,
         "fødselsnummer" to fødselsnummer,
-        "yrkesaktivitetstype" to yrkesaktivitetstype,
-        "organisasjonsnummer" to orgnummer,
         "@løsning" to løsninger,
         "@final" to true,
         "@besvart" to besvart
     ).apply {
         vedtaksperiodeId?.let { this["vedtaksperiodeId"] = vedtaksperiodeId.toString() }
         behandlingId?.let { this["behandlingId"] = behandlingId.toString() }
-    }
-    )
+        yrkesaktivitetstype?.let { this["yrkesaktivitetstype"] = yrkesaktivitetstype }
+        orgnummer?.let { this["organisasjonsnummer"] = orgnummer }
+    })
 
     fun lagIdentOpphørt(fnr: String, nyttFnr: String) = nyHendelse(
         "ident_opphørt", mapOf(
