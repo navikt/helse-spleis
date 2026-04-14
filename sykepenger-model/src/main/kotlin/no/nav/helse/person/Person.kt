@@ -489,8 +489,8 @@ class Person private constructor(
         .map { it.grunnlagForFeriepenger() }
         .fold(Feriepengegrunnlagstidslinje(emptyList()), Feriepengegrunnlagstidslinje::plus)
 
-    internal fun trengerInitiellHistorikkFraInfotrygd(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, vedtaksperiodeId: UUID) {
-        infotrygdhistorikk.initiell(aktivitetslogg, eventBus, yrkesaktiviteter.tidligsteDato(), vedtaksperiodeId)
+    internal fun trengerInitiellHistorikkFraInfotrygd(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, vedtaksperiodeId: UUID, yrkesaktivitetsporing: Behandlingsporing.Yrkesaktivitet) {
+        infotrygdhistorikk.initiell(aktivitetslogg, eventBus, yrkesaktiviteter.tidligsteDato(), vedtaksperiodeId, yrkesaktivitetsporing)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {

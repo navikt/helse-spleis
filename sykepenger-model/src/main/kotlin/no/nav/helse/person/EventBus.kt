@@ -246,8 +246,8 @@ class EventBus {
         observers.forEach { it.trengerInformasjonTilBeregning(event) }
     }
 
-    internal fun trengerInitiellHistorikkFraInfotrygd(periode: Periode, vedtaksperiodeId: UUID) {
-        val event = EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent(periode, vedtaksperiodeId)
+    internal fun trengerInitiellHistorikkFraInfotrygd(periode: Periode, vedtaksperiodeId: UUID, yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet) {
+        val event = EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent(periode, vedtaksperiodeId, yrkesaktivitetssporing)
         _events.add(event)
         observers.forEach { it.trengerInitiellHistorikkFraInfotrygd(event) }
     }

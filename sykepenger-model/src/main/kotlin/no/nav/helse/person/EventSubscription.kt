@@ -826,7 +826,8 @@ interface EventSubscription {
 
     data class TrengerInitiellHistorikkFraInfotrygdEvent(
         val periode: Periode,
-        val vedtaksperiodeId: UUID
+        val vedtaksperiodeId: UUID,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
     ): Event
 
     data class TrengerOppdatertHistorikkFraInfotrygdEvent(

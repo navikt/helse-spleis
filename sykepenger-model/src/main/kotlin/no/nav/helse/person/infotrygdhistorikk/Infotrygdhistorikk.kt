@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkUtDto
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.EventBus
@@ -53,9 +54,9 @@ internal class Infotrygdhistorikk private constructor(
         siste.validerNyereOpplysninger(aktivitetslogg, periode)
     }
 
-    internal fun initiell(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, tidligsteDato: LocalDate, vedtaksperiodeId: UUID) {
+    internal fun initiell(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, tidligsteDato: LocalDate, vedtaksperiodeId: UUID, yrkesaktivitetsporing: Behandlingsporing.Yrkesaktivitet) {
         val oppfriskningsperiode = oppfriskningsperiode(tidligsteDato)
-        eventBus.trengerInitiellHistorikkFraInfotrygd(oppfriskningsperiode, vedtaksperiodeId)
+        eventBus.trengerInitiellHistorikkFraInfotrygd(oppfriskningsperiode, vedtaksperiodeId, yrkesaktivitetsporing)
         utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode)
     }
 

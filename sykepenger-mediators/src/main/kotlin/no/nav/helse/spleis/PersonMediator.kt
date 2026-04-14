@@ -739,7 +739,9 @@ internal class PersonMediator(
             "historikkFom" to event.periode.start,
             "historikkTom" to event.periode.endInclusive,
         ))).somJsonMessage(message.meldingsporing.id, mapOf(
-            "vedtaksperiodeId" to event.vedtaksperiodeId
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype
         ))
     }
 

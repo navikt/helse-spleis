@@ -73,8 +73,8 @@ internal class EnBehovslytterSomSerOmBehovErLike() : Behovslytter {
                     // Akkurat dette behovet sendes i to drakter. Initiell historikk og oppdatert historikk.
                     // For initiell historikk er det _veldig_ viktig at vedtaksperiodeId er med ettersom svaret på behovet er driver for at den spesifikke perioden går videre
                     // For oppdatert historikk sendes behovet ut fra personnivå og er ikke koblet til noen spesifikk periode
-                    // .. disse tre ekstra parameterne brukes ikke til noe, så fjerner dem fra sammenligningen.
-                    json.remove(setOf("organisasjonsnummer", "yrkesaktivitetstype", "behandlingId"))
+                    // .. dette ekstra parameteret brukes ikke til noe, så fjerner dem fra sammenligningen.
+                    json.remove(setOf("behandlingId"))
                 }
 
                 // For utbetaling/simulering så kan det sendes flere like behov, men forskjellig fagområder.

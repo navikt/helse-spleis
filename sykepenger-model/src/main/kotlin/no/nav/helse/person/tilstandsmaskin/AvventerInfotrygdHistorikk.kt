@@ -9,8 +9,9 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal data object AvventerInfotrygdHistorikk : Vedtaksperiodetilstand {
     override val type = TilstandType.AVVENTER_INFOTRYGDHISTORIKK
+
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-        vedtaksperiode.person.trengerInitiellHistorikkFraInfotrygd(aktivitetslogg, eventBus, vedtaksperiode.id)
+        vedtaksperiode.person.trengerInitiellHistorikkFraInfotrygd(aktivitetslogg, eventBus, vedtaksperiode.id, vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
     }
 
     override fun gjenopptaBehandling(
@@ -19,11 +20,11 @@ internal data object AvventerInfotrygdHistorikk : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vedtaksperiode.person.trengerInitiellHistorikkFraInfotrygd(aktivitetslogg, eventBus, vedtaksperiode.id)
+        vedtaksperiode.person.trengerInitiellHistorikkFraInfotrygd(aktivitetslogg, eventBus, vedtaksperiode.id, vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        vedtaksperiode.person.trengerInitiellHistorikkFraInfotrygd(aktivitetslogg, eventBus, vedtaksperiode.id)
+        vedtaksperiode.person.trengerInitiellHistorikkFraInfotrygd(aktivitetslogg, eventBus, vedtaksperiode.id, vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
         return null
     }
 }
