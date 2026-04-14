@@ -194,6 +194,7 @@ internal class MessageMediator(
                 hendelseRepository.lagreMelding(message)
                 hendelseMediator.behandle(message, context)
                 hendelseRepository.markerSomBehandlet(message.meldingsporing.id)
+                context.kvitterUt(message)
             }.also { result ->
                 val antallSekunder = result.toDouble(DurationUnit.SECONDS)
                 val label = when {
@@ -209,6 +210,10 @@ internal class MessageMediator(
             if (kritiskFeilSomSkalMedføreAtPoddenDør(err, message)) severeErrorHandler(err, message, context)
             else errorHandler(err, message)
         }
+    }
+
+    private fun MessageContext.kvitterUt(message: HendelseMessage) {
+        this.publish(message.meldingsporing.fødselsnummer, message.somKvittering())
     }
 
     private fun kritiskFeilSomSkalMedføreAtPoddenDør(err: Exception, message: HendelseMessage): Boolean {

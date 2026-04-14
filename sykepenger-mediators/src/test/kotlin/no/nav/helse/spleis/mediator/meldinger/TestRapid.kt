@@ -28,7 +28,7 @@ internal class TestRapid : RapidsConnection() {
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()
-    internal val inspektør get() = RapidInspektør(messages.toList())
+    internal val inspektør get() = RapidInspektør(messages.toList().filterNot { it.second.contains("melding_om_melding_håndtert") })
     private val observers = mutableListOf<TestRapidObserver>()
 
     internal fun observer(observer: TestRapidObserver) {
