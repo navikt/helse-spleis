@@ -5,14 +5,15 @@ import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spill_av_im.Forespørsel
+import no.nav.helse.spill_av_im.FørsteFraværsdag
 import no.nav.helse.spill_av_im.Periode
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 
 internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
     private val behov = mutableListOf<BehovEvent>()
     private val tilstander = mutableMapOf<UUID, TilstandType>()
-    private val replays = mutableSetOf<Forespørsel>()
     private val hånderteInntektsmeldinger = mutableSetOf<UUID>()
 
     override fun registrerBehov(aktivitetslogg: Aktivitetslogg) {}
@@ -30,8 +31,10 @@ internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
 
     private fun kvitterVedtaksperiode(vedtaksperiodeId: UUID) {
         val vedtaksperiodebehov = behov
-            // kvitterer ikke ut utbetalingsbehov som følge av at vedtaksperioden endrer tilstand
+            // kvitterer ikke ut utbetalingsbehov som følge av at vedtaksperioden endrer tilstand, det gjøres som følge av utbetaling-events
             .filterNot { (event) -> event is EventSubscription.UtbetalingEvent }
+            // kvitterer ikke ut replay forespørsler, det gjøres når det håndteres replay
+            .filterNot { (event) -> event is EventSubscription.TrengerInntektsmeldingReplayEvent }
             .filter { it.vedtaksperiodeId == vedtaksperiodeId }
             // TrengerHistorikkFraInfotrygdEvent er bare knagget på person, med kvitterer de ut når vedtaksperioden endrer tilstand
             .plus(behov.relevanteEventMedMetadata<EventSubscription.TrengerHistorikkFraInfotrygdEvent>())
@@ -40,10 +43,6 @@ internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
         log.log("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.navn }})")
         behov.removeAll(vedtaksperiodebehov)
         log.log(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.navn }})")
-
-        if (replays.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }) {
-            log.log("-> Vedtaksperioden ba om replay, men det ble ikke utført")
-        }
     }
 
     override fun utbetalingUtbetalt(event: EventSubscription.UtbetalingUtbetaltEvent) {
@@ -56,20 +55,6 @@ internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
         behov.removeAll { it.utbetalingId == event.utbetalingId }
     }
 
-    override fun inntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent) {
-        replays.add(
-            Forespørsel(
-                fnr = event.opplysninger.personidentifikator.toString(),
-                orgnr = event.opplysninger.arbeidstaker.organisasjonsnummer,
-                vedtaksperiodeId = event.opplysninger.vedtaksperiodeId,
-                skjæringstidspunkt = event.opplysninger.skjæringstidspunkt,
-                førsteFraværsdager = event.opplysninger.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.arbeidstaker.organisasjonsnummer, it.førsteFraværsdag) },
-                sykmeldingsperioder = event.opplysninger.sykmeldingsperioder.map { Periode(it.start, it.endInclusive) },
-                egenmeldinger = event.opplysninger.egenmeldingsperioder.map { Periode(it.start, it.endInclusive) },
-                harForespurtArbeidsgiverperiode = EventSubscription.Arbeidsgiverperiode in event.opplysninger.forespurteOpplysninger
-            )
-        )
-    }
 
     override fun inntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent) {
         hånderteInntektsmeldinger.add(event.meldingsreferanseId)
@@ -96,7 +81,7 @@ internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
         .mapValues { (_, utbetalingsdetaljer) -> utbetalingsdetaljer.last() }
         .values
         .toList()
-        .also { if (it.isEmpty()) error("Forventet at det skal være spurt om utbetaling, men det var det ikke!") }
+        .also { if (it.isEmpty()) fail("Forventet at det skal være spurt om utbetaling, men det var det ikke!") }
     }
 
     override fun simuleringsdetaljer(vedtaksperiodeId: UUID): List<Behovsamler.Simuleringsdetaljer> {
@@ -107,7 +92,7 @@ internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
                 fagsystemId = it.oppdragsdetaljer.fagsystemId,
                 fagområde = it.oppdragsdetaljer.fagområde
             )
-        }.also { if (it.isEmpty()) error("Forventet at det skal være spurt om simulering, men det var det ikke!") }
+        }.also { if (it.isEmpty()) fail("Forventet at det skal være spurt om simulering, men det var det ikke!") }
     }
 
     override fun godkjenningsdetaljer(vedtaksperiodeId: UUID): Behovsamler.Godkjenningsdetaljer {
@@ -152,19 +137,24 @@ internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
             Behovsamler.Feriepengerutbetalingsdetaljer(
                 utbetalingId = it.utbetalingId
             )
-        }.also { if (it.isEmpty()) error("Forventet at det skal være spurt om feriepengerutbetaling, men det var det ikke!") }
+        }.also { if (it.isEmpty()) fail("Forventet at det skal være spurt om feriepengerutbetaling, men det var det ikke!") }
     }
+
+    override fun inntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent) = registrerBehov(event, vedtaksperiodeId = event.opplysninger.vedtaksperiodeId)
+
+    private fun trengerInntektsmeldingReplayEvents() = behov.relevanteEventMedMetadata<EventSubscription.TrengerInntektsmeldingReplayEvent>().toSet()
 
     override fun <T> håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
         operasjon: () -> T?,
         håndterForespørsel: (forespørsel: Forespørsel, alleredeHåndterteInntektsmeldinger: Set<UUID>) -> Unit
     ): T? {
-        val forespørslerFør = replays.toSet()
+        val eventsFør = trengerInntektsmeldingReplayEvents()
         val verdi = operasjon()
-        val nyeForespørsler = replays.toSet() - forespørslerFør
-        nyeForespørsler.forEach { forespørsel ->
+        val nyeEvents = trengerInntektsmeldingReplayEvents() - eventsFør
+        nyeEvents.forEach { nyttEvent ->
+            val forespørsel = (nyttEvent.event as EventSubscription.TrengerInntektsmeldingReplayEvent).somForespørsel()
             håndterForespørsel(forespørsel, hånderteInntektsmeldinger.toSet())
-            replays.removeAll { it.vedtaksperiodeId == forespørsel.vedtaksperiodeId }
+            behov.remove(nyttEvent)
         }
         return verdi
     }
@@ -198,5 +188,16 @@ internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
             assertNotNull(tingen, feilmelding)
             return tingen!!
         }
+
+        fun EventSubscription.TrengerInntektsmeldingReplayEvent.somForespørsel() = Forespørsel(
+            fnr = opplysninger.personidentifikator.toString(),
+            orgnr = opplysninger.arbeidstaker.organisasjonsnummer,
+            vedtaksperiodeId = opplysninger.vedtaksperiodeId,
+            skjæringstidspunkt = opplysninger.skjæringstidspunkt,
+            førsteFraværsdager = opplysninger.førsteFraværsdager.map { FørsteFraværsdag(it.arbeidstaker.organisasjonsnummer, it.førsteFraværsdag) },
+            sykmeldingsperioder = opplysninger.sykmeldingsperioder.map { Periode(it.start, it.endInclusive) },
+            egenmeldinger = opplysninger.egenmeldingsperioder.map { Periode(it.start, it.endInclusive) },
+            harForespurtArbeidsgiverperiode = EventSubscription.Arbeidsgiverperiode in opplysninger.forespurteOpplysninger
+        )
     }
 }
