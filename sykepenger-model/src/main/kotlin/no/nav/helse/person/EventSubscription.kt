@@ -824,7 +824,12 @@ interface EventSubscription {
         val skjæringstidspunkt: LocalDate
     ): Event
 
-    data class TrengerHistorikkFraInfotrygdEvent(
+    data class TrengerInitiellHistorikkFraInfotrygdEvent(
+        val periode: Periode,
+        val vedtaksperiodeId: UUID
+    ): Event
+
+    data class TrengerOppdatertHistorikkFraInfotrygdEvent(
         val periode: Periode
     ): Event
 
@@ -940,7 +945,8 @@ interface EventSubscription {
     fun benyttetGrunnlagsdataForBeregning(event: BenyttetGrunnlagsdataForBeregningEvent) {}
     fun trengerInformasjonTilVilkårsprøving(event: TrengerInformasjonTilVilkårsprøvingEvent) {}
     fun trengerInformasjonTilBeregning(event: TrengerInformasjonTilBeregningEvent) {}
-    fun trengerHistorikkFraInfotrygd(event: TrengerHistorikkFraInfotrygdEvent) {}
+    fun trengerInitiellHistorikkFraInfotrygd(event: TrengerInitiellHistorikkFraInfotrygdEvent) {}
+    fun trengerOppdatertHistorikkFraInfotrygd(event: TrengerOppdatertHistorikkFraInfotrygdEvent) {}
     fun utbetalFeriepenger(event: UtbetalFeriepengerEvent) {}
     fun utbetal(event: UtbetalingEvent) {}
     fun simuler(event: SimuleringEvent) {}

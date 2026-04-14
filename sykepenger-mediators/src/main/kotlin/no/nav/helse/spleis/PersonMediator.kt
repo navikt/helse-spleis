@@ -77,7 +77,8 @@ internal class PersonMediator(
                     is EventSubscription.SelvstendigUtbetaltEtterVentetidEvent -> mapSelvstendigUtbetaltEtterVentetid(event) // ✅ Er selvstendig-spesifikk, så den er grei
                     is EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent -> mapTrengerInformasjonTilVilkårsprøving(event)
                     is EventSubscription.TrengerInformasjonTilBeregningEvent -> mapTrengerInformasjonTilBeregning(event)
-                    is EventSubscription.TrengerHistorikkFraInfotrygdEvent -> mapTrengerHistorikkFraInfotrygd(event) // ✅ Meldingen er på person-nivå, så den er grei
+                    is EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent -> mapTrengerInitiellHistorikkFraInfotrygd(event)
+                    is EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent -> mapTrengerOppdatertHistorikkFraInfotrygd(event) // ✅ Meldingen er på person-nivå, så den er grei
                     is EventSubscription.UtbetalFeriepengerEvent -> mapUtbetalFeriepenger(event) // ✅ Er arbeidstaker-spesifikk
                     is EventSubscription.SimuleringEvent -> mapSimulering(event)
                     is EventSubscription.UtbetalingEvent -> mapUtbetaling(event)
@@ -733,7 +734,16 @@ internal class PersonMediator(
         ))
     }
 
-    private fun mapTrengerHistorikkFraInfotrygd(event: EventSubscription.TrengerHistorikkFraInfotrygdEvent): JsonMessage {
+    private fun mapTrengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent): JsonMessage {
+        return listOf(Behov(Behov.Behovstype.Sykepengehistorikk, mapOf(
+            "historikkFom" to event.periode.start,
+            "historikkTom" to event.periode.endInclusive,
+        ))).somJsonMessage(message.meldingsporing.id, mapOf(
+            "vedtaksperiodeId" to event.vedtaksperiodeId
+        ))
+    }
+
+    private fun mapTrengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent): JsonMessage {
         return listOf(Behov(Behov.Behovstype.Sykepengehistorikk, mapOf(
             "historikkFom" to event.periode.start,
             "historikkTom" to event.periode.endInclusive

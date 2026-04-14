@@ -246,10 +246,16 @@ class EventBus {
         observers.forEach { it.trengerInformasjonTilBeregning(event) }
     }
 
-    internal fun trengerHistorikkFraInfotrygd(periode: Periode) {
-        val event = EventSubscription.TrengerHistorikkFraInfotrygdEvent(periode)
+    internal fun trengerInitiellHistorikkFraInfotrygd(periode: Periode, vedtaksperiodeId: UUID) {
+        val event = EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent(periode, vedtaksperiodeId)
         _events.add(event)
-        observers.forEach { it.trengerHistorikkFraInfotrygd(event) }
+        observers.forEach { it.trengerInitiellHistorikkFraInfotrygd(event) }
+    }
+
+    internal fun trengerOppdatertHistorikkFraInfotrygd(periode: Periode) {
+        val event = EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent(periode)
+        _events.add(event)
+        observers.forEach { it.trengerOppdatertHistorikkFraInfotrygd(event) }
     }
 
     internal fun utbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent) {

@@ -36,8 +36,8 @@ internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
             // kvitterer ikke ut replay forespørsler, det gjøres når det håndteres replay
             .filterNot { (event) -> event is EventSubscription.TrengerInntektsmeldingReplayEvent }
             .filter { it.vedtaksperiodeId == vedtaksperiodeId }
-            // TrengerHistorikkFraInfotrygdEvent er bare knagget på person, med kvitterer de ut når vedtaksperioden endrer tilstand
-            .plus(behov.relevanteEventMedMetadata<EventSubscription.TrengerHistorikkFraInfotrygdEvent>())
+            // TrengerOppdatertHistorikkFraInfotrygdEvent er bare knagget på person, med kvitterer de ut når vedtaksperioden endrer tilstand
+            .plus(behov.relevanteEventMedMetadata<EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent>())
             .takeUnless { it.isEmpty() } ?: return
 
         log.log("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.navn }})")
@@ -54,7 +54,6 @@ internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
     override fun annullering(event: EventSubscription.UtbetalingAnnullertEvent) {
         behov.removeAll { it.utbetalingId == event.utbetalingId }
     }
-
 
     override fun inntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent) {
         hånderteInntektsmeldinger.add(event.meldingsreferanseId)
@@ -130,7 +129,7 @@ internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
         }
     }
 
-    override fun harForespurtHistorikkFraInfotrygd(vedtaksperiodeId: UUID) = behov.relevantEvent<EventSubscription.TrengerHistorikkFraInfotrygdEvent>().isNotEmpty()
+    override fun harForespurtHistorikkFraInfotrygd(vedtaksperiodeId: UUID) = behov.relevantEvent<EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent>().isNotEmpty()
 
     override fun feriepengerutbetalingsdetaljer(): List<Behovsamler.Feriepengerutbetalingsdetaljer> {
         return behov.relevantEvent<EventSubscription.UtbetalFeriepengerEvent>().map {
@@ -163,7 +162,9 @@ internal class EventBusBehovsamler(private val log: DeferredLog): Behovsamler {
 
     override fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) = registrerBehov(event, vedtaksperiodeId = event.vedtaksperiodeId)
 
-    override fun trengerHistorikkFraInfotrygd(event: EventSubscription.TrengerHistorikkFraInfotrygdEvent) = registrerBehov(event)
+    override fun trengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent) = registrerBehov(event, vedtaksperiodeId = event.vedtaksperiodeId)
+
+    override fun trengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent) = registrerBehov(event)
 
     override fun trengerGodkjenning(event: EventSubscription.GodkjenningEvent) = registrerBehov(event, vedtaksperiodeId = event.vedtaksperiodeId, utbetalingId = event.utbetalingId)
 

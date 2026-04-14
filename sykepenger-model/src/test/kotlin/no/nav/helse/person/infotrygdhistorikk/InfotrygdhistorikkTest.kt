@@ -37,7 +37,7 @@ internal class InfotrygdhistorikkTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var eventBus: EventBus
     private fun EventBus.detEvenesteEventetSomMåVæreTrengerHistorikkFraInfotrygd() =
-        checkNotNull(events.singleOrNull() as? EventSubscription.TrengerHistorikkFraInfotrygdEvent) { "Det var mystisk!" }
+        checkNotNull(events.singleOrNull() as? EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent) { "Det var mystisk!" }
 
     @BeforeEach
     fun setup() {
