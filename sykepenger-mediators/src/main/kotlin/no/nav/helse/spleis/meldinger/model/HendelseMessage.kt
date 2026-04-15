@@ -63,7 +63,7 @@ internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivit
     internal fun somKvittering(): String = """{
         "@event_name": "melding_om_melding_håndtert",
         "originalt_event_name" : "$navn",
-        "original_id" : "${meldingsporing.id}",
+        "original_id" : "${meldingsporing.id.id}",
         "fødselsnummer" : "${meldingsporing.fødselsnummer}"
     }""".trimIndent()
 }
