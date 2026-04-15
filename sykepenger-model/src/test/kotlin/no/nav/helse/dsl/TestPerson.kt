@@ -83,10 +83,11 @@ internal class TestPerson(
 
     private lateinit var forrigeAktivitetslogg: Aktivitetslogg
     internal val personlogg = Aktivitetslogg()
-    private val behovsamler: Behovsamler = when (Toggle.BehovFraEventBus.enabled) {
-        true -> EventBusBehovsamler(deferredLog)
-        false -> AktivitetsloggBehovsamler(deferredLog)
+    private val behovsoppsamler = when (Toggle.BehovFraEventBus.enabled) {
+        true -> Behovsoppsamler.FraEventBus(deferredLog)
+        false -> Behovsoppsamler.FraAktivitetslogg(deferredLog)
     }
+    private val behovshåndterer = Behovshåndterer(behovsoppsamler)
     private val varslersamler = Varslersamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk()
     private val vedtaksperiodesamler = Vedtaksperiodesamler(person)
@@ -94,7 +95,8 @@ internal class TestPerson(
     private val eventBus = EventBus().apply {
         register(ugyldigeSituasjoner)
         register(vedtaksperiodesamler)
-        register(behovsamler)
+        register(behovsoppsamler)
+        register(behovshåndterer)
         register(observatør)
     }
 
@@ -123,15 +125,15 @@ internal class TestPerson(
         forrigeAktivitetslogg = Aktivitetslogg(personlogg)
         try {
             person.håndter(eventBus, this, forrigeAktivitetslogg)
+            (behovsoppsamler as? Behovsoppsamler.FraAktivitetslogg)?.registrerFra(forrigeAktivitetslogg)
         } finally {
             varslersamler.registrerVarsler(forrigeAktivitetslogg.varsel)
-            behovsamler.registrerBehov(forrigeAktivitetslogg)
         }
         return this
     }
 
     internal fun validerState(assertetVarsler: Varslersamler.AssertetVarsler) {
-        behovsamler.loggUbesvarteBehov()
+        behovsoppsamler.loggUbesvarteBehov()
         varslersamler.bekreftVarslerAssertet(assertetVarsler)
         ugyldigeSituasjoner.bekreftVarselHarKnytningTilVedtaksperiode(personlogg.varsel)
     }
@@ -170,7 +172,7 @@ internal class TestPerson(
         orgnummer: String,
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT
     ) {
-        val (utbetalingId) = behovsamler.feriepengerutbetalingsdetaljer().last()
+        val (utbetalingId) = behovshåndterer.feriepengerutbetalingsdetaljer().last()
 
         FeriepengeutbetalingHendelse(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -273,7 +275,7 @@ internal class TestPerson(
             harOppgittOpprettholdtInntekt: Boolean? = null,
             harOppgittOppholdIUtlandet: Boolean? = null
         ) =
-            behovsamler.håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
+            behovshåndterer.håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
                 operasjon = {
                     vedtaksperiodesamler.fangVedtaksperiode(this.orgnummer) {
                         arbeidsgiverHendelsefabrikk.lagSøknad(
@@ -300,7 +302,7 @@ internal class TestPerson(
                             harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet
                         ).håndter(Person::håndterSøknad)
                     }?.also {
-                        if (behovsamler.harForespurtHistorikkFraInfotrygd(it)) {
+                        if (behovshåndterer.harForespurtHistorikkFraInfotrygd(it)) {
                             arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikk(it).håndter(Person::håndterUtbetalingshistorikk)
                         }
                     }
@@ -613,7 +615,7 @@ internal class TestPerson(
                 }
             }
 
-            behovsamler.bekreftForespurtVilkårsprøving(vedtaksperiodeId)
+            behovshåndterer.bekreftForespurtVilkårsprøving(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagVilkårsgrunnlag(
                 vedtaksperiodeId,
                 skjæringstidspunkt,
@@ -639,7 +641,7 @@ internal class TestPerson(
             andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList(),
             orgnummer: String = "aa"
         ) {
-            behovsamler.bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId)
+            behovshåndterer.bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, selvstendigForsikring, andreYtelser)
                 .håndter(Person::håndterYtelser)
         }
@@ -658,7 +660,7 @@ internal class TestPerson(
             andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList(),
             orgnummer: String = "aa"
         ) {
-            behovsamler.bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId)
+            behovshåndterer.bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, null, andreYtelser)
                 .håndter(Person::håndterYtelser)
         }
@@ -672,20 +674,20 @@ internal class TestPerson(
             simuleringOK: Boolean = true,
             simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
         ) {
-            behovsamler.simuleringsdetaljer(vedtaksperiodeId).forEach { (vedtaksperiodeId, utbetalingId, fagsystemId, fagområde) ->
+            behovshåndterer.simuleringsdetaljer(vedtaksperiodeId).forEach { (vedtaksperiodeId, utbetalingId, fagsystemId, fagområde) ->
                 arbeidsgiverHendelsefabrikk.lagSimulering(vedtaksperiodeId, utbetalingId, fagsystemId, fagområde, simuleringOK, simuleringsresultat)
                     .håndter(Person::håndterSimulering)
             }
         }
 
         internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true, automatiskBehandling: Boolean = true, godkjenttidspunkt: LocalDateTime = LocalDateTime.now(), utbetalingIdILøsning: UUID? = null) {
-            val (behandlingId, utbetalingId) = behovsamler.godkjenningsdetaljer(vedtaksperiodeId)
+            val (behandlingId, utbetalingId) = behovshåndterer.godkjenningsdetaljer(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagUtbetalingsgodkjenning(vedtaksperiodeId, behandlingId, godkjent, automatiskBehandling, utbetalingIdILøsning ?: utbetalingId, godkjenttidspunkt)
                 .håndter(Person::håndterUtbetalingsgodkjenning)
         }
 
         internal fun håndterUtbetalingshistorikkEtterInfotrygdendring(vararg utbetalinger: Infotrygdperiode) {
-            behovsamler.håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
+            behovshåndterer.håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
                 operasjon = {
                     arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger.toList())
                         .håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
@@ -695,13 +697,13 @@ internal class TestPerson(
         }
 
         internal fun håndterVedtakFattet(vedtaksperiodeId: UUID, automatisert: Boolean = true, vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()) {
-            val (behandlingId, utbetalingId) = behovsamler.godkjenningsdetaljer(vedtaksperiodeId)
+            val (behandlingId, utbetalingId) = behovshåndterer.godkjenningsdetaljer(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagVedtakFattet(vedtaksperiodeId, behandlingId, utbetalingId, automatisert, vedtakFattetTidspunkt)
                 .håndter(Person::håndterVedtakFattet)
         }
 
         internal fun håndterKanIkkeBehandlesHer(vedtaksperiodeId: UUID, automatisert: Boolean = true) {
-            val (behandlingId, utbetalingId) = behovsamler.godkjenningsdetaljer(vedtaksperiodeId)
+            val (behandlingId, utbetalingId) = behovshåndterer.godkjenningsdetaljer(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagKanIkkeBehandlesHer(vedtaksperiodeId, behandlingId, utbetalingId, automatisert)
                 .håndter(Person::håndterKanIkkeBehandlesHer)
         }
@@ -717,14 +719,14 @@ internal class TestPerson(
         }
 
         internal fun håndterUtbetalt(status: Oppdragstatus, fagsystemId: String) {
-            behovsamler.utbetalingsdetaljer(orgnummer).lastOrNull { it.fagsystemId == fagsystemId }?.also { (vedtaksperiodeId, behandlingId, utbetalingId) ->
+            behovshåndterer.utbetalingsdetaljer(orgnummer).lastOrNull { it.fagsystemId == fagsystemId }?.also { (vedtaksperiodeId, behandlingId, _ , utbetalingId) ->
                 arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(vedtaksperiodeId, behandlingId, utbetalingId, fagsystemId, status)
                     .håndter(Person::håndterUtbetalingHendelse)
             }
         }
 
         internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT) {
-            behovsamler.utbetalingsdetaljer(orgnummer).forEach { utbetalingsdetaljer ->
+            behovshåndterer.utbetalingsdetaljer(orgnummer).forEach { utbetalingsdetaljer ->
                 arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(utbetalingsdetaljer.vedtaksperiodeId, utbetalingsdetaljer.behandlingId, utbetalingsdetaljer.utbetalingId, utbetalingsdetaljer.fagsystemId, status)
                     .håndter(Person::håndterUtbetalingHendelse)
             }
@@ -747,7 +749,7 @@ internal class TestPerson(
             nåtidspunkt: LocalDateTime = LocalDateTime.now(),
             flagg: Set<String> = emptySet()
         ) {
-            behovsamler.håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
+            behovshåndterer.håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
                 operasjon = {
                     arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt, nåtidspunkt, flagg = flagg)
                         .håndter(Person::håndterPåminnelse)
