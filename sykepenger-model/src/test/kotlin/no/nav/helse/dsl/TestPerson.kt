@@ -26,6 +26,7 @@ import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
@@ -267,6 +268,8 @@ internal class TestPerson(
             sykmeldingSkrevet: LocalDateTime? = null,
             orgnummer: String = "",
             søknadId: UUID = UUID.randomUUID(),
+            korrigerer: UUID? = null,
+            opprinneligSendt: LocalDate? = null,
             utenlandskSykmelding: Boolean = false,
             arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER,
             sendTilGosys: Boolean = false,
@@ -290,6 +293,8 @@ internal class TestPerson(
                     sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
                     sykmeldingSkrevet = sykmeldingSkrevet,
                     id = søknadId,
+                    korrigerer = korrigerer,
+                    opprinneligSendt = opprinneligSendt,
                     yrkesskade = yrkesskade,
                     utenlandskSykmelding = utenlandskSykmelding,
                     arbeidssituasjon = arbeidssituasjon,
@@ -677,6 +682,10 @@ internal class TestPerson(
                 .håndter(Person::håndterUtbetalingsgodkjenning)
         }
 
+        internal fun håndterInfotrygdendring() =
+            Infotrygdendring(MeldingsreferanseId(UUID.randomUUID()))
+                .håndter(Person::håndterInfotrygdendringer)
+
         internal fun håndterUtbetalingshistorikkEtterInfotrygdendring(vararg utbetalinger: Infotrygdperiode) =
             arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger.toList())
                 .håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
@@ -761,8 +770,8 @@ internal class TestPerson(
             perioderMedMinimumSykdomsgradVurdertIkkeOK.toSet()
         ).håndter(Person::håndterMinimumSykdomsgradsvurderingMelding)
 
-        internal fun håndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =
-            arbeidsgiverHendelsefabrikk.lagHåndterOverstyrTidslinje(overstyringsdager)
+        internal fun håndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>, meldingsreferanseId: UUID = UUID.randomUUID()) =
+            arbeidsgiverHendelsefabrikk.lagHåndterOverstyrTidslinje(overstyringsdager, meldingsreferanseId)
                 .håndter(Person::håndterOverstyrTidslinje)
 
         internal fun håndterOverstyrInntekt(

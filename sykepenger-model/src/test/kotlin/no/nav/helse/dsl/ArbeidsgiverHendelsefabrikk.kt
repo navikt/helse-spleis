@@ -247,7 +247,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             meldingsreferanseId = MeldingsreferanseId(id),
             element = InfotrygdhistorikkElement.opprett(
                 oppdatert = besvart,
-                hendelseId = MeldingsreferanseId(UUID.randomUUID()),
+                hendelseId = MeldingsreferanseId(id),
                 perioder = utbetalinger
             ),
             besvart = LocalDateTime.now()
@@ -475,9 +475,9 @@ internal class ArbeidsgiverHendelsefabrikk(
             force = force
         )
 
-    internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =
+    internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>, meldingsreferanseId: UUID = UUID.randomUUID()) =
         OverstyrTidslinje(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+            meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
             behandlingsporing = behandlingsporing,
             dager = overstyringsdager,
             opprettet = LocalDateTime.now()

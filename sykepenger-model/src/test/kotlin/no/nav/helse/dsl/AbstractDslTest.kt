@@ -289,6 +289,12 @@ internal abstract class AbstractDslTest {
         testperson.nyPeriode(periode, *orgnummer, grad = grad)
     }
 
+    protected fun TestPerson.TestArbeidsgiver.nyPeriode(periode: Periode, grad: Prosentdel = 100.prosent, søknadId: UUID = UUID.randomUUID()): UUID {
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
+        return håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad), søknadId = søknadId)
+            ?: error("Det ble ikke opprettet noen vedtaksperiode.")
+    }
+
     /* alternative metoder fremfor å lage en arbeidsgiver-blokk hver gang */
     protected fun String.håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode, sykmeldingSkrevet: LocalDateTime? = null, mottatt: LocalDateTime? = null) =
         this { håndterSykmelding(*sykmeldingsperiode, sykmeldingSkrevet = sykmeldingSkrevet, mottatt = mottatt) }

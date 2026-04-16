@@ -14,6 +14,12 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyPeriode
+import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -31,29 +37,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.september
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
-import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
-import no.nav.helse.spleis.e2e.assertSisteTilstand
-import no.nav.helse.spleis.e2e.assertTilstand
-import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.assertVarsler
-import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.håndterArbeidsgiveropplysninger
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterPåminnelse
-import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSykmelding
-import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalt
-import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
-import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.nullstillTilstandsendringer
-import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.spleis.e2e.tilGodkjent
-import no.nav.helse.spleis.e2e.tilSimulering
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
@@ -64,478 +48,541 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class KorrigertSøknadTest : AbstractEndToEndTest() {
+internal class KorrigertSøknadTest : AbstractDslTest() {
 
     @Test
     fun `Avventer inntektsmelding når korrigerende søknad flytter skjæringstidspunkt - brukt inntekter fra a-ordningen`() {
-        nyttVedtak(januar)
-        forlengVedtak(februar)
-        forlengVedtak(mars)
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            forlengVedtak(mars)
 
-        håndterSøknad(10.april til 30.april)
-        håndterPåminnelse(
-            4.vedtaksperiode,
-            AVVENTER_INNTEKTSMELDING,
-            tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
-            nå = 10.februar(2025).atStartOfDay()
-        )
-        håndterVilkårsgrunnlag(4.vedtaksperiode)
-        håndterYtelser(4.vedtaksperiode)
-        håndterSimulering(4.vedtaksperiode)
-        assertVarsel(Varselkode.RV_IV_10, 4.vedtaksperiode.filter())
-        assertSisteTilstand(4.vedtaksperiode, AVVENTER_GODKJENNING)
+            håndterSøknad(10.april til 30.april)
+            håndterPåminnelse(
+                4.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
+                nåtidspunkt = 10.februar(2025).atStartOfDay()
+            )
+            håndterVilkårsgrunnlag(4.vedtaksperiode)
+            håndterYtelser(4.vedtaksperiode)
+            håndterSimulering(4.vedtaksperiode)
+            assertVarsel(Varselkode.RV_IV_10, 4.vedtaksperiode.filter())
+            assertSisteTilstand(4.vedtaksperiode, AVVENTER_GODKJENNING)
 
-        håndterSøknad(Sykdom(10.april, 30.april, 100.prosent), Ferie(10.april, 10.april))
-        assertSisteTilstand(4.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            håndterSøknad(Sykdom(10.april, 30.april, 100.prosent), Ferie(10.april, 10.april))
+            assertSisteTilstand(4.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        }
     }
 
     @Test
     fun `Gjenbruker inntekt når korrigerende søknad flytter skjæringstidspunkt - fått IM for originalt skjæringstidspunkt`() {
-        nyttVedtak(januar)
-        forlengVedtak(februar)
-        forlengVedtak(mars)
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            forlengVedtak(mars)
 
-        håndterSøknad(10.april til 30.april)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.april)
-        håndterVilkårsgrunnlag(4.vedtaksperiode)
-        håndterYtelser(4.vedtaksperiode)
-        håndterSimulering(4.vedtaksperiode)
+            håndterSøknad(10.april til 30.april)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.april)
+            håndterVilkårsgrunnlag(4.vedtaksperiode)
+            håndterYtelser(4.vedtaksperiode)
+            håndterSimulering(4.vedtaksperiode)
 
-        assertSisteTilstand(4.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertSisteTilstand(4.vedtaksperiode, AVVENTER_GODKJENNING)
 
-        håndterSøknad(Sykdom(10.april, 30.april, 100.prosent), Ferie(10.april, 10.april))
-        assertSisteTilstand(4.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            håndterSøknad(Sykdom(10.april, 30.april, 100.prosent), Ferie(10.april, 10.april))
+            assertSisteTilstand(4.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        }
     }
 
     @Test
     fun `korrigerer med arbeid gjenopptatt etter utbetalt`() {
-        nyttVedtak(januar)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(1.januar, 31.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-        assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-        assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAA", inspektør.sykdomstidslinje.toShortString())
-        assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(1.januar, 31.januar))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAA", inspektør.sykdomstidslinje.toShortString())
+            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        }
     }
 
     @Test
     fun `korrigert søknad i til utbetaling - utbetaler først, så revurdere`() {
-        tilGodkjent(3.januar til 26.januar, 100.prosent)
+        a1 {
+            val id = tilGodkjenning(3.januar til 26.januar, 100.prosent)
+            håndterUtbetalingsgodkjenning(id)
+        }
         nullstillTilstandsendringer()
-        håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
-        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
+        a1 {
+            håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
+            assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
+        }
     }
 
     @Test
     fun `korrigert søknad i avventer simulering - forkaster utbetalingen`() {
-        tilSimulering(3.januar til 26.januar, 100.prosent)
+        a1 {
+            val id = nyPeriode(3.januar til 26.januar, 100.prosent)
+            håndterInntektsmelding(listOf(3.januar til 18.januar))
+            håndterVilkårsgrunnlag(id)
+            håndterYtelser(id)
+        }
         nullstillTilstandsendringer()
-        håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
-        assertEquals(FORKASTET, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
-        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        a1 {
+            håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
+            assertEquals(FORKASTET, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
+            assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        }
     }
 
     @Test
     fun `Arbeidsdag i søknad nr 2 kaster ikke ut perioden`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(januar)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(januar)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        }
     }
 
     @Test
     fun `Overlappende søknad som er lengre tilbake støttes ikke`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar))
-        håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
-        håndterSøknad(januar)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar))
+            håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        }
     }
 
     @Test
     fun `Overlappende søknad som er lengre frem støttes ikke`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar))
-        håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 1.februar, 100.prosent))
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            TIL_INFOTRYGD
-        )
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar))
+            håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 1.februar, 100.prosent))
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                TIL_INFOTRYGD
+            )
+        }
     }
 
     @Test
     fun `Korrigerer fridager til sykedag`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Permisjon(30.januar, 30.januar), Ferie(31.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), korrigerer = søknadId, opprinneligSendt = 1.februar)
-        inspektør.sykdomstidslinje.inspektør.also {
-            assertTrue(it[30.januar] is Sykedag)
-            assertTrue(it[31.januar] is Sykedag)
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Permisjon(30.januar, 30.januar), Ferie(31.januar, 31.januar))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            inspektør.sykdomstidslinje.inspektør.also {
+                assertTrue(it[30.januar] is Sykedag)
+                assertTrue(it[31.januar] is Sykedag)
+            }
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
         }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
     }
 
     @Test
     fun `Korrigerer sykedag til feriedag`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(januar)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Permisjon(30.januar, 30.januar), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
-        inspektør.sykdomstidslinje.inspektør.also {
-            assertTrue(it[30.januar] is Permisjonsdag)
-            assertTrue(it[31.januar] is Feriedag)
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(januar)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Permisjon(30.januar, 30.januar), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            inspektør.sykdomstidslinje.inspektør.also {
+                assertTrue(it[30.januar] is Permisjonsdag)
+                assertTrue(it[31.januar] is Feriedag)
+            }
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
         }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
     }
 
     @Test
     fun `Korrigerer grad`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(januar)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent), korrigerer = søknadId, opprinneligSendt = 1.februar)
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        assertEquals(50, inspektør.sykdomstidslinje.inspektør.grader[17.januar])
-        assertEquals(50, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.grad(17.januar))
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(januar)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            assertEquals(50, inspektør.sykdomstidslinje.inspektør.grader[17.januar])
+            assertEquals(50, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.grad(17.januar))
+        }
     }
 
     @Test
     fun `Korrigerer feriedag til sykedag i forlengelse`() {
-        nyttVedtak(januar)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        val søknadId = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), korrigerer = søknadId, opprinneligSendt = 1.mars)
+        a1 {
+            nyttVedtak(januar)
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+            val søknadId = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), korrigerer = søknadId, opprinneligSendt = 1.mars)
 
-        inspektør.sykdomstidslinje.inspektør.also {
-            assertTrue(it[28.februar] is Sykedag)
+            inspektør.sykdomstidslinje.inspektør.also {
+                assertTrue(it[28.februar] is Sykedag)
+            }
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK
+            )
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         }
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK
-        )
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
     }
 
     @Test
     fun `korrigerende søknad som lager nytt skjæringstidspunkt på tidligere forlengelse`() {
-        håndterSykmelding(januar)
-        håndterSøknad(januar)
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
+        a1 {
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(februar)
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+            håndterSøknad(februar)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(mars)
+            håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
+            håndterSøknad(mars)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
 
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(20.februar, 28.februar))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(20.februar, 28.februar))
 
-        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
+            assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        assertTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
 
-        assertTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTilstand(2.vedtaksperiode, AVSLUTTET)
-        assertTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        }
     }
 
     @Test
     fun `nytt skjæringstidspunkt på forlengelse etter friskmelding på førstegangsbehandling`() {
-        håndterSykmelding(januar)
-        håndterSøknad(januar)
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
+        a1 {
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(februar)
-
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+            håndterSøknad(februar)
+        }
         nullstillTilstandsendringer()
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(25.januar, 31.januar))
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(25.januar, 31.januar))
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        }
         nullstillTilstandsendringer()
-        håndterUtbetalt()
-        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        a1 {
+            håndterUtbetalt()
+            assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        }
     }
 
     @Test
     fun `Blir værende i nåværende tilstand dersom søknad kommer inn i AVVENTER_INNTEKTSMELDING_UFERDIG_GAP`() {
-        håndterSykmelding(januar)
-        håndterSøknad(januar)
+        a1 {
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
 
-        håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
-        val søknadId = håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar), korrigerer = søknadId, opprinneligSendt = 1.mars)
-        inspektør.sykdomstidslinje.inspektør.also {
-            assertTrue(it[28.februar] is Feriedag)
+            håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
+            val søknadId = håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
+            håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar), korrigerer = søknadId, opprinneligSendt = 1.mars)
+            inspektør.sykdomstidslinje.inspektør.also {
+                assertTrue(it[28.februar] is Feriedag)
+            }
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
     }
 
     @Test
     fun `Blir værende i nåværende tilstand dersom søknad kommer inn i AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE`() {
-        håndterSykmelding(januar)
-        håndterSøknad(januar)
+        a1 {
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        val søknadId = håndterSøknad(februar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar), korrigerer = søknadId, opprinneligSendt = 1.mars)
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+            val søknadId = håndterSøknad(februar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar), korrigerer = søknadId, opprinneligSendt = 1.mars)
 
-        inspektør.sykdomstidslinje.inspektør.also {
-            assertTrue(it[28.februar] is Feriedag)
+            inspektør.sykdomstidslinje.inspektør.also {
+                assertTrue(it[28.februar] is Feriedag)
+            }
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
     }
 
     @Test
     fun `Blir værende i nåværende tilstand dersom søknad kommer inn i AVENTER_TIDLIGERE_ELLER_OVERLAPPENDE`() {
-        håndterSykmelding(Sykmeldingsperiode(1.desember(2017), 11.desember(2017)))
-        håndterSøknad(Sykdom(1.desember(2017), 11.desember(2017), 100.prosent))
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.desember(2017), 11.desember(2017)))
+            håndterSøknad(Sykdom(1.desember(2017), 11.desember(2017), 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
-        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+            håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar))
-        val søknadId = håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar)
-        )
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar))
+            val søknadId = håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar)
+            )
+            håndterVilkårsgrunnlag(3.vedtaksperiode)
+            håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
 
 
-        inspektør.sykdomstidslinje.inspektør.also {
-            assertTrue(it[31.januar] is Feriedag)
+            inspektør.sykdomstidslinje.inspektør.also {
+                assertTrue(it[31.januar] is Feriedag)
+            }
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 2.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 3.vedtaksperiode.filter())
         }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
-        assertVarsler(emptyList(), 3.vedtaksperiode.filter())
     }
 
     @Test
     fun `Blir værende i nåværende tilstand dersom søknad kommer inn i AVVENTER_INNTEKTSMELDING_FERDIG_GAP`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(januar)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(januar)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
 
-        inspektør.sykdomstidslinje.inspektør.also {
-            assertTrue(it[31.januar] is Feriedag)
+            inspektør.sykdomstidslinje.inspektør.also {
+                assertTrue(it[31.januar] is Feriedag)
+            }
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
     }
 
     @Test
     fun `avslutter periode med friskmelding -- avventer vilkårsprøving`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(januar)
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(17.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(17.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
 
-        inspektør.sykdomstidslinje.inspektør.also { inspektør ->
-            (17.januar til 31.januar).forEach {
-                assertTrue(inspektør[it] is Dag.Arbeidsdag || inspektør[it] is Dag.FriskHelgedag)
+            inspektør.sykdomstidslinje.inspektør.also { inspektør ->
+                (17.januar til 31.januar).forEach {
+                    assertTrue(inspektør[it] is Dag.Arbeidsdag || inspektør[it] is Dag.FriskHelgedag)
+                }
             }
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING
+            )
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING
-        )
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
     }
 
     @Test
     fun `avslutter periode med 100 prosent ferie og ingen utbetaling -- avventer vilkårsprøving`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(januar)
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
 
-        inspektør.sykdomstidslinje.inspektør.also { inspektør ->
-            (17.januar til 31.januar).forEach {
-                assertTrue(inspektør[it] is Feriedag)
+            inspektør.sykdomstidslinje.inspektør.also { inspektør ->
+                (17.januar til 31.januar).forEach {
+                    assertTrue(inspektør[it] is Feriedag)
+                }
             }
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING
+            )
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING
-        )
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
     }
 
     @Test
     fun `Blir værende i nåværende tilstand dersom søknad kommer inn i AVVENTER_VILKÅRSPRØVING`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(januar)
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
 
-        inspektør.sykdomstidslinje.inspektør.also {
-            assertTrue(it[31.januar] is Feriedag)
+            inspektør.sykdomstidslinje.inspektør.also {
+                assertTrue(it[31.januar] is Feriedag)
+            }
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING
+            )
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING
-        )
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
     }
 
     @Test
     fun `Blir værende i nåværende tilstand dersom søknad kommer inn i AVVENTER_HISTORIKK`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(januar)
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
 
-        inspektør.sykdomstidslinje.inspektør.also {
-            assertTrue(it[31.januar] is Feriedag)
+            inspektør.sykdomstidslinje.inspektør.also {
+                assertTrue(it[31.januar] is Feriedag)
+            }
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK
+            )
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK
-        )
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
     }
 
     @Test
     fun `Går tilbake til AVVENTER_HISTORIKK når søknaden kommer inn i AVVENTER_SIMULERING`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), korrigerer = søknadId, opprinneligSendt = 1.februar)
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), korrigerer = søknadId, opprinneligSendt = 1.februar)
 
-        inspektør.sykdomstidslinje.inspektør.also {
-            assertTrue(it[31.januar] is Sykedag)
+            inspektør.sykdomstidslinje.inspektør.also {
+                assertTrue(it[31.januar] is Sykedag)
+            }
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK
+            )
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK
-        )
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
     }
 
     @Test
     fun `Går tilbake til AVVENTER_HISTORIKK når søknaden kommer inn i AVVENTER_GODKJENNING`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
-        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), korrigerer = søknadId, opprinneligSendt = 1.februar)
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), korrigerer = søknadId, opprinneligSendt = 1.februar)
 
-        inspektør.sykdomstidslinje.inspektør.also {
-            assertTrue(it[31.januar] is Sykedag)
+            inspektør.sykdomstidslinje.inspektør.also {
+                assertTrue(it[31.januar] is Sykedag)
+            }
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK
+            )
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK
-        )
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
     }
 
     @Test
     fun `Ikke foreld dager ved sen korrigerende søknad om original søknad var innenfor avskjæringsdag`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 31.januar)
-        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), sendtTilNAVEllerArbeidsgiver = 30.september, korrigerer = søknadId, opprinneligSendt = 31.januar)
-        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 31.januar)
+            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), sendtTilNAVEllerArbeidsgiver = 30.september, korrigerer = søknadId, opprinneligSendt = 31.januar)
+            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+        }
     }
 
     @Test
     fun `Foreld dager ved sen søknad, selv om vi mottar korrigerende søknad`() {
-        håndterSykmelding(januar)
-        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-        assertEquals("KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKK", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), sendtTilNAVEllerArbeidsgiver = 2.mai, korrigerer = søknadId, opprinneligSendt = 1.mai)
-        assertEquals("KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-        assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
+        a1 {
+            håndterSykmelding(januar)
+            val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
+            assertEquals("KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKK", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), sendtTilNAVEllerArbeidsgiver = 2.mai, korrigerer = søknadId, opprinneligSendt = 1.mai)
+            assertEquals("KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+            assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
+        }
     }
 }
