@@ -70,8 +70,6 @@ internal class ArbeidsgiverHendelsefabrikk(
     private val behandlingsporing: Behandlingsporing.Yrkesaktivitet
 ) {
 
-    private val sykmeldinger = mutableListOf<Sykmelding>()
-    private val søknader = mutableListOf<Søknad>()
     private val inntektsmeldinger = mutableMapOf<UUID, AbstractEndToEndTest.InnsendtInntektsmelding>()
 
     internal fun lagSykmelding(
@@ -82,9 +80,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             meldingsreferanseId = MeldingsreferanseId(id),
             behandlingsporing = behandlingsporing,
             sykeperioder = listOf(*sykeperioder)
-        ).apply {
-            sykmeldinger.add(this)
-        }
+        )
     }
 
     internal fun lagSøknad(
@@ -147,9 +143,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
             harOppgittOpprettholdtInntekt = harOppgittOpprettholdtInntekt,
             harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet
-        ).apply {
-            søknader.add(this)
-        }
+        )
     }
 
     fun lagAvbruttSøknad(sykmeldingsperiode: Periode): AvbruttSøknad =
