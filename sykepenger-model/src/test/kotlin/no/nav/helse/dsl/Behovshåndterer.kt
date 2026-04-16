@@ -73,7 +73,7 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
         val etter = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InntektsmeldingReplay>().toSet() - før
         etter.forEach { replayDetaljer ->
             håndterForespørsel(replayDetaljer.forespørsel, hånderteInntektsmeldinger.toSet())
-            behovsoppsamler.fjern(replayDetaljer)
+            behovsoppsamler.besvart(replayDetaljer)
         }
         return verdi
     }

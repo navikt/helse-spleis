@@ -17,7 +17,7 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
     protected fun registrer(behovsdetaljer: Behovsdetaljer) {
         this.behovsdetaljer.add(behovsdetaljer)
     }
-    internal fun fjern(behovsdelajer: Behovsdetaljer) {
+    internal fun besvart(behovsdelajer: Behovsdetaljer) {
         this.behovsdetaljer.remove(behovsdelajer)
     }
 
