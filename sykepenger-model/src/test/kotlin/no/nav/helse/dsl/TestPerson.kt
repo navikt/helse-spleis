@@ -47,7 +47,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -124,8 +123,15 @@ internal class TestPerson(
     private fun <T : Hendelse> T.håndter(håndter: Person.(EventBus, T, IAktivitetslogg) -> Unit): T {
         forrigeAktivitetslogg = Aktivitetslogg(personlogg)
         try {
-            person.håndter(eventBus, this, forrigeAktivitetslogg)
-            (behovsoppsamler as? Behovsoppsamler.FraAktivitetslogg)?.registrerFra(forrigeAktivitetslogg)
+            behovshåndterer.håndterBehovSomOppstårAutomatisk(
+                hendelse = this,
+                operasjon = {
+                    person.håndter(eventBus, this, forrigeAktivitetslogg)
+                    (behovsoppsamler as? Behovsoppsamler.FraAktivitetslogg)?.registrerFra(forrigeAktivitetslogg)
+                },
+                håndterInntektsmeldingerReplay = { it.håndter(Person::håndterInntektsmeldingerReplay) },
+                håndterInitiellHistorikkFraInfotrygd = { it.håndter(Person::håndterUtbetalingshistorikk) }
+            )
         } finally {
             varslersamler.registrerVarsler(forrigeAktivitetslogg.varsel)
         }
@@ -275,40 +281,31 @@ internal class TestPerson(
             harOppgittOpprettholdtInntekt: Boolean? = null,
             harOppgittOppholdIUtlandet: Boolean? = null
         ) =
-            behovshåndterer.håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
-                operasjon = {
-                    vedtaksperiodesamler.fangVedtaksperiode(this.orgnummer) {
-                        arbeidsgiverHendelsefabrikk.lagSøknad(
-                            *perioder,
-                            egenmeldinger = egenmeldinger,
-                            andreInntektskilder = andreInntektskilder,
-                            arbeidUtenforNorge = arbeidUtenforNorge,
-                            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
-                            sykmeldingSkrevet = sykmeldingSkrevet,
-                            id = søknadId,
-                            yrkesskade = yrkesskade,
-                            utenlandskSykmelding = utenlandskSykmelding,
-                            arbeidssituasjon = arbeidssituasjon,
-                            sendTilGosys = sendTilGosys,
-                            registrert = registrert,
-                            merknaderFraSykmelding = merknaderFraSykmelding,
-                            inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
-                            pensjonsgivendeInntekter = pensjonsgivendeInntekter,
-                            fraværFørSykmelding = fraværFørSykmelding,
-                            harOppgittAvvikling = harOppgittAvvikling,
-                            harOppgittVarigEndring = harOppgittVarigEndring,
-                            harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
-                            harOppgittOpprettholdtInntekt = harOppgittOpprettholdtInntekt,
-                            harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet
-                        ).håndter(Person::håndterSøknad)
-                    }?.also {
-                        if (behovshåndterer.harForespurtHistorikkFraInfotrygd(it)) {
-                            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikk(it).håndter(Person::håndterUtbetalingshistorikk)
-                        }
-                    }
-                },
-                håndterForespørsel = ::håndterInntektsmeldingReplay
-            )
+            vedtaksperiodesamler.fangVedtaksperiode(this.orgnummer) {
+                arbeidsgiverHendelsefabrikk.lagSøknad(
+                    *perioder,
+                    egenmeldinger = egenmeldinger,
+                    andreInntektskilder = andreInntektskilder,
+                    arbeidUtenforNorge = arbeidUtenforNorge,
+                    sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
+                    sykmeldingSkrevet = sykmeldingSkrevet,
+                    id = søknadId,
+                    yrkesskade = yrkesskade,
+                    utenlandskSykmelding = utenlandskSykmelding,
+                    arbeidssituasjon = arbeidssituasjon,
+                    sendTilGosys = sendTilGosys,
+                    registrert = registrert,
+                    merknaderFraSykmelding = merknaderFraSykmelding,
+                    inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
+                    pensjonsgivendeInntekter = pensjonsgivendeInntekter,
+                    fraværFørSykmelding = fraværFørSykmelding,
+                    harOppgittAvvikling = harOppgittAvvikling,
+                    harOppgittVarigEndring = harOppgittVarigEndring,
+                    harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
+                    harOppgittOpprettholdtInntekt = harOppgittOpprettholdtInntekt,
+                    harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet
+                ).håndter(Person::håndterSøknad)
+            }
 
         internal fun håndterFørstegangssøknadSelvstendig(
             periode: Periode,
@@ -450,12 +447,6 @@ internal class TestPerson(
 
         internal fun håndterAnmodningOmForkasting(vedtaksperiodeId: UUID, force: Boolean = false) =
             arbeidsgiverHendelsefabrikk.lagAnmodningOmForkasting(vedtaksperiodeId, force).håndter(Person::håndterAnmodningOmForkasting)
-
-        private fun håndterInntektsmeldingReplay(forespørsel: Forespørsel, alleredeHåndterteInntektsmeldinger: Set<UUID>) {
-            val fabrikk = arbeidsgivere[forespørsel.orgnr]?.arbeidsgiverHendelsefabrikk ?: arbeidsgiverHendelsefabrikk
-            fabrikk.lagInntektsmeldingReplay(forespørsel, alleredeHåndterteInntektsmeldinger)
-                .håndter(Person::håndterInntektsmeldingerReplay)
-        }
 
         internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
@@ -686,15 +677,9 @@ internal class TestPerson(
                 .håndter(Person::håndterUtbetalingsgodkjenning)
         }
 
-        internal fun håndterUtbetalingshistorikkEtterInfotrygdendring(vararg utbetalinger: Infotrygdperiode) {
-            behovshåndterer.håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
-                operasjon = {
-                    arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger.toList())
-                        .håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
-                },
-                håndterForespørsel = ::håndterInntektsmeldingReplay
-            )
-        }
+        internal fun håndterUtbetalingshistorikkEtterInfotrygdendring(vararg utbetalinger: Infotrygdperiode) =
+            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger.toList())
+                .håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
 
         internal fun håndterVedtakFattet(vedtaksperiodeId: UUID, automatisert: Boolean = true, vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()) {
             val (behandlingId, utbetalingId) = behovshåndterer.godkjenningsdetaljer(vedtaksperiodeId)
@@ -749,13 +734,8 @@ internal class TestPerson(
             nåtidspunkt: LocalDateTime = LocalDateTime.now(),
             flagg: Set<String> = emptySet()
         ) {
-            behovshåndterer.håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
-                operasjon = {
-                    arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt, nåtidspunkt, flagg = flagg)
-                        .håndter(Person::håndterPåminnelse)
-                },
-                håndterForespørsel = ::håndterInntektsmeldingReplay
-            )
+            arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt, nåtidspunkt, flagg = flagg)
+                .håndter(Person::håndterPåminnelse)
         }
 
         internal fun håndterGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) {

@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.somOrganisasjonsnummer
-import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
 import no.nav.inntektsmeldingkontrakt.Refusjon
@@ -21,7 +20,6 @@ import org.junit.jupiter.api.assertNotNull
 
 class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubscription {
     private val tilstander = mutableMapOf<UUID, TilstandType>()
-    private val hånderteInntektsmeldinger = mutableSetOf<UUID>()
     private val uhåndterteInntektsmeldinger = mutableMapOf<UUID, Inntektsmeldingdetaljer>()
 
     fun utbetalingsdetaljer(orgnummer: String): List<Behovsoppsamler.Behovsdetaljer.Utbetaling> {
@@ -49,10 +47,6 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
         behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling>()
             .also { if (it.isEmpty()) fail("Forventet at det skal være spurt om feriepengerutbetaling, men det var det ikke!") }
 
-    fun harForespurtHistorikkFraInfotrygd(vedtaksperiodeId: UUID) =
-        behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InitiellHistorikFraInfotrygd>()
-            .any { it.vedtaksperiodeId == vedtaksperiodeId }
-
     fun bekreftForespurtVilkårsprøving(vedtaksperiodeId: UUID) =
         assertNotNull(behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InformasjonTilVilkårsprøving>().filter { it.vedtaksperiodeId == vedtaksperiodeId }) {
             "Forventet at det skulle være forspurt informasjon til vilkårsprøving. Vedtaksperioden er i tilstand ${tilstander[vedtaksperiodeId]}"
@@ -73,27 +67,12 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
     }
 
     override fun inntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent) {
-        hånderteInntektsmeldinger.add(event.meldingsreferanseId)
         uhåndterteInntektsmeldinger.remove(event.meldingsreferanseId)
     }
 
     private fun inntektsmeldingReplayBehovAkkuratNå() = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InntektsmeldingReplay>().toSet()
 
     private fun initiellHistorikFraInfotrygdBehovAkkuratNå() = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InitiellHistorikFraInfotrygd>().toSet()
-
-    fun <T> håndterForespørslerOmReplayAvInntektsmeldingSomFølgeAv(
-        operasjon: () -> T?,
-        håndterForespørsel: (forespørsel: Forespørsel, alleredeHåndterteInntektsmeldinger: Set<UUID>) -> Unit
-    ): T? {
-        val før = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InntektsmeldingReplay>().toSet()
-        val verdi = operasjon()
-        val etter = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InntektsmeldingReplay>().toSet() - før
-        etter.forEach { replayDetaljer ->
-            håndterForespørsel(replayDetaljer.forespørsel, hånderteInntektsmeldinger.toSet())
-            behovsoppsamler.besvart(replayDetaljer)
-        }
-        return verdi
-    }
 
     fun håndterBehovSomOppstårAutomatisk(
         operasjon: () -> Unit,

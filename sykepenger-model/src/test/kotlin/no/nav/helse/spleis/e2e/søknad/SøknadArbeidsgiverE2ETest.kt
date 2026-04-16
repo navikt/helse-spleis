@@ -29,6 +29,8 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
@@ -513,7 +515,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
             håndterSykmelding(Sykmeldingsperiode(9.januar, 12.januar))
             håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar))
-            håndterInntektsmelding(
+            val im = håndterInntektsmelding(
                 listOf(
                     1.januar til 5.januar,
                     9.januar til 12.januar,
@@ -522,13 +524,22 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
                 førsteFraværsdag = 16.januar
             )
             håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
+            assertFalse(im in observatør.inntektsmeldingHåndtert.map { it.first })
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+
             håndterSøknad(Sykdom(9.januar, 12.januar, 100.prosent))
+            assertFalse(im in observatør.inntektsmeldingHåndtert.map { it.first })
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+
             håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
+            assertTrue(im in observatør.inntektsmeldingHåndtert.map { it.first })
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+
             assertEquals(1.januar til 5.januar, inspektør.periode(1.vedtaksperiode))
             assertEquals(6.januar til 12.januar, inspektør.periode(2.vedtaksperiode))
             assertEquals(13.januar til 31.januar, inspektør.periode(3.vedtaksperiode))
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         }
     }
