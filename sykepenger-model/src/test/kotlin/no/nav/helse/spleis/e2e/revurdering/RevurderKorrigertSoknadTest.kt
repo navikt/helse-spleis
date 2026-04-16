@@ -24,25 +24,12 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
-import no.nav.helse.spleis.e2e.assertSisteTilstand
-import no.nav.helse.spleis.e2e.assertTilstand
-import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.assertVarsler
-import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
-import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSykmelding
-import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalt
-import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
-import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.nullstillTilstandsendringer
-import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
@@ -57,10 +44,11 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
+internal class RevurderKorrigertSoknadTest : AbstractDslTest() {
 
     @Test
     fun `Avsluttet periode får en korrigert søknad med perfekt overlapp - skal sette i gang en revurdering`() {
+        a1 {
         nyttVedtak(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 18.januar))
 
@@ -72,10 +60,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTrue(inspektør.sykdomstidslinje[18.januar] is Feriedag)
         assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar] is Fridag)
         assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[18.januar] is Fridag)
+        }
     }
 
     @Test
     fun `Avsluttet periode får en overlappende søknad som strekker seg etter vedtaksperiode - skal sette i gang revurdering`() {
+        a1 {
         nyttVedtak(januar)
         nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar))
@@ -85,10 +75,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
+        }
     }
 
     @Test
     fun `Avsluttet periode får en overlappende søknad som strekker seg før vedtaksperiode - skal sette i gang revurdering`() {
+        a1 {
         nyttVedtak(januar)
         nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(15.desember(2017), 15.januar))
@@ -99,10 +91,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertVarsler(listOf(Varselkode.RV_IV_7, RV_SØ_13), 1.vedtaksperiode.filter())
+        }
     }
 
     @Test
     fun `Avsluttet periode får en overlappende søknad som starter etter og slutter før vedtaksperiode - skal sette i gang revurdering`() {
+        a1 {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar))
         håndterSøknad(Sykdom(17.januar, 25.januar, 50.prosent))
@@ -121,12 +115,14 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         (26..31).forEach {
             assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
         }
+        }
     }
 
     @Test
     fun `Korrigerende søknad med ferie`() {
+        a1 {
         nyttVedtak(januar)
-        nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        nyttVedtak(mars)
         assertEquals(Sykedag::class, inspektør.sykdomstidslinje[17.januar]::class)
         assertEquals(Sykedag::class, inspektør.sykdomstidslinje[18.januar]::class)
 
@@ -155,12 +151,14 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
             assertEquals(NY, utbetalingslinjeInspektør.endringskode)
             assertNull(utbetalingslinjeInspektør.datoStatusFom)
         }
+        }
     }
 
     @Test
     fun `Korrigerende søknad setter i gang en revurdering på siste skjæringstidspunkt`() {
+        a1 {
         nyttVedtak(januar)
-        nyttVedtak(mars, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+        nyttVedtak(mars)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(15.mars, 16.mars))
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -168,10 +166,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertEquals(20, inspektør.sykdomstidslinje.subset(mars).inspektør.dagteller[Sykedag::class])
         assertEquals(2, inspektør.sykdomstidslinje.subset(mars).inspektør.dagteller[Feriedag::class])
         assertEquals(9, inspektør.sykdomstidslinje.subset(mars).inspektør.dagteller[SykHelgedag::class])
+        }
     }
 
     @Test
     fun `Avsluttet periode med en forlengelse får en korrigerende søknad - skal sette i gang revurdering`() {
+        a1 {
         nyttVedtak(januar)
         forlengVedtak(februar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 18.januar))
@@ -181,10 +181,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertEquals(21, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Sykedag::class])
         assertEquals(2, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Feriedag::class])
         assertEquals(8, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[SykHelgedag::class])
+        }
     }
 
     @Test
     fun `Avsluttet forlengelse får en overlappende søknad - skal sette i gang revurdering`() {
+        a1 {
         nyttVedtak(januar, 50.prosent)
         forlengVedtak(februar, 50.prosent)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar))
@@ -202,10 +204,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         (21..28).forEach {
             assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
         }
+        }
     }
 
     @Test
     fun `Overlappende søknad treffer førstegangsbehandling og forlengelse`() {
+        a1 {
         nyttVedtak(januar, 50.prosent)
         forlengVedtak(februar, 50.prosent)
         nullstillTilstandsendringer()
@@ -216,10 +220,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertVarsler(listOf(RV_SØ_13), 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+        }
     }
 
     @Test
     fun `Avsluttet forlengelse får en overlappende søknad som slutter etter`() {
+        a1 {
         nyttVedtak(januar, 50.prosent)
         forlengVedtak(februar, 50.prosent)
         nullstillTilstandsendringer()
@@ -230,10 +236,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+        }
     }
 
     @Test
     fun `Avsluttet periode med forlengelse får en overlappende søknad som starter før`() {
+        a1 {
         nyttVedtak(januar, 50.prosent)
         forlengVedtak(februar, 50.prosent)
         nullstillTilstandsendringer()
@@ -247,10 +255,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertVarsler(listOf(RV_SØ_13, Varselkode.RV_IV_7), 1.vedtaksperiode.filter())
+        }
     }
 
     @Test
     fun `Korrigerende søknad for periode i AvventerGodkjenningRevurdering - setter i gang en overstyring av revurderingen`() {
+        a1 {
         nyttVedtak(januar, 100.prosent)
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         håndterYtelser(1.vedtaksperiode)
@@ -274,10 +284,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         (22..26).forEach {
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
         }
+        }
     }
 
     @Test
     fun `Korrigerende søknad for periode i AvventerSimuleringRevurdering - setter i gang en overstyring av revurderingen`() {
+        a1 {
         nyttVedtak(januar, 100.prosent)
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         håndterYtelser(1.vedtaksperiode)
@@ -300,10 +312,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         (22..26).forEach {
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
         }
+        }
     }
 
     @Test
     fun `Korrigerende søknad for periode i AvventerHistorikkRevurdering - setter i gang en overstyring av revurderingen`() {
+        a1 {
         nyttVedtak(januar, 100.prosent)
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -326,12 +340,14 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         (22..26).forEach {
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
         }
+        }
     }
 
     @Test
     fun `Korrigerende søknad for periode i AvventerRevurdering - setter i gang en overstyring av revurderingen`() {
+        a1 {
         nyttVedtak(januar, 100.prosent)
-        nyttVedtak(15.februar til 15.mars, 100.prosent, vedtaksperiodeIdInnhenter = 2.vedtaksperiode, arbeidsgiverperiode = emptyList())
+        nyttVedtak(15.februar til 15.mars, 100.prosent, arbeidsgiverperiode = emptyList())
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Dagtype.Feriedag)))
 
         assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -356,14 +372,16 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         (1..15).forEach {
             assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.mars].økonomi.inspektør.grad)
         }
+        }
     }
 
     @Test
     fun `Korrigerende søknad i AvventerVilkårsprøving - setter i gang en overstyring av behandlingen`() {
+        a1 {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar))
         håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
 
-        håndterInntektsmelding(listOf(31.januar til 15.februar))
+        håndterInntektsmelding(listOf(31.januar til 15.februar), beregnetInntekt = INNTEKT)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
@@ -378,10 +396,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         (16..16).forEach {
             assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
         }
+        }
     }
 
     @Test
     fun `Korrigerende søknad for førstegangsbehandling med forlengelse i avventerGodkjenning - setter i gang en revurdering`() {
+        a1 {
         nyttVedtak(januar, 100.prosent)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(februar)
@@ -391,10 +411,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
     }
 
     @Test
     fun `Korrigert søknad med friskmelding for avsluttet periode`() {
+        a1 {
         nyttVedtak(januar, 100.prosent)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(20.januar, 31.januar))
 
@@ -409,10 +431,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertEquals(1, utbetalingInspektørRevurdering.antallLinjer())
         assertEquals(17.januar til 19.januar, utbetalingInspektørRevurdering.fom(0) til utbetalingInspektørRevurdering.tom(0))
         assertEquals(ENDR, utbetalingInspektørRevurdering.endringskode(0))
+        }
     }
 
     @Test
     fun `Korrigert søknad med friskmelding for periode i AvventerGodkjenningRevurdering`() {
+        a1 {
         nyttVedtak(januar, 100.prosent)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 20.prosent))
         håndterYtelser(1.vedtaksperiode)
@@ -428,5 +452,6 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertEquals(8, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Arbeidsdag::class])
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+        }
     }
 }
