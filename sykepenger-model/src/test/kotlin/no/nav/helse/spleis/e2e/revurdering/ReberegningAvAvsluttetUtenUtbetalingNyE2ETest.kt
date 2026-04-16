@@ -50,7 +50,6 @@ import no.nav.helse.sisteBehov
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.assertInntektshistorikkForDato
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -1346,7 +1345,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `omgjøring med funksjonell feil, som blir varsel, i inntektsmelding fra Altinn eller LPS`() {
+    fun `omgjøring med funksjonell feil, som blir varsel, i inntektsmelding fra Altinn eller LPS`() = a1 {
         håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
         nyttVedtak(18.januar til 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar))
         nullstillTilstandsendringer()
@@ -1372,7 +1371,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `omgjøring med funksjonell feil i inntektsmelding fra portalen`()  {
+    fun `omgjøring med funksjonell feil i inntektsmelding fra portalen`() = a1 {
         håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
         nyttVedtak(18.januar til 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar))
         nullstillTilstandsendringer()

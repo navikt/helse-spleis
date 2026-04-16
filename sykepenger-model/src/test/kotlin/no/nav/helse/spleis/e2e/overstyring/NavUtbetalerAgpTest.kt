@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.util.UUID
+import kotlin.reflect.KClass
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
@@ -49,7 +50,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.assertUtbetalingsdag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.til
@@ -700,6 +700,13 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
             assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
             assertFunksjonellFeil(RV_IM_8, 1.vedtaksperiode.filter())
 
+        }
+    }
+
+    private inline fun <reified R : Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Int = 100) {
+        dag.let {
+            assertEquals(expectedDagtype, it::class)
+            it.økonomi.brukTotalGrad { totalGrad -> assertEquals(expectedTotalgrad, totalGrad) }
         }
     }
 }

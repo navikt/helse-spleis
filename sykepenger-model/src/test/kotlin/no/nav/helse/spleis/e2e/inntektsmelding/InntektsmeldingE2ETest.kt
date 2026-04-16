@@ -54,7 +54,6 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinj
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.assertInntektshistorikkForDato
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyttVedtak

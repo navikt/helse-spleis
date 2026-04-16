@@ -297,7 +297,7 @@ internal abstract class AbstractDslTest {
 
     /* alternative metoder fremfor å lage en arbeidsgiver-blokk hver gang */
     protected fun String.håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode, sykmeldingSkrevet: LocalDateTime? = null, mottatt: LocalDateTime? = null) =
-        this { håndterSykmelding(*sykmeldingsperiode, sykmeldingSkrevet = sykmeldingSkrevet, mottatt = mottatt) }
+        this { håndterSykmelding(*sykmeldingsperiode) }
 
     protected fun String.håndterSøknad(
         vararg perioder: Søknad.Søknadsperiode,

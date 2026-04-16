@@ -8,7 +8,6 @@ import no.nav.helse.person.EventSubscription.VedtaksperiodeEndretEvent
 import no.nav.helse.person.Person
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.somOrganisasjonsnummer
-import no.nav.helse.spill_av_im.Forespørsel
 import org.junit.jupiter.api.fail
 
 internal typealias InntektsmeldingId = UUID
@@ -56,24 +55,13 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
 
     private val forkastedeEventer = mutableMapOf<UUID, EventSubscription.VedtaksperiodeForkastetEvent>()
     val annulleringer = mutableListOf<EventSubscription.UtbetalingAnnullertEvent>()
-    val inntektsmeldingReplayEventer = mutableListOf<Forespørsel>()
-
-    internal fun replayInntektsmeldinger(block: () -> Unit): Set<Forespørsel> {
-        val replaysFør = inntektsmeldingReplayEventer.toSet()
-        block()
-        return inntektsmeldingReplayEventer.toSet() - replaysFør
-    }
 
     fun hendelseider(vedtaksperiodeId: UUID) =
         vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
 
-    fun sisteVedtaksperiode() = IdInnhenter { orgnummer -> vedtaksperioder.getValue(orgnummer).last() }
 
     fun sisteVedtaksperiodeId(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
-    fun kvitterInntektsmeldingReplay(vedtaksperiodeId: UUID) {
-        inntektsmeldingReplayEventer.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }
-    }
 
     override fun analytiskDatapakke(event: EventSubscription.AnalytiskDatapakkeEvent) {
         this.analytiskDatapakkeEventer.add(event)
@@ -178,21 +166,6 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
     override fun trengerIkkeArbeidsgiveropplysninger(event: EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent) {
         trengerIkkeArbeidsgiveropplysningerVedtaksperioder.add(event)
         trengerArbeidsgiveroppysninger.remove(event.vedtaksperiodeId)
-    }
-
-    override fun inntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent) {
-        inntektsmeldingReplayEventer.add(
-            Forespørsel(
-                fnr = event.opplysninger.personidentifikator.toString(),
-                orgnr = event.opplysninger.arbeidstaker.organisasjonsnummer,
-                vedtaksperiodeId = event.opplysninger.vedtaksperiodeId,
-                skjæringstidspunkt = event.opplysninger.skjæringstidspunkt,
-                førsteFraværsdager = event.opplysninger.førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.arbeidstaker.organisasjonsnummer, it.førsteFraværsdag) },
-                sykmeldingsperioder = event.opplysninger.sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-                egenmeldinger = event.opplysninger.egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
-                harForespurtArbeidsgiverperiode = EventSubscription.Arbeidsgiverperiode in event.opplysninger.forespurteOpplysninger
-            )
-        )
     }
 
     override fun annullering(event: EventSubscription.UtbetalingAnnullertEvent) {

@@ -32,7 +32,7 @@ internal class ForeldetSøknadE2ETest : AbstractDslTest() {
     @Test
     fun `forledet søknad`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), mottatt = 1.januar(2019).atStartOfDay())
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2019))
             assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
@@ -42,7 +42,7 @@ internal class ForeldetSøknadE2ETest : AbstractDslTest() {
     @Test
     fun `forledet søknad med inntektsmelding`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), mottatt = 1.januar(2019).atStartOfDay())
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2019))
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
@@ -112,7 +112,7 @@ internal class ForeldetSøknadE2ETest : AbstractDslTest() {
     fun `forledet søknad ved forlengelse`() {
         a1 {
             nyttVedtak(januar)
-            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), mottatt = 1.februar(2019).atStartOfDay())
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.februar(2019))
             assertVarsel(RV_SØ_2, 2.vedtaksperiode.filter())
             assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)

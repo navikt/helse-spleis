@@ -15,7 +15,6 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dto.tilSpannerPersonDto
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestWatcher
@@ -46,7 +45,6 @@ class SpannerEtterTestInterceptor : TestWatcher {
         // fisk ut person på et vis og opprett SpannerDto
         val (person, personlogg) = when (val testcontext = context!!.testInstance.get()) {
             is AbstractDslTest -> testcontext.testperson.person to testcontext.testperson.personlogg
-            is AbstractEndToEndTest -> testcontext.person to testcontext.personlogg
             else -> error("Kjenner ikke til testcontext-typen, og kan derfor ikke finne testperson!")
         }
         val spannerPerson = person.dto().tilSpannerPersonDto()

@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.Year
+import kotlin.reflect.KClass
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
@@ -1287,4 +1288,10 @@ internal class SelvstendigTest : AbstractDslTest() {
         }
     }
 
+    private inline fun <reified R : Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Int = 100) {
+        dag.let {
+            assertEquals(expectedDagtype, it::class)
+            it.økonomi.brukTotalGrad { totalGrad -> assertEquals(expectedTotalgrad, totalGrad) }
+        }
+    }
 }

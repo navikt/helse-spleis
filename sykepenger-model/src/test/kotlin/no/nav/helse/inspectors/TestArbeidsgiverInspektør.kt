@@ -7,7 +7,6 @@ import no.nav.helse.feriepenger.Feriepengerklassekode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Person
 import no.nav.helse.person.Yrkesaktivitet
-import no.nav.helse.spleis.e2e.IdInnhenter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import org.junit.jupiter.api.fail
@@ -88,18 +87,12 @@ internal class TestArbeidsgiverInspektør(
         val statuskode: String? = null
     )
 
-    private fun <V> IdInnhenter.finn(hva: Map<Int, V>) = hva.getValue(this.indeks)
-    private val IdInnhenter.indeks get() = id(orgnummer).indeks
-
     private fun <V> UUID.finn(hva: Map<Int, V>) = hva.getValue(this.indeks)
     private val UUID.indeks get() = vedtaksperiodeindekser[this] ?: fail { "Vedtaksperiode $this finnes ikke" }
 
     internal fun sisteAvsluttedeUtbetalingForVedtaksperiode(vedtaksperiodeId: UUID) = avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId).last()
-    internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.filter { it.inspektør.erUbetalt }
-    internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.filter { it.erAvsluttet }
-    internal fun utbetalinger(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun utbetalinger(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger
 
     internal fun utbetalingerInFlight() = utbetalinger.filter { it.tilstand == Utbetalingstatus.OVERFØRT }
@@ -109,66 +102,48 @@ internal class TestArbeidsgiverInspektør(
     internal fun utbetalingId(indeks: Int) = utbetalinger[indeks].utbetalingId
     internal fun utbetalingslinjer(indeks: Int) = utbetalinger[indeks].arbeidsgiverOppdrag
 
-    internal fun periode(vedtaksperiodeIdInnhenter: IdInnhenter) = periode(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun periode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.periode
-    internal fun vedtaksperiodeSykdomstidslinje(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.sykdomstidslinje
     internal fun vedtaksperiodeSykdomstidslinje(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.sykdomstidslinje
 
-    internal fun periodeErForkastet(vedtaksperiodeIdInnhenter: IdInnhenter) = periodeErForkastet(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun periodeErForkastet(vedtaksperiodeId: UUID) = vedtaksperiodeId in vedtaksperiodeForkastet
 
-    internal fun periodeErIkkeForkastet(vedtaksperiodeIdInnhenter: IdInnhenter) = !periodeErForkastet(vedtaksperiodeIdInnhenter)
     internal fun periodeErIkkeForkastet(vedtaksperiodeId: UUID) = !periodeErForkastet(vedtaksperiodeId)
 
-    internal fun sisteMaksdato(vedtaksperiodeIdInnhenter: IdInnhenter) = sisteMaksdato(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun sisteMaksdato(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.maksdatoer.last()
 
     internal fun sisteUtbetalingId(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.last().id
 
-    internal fun vilkårsgrunnlag(vedtaksperiodeIdInnhenter: IdInnhenter) = person.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeIdInnhenter))
     internal fun vilkårsgrunnlag(vedtaksperiodeId: UUID) = person.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeId))
     internal fun vilkårsgrunnlag(skjæringstidspunkt: LocalDate) = person.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun sisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(tilstander)
     internal fun sisteTilstand(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(tilstander)
 
-    internal fun skjæringstidspunkt(vedtaksperiodeIdInnhenter: IdInnhenter) = skjæringstidspunkt(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun skjæringstidspunkt(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.skjæringstidspunkt
 
-    internal fun skjæringstidspunkter(vedtaksperiodeIdInnhenter: IdInnhenter) = skjæringstidspunkter(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun skjæringstidspunkter(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.skjæringstidspunkter
 
     internal fun førsteFraværsdag(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.førsteFraværsdag
 
-    internal fun utbetalingstidslinjer(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalingstidslinjer(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun utbetalingstidslinjer(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalingstidslinje
 
-    internal fun vedtaksperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder.getValue(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun vedtaksperioder(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId)
     internal fun vedtaksperioder(periode: Periode) = vedtaksperioder.values.first { it.periode == periode }
 
-    internal fun hendelser(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter.id(orgnummer)).inspektør.hendelser
     internal fun hendelser(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.hendelser
-    internal fun hendelseIder(vedtaksperiodeIdInnhenter: IdInnhenter) = hendelseIder(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun hendelseIder(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.hendelseIder.map { it.id }.toSet()
 
     internal fun sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.last().arbeidsgiverOppdrag.fagsystemId
 
-    internal fun vedtaksperiodeId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.id(orgnummer)
 
     internal fun sykmeldingsperioder() = sykmeldingsperioder.toList()
 
-    internal fun venteperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).inspektør.dagerUtenNavAnsvar
     internal fun venteperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.dagerUtenNavAnsvar
 
     internal fun egenmeldingsdager(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).egenmeldingsdager
-    internal fun egenmeldingsdager(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).egenmeldingsdager
 
-    internal fun refusjon(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperioder(vedtaksperiodeIdInnhenter).refusjonstidslinje
     internal fun refusjon(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).refusjonstidslinje
 
     internal fun dagerNavOvertarAnsvar(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).dagerNavOvertarAnsvar
-    internal fun dagerNavOvertarAnsvar(vedtaksperiodeId: IdInnhenter) = vedtaksperioder.getValue(vedtaksperiodeId.id(orgnummer)).dagerNavOvertarAnsvar
 
     internal fun faktaavklartInntekt(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).inspektør.faktaavklartInntekt
     internal fun korrigertInntekt(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).inspektør.korrigertInntekt

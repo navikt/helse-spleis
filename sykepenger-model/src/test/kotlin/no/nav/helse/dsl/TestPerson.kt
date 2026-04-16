@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Hendelse
@@ -59,6 +60,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.fail
 
 internal class TestPerson(
@@ -222,9 +224,7 @@ internal class TestPerson(
         internal fun håndterSykmelding(periode: Periode) = håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
 
         internal fun håndterSykmelding(
-            vararg sykmeldingsperiode: Sykmeldingsperiode,
-            sykmeldingSkrevet: LocalDateTime? = null,
-            mottatt: LocalDateTime? = null
+            vararg sykmeldingsperiode: Sykmeldingsperiode
         ) = arbeidsgiverHendelsefabrikk.lagSykmelding(*sykmeldingsperiode).håndter(Person::håndterSykmelding)
 
         internal fun håndterAvbruttSøknad(sykmeldingsperiode: Periode) = arbeidsgiverHendelsefabrikk.lagAvbruttSøknad(sykmeldingsperiode).håndter(Person::håndterAvbruttSøknad)
@@ -412,6 +412,10 @@ internal class TestPerson(
                 arbeidsforholdId = arbeidsforholdId
             ).håndter(Person::håndterInntektsmelding)
             return id
+        }
+
+        internal fun assertInntektshistorikkForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
+            assertEquals(forventetInntekt, inspektør.inntektInspektør.omregnetÅrsinntekt(dato)?.sykepengegrunnlag)
         }
 
         internal fun håndterArbeidsgiveropplysninger(
@@ -773,6 +777,12 @@ internal class TestPerson(
         internal fun håndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>, meldingsreferanseId: UUID = UUID.randomUUID()) =
             arbeidsgiverHendelsefabrikk.lagHåndterOverstyrTidslinje(overstyringsdager, meldingsreferanseId)
                 .håndter(Person::håndterOverstyrTidslinje)
+
+        internal fun manuellPermisjonsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Permisjonsdag)
+        internal fun manuellFeriedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Feriedag)
+        internal fun manuellForeldrepengedag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Foreldrepengerdag)
+        internal fun manuellSykedag(dato: LocalDate, grad: Int = 100) = ManuellOverskrivingDag(dato, Dagtype.Sykedag, grad)
+        internal fun manuellArbeidsdag(dato: LocalDate) = ManuellOverskrivingDag(dato, Dagtype.Arbeidsdag)
 
         internal fun håndterOverstyrInntekt(
             skjæringstidspunkt: LocalDate,

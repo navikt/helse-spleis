@@ -16,7 +16,7 @@ internal class Varslersamler {
             .filterNot { varsel -> assertetVarsler.erVarselKvittert(varsel) }
 
         check(varslerIkkeAssertet.isEmpty()) {
-            "Det er varsler som ikke er assertet på:\n${varslerIkkeAssertet.joinToString(separator = "\n") { "- ${it.kode} - ${it.kontekster.joinToString() { it.melding() }}" }}"
+            "Det er varsler som ikke er assertet på:\n${varslerIkkeAssertet.joinToString(separator = "\n") { "- ${it.kode} - ${it.kontekster.joinToString { it.melding() }}" }}"
         }
     }
 

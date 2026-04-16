@@ -297,7 +297,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
             // OBS: Disse kastes ikke ut fordi de er for gamle. De kastes ut fordi de kommer out of order
             håndterSykmelding(Sykmeldingsperiode(13.januar(2020), 31.januar(2020)))
             håndterSøknad(Sykdom(13.januar(2020), 31.januar(2020), 100.prosent))
-            håndterSykmelding(Sykmeldingsperiode(9.februar(2017), 15.februar(2017)), mottatt = 31.januar(2020).atStartOfDay())
+            håndterSykmelding(Sykmeldingsperiode(9.februar(2017), 15.februar(2017)))
 
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
         }

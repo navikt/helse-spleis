@@ -12,7 +12,6 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
-import no.nav.helse.spleis.e2e.IdInnhenter
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
@@ -91,10 +90,9 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
-        vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = a1
     ) {
-        assertBeregnet(0, 1, paragraf, versjon, ledd, punktum, bokstav, input, output, vedtaksperiodeId, organisasjonsnummer)
+        assertBeregnet(0, 1, paragraf, versjon, ledd, punktum, bokstav, input, output, organisasjonsnummer)
     }
 
     internal fun assertBeregnet(
@@ -107,11 +105,10 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
-        vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = a1,
         lovverk: String = "folketrygdloven"
     ) {
-        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET, vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET)
         assertEquals(forventetAntall, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
         val subsumsjon = resultat[index]
 
@@ -189,10 +186,9 @@ internal class SubsumsjonInspektør(regelverkslogg: SubsumsjonsListLog) {
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
-        vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = a1
     ) {
-        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId?.id(organisasjonsnummer)).also {
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT).also {
             assertEquals(antall, it.size, "Forventer $antall subsumsjoner for vilkåret. Subsumsjoner funnet: $it")
         }
         resultat.forEach {

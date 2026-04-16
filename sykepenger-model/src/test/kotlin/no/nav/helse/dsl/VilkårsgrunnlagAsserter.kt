@@ -10,12 +10,10 @@ import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.AOrdningen
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Arbeidsgiver
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Infotrygd
 import no.nav.helse.person.inntekt.InntektsgrunnlagView
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.fail
 
 internal fun ArbeidsgiverInntektsopplysning.assertArbeidsgiverInntektsopplysning(
     forventetFaktaavklartInntekt: Inntekt,
@@ -33,22 +31,6 @@ internal fun TestPerson.TestArbeidsgiver.assertInntektsgrunnlag(
     assertBlock: InntektsgrunnlagAssert.() -> Unit
 ) {
     assertInntektsgrunnlag(inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.view().inntektsgrunnlag, forventetAntallArbeidsgivere, assertBlock)
-}
-
-internal fun AbstractEndToEndTest.assertInntektsgrunnlag(
-    skjæringstidspunkt: LocalDate,
-    forventetAntallArbeidsgivere: Int,
-    assertBlock: InntektsgrunnlagAssert.() -> Unit
-) {
-    val inntektsgrunnlagView = person.inspektør
-        .vilkårsgrunnlagHistorikk
-        .vilkårsgrunnlagHistorikkInnslag()
-        .firstOrNull()
-        ?.vilkårsgrunnlag
-        ?.firstOrNull { it.skjæringstidspunkt == skjæringstidspunkt }
-        ?.inntektsgrunnlag ?: fail { "finner ikke aktivt skjæringstidspunkt $skjæringstidspunkt" }
-
-    assertInntektsgrunnlag(inntektsgrunnlagView, forventetAntallArbeidsgivere, assertBlock)
 }
 
 private fun assertInntektsgrunnlag(
