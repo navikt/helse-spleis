@@ -1,6 +1,7 @@
 package no.nav.helse.dsl
 
 import java.util.UUID
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.person. EventSubscription
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -93,7 +94,8 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
         ): Behovsdetaljer
 
         data class InitiellHistorikFraInfotrygd(
-            override val vedtaksperiodeId: UUID
+            override val vedtaksperiodeId: UUID,
+            val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
         ): Behovsdetaljer
 
         data object OppdatertHistorikkFraInfotrygd: Behovsdetaljer
@@ -133,7 +135,16 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
                     val behovsdetaljer = when (behovene.first()) {
                         Aktivitet.Behov.Behovtype.Sykepengehistorikk -> when (vedtaksperiodeId) {
                             null -> Behovsdetaljer.OppdatertHistorikkFraInfotrygd
-                            else -> Behovsdetaljer.InitiellHistorikFraInfotrygd(vedtaksperiodeId)
+                            else -> Behovsdetaljer.InitiellHistorikFraInfotrygd(
+                                vedtaksperiodeId = vedtaksperiodeId,
+                                yrkesaktivitetssporing = when (val yrkesaktivitetstype = meldingMap["yrkesaktivitetstype"] as String?) {
+                                    "SELVSTENDIG" -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+                                    "FRILANS" -> Behandlingsporing.Yrkesaktivitet.Frilans
+                                    "ARBEIDSLEDIG" -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+                                    "ARBEIDSTAKER" -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(meldingMap.getValue("organisasjonsnummer") as String)
+                                    else -> error("Ukjent yrkesaktivitetstype $yrkesaktivitetstype")
+                                }
+                            )
                         }
                         Aktivitet.Behov.Behovtype.Godkjenning -> Behovsdetaljer.Godkjenning(
                             vedtaksperiodeId = checkNotNull(vedtaksperiodeId),
@@ -192,7 +203,7 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
         override fun utbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent) =
             registrer(Behovsdetaljer.Feriepengeutbetaling(event.utbetalingId))
         override fun trengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent) =
-            registrer(Behovsdetaljer.InitiellHistorikFraInfotrygd(event.vedtaksperiodeId))
+            registrer(Behovsdetaljer.InitiellHistorikFraInfotrygd(event.vedtaksperiodeId, event.yrkesaktivitetssporing))
         override fun trengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent) =
             registrer(Behovsdetaljer.OppdatertHistorikkFraInfotrygd)
         override fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) = when (event.trengerInformasjonOmSelvstendigForsikring) {

@@ -24,13 +24,13 @@ import no.nav.helse.økonomi.Inntekt
 
 class Inntektsmelding(
     meldingsreferanseId: MeldingsreferanseId,
-    private val refusjon: Refusjon,
+    internal val refusjon: Refusjon,
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     beregnetInntekt: Inntekt,
-    arbeidsgiverperioder: List<Periode>,
-    private val begrunnelseForReduksjonEllerIkkeUtbetalt: BegrunnelseForReduksjonEllerIkkeUtbetalt?,
-    private val opphørAvNaturalytelser: List<OpphørAvNaturalytelse>,
-    private val førsteFraværsdag: LocalDate?,
+    internal val arbeidsgiverperioder: List<Periode>,
+    internal val begrunnelseForReduksjonEllerIkkeUtbetalt: BegrunnelseForReduksjonEllerIkkeUtbetalt?,
+    internal val opphørAvNaturalytelser: List<OpphørAvNaturalytelse>,
+    internal val førsteFraværsdag: LocalDate?,
     mottatt: LocalDateTime,
     internal val arbeidsforholdId: String? // tmp-løsning for å prøve å glemme inntektsmeldinger med arbeidsforholdId
 ) : Hendelse {

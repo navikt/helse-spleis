@@ -258,18 +258,23 @@ internal class ArbeidsgiverHendelsefabrikk(
         opplysninger = opplysninger.toList()
     )
 
-    internal fun lagInntektsmeldingReplay(forespørsel: Forespørsel, håndterteInntektsmeldinger: Set<UUID>) =
+    internal fun lagInntektsmeldingReplay(vedtaksperiodeId: UUID, inntektsmeldinger: List<Inntektsmelding>) =
         InntektsmeldingerReplay(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
                 organisasjonsnummer = organisasjonsnummer
             ),
-            vedtaksperiodeId = forespørsel.vedtaksperiodeId,
+            vedtaksperiodeId = vedtaksperiodeId,
             inntektsmeldinger = inntektsmeldinger
-                .filter { forespørsel.erInntektsmeldingRelevant(it.value.inntektsmeldingkontrakt) }
-                .map { (_, im) -> im.generator() }
-                .filterNot { it.metadata.meldingsreferanseId.id in håndterteInntektsmeldinger }
         )
+
+    internal fun lagInntektsmeldingReplay(forespørsel: Forespørsel, håndterteInntektsmeldinger: Set<UUID>): InntektsmeldingerReplay {
+        val inntektsmeldinger = inntektsmeldinger
+            .filter { forespørsel.erInntektsmeldingRelevant(it.value.inntektsmeldingkontrakt) }
+            .map { (_, im) -> im.generator() }
+            .filterNot { it.metadata.meldingsreferanseId.id in håndterteInntektsmeldinger }
+        return lagInntektsmeldingReplay(forespørsel.vedtaksperiodeId, inntektsmeldinger)
+    }
 
     internal fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
