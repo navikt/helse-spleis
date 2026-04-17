@@ -22,7 +22,6 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_OMGJØRING
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
@@ -857,7 +856,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertEquals("FLERE_ARBEIDSGIVERE", testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.inntektskilde)
+            assertEquals("FLERE_ARBEIDSGIVERE", testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.inntektskilde)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         }
 
