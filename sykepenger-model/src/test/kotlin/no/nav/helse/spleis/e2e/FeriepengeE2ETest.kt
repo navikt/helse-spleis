@@ -8,13 +8,13 @@ import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.feriepenger.Feriepengerendringskode
 import no.nav.helse.feriepenger.Feriepengerklassekode
-import no.nav.helse.harBehov
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -37,11 +37,9 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.september
 import no.nav.helse.serde.reflection.castAsList
-import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -521,7 +519,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
 
-        val fagsystemIdFeriepenger = testperson.personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Feriepengeutbetaling).detaljer()["fagsystemId"] as String
+        val fagsystemIdFeriepenger = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling>().last().fagsystemId
         håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
 
         assertTrue(testperson.personlogg.toString().contains("Data for feriepenger fra Oppdrag/UR"))
@@ -543,7 +541,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
 
-        val fagsystemIdFeriepenger = testperson.personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Feriepengeutbetaling).detaljer()["fagsystemId"] as String
+        val fagsystemIdFeriepenger = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling>().last().fagsystemId
         håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
 
         a1 {
@@ -592,7 +590,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
                 opptjeningsår = Year.of(2020),
                 datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
             )
-            assertFalse(testperson.personlogg.harBehov(Aktivitet.Behov.Behovtype.Feriepengeutbetaling))
+            assertEquals(0, testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling>().size)
         }
     }
 

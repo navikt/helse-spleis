@@ -4,24 +4,14 @@ import java.util.*
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
-internal fun Aktivitetslogg.sisteBehov(type: Aktivitet.Behov.Behovtype) =
-    behov.last { it.type == type }
-
-internal fun Aktivitetslogg.harBehov(behov: Aktivitet.Behov.Behovtype) =
-    this.behov.any { it.type == behov }
-
-internal fun Aktivitetslogg.antallEtterspurteBehov(vedtaksperiodeId: UUID, behov: Aktivitet.Behov.Behovtype) =
-    this.behov.filter {
-        it.alleKontekster["vedtaksperiodeId"] == vedtaksperiodeId.toString()
-    }.count { it.type == behov }
-
-internal fun Aktivitetslogg.etterspurteBehov(vedtaksperiodeId: UUID) =
+private fun Aktivitetslogg.etterspurteBehov(vedtaksperiodeId: UUID) =
     behov.filter {
         it.kontekster.any {
             it.kontekstType == "Vedtaksperiode" && it.kontekstMap["vedtaksperiodeId"] == vedtaksperiodeId.toString()
         }
     }
 
+// TODO: Fjern meg!
 internal inline fun <reified T> Aktivitetslogg.hentFeltFraBehov(vedtaksperiodeId: UUID, behov: Aktivitet.Behov.Behovtype, felt: String): T? {
     return etterspurteBehov(vedtaksperiodeId).last { it.type == behov }.detaljer[felt] as T?
 }

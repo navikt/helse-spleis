@@ -1,13 +1,11 @@
 package no.nav.helse.dsl
 
 import java.util.UUID
-import no.nav.helse.etterspurteBehov
 import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.Alle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -70,22 +68,6 @@ internal class AktivitetsloggAsserts(
     internal fun assertFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter) {
         val errors = collectFunksjonelleFeil(filter)
         assertTrue(errors.contains(varselkode.varseltekst), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
-    }
-
-    internal fun assertIngenBehov(vedtaksperiode: UUID, behovtype: Aktivitet.Behov.Behovtype) {
-        assertTrue(aktivitetslogg.etterspurteBehov(vedtaksperiode).none { it.type == behovtype })
-    }
-
-    internal fun assertBehov(vedtaksperiode: UUID, behovtype: Aktivitet.Behov.Behovtype) {
-        assertTrue(aktivitetslogg.etterspurteBehov(vedtaksperiode).any { it.type == behovtype })
-    }
-
-    internal fun assertBehov(forventetBehov: List<Aktivitet.Behov.Behovtype>, block: () -> Unit) {
-        val behovFør = aktivitetslogg.behov.collect(Alle)
-        block()
-        val behovEtter = aktivitetslogg.behov.collect(Alle)
-        val nyeBehov = behovEtter.subList(behovFør.size, behovEtter.size).map { it.type }
-        assertEquals(nyeBehov, forventetBehov)
     }
 
     private fun funksjonelleFeilFørOgEtter(block: () -> Unit): Pair<Map<String, Int>, Map<String, Int>> {

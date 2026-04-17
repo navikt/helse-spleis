@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.*
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
@@ -46,7 +47,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -1091,11 +1091,8 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             val behovTeller = testperson.personlogg.behov.size
             håndterAnnullering(1.vedtaksperiode)
             assertIngenFunksjonelleFeil()
-            val behov = testperson.personlogg.sisteBehov(Behovtype.Utbetaling)
+            val annulleringnehov = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Utbetaling>().last()
 
-            @Suppress("UNCHECKED_CAST")
-            val statusForUtbetaling = (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
-            assertEquals("OPPH", statusForUtbetaling)
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
             assertFalse(testperson.personlogg.harFunksjonelleFeil())
             assertEquals(2, inspektør.antallUtbetalinger)
@@ -1105,10 +1102,11 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
                 assertEquals(26.januar, it.tom(0))
                 assertEquals(19.januar, it.datoStatusFom(0))
             }
-            testperson.personlogg.behov.last().also {
-                assertEquals(Behovtype.Utbetaling, it.type)
-                assertNull(it.detaljer()["maksdato"])
-                assertEquals("SPREF", it.detaljer()["fagområde"])
+
+            with (annulleringnehov) {
+                assertNull(maksdato)
+                assertEquals("SPREF", fagområde)
+                assertEquals("OPPH", linjer.single().statuskode)
             }
         }
     }

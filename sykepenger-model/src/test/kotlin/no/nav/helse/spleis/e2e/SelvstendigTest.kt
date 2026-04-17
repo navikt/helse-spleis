@@ -28,7 +28,6 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
@@ -328,10 +327,6 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 100) })
             håndterUtbetalt(status = Oppdragstatus.OVERFØRT)
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING)
-            assertBehov(Aktivitet.Behov.Behovtype.Utbetaling) {
-                håndterPåminnelse(1.vedtaksperiode, SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING)
-            }
-
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
             assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
         }

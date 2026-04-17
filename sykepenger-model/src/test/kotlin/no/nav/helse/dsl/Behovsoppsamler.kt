@@ -1,5 +1,6 @@
 package no.nav.helse.dsl
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.person. EventSubscription
@@ -73,8 +74,15 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
             val behandlingId: UUID,
             val organisasjonsnummer: String,
             override val utbetalingId: UUID,
-            val fagsystemId: String
-        ): Behovsdetaljer
+            val fagsystemId: String,
+            val fagområde: String,
+            val maksdato: LocalDate?,
+            val linjer: List<Linje>
+        ): Behovsdetaljer {
+            data class Linje(
+                val statuskode: String?
+            )
+        }
 
         data class Simulering(
             override val vedtaksperiodeId: UUID,
@@ -86,11 +94,13 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
         data class Godkjenning(
             val behandlingId: UUID,
             override val utbetalingId: UUID,
-            override val vedtaksperiodeId: UUID
+            override val vedtaksperiodeId: UUID,
+            val inntektskilde: String
         ): Behovsdetaljer
 
         data class Feriepengeutbetaling(
-            override val utbetalingId: UUID
+            override val utbetalingId: UUID,
+            val fagsystemId: String
         ): Behovsdetaljer
 
         data class InitiellHistorikFraInfotrygd(
@@ -149,7 +159,8 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
                         Aktivitet.Behov.Behovtype.Godkjenning -> Behovsdetaljer.Godkjenning(
                             vedtaksperiodeId = checkNotNull(vedtaksperiodeId),
                             behandlingId = checkNotNull(behandlingId),
-                            utbetalingId = checkNotNull(utbetalingId)
+                            utbetalingId = checkNotNull(utbetalingId),
+                            inntektskilde = behovMap.getValue("Godkjenning").single().getValue("inntektskilde") as String
                         )
                         Aktivitet.Behov.Behovtype.Simulering -> Behovsdetaljer.Simulering(
                             vedtaksperiodeId = checkNotNull(vedtaksperiodeId),
@@ -157,15 +168,23 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
                             fagsystemId = behovMap.getValue("Simulering").single().getValue("fagsystemId") as String,
                             fagområde = behovMap.getValue("Simulering").single().getValue("fagområde") as String
                         )
-                        Aktivitet.Behov.Behovtype.Utbetaling -> Behovsdetaljer.Utbetaling(
-                            vedtaksperiodeId = checkNotNull(vedtaksperiodeId),
-                            behandlingId = checkNotNull(behandlingId),
+                        Aktivitet.Behov.Behovtype.Utbetaling -> {
+                            val behovInput = behovMap.getValue("Utbetaling").single()
+                            Behovsdetaljer.Utbetaling(
+                                vedtaksperiodeId = checkNotNull(vedtaksperiodeId),
+                                behandlingId = checkNotNull(behandlingId),
+                                utbetalingId = checkNotNull(utbetalingId),
+                                fagområde = behovInput.getValue("fagområde") as String,
+                                fagsystemId = behovInput.getValue("fagsystemId") as String,
+                                organisasjonsnummer = meldingMap.getValue("organisasjonsnummer") as String,
+                                maksdato = (behovInput["maksdato"] as? String)?.let { LocalDate.parse(it) },
+                                linjer = ((behovInput.getValue("linjer")) as List<Map<String, *>>).map { Behovsdetaljer.Utbetaling.Linje(it["statuskode"] as? String) }
+                            )
+                        }
+                        Aktivitet.Behov.Behovtype.Feriepengeutbetaling -> Behovsdetaljer.Feriepengeutbetaling(
                             utbetalingId = checkNotNull(utbetalingId),
-                            fagsystemId = behovMap.getValue("Utbetaling").single().getValue("fagsystemId") as String,
-                            organisasjonsnummer = meldingMap.getValue("organisasjonsnummer") as String
+                            fagsystemId = behovMap.getValue("Feriepengeutbetaling").single().getValue("fagsystemId") as String,
                         )
-                        Aktivitet.Behov.Behovtype.Feriepengeutbetaling -> Behovsdetaljer.Feriepengeutbetaling(checkNotNull(utbetalingId))
-
                         Aktivitet.Behov.Behovtype.Foreldrepenger,
                         Aktivitet.Behov.Behovtype.Pleiepenger,
                         Aktivitet.Behov.Behovtype.Omsorgspenger,
@@ -195,13 +214,22 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
 
     class FraEventBus(log: DeferredLog): Behovsoppsamler(log) {
         override fun utbetal(event: EventSubscription.UtbetalingEvent) =
-            registrer(Behovsdetaljer.Utbetaling(event.vedtaksperiodeId, event.behandlingId, event.yrkesaktivitetssporing.somOrganisasjonsnummer, event.utbetalingId, event.oppdragsdetaljer.fagsystemId))
+            registrer(Behovsdetaljer.Utbetaling(
+                vedtaksperiodeId = event.vedtaksperiodeId,
+                behandlingId = event.behandlingId,
+                organisasjonsnummer = event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                utbetalingId = event.utbetalingId,
+                fagområde = event.oppdragsdetaljer.fagområde,
+                fagsystemId = event.oppdragsdetaljer.fagsystemId,
+                maksdato = event.oppdragsdetaljer.maksdato,
+                linjer = event.oppdragsdetaljer.linjer.map { Behovsdetaljer.Utbetaling.Linje(it.statuskode) }
+            ))
         override fun simuler(event: EventSubscription.SimuleringEvent) =
             registrer(Behovsdetaljer.Simulering(event.vedtaksperiodeId, event.utbetalingId, event.oppdragsdetaljer.fagsystemId, event.oppdragsdetaljer.fagområde))
         override fun trengerGodkjenning(event: EventSubscription.GodkjenningEvent) =
-            registrer(Behovsdetaljer.Godkjenning(event.behandlingId, event.utbetalingId, event.vedtaksperiodeId,))
+            registrer(Behovsdetaljer.Godkjenning(event.behandlingId, event.utbetalingId, event.vedtaksperiodeId, event.inntektskilde))
         override fun utbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent) =
-            registrer(Behovsdetaljer.Feriepengeutbetaling(event.utbetalingId))
+            registrer(Behovsdetaljer.Feriepengeutbetaling(event.utbetalingId, event.fagsystemId))
         override fun trengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent) =
             registrer(Behovsdetaljer.InitiellHistorikFraInfotrygd(event.vedtaksperiodeId, event.yrkesaktivitetssporing))
         override fun trengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent) =

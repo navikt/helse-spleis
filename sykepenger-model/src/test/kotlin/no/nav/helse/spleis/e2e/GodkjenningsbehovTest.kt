@@ -4,12 +4,12 @@ import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.AktivitetsloggAsserts
+import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.Varslersamler
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
@@ -37,7 +37,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
@@ -184,7 +183,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertFalse(kanAvvises(1.vedtaksperiode))
 
-            val utbetalingId = UUID.fromString(testperson.personlogg.sisteBehov(Aktivitet.Behov.Behovtype.Godkjenning).alleKontekster["utbetalingId"])
+            val utbetalingId = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last().utbetalingId
             val utbetaling = inspektør.utbetalinger(1.vedtaksperiode).last()
             assertEquals(utbetalingId, utbetaling.inspektør.utbetalingId)
 

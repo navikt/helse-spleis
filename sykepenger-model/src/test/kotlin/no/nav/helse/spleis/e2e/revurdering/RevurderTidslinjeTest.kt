@@ -2,14 +2,13 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.forlengelseTilGodkjenning
 import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -24,7 +23,6 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
@@ -955,13 +953,12 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
     fun `etterspør ytelser ved påminnelser i avventer_historikk_revurdering`() {
         a1 {
             nyttVedtak(januar)
-            assertEtterspurteYtelser(1, 1.vedtaksperiode)
 
             håndterOverstyrTidslinje((25.januar til 26.januar).map { manuellFeriedag(it) })
-            assertEtterspurteYtelser(2, 1.vedtaksperiode)
+            assertEtterspurteYtelser(1, 1.vedtaksperiode)
 
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertEtterspurteYtelser(3, 1.vedtaksperiode)
+            assertEtterspurteYtelser(2, 1.vedtaksperiode)
         }
     }
 
@@ -970,17 +967,18 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterOverstyrTidslinje((25.januar til 26.januar).map { manuellFeriedag(it) })
+            assertEtterspurteYtelser(1, 1.vedtaksperiode)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertEtterspurteYtelser(3, 1.vedtaksperiode)
+            assertEtterspurteYtelser(2, 1.vedtaksperiode)
 
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
-            assertEquals(3, testperson.personlogg.antallEtterspurteBehov(1.vedtaksperiode, Aktivitet.Behov.Behovtype.Simulering))
+            assertEquals(2, testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Simulering>().size)
 
             håndterSimulering(1.vedtaksperiode)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertEquals(3, testperson.personlogg.antallEtterspurteBehov(1.vedtaksperiode, Aktivitet.Behov.Behovtype.Godkjenning))
+            assertEquals(2, testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().size)
         }
     }
 
@@ -1232,12 +1230,6 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
     }
 
     private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeId: UUID) {
-        assertEquals(expected, testperson.personlogg.antallEtterspurteBehov(vedtaksperiodeId, Aktivitet.Behov.Behovtype.Foreldrepenger))
-        assertEquals(expected, testperson.personlogg.antallEtterspurteBehov(vedtaksperiodeId, Aktivitet.Behov.Behovtype.Pleiepenger))
-        assertEquals(expected, testperson.personlogg.antallEtterspurteBehov(vedtaksperiodeId, Aktivitet.Behov.Behovtype.Omsorgspenger))
-        assertEquals(expected, testperson.personlogg.antallEtterspurteBehov(vedtaksperiodeId, Aktivitet.Behov.Behovtype.Opplæringspenger))
-        assertEquals(expected, testperson.personlogg.antallEtterspurteBehov(vedtaksperiodeId, Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2))
-        assertEquals(expected, testperson.personlogg.antallEtterspurteBehov(vedtaksperiodeId, Aktivitet.Behov.Behovtype.DagpengerV2))
-        assertEquals(expected, testperson.personlogg.antallEtterspurteBehov(vedtaksperiodeId, Aktivitet.Behov.Behovtype.Institusjonsopphold))
+        assertEquals(expected, testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker>().filter { it.vedtaksperiodeId == vedtaksperiodeId }.size)
     }
 }

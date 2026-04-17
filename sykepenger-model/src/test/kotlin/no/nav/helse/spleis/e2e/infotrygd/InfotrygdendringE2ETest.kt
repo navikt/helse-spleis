@@ -3,9 +3,9 @@ package no.nav.helse.spleis.e2e.infotrygd
 import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
-import no.nav.helse.harBehov
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -13,13 +13,11 @@ import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdendringE2ETest : AbstractDslTest() {
@@ -52,7 +50,7 @@ internal class InfotrygdendringE2ETest : AbstractDslTest() {
         a1 {
             nyPeriode(1.januar til 16.januar)
             håndterInfotrygdendring()
-            assertTrue(testperson.personlogg.harBehov(Sykepengehistorikk))
+            assertEquals(1, testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.OppdatertHistorikkFraInfotrygd>().size)
             håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
                 ArbeidsgiverUtbetalingsperiode(
                     a1, 1.januar(2016), 31.januar(2016)

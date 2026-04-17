@@ -28,7 +28,6 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Person
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -268,19 +267,6 @@ internal abstract class AbstractDslTest {
 
     protected fun TestPerson.TestArbeidsgiver.assertIngenInfo(forventet: String, filter: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertIngenInfo(forventet, filter)
-
-    protected fun TestPerson.TestArbeidsgiver.assertIngenInfoSomInneholder(forventet: String, filter: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertIngenInfoSomInneholder(forventet, filter)
-
-    protected fun TestPerson.TestArbeidsgiver.assertIngenBehov(vedtaksperiodeId: UUID, behovtype: Aktivitet.Behov.Behovtype) =
-        testArbeidsgiverAsserter.assertIngenBehov(vedtaksperiodeId, behovtype)
-
-    protected fun TestPerson.TestArbeidsgiver.assertBehov(vedtaksperiodeId: UUID, behovtype: Aktivitet.Behov.Behovtype) =
-        testArbeidsgiverAsserter.assertBehov(vedtaksperiodeId, behovtype)
-
-    protected fun TestPerson.TestArbeidsgiver.assertBehov(vararg behovtype: Aktivitet.Behov.Behovtype, block: () -> Unit) {
-        testArbeidsgiverAsserter.assertBehov(behovtype.toList(), block)
-    }
 
     protected fun nyPeriode(periode: Periode, vararg orgnummer: String, grad: Prosentdel = 100.prosent) {
         testperson.nyPeriode(periode, *orgnummer, grad = grad)

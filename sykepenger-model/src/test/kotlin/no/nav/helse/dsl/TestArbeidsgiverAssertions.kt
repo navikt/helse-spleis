@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.ArbeidstakerOpptjeningView
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -105,9 +104,6 @@ internal class TestArbeidsgiverAssertions(
     internal fun assertIngenInfo(forventet: String, filter: AktivitetsloggFilter) =
         aktivitetsloggAsserts.assertIngenInfo(forventet, filter)
 
-    internal fun assertIngenInfoSomInneholder(forventet: String, filter: AktivitetsloggFilter) =
-        aktivitetsloggAsserts.assertIngenInfoSomInneholder(forventet, filter)
-
     internal fun assertVarsler(varsler: Collection<Varselkode>, filter: AktivitetsloggFilter) =
         aktivitetsloggAsserts.assertVarsler(varsler, filter)
 
@@ -122,15 +118,6 @@ internal class TestArbeidsgiverAssertions(
 
     internal fun assertFunksjonellFeil(varselkode: Varselkode, filter: AktivitetsloggFilter) =
         aktivitetsloggAsserts.assertFunksjonellFeil(varselkode, filter)
-
-    internal fun assertIngenBehov(vedtaksperiode: UUID, behovtype: Aktivitet.Behov.Behovtype) =
-        aktivitetsloggAsserts.assertIngenBehov(vedtaksperiode, behovtype)
-
-    internal fun assertBehov(vedtaksperiode: UUID, behovtype: Aktivitet.Behov.Behovtype) =
-        aktivitetsloggAsserts.assertBehov(vedtaksperiode, behovtype)
-
-    internal fun assertBehov(forventetBehov: List<Aktivitet.Behov.Behovtype>, block: () -> Unit) =
-        aktivitetsloggAsserts.assertBehov(forventetBehov, block)
 
     internal fun ingenNyeFunksjonelleFeil(block: () -> Unit) {
         return aktivitetsloggAsserts.ingenNyeFunksjonelleFeil(block)
