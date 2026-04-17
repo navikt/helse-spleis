@@ -4,13 +4,11 @@ import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.AktivitetsloggAsserts
+import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.Varslersamler
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -51,6 +49,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -95,18 +94,13 @@ internal class InfotrygdTest : AbstractDslTest() {
 
             assertVarsler(listOf(RV_IT_3), 1.vedtaksperiode.filter())
             assertEquals(2, observatør.utkastTilVedtakEventer.size)
-            AktivitetsloggAsserts(testperson.personlogg, Varslersamler.AssertetVarsler()).assertHarTag(
-                vedtaksperiode = 1.vedtaksperiode,
-                forventetTag = "OverlapperMedInfotrygd"
-            )
+
+            assertTrue("OverlapperMedInfotrygd" in testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.tags)
 
             håndterUtbetalingshistorikkEtterInfotrygdendring()
             håndterYtelser(1.vedtaksperiode)
 
-            AktivitetsloggAsserts(testperson.personlogg, Varslersamler.AssertetVarsler()).assertHarIkkeTag(
-                vedtaksperiode = 1.vedtaksperiode,
-                ikkeForventetTag = "OverlapperMedInfotrygd"
-            )
+            assertFalse("OverlapperMedInfotrygd" in testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.tags)
         }
     }
 

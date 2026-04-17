@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
+import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -15,10 +16,8 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
-import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.januar
 import no.nav.helse.november
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
@@ -35,7 +34,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.fail
 
 internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
     @Test
@@ -56,12 +54,12 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
-            val relevanteOrgnumre1: Iterable<String> = testperson.personlogg.hentFeltFraBehov(1.vedtaksperiode, Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
+            val relevanteOrgnumre1: Iterable<String> = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.orgnummereMedRelevanteArbeidsforhold.toList()
             assertEquals(listOf(a1, a2).toList(), relevanteOrgnumre1.toList())
             håndterOverstyrArbeidsforhold(skjæringstidspunkt, OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring"))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            val relevanteOrgnumre2: Iterable<String> = testperson.personlogg.hentFeltFraBehov(1.vedtaksperiode, Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
+            val relevanteOrgnumre2: Iterable<String> = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.orgnummereMedRelevanteArbeidsforhold.toList()
             assertEquals(listOf(a1), relevanteOrgnumre2.toList())
         }
     }

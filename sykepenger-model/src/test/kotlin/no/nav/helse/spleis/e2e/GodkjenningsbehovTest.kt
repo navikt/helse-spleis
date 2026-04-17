@@ -3,11 +3,9 @@ package no.nav.helse.spleis.e2e
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.AktivitetsloggAsserts
 import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.Varslersamler
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.nyttVedtak
@@ -15,13 +13,12 @@ import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.til
-import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
@@ -364,10 +361,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            AktivitetsloggAsserts(testperson.personlogg, Varslersamler.AssertetVarsler()).assertHarTag(
-                vedtaksperiode = 1.vedtaksperiode,
-                forventetTag = "InntektFraAOrdningenLagtTilGrunn"
-            )
+            assertTrue("InntektFraAOrdningenLagtTilGrunn" in testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.tags)
         }
     }
 
@@ -392,38 +386,23 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
         a2 {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            AktivitetsloggAsserts(testperson.personlogg, Varslersamler.AssertetVarsler()).assertHarTag(
-                vedtaksperiode = 1.vedtaksperiode,
-                forventetTag = "InntektFraAOrdningenLagtTilGrunn"
-            )
+            assertTrue("InntektFraAOrdningenLagtTilGrunn" in testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.tags)
         }
     }
 
     private fun kanAvvises(vedtaksperiode: UUID) =
-        testperson.personlogg.hentFeltFraBehov<Boolean>(
-            vedtaksperiodeId = vedtaksperiode,
-            behov = Aktivitet.Behov.Behovtype.Godkjenning,
-            felt = "kanAvvises"
-        )!!
+        testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == vedtaksperiode }.event.kanAvvises
 
     private fun vilkårsgrunnlagIdFraSisteGodkjenningsbehov(vedtaksperiode: UUID) =
-        testperson.personlogg.hentFeltFraBehov<String>(
-            vedtaksperiodeId = vedtaksperiode,
-            behov = Aktivitet.Behov.Behovtype.Godkjenning,
-            felt = "vilkårsgrunnlagId"
-        )!!.let { UUID.fromString(it) }
+        testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == vedtaksperiode }.event.vilkårsgrunnlagId
 
     private fun sykepengegrunnlag(vedtaksperiode: UUID) =
-        testperson.personlogg.hentFeltFraBehov<Map<String, Any>>(
-            vedtaksperiodeId = vedtaksperiode,
-            behov = Aktivitet.Behov.Behovtype.Godkjenning,
-            felt = "sykepengegrunnlagsfakta"
-        )!!["sykepengegrunnlag"]
+        testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == vedtaksperiode }.event.sykepengegrunnlagsfakta.sykepengegrunnlag
 
-    private fun inntektskilder(vedtaksperiode: UUID) =
-        testperson.personlogg.hentFeltFraBehov<Map<String, List<Map<String, Any>>>>(
-            vedtaksperiodeId = vedtaksperiode,
-            behov = Aktivitet.Behov.Behovtype.Godkjenning,
-            felt = "sykepengegrunnlagsfakta"
-        )!!["arbeidsgivere"]!!.map { it["inntektskilde"]?.toString() }.mapNotNull { it }.map { Inntektskilde.valueOf(it) }
+    private fun inntektskilder(vedtaksperiode: UUID) = when (val fakta = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == vedtaksperiode }.event.sykepengegrunnlagsfakta) {
+        is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel -> fakta.arbeidsgivere.map { Inntektskilde.valueOf(it.inntektskilde) }
+        is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn -> fakta.arbeidsgivere.map { Inntektskilde.Saksbehandler }
+        is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerFraInfotrygd,
+        is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel -> error("Denne testen tester ikke disse casene..")
+    }
 }

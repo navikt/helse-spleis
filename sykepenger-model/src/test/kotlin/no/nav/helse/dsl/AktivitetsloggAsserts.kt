@@ -1,13 +1,10 @@
 package no.nav.helse.dsl
 
-import java.util.UUID
-import no.nav.helse.hentFeltFraBehov
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class AktivitetsloggAsserts(
@@ -22,11 +19,6 @@ internal class AktivitetsloggAsserts(
     internal fun assertIngenInfo(forventet: String, filter: AktivitetsloggFilter) {
         val info = collectInfo(filter)
         assertEquals(0, info.count { it == forventet }, "fant uventet info. Info:\n${info.joinToString("\n")}")
-    }
-
-    internal fun assertIngenInfoSomInneholder(forventet: String, filter: AktivitetsloggFilter) {
-        val info = collectInfo(filter)
-        assertEquals(0, info.count { it.contains(forventet) }, "fant uventet info. Info:\n${info.joinToString("\n")}")
     }
 
     internal fun assertVarsler(varsler: Collection<Varselkode>, filter: AktivitetsloggFilter) {
@@ -95,24 +87,6 @@ internal class AktivitetsloggAsserts(
     internal fun assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter) {
         val errors = collectFunksjonelleFeil(filter)
         assertTrue(errors.isEmpty(), "forventet ingen errors. Errors: \n${errors.joinToString("\n")}")
-    }
-
-    internal fun assertHarTag(vedtaksperiode: UUID, forventetTag: String) {
-        val tags = aktivitetslogg.hentFeltFraBehov<Set<String>>(
-            vedtaksperiodeId = vedtaksperiode,
-            behov = Aktivitet.Behov.Behovtype.Godkjenning,
-            felt = "tags"
-        )
-        assertTrue(tags?.contains(forventetTag) ?: false, "Fant ikke forventet tag: $forventetTag. Faktiske tags: $tags ")
-    }
-
-    internal fun assertHarIkkeTag(vedtaksperiode: UUID, ikkeForventetTag: String) {
-        val tags = aktivitetslogg.hentFeltFraBehov<Set<String>>(
-            vedtaksperiodeId = vedtaksperiode,
-            behov = Aktivitet.Behov.Behovtype.Godkjenning,
-            felt = "tags"
-        )
-        assertFalse(tags?.contains(ikkeForventetTag) ?: true, "Fant tag vi ikke forventet: $ikkeForventetTag. Faktiske tags: $tags ")
     }
 
     private fun <A : Aktivitet> List<A>.collect(filter: AktivitetsloggFilter) =

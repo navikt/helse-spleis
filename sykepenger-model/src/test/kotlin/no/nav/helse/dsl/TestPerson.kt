@@ -211,7 +211,7 @@ internal class TestPerson(
 
     inner class TestArbeidsgiver(
         internal val orgnummer: String,
-        private val behandlingsporing: Behandlingsporing.Yrkesaktivitet
+        internal val behandlingsporing: Behandlingsporing.Yrkesaktivitet
     ) {
         private val arbeidsgiverHendelsefabrikk = ArbeidsgiverHendelsefabrikk(orgnummer, behandlingsporing)
 
