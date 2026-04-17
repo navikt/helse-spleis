@@ -72,14 +72,13 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
                 assertEquals(0, utbetalingInspektør.arbeidsgiverOppdrag.size)
                 assertEquals(1, utbetalingInspektør.personOppdrag.size)
             }
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2022),
+                datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2023)
+            )
+            assertEquals(1605.5819999999999, inspektør.spleisFeriepengebeløpPerson.first())
+            assertEquals(0.0, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
         }
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2022),
-            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2023)
-        )
-
-        assertEquals(1605.5819999999999, a1.inspektør.spleisFeriepengebeløpPerson.first())
-        assertEquals(0.0, a1.inspektør.spleisFeriepengebeløpArbeidsgiver.first())
     }
 
     @Test
@@ -101,14 +100,13 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
                     assertEquals(17.januar, linje.datoStatusFom)
                 }
             }
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2018),
+                datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2019)
+            )
+            assertEquals(0.0, inspektør.spleisFeriepengebeløpPerson.first())
+            assertEquals(0.0, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
         }
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2018),
-            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2019)
-        )
-
-        assertEquals(0.0, a1.inspektør.spleisFeriepengebeløpPerson.first())
-        assertEquals(0.0, a1.inspektør.spleisFeriepengebeløpArbeidsgiver.first())
     }
 
     @Test
@@ -119,16 +117,15 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
                 assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
                 assertEquals(1, utbetalingInspektør.personOppdrag.size)
             }
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2022),
+                datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2023)
+            )
+            assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpPerson.first())
+            assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
+            assertEquals(0.0, inspektør.infotrygdFeriepengebeløpPerson.first())
+            assertEquals(0.0, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
         }
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2022),
-            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2023)
-        )
-
-        assertEquals(802.2299999999999, a1.inspektør.spleisFeriepengebeløpPerson.first())
-        assertEquals(802.2299999999999, a1.inspektør.spleisFeriepengebeløpArbeidsgiver.first())
-        assertEquals(0.0, a1.inspektør.infotrygdFeriepengebeløpPerson.first())
-        assertEquals(0.0, a1.inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
     }
 
     @Test
@@ -153,11 +150,12 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             ),
             datoForSisteFeriepengekjøringIInfotrygd = 31.mai(2023)
         )
-
-        assertEquals(802.2299999999999, a1.inspektør.spleisFeriepengebeløpPerson.first())
-        assertEquals(802.2299999999999, a1.inspektør.spleisFeriepengebeløpArbeidsgiver.first())
-        assertEquals(802.2299999999999, a1.inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
-        assertEquals(802.2299999999999, a1.inspektør.infotrygdFeriepengebeløpPerson.first())
+        a1 {
+            assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpPerson.first())
+            assertEquals(802.2299999999999, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
+            assertEquals(802.2299999999999, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
+            assertEquals(802.2299999999999, inspektør.infotrygdFeriepengebeløpPerson.first())
+        }
     }
 
     @Test
@@ -178,94 +176,103 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             ),
             datoForSisteFeriepengekjøringIInfotrygd = 1.april(2022)
         )
+        a1 {
+            assertEquals(1070.388, inspektør.spleisFeriepengebeløpPerson.first())
+            assertEquals(535.194, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
+            assertEquals(2698.41, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
+            assertEquals(2698.41, inspektør.infotrygdFeriepengebeløpPerson.first())
 
-        assertEquals(1070.388, a1.inspektør.spleisFeriepengebeløpPerson.first())
-        assertEquals(535.194, a1.inspektør.spleisFeriepengebeløpArbeidsgiver.first())
-        assertEquals(2698.41, a1.inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
-        assertEquals(2698.41, a1.inspektør.infotrygdFeriepengebeløpPerson.first())
-
-        val utbetalingslinjer = listOf(
-            Feriepengeutbetalingslinje(
-                fom = 1.mai(2023), tom = 31.mai(2023), beløp = -267,
-                klassekode = Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
-                endringskode = Feriepengerendringskode.NY
-            ), Feriepengeutbetalingslinje(
-                fom = 1.mai(2023), tom = 31.mai(2023), beløp = 268,
-                klassekode = Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
-                endringskode = Feriepengerendringskode.NY
+            val utbetalingslinjer = listOf(
+                Feriepengeutbetalingslinje(
+                    fom = 1.mai(2023), tom = 31.mai(2023), beløp = -267,
+                    klassekode = Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
+                    endringskode = Feriepengerendringskode.NY
+                ), Feriepengeutbetalingslinje(
+                    fom = 1.mai(2023), tom = 31.mai(2023), beløp = 268,
+                    klassekode = Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
+                    endringskode = Feriepengerendringskode.NY
+                )
             )
-        )
-        assertEquals(utbetalingslinjer, a1.inspektør.feriepengeoppdrag.utbetalingslinjer)
+            assertEquals(utbetalingslinjer, inspektør.feriepengeoppdrag.utbetalingslinjer)
+        }
     }
 
     @Test
     fun `Infotrygd har betalt ut 48 dager til person - Spleis har utbetalt 48 i forkant`() {
-        a1 { nyttVedtak(1.januar(2022) til 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null)) }
-        val dagsatsIT = 1574
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2022),
-            utbetalinger = listOf(Personutbetalingsperiode(a1, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.mars(2022))),
-            datoForSisteFeriepengekjøringIInfotrygd = 31.mars(2023)
-        )
-        assertEquals(0.0, a1.inspektør.spleisFeriepengebeløpArbeidsgiver.first())
-        assertEquals(0.0, a1.inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
-        assertEquals(7006.1759999999995, a1.inspektør.spleisFeriepengebeløpPerson.first())
-        assertEquals(0.0, a1.inspektør.infotrygdFeriepengebeløpPerson.first())
-
-        val utbetalingslinje = listOf(
-            Feriepengeutbetalingslinje(
-                fom = 1.mai(2023),
-                tom = 31.mai(2023),
-                beløp = -700,
-                klassekode = Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
-                endringskode = Feriepengerendringskode.NY
+        a1 {
+            nyttVedtak(1.januar(2022) til 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
+            val dagsatsIT = 1574
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2022),
+                utbetalinger = listOf(Personutbetalingsperiode(a1, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.mars(2022))),
+                datoForSisteFeriepengekjøringIInfotrygd = 31.mars(2023)
             )
-        )
-        assertEquals(utbetalingslinje, a1.inspektør.feriepengeoppdrag.utbetalingslinjer)
+            assertEquals(0.0, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
+            assertEquals(0.0, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
+            assertEquals(7006.1759999999995, inspektør.spleisFeriepengebeløpPerson.first())
+            assertEquals(0.0, inspektør.infotrygdFeriepengebeløpPerson.first())
+
+            val utbetalingslinje = listOf(
+                Feriepengeutbetalingslinje(
+                    fom = 1.mai(2023),
+                    tom = 31.mai(2023),
+                    beløp = -700,
+                    klassekode = Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
+                    endringskode = Feriepengerendringskode.NY
+                )
+            )
+            assertEquals(utbetalingslinje, inspektør.feriepengeoppdrag.utbetalingslinjer)
+        }
     }
 
     @Test
     fun `Spleis utbetaler feriepenger til person, blir annullert i Spleis mellom første og andre kjøring`() {
-        a1 { nyttVedtak(1.januar(2022) til 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null)) }
-        val dagsatsIT = 1574
+        a1 {
+            nyttVedtak(1.januar(2022) til 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
+            val dagsatsIT = 1574
 
-        // Første kjøring
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2022),
-            utbetalinger = listOf(Personutbetalingsperiode(a1, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.mars(2022))),
-            datoForSisteFeriepengekjøringIInfotrygd = 1.april(2022)
-        )
-        assertEquals(7006.1759999999995, a1.inspektør.spleisFeriepengebeløpPerson.first())
-        assertEquals(listOf(
-            Feriepengeutbetalingslinje(1.mai(2023), 31.mai(2023), -700, Feriepengerklassekode.SykepengerArbeidstakerFeriepenger, Feriepengerendringskode.NY)
-        ), a1.inspektør.feriepengeoppdrag.utbetalingslinjer)
+            // Første kjøring
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2022),
+                utbetalinger = listOf(Personutbetalingsperiode(a1, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.mars(2022))),
+                datoForSisteFeriepengekjøringIInfotrygd = 1.april(2022)
+            )
+            assertEquals(7006.1759999999995, inspektør.spleisFeriepengebeløpPerson.first())
+            assertEquals(listOf(
+                Feriepengeutbetalingslinje(1.mai(2023), 31.mai(2023), -700, Feriepengerklassekode.SykepengerArbeidstakerFeriepenger, Feriepengerendringskode.NY)
+            ), inspektør.feriepengeoppdrag.utbetalingslinjer)
 
-        håndterAnnullering(1.vedtaksperiode)
-        håndterUtbetalt()
-        // Andre kjøring ❤️
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2022),
-            utbetalinger = listOf(
-                Personutbetalingsperiode(a1, 17.januar(2022), 31.mars(2022), dagsatsIT, 31.mars(2022)),
-                Personutbetalingsperiode(a1, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.oktober(2022))
-            ),
-            datoForSisteFeriepengekjøringIInfotrygd = 1.november(2022)
-        )
-        assertEquals(listOf(
-            Feriepengeutbetalingslinje(1.mai(2023), 31.mai(2023), -700, Feriepengerklassekode.SykepengerArbeidstakerFeriepenger, Feriepengerendringskode.ENDR, statuskode = "OPPH")
-        ), a1.inspektør.feriepengeoppdrag.utbetalingslinjer)
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+            // Andre kjøring ❤️
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2022),
+                utbetalinger = listOf(
+                    Personutbetalingsperiode(a1, 17.januar(2022), 31.mars(2022), dagsatsIT, 31.mars(2022)),
+                    Personutbetalingsperiode(a1, 1.august(2022), 31.oktober(2022), dagsatsIT, 31.oktober(2022))
+                ),
+                datoForSisteFeriepengekjøringIInfotrygd = 1.november(2022)
+            )
+            assertEquals(listOf(
+                Feriepengeutbetalingslinje(1.mai(2023), 31.mai(2023), -700, Feriepengerklassekode.SykepengerArbeidstakerFeriepenger, Feriepengerendringskode.ENDR, statuskode = "OPPH")
+            ), inspektør.feriepengeoppdrag.utbetalingslinjer)
+        }
     }
 
     @Test
     fun `serialiserer og deserialiserer Spleis feriepengebeløp for person`() {
-        a1 { nyttVedtak(1.januar(2022) til 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null)) }
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2022),
-            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2023)
-        )
-        assertEquals(1605.5819999999999, a1.inspektør.spleisFeriepengebeløpPerson.first())
+        a1 {
+            nyttVedtak(1.januar(2022) til 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2022),
+                datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2023)
+            )
+            assertEquals(1605.5819999999999, inspektør.spleisFeriepengebeløpPerson.first())
+        }
         assertGjenoppbygget(dto())
-        assertEquals(1605.5819999999999, a1.inspektør.spleisFeriepengebeløpPerson.first())
+        a1 {
+            assertEquals(1605.5819999999999, inspektør.spleisFeriepengebeløpPerson.first())
+        }
     }
 
     private fun standardOppsett2020() {
@@ -288,15 +295,16 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
         )
+        a1 {
+            assertEquals(0.0, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
+            assertEquals(0.0, inspektør.infotrygdFeriepengebeløpPerson.first())
+            assertEquals(1431 * 10 * 0.102, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
 
-        assertEquals(0.0, a1.inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
-        assertEquals(0.0, a1.inspektør.infotrygdFeriepengebeløpPerson.first())
-        assertEquals(1431 * 10 * 0.102, a1.inspektør.spleisFeriepengebeløpArbeidsgiver.first())
-
-        assertEquals(
-            Feriepengeutbetalingslinje(1.mai(2021), 31.mai(2021), 1460, Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig, Feriepengerendringskode.NY),
-            a1.inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.first()
-        )
+            assertEquals(
+                Feriepengeutbetalingslinje(1.mai(2021), 31.mai(2021), 1460, Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig, Feriepengerendringskode.NY),
+                inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.first()
+            )
+        }
     }
 
     @Test
@@ -308,15 +316,16 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 3211, 1.mai(2021), 31.mai(2021))),
             datoForSisteFeriepengekjøringIInfotrygd = 1.april(2020)
         )
+        a1 {
+            assertEquals(1431 * 22 * 0.102, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
+            assertEquals(0.0, inspektør.infotrygdFeriepengebeløpPerson.first())
+            assertEquals(1431 * 10 * 0.102, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
 
-        assertEquals(1431 * 22 * 0.102, a1.inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
-        assertEquals(0.0, a1.inspektør.infotrygdFeriepengebeløpPerson.first())
-        assertEquals(1431 * 10 * 0.102, a1.inspektør.spleisFeriepengebeløpArbeidsgiver.first())
-
-        assertEquals(
-            Feriepengeutbetalingslinje(1.mai(2021), 31.mai(2021), 1460, Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig, Feriepengerendringskode.NY),
-            a1.inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.first()
-        )
+            assertEquals(
+                Feriepengeutbetalingslinje(1.mai(2021), 31.mai(2021), 1460, Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig, Feriepengerendringskode.NY),
+                inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.first()
+            )
+        }
     }
 
     @Test
@@ -338,15 +347,16 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 3357, 1.mai(2021), 31.mai(2021))),
             datoForSisteFeriepengekjøringIInfotrygd = 1.februar(2020)
         )
+        a1 {
+            assertEquals(1431 * 23 * 0.102, inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
+            assertEquals(0.0, inspektør.infotrygdFeriepengebeløpPerson.first())
+            assertEquals(1431 * 10 * 0.102, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
 
-        assertEquals(1431 * 23 * 0.102, a1.inspektør.infotrygdFeriepengebeløpArbeidsgiver.first())
-        assertEquals(0.0, a1.inspektør.infotrygdFeriepengebeløpPerson.first())
-        assertEquals(1431 * 10 * 0.102, a1.inspektør.spleisFeriepengebeløpArbeidsgiver.first())
-
-        assertEquals(
-            Feriepengeutbetalingslinje(1.mai(2021), 31.mai(2021), 1460, Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig, Feriepengerendringskode.NY),
-            a1.inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.first()
-        )
+            assertEquals(
+                Feriepengeutbetalingslinje(1.mai(2021), 31.mai(2021), 1460, Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig, Feriepengerendringskode.NY),
+                inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.first()
+            )
+        }
     }
 
     @Test
@@ -358,7 +368,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             skalBeregnesManuelt = true
         )
 
-        assertEquals(0, a1.inspektør.feriepengeoppdrag.size)
+        assertEquals(0, a1 { inspektør.feriepengeoppdrag.size })
         assertTrue(testperson.personlogg.toString().contains("Person er markert for manuell beregning av feriepenger"))
     }
 
@@ -372,7 +382,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             datoForSisteFeriepengekjøringIInfotrygd = 1.desember(2020)
         )
 
-        assertEquals(2, a1.inspektør.feriepengeoppdrag.size)
+        assertEquals(2, a1 { inspektør.feriepengeoppdrag.size })
         assertEquals(1, engangsutbetalinger().size)
 
         håndterUtbetalingshistorikkForFeriepenger(
@@ -382,7 +392,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             datoForSisteFeriepengekjøringIInfotrygd = 1.desember(2020)
         )
 
-        assertEquals(4, a1.inspektør.feriepengeoppdrag.size)
+        assertEquals(4, a1 { inspektør.feriepengeoppdrag.size })
         assertEquals(1, engangsutbetalinger().size)
     }
 
@@ -406,9 +416,9 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             datoForSisteFeriepengekjøringIInfotrygd = 2.desember(2020)
         )
 
-        assertEquals(2, a1.inspektør.feriepengeoppdrag.size)
+        assertEquals(2, a1 { inspektør.feriepengeoppdrag.size })
         assertEquals(2, ORGNUMMER2.inspektør.feriepengeoppdrag.size)
-        assertEquals(7006, a1.inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.first().beløp)
+        assertEquals(7006, a1 { inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.first().beløp })
         assertEquals(-2142, ORGNUMMER2.inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.first().beløp)
     }
 
@@ -433,7 +443,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             håndterUtbetalt()
         }
 
-        assertEquals(0, a1.inspektør.feriepengeoppdrag.size)
+        assertEquals(0, a1 { inspektør.feriepengeoppdrag.size })
         assertEquals(2, ORGNUMMER2.inspektør.feriepengeoppdrag.size)
         assertTrue(ORGNUMMER2.inspektør.feriepengeoppdrag.first().feriepengeutbetalingslinjer.isEmpty())
     }
@@ -452,7 +462,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
                 datoForSisteFeriepengekjøringIInfotrygd = 31.januar(2020)
             )
         }.also { assertTrue(it.isEmpty()) }
-        assertEquals(2, a1.inspektør.feriepengeoppdrag.size)
+        assertEquals(2, a1 { inspektør.feriepengeoppdrag.size })
     }
 
     @Test
@@ -469,7 +479,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
                 datoForSisteFeriepengekjøringIInfotrygd = 1.februar(2020)
             )
         }.also { assertTrue(it.isNotEmpty()) }
-        assertEquals(2, a1.inspektør.feriepengeoppdrag.size)
+        assertEquals(2, a1 { inspektør.feriepengeoppdrag.size })
     }
 
     @Test
@@ -482,7 +492,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
                 datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2022)
             )
         }.also { assertTrue(it.isEmpty()) }
-        assertEquals(2, a1.inspektør.feriepengeoppdrag.size)
+        assertEquals(2, a1 { inspektør.feriepengeoppdrag.size })
     }
 
     @Test
@@ -667,7 +677,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         val fagsystemId = førsteUtbetaling.detaljer()["fagsystemId"]
 
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
-        assertEquals(4, a1.inspektør.feriepengeoppdrag.size)
+        assertEquals(4, a1 { inspektør.feriepengeoppdrag.size })
         assertEquals(1, engangsutbetalinger().size)
 
         håndterUtbetalingshistorikkForFeriepenger(
@@ -677,7 +687,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             datoForSisteFeriepengekjøringIInfotrygd = 1.juli(2020)
         )
 
-        assertEquals(6, a1.inspektør.feriepengeoppdrag.size)
+        assertEquals(6, a1 { inspektør.feriepengeoppdrag.size })
         assertEquals(2, engangsutbetalinger().size)
         val utbetaling = engangsutbetalinger().last()
         assertEquals((38 * DAGSINNTEKT * 0.102).roundToInt(), utbetaling.linje()["sats"])
@@ -713,11 +723,13 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         val førsteUtbetaling = engangsutbetalinger().last()
         val fagsystemId = førsteUtbetaling.detaljer()["fagsystemId"]
 
-        håndterAnnullering(1.vedtaksperiode)
-        håndterUtbetalt()
+        a1 {
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
 
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
-        assertEquals(4, a1.inspektør.feriepengeoppdrag.size)
+        assertEquals(4, a1 { inspektør.feriepengeoppdrag.size })
         assertEquals(2, engangsutbetalinger().size)
         val utbetaling = engangsutbetalinger().last()
         assertEquals((43 * DAGSINNTEKT * 0.102).roundToInt(), utbetaling.linje()["sats"])
@@ -732,24 +744,28 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
         val fagsystemId1FraBehov = engangsutbetalinger().last().detaljer()["fagsystemId"]
 
-        håndterAnnullering(1.vedtaksperiode)
-        håndterUtbetalt()
+        a1 {
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
 
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
 
-        assertEquals(6, a1.inspektør.feriepengeoppdrag.size)
-        assertEquals(2, engangsutbetalinger().size)
+        a1 {
+            assertEquals(6, inspektør.feriepengeoppdrag.size)
+            assertEquals(2, engangsutbetalinger().size)
 
-        val fagsystemId1 = a1.inspektør.feriepengeoppdrag[0].fagsystemId
-        val fagsystemId2 = a1.inspektør.feriepengeoppdrag[2].fagsystemId
-        val fagsystemId3 = a1.inspektør.feriepengeoppdrag[4].fagsystemId
-        assertEquals(fagsystemId1, fagsystemId2)
-        assertEquals(fagsystemId1, fagsystemId3)
+            val fagsystemId1 = inspektør.feriepengeoppdrag[0].fagsystemId
+            val fagsystemId2 = inspektør.feriepengeoppdrag[2].fagsystemId
+            val fagsystemId3 = inspektør.feriepengeoppdrag[4].fagsystemId
+            assertEquals(fagsystemId1, fagsystemId2)
+            assertEquals(fagsystemId1, fagsystemId3)
 
-        val fagsystemId2FraBehov = engangsutbetalinger().last().detaljer()["fagsystemId"]
-        assertEquals(fagsystemId1, fagsystemId1FraBehov)
-        assertEquals(fagsystemId1FraBehov, fagsystemId2FraBehov)
+            val fagsystemId2FraBehov = engangsutbetalinger().last().detaljer()["fagsystemId"]
+            assertEquals(fagsystemId1, fagsystemId1FraBehov)
+            assertEquals(fagsystemId1FraBehov, fagsystemId2FraBehov)
+        }
     }
 
     @Test
@@ -758,8 +774,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
         val fagsystemId1FraBehov = engangsutbetalinger().last().detaljer()["fagsystemId"]
 
-        håndterAnnullering(1.vedtaksperiode)
-        håndterUtbetalt()
+        a1 {
+            håndterAnnullering(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
 
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
 
@@ -775,25 +793,27 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         }
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
 
-        assertEquals(6, a1.inspektør.feriepengeoppdrag.size)
-        assertEquals(3, engangsutbetalinger().size)
+        a1 {
+            assertEquals(6, inspektør.feriepengeoppdrag.size)
+            assertEquals(3, engangsutbetalinger().size)
 
-        val fagsystemId1 = a1.inspektør.feriepengeoppdrag[0].fagsystemId
-        val fagsystemId2 = a1.inspektør.feriepengeoppdrag[2].fagsystemId
-        val fagsystemId3 = a1.inspektør.feriepengeoppdrag[4].fagsystemId
+            val fagsystemId1 = inspektør.feriepengeoppdrag[0].fagsystemId
+            val fagsystemId2 = inspektør.feriepengeoppdrag[2].fagsystemId
+            val fagsystemId3 = inspektør.feriepengeoppdrag[4].fagsystemId
 
-        assertEquals(fagsystemId1, fagsystemId2)
-        assertEquals(fagsystemId1, fagsystemId3)
+            assertEquals(fagsystemId1, fagsystemId2)
+            assertEquals(fagsystemId1, fagsystemId3)
 
-        val fagsystemId2FraBehov = engangsutbetalinger()[1].detaljer()["fagsystemId"]
-        assertEquals(fagsystemId1, fagsystemId1FraBehov)
-        assertEquals(fagsystemId1FraBehov, fagsystemId2FraBehov)
+            val fagsystemId2FraBehov = engangsutbetalinger()[1].detaljer()["fagsystemId"]
+            assertEquals(fagsystemId1, fagsystemId1FraBehov)
+            assertEquals(fagsystemId1FraBehov, fagsystemId2FraBehov)
 
-        val utbetaling = engangsutbetalinger().last()
-        assertEquals((41 * DAGSINNTEKT * 0.102).roundToInt(), utbetaling.linje()["sats"])
-        assertNull(utbetaling.linje()["datoStatusFom"])
-        assertEquals(fagsystemId3, utbetaling.detaljer()["fagsystemId"])
-        assertEquals(engangsutbetalinger().first().linje()["klassekode"], utbetaling.linje()["klassekode"])
+            val utbetaling = engangsutbetalinger().last()
+            assertEquals((41 * DAGSINNTEKT * 0.102).roundToInt(), utbetaling.linje()["sats"])
+            assertNull(utbetaling.linje()["datoStatusFom"])
+            assertEquals(fagsystemId3, utbetaling.detaljer()["fagsystemId"])
+            assertEquals(engangsutbetalinger().first().linje()["klassekode"], utbetaling.linje()["klassekode"])
+        }
     }
 
     @Test

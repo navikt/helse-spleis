@@ -6,6 +6,7 @@ import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -709,7 +710,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         }
     }
 
-    private fun assertDokumentsporingPåSisteBehandling(vedtaksperiode: UUID, vararg forventet: Dokumentsporing) {
+    private fun TestPerson.TestArbeidsgiver.assertDokumentsporingPåSisteBehandling(vedtaksperiode: UUID, vararg forventet: Dokumentsporing) {
         val faktisk = inspektør.vedtaksperioder(vedtaksperiode).behandlinger.behandlinger
             .last().endringer
             .map { it.dokumentsporing }.filter { when (it.dokumentType) {

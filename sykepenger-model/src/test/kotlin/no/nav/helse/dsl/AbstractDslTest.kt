@@ -78,10 +78,7 @@ internal abstract class AbstractDslTest {
     internal lateinit var testperson: TestPerson
     private lateinit var deferredLog: DeferredLog
     protected fun Int.vedtaksperiode(orgnummer: String) = orgnummer { vedtaksperiode }
-    protected val Int.vedtaksperiode get() = vedtaksperiode(bareÈnArbeidsgiver(a1))
-
     protected val String.inspektør get() = inspektør(this)
-    protected val inspektør: TestArbeidsgiverInspektør get() = bareÈnArbeidsgiver(a1).inspektør
 
     private val TestPerson.TestArbeidsgiver.testArbeidsgiverAsserter
         get() = TestArbeidsgiverAssertions(
@@ -446,100 +443,6 @@ internal abstract class AbstractDslTest {
     ) =
         this { tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status) }
 
-    /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
-    private fun bareÈnArbeidsgiver(orgnr: String): String {
-        check(testperson.view().arbeidsgivere.size < 2) {
-            "Kan ikke bruke forenklet API for én arbeidsgivere når det finnes flere! Det er ikke trygt og kommer til å lage feil!"
-        }
-        return orgnr
-    }
-
-    protected fun håndterSykmelding(periode: Periode) = håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
-    protected fun håndterSykmelding(
-        vararg sykmeldingsperiode: Sykmeldingsperiode,
-        sykmeldingSkrevet: LocalDateTime? = null,
-        mottatt: LocalDateTime? = null,
-        orgnummer: String = a1
-    ) =
-        bareÈnArbeidsgiver(orgnummer).håndterSykmelding(*sykmeldingsperiode, sykmeldingSkrevet = sykmeldingSkrevet, mottatt = mottatt)
-
-    protected fun håndterSøknad(periode: Periode) = håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
-    protected fun håndterSøknad(
-        vararg perioder: Søknad.Søknadsperiode,
-        andreInntektskilder: Boolean = false,
-        arbeidUtenforNorge: Boolean = false,
-        sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
-        sykmeldingSkrevet: LocalDateTime? = null,
-        orgnummer: String = a1,
-        sendTilGosys: Boolean = false,
-        inntekterFraNyeArbeidsforhold: Boolean = false
-    ) =
-        bareÈnArbeidsgiver(orgnummer).håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys, inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold)
-
-    protected fun håndterInntektsmelding(
-        arbeidsgiverperioder: List<Periode>,
-        beregnetInntekt: Inntekt,
-        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        id: UUID = UUID.randomUUID(),
-        orgnummer: String = a1,
-        mottatt: LocalDateTime = LocalDateTime.now()
-    ) =
-        bareÈnArbeidsgiver(orgnummer).håndterInntektsmelding(
-            arbeidsgiverperioder,
-            beregnetInntekt,
-            førsteFraværsdag,
-            refusjon,
-            opphørAvNaturalytelser,
-            begrunnelseForReduksjonEllerIkkeUtbetalt,
-            id,
-            mottatt = mottatt
-        )
-
-    internal fun håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, orgnummer: String = a1) =
-        bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId)
-
-    internal fun håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus, orgnummer: String = a1) =
-        bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus)
-
-    internal fun håndterYtelser(
-        vedtaksperiodeId: UUID,
-        foreldrepenger: List<GradertPeriode> = emptyList(),
-        svangerskapspenger: List<GradertPeriode> = emptyList(),
-        pleiepenger: List<GradertPeriode> = emptyList(),
-        omsorgspenger: List<GradertPeriode> = emptyList(),
-        opplæringspenger: List<GradertPeriode> = emptyList(),
-        institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
-        arbeidsavklaringspenger: List<Periode> = emptyList(),
-        arbeidsavklaringspengerV2: List<Periode> = emptyList(),
-        dagpenger: List<Periode> = emptyList(),
-        orgnummer: String = a1
-    ) =
-        bareÈnArbeidsgiver(orgnummer).håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, arbeidsavklaringspengerV2, dagpenger)
-
-    internal fun håndterSimulering(vedtaksperiodeId: UUID, orgnummer: String = a1) =
-        bareÈnArbeidsgiver(orgnummer).håndterSimulering(vedtaksperiodeId)
-
-    internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true, orgnummer: String = a1) =
-        bareÈnArbeidsgiver(orgnummer).håndterUtbetalingsgodkjenning(vedtaksperiodeId, godkjent)
-
-    internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT, orgnummer: String = a1) =
-        bareÈnArbeidsgiver(orgnummer).håndterUtbetalt(status)
-
-    protected fun håndterAnnullering(vedtaksperiodeId: UUID, orgnummer: String = a1) =
-        bareÈnArbeidsgiver(orgnummer).håndterAnnullering(vedtaksperiodeId)
-
-    protected fun håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) =
-        bareÈnArbeidsgiver(a1).håndterIdentOpphørt(nyttFnr)
-
-    protected fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
-        bareÈnArbeidsgiver(a1).håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt)
-
-    protected fun håndterGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =
-        bareÈnArbeidsgiver(a1).håndterGrunnbeløpsregulering(skjæringstidspunkt)
-
     protected fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) =
         testperson { håndterOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold) }
 
@@ -548,27 +451,6 @@ internal abstract class AbstractDslTest {
 
     protected fun håndterOverstyrArbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID = UUID.randomUUID()) =
         testperson { håndterOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, arbeidsgiveropplysninger, meldingsreferanseId) }
-
-    protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) =
-        bareÈnArbeidsgiver(a1).assertTilstander(id, *tilstander)
-
-    protected fun assertSisteTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) =
-        bareÈnArbeidsgiver(orgnummer).assertSisteTilstand(id, tilstand)
-
-    protected fun assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) =
-        bareÈnArbeidsgiver(a1).assertIngenFunksjonelleFeil(filter)
-
-    protected fun assertVarsler(varsler: Collection<Varselkode>, filter: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertVarsler(varsler, filter)
-
-    protected fun assertVarsel(warning: String, filter: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertVarsel(warning, filter)
-
-    protected fun assertVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertVarsel(kode, filter)
-
-    protected fun assertFunksjonellFeil(kode: Varselkode, filter: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertFunksjonellFeil(kode, filter)
 
     protected fun assertActivities() {
         assertTrue(testperson.personlogg.aktiviteter.isNotEmpty()) { testperson.personlogg.toString() }
@@ -605,18 +487,6 @@ internal abstract class AbstractDslTest {
         orgnummer: String = a1,
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT
     ) = testperson { håndterFeriepengerUtbetalt(fagsystemId, orgnummer, status) }
-
-    protected fun nyttVedtak(
-        vedtaksperiode: Periode,
-        grad: Prosentdel = 100.prosent,
-        førsteFraværsdag: LocalDate = vedtaksperiode.start,
-        beregnetInntekt: Inntekt = INNTEKT,
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        arbeidsgiverperiode: List<Periode> = emptyList(),
-        status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-        ghosts: List<String> = emptyList()
-    ) =
-        bareÈnArbeidsgiver(a1).nyttVedtak(vedtaksperiode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, ghosts)
 
     protected fun dto() = testperson.dto()
 

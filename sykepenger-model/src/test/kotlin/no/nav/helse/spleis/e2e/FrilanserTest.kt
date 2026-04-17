@@ -121,7 +121,7 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt(orgnummer = a1)
+            håndterUtbetalt()
 
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)

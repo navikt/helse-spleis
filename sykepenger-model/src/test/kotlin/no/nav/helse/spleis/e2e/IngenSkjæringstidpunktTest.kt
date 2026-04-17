@@ -4,8 +4,10 @@ import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -264,7 +266,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             håndterUtbetalt()
         }
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar), orgnummer = a2)
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar))
         }
         a1 {
             håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar))
@@ -286,7 +288,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
         }
     }
 
-    private fun utbetalingIder(vedtaksperiode: UUID) = inspektør.vedtaksperioder(vedtaksperiode).inspektør.behandlinger.flatMap { it.endringer.mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId } }
+    private fun TestPerson.TestArbeidsgiver.utbetalingIder(vedtaksperiode: UUID) = inspektør.vedtaksperioder(vedtaksperiode).inspektør.behandlinger.flatMap { it.endringer.mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId } }
 
 }
 

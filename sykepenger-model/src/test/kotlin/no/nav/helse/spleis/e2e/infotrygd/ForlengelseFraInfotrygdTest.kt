@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.infotrygd
 
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.februar
@@ -82,7 +83,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterSøknad(februar)
             assertForlengerInfotrygdperiode()
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 
@@ -94,7 +95,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractDslTest() {
         a1 {
             nyPeriode(februar, a1)
             assertForlengerInfotrygdperiode()
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 
@@ -111,7 +112,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractDslTest() {
         }
     }
 
-    private fun assertForlengerInfotrygdperiode() {
+    private fun TestPerson.TestArbeidsgiver.assertForlengerInfotrygdperiode() {
         assertFunksjonellFeil(Varselkode.RV_IT_14, 1.vedtaksperiode.filter())
     }
 }

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.infotrygd
 import java.time.LocalDate
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode

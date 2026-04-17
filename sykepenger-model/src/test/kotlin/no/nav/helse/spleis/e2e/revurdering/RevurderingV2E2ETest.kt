@@ -6,6 +6,7 @@ import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.forlengVedtak
@@ -1189,7 +1190,7 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
         }
     }
 
-    private inline fun <reified D : Dag, reified UD : Utbetalingsdag> assertDag(vedtaksperiodeId: UUID, dato: LocalDate, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {
+    private inline fun <reified D : Dag, reified UD : Utbetalingsdag> TestPerson.TestArbeidsgiver.assertDag(vedtaksperiodeId: UUID, dato: LocalDate, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {
         inspektør.sykdomshistorikk.sykdomstidslinje()[dato].let {
             assertTrue(it is D) { "Forventet at $dato er ${D::class.simpleName} men var ${it::class.simpleName}" }
         }
@@ -1200,7 +1201,7 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
         }
     }
 
-    private fun assertDiff(diff: Int) {
+    private fun TestPerson.TestArbeidsgiver.assertDiff(diff: Int) {
         assertEquals(diff, inspektør.sisteUtbetaling().nettobeløp)
     }
 }

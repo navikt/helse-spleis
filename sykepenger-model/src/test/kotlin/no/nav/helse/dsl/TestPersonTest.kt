@@ -23,6 +23,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class TestPersonTest : AbstractDslTest() {
@@ -36,41 +37,46 @@ internal class TestPersonTest : AbstractDslTest() {
 
     @Test
     fun `kan sende sykmelding til arbeidsgiver`() {
-        a1.håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        assertEquals(1, a1.inspektør.sykmeldingsperioder().size)
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            assertEquals(1, inspektør.sykmeldingsperioder().size)
+        }
     }
 
     @Test
     fun `kan teste utenfor arbeidsgiver-kontekst`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+        }
     }
 
     @Test
     fun `kan sende sykmelding via testblokk`() {
         a1 {
             håndterSykmelding(januar)
+            assertEquals(1, inspektør.sykmeldingsperioder().size)
+
         }
-        assertEquals(1, a1.inspektør.sykmeldingsperioder().size)
     }
 
     @Test
@@ -134,47 +140,47 @@ internal class TestPersonTest : AbstractDslTest() {
 
     @Test
     fun `ingen historie med inntektsmelding først`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
-            assertEquals(1, it.size)
-            assertEquals(3.januar til 26.januar, it.first())
-        }
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        assertIngenFunksjonelleFeil()
-        assertActivities()
         a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
+                assertEquals(1, it.size)
+                assertEquals(3.januar til 26.januar, it.first())
+            }
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertIngenFunksjonelleFeil()
+            assertActivities()
             assertInntektsgrunnlag(3.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
-        }
-        inspektør.also {
-            assertEquals(2, it.sykdomshistorikk.size)
-            assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Dag.Sykedag::class])
-            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[Dag.SykHelgedag::class])
-        }
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        Assertions.assertTrue(1.vedtaksperiode in observatør.utbetalteVedtaksperioder)
-        inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
-            assertEquals(1, it.size)
-            assertEquals(3.januar til 26.januar, it.first())
+            inspektør.also {
+                assertEquals(2, it.sykdomshistorikk.size)
+                assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Dag.Sykedag::class])
+                assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[Dag.SykHelgedag::class])
+            }
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+            assertTrue(1.vedtaksperiode in observatør.utbetalteVedtaksperioder)
+            inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
+                assertEquals(1, it.size)
+                assertEquals(3.januar til 26.januar, it.first())
+            }
         }
     }
 }

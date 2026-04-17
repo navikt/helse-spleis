@@ -4,9 +4,11 @@ import java.time.LocalDate
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyPeriode
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Periode
@@ -645,7 +647,7 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
         }
     }
 
-    private inline fun <reified D : Dag, reified UD : Utbetalingsdag> assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {
+    private inline fun <reified D : Dag, reified UD : Utbetalingsdag> TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {
         inspektør.sykdomshistorikk.tidslinje(0)[dato].let {
             assertTrue(it is D) { "Forventet ${D::class.simpleName} men var ${it::class.simpleName}" }
         }
@@ -657,7 +659,7 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
         }
     }
 
-    private fun assertDiff(diff: Int) {
+    private fun TestPerson.TestArbeidsgiver.assertDiff(diff: Int) {
         assertEquals(diff, inspektør.sisteUtbetaling().nettobeløp)
     }
 }

@@ -259,51 +259,51 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
 
     @Test
     fun `overstyring av refusjon skal starte revurdering fom første dato med endring`() {
-        a1 { nyttVedtak(januar) }
-        a1 { forlengVedtak(februar) }
-        a1 { forlengVedtak(mars) }
-        nullstillTilstandsendringer()
-        val overstyringId = UUID.randomUUID()
-        håndterOverstyrArbeidsgiveropplysninger(
-            skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.mars, null, INNTEKT / 2)))),
-            meldingsreferanseId = overstyringId
-        )
-        håndterYtelser(3.vedtaksperiode)
-        assertVarsel(Varselkode.RV_UT_23, 3.vedtaksperiode.filter())
-        håndterSimulering(3.vedtaksperiode)
-
-        val førsteMarsUtbetaling = inspektør.utbetaling(2)
-        val revurderingMarsUtbetaling = inspektør.utbetaling(3)
-        assertEquals(førsteMarsUtbetaling.korrelasjonsId, revurderingMarsUtbetaling.korrelasjonsId)
-        assertEquals(1, revurderingMarsUtbetaling.personOppdrag.size)
-        revurderingMarsUtbetaling.arbeidsgiverOppdrag.also { oppdrag ->
-            assertEquals(1.mars, oppdrag[0].inspektør.fom)
-            assertEquals(31.mars, oppdrag[0].inspektør.tom)
-            assertEquals(715, oppdrag[0].inspektør.beløp)
-            assertEquals(NY, oppdrag[0].inspektør.endringskode)
-        }
-        revurderingMarsUtbetaling.personOppdrag.also { oppdrag ->
-            assertEquals(1.mars, oppdrag[0].inspektør.fom)
-            assertEquals(31.mars, oppdrag[0].inspektør.tom)
-            assertEquals(715, oppdrag[0].inspektør.beløp)
-            assertEquals(NY, oppdrag[0].inspektør.endringskode)
-        }
-        assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-
-        assertEquals(1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
         a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            forlengVedtak(mars)
+            nullstillTilstandsendringer()
+            val overstyringId = UUID.randomUUID()
+            håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.mars, null, INNTEKT / 2)))),
+                meldingsreferanseId = overstyringId
+            )
+            håndterYtelser(3.vedtaksperiode)
+            assertVarsel(Varselkode.RV_UT_23, 3.vedtaksperiode.filter())
+            håndterSimulering(3.vedtaksperiode)
+
+            val førsteMarsUtbetaling = inspektør.utbetaling(2)
+            val revurderingMarsUtbetaling = inspektør.utbetaling(3)
+            assertEquals(førsteMarsUtbetaling.korrelasjonsId, revurderingMarsUtbetaling.korrelasjonsId)
+            assertEquals(1, revurderingMarsUtbetaling.personOppdrag.size)
+            revurderingMarsUtbetaling.arbeidsgiverOppdrag.also { oppdrag ->
+                assertEquals(1.mars, oppdrag[0].inspektør.fom)
+                assertEquals(31.mars, oppdrag[0].inspektør.tom)
+                assertEquals(715, oppdrag[0].inspektør.beløp)
+                assertEquals(NY, oppdrag[0].inspektør.endringskode)
+            }
+            revurderingMarsUtbetaling.personOppdrag.also { oppdrag ->
+                assertEquals(1.mars, oppdrag[0].inspektør.fom)
+                assertEquals(31.mars, oppdrag[0].inspektør.tom)
+                assertEquals(715, oppdrag[0].inspektør.beløp)
+                assertEquals(NY, oppdrag[0].inspektør.endringskode)
+            }
+            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+
+            assertEquals(1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
-        }
-        assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
-        assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(februar, INNTEKT), inspektør.refusjon(2.vedtaksperiode), ignoreMeldingsreferanseId = true)
-        assertBeløpstidslinje(Beløpstidslinje.fra(mars, INNTEKT / 2, overstyringId.saksbehandler), inspektør.refusjon(3.vedtaksperiode))
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(februar, INNTEKT), inspektør.refusjon(2.vedtaksperiode), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(Beløpstidslinje.fra(mars, INNTEKT / 2, overstyringId.saksbehandler), inspektør.refusjon(3.vedtaksperiode))
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET)
+            assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        }
     }
 
     @Test
@@ -311,22 +311,20 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
         medJSONPerson("/personer/infotrygdforlengelse.json", 334)
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
-        }
-        assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.view() is InfotrygdView)
-        val antallHistorikkInnslagFør = inspektør.vilkårsgrunnlagHistorikkInnslag().size
-        val nyInntekt = INNTEKT * 2
-        nullstillTilstandsendringer()
-        håndterOverstyrArbeidsgiveropplysninger(
-            skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, nyInntekt, emptyList()))
-        )
-        assertEquals(antallHistorikkInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        a1 {
+            assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.view() is InfotrygdView)
+            val antallHistorikkInnslagFør = inspektør.vilkårsgrunnlagHistorikkInnslag().size
+            val nyInntekt = INNTEKT * 2
+            nullstillTilstandsendringer()
+            håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 1.januar,
+                arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, nyInntekt, emptyList()))
+            )
+            assertEquals(antallHistorikkInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
+            assertTilstander(1.vedtaksperiode, AVSLUTTET)
         }
-        assertTilstander(1.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
@@ -818,35 +816,35 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSimulering(vedtaksperiode)
             håndterUtbetalingsgodkjenning(vedtaksperiode)
             håndterUtbetalt()
-        }
 
-        nyPeriode(5.februar til 28.februar, a1)
-        val im2 = håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT,
-            førsteFraværsdag = 7.februar
-        )
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-
-        assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, im1.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
-        assertBeløpstidslinje(Beløpstidslinje.fra(5.februar til 28.februar, INNTEKT, im2.arbeidsgiver), inspektør.refusjon(2.vedtaksperiode))
-
-        nullstillTilstandsendringer()
-
-        val overstyringId = UUID.randomUUID()
-        håndterOverstyrArbeidsgiveropplysninger(
-            skjæringstidspunkt = 5.februar,
-            meldingsreferanseId = overstyringId,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(5.februar, null, INNTEKT)))
+            nyPeriode(5.februar til 28.februar)
+            val im2 = håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+                førsteFraværsdag = 7.februar
             )
-        )
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
 
-        assertBeløpstidslinje(Beløpstidslinje.fra(5.februar til 28.februar, INNTEKT, im2.arbeidsgiver), inspektør.refusjon(2.vedtaksperiode))
+            assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, im1.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+            assertBeløpstidslinje(Beløpstidslinje.fra(5.februar til 28.februar, INNTEKT, im2.arbeidsgiver), inspektør.refusjon(2.vedtaksperiode))
 
-        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
-        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING)
+            nullstillTilstandsendringer()
+
+            val overstyringId = UUID.randomUUID()
+            håndterOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = 5.februar,
+                meldingsreferanseId = overstyringId,
+                arbeidsgiveropplysninger = listOf(
+                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(5.februar, null, INNTEKT)))
+                )
+            )
+
+            assertBeløpstidslinje(Beløpstidslinje.fra(5.februar til 28.februar, INNTEKT, im2.arbeidsgiver), inspektør.refusjon(2.vedtaksperiode))
+
+            assertVarsler(emptyList(), 2.vedtaksperiode.filter())
+            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        }
     }
 }

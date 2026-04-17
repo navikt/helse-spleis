@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode

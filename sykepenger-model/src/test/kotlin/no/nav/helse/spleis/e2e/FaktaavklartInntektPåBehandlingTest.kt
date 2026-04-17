@@ -8,6 +8,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.forlengVedtak
@@ -439,8 +440,8 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
         }
     }
 
-    private fun faktaavvklartArbeidstakerInntekt(vedtaksperiodeId: UUID) = inspektør.faktaavklartInntekt(vedtaksperiodeId) as? ArbeistakerFaktaavklartInntektView
-    private fun faktaavvklartArbeidstakerBeløp(vedtaksperiodeId: UUID) = (faktaavvklartArbeidstakerInntekt(vedtaksperiodeId))?.beløp
-    private fun korrigertInntekt(vedtaksperiodeId: UUID) = inspektør.korrigertInntekt(vedtaksperiodeId)
-    private fun korrigertInntektBeløp(vedtaksperiodeId: UUID) = korrigertInntekt(vedtaksperiodeId)?.beløp
+    private fun TestPerson.TestArbeidsgiver.faktaavvklartArbeidstakerInntekt(vedtaksperiodeId: UUID) = inspektør.faktaavklartInntekt(vedtaksperiodeId) as? ArbeistakerFaktaavklartInntektView
+    private fun TestPerson.TestArbeidsgiver.faktaavvklartArbeidstakerBeløp(vedtaksperiodeId: UUID) = (faktaavvklartArbeidstakerInntekt(vedtaksperiodeId))?.beløp
+    private fun TestPerson.TestArbeidsgiver.korrigertInntekt(vedtaksperiodeId: UUID) = inspektør.korrigertInntekt(vedtaksperiodeId)
+    private fun TestPerson.TestArbeidsgiver.korrigertInntektBeløp(vedtaksperiodeId: UUID) = korrigertInntekt(vedtaksperiodeId)?.beløp
 }

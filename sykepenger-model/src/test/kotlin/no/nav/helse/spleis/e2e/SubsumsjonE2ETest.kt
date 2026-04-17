@@ -13,6 +13,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyPeriode
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
@@ -85,20 +86,20 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
     @Test
     fun `subsummerer ikke inntektsspesfikke subsumsjoner ved overstyring som ikke fører til endrede inntekter i sykpengegrunnlaget`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
 
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             testperson.personlogg
             assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)))
             assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_29, versjon = 1.januar(2019)))
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
 
         }
 
@@ -1174,18 +1175,18 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
     fun `§ 8-15 - lager subsumsjon ved deaktivering av ghostarbeidsforhold`() {
         a1 {
 
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
-            håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars))
+            håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
         }
         a2 {
             håndterOverstyrArbeidsforhold(
@@ -1239,18 +1240,18 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
     @Test
     fun `§ 8-15 - lager subsumsjon ved deaktivering av ghostarbeidsforhold uten inntekt`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars))
             håndterSøknad(1.januar til 15.mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
         }
 
         a2 {
@@ -1304,18 +1305,18 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
     @Test
     fun `§ 8-15 - lager subsumsjon ved reaktivering av ghostarbeidsforhold`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars))
             håndterSøknad(1.januar til 15.mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
 
         }
         a2 {
@@ -1364,8 +1365,8 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
             )
         }
         a1 {
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
             håndterOverstyrArbeidsforhold(
                 1.januar,
                 OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
@@ -1420,18 +1421,18 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
     @Test
     fun `§ 8-15 - lager subsumsjon ved deaktivering av ghostarbeidsforhold når inntekt har blitt overstyrt først`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars))
             håndterSøknad(1.januar til 15.mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
 
             a2 {
                 håndterOverstyrInntekt(1.januar, 1001.månedlig)
@@ -1803,7 +1804,7 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
     @Test
     fun `§ 8-28 tredje ledd bokstav a - legger tre siste innraporterte inntekter til grunn for andre arbeidsgivere`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars))
             håndterSøknad(1.januar til 15.mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
@@ -1812,12 +1813,11 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(
                 vedtaksperiodeId = 1.vedtaksperiode,
-                a1, a2,
-                orgnummer = a1
+                a1, a2
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
             SubsumsjonInspektør(jurist).assertBeregnet(
                 versjon = 1.januar(2019),
                 paragraf = PARAGRAF_8_28,
@@ -1862,7 +1862,7 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
     fun `§ 8-28 tredje ledd bokstav b - legger tiden arbeidsforholdet har var til grunn om det er nyere enn tre måneder`() {
         a1 {
 
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars))
             håndterSøknad(1.januar til 15.mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
@@ -1883,14 +1883,13 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
 
             håndterVilkårsgrunnlag(
                 vedtaksperiodeId = 1.vedtaksperiode,
-                orgnummer = a1,
                 skatteinntekter = skatteinntekter,
                 arbeidsforhold = arbeidsforhold
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
         }
         a2 {
             håndterOverstyrArbeidsgiveropplysninger(
@@ -1936,18 +1935,18 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
     @Test
     fun `§ 8-28 tredje ledd bokstav c - saksbehandler overstyrer inntekt pga varig lønnsendring som ikke ble hensyntatt`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars))
             håndterSøknad(1.januar til 15.mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
         }
         a2 {
             håndterOverstyrArbeidsgiveropplysninger(
@@ -1991,18 +1990,18 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
     @Test
     fun `§ 8-28 femte ledd - saksbehandler overstyrer inntekt pga mangelfull rapportering til A-ordningen`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars))
             håndterSøknad(1.januar til 15.mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
         }
         a2 {
             håndterOverstyrArbeidsgiveropplysninger(
@@ -2046,17 +2045,17 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
     fun `§ 8-29 - filter for inntekter som skal medregnes ved beregning av sykepengegrunnlaget for arbeidsforhold hvor sykdom ikke starter på skjæringstidspunktet`() {
         a1 {
 
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars))
             håndterSøknad(1.januar til 15.mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
             SubsumsjonInspektør(jurist).assertBeregnet(
                 versjon = 1.januar(2019),
                 paragraf = PARAGRAF_8_29,

@@ -3,7 +3,9 @@ package no.nav.helse.spleis.e2e
 import java.util.UUID
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -650,14 +652,14 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
         }
     }
 
-    private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: UUID) {
+    private fun TestPerson.TestArbeidsgiver.utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: UUID) {
         håndterYtelser(vedtaksperiode)
         håndterSimulering(vedtaksperiode)
         håndterUtbetalingsgodkjenning(vedtaksperiode)
         håndterUtbetalt()
     }
 
-    private fun utbetalPeriode(vedtaksperiode: UUID) {
+    private fun TestPerson.TestArbeidsgiver.utbetalPeriode(vedtaksperiode: UUID) {
         håndterVilkårsgrunnlag(vedtaksperiode)
         utbetalPeriodeEtterVilkårsprøving(vedtaksperiode)
     }

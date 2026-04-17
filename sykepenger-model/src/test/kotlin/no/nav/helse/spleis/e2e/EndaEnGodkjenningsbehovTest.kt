@@ -868,25 +868,27 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
 
     @Test
     fun `Periode uten navdager eller avslagsdager får Innvilget-tag`() {
-        nyttVedtak(januar)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
-        håndterYtelser(2.vedtaksperiode)
-        assertGodkjenningsbehov(
-            tags = setOf("Forlengelse", "Innvilget", "IngenUtbetaling", "Ferie", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
-            vedtaksperiodeId = 2.vedtaksperiode,
-            periodeType = "FORLENGELSE",
-            periodeFom = 1.februar,
-            periodeTom = 28.februar,
-            førstegangsbehandling = false,
-            behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
-            perioderMedSammeSkjæringstidspunkt = listOf(
-                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
-            ),
-            foreløpigBeregnetSluttPåSykepenger = 25.januar(2019),
-            utbetalingsdager = (1.februar til 28.februar).feriedager(),
-        )
+        a1 {
+            nyttVedtak(januar)
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
+            håndterYtelser(2.vedtaksperiode)
+            assertGodkjenningsbehov(
+                tags = setOf("Forlengelse", "Innvilget", "IngenUtbetaling", "Ferie", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+                vedtaksperiodeId = 2.vedtaksperiode,
+                periodeType = "FORLENGELSE",
+                periodeFom = 1.februar,
+                periodeTom = 28.februar,
+                førstegangsbehandling = false,
+                behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
+                perioderMedSammeSkjæringstidspunkt = listOf(
+                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
+                ),
+                foreløpigBeregnetSluttPåSykepenger = 25.januar(2019),
+                utbetalingsdager = (1.februar til 28.februar).feriedager(),
+            )
+        }
     }
 
     @Test
@@ -991,14 +993,14 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         }
     }
 
-    private fun assertTags(tags: Set<String>, vedtaksperiodeId: UUID = 1.vedtaksperiode) {
+    private fun assertTags(tags: Set<String>, vedtaksperiodeId: UUID = 1.vedtaksperiode(a1)) {
         val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
         assertEquals(tags, actualtags)
         val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
         assertEquals(actualtags, utkastTilVedtak.tags)
     }
 
-    private fun assertIngenTag(tag: String, vedtaksperiodeId: UUID = 1.vedtaksperiode) {
+    private fun assertIngenTag(tag: String, vedtaksperiodeId: UUID = 1.vedtaksperiode(a1)) {
         val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
         assertFalse(actualtags.contains(tag))
         val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
@@ -1006,7 +1008,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     }
 
     private fun assertSykepengegrunnlagsfakta(
-        vedtaksperiodeId: UUID = 1.vedtaksperiode,
+        vedtaksperiodeId: UUID = 1.vedtaksperiode(a1),
         sykepengegrunnlagsfakta: Map<String, Any?>
     ) {
         val actualSykepengegrunnlagsfakta = hentFelt<Any>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "sykepengegrunnlagsfakta")!!
@@ -1098,7 +1100,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         assertEquals(vedtaksperiodeId, utkastTilVedtak.vedtaksperiodeId)
     }
 
-    private inline fun <reified T> hentFelt(vedtaksperiodeId: UUID = 1.vedtaksperiode, feltNavn: String) =
+    private inline fun <reified T> hentFelt(vedtaksperiodeId: UUID = 1.vedtaksperiode(a1), feltNavn: String) =
         testperson.personlogg.hentFeltFraBehov<T>(
             vedtaksperiodeId = vedtaksperiodeId,
             behov = Aktivitet.Behov.Behovtype.Godkjenning,

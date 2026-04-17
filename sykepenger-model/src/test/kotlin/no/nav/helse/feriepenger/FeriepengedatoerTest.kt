@@ -432,29 +432,28 @@ internal class FeriepengedatoerTest : AbstractDslTest() {
         orgnummer: String = a1
     ) {
         orgnummer {
-            håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil), orgnummer = orgnummer)
+            håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil))
             håndterSøknad(
                 Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
-                orgnummer = orgnummer
             )
             håndterArbeidsgiveropplysninger(
                 listOf(arbeidsgiverperiode),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
             val sisteVedtaksperiode = sisteVedtaksperiode
-            håndterVilkårsgrunnlag(sisteVedtaksperiode, orgnummer = orgnummer)
-            håndterYtelser(sisteVedtaksperiode, orgnummer = orgnummer)
-            håndterSimulering(sisteVedtaksperiode, orgnummer = orgnummer)
-            håndterUtbetalingsgodkjenning(sisteVedtaksperiode, orgnummer = orgnummer)
-            håndterUtbetalt(orgnummer = orgnummer)
+            håndterVilkårsgrunnlag(sisteVedtaksperiode)
+            håndterYtelser(sisteVedtaksperiode)
+            håndterSimulering(sisteVedtaksperiode)
+            håndterUtbetalingsgodkjenning(sisteVedtaksperiode)
+            håndterUtbetalt()
             håndterOverstyrTidslinje(arbeidsgiverperiode.oppdaterTom(syktil).map {
                 ManuellOverskrivingDag(it, Dagtype.Feriedag)
             })
-            håndterYtelser(sisteVedtaksperiode, orgnummer = orgnummer)
+            håndterYtelser(sisteVedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, sisteVedtaksperiode.filter())
-            håndterSimulering(sisteVedtaksperiode, orgnummer = orgnummer)
-            håndterUtbetalingsgodkjenning(sisteVedtaksperiode, orgnummer = orgnummer)
-            håndterUtbetalt(orgnummer = orgnummer)
+            håndterSimulering(sisteVedtaksperiode)
+            håndterUtbetalingsgodkjenning(sisteVedtaksperiode)
+            håndterUtbetalt()
 
         }
     }

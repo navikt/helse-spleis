@@ -49,6 +49,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.sisteBehov
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -64,7 +65,7 @@ import org.junit.jupiter.api.Test
 internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest() {
 
     @Test
-    fun `arbeidsgiver opplyser om egenmeldinger og bruker opplyser om ferie`() {
+    fun `arbeidsgiver opplyser om egenmeldinger og bruker opplyser om ferie`() = a1 {
         håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         nullstillTilstandsendringer()
@@ -85,30 +86,28 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `omgjøre kort periode etter mottatt im - med eldre utbetalt periode`() {
+    fun `omgjøre kort periode etter mottatt im - med eldre utbetalt periode`() = a1 {
         nyttVedtak(januar)
-        a1 {
-            nyPeriode(10.august til 20.august)
-            håndterInntektsmelding(
-                listOf(1.august til 16.august),
-                beregnetInntekt = INNTEKT
-            )
-            håndterVilkårsgrunnlag(2.vedtaksperiode)
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
+        nyPeriode(10.august til 20.august)
+        håndterInntektsmelding(
+            listOf(1.august til 16.august),
+            beregnetInntekt = INNTEKT
+        )
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
 
-            val førsteUtbetaling = inspektør.utbetaling(0)
-            inspektør.utbetaling(1).also { utbetalingInspektør ->
-                assertNotEquals(førsteUtbetaling.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
-                assertNotEquals(førsteUtbetaling.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-                assertNotEquals(førsteUtbetaling.personOppdrag.inspektør.fagsystemId(), utbetalingInspektør.personOppdrag.inspektør.fagsystemId())
-                assertEquals(1.august til 20.august, utbetalingInspektør.periode)
-            }
+        val førsteUtbetaling = inspektør.utbetaling(0)
+        inspektør.utbetaling(1).also { utbetalingInspektør ->
+            assertNotEquals(førsteUtbetaling.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
+            assertNotEquals(førsteUtbetaling.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            assertNotEquals(førsteUtbetaling.personOppdrag.inspektør.fagsystemId(), utbetalingInspektør.personOppdrag.inspektør.fagsystemId())
+            assertEquals(1.august til 20.august, utbetalingInspektør.periode)
         }
     }
 
     @Test
-    fun `inntektsmelding på kort periode gjør at en nyere kort periode skal utbetales`() {
+    fun `inntektsmelding på kort periode gjør at en nyere kort periode skal utbetales`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar))
         håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(9.februar, 20.februar))
@@ -123,7 +122,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `revurderer eldre skjæringstidspunkt`() {
+    fun `revurderer eldre skjæringstidspunkt`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         nyttVedtak(mars)
@@ -134,7 +133,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `revurderer eldre skjæringstidspunkt selv ved flere mindre perioder`() {
+    fun `revurderer eldre skjæringstidspunkt selv ved flere mindre perioder`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -155,7 +154,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `gjenopptar ikke behandling dersom det er nyere periode som er utbetalt`() {
+    fun `gjenopptar ikke behandling dersom det er nyere periode som er utbetalt`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         nyttVedtak(mars)
@@ -175,7 +174,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `revurderer ikke avsluttet periode dersom perioden fortsatt er innenfor agp etter IM`() {
+    fun `revurderer ikke avsluttet periode dersom perioden fortsatt er innenfor agp etter IM`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -185,7 +184,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `avvist revurdering uten tidligere utbetaling kan forkastes`() {
+    fun `avvist revurdering uten tidligere utbetaling kan forkastes`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -203,11 +202,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         nullstillTilstandsendringer()
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, godkjent = false)
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        a1 { assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD) }
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
     }
 
     @Test
-    fun `infotrygd har utbetalt perioden - vi har kun arbeidsgiverperiode`() {
+    fun `infotrygd har utbetalt perioden - vi har kun arbeidsgiverperiode`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -220,11 +219,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         nullstillTilstandsendringer()
-        a1 {
-            håndterUtbetalingshistorikkEtterInfotrygdendring(
-                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 27.januar)
-            )
-        }
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 27.januar)
+        )
         håndterYtelser(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -232,17 +229,15 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `infotrygd har utbetalt perioden - vi har ingenting`() {
+    fun `infotrygd har utbetalt perioden - vi har ingenting`() = a1 {
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         nullstillTilstandsendringer()
-        a1 {
-            håndterUtbetalingshistorikkEtterInfotrygdendring(
-                PersonUtbetalingsperiode(a1, 1.januar, 27.januar)
-            )
-        }
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            PersonUtbetalingsperiode(a1, 1.januar, 27.januar)
+        )
         håndterYtelser(1.vedtaksperiode)
 
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
@@ -284,7 +279,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `tildele utbetaling etter reberegning`() {
+    fun `tildele utbetaling etter reberegning`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -299,7 +294,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         nullstillTilstandsendringer()
-        a1 { håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Feriedag))) }
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -315,7 +310,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `avvist omgjøring uten tidligere utbetaling forkaster nyere forlengelser`() {
+    fun `avvist omgjøring uten tidligere utbetaling forkaster nyere forlengelser`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -336,15 +331,13 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         nullstillTilstandsendringer()
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
 
-        a1 {
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-        }
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
     }
 
     @Test
-    fun `avvist omgjøring uten tidligere utbetaling forkaster ikke nyere perioder`() {
+    fun `avvist omgjøring uten tidligere utbetaling forkaster ikke nyere perioder`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -365,15 +358,13 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         nullstillTilstandsendringer()
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
 
-        a1 {
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        }
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
     }
 
     @Test
-    fun `avvist omgjøring uten tidligere utbetaling gjenopptar nyere perioder som har inntekt`() {
+    fun `avvist omgjøring uten tidligere utbetaling gjenopptar nyere perioder som har inntekt`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -404,15 +395,13 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         nullstillTilstandsendringer()
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
 
-        a1 {
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-        }
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
     }
 
     @Test
-    fun `inntektsmelding gjør om kort periode til arbeidsdager`() {
+    fun `inntektsmelding gjør om kort periode til arbeidsdager`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
 
@@ -446,7 +435,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `støtter omgjøring om det er utbetalt en senere periode på samme skjæringstidspunkt`() {
+    fun `støtter omgjøring om det er utbetalt en senere periode på samme skjæringstidspunkt`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
 
@@ -473,11 +462,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt = INNTEKT)
 
         assertEquals("UUUGG UUUUSHR AAAAARH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
-        a1 {
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, arbeidsgiverperioder)
-            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 28.januar, arbeidsgiverperioder)
-            assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 28.januar, arbeidsgiverperioder)
-        }
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, arbeidsgiverperioder)
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 28.januar, arbeidsgiverperioder)
+        assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 28.januar, arbeidsgiverperioder)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -486,7 +473,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `støtter omgjøring om det er utbetalt en senere periode på nyere skjæringstidspunkt`() {
+    fun `støtter omgjøring om det er utbetalt en senere periode på nyere skjæringstidspunkt`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
 
@@ -511,7 +498,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `inntektsmelding gjør at kort periode faller utenfor agp - før vilkårsprøving`() {
+    fun `inntektsmelding gjør at kort periode faller utenfor agp - før vilkårsprøving`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -539,7 +526,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `inntektsmelding gjør at kort periode faller utenfor agp - etter vilkårsprøving`() {
+    fun `inntektsmelding gjør at kort periode faller utenfor agp - etter vilkårsprøving`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -567,7 +554,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `revurderer ikke avsluttet periode dersom perioden fortsatt er innenfor agp etter IM selv ved flere mindre`() {
+    fun `revurderer ikke avsluttet periode dersom perioden fortsatt er innenfor agp etter IM selv ved flere mindre`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar))
@@ -582,7 +569,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige`() {
+    fun `avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -601,7 +588,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige 2`() {
+    fun `avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige 2`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -620,7 +607,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `gjenopptar behandling på neste periode dersom inntektsmelding treffer avsluttet periode`() {
+    fun `gjenopptar behandling på neste periode dersom inntektsmelding treffer avsluttet periode`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
@@ -631,7 +618,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `revurderer ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype`() {
+    fun `revurderer ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -655,7 +642,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `omgjører ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype - omvendt`() {
+    fun `omgjører ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype - omvendt`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
@@ -1040,7 +1027,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `infotrygd har plutselig utbetalt`() {
+    fun `infotrygd har plutselig utbetalt`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar))
         håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -1053,7 +1040,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
 
         nullstillTilstandsendringer()
         val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 20.januar))
-        a1 { håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray()) }
+        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
         håndterYtelser(1.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
@@ -1061,7 +1048,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() {
+    fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() = a1 {
         val forMyeInntekt = INNTEKT * 1.2
         val riktigInntekt = INNTEKT
 
@@ -1101,16 +1088,12 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        a1 {
-            assertInntektsgrunnlag(22.januar, forventetAntallArbeidsgivere = 1) {
-                assertInntektsgrunnlag(a1, riktigInntekt)
-            }
+        assertInntektsgrunnlag(22.januar, forventetAntallArbeidsgivere = 1) {
+            assertInntektsgrunnlag(a1, riktigInntekt)
         }
 
-        a1 {
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 22.januar, listOf(22.januar til 6.februar))
-            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 22.januar, listOf(22.januar til 6.februar))
-        }
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 22.januar, listOf(22.januar til 6.februar))
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 22.januar, listOf(22.januar til 6.februar))
 
         val førsteUtbetalingsdag = inspektør.utbetalingstidslinjer(1.vedtaksperiode)[7.februar]
         assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
@@ -1134,7 +1117,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `arbeidsgiver angrer på innsendt arbeidsgiverperiode - endrer ikke på sykdomstidslinjen fra im2`() {
+    fun `arbeidsgiver angrer på innsendt arbeidsgiverperiode - endrer ikke på sykdomstidslinjen fra im2`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar))
         håndterSøknad(Sykdom(5.februar, 20.februar, 100.prosent), Ferie(10.februar, 20.februar))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
@@ -1164,43 +1147,40 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `omgjøring med ghost`() {
+    fun `omgjøring med ghost`() = a1 {
         val beregnetInntektA1 = 31000.månedlig
 
-        håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar), orgnummer = a1)
-        håndterSøknad(Sykdom(10.januar, 25.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar))
+        håndterSøknad(Sykdom(10.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            beregnetInntekt = beregnetInntektA1,
-            orgnummer = a1
+            beregnetInntekt = beregnetInntektA1
         )
-        a1 { håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2) }
-        a1 { assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter()) }
+        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
+        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
 
-        inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode)[17.januar].let {
+        inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].let {
             assertEquals(1080.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
             assertEquals(beregnetInntektA1, it.økonomi.inspektør.aktuellDagsinntekt)
         }
 
-        a1 {
-            assertTilstander(
-                1.vedtaksperiode,
-                START,
-                AVVENTER_INFOTRYGDHISTORIKK,
-                AVVENTER_INNTEKTSMELDING,
-                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
-                AVSLUTTET_UTEN_UTBETALING,
-                AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING
-            )
-        }
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INFOTRYGDHISTORIKK,
+            AVVENTER_INNTEKTSMELDING,
+            AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING
+        )
     }
 
     @Test
@@ -1264,7 +1244,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `forkaster vedtaksperioder i revurdering som kun består av AUU`() {
+    fun `forkaster vedtaksperioder i revurdering som kun består av AUU`() = a1 {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar))
         håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
 
@@ -1279,15 +1259,13 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
 
         assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
-        a1 {
-            assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-        }
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
     }
 
     @Test
-    fun `Skal ikke forkaste vedtaksperioder med overlappende utbetaling som treffes av søknad som forkastes på direkten`() {
+    fun `Skal ikke forkaste vedtaksperioder med overlappende utbetaling som treffes av søknad som forkastes på direkten`() = a1 {
         håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
 
@@ -1311,10 +1289,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
             arbeidsgiverperioder,
             beregnetInntekt = INNTEKT * 1.2
         )
-        a1 {
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, arbeidsgiverperioder)
-            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 2.januar, arbeidsgiverperioder)
-        }
+        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, arbeidsgiverperioder)
+        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 2.januar, arbeidsgiverperioder)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -1324,7 +1300,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
 
         assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
-        a1 { assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD) }
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
@@ -1338,9 +1314,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `allerede utbetalt i Infotrygd uten utbetaling etterpå`() {
-        a1 { nyPeriode(2.januar til 17.januar) }
-        a1 { håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 17.januar)) }
+    fun `allerede utbetalt i Infotrygd uten utbetaling etterpå`() = a1 {
+        nyPeriode(2.januar til 17.januar)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 17.januar))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
     }
 

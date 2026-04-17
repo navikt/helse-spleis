@@ -4,10 +4,12 @@ import java.time.LocalDate
 import java.util.*
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -1078,8 +1080,8 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     fun `avvis hvis arbeidsgiver er ukjent`() {
         a1 {
             nyttVedtak(3.januar til 26.januar, 100.prosent)
-            assertThrows<IllegalStateException> { håndterAnnullering(vedtaksperiodeId = UUID.randomUUID(), orgnummer = a2) }
         }
+        assertThrows<IllegalStateException> { a2 { håndterAnnullering(UUID.randomUUID()) } }
     }
 
     @Test
@@ -1181,7 +1183,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         }
     }
 
-    private fun sisteBehovErAnnullering(vedtaksperiodeIdInnhenter: UUID) {
+    private fun TestPerson.TestArbeidsgiver.sisteBehovErAnnullering(vedtaksperiodeIdInnhenter: UUID) {
         testperson.personlogg.behov.last().also {
             assertEquals(Behovtype.Utbetaling, it.type)
             assertEquals(inspektør.sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeIdInnhenter), it.detaljer()["fagsystemId"])

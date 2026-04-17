@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -60,6 +61,6 @@ internal class AndreInntektskilderTest: AbstractDslTest() {
         }
     }
 
-    private fun håndterSøknad(periode: Periode, andreInntektskilder: Boolean) =
+    private fun TestPerson.TestArbeidsgiver.håndterSøknad(periode: Periode, andreInntektskilder: Boolean) =
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), andreInntektskilder = andreInntektskilder)
 }

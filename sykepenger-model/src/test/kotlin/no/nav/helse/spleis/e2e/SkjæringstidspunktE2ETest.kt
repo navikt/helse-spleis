@@ -5,6 +5,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.forlengelseTilGodkjenning
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -178,12 +179,12 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
     fun `Finner skjæringstidspunkt for periode med arbeidsdager på slutten som overlapper med sykdom hos annen arbeidsgiver`() {
         a1 {
 
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-            håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars), orgnummer = a1)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars))
         }
         a2 {
 
-            håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar), orgnummer = a2)
+            håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar))
         }
 
         a1 {
@@ -211,7 +212,7 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
 
 
         a1 {
-            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
 
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -250,7 +251,7 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
         }
 
         a1 {
-            håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

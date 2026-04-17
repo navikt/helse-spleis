@@ -8,6 +8,7 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
 import no.nav.helse.fredag
@@ -596,7 +597,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode, orgnummer = a1)
             håndterSøknad(februar)
             håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+            håndterSimulering(2.vedtaksperiode)
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
         }
     }

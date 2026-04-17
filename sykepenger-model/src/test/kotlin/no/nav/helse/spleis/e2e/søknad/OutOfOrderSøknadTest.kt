@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.søknad
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.brukerutbetaling
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -29,7 +30,7 @@ internal class BrukerutbetalingerTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         }
     }
 
@@ -46,14 +47,16 @@ internal class BrukerutbetalingerTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         }
     }
 
     @Test
     fun `utbetaling med full refusjon til arbeidsgiver`() {
-        nyttVedtak(januar)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        a1 {
+            nyttVedtak(januar)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        }
     }
 
     @Test
@@ -68,7 +71,7 @@ internal class BrukerutbetalingerTest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         }
     }
 }
