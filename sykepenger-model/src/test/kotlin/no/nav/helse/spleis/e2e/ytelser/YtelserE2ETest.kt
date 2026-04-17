@@ -9,7 +9,6 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Dagtype
@@ -281,7 +280,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
         a1 {
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
 
-            håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)), orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
 
             assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
@@ -594,9 +593,9 @@ internal class YtelserE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Permisjon(1.februar, 28.februar))
-            håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(2.vedtaksperiode)
             håndterSøknad(februar)
-            håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
         }

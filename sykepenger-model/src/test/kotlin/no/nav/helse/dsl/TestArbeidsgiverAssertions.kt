@@ -64,11 +64,6 @@ internal class TestArbeidsgiverAssertions(
         assertEquals(forventet, opptjening.opptjeningsdager)
     }
 
-    internal fun assertErOppfylt(skjæringstidspunkt: LocalDate) {
-        val opptjening = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).opptjening as ArbeidstakerOpptjeningView
-        assertTrue(opptjening.erOppfylt)
-    }
-
     internal fun assertErIkkeOppfylt(skjæringstidspunkt: LocalDate) {
         val opptjening = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).opptjening as ArbeidstakerOpptjeningView
         assertFalse(opptjening.erOppfylt)

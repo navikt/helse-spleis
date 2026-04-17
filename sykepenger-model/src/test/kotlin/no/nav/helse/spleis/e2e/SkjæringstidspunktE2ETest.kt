@@ -192,7 +192,7 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             håndterSøknad(24.februar til 24.mars)
         }
         a2 {
-            håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), Arbeid(20.februar, 25.februar), orgnummer = a2)
+            håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), Arbeid(20.februar, 25.februar))
         }
 
         a1 {
@@ -284,7 +284,7 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             håndterSøknad(23.februar til 24.mars)
         }
         a2 {
-            håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), Arbeid(20.februar, 25.februar), orgnummer = a2)
+            håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), Arbeid(20.februar, 25.februar))
         }
 
         a1 {
@@ -302,7 +302,7 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             )
         }
         a1 {
-            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)

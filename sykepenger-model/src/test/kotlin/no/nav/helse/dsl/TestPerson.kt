@@ -266,7 +266,6 @@ internal class TestPerson(
             yrkesskade: Boolean = false,
             sendtTilNAVEllerArbeidsgiver: Temporal? = null,
             sykmeldingSkrevet: LocalDateTime? = null,
-            orgnummer: String = "",
             søknadId: UUID = UUID.randomUUID(),
             korrigerer: UUID? = null,
             opprinneligSendt: LocalDate? = null,
@@ -396,7 +395,6 @@ internal class TestPerson(
             opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
             id: UUID = UUID.randomUUID(),
-            orgnummer: String = "",
             mottatt: LocalDateTime = LocalDateTime.now(),
             arbeidsforholdId: String? = null,
         ): UUID {
@@ -460,8 +458,7 @@ internal class TestPerson(
         internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
-            skatteinntekt: Inntekt? = INNTEKT,
-            orgnummer: String = "aa"
+            skatteinntekt: Inntekt? = INNTEKT
         ) = håndterVilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
@@ -473,8 +470,7 @@ internal class TestPerson(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
             inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
-            skatteinntekt: Inntekt? = INNTEKT,
-            orgnummer: String = "aa"
+            skatteinntekt: Inntekt? = INNTEKT
         ) = håndterVilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId,
             medlemskapstatus = medlemskapstatus,
@@ -492,8 +488,7 @@ internal class TestPerson(
         internal fun håndterVilkårsgrunnlagFlereArbeidsgivere(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             vararg orgnumre: String,
-            inntekt: Inntekt = INNTEKT,
-            orgnummer: String = ""
+            inntekt: Inntekt = INNTEKT
         ) = håndterVilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
@@ -509,8 +504,7 @@ internal class TestPerson(
             skatteinntekter: List<Pair<String, Inntekt>>,
             arbeidsforhold: List<Triple<String, LocalDate, LocalDate?>> = skatteinntekter.map { (orgnr, _) -> Triple(orgnr, LocalDate.EPOCH, null) },
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
-            orgnummer: String = this.orgnummer
+            inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null
         ) {
             val skjæringstidspunkt = inspektør.skjæringstidspunkt(vedtaksperiodeId)
             val opptjeningsinntekter = inntekterForOpptjeningsvurdering?.let {
@@ -550,7 +544,6 @@ internal class TestPerson(
             return håndterVilkårsgrunnlag(
                 vedtaksperiodeId = vedtaksperiodeId,
                 medlemskapstatus = medlemskapstatus,
-                orgnummer = orgnummer,
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = månedligeInntekter
                         .flatMap { (måned, inntekter) -> inntekter.map { (orgnr, inntekt) -> Triple(måned, orgnr, inntekt) } }
@@ -581,8 +574,7 @@ internal class TestPerson(
         internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             skatteinntekter: List<Pair<String, Inntekt>>,
-            arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
-            orgnummer: String = "aa"
+            arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
         ) {
             val skjæringstidspunkt = inspektør.skjæringstidspunkt(vedtaksperiodeId)
             håndterVilkårsgrunnlag(
@@ -601,8 +593,7 @@ internal class TestPerson(
             inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
             arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
             inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = null,
-            skjæringstidspunkt: LocalDate = inspektør.skjæringstidspunkt(vedtaksperiodeId),
-            orgnummer: String = "aa"
+            skjæringstidspunkt: LocalDate = inspektør.skjæringstidspunkt(vedtaksperiodeId)
         ) {
             val inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering ?: run {
 
@@ -638,8 +629,7 @@ internal class TestPerson(
             dagpenger: List<Periode> = emptyList(),
             inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
             selvstendigForsikring: SelvstendigForsikring? = null,
-            andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList(),
-            orgnummer: String = "aa"
+            andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList()
         ) {
             behovshåndterer.bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, selvstendigForsikring, andreYtelser)
@@ -657,8 +647,7 @@ internal class TestPerson(
             arbeidsavklaringspengerV2: List<Periode> = emptyList(),
             dagpenger: List<Periode> = emptyList(),
             inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
-            andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList(),
-            orgnummer: String = "aa"
+            andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList()
         ) {
             behovshåndterer.bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, null, andreYtelser)
@@ -836,9 +825,6 @@ internal fun lagStandardSykepengegrunnlag(arbeidsgivere: List<Pair<String, Innte
         }
     )
 
-internal fun List<String>.lagStandardSykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
-    lagStandardSykepengegrunnlag(map { it to inntekt }, skjæringstidspunkt)
-
 internal fun lagStandardInntekterForOpptjeningsvurdering(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
     lagStandardInntekterForOpptjeningsvurdering(listOf(orgnummer to inntekt), skjæringstidspunkt)
 
@@ -909,7 +895,6 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode> = emptyList(),
-    status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     ghosts: List<String> = emptyList()
 ): UUID {
     val arbeidsgivere = listOf(this.orgnummer) + ghosts
@@ -941,7 +926,7 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     ghosts: List<String> = emptyList()
 ) {
-    val vedtaksperiode = tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, ghosts)
+    val vedtaksperiode = tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, ghosts)
     håndterUtbetalingsgodkjenning(vedtaksperiode)
     håndterUtbetalt(status)
 }

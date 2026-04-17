@@ -335,7 +335,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a1 {
-            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -534,7 +534,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
-            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2, orgnummer = a2)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiodeId = 1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)

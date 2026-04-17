@@ -526,10 +526,9 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
             håndterInntektsmelding(
                 listOf(2.januar til 17.januar),
                 beregnetInntekt = 4000.månedlig,
-                orgnummer = a1,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "mjau",
             )
-            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_VV_4, RV_IM_8, RV_VV_2), 1.vedtaksperiode.filter())
             assertEquals(listOf(2.januar til 17.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)

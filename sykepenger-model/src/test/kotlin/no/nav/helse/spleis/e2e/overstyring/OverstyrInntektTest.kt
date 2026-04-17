@@ -63,7 +63,7 @@ internal class OverstyrInntektTest : AbstractDslTest() {
     @Test
     fun `overstyre ghostinntekt`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar)
             )

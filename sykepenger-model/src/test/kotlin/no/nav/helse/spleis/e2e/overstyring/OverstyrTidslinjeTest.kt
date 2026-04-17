@@ -316,7 +316,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             assertEquals(Dag.Arbeidsdag::class, dagen::class)
             assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode)
 
             assertEquals(9.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
             assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
@@ -351,7 +351,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             assertEquals(Dag.Arbeidsdag::class, dagen::class)
             assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
 
-            håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(2.vedtaksperiode)
 
             assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
             assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
@@ -408,7 +408,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
                 )
             )
             assertEquals(6, inspektør.sykdomshistorikk.elementer())
-            håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(2.vedtaksperiode)
 
             assertSykdomstidslinjedag(9.januar, Dag.Sykedag::class, OverstyrTidslinje::class)
             assertSykdomstidslinjedag(10.januar, Dag.Feriedag::class, OverstyrTidslinje::class)

@@ -784,8 +784,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 listOf(1.januar til 16.januar),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
             assertGodkjenningsbehov(
                 behovsoppsamler = testperson.behovsoppsamler,
                 tags = setOf("Førstegangsbehandling", "Avslag", "IngenUtbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
@@ -839,8 +839,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 listOf(1.januar til 16.januar),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-            håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
             assertGodkjenningsbehov(
                 behovsoppsamler = testperson.behovsoppsamler,
                 tags = setOf("Førstegangsbehandling", "Avslag", "IngenUtbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
@@ -972,7 +972,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, beregnetInntekt = 20000.månedlig, arbeidsgiverperioder = listOf(1.januar til 16.januar))
         }
         a1 {
-            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, orgnummer = a1)
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
         }

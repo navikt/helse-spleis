@@ -11,7 +11,6 @@ import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.gjenopprettFraJSONtekst
 import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -58,9 +57,6 @@ internal abstract class AbstractDslTest {
         protected val personInspektør = { person: Person -> PersonInspektør(person) }
 
         @JvmStatic
-        protected val personView = { person: Person -> person.view() }
-
-        @JvmStatic
         protected val agInspektør = { orgnummer: String -> { person: Person -> TestArbeidsgiverInspektør(person, orgnummer) } }
 
         @JvmStatic
@@ -87,7 +83,6 @@ internal abstract class AbstractDslTest {
             aktivitetsloggAsserts = AktivitetsloggAsserts(testperson.personlogg, assertetVarsler)
         )
     private val testPersonAsserter get() = TestPersonAssertions(testperson.inspiser(personInspektør), jurist)
-    protected fun personView() = testperson.view()
     protected fun <INSPEKTØR> inspiser(inspektør: (Person) -> INSPEKTØR) = testperson.inspiser(inspektør)
     internal fun inspektør(orgnummer: String) = inspiser(agInspektør(orgnummer))
     protected fun inspektør(vedtaksperiodeId: UUID) = inspiser(personInspektør).vedtaksperiode(vedtaksperiodeId).inspektør
@@ -204,10 +199,6 @@ internal abstract class AbstractDslTest {
         assertVilkårsgrunnlagFraSpleisFor()
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertErOppfylt(skjæringstidspunkt: LocalDate = 1.januar) {
-        testArbeidsgiverAsserter.assertErOppfylt(skjæringstidspunkt)
-    }
-
     protected fun TestPerson.TestArbeidsgiver.assertErIkkeOppfylt(skjæringstidspunkt: LocalDate = 1.januar) {
         testArbeidsgiverAsserter.assertErIkkeOppfylt(skjæringstidspunkt)
     }
@@ -278,10 +269,6 @@ internal abstract class AbstractDslTest {
             ?: error("Det ble ikke opprettet noen vedtaksperiode.")
     }
 
-    /* alternative metoder fremfor å lage en arbeidsgiver-blokk hver gang */
-    protected fun String.håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode, sykmeldingSkrevet: LocalDateTime? = null, mottatt: LocalDateTime? = null) =
-        this { håndterSykmelding(*sykmeldingsperiode) }
-
     protected fun String.håndterSøknad(
         vararg perioder: Søknad.Søknadsperiode,
         andreInntektskilder: Boolean = false,
@@ -319,7 +306,6 @@ internal abstract class AbstractDslTest {
     protected fun String.håndterInntektsmeldingPortal(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
-        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
         vedtaksperiodeId: UUID,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
@@ -352,7 +338,6 @@ internal abstract class AbstractDslTest {
         omsorgspenger: List<GradertPeriode> = emptyList(),
         opplæringspenger: List<GradertPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
-        arbeidsavklaringspenger: List<Periode> = emptyList(),
         arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
     ) =
@@ -423,11 +408,9 @@ internal abstract class AbstractDslTest {
         førsteFraværsdag: LocalDate = periode.start,
         beregnetInntekt: Inntekt = INNTEKT,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        arbeidsgiverperiode: List<Periode> = emptyList(),
-        status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag)
+        arbeidsgiverperiode: List<Periode> = emptyList()
     ) =
-        this { tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status) }
+        this { tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode) }
 
     protected fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) =
         testperson { håndterOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold) }

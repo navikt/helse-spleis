@@ -112,7 +112,6 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                orgnummer = a1,
                 skatteinntekter = listOf(a1 to INNTEKT, a2 to 1000.månedlig),
                 arbeidsforhold = listOf(
                     Triple(a1, EPOCH, null)
@@ -140,7 +139,6 @@ internal class FrilanserTest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                orgnummer = a1,
                 skatteinntekter = listOf(a1 to 10000.månedlig, a2 to 100.månedlig),
                 arbeidsforhold = listOf(
                     Triple(a1, EPOCH, null),
