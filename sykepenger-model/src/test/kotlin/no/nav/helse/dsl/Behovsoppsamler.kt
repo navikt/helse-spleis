@@ -213,7 +213,7 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
                                         beløpTilBruker = it.getValue("beløpTilBruker") as Int,
                                         sykdomsgrad = it.getValue("sykdomsgrad") as Int,
                                         dekningsgrad = it.getValue("dekningsgrad") as Int,
-                                        begrunnelser = (it.getValue("begrunnelser") as List<String>)?.map { EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.valueOf(it) }
+                                        begrunnelser = (it.getValue("begrunnelser") as List<String>).takeUnless { it.isEmpty() }?.map { EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.valueOf(it) }
                                     )},
                                     sykepengegrunnlagsfakta = when (yrkesaktivitetssporing) {
                                         Behandlingsporing.Yrkesaktivitet.Arbeidsledig,

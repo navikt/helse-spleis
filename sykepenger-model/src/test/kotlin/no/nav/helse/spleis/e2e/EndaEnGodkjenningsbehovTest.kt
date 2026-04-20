@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.august
@@ -1029,21 +1028,12 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         assertFalse(utkastTilVedtak.tags.contains(tag))
     }
 
-private fun Periode.utbetalingsdager(beløpTilArbeidsgiver: Int, beløpTilBruker: Int) = map { dato ->
-    if (dato.erHelg()) utbetalingsdag(dato, "NavHelgDag", 0, 0, 100, 100)
-    else utbetalingsdag(dato, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100, 100)
-}}
+    private fun Periode.utbetalingsdager(beløpTilArbeidsgiver: Int, beløpTilBruker: Int) = map { dato ->
+        if (dato.erHelg()) utbetalingsdag(dato, "NavHelgDag", 0, 0, 100, 100)
+        else utbetalingsdag(dato, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100, 100)
+    }
 
-private fun Periode.feriedager() = map { dato ->
-    utbetalingsdag(dato, "Feriedag", 0, 0, 0, 100)
+    private fun Periode.feriedager() = map { dato ->
+        utbetalingsdag(dato, "Feriedag", 0, 0, 0, 100)
+    }
 }
-
-private fun utbetalingsdag(dato: LocalDate, type: String, beløpTilArbeidsgiver: Int, beløpTilBruker: Int, sykdomsgrad: Int, dekningsgrad: Int, begrunnelser: List<String> = emptyList()) = mapOf(
-    "dato" to dato.toString(),
-    "type" to type,
-    "beløpTilArbeidsgiver" to beløpTilArbeidsgiver,
-    "beløpTilBruker" to beløpTilBruker,
-    "sykdomsgrad" to sykdomsgrad,
-    "dekningsgrad" to dekningsgrad,
-    "begrunnelser" to begrunnelser
-)

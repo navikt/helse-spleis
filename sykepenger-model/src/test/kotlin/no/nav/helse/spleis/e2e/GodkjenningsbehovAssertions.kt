@@ -91,7 +91,7 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
             beløpTilBruker = it.getValue("beløpTilBruker") as Int,
             sykdomsgrad = it.getValue("sykdomsgrad") as Int,
             dekningsgrad = it.getValue("dekningsgrad") as Int,
-            begrunnelser = (it.getValue("begrunnelser") as List<String>)?.map { EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.valueOf(it) }
+            begrunnelser = (it.getValue("begrunnelser") as List<String>).takeUnless { it.isEmpty() }?.map { EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.valueOf(it) }
         )},
         yrkesaktivitetssporing = behandlingsporing,
         perioderMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt.map { EventSubscription.GodkjenningEvent.PeriodeMedSammeSkjæringstidspunkt(
@@ -194,7 +194,7 @@ internal fun standardUtbetalingsdager(beløpTilArbeidsgiver: Int, beløpTilBruke
         utbetalingsdag(31.januar, "NavDag", beløpTilArbeidsgiver, beløpTilBruker, 100, 100)
     )
 
-private fun utbetalingsdag(dato: LocalDate, type: String, beløpTilArbeidsgiver: Int, beløpTilBruker: Int, sykdomsgrad: Int, dekningsgrad: Int, begrunnelser: List<String> = emptyList()) = mapOf(
+internal fun utbetalingsdag(dato: LocalDate, type: String, beløpTilArbeidsgiver: Int, beløpTilBruker: Int, sykdomsgrad: Int, dekningsgrad: Int, begrunnelser: List<String> = emptyList()) = mapOf(
     "dato" to dato.toString(),
     "type" to type,
     "beløpTilArbeidsgiver" to beløpTilArbeidsgiver,

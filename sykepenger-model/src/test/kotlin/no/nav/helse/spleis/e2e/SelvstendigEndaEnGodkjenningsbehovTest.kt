@@ -325,13 +325,6 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
         }
     }
 
-    private fun utbetalingsdag(dato: LocalDate, type: String, beløpTilBruker: Int, sykdomsgrad: Int, dekningsgrad: Int, begrunnelser: List<String> = emptyList()) = mapOf(
-        "dato" to dato.toString(),
-        "type" to type,
-        "beløpTilArbeidsgiver" to 0,
-        "beløpTilBruker" to beløpTilBruker,
-        "sykdomsgrad" to sykdomsgrad,
-        "dekningsgrad" to dekningsgrad,
-        "begrunnelser" to begrunnelser
-    )
+    private fun utbetalingsdag(dato: LocalDate, type: String, beløpTilBruker: Int, sykdomsgrad: Int, dekningsgrad: Int, begrunnelser: List<String> = emptyList()) =
+        utbetalingsdag(dato, type, 0, beløpTilBruker, sykdomsgrad, dekningsgrad, begrunnelser)
 }
