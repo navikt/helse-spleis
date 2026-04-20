@@ -102,7 +102,7 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
 
         data class Feriepengeutbetaling(
             override val utbetalingId: UUID,
-            val fagsystemId: String
+            val event: EventSubscription.UtbetalFeriepengerEvent
         ): Behovsdetaljer
 
         data class InitiellHistorikFraInfotrygd(
@@ -275,10 +275,35 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
                                 linjer = ((behovInput.getValue("linjer")) as List<Map<String, *>>).map { Behovsdetaljer.Utbetaling.Linje(it["statuskode"] as? String) }
                             )
                         }
-                        Aktivitet.Behov.Behovtype.Feriepengeutbetaling -> Behovsdetaljer.Feriepengeutbetaling(
-                            utbetalingId = checkNotNull(utbetalingId),
-                            fagsystemId = behovMap.getValue("Feriepengeutbetaling").single().getValue("fagsystemId") as String,
-                        )
+                        Aktivitet.Behov.Behovtype.Feriepengeutbetaling -> {
+                            val behovInput = behovMap.getValue("Feriepengeutbetaling").single()
+                            val linje = (behovInput.getValue("linjer") as List<Map<String, Any>>).single()
+                            Behovsdetaljer.Feriepengeutbetaling(
+                                utbetalingId = checkNotNull(utbetalingId),
+                                event = EventSubscription.UtbetalFeriepengerEvent(
+                                    mottaker = behovInput.getValue("mottaker") as String,
+                                    organisasjonsnummer = meldingMap.getValue("organisasjonsnummer") as String,
+                                    utbetalingId = checkNotNull(utbetalingId),
+                                    fagområde = behovInput.getValue("fagområde") as String,
+                                    fagsystemId = behovInput.getValue("fagsystemId") as String,
+                                    endringskode = behovInput.getValue("endringskode") as String,
+                                    linje = EventSubscription.UtbetalFeriepengerEvent.Linje(
+                                        periode = no.nav.helse.hendelser.Periode(
+                                            fom = (linje.getValue("fom") as String).let { LocalDate.parse(it) },
+                                            tom = (linje.getValue("tom") as String).let { LocalDate.parse(it) }
+                                        ),
+                                        sats = linje.getValue("sats") as Int,
+                                        endringskode = linje.getValue("endringskode") as String,
+                                        delytelseId = linje.getValue("delytelseId") as Int,
+                                        refDelytelseId = linje["refDelytelseId"] as Int?,
+                                        refFagsystemId = linje["refFagsystemId"] as String?,
+                                        statuskode = linje["statuskode"] as String?,
+                                        datoStatusFom =  (linje["datoStatusFom"] as String?)?.let { LocalDate.parse(it) },
+                                        klassekode = linje.getValue("klassekode") as String
+                                    )
+                                )
+                            )
+                        }
                         Aktivitet.Behov.Behovtype.Foreldrepenger,
                         Aktivitet.Behov.Behovtype.Pleiepenger,
                         Aktivitet.Behov.Behovtype.Omsorgspenger,
@@ -333,7 +358,7 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
         override fun trengerGodkjenning(event: EventSubscription.GodkjenningEvent) =
             registrer(Behovsdetaljer.Godkjenning(event.behandlingId, event.utbetalingId, event.vedtaksperiodeId, event))
         override fun utbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent) =
-            registrer(Behovsdetaljer.Feriepengeutbetaling(event.utbetalingId, event.fagsystemId))
+            registrer(Behovsdetaljer.Feriepengeutbetaling(event.utbetalingId, event))
         override fun trengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent) =
             registrer(Behovsdetaljer.InitiellHistorikFraInfotrygd(event.vedtaksperiodeId, event.yrkesaktivitetssporing))
         override fun trengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent) =

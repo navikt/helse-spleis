@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.nyttVedtak
@@ -16,7 +17,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -440,20 +440,23 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            val utbetalingsbehov = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Utbetaling>()
+                .filter { it.fagsystemId == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
+                .also { assertEquals(1, it.size) }
+                .single()
+
             håndterUtbetalt()
             håndterAnnullering(1.vedtaksperiode) // Stale
             håndterAnnullering(1.vedtaksperiode)
+            val annuleringsbehov = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Utbetaling>()
+                .filter { it.fagsystemId == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
+                .also { assertEquals(1, it.size) }
+                .single()
             håndterUtbetalt()
 
             assertTrue(inspektør.sisteUtbetaling().erAnnullering)
             assertEquals(1, observatør.annulleringer.size)
-            assertEquals(
-                2,
-                testperson.personlogg.behov
-                    .filter { it.detaljer()["fagsystemId"] == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
-                    .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }
-                    .size
-            )
+            assertEquals(2, setOf(utbetalingsbehov, annuleringsbehov).size)
             assertEquals(2, inspektør.antallUtbetalinger)
         }
     }
