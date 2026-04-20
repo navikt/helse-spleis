@@ -3,6 +3,7 @@ package no.nav.helse.dsl
 import java.time.LocalDate
 import java.time.Year
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.person. EventSubscription
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -109,7 +110,9 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
             val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
         ): Behovsdetaljer
 
-        data object OppdatertHistorikkFraInfotrygd: Behovsdetaljer
+        data class OppdatertHistorikkFraInfotrygd(
+            val periode: no.nav.helse.hendelser.Periode
+        ): Behovsdetaljer
 
         data class InformasjonTilBeregningAvArbeidstaker(
             override val vedtaksperiodeId: UUID
@@ -129,6 +132,13 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
         ): Behovsdetaljer
     }
 
+    companion object {
+        fun opprettBehovsoppsamler(deferredLog: DeferredLog = DeferredLog()) = when (Toggle.BehovFraEventBus.enabled) {
+            true -> FraEventBus(deferredLog)
+            false -> FraAktivitetslogg(deferredLog)
+        }
+    }
+
     class FraAktivitetslogg(log: DeferredLog): Behovsoppsamler(log) {
         internal fun registrerFra(aktivitetslogg: Aktivitetslogg) {
             aktivitetslogg.behov
@@ -145,7 +155,12 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
                     val behovene = behovMap.keys.map { Aktivitet.Behov.Behovtype.valueOf(it) }
                     val behovsdetaljer = when (behovene.first()) {
                         Aktivitet.Behov.Behovtype.Sykepengehistorikk -> when (vedtaksperiodeId) {
-                            null -> Behovsdetaljer.OppdatertHistorikkFraInfotrygd
+                            null -> Behovsdetaljer.OppdatertHistorikkFraInfotrygd(
+                                periode = no.nav.helse.hendelser.Periode(
+                                    fom = (behovMap.getValue("Sykepengehistorikk").single()["historikkFom"] as String).let { LocalDate.parse(it) },
+                                    tom = (behovMap.getValue("Sykepengehistorikk").single()["historikkTom"] as String).let { LocalDate.parse(it) }
+                                ),
+                            )
                             else -> Behovsdetaljer.InitiellHistorikFraInfotrygd(
                                 vedtaksperiodeId = vedtaksperiodeId,
                                 yrkesaktivitetssporing = meldingMap.yrkesaktivitetssporing()
@@ -322,7 +337,7 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
         override fun trengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent) =
             registrer(Behovsdetaljer.InitiellHistorikFraInfotrygd(event.vedtaksperiodeId, event.yrkesaktivitetssporing))
         override fun trengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent) =
-            registrer(Behovsdetaljer.OppdatertHistorikkFraInfotrygd)
+            registrer(Behovsdetaljer.OppdatertHistorikkFraInfotrygd(event.periode))
         override fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) = when (event.trengerInformasjonOmSelvstendigForsikring) {
             true -> registrer(Behovsdetaljer.InformasjonTilBeregningAvSelvstendig(event.vedtaksperiodeId))
             false -> registrer(Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker(event.vedtaksperiodeId))

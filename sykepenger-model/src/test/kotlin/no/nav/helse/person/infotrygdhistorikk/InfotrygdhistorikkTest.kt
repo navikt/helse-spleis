@@ -3,6 +3,7 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -12,7 +13,6 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.EventBus
-import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest.Companion.eksisterendeInfotrygdHistorikkelement
@@ -25,186 +25,246 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdhistorikkTest {
-    private companion object {
-        private val tidligsteDato = 1.januar
-    }
-
-    private lateinit var historikk: Infotrygdhistorikk
-    private lateinit var aktivitetslogg: Aktivitetslogg
-    private lateinit var eventBus: EventBus
-    private fun EventBus.detEvenesteEventetSomMåVæreTrengerHistorikkFraInfotrygd() =
-        checkNotNull(events.singleOrNull() as? EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent) { "Det var mystisk!" }
-
-    @BeforeEach
-    fun setup() {
-        resetSeed(1.januar)
-        historikk = Infotrygdhistorikk()
-        aktivitetslogg = Aktivitetslogg()
-        eventBus = EventBus()
-    }
 
     @Test
     fun `må oppfriske tom historikk`() {
-        historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
-        assertTrue(aktivitetslogg.behov.isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(0, historikk.inspektør.elementer())
+        infotrygdhistorikkTest(
+            setup = { historikk, eventBus, aktivitetslogg ->
+                 historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
+            },
+            assertions = { historikk, nyeBehov, _ ->
+                assertEquals(1, nyeBehov.size)
+                assertEquals(0, historikk.inspektør.elementer())
+            }
+        )
     }
 
     @Test
     fun `kan justere perioden for oppfrisk`() {
-        Aktivitetslogg().also {
-            val eventBus = EventBus()
-            historikk.oppfrisk(it, eventBus, tidligsteDato)
-            val trengerHistorikkFraInfotrygd = eventBus.detEvenesteEventetSomMåVæreTrengerHistorikkFraInfotrygd()
-            assertEquals("${tidligsteDato.minusYears(4)}", it.behov.first().detaljer()["historikkFom"])
-            assertEquals("${tidligsteDato.minusYears(4)}", trengerHistorikkFraInfotrygd.periode.start.toString())
-            assertEquals("${LocalDate.now()}", it.behov.first().detaljer()["historikkTom"])
-            assertEquals("${LocalDate.now()}", trengerHistorikkFraInfotrygd.periode.endInclusive.toString())
-        }
-        Aktivitetslogg().also {
-            val eventBus = EventBus()
-            historikk.oppfrisk(it, eventBus, 1.februar)
-            val trengerHistorikkFraInfotrygd = eventBus.detEvenesteEventetSomMåVæreTrengerHistorikkFraInfotrygd()
-            assertEquals("${1.februar.minusYears(4)}", it.behov.first().detaljer()["historikkFom"])
-            assertEquals("${1.februar.minusYears(4)}", trengerHistorikkFraInfotrygd.periode.start.toString())
-            assertEquals("${LocalDate.now()}", it.behov.first().detaljer()["historikkTom"])
-            assertEquals("${LocalDate.now()}", trengerHistorikkFraInfotrygd.periode.endInclusive.toString())
-        }
+        infotrygdhistorikkTest(
+            setup = { historikk, eventBus, aktivitetslogg ->
+                historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
+            },
+            assertions = { _, nyeBehov, _ ->
+                assertEquals(1, nyeBehov.size)
+                val behov = nyeBehov.single()
+                assertEquals(tidligsteDato.minusYears(4), behov.periode.start)
+                assertEquals(LocalDate.now(), behov.periode.endInclusive)
+            }
+        )
+
+        infotrygdhistorikkTest(
+            setup = { historikk, eventBus, aktivitetslogg ->
+                historikk.oppfrisk(aktivitetslogg, eventBus, 1.februar)
+            },
+            assertions = { _, nyeBehov, _ ->
+                assertEquals(1, nyeBehov.size)
+                val behov = nyeBehov.single()
+                assertEquals(1.februar.minusYears(4), behov.periode.start)
+                assertEquals(LocalDate.now(), behov.periode.endInclusive)
+            }
+        )
     }
 
     @Test
     fun `tømme historikk - ingen data`() {
-        historikk.tøm()
-        historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
-        assertTrue(aktivitetslogg.behov.isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(0, historikk.inspektør.elementer())
+        infotrygdhistorikkTest(
+            setup = { historikk, eventBus, aktivitetslogg ->
+                historikk.tøm()
+                historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
+            },
+            assertions = { historikk, nyeBehov, _ ->
+                assertEquals(1, nyeBehov.size)
+                assertEquals(0, historikk.inspektør.elementer())
+            }
+        )
     }
 
     @Test
     fun `tømme historikk - med tom data`() {
-        val tidsstempel = LocalDateTime.now()
-        historikk.oppdaterHistorikk(historikkelement(oppdatert = tidsstempel))
-        historikk.tøm()
-        historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
-        assertTrue(aktivitetslogg.behov.isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(1, historikk.inspektør.elementer())
+        infotrygdhistorikkTest(
+            setup = { historikk, eventBus, aktivitetslogg ->
+                val tidsstempel = LocalDateTime.now()
+                historikk.oppdaterHistorikk(historikkelement(oppdatert = tidsstempel))
+                historikk.tøm()
+                historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
+            },
+            assertions = { historikk, nyeBehov, _ ->
+                assertEquals(1, nyeBehov.size)
+                assertEquals(1,historikk.inspektør.elementer())
+            }
+        )
     }
 
     @Test
     fun `tømme historikk - med ulagret data`() {
         val tidsstempel = LocalDateTime.now()
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                oppdatert = tidsstempel,
-                perioder = listOf(Friperiode(1.januar, 10.januar))
-            )
+
+        infotrygdhistorikkTest(
+            setup = { historikk, eventBus, aktivitetslogg ->
+                historikk.oppdaterHistorikk(
+                    historikkelement(
+                        oppdatert = tidsstempel,
+                        perioder = listOf(Friperiode(1.januar, 10.januar))
+                    )
+                )
+                historikk.tøm()
+                historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
+            },
+            assertions = { historikk, nyeBehov, _ ->
+                assertEquals(1, nyeBehov.size)
+                assertEquals(1, historikk.inspektør.elementer())
+            }
         )
-        historikk.tøm()
-        historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
-        assertTrue(aktivitetslogg.behov.isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(1, historikk.inspektør.elementer())
     }
 
     @Test
     fun `tømme historikk - med flere ulagret data`() {
         val tidsstempel1 = LocalDateTime.now().minusHours(1)
         val tidsstempel2 = LocalDateTime.now()
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                oppdatert = tidsstempel1,
-                perioder = listOf(Friperiode(1.januar, 5.januar))
-            )
+
+        infotrygdhistorikkTest(
+            setup = { historikk, eventBus, aktivitetslogg ->
+                historikk.oppdaterHistorikk(
+                    historikkelement(
+                        oppdatert = tidsstempel1,
+                        perioder = listOf(Friperiode(1.januar, 5.januar))
+                    )
+                )
+                historikk.oppdaterHistorikk(
+                    historikkelement(
+                        oppdatert = tidsstempel2,
+                        perioder = listOf(Friperiode(1.januar, 10.januar))
+                    )
+                )
+                historikk.tøm()
+                historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
+            },
+            assertions = { historikk, nyeBehov, _ ->
+                assertEquals(1, nyeBehov.size)
+                assertTrue(tidsstempel2 < historikk.inspektør.opprettet(0))
+                assertEquals(tidsstempel2, historikk.inspektør.oppdatert(0))
+            }
         )
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                oppdatert = tidsstempel2,
-                perioder = listOf(Friperiode(1.januar, 10.januar))
-            )
-        )
-        historikk.tøm()
-        historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
-        assertTrue(aktivitetslogg.behov.isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(1, historikk.inspektør.elementer())
-        assertTrue(tidsstempel2 < historikk.inspektør.opprettet(0))
-        assertEquals(tidsstempel2, historikk.inspektør.oppdatert(0))
     }
 
     @Test
     fun `tømme historikk - etter lagring av tom inntektliste`() {
-        val historikk = Infotrygdhistorikk.gjenopprett(
-            InfotrygdhistorikkInnDto(
-                listOf(
-                    eksisterendeInfotrygdHistorikkelement(),
-                    eksisterendeInfotrygdHistorikkelement()
+        infotrygdhistorikkTest(
+            historikk = Infotrygdhistorikk.gjenopprett(
+                InfotrygdhistorikkInnDto(
+                    listOf(
+                        eksisterendeInfotrygdHistorikkelement(),
+                        eksisterendeInfotrygdHistorikkelement()
+                    )
                 )
-            )
+            ),
+            setup = { historikk, eventBus, aktivitetslogg ->
+                historikk.tøm()
+                historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
+            },
+            assertions = { historikk, nyeBehov, _ ->
+                assertEquals(1, nyeBehov.size)
+                assertEquals(1, historikk.inspektør.elementer())
+            }
         )
-        historikk.tøm()
-        historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
-        assertTrue(aktivitetslogg.behov.isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(1, historikk.inspektør.elementer())
     }
 
     @Test
     fun `trenger ikke oppfriske gammel historikk`() {
-        historikk.oppdaterHistorikk(historikkelement(oppdatert = LocalDateTime.now().minusHours(24)))
-        historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
-        assertTrue(aktivitetslogg.behov.isNotEmpty())
-        assertEquals(1, historikk.inspektør.elementer())
+        infotrygdhistorikkTest(
+            setup = { historikk, eventBus, aktivitetslogg ->
+                historikk.oppdaterHistorikk(historikkelement(oppdatert = LocalDateTime.now().minusHours(24)))
+                historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
+            },
+            assertions = { historikk, nyeBehov, _ ->
+                assertEquals(1, nyeBehov.size)
+                assertEquals(1, historikk.inspektør.elementer())
+            }
+        )
     }
 
     @Test
     fun `kan bestemme tidspunkt selv`() {
-        val tidsstempel = LocalDateTime.now().minusHours(24)
-        historikk.oppdaterHistorikk(historikkelement(oppdatert = tidsstempel))
-        historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
-        assertTrue(aktivitetslogg.behov.isNotEmpty())
-        assertEquals(1, historikk.inspektør.elementer())
+        infotrygdhistorikkTest(
+            setup = { historikk, eventBus, aktivitetslogg ->
+                val tidsstempel = LocalDateTime.now().minusHours(24)
+                historikk.oppdaterHistorikk(historikkelement(oppdatert = tidsstempel))
+                historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
+            },
+            assertions = { historikk, nyeBehov, _ ->
+                assertEquals(1, nyeBehov.size)
+                assertEquals(1, historikk.inspektør.elementer())
+            }
+        )
     }
 
     @Test
     fun `oppfrisker ikke ny historikk`() {
-        historikk.oppdaterHistorikk(historikkelement())
-        historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
-        assertTrue(aktivitetslogg.behov.isNotEmpty())
+        infotrygdhistorikkTest(
+            setup = { historikk, eventBus, aktivitetslogg ->
+                historikk.oppdaterHistorikk(historikkelement())
+                historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
+            },
+            assertions = { _, nyeBehov, _ ->
+                assertEquals(1, nyeBehov.size)
+            }
+        )
     }
 
     @Test
     fun `oppdaterer tidspunkt når ny historikk er lik gammel`() {
-        val perioder = listOf(
-            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar)
-        )
         val nå = LocalDateTime.now()
-        val gammel = nå.minusHours(24)
-        assertEquals(1.januar, historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = gammel)))
-        assertNull(historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = nå)))
-        historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
-        assertEquals(1, historikk.inspektør.elementer())
-        assertTrue(nå < historikk.inspektør.opprettet(0))
-        assertEquals(nå, historikk.inspektør.oppdatert(0))
+
+        infotrygdhistorikkTest(
+            setup = { historikk, eventBus, aktivitetslogg ->
+                val perioder = listOf(
+                    ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar)
+                )
+                val gammel = nå.minusHours(24)
+                assertEquals(1.januar, historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = gammel)))
+                assertNull(historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = nå)))
+                historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
+            },
+            assertions = { historikk, _, _ ->
+                assertEquals(1, historikk.inspektør.elementer())
+                assertTrue(nå < historikk.inspektør.opprettet(0))
+                assertEquals(nå, historikk.inspektør.oppdatert(0))
+            }
+        )
     }
 
     @Test
     fun `tom utbetalingstidslinje`() {
-        assertTrue(historikk.utbetalingstidslinje().isEmpty())
+        infotrygdhistorikkTest(
+            setup = { _, _, _ -> },
+            assertions = { historikk, _,_ ->
+                assertTrue(historikk.utbetalingstidslinje().isEmpty())
+            }
+        )
     }
 
     @Test
     fun `utbetalingstidslinje kuttes ikke`() {
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                listOf(
-                    ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar)
+        infotrygdhistorikkTest(
+            setup = { historikk, _, _ ->
+                historikk.oppdaterHistorikk(
+                    historikkelement(
+                        listOf(
+                            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar)
+                        )
+                    )
                 )
-            )
+            },
+            assertions = { historikk, _,_ ->
+                historikk.utbetalingstidslinje().also {
+                    assertEquals(januar, it.periode())
+                }
+            }
         )
-        historikk.utbetalingstidslinje().also {
-            assertEquals(januar, it.periode())
-        }
     }
 
     @Test
@@ -215,7 +275,7 @@ internal class InfotrygdhistorikkTest {
             Friperiode(1.mars, 31.mars)
         )
         val nå = LocalDateTime.now()
-        historikk = Infotrygdhistorikk.gjenopprett(
+        val gjenopprettetHistorikk = Infotrygdhistorikk.gjenopprett(
             InfotrygdhistorikkInnDto(
                 elementer = listOf(
                     PersonData.InfotrygdhistorikkElementData(
@@ -233,58 +293,115 @@ internal class InfotrygdhistorikkTest {
                 )
             )
         )
-        assertEquals(1, historikk.inspektør.elementer())
-        assertNull(historikk.oppdaterHistorikk(historikkelement(perioder)))
-        assertEquals(1, historikk.inspektør.elementer())
+
+        infotrygdhistorikkTest(
+            historikk = gjenopprettetHistorikk,
+            setup = { _, _, _ -> },
+            assertions = { historikk, nyeBehov, _ ->
+                assertEquals(1, historikk.inspektør.elementer())
+                assertNull(historikk.oppdaterHistorikk(historikkelement(perioder)))
+                assertEquals(1, historikk.inspektør.elementer())
+            }
+        )
     }
 
     @Test
     fun `tom historikk validerer`() {
-        assertTrue(historikk.validerMedFunksjonellFeil(aktivitetslogg, 1.januar til 31.januar))
-        assertFalse(aktivitetslogg.harFunksjonelleFeil())
+        infotrygdhistorikkTest(
+            setup = { _, _, _ -> },
+            assertions = { historikk, nyeBehov, aktivitetslogg ->
+                assertTrue(historikk.validerMedFunksjonellFeil(aktivitetslogg, 1.januar til 31.januar))
+                assertFalse(aktivitetslogg.harFunksjonelleFeil())
+            }
+        )
     }
 
     @Test
     fun `nyere opplysninger i Infotrygd`() {
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 15.februar),
-                    Friperiode(15.mars, 20.mars)
+        fun oppdater(historikk: Infotrygdhistorikk) {
+            historikk.oppdaterHistorikk(
+                historikkelement(
+                    listOf(
+                        ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 15.februar),
+                        Friperiode(15.mars, 20.mars)
+                    )
                 )
             )
+        }
+
+        infotrygdhistorikkTest(
+            setup = { historikk, _, _ ->
+                oppdater(historikk)
+            },
+            assertions = { historikk, _, aktivitetslogg ->
+                historikk.validerNyereOpplysninger(aktivitetslogg, 1.januar til 31.januar)
+                assertFalse(aktivitetslogg.harFunksjonelleFeil())
+                aktivitetslogg.assertVarsel(Varselkode.RV_IT_1)
+            }
         )
-        Aktivitetslogg().also {
-            historikk.validerNyereOpplysninger(it, 1.januar til 31.januar)
-            assertFalse(it.harFunksjonelleFeil())
-            it.assertVarsel(Varselkode.RV_IT_1)
-        }
-        Aktivitetslogg().also {
-            assertFalse(historikk.validerMedFunksjonellFeil(it, 20.februar til 28.februar))
-            assertTrue(it.harVarslerEllerVerre())
-            it.assertFunksjonellFeil(Varselkode.RV_IT_37)
-        }
-        Aktivitetslogg().also {
-            assertTrue(historikk.validerMedFunksjonellFeil(it, 1.mai til 5.mai))
-            assertFalse(it.harVarslerEllerVerre())
-        }
+
+        infotrygdhistorikkTest(
+            setup = { historikk, _, _ ->
+                oppdater(historikk)
+            },
+            assertions = { historikk, nyeBehov, aktivitetslogg ->
+                assertFalse(historikk.validerMedFunksjonellFeil(aktivitetslogg, 20.februar til 28.februar))
+                assertTrue(aktivitetslogg.harVarslerEllerVerre())
+                aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IT_37)
+            }
+        )
+
+        infotrygdhistorikkTest(
+            setup = { historikk, _, _ ->
+                oppdater(historikk)
+            },
+            assertions = { historikk, nyeBehov, aktivitetslogg ->
+                assertTrue(historikk.validerMedFunksjonellFeil(aktivitetslogg, 1.mai til 5.mai))
+                assertFalse(aktivitetslogg.harVarslerEllerVerre())
+            }
+        )
     }
 
     @Test
     fun skjæringstidspunkt() {
-        historikk.oppdaterHistorikk(
-            historikkelement(
-                listOf(
-                    ArbeidsgiverUtbetalingsperiode("ag1", 5.januar, 10.januar),
-                    Friperiode(11.januar, 12.januar),
-                    ArbeidsgiverUtbetalingsperiode("ag2", 13.januar, 15.januar),
-                    ArbeidsgiverUtbetalingsperiode("ag1", 16.januar, 20.januar),
-                    ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar)
+        infotrygdhistorikkTest(
+            setup = { historikk, _, _ ->
+                historikk.oppdaterHistorikk(
+                    historikkelement(
+                        listOf(
+                            ArbeidsgiverUtbetalingsperiode("ag1", 5.januar, 10.januar),
+                            Friperiode(11.januar, 12.januar),
+                            ArbeidsgiverUtbetalingsperiode("ag2", 13.januar, 15.januar),
+                            ArbeidsgiverUtbetalingsperiode("ag1", 16.januar, 20.januar),
+                            ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar)
+                        )
+                    )
                 )
-            )
+            },
+            assertions = { historikk, _, _ ->
+                assertEquals(5.januar, historikk.skjæringstidspunkt(emptyList()).sisteOrNull(5.januar til 31.januar))
+                assertEquals(1.januar, historikk.skjæringstidspunkt(listOf(2.S, 3.S)).sisteOrNull(januar))
+            }
         )
-        assertEquals(5.januar, historikk.skjæringstidspunkt(emptyList()).sisteOrNull(5.januar til 31.januar))
-        assertEquals(1.januar, historikk.skjæringstidspunkt(listOf(2.S, 3.S)).sisteOrNull(januar))
+    }
+
+    private fun infotrygdhistorikkTest(
+        historikk: Infotrygdhistorikk = Infotrygdhistorikk(),
+        setup: (historikk: Infotrygdhistorikk, eventBus: EventBus, aktivitetslogg: Aktivitetslogg) -> Unit,
+        assertions: (historikk: Infotrygdhistorikk, nyeBehov: Set<Behovsoppsamler.Behovsdetaljer.OppdatertHistorikkFraInfotrygd>, aktivitetslogg: Aktivitetslogg) -> Unit,
+    ) {
+        resetSeed(1.januar)
+        val aktivitetslogg = Aktivitetslogg()
+        val behovsoppsamler = Behovsoppsamler.opprettBehovsoppsamler()
+        val eventBus = EventBus().apply {
+            register(behovsoppsamler)
+        }
+        val behovFør = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.OppdatertHistorikkFraInfotrygd>().toSet()
+        setup(historikk, eventBus, aktivitetslogg)
+        (behovsoppsamler as? Behovsoppsamler.FraAktivitetslogg)?.registrerFra(aktivitetslogg)
+        val nyeBehov = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.OppdatertHistorikkFraInfotrygd>().toSet() - behovFør
+
+        assertions(historikk, nyeBehov, aktivitetslogg)
     }
 
     private fun historikkelement(
@@ -297,4 +414,8 @@ internal class InfotrygdhistorikkTest {
             hendelseId = MeldingsreferanseId(hendelseId),
             perioder = perioder
         )
+
+    private companion object {
+        private val tidligsteDato = 1.januar
+    }
 }

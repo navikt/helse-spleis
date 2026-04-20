@@ -85,10 +85,7 @@ internal class TestPerson(
 
     private lateinit var forrigeAktivitetslogg: Aktivitetslogg
     internal val personlogg = Aktivitetslogg()
-    internal val behovsoppsamler = when (Toggle.BehovFraEventBus.enabled) {
-        true -> Behovsoppsamler.FraEventBus(deferredLog)
-        false -> Behovsoppsamler.FraAktivitetslogg(deferredLog)
-    }
+    internal val behovsoppsamler = Behovsoppsamler.opprettBehovsoppsamler(deferredLog)
     private val behovshåndterer = Behovshåndterer(behovsoppsamler)
     private val varslersamler = Varslersamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk()
