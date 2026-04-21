@@ -37,6 +37,7 @@ import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKEL
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 internal class MaksdatoberegningTest {
@@ -951,6 +952,60 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(248), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(4.januar(2021)), maksdatoer)
+    }
+
+    /**
+     * Disse testene bør sees i kontekst av hverandre, så de bor inne i en nested test
+     *
+     * De burde kanskje egentlig vært én test, som sammenlignet resultatene, men
+     * MaksdatoberegningTest har ikke noen tydelig _affordance_ for sånt...
+     *
+     * Om de gir samme verdier for forbrukte dager, gjenstående dager, og maksdatoer,
+     * så betyr det at vi bruker første utbetalte dag som utgangspunkt for å regne på
+     * treårs-vinduet for å tilgi historisk forbrukte dager. Jeg mener dette er korrekt
+     * oppførsel, men det er per dags dato litt usikkerhet i jussen, så det kan hende
+     * dette må endres
+     *
+     * Om de gir forskjellige verdier, betyr det at vi bruker første dag i vedtaksperioden,
+     * som kan være en arbeidsgiverdag som utgangspunkt
+     *
+     * Den tredje testen viser hva som skjer med AGP som Nav utbetaler; vi bruker her første
+     * utbetalte dag _etter_ AGP. Dette mistenker jeg er _feil_ oppførsel.
+     */
+    @Nested
+    inner class TreårsvinduKontekst {
+        @Test
+        fun `tilbakevendende sykdom etterfulgt av AGP og én utbetalingsdag` () {
+            val tidslinje = tilbakevendendeSykdom(16.AP, 1.NAVDAGER)
+            val avslåtteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
+
+            assertEquals(emptyList<Nothing>(), avslåtteDager)
+            assertEquals(listOf(234), forbrukteDager)
+            assertEquals(listOf(14), gjenståendeDager)
+            assertEquals(listOf(5.februar(2021)), maksdatoer)
+        }
+
+        @Test
+        fun `tilbakevendende sykdom etterfulgt av seksten fridager og én utbetalingsdag` () {
+            val tidslinje = tilbakevendendeSykdom(16.FRI, 1.NAVDAGER)
+            val avslåtteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
+
+            assertEquals(emptyList<Nothing>(), avslåtteDager)
+            assertEquals(listOf(234), forbrukteDager)
+            assertEquals(listOf(14), gjenståendeDager)
+            assertEquals(listOf(5.februar(2021)), maksdatoer)
+        }
+
+        @Test
+        fun `tilbakevendende sykdom etterfulgt av AGP som Nav dekker og én utbetalingsdag` () {
+            val tidslinje = tilbakevendendeSykdom(16.NAP, 1.NAVDAGER)
+            val avslåtteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
+
+            assertEquals(emptyList<Nothing>(), avslåtteDager)
+            assertEquals(listOf(234), forbrukteDager)
+            assertEquals(listOf(14), gjenståendeDager)
+            assertEquals(listOf(5.februar(2021)), maksdatoer)
+        }
     }
 
     @Test
