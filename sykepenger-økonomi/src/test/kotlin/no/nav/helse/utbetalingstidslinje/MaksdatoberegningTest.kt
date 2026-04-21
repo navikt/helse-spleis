@@ -37,6 +37,7 @@ import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKEL
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -499,6 +500,18 @@ internal class MaksdatoberegningTest {
         assertEquals(listOf(248), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
         assertEquals(listOf(12.desember), maksdatoer)
+    }
+
+    @Test
+    fun `ferie etter agp burde ikke telle som oppholdsdag`() {
+        val tidslinje = tidslinjeOf(50.NAVDAGER, 165.ARB, 16.AP, 1.FRI, 1.NAVDAGER)
+        val avslåtteDager = listOf(tidslinje).utbetalingsavgrenser(UNG_PERSON_FNR_2018)
+
+        // FIXME: Dette er nesten helt sikkert feil i henhold til jussen
+        assertEquals(listOf(emptyList<Nothing>(), emptyList<Nothing>()), avslåtteDager)
+        assertEquals(listOf(50, 1), forbrukteDager)
+        assertEquals(listOf(198, 247), gjenståendeDager)
+        assertEquals(listOf(12.juni(2019), 21.august(2019)), maksdatoer)
     }
 
     @Test
