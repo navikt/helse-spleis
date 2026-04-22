@@ -83,6 +83,7 @@ internal class PersonMediator(
                     is EventSubscription.SimuleringEvent -> mapSimulering(event)
                     is EventSubscription.UtbetalingEvent -> mapUtbetaling(event)
                     is EventSubscription.GodkjenningEvent -> mapGodkjenning(event)
+                    is EventSubscription.NyInformasjonIInfotrygdEvent -> mapNyInformasjonIInfotrygdEvent(event)
                 }
             }
             .mapNotNull { jsonMessage -> mapTilPakke(jsonMessage) }
@@ -842,6 +843,9 @@ internal class PersonMediator(
             "utbetalingId" to event.utbetalingId
         ))
     }
+
+    private fun mapNyInformasjonIInfotrygdEvent(event: EventSubscription.NyInformasjonIInfotrygdEvent) =
+        JsonMessage.newMessage("ny_informasjon_i_infotrygd", mapOf("fom" to event.fraOgMed))
 
     private fun mapAvsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent): JsonMessage {
         return JsonMessage.newMessage(

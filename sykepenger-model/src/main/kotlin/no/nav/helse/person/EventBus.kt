@@ -279,4 +279,10 @@ class EventBus {
         _events.add(event)
         observers.forEach { it.trengerGodkjenning(event) }
     }
+
+    internal fun nyInformasjonIInfotrygd(fraOgMed: LocalDate) {
+        val event = EventSubscription.NyInformasjonIInfotrygdEvent(fraOgMed)
+        _events.add(event)
+        observers.forEach { it.nyInformasjonIInfotrygd(event) }
+    }
 }

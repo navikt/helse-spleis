@@ -319,6 +319,7 @@ class Person private constructor(
             null
         } else {
             aktivitetslogg.info("Oppfrisket Infotrygdhistorikk ble lagret, starter revurdering fra tidligste endring $tidligsteDatoForEndring")
+            eventBus.nyInformasjonIInfotrygd(tidligsteDatoForEndring)
             Revurderingseventyr.infotrygdendring(hendelse, tidligsteDatoForEndring, tidligsteDatoForEndring.somPeriode())
         }
         beregnSkjæringstidspunkter()

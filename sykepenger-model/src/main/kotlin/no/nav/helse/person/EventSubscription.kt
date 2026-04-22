@@ -906,6 +906,10 @@ interface EventSubscription {
         val saksbehandler = "SPLEIS"
     }
 
+    data class NyInformasjonIInfotrygdEvent(
+        val fraOgMed: LocalDate
+    ): Event
+
     fun inntektsmeldingReplay(event: TrengerInntektsmeldingReplayEvent) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(event: VedtaksperiodePåminnetEvent) {}
@@ -952,4 +956,5 @@ interface EventSubscription {
     fun utbetal(event: UtbetalingEvent) {}
     fun simuler(event: SimuleringEvent) {}
     fun trengerGodkjenning(event: GodkjenningEvent) {}
+    fun nyInformasjonIInfotrygd(event: NyInformasjonIInfotrygdEvent) {}
 }
