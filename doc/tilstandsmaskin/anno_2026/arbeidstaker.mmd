@@ -1,0 +1,73 @@
+stateDiagram-v2
+    direction TB
+
+    [*] --> ArbeidstakerStart
+
+    ArbeidstakerStart --> AvventerInfotrygdHistorikk : ingen infotrygdhistorikk
+    ArbeidstakerStart --> AvventerInntektsmelding : har infotrygdhistorikk
+
+    AvventerInfotrygdHistorikk --> AvventerInntektsmelding : historikk mottatt
+
+    AvventerInntektsmelding --> AvventerAvsluttetUtenUtbetaling : skal ikke til Speil
+    AvventerInntektsmelding --> AvventerSøknadForOverlappendePeriode : avventer søknad
+    AvventerInntektsmelding --> AvventerInntektsopplysningerForAnnenArbeidsgiver : mangler inntekt annen AG
+    AvventerInntektsmelding --> AvventerRefusjonsopplysningerAnnenPeriode : mangler refusjon annen periode
+    AvventerInntektsmelding --> AvventerBlokkerendePeriode : har inntekt og refusjon
+
+    AvventerSøknadForOverlappendePeriode --> AvventerBlokkerendePeriode : søknad mottatt
+    AvventerInntektsopplysningerForAnnenArbeidsgiver --> AvventerBlokkerendePeriode : inntekt mottatt
+    AvventerRefusjonsopplysningerAnnenPeriode --> AvventerBlokkerendePeriode : refusjon mottatt
+
+    AvventerAvsluttetUtenUtbetaling --> AvsluttetUtenUtbetaling : bekreftet
+
+    AvventerBlokkerendePeriode --> AvventerVilkårsprøving : mangler vilkårsgrunnlag
+    AvventerBlokkerendePeriode --> AvventerHistorikk : har vilkårsgrunnlag
+
+    AvventerVilkårsprøving --> AvventerHistorikk : vilkårsgrunnlag vurdert
+
+    AvventerHistorikk --> AvventerSimulering : har utbetalinger
+    AvventerHistorikk --> AvventerGodkjenning : ingen utbetalinger
+
+    AvventerSimulering --> AvventerGodkjenning : simulering ok
+
+    AvventerGodkjenning --> TilUtbetaling : godkjent, har utbetaling
+    AvventerGodkjenning --> Avsluttet : godkjent, ingen utbetaling (iverksatt direkte)
+
+    TilUtbetaling --> Avsluttet : utbetaling iverksatt
+
+    state Revurdering {
+        direction TB
+        [*] --> AvventerRevurdering
+
+        AvventerRevurdering --> AvventerVilkårsprøvingRevurdering : mangler vilkårsgrunnlag
+        AvventerRevurdering --> AvventerHistorikkRevurdering : har vilkårsgrunnlag
+
+        AvventerVilkårsprøvingRevurdering --> AvventerHistorikkRevurdering : vilkårsgrunnlag vurdert
+
+        AvventerHistorikkRevurdering --> AvventerSimuleringRevurdering : har utbetalinger
+        AvventerHistorikkRevurdering --> AvventerGodkjenningRevurdering : ingen utbetalinger
+
+        AvventerSimuleringRevurdering --> AvventerGodkjenningRevurdering : simulering ok
+
+        AvventerGodkjenningRevurdering --> AvventerRevurderingTilUtbetaling : godkjent, har utbetaling
+        AvventerGodkjenningRevurdering --> [*] : godkjent, ingen utbetaling
+
+        AvventerRevurderingTilUtbetaling --> AvventerRevurdering : utbetaling iverksatt
+    }
+
+    Avsluttet --> Revurdering : revurdering igangsatt
+    AvsluttetUtenUtbetaling --> Revurdering : revurdering igangsatt
+    Revurdering --> Avsluttet : revurdering fullført
+
+    state Annullering {
+        direction TB
+        [*] --> AvventerAnnullering
+        AvventerAnnullering --> TilAnnullering : annullering igangsatt
+        AvventerAnnulleringTilUtbetaling --> AvventerAnnullering : utbetaling iverksatt
+    }
+
+    Avsluttet --> Annullering : annuller
+    TilUtbetaling --> AvventerAnnulleringTilUtbetaling : annuller
+    Annullering --> TilInfotrygd : annullering iverksatt
+
+    TilInfotrygd : TilInfotrygd\n(forkastet)

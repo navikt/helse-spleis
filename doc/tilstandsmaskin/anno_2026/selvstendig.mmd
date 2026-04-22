@@ -1,0 +1,47 @@
+stateDiagram-v2
+    direction TB
+
+    [*] --> SelvstendigStart
+
+    SelvstendigStart --> SelvstendigAvventerInfotrygdHistorikk : ingen infotrygdhistorikk
+    SelvstendigStart --> SelvstendigAvventerBlokkerendePeriode : har infotrygdhistorikk
+
+    SelvstendigAvventerInfotrygdHistorikk --> SelvstendigAvventerBlokkerendePeriode : historikk mottatt
+
+    SelvstendigAvventerBlokkerendePeriode --> SelvstendigAvventerVilkårsprøving : mangler vilkårsgrunnlag
+    SelvstendigAvventerBlokkerendePeriode --> SelvstendigAvventerHistorikk : har vilkårsgrunnlag
+
+    SelvstendigAvventerVilkårsprøving --> SelvstendigAvventerHistorikk : vilkårsgrunnlag vurdert
+
+    SelvstendigAvventerHistorikk --> SelvstendigAvventerSimulering : har utbetalinger
+    SelvstendigAvventerHistorikk --> SelvstendigAvventerGodkjenning : ingen utbetalinger
+
+    SelvstendigAvventerSimulering --> SelvstendigAvventerGodkjenning : simulering ok
+
+    SelvstendigAvventerGodkjenning --> SelvstendigTilUtbetaling : godkjent, har utbetaling
+    SelvstendigAvventerGodkjenning --> SelvstendigAvsluttet : godkjent, ingen utbetaling
+
+    SelvstendigTilUtbetaling --> SelvstendigAvsluttet : utbetaling iverksatt
+
+    state SelvstendigRevurdering {
+        direction TB
+        [*] --> SelvstendigAvventerRevurdering
+
+        SelvstendigAvventerRevurdering --> SelvstendigAvventerVilkårsprøvingRevurdering : mangler vilkårsgrunnlag
+        SelvstendigAvventerRevurdering --> SelvstendigAvventerHistorikkRevurdering : har vilkårsgrunnlag
+
+        SelvstendigAvventerVilkårsprøvingRevurdering --> SelvstendigAvventerHistorikkRevurdering : vilkårsgrunnlag vurdert
+
+        SelvstendigAvventerHistorikkRevurdering --> SelvstendigAvventerSimuleringRevurdering : har utbetalinger
+        SelvstendigAvventerHistorikkRevurdering --> SelvstendigAvventerGodkjenningRevurdering : ingen utbetalinger
+
+        SelvstendigAvventerSimuleringRevurdering --> SelvstendigAvventerGodkjenningRevurdering : simulering ok
+
+        SelvstendigAvventerGodkjenningRevurdering --> SelvstendigAvventerRevurderingTilUtbetaling : godkjent, har utbetaling
+        SelvstendigAvventerGodkjenningRevurdering --> [*] : godkjent, ingen utbetaling
+
+        SelvstendigAvventerRevurderingTilUtbetaling --> SelvstendigAvventerRevurdering : utbetaling iverksatt
+    }
+
+    SelvstendigAvsluttet --> SelvstendigRevurdering : revurdering igangsatt
+    SelvstendigRevurdering --> SelvstendigAvsluttet : revurdering fullført

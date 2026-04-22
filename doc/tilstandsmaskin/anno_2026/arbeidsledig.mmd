@@ -1,0 +1,11 @@
+stateDiagram-v2
+    direction LR
+
+    [*] --> ArbeidsledigStart
+
+    ArbeidsledigStart --> ArbeidsledigAvventerInfotrygdHistorikk : ingen infotrygdhistorikk
+    ArbeidsledigStart --> ArbeidsledigAvventerBlokkerendePeriode : har infotrygdhistorikk
+
+    ArbeidsledigAvventerInfotrygdHistorikk --> ArbeidsledigAvventerBlokkerendePeriode : historikk mottatt
+
+    ArbeidsledigAvventerBlokkerendePeriode --> AvsluttetUtenUtbetaling : behandling fullført

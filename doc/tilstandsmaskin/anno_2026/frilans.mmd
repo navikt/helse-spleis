@@ -1,0 +1,11 @@
+stateDiagram-v2
+    direction LR
+
+    [*] --> FrilansStart
+
+    FrilansStart --> FrilansAvventerInfotrygdHistorikk : ingen infotrygdhistorikk
+    FrilansStart --> FrilansAvventerBlokkerendePeriode : har infotrygdhistorikk
+
+    FrilansAvventerInfotrygdHistorikk --> FrilansAvventerBlokkerendePeriode : historikk mottatt
+
+    FrilansAvventerBlokkerendePeriode --> AvsluttetUtenUtbetaling : behandling fullført
