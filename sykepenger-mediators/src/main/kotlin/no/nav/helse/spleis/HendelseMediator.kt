@@ -421,7 +421,7 @@ internal class HendelseMediator(
     }
 
     override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, context: MessageContext) {
-        person(personidentifikator, message, emptySet(), Regelverkslogg.EmptyLog, null) { person ->
+        person(personidentifikator, message, context, emptySet(), Regelverkslogg.EmptyLog, null) { person ->
             val dto = person.dto()
             val avstemmer = Avstemmer(dto)
             context.publish(avstemmer.tilJsonMessage().toJson().also {
@@ -604,20 +604,35 @@ internal class HendelseMediator(
         val eventBus = EventBus()
         eventBus.register(VedtaksperiodeProbe)
 
-        person(personidentifikator, message, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person ->
+        person(personidentifikator, message, context, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person ->
             handler(eventBus, person, aktivitetslogg)
         }
         ferdigstill(context, eventBus, personMediator, subsumsjonMediator, datadelingMediator, message, aktivitetslogg, behovMediator)
     }
 
-    private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, historiskeFolkeregisteridenter: Set<Personidentifikator>, regelverkslogg: Regelverkslogg, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
+    private fun personHverkenFunnetEllerOpprettet(context: MessageContext, message: HendelseMessage) {
+        val json = JsonMessage.newMessage("melding_om_melding_ikke_håndtert_fordi_person_ikke_funnet", mapOf(
+            "fødselsnummer" to message.meldingsporing.fødselsnummer,
+            "originalt_event_name" to "${message.navn}",
+            "original_id" to "${message.meldingsporing.id.id}",
+        )).toJson()
+        sikkerLogg.info("fant ikke person ${message.meldingsporing.fødselsnummer}, oppretter heller ingen ny person:\n\t$json")
+        context.publish(message.meldingsporing.fødselsnummer, json)
+    }
+
+    private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, context: MessageContext, historiskeFolkeregisteridenter: Set<Personidentifikator>, regelverkslogg: Regelverkslogg, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
         personDao.hentEllerOpprettPerson(
             regelverkslogg = regelverkslogg,
             personidentifikator = personidentifikator,
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
             message = message,
             hendelseRepository = hendelseRepository,
-            lagNyPerson = { personopplysninger?.person(regelverkslogg) },
+            lagNyPerson = {
+                when (val nyPerson = personopplysninger?.person(regelverkslogg)) {
+                    null -> null.also { personHverkenFunnetEllerOpprettet(context, message) }
+                    else -> nyPerson
+                }
+            },
             håndterPerson = { person -> person.also(block) }
         )
     }

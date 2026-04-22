@@ -471,11 +471,11 @@ internal abstract class AbstractEndToEndMediatorTest {
         yrkesaktivitetstype: String = "ARBEIDSTAKER",
         flagg: Set<String> = emptySet(),
         tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
-    ): UUID {
+    ): Pair<UUID, String> {
         val vedtaksperiodeId = if (vedtaksperiodeIndeks == -1) UUID.randomUUID() else testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)
-        val (_, message) = meldingsfabrikk.lagPåminnelse(vedtaksperiodeId, tilstandType, orgnummer, yrkesaktivitetstype, flagg, tilstandsendringstidspunkt)
+        val (meldingId, message) = meldingsfabrikk.lagPåminnelse(vedtaksperiodeId, tilstandType, orgnummer, yrkesaktivitetstype, flagg, tilstandsendringstidspunkt)
         testRapid.sendTestMessage(message)
-        return vedtaksperiodeId
+        return vedtaksperiodeId to meldingId
     }
 
     protected fun sendUtbetalingsgodkjenning(
@@ -824,9 +824,10 @@ internal abstract class AbstractEndToEndMediatorTest {
         return id.toUUID() to message
     }
 
-    protected fun sendInfotrygdendring() {
-        val (_, message) = meldingsfabrikk.lagInfotrygdendringer()
+    protected fun sendInfotrygdendring(): String {
+        val (id, message) = meldingsfabrikk.lagInfotrygdendringer()
         testRapid.sendTestMessage(message)
+        return id
     }
 
     protected fun nyttVedtak(fom: LocalDate = LocalDate.of(2018, 1, 1), tom: LocalDate = LocalDate.of(2018, 1, 31)) {
@@ -973,5 +974,13 @@ internal abstract class AbstractEndToEndMediatorTest {
                 }
             ))
         }
+    }
+
+    protected fun assertMeldingOmMeldingIkkeHåndtertFordiPersonIkkeFunnet(originaltEventName: String, originalId: String) {
+        assertEquals(1, testRapid.inspektør.antall())
+        val melding = testRapid.inspektør.melding(0)
+        assertEquals("melding_om_melding_ikke_håndtert_fordi_person_ikke_funnet", melding.path("@event_name").asText())
+        assertEquals(originaltEventName, melding.path("originalt_event_name").asText())
+        assertEquals(originalId, melding.path("original_id").asText())
     }
 }

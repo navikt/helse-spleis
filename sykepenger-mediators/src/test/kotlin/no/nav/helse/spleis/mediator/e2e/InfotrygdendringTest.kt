@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata
 import org.junit.jupiter.api.Assertions
@@ -28,8 +27,8 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `sender infotrygdendring uten at vi vet om person fra før`() {
-        sendInfotrygdendring()
-        assertTrue(testRapid.inspektør.antall() == 0)
+        val infotrygdendringId = sendInfotrygdendring()
+        assertMeldingOmMeldingIkkeHåndtertFordiPersonIkkeFunnet("infotrygdendring", infotrygdendringId)
     }
 
     @Test

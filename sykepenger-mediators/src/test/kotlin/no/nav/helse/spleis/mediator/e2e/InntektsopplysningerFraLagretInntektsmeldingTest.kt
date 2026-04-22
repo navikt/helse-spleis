@@ -13,6 +13,7 @@ internal class InntektsopplysningerFraLagretInntektsmeldingTest : AbstractEndToE
     @Test
     fun `kan bruke inntektsopplysninger fra lagret navno-inntektsmelding`() {
         val (meldingsreferanseIdInntektsmelding, _) = sendNavNoInntektsmelding(listOf(1.januar til 16.januar), UUID.randomUUID())
+        assertMeldingOmMeldingIkkeHåndtertFordiPersonIkkeFunnet("arbeidsgiveropplysninger", meldingsreferanseIdInntektsmelding.toString())
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
         assertTilstand(0, "AVVENTER_INNTEKTSMELDING")
 
@@ -23,6 +24,7 @@ internal class InntektsopplysningerFraLagretInntektsmeldingTest : AbstractEndToE
     @Test
     fun `kan bruke inntektsopplysninger fra lagret lps-inntektsmelding`() {
         val (meldingsreferanseIdInntektsmelding, _) = sendInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
+        assertMeldingOmMeldingIkkeHåndtertFordiPersonIkkeFunnet("inntektsmelding", meldingsreferanseIdInntektsmelding.toString())
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)))
         assertTilstand(0, "AVVENTER_INNTEKTSMELDING")
 

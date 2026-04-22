@@ -22,9 +22,6 @@ import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 
 internal class PersonDao(private val dataSource: DataSource, private val STØTTER_IDENTBYTTE: Boolean) {
-    private companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    }
 
     fun hentEllerOpprettPerson(
         regelverkslogg: Regelverkslogg,
@@ -53,7 +50,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         dataSource.connection {
             transaction {
                 val (personId, person) = hentPersonEllerOpprettNy(this, regelverkslogg, hendelseRepository, personidentifikator, lagNyPerson, historiskeFolkeregisteridenter)
-                    ?: return@transaction fantIkkePerson(personidentifikator)
+                    ?: return@transaction
 
                 knyttPersonTilHistoriskeIdenter(this, personId, personidentifikator, historiskeFolkeregisteridenter)
 
@@ -85,10 +82,6 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         val person = lagNyPerson() ?: return null
         val personId = opprettNyPersonversjon(connection, person.personidentifikator, 0, "{}")
         return personId to person
-    }
-
-    private fun fantIkkePerson(personidentifikator: Personidentifikator) {
-        sikkerlogg.info("fant ikke person $personidentifikator, oppretter heller ingen ny person")
     }
 
     private fun hentTidligereBehandledeIdenter(connection: Connection, personId: Long, historiskeFolkeregisteridenter: Set<Personidentifikator>): List<SerialisertPerson> {

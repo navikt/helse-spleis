@@ -16,8 +16,8 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `påminnelse når person ikke finnes`() {
-        sendNyPåminnelse()
-        assertEquals(0, testRapid.inspektør.antall())
+        val (_, påminnelseId) = sendNyPåminnelse()
+        assertMeldingOmMeldingIkkeHåndtertFordiPersonIkkeFunnet("påminnelse", påminnelseId)
     }
 
     @Test
