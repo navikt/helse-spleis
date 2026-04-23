@@ -80,39 +80,45 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
         håndterInntektsmeldingerReplay: (inntektsmeldingerReplay: InntektsmeldingerReplay) -> Unit,
         håndterInitiellHistorikkFraInfotrygd: (utbetalingshistorikk: Utbetalingshistorikk) -> Unit
     ) {
-        val inntektsmeldingReplayBehovFør = inntektsmeldingReplayBehovAkkuratNå()
-        val initiellHistorikFraInfotrygdBehovFør = initiellHistorikFraInfotrygdBehovAkkuratNå()
-
         (hendelse as? Inntektsmelding)?.let { inntektsmelding ->
             uhåndterteInntektsmeldinger[inntektsmelding.metadata.meldingsreferanseId.id] = Inntektsmeldingdetaljer(inntektsmelding)
         }
-        operasjon()
 
-        val nyeInntektsmeldingReplayBehov = inntektsmeldingReplayBehovAkkuratNå() - inntektsmeldingReplayBehovFør
-        val nyeInitiellHistorikFraInfotrygdBehov =  initiellHistorikFraInfotrygdBehovAkkuratNå() - initiellHistorikFraInfotrygdBehovFør
+        val nyeBehov = alleBehovSomOppstårSomFølgeAv {
+            operasjon()
+        }
 
-        nyeInitiellHistorikFraInfotrygdBehov.forEach { initiellHistorikFraInfotrygdBehov ->
+        nyeBehov.filterIsInstance<Behovsoppsamler.Behovsdetaljer.InitiellHistorikFraInfotrygd>().forEach { initiellHistorikFraInfotrygdBehov ->
             val fabrikk = initiellHistorikFraInfotrygdBehov.yrkesaktivitetssporing.let { ArbeidsgiverHendelsefabrikk(it.somOrganisasjonsnummer, it) }
             val løsning = fabrikk.lagUtbetalingshistorikk(initiellHistorikFraInfotrygdBehov.vedtaksperiodeId)
             håndterInitiellHistorikkFraInfotrygd(løsning)
         }
 
-        nyeInntektsmeldingReplayBehov.forEach { trengerInntektsmeldingReplay ->
-            val fabrikk = trengerInntektsmeldingReplay.forespørsel.orgnr.let { ArbeidsgiverHendelsefabrikk(it, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(it)) }
+        nyeBehov.filterIsInstance<Behovsoppsamler.Behovsdetaljer.InntektsmeldingReplay>().forEach { trengerInntektsmeldingReplayBehov ->
+            val fabrikk = trengerInntektsmeldingReplayBehov.forespørsel.orgnr.let { ArbeidsgiverHendelsefabrikk(it, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(it)) }
             val inntektsmeldinger = uhåndterteInntektsmeldinger.values
-                .filter { inntektsmeldingdetaljer -> trengerInntektsmeldingReplay.forespørsel.orgnr == inntektsmeldingdetaljer.inntektsmelding.behandlingsporing.organisasjonsnummer}
-                .filter { inntektsmeldingdetaljer -> trengerInntektsmeldingReplay.forespørsel.erInntektsmeldingRelevant(inntektsmeldingdetaljer.eksternKontrakt) }
+                .filter { inntektsmeldingdetaljer -> trengerInntektsmeldingReplayBehov.forespørsel.orgnr == inntektsmeldingdetaljer.inntektsmelding.behandlingsporing.organisasjonsnummer}
+                .filter { inntektsmeldingdetaljer -> trengerInntektsmeldingReplayBehov.forespørsel.erInntektsmeldingRelevant(inntektsmeldingdetaljer.eksternKontrakt) }
                 .map { it.inntektsmelding }
                 .sortedBy { it.metadata.innsendt }
 
             val løsning = fabrikk.lagInntektsmeldingReplay(
-                vedtaksperiodeId = trengerInntektsmeldingReplay.vedtaksperiodeId,
+                vedtaksperiodeId = trengerInntektsmeldingReplayBehov.vedtaksperiodeId,
                 inntektsmeldinger = inntektsmeldinger
             )
-            behovsoppsamler.besvart(trengerInntektsmeldingReplay)
+            behovsoppsamler.besvart(trengerInntektsmeldingReplayBehov)
             håndterInntektsmeldingerReplay(løsning)
         }
     }
+
+    internal inline fun <reified R: Behovsoppsamler.Behovsdetaljer> behovSomOppstårSomFølgeAv(block:() -> Unit): Set<R>{
+        val før = behovsoppsamler.behovsdetaljer<R>().toSet()
+        block()
+        val etter = behovsoppsamler.behovsdetaljer<R>().toSet()
+        return etter - før
+    }
+
+    private inline fun alleBehovSomOppstårSomFølgeAv(block:() -> Unit) = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer>(block)
 
     private class Inntektsmeldingdetaljer private constructor(
         val inntektsmelding: Inntektsmelding,

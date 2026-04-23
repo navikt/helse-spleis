@@ -24,8 +24,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView
-import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
@@ -1088,15 +1086,16 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     fun `annuller siste utbetaling`() {
         a1 {
             nyttVedtak(3.januar til 26.januar, 100.prosent)
-            val behovTeller = testperson.personlogg.behov.size
-            håndterAnnullering(1.vedtaksperiode)
+
+            val annulleringnehov = annulleringsbehov(1.vedtaksperiode) {
+                håndterAnnullering(1.vedtaksperiode)
+            }
+
             assertIngenFunksjonelleFeil()
-            val annulleringnehov = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Utbetaling>().last()
 
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
             assertFalse(testperson.personlogg.harFunksjonelleFeil())
             assertEquals(2, inspektør.antallUtbetalinger)
-            assertEquals(1, testperson.personlogg.behov.size - behovTeller)
             inspektør.utbetaling(1).arbeidsgiverOppdrag.inspektør.also {
                 assertEquals(19.januar, it.fom(0))
                 assertEquals(26.januar, it.tom(0))
@@ -1159,12 +1158,15 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         a1 {
             nyttVedtak(3.januar til 26.januar, 100.prosent)
             nyttVedtak(mars, 100.prosent)
-            håndterAnnullering(2.vedtaksperiode)
+            annulleringsbehov(2.vedtaksperiode) {
+                håndterAnnullering(2.vedtaksperiode)
+            }
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-            sisteBehovErAnnullering(2.vedtaksperiode)
-            håndterAnnullering(1.vedtaksperiode)
+
+            annulleringsbehov(1.vedtaksperiode) {
+                håndterAnnullering(1.vedtaksperiode)
+            }
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-            sisteBehovErAnnullering(1.vedtaksperiode)
         }
     }
 
@@ -1181,24 +1183,13 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.sisteBehovErAnnullering(vedtaksperiodeIdInnhenter: UUID) {
-        testperson.personlogg.behov.last().also {
-            assertEquals(Behovtype.Utbetaling, it.type)
-            assertEquals(inspektør.sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeIdInnhenter), it.detaljer()["fagsystemId"])
-            assertEquals("OPPH", it.hentLinjer()[0]["statuskode"])
-        }
-    }
-
-    private fun assertIngenAnnulleringsbehov() {
-        assertFalse(
-            testperson.personlogg.behov
-                .filter { it.type == Behovtype.Utbetaling }
-                .any {
-                    it.hentLinjer().any { linje ->
-                        linje["statuskode"] == "OPPH"
-                    }
-                }
-        )
+    private fun TestPerson.TestArbeidsgiver.annulleringsbehov(vedtaksperiodeId: UUID, block: () -> Unit): Behovsoppsamler.Behovsdetaljer.Utbetaling{
+        val behovet = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Utbetaling> {
+            block()
+        }.single { it.vedtaksperiodeId == vedtaksperiodeId }
+        assertEquals(inspektør.sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeId), behovet.fagsystemId)
+        assertEquals("OPPH", behovet.linjer.single().statuskode)
+        return behovet
     }
 
     @Test
@@ -1214,10 +1205,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
     }
-
-    private fun Aktivitet.Behov.hentLinjer() =
-        @Suppress("UNCHECKED_CAST")
-        (detaljer()["linjer"] as List<Map<String, Any>>)
 
     @Test
     fun `Ved feilet annulleringsutbetaling settes utbetaling til annullering feilet`() {
@@ -1264,14 +1251,14 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(3.januar til 26.januar, 100.prosent)
             forlengVedtak(27.januar til 30.januar, 100.prosent)
             nyttVedtak(1.mars til 20.mars, 100.prosent)
-            val behovTeller = testperson.personlogg.behov.size
             nullstillTilstandsendringer()
 
             // Annuler 1 mars til 20 mars
-            håndterAnnullering(3.vedtaksperiode)
+            annulleringsbehov(3.vedtaksperiode) {
+                håndterAnnullering(3.vedtaksperiode)
+            }
             håndterUtbetalt()
             assertFalse(testperson.personlogg.harFunksjonelleFeil(), testperson.personlogg.toString())
-            assertEquals(1, testperson.personlogg.behov.size - behovTeller, testperson.personlogg.toString())
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVSLUTTET)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
@@ -1310,9 +1297,11 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
 
-            håndterAnnullering(1.vedtaksperiode)
+            annulleringsbehov(1.vedtaksperiode) {
+                håndterAnnullering(1.vedtaksperiode)
+            }
             val annullering = inspektør.utbetaling(2)
-            sisteBehovErAnnullering(1.vedtaksperiode)
+
             assertTrue(annullering.erAnnullering)
             assertEquals(26.januar, annullering.arbeidsgiverOppdrag.inspektør.periode?.endInclusive)
             assertEquals(19.januar, annullering.arbeidsgiverOppdrag.first().inspektør.fom)
