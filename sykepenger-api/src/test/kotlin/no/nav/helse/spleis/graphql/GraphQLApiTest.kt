@@ -30,8 +30,8 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.person.EventBus
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Person
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
@@ -839,6 +839,22 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             .also(assertBlock)
     }
 
+    private class Simuleringsutfisker: EventSubscription {
+        lateinit var vedtaksperiodeId: UUID private set
+        lateinit var behandlingId: UUID private set
+        lateinit var utbetalingId: UUID private set
+        lateinit var fagsystemId: String private set
+        lateinit var fagområde: String private set
+
+        override fun simuler(event: EventSubscription.SimuleringEvent) {
+            vedtaksperiodeId = event.vedtaksperiodeId
+            behandlingId = event.behandlingId
+            utbetalingId = event.utbetalingId
+            fagsystemId = event.oppdragsdetaljer.fagsystemId
+            fagområde = event.oppdragsdetaljer.fagområde
+        }
+    }
+
     private fun opprettTestdata(eventBus: EventBus): (TestDataSource) -> Unit {
         return fun(testDataSource: TestDataSource) {
             person.håndterSykmelding(eventBus, sykmelding(), Aktivitetslogg())
@@ -849,13 +865,14 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag(), Aktivitetslogg())
             val ytelser = ytelser()
             val aktivitetslogg = Aktivitetslogg()
+            val simuleringsutfisker = Simuleringsutfisker()
+            eventBus.register(simuleringsutfisker)
             person.håndterYtelser(eventBus, ytelser, aktivitetslogg)
-            val simuleringsbehov = aktivitetslogg.behov.last { it.type == Simulering }
-            val vedtaksperiodeId = UUID.fromString(simuleringsbehov.alleKontekster.getValue("vedtaksperiodeId"))
-            val behandlingId = UUID.fromString(simuleringsbehov.alleKontekster.getValue("behandlingId"))
-            val utbetalingId = UUID.fromString(simuleringsbehov.alleKontekster.getValue("utbetalingId"))
-            val fagsystemId = simuleringsbehov.detaljer().getValue("fagsystemId") as String
-            val fagområde = simuleringsbehov.detaljer().getValue("fagområde") as String
+            val vedtaksperiodeId = simuleringsutfisker.vedtaksperiodeId
+            val behandlingId = simuleringsutfisker.behandlingId
+            val utbetalingId = simuleringsutfisker.utbetalingId
+            val fagsystemId = simuleringsutfisker.fagsystemId
+            val fagområde = simuleringsutfisker.fagområde
             person.håndterSimulering(eventBus, simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde), Aktivitetslogg())
             person.håndterUtbetalingsgodkjenning(eventBus, utbetalingsgodkjenning(behandlingId = behandlingId, utbetalingId = utbetalingId), Aktivitetslogg())
             person.håndterUtbetalingHendelse(eventBus,  utbetaling(vedtaksperiodeId = vedtaksperiodeId, behandlingId = behandlingId, utbetalingId = utbetalingId, fagsystemId = fagsystemId), Aktivitetslogg())
