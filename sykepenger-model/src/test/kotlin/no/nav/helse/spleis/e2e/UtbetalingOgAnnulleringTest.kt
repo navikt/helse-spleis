@@ -439,19 +439,17 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            val utbetalingsbehov = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Utbetaling>()
-                .filter { it.fagsystemId == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
-                .also { assertEquals(1, it.size) }
-                .single()
+
+            val utbetalingsbehov = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Utbetaling> {
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            }.single { it.fagsystemId == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
 
             håndterUtbetalt()
-            håndterAnnullering(1.vedtaksperiode) // Stale
+            val annuleringsbehov = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Utbetaling> {
+                håndterAnnullering(1.vedtaksperiode) // Stale
+            }.single { it.fagsystemId == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
+
             håndterAnnullering(1.vedtaksperiode)
-            val annuleringsbehov = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Utbetaling>()
-                .filter { it.fagsystemId == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
-                .also { assertEquals(1, it.size) }
-                .single()
             håndterUtbetalt()
 
             assertTrue(inspektør.sisteUtbetaling().erAnnullering)

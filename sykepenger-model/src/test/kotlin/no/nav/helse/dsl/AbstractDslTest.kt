@@ -390,7 +390,7 @@ internal abstract class AbstractDslTest {
     protected fun String.assertFunksjonellFeil(kode: Varselkode, filter: AktivitetsloggFilter) =
         this { assertFunksjonellFeil(kode, filter) }
 
-    protected inline fun <reified R: Behovsoppsamler.Behovsdetaljer> behovSomOppstårSomFølgeAv(block: () -> Unit) = testperson.behovshåndterer.behovSomOppstårSomFølgeAv<R> { block() }
+    internal inline fun <reified R: Behovsoppsamler.Behovsdetaljer> behovSomOppstårSomFølgeAv(block: () -> Unit) = testperson.behovshåndterer.behovSomOppstårSomFølgeAv<R> { block() }
 
     protected fun String.nyttVedtak(
         periode: Periode,

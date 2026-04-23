@@ -49,8 +49,10 @@ internal class InfotrygdendringE2ETest : AbstractDslTest() {
     fun `infotrygdendring gjør vi at trenger oppdatert historikk`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
-            håndterInfotrygdendring()
-            assertEquals(1, testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.OppdatertHistorikkFraInfotrygd>().size)
+            val oppdaterHistorikkBehov = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.OppdatertHistorikkFraInfotrygd> {
+                håndterInfotrygdendring()
+            }
+            assertEquals(1, oppdaterHistorikkBehov.size)
             håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
                 ArbeidsgiverUtbetalingsperiode(
                     a1, 1.januar(2016), 31.januar(2016)

@@ -59,11 +59,12 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag()
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "DelvisInnvilget", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"),
                 forbrukteSykedager = 10,
                 gjenståendeSykedager = 238,
@@ -117,11 +118,14 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 refusjon = Inntektsmelding.Refusjon(INNTEKT, null)
             )
             håndterVilkårsgrunnlag()
-            håndterYtelser(1.vedtaksperiode)
+
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterYtelser(1.vedtaksperiode)
+            }
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Avslag", "IngenUtbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"),
                 forbrukteSykedager = 0,
                 gjenståendeSykedager = 248,
@@ -167,12 +171,14 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     @Test
     fun `Arbeidsgiver ønsker refusjon for én dag i perioden`() {
         a1 {
-            tilGodkjenning(
-                periode = januar,
-                refusjon = Inntektsmelding.Refusjon(INGEN, null, listOf(Inntektsmelding.Refusjon.EndringIRefusjon(1.daglig, 31.januar)))
-            )
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                tilGodkjenning(
+                    periode = januar,
+                    refusjon = Inntektsmelding.Refusjon(INGEN, null, listOf(Inntektsmelding.Refusjon.EndringIRefusjon(1.daglig, 31.januar)))
+                )
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Personutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"),
                 utbetalingsdager = standardUtbetalingsdager(0, 1431).dropLast(1) + 31.januar.somPeriode().utbetalingsdager(1, 1430)
             )
@@ -182,18 +188,23 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     @Test
     fun `Arbeidsgiver ønsker ikke refusjon i forlengelsen`() {
         a1 {
-            tilGodkjenning(januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.januar))
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}){
+                tilGodkjenning(januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.januar))
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver")
             )
 
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            forlengelseTilGodkjenning(februar)
+
+            val godkjenningsbehov2 = enesteGodkjenningsbehovSomFølgeAv({2.vedtaksperiode}) {
+                forlengelseTilGodkjenning(februar)
+            }
 
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov2,
                 tags = setOf("Forlengelse", "Innvilget", "Personutbetaling", "EnArbeidsgiver"),
                 periodeFom = 1.februar,
                 periodeTom = 28.februar,
@@ -223,9 +234,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         }
         a1 {
             håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({2.vedtaksperiode}) {
+                håndterSimulering(2.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 vedtaksperiodeId = 2.vedtaksperiode(a1),
                 periodeFom = 1.februar,
                 periodeTom = 10.februar,
@@ -269,9 +282,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     @Test
     fun arbeidsgiverutbetaling() {
         a1 {
-            tilGodkjenning(januar)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                tilGodkjenning(januar)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
                 sykepengegrunnlagsfakta = mapOf(
                     "sykepengegrunnlag" to INNTEKT.årlig,
@@ -297,9 +312,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag()
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Ferie", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
                 forbrukteSykedager = 10,
                 gjenståendeSykedager = 238,
@@ -314,9 +331,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     @Test
     fun `6G-begrenset`() {
         a1 {
-            tilGodkjenning(januar, beregnetInntekt = 100000.månedlig)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                tilGodkjenning(januar, beregnetInntekt = 100000.månedlig)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "6GBegrenset", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
                 utbetalingsdager = standardUtbetalingsdager(2161, 0),
                 sykepengegrunnlagsfakta = mapOf(
@@ -340,9 +359,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     fun `ingen ny arbeidsgiverperiode og sykepengegrunnlag under 2g`() {
         a1 {
             nyttVedtak(januar)
-            tilGodkjenning(10.februar til 20.februar, beregnetInntekt = 10000.månedlig, arbeidsgiverperiode = emptyList())
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({2.vedtaksperiode}) {
+                tilGodkjenning(10.februar til 20.februar, beregnetInntekt = 10000.månedlig, arbeidsgiverperiode = emptyList())
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 skjæringstidspunkt = 10.februar,
                 periodeFom = 10.februar,
                 periodeTom = 20.februar,
@@ -396,8 +417,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje((juli).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
             håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            assertTags(setOf("Førstegangsbehandling", "IngenNyArbeidsgiverperiode", "Innvilget", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"), 2.vedtaksperiode)
+
+            assertTags(setOf("Førstegangsbehandling", "IngenNyArbeidsgiverperiode", "Innvilget", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"), { 2.vedtaksperiode}) {
+                håndterSimulering(2.vedtaksperiode)
+            }
         }
     }
 
@@ -417,10 +440,12 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
-            tilGodkjenning(16.februar til 28.februar)
+
+            assertTags(setOf("Førstegangsbehandling", "IngenNyArbeidsgiverperiode", "Innvilget", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"), { 2.vedtaksperiode }) {
+                tilGodkjenning(16.februar til 28.februar)
+            }
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS???? ??????? ????SHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
             assertEquals(listOf(1.januar til 16.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
-            assertTags(setOf("Førstegangsbehandling", "IngenNyArbeidsgiverperiode", "Innvilget", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"), 2.vedtaksperiode)
         }
     }
 
@@ -429,17 +454,19 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         medJSONPerson("/personer/infotrygdforlengelse.json", 334)
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar)))
-            forlengelseTilGodkjenning(mars)
-            assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({2.vedtaksperiode}) {
+                forlengelseTilGodkjenning(mars)
+            }
+            assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode, godkjenningsbehov)
+
             assertSykepengegrunnlagsfakta(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 sykepengegrunnlagsfakta = mapOf(
                     "sykepengegrunnlag" to 372_000.0,
                     "6G" to 561_804.0,
                     "fastsatt" to "IInfotrygd",
                     "selvstendig" to null
                 ),
-                vedtaksperiodeId = 2.vedtaksperiode
             )
         }
     }
@@ -451,34 +478,38 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar)))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.februar, Dagtype.Sykedag, 50)))
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            assertTags(setOf("Førstegangsbehandling", "Innvilget", "Revurdering", "NegativArbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "InngangsvilkårFraInfotrygd", "EnArbeidsgiver"), { 1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertVarsler(listOf(Varselkode.RV_UT_23, Varselkode.RV_IT_14), 1.vedtaksperiode.filter())
-            assertIngenTag("IngenNyArbeidsgiverperiode")
-            assertTags(setOf("Førstegangsbehandling", "Innvilget", "Revurdering", "NegativArbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "InngangsvilkårFraInfotrygd", "EnArbeidsgiver"))
         }
     }
 
     @Test
     fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga forlengelse`() {
         a1 {
-            tilGodkjenning(januar)
-            assertIngenTag("IngenNyArbeidsgiverperiode", 1.vedtaksperiode)
+            assertIngenTag("IngenNyArbeidsgiverperiode", { 1.vedtaksperiode }) {
+                tilGodkjenning(januar)
+            }
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            forlengelseTilGodkjenning(februar)
-            assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode)
+            assertIngenTag("IngenNyArbeidsgiverperiode", { 2.vedtaksperiode}) {
+                forlengelseTilGodkjenning(februar)
+            }
         }
     }
 
     @Test
     fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det er ny AGP`() {
         a1 {
-            tilGodkjenning(januar)
-            assertIngenTag("IngenNyArbeidsgiverperiode", 1.vedtaksperiode)
+            assertIngenTag("IngenNyArbeidsgiverperiode", { 1.vedtaksperiode }) {
+                tilGodkjenning(januar)
+            }
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            tilGodkjenning(mars)
-            assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode)
+            assertIngenTag("IngenNyArbeidsgiverperiode", { 2.vedtaksperiode }) {
+                tilGodkjenning(mars)
+            }
         }
     }
 
@@ -487,11 +518,12 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
             håndterSøknad(1.januar til 10.januar)
-            tilGodkjenning(15.januar til 31.januar)
 
+            assertIngenTag("IngenNyArbeidsgiverperiode", { 2.vedtaksperiode }) {
+                tilGodkjenning(15.januar til 31.januar)
+            }
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode)
         }
     }
 
@@ -500,8 +532,9 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
             håndterSøknad(1.januar til 16.januar)
-            tilGodkjenning(17.januar til 31.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
-            assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode)
+            assertIngenTag("IngenNyArbeidsgiverperiode", { 2.vedtaksperiode}) {
+                tilGodkjenning(17.januar til 31.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            }
         }
     }
 
@@ -516,9 +549,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Personutbetaling", "EnArbeidsgiver"),
                 utbetalingsdager = standardUtbetalingsdager(0, 1431)
             )
@@ -536,9 +571,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Personutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
                 utbetalingsdager = standardUtbetalingsdager(715, 715)
             )
@@ -550,9 +587,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
-            håndterYtelser(2.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({2.vedtaksperiode }) {
+                håndterYtelser(2.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Forlengelse", "Innvilget", "IngenUtbetaling", "Ferie", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
                 vedtaksperiodeId = 2.vedtaksperiode,
                 periodeFom = 1.februar,
@@ -589,9 +628,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             tilGodkjenning(januar)
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning("a1", INNTEKT / 2)))
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "SykepengegrunnlagUnder2G", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 periodeFom = 1.januar,
@@ -629,9 +670,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null)
             )
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Revurdering", "NegativArbeidsgiverutbetaling", "Personutbetaling", "EnArbeidsgiver"),
                 kanAvvises = false,
                 utbetalingstype = "REVURDERING",
@@ -649,9 +692,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null)
             )
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
-            assertGodkjenningsbehov(behovsoppsamler = testperson.behovsoppsamler, tags = setOf("Førstegangsbehandling", "Innvilget", "Revurdering", "Arbeidsgiverutbetaling", "NegativPersonutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"), kanAvvises = false, utbetalingstype = "REVURDERING")
+            assertGodkjenningsbehov(actualBehov = godkjenningsbehov, tags = setOf("Førstegangsbehandling", "Innvilget", "Revurdering", "Arbeidsgiverutbetaling", "NegativPersonutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"), kanAvvises = false, utbetalingstype = "REVURDERING")
         }
     }
 
@@ -682,9 +727,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         a1 {
             håndterVilkårsgrunnlag()
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 vedtaksperiodeId = 1.vedtaksperiode(a1),
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "6GBegrenset", "FlereArbeidsgivere", "ArbeidsgiverØnskerRefusjon"),
                 inntektskilde = "FLERE_ARBEIDSGIVERE",
@@ -719,8 +766,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     @Test
     fun `Periode med minst én navdag får Innvilget-tag`() {
         a1 {
-            tilGodkjenning(januar, beregnetInntekt = INNTEKT)
-            assertGodkjenningsbehov(behovsoppsamler = testperson.behovsoppsamler, tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"))
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                tilGodkjenning(januar, beregnetInntekt = INNTEKT)
+            }
+            assertGodkjenningsbehov(actualBehov = godkjenningsbehov, tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"))
         }
     }
 
@@ -729,9 +778,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         medPersonidentifikator(Personidentifikator("18.01.1948"))
         medFødselsdato(18.januar(1948))
         a1 {
-            tilGodkjenning(januar, beregnetInntekt = INNTEKT)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                tilGodkjenning(januar, beregnetInntekt = INNTEKT)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "DelvisInnvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
                 forbrukteSykedager = 1,
                 gjenståendeSykedager = 0,
@@ -784,9 +835,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                håndterYtelser(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Avslag", "IngenUtbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
                 forbrukteSykedager = 0,
                 gjenståendeSykedager = 0,
@@ -839,9 +892,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                håndterYtelser(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Avslag", "IngenUtbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
                 forbrukteSykedager = 0,
                 gjenståendeSykedager = 0,
@@ -889,9 +944,11 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
-            håndterYtelser(2.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({2.vedtaksperiode }) {
+                håndterYtelser(2.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Forlengelse", "Innvilget", "IngenUtbetaling", "Ferie", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
                 vedtaksperiodeId = 2.vedtaksperiode,
                 periodeType = "FORLENGELSE",
@@ -912,13 +969,17 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     @Test
     fun `legger til førstegangsbehandling eller forlengelse som tag`() {
         a1 {
-            tilGodkjenning(januar, beregnetInntekt = INNTEKT)
-            assertGodkjenningsbehov(behovsoppsamler = testperson.behovsoppsamler, tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"))
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                tilGodkjenning(januar, beregnetInntekt = INNTEKT)
+            }
+            assertGodkjenningsbehov(actualBehov = godkjenningsbehov, tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"))
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            forlengelseTilGodkjenning(februar)
+            val godkjenningsbehov2 = enesteGodkjenningsbehovSomFølgeAv({2.vedtaksperiode}) {
+                forlengelseTilGodkjenning(februar)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov2,
                 tags = setOf("Forlengelse", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
                 periodeFom = 1.februar,
                 periodeTom = 28.februar,
@@ -950,10 +1011,12 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
 
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 relevanteSøknader = setOf(søknadId),
                 tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon")
             )
@@ -985,11 +1048,12 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
 
             assertSykepengegrunnlagsfakta(
-                behovsoppsamler = testperson.behovsoppsamler,
-                vedtaksperiodeId = 1.vedtaksperiode,
+                actualBehov = godkjenningsbehov,
                 sykepengegrunnlagsfakta = mapOf(
                     "sykepengegrunnlag" to 561804.0,
                     "6G" to 561804.0,
@@ -1014,15 +1078,21 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         }
     }
 
-    private fun assertTags(tags: Set<String>, vedtaksperiodeId: UUID = 1.vedtaksperiode(a1)) {
-        val actualtags = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == vedtaksperiodeId }.event.tags
+    private fun assertTags(tags: Set<String>, vedtaksperiodeId: () -> UUID, block: () -> Unit) {
+        val actualtags = enesteGodkjenningsbehovSomFølgeAv(vedtaksperiodeId, block).event.tags
         assertEquals(tags, actualtags)
         val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
         assertEquals(actualtags, utkastTilVedtak.tags)
     }
 
-    private fun assertIngenTag(tag: String, vedtaksperiodeId: UUID = 1.vedtaksperiode(a1)) {
-        val actualtags = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == vedtaksperiodeId }.event.tags
+    private fun assertIngenTag(tag: String, vedtaksperiodeId: () -> UUID, block: () -> Unit) {
+        val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv(vedtaksperiodeId, block)
+        assertIngenTag(tag, vedtaksperiodeId(), godkjenningsbehov)
+    }
+
+    private fun assertIngenTag(tag: String, vedtaksperiodeId: UUID, godkjenningsbehov: Behovsoppsamler.Behovsdetaljer.Godkjenning) {
+        assertEquals(vedtaksperiodeId, godkjenningsbehov.vedtaksperiodeId)
+        val actualtags = godkjenningsbehov.event.tags
         assertFalse(actualtags.contains(tag))
         val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
         assertFalse(utkastTilVedtak.tags.contains(tag))

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Behovsoppsamler
@@ -54,9 +53,11 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
-            val inntektskilder = inntektskilder(1.vedtaksperiode)
+            val inntektskilder = inntektskilder(godkjenningsbehov)
             assertEquals(listOf(Inntektskilde.Arbeidsgiver, Inntektskilde.AOrdningen), inntektskilder)
         }
     }
@@ -73,9 +74,11 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         a1 {
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
-            val inntektskilder = inntektskilder(1.vedtaksperiode)
+            val inntektskilder = inntektskilder(godkjenningsbehov)
             assertEquals(listOf(Inntektskilde.Saksbehandler), inntektskilder)
         }
     }
@@ -86,8 +89,10 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         a1 {
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            val inntektskilder = inntektskilder(1.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
+            val inntektskilder = inntektskilder(godkjenningsbehov)
             assertEquals(listOf(Inntektskilde.Saksbehandler), inntektskilder)
         }
     }
@@ -95,17 +100,21 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
     @Test
     fun `sender med sykepengegrunnlag i godkjenningsbehovet`() {
         a1 {
-            tilGodkjenning(januar, beregnetInntekt = INNTEKT * 6)
-            assertEquals(Grunnbeløp.`6G`.beløp(1.januar).årlig, sykepengegrunnlag(1.vedtaksperiode))
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                tilGodkjenning(januar, beregnetInntekt = INNTEKT * 6)
+            }
+            assertEquals(Grunnbeløp.`6G`.beløp(1.januar).årlig, godkjenningsbehov.event.sykepengegrunnlagsfakta.sykepengegrunnlag)
         }
     }
 
     @Test
     fun `sender med feil vilkårsgrunnlagId i påminnet godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden`() {
         a1 {
-            tilGodkjenning(januar)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                tilGodkjenning(januar)
+            }
             val vilkårsgrunnlagId1 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inspektør.vilkårsgrunnlagId
-            assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagIdFraSisteGodkjenningsbehov(1.vedtaksperiode))
+            assertEquals(vilkårsgrunnlagId1, godkjenningsbehov.event.vilkårsgrunnlagId)
             nyPeriode(februar)
             nyPeriode(mars)
             nullstillTilstandsendringer()
@@ -118,7 +127,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             val vilkårsgrunnlagId2 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inspektør.vilkårsgrunnlagId
             assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagId2)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagIdFraSisteGodkjenningsbehov(1.vedtaksperiode))
+            assertEquals(vilkårsgrunnlagId1, godkjenningsbehov.event.vilkårsgrunnlagId)
         }
     }
 
@@ -141,9 +150,11 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING)
             val vilkårsgrunnlagId2 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inspektør.vilkårsgrunnlagId
             assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagId2)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
-            assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagIdFraSisteGodkjenningsbehov(1.vedtaksperiode))
+            assertEquals(vilkårsgrunnlagId1, godkjenningsbehov.event.vilkårsgrunnlagId)
         }
     }
 
@@ -173,14 +184,16 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertFalse(kanAvvises(1.vedtaksperiode))
+            assertFalse(godkjenningsbehov.event.kanAvvises)
 
-            val utbetalingId = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last().utbetalingId
+            val utbetalingId = godkjenningsbehov.utbetalingId
             val utbetaling = inspektør.utbetalinger(1.vedtaksperiode).last()
             assertEquals(utbetalingId, utbetaling.inspektør.utbetalingId)
 
@@ -209,9 +222,11 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
     @Test
     fun `førstegangsbehandling som kan avvises`() {
         a1 {
-            tilGodkjenning(januar)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                tilGodkjenning(januar)
+            }
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertTrue(kanAvvises(1.vedtaksperiode))
+            assertTrue(godkjenningsbehov.event.kanAvvises)
         }
     }
 
@@ -223,9 +238,11 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertTrue(kanAvvises(1.vedtaksperiode))
+            assertTrue(godkjenningsbehov.event.kanAvvises)
         }
     }
 
@@ -239,10 +256,12 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(2.januar til 17.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
+            val godkjenningsbehov1 = enesteGodkjenningsbehovSomFølgeAv({2.vedtaksperiode}) {
+                håndterSimulering(2.vedtaksperiode)
+            }
 
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertTrue(kanAvvises(2.vedtaksperiode))
+            assertTrue(godkjenningsbehov1.event.kanAvvises)
 
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
@@ -253,17 +272,21 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov2 = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertFalse(kanAvvises(1.vedtaksperiode))
+            assertFalse(godkjenningsbehov2.event.kanAvvises)
 
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            håndterYtelser(2.vedtaksperiode)
+            val godkjenningsbehov3 = enesteGodkjenningsbehovSomFølgeAv({2.vedtaksperiode}) {
+                håndterYtelser(2.vedtaksperiode)
+            }
 
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertFalse(kanAvvises(2.vedtaksperiode))
+            assertFalse(godkjenningsbehov3.event.kanAvvises)
         }
     }
 
@@ -273,9 +296,11 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.05, emptyList())))
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertFalse(kanAvvises(1.vedtaksperiode))
+            assertFalse(godkjenningsbehov.event.kanAvvises)
         }
     }
 
@@ -290,10 +315,12 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
+            val godkjenningsbehov1 = enesteGodkjenningsbehovSomFølgeAv({2.vedtaksperiode}) {
+                håndterSimulering(2.vedtaksperiode)
+            }
 
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertTrue(kanAvvises(2.vedtaksperiode))
+            assertTrue(godkjenningsbehov1.event.kanAvvises)
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
@@ -307,10 +334,12 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
+            val godkjenningsbehov2 = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterYtelser(1.vedtaksperiode)
+            }
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertFalse(kanAvvises(1.vedtaksperiode))
+            assertFalse(godkjenningsbehov2.event.kanAvvises)
         }
     }
 
@@ -326,20 +355,23 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 2.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
+            val godkjenningsbehov1 = enesteGodkjenningsbehovSomFølgeAv({2.vedtaksperiode}) {
+                håndterSimulering(2.vedtaksperiode)
+            }
 
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertTrue(kanAvvises(2.vedtaksperiode))
+            assertTrue(godkjenningsbehov1.event.kanAvvises)
 
             håndterUtbetalingsgodkjenning(2.vedtaksperiode, godkjent = false)
 
             assertSisteForkastetTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
-            håndterYtelser(1.vedtaksperiode)
-
+            val godkjenningsbehov2 = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterYtelser(1.vedtaksperiode)
+            }
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertFalse(kanAvvises(1.vedtaksperiode))
+            assertFalse(godkjenningsbehov2.event.kanAvvises)
 
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -359,9 +391,11 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertTrue("InntektFraAOrdningenLagtTilGrunn" in testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.tags)
+            assertTrue("InntektFraAOrdningenLagtTilGrunn" in godkjenningsbehov.event.tags)
         }
     }
 
@@ -385,21 +419,14 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            assertTrue("InntektFraAOrdningenLagtTilGrunn" in testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.tags)
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
+            assertTrue("InntektFraAOrdningenLagtTilGrunn" in godkjenningsbehov.event.tags)
         }
     }
 
-    private fun kanAvvises(vedtaksperiode: UUID) =
-        testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == vedtaksperiode }.event.kanAvvises
-
-    private fun vilkårsgrunnlagIdFraSisteGodkjenningsbehov(vedtaksperiode: UUID) =
-        testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == vedtaksperiode }.event.vilkårsgrunnlagId
-
-    private fun sykepengegrunnlag(vedtaksperiode: UUID) =
-        testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == vedtaksperiode }.event.sykepengegrunnlagsfakta.sykepengegrunnlag
-
-    private fun inntektskilder(vedtaksperiode: UUID) = when (val fakta = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == vedtaksperiode }.event.sykepengegrunnlagsfakta) {
+    private fun inntektskilder(godkjenningsbehov: Behovsoppsamler.Behovsdetaljer.Godkjenning) = when (val fakta = godkjenningsbehov.event.sykepengegrunnlagsfakta) {
         is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel -> fakta.arbeidsgivere.map { Inntektskilde.valueOf(it.inntektskilde) }
         is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn -> fakta.arbeidsgivere.map { Inntektskilde.Saksbehandler }
         is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerFraInfotrygd,

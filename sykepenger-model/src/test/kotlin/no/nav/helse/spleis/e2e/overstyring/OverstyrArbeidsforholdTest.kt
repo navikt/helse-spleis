@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
@@ -23,6 +24,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.enesteGodkjenningsbehovSomFølgeAv
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -52,15 +54,17 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            testperson
+            assertOrgnummereMedRelevanteArbeidsforholdFraGodkjenningsbehov(1.vedtaksperiode, listOf(a1, a2)) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
-            val relevanteOrgnumre1: Iterable<String> = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.orgnummereMedRelevanteArbeidsforhold.toList()
-            assertEquals(listOf(a1, a2).toList(), relevanteOrgnumre1.toList())
             håndterOverstyrArbeidsforhold(skjæringstidspunkt, OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring"))
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            val relevanteOrgnumre2: Iterable<String> = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.orgnummereMedRelevanteArbeidsforhold.toList()
-            assertEquals(listOf(a1), relevanteOrgnumre2.toList())
+
+            assertOrgnummereMedRelevanteArbeidsforholdFraGodkjenningsbehov(1.vedtaksperiode, listOf(a1)) {
+                håndterSimulering(1.vedtaksperiode)
+            }
         }
     }
 
@@ -322,5 +326,10 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
             assertVarsel(RV_OV_1, 1.vedtaksperiode.filter())
             assertInstanceOf(Utbetalingsdag.AvvistDag::class.java, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[31.januar])
         }
+    }
+
+    private fun assertOrgnummereMedRelevanteArbeidsforholdFraGodkjenningsbehov(vedtaksperiodeId: UUID, expected: List<String>, block: () -> Unit) {
+        val actual= enesteGodkjenningsbehovSomFølgeAv({vedtaksperiodeId}, block).event.orgnummereMedRelevanteArbeidsforhold.toList()
+        assertEquals(expected, actual)
     }
 }

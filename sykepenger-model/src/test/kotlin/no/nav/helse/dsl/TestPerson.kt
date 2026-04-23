@@ -8,7 +8,6 @@ import java.time.temporal.Temporal
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.hendelser.AndreYtelser
@@ -85,7 +84,7 @@ internal class TestPerson(
 
     private lateinit var forrigeAktivitetslogg: Aktivitetslogg
     internal val personlogg = Aktivitetslogg()
-    internal val behovsoppsamler = Behovsoppsamler.opprettBehovsoppsamler(deferredLog)
+    private val behovsoppsamler = Behovsoppsamler.opprettBehovsoppsamler(deferredLog)
     internal val behovshåndterer = Behovshåndterer(behovsoppsamler)
     private val varslersamler = Varslersamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk()

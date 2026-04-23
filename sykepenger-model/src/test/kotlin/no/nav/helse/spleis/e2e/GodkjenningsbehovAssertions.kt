@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.Year
 import java.util.UUID
 import no.nav.helse.desember
+import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.TestPerson
@@ -16,12 +17,13 @@ import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.EventSubscription
 import org.junit.jupiter.api.Assertions.assertEquals
 
-internal fun TestPerson.TestArbeidsgiver.assertSykepengegrunnlagsfakta(
-    vedtaksperiodeId: UUID = 1.vedtaksperiode,
+internal fun AbstractDslTest.enesteGodkjenningsbehovSomFølgeAv(vedtaksperiodeId: () -> UUID, block: () -> Unit) = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Godkjenning> { block() }.single { it.vedtaksperiodeId == vedtaksperiodeId() }
+
+internal fun assertSykepengegrunnlagsfakta(
     sykepengegrunnlagsfakta: Map<String, Any?>,
-    behovsoppsamler: Behovsoppsamler
+    actualBehov: Behovsoppsamler.Behovsdetaljer.Godkjenning
 ) {
-    val actualSykepengegrunnlagsfakta = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == vedtaksperiodeId }.event.sykepengegrunnlagsfakta
+    val actualSykepengegrunnlagsfakta = actualBehov.event.sykepengegrunnlagsfakta
     assertEquals(somArbedistakerSykepengegrunnlagsfakta(sykepengegrunnlagsfakta), actualSykepengegrunnlagsfakta)
 }
 
@@ -60,7 +62,7 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
         "selvstendig" to null
     ),
     arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
-    behovsoppsamler: Behovsoppsamler
+    actualBehov: Behovsoppsamler.Behovsdetaljer.Godkjenning
 ) {
     val benyttetUtbetalingId = UUID.randomUUID()
     val benyttetVilkårsgrunnlagId = UUID.randomUUID()
@@ -110,17 +112,15 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
         }
 
     )
-    val actual = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last().event.let { ubesudlet ->
-        ubesudlet.copy(
-            utbetalingId = benyttetUtbetalingId,
-            vilkårsgrunnlagId = benyttetVilkårsgrunnlagId,
-            relevanteSøknader = when (relevanteSøknader) {
-                null -> emptySet()
-                else -> ubesudlet.relevanteSøknader
-            },
-            tags = ubesudlet.tags
-        )
-    }
+    val actual = actualBehov.event.copy(
+        utbetalingId = benyttetUtbetalingId,
+        vilkårsgrunnlagId = benyttetVilkårsgrunnlagId,
+        relevanteSøknader = when (relevanteSøknader) {
+            null -> emptySet()
+            else -> actualBehov.event.relevanteSøknader
+        },
+        tags = actualBehov.event.tags
+    )
     assertEquals(expected, actual)
 }
 

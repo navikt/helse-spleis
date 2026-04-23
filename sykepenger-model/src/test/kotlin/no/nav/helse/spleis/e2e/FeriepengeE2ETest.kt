@@ -915,7 +915,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         }.also { assertTrue(it.isNotEmpty()) }
     }
 
-    private fun fangAlleFeriepengebehovene(block: () -> Unit): Set<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling> = testperson.behovshåndterer.behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling> { block() }
+    private fun fangAlleFeriepengebehovene(block: () -> Unit): Set<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling> = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling> { block() }
 
     private fun assertIngenFeriepengebehov(block: () -> Unit) = fangAlleFeriepengebehovene(block).let {
         assertEquals(0, it.size) { "Forventet ingen behov for feriepenger, var ${it.size}" }

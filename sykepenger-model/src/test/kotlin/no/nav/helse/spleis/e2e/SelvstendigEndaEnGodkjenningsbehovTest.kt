@@ -24,9 +24,11 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Personutbetaling", "Innvilget", "EnArbeidsgiver"),
                 forbrukteSykedager = 11,
                 gjenståendeSykedager = 237,
@@ -100,9 +102,11 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelserSelvstendig(1.vedtaksperiode, selvstendigForsikring = SelvstendigForsikring(14.oktober(2017), null, HundreProsentFraDagEn, 450000.årlig))
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Personutbetaling", "Innvilget", "EnArbeidsgiver"),
                 forbrukteSykedager = 11,
                 gjenståendeSykedager = 237,
@@ -177,9 +181,11 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelserSelvstendig(1.vedtaksperiode, selvstendigForsikring = SelvstendigForsikring(14.oktober(2017), null, HundreProsentFraDagSytten, 450000.årlig))
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Personutbetaling", "Innvilget", "EnArbeidsgiver"),
                 forbrukteSykedager = 11,
                 gjenståendeSykedager = 237,
@@ -254,9 +260,11 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelserSelvstendig(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertGodkjenningsbehov(
-                behovsoppsamler = testperson.behovsoppsamler,
+                actualBehov = godkjenningsbehov,
                 tags = setOf("Førstegangsbehandling", "Personutbetaling", "Innvilget", "EnArbeidsgiver"),
                 forbrukteSykedager = 11,
                 gjenståendeSykedager = 237,

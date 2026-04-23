@@ -49,6 +49,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
+import no.nav.helse.spleis.e2e.enesteGodkjenningsbehovSomFølgeAv
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -872,10 +873,10 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            assertOrgnummereMedRelevanteArbeidsforholdFraGodkjenningsbehov(1.vedtaksperiode, listOf(a1, a2)) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
-            val relevanteOrgnumre1: Iterable<String> = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.orgnummereMedRelevanteArbeidsforhold.toList()
-            assertEquals(listOf(a1, a2).toList(), relevanteOrgnumre1.toList())
             håndterOverstyrArbeidsforhold(
                 skjæringstidspunkt,
                 OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
@@ -885,9 +886,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
                 )
             )
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            val relevanteOrgnumre2: Iterable<String> = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.orgnummereMedRelevanteArbeidsforhold.toList()
-            assertEquals(listOf(a1), relevanteOrgnumre2.toList())
+            assertOrgnummereMedRelevanteArbeidsforholdFraGodkjenningsbehov(1.vedtaksperiode, listOf(a1)) {
+                håndterSimulering(1.vedtaksperiode)
+            }
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertBeregningsgrunnlag(372000.årlig)
                 assertSykepengegrunnlag(372000.årlig)
@@ -1039,5 +1040,10 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
         }
+    }
+
+    private fun assertOrgnummereMedRelevanteArbeidsforholdFraGodkjenningsbehov(vedtaksperiodeId: UUID, expected: List<String>, block: () -> Unit) {
+        val actual= enesteGodkjenningsbehovSomFølgeAv({vedtaksperiodeId}, block).event.orgnummereMedRelevanteArbeidsforhold.toList()
+        assertEquals(expected, actual)
     }
 }

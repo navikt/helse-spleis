@@ -46,6 +46,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.enesteGodkjenningsbehovSomFølgeAv
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -90,17 +91,20 @@ internal class InfotrygdTest : AbstractDslTest() {
             assertEquals(1, observatør.utkastTilVedtakEventer.size)
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
+            val behov1 = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
+            assertTrue("OverlapperMedInfotrygd" in behov1.event.tags)
 
             assertVarsler(listOf(RV_IT_3), 1.vedtaksperiode.filter())
             assertEquals(2, observatør.utkastTilVedtakEventer.size)
 
-            assertTrue("OverlapperMedInfotrygd" in testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.tags)
 
             håndterUtbetalingshistorikkEtterInfotrygdendring()
-            håndterYtelser(1.vedtaksperiode)
-
-            assertFalse("OverlapperMedInfotrygd" in testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.tags)
+            val behov2 = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterYtelser(1.vedtaksperiode)
+            }
+            assertFalse("OverlapperMedInfotrygd" in behov2.event.tags)
         }
     }
 

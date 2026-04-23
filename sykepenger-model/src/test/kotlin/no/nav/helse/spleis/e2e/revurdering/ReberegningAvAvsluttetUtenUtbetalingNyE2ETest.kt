@@ -50,6 +50,7 @@ import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.enesteGodkjenningsbehovSomFølgeAv
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -855,8 +856,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            assertEquals("FLERE_ARBEIDSGIVERE", testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().last { it.vedtaksperiodeId == 1.vedtaksperiode }.event.inntektskilde)
+            val godkjennignsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
+                håndterSimulering(1.vedtaksperiode)
+            }
+            assertEquals("FLERE_ARBEIDSGIVERE", godkjennignsbehov.event.inntektskilde)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         }
 
