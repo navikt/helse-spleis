@@ -68,6 +68,7 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
     }
 
     sealed interface Behovsdetaljer {
+        val id: UUID
         val utbetalingId: UUID? get() = null
         val vedtaksperiodeId: UUID? get() = null
 
@@ -79,7 +80,8 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
             val fagsystemId: String,
             val fagområde: String,
             val maksdato: LocalDate?,
-            val linjer: List<Linje>
+            val linjer: List<Linje>,
+            override val id: UUID = UUID.randomUUID()
         ): Behovsdetaljer {
             data class Linje(
                 val statuskode: String?
@@ -90,45 +92,54 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
             override val vedtaksperiodeId: UUID,
             override val utbetalingId: UUID,
             val fagsystemId: String,
-            val fagområde: String
+            val fagområde: String,
+            override val id: UUID = UUID.randomUUID()
         ): Behovsdetaljer
 
         data class Godkjenning(
             val behandlingId: UUID,
             override val utbetalingId: UUID,
             override val vedtaksperiodeId: UUID,
-            val event: EventSubscription.GodkjenningEvent
+            val event: EventSubscription.GodkjenningEvent,
+            override val id: UUID = UUID.randomUUID()
         ): Behovsdetaljer
 
         data class Feriepengeutbetaling(
             override val utbetalingId: UUID,
-            val event: EventSubscription.UtbetalFeriepengerEvent
+            val event: EventSubscription.UtbetalFeriepengerEvent,
+            override val id: UUID = UUID.randomUUID()
         ): Behovsdetaljer
 
         data class InitiellHistorikFraInfotrygd(
             override val vedtaksperiodeId: UUID,
-            val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet
+            val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+            override val id: UUID = UUID.randomUUID()
         ): Behovsdetaljer
 
         data class OppdatertHistorikkFraInfotrygd(
-            val periode: no.nav.helse.hendelser.Periode
+            val periode: no.nav.helse.hendelser.Periode,
+            override val id: UUID = UUID.randomUUID()
         ): Behovsdetaljer
 
         data class InformasjonTilBeregningAvArbeidstaker(
-            override val vedtaksperiodeId: UUID
+            override val vedtaksperiodeId: UUID,
+            override val id: UUID = UUID.randomUUID()
         ): Behovsdetaljer
 
         data class InformasjonTilBeregningAvSelvstendig(
-            override val vedtaksperiodeId: UUID
+            override val vedtaksperiodeId: UUID,
+            override val id: UUID = UUID.randomUUID()
         ): Behovsdetaljer
 
         data class InformasjonTilVilkårsprøving(
-            override val vedtaksperiodeId: UUID
+            override val vedtaksperiodeId: UUID,
+            override val id: UUID = UUID.randomUUID()
         ): Behovsdetaljer
 
         data class InntektsmeldingReplay(
             override val vedtaksperiodeId: UUID,
-            val forespørsel: Forespørsel
+            val forespørsel: Forespørsel,
+            override val id: UUID = UUID.randomUUID()
         ): Behovsdetaljer
     }
 

@@ -954,11 +954,10 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
 
-            håndterOverstyrTidslinje((25.januar til 26.januar).map { manuellFeriedag(it) })
-            assertEtterspurteYtelser(1, 1.vedtaksperiode)
-
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertEtterspurteYtelser(2, 1.vedtaksperiode)
+            assertEtterspurteYtelser(2, 1.vedtaksperiode) {
+                håndterOverstyrTidslinje((25.januar til 26.januar).map { manuellFeriedag(it) })
+                håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            }
         }
     }
 
@@ -966,19 +965,23 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
     fun `Håndter påminnelser i alle tilstandene knyttet til en revurdering med en arbeidsgiver`() {
         a1 {
             nyttVedtak(januar)
-            håndterOverstyrTidslinje((25.januar til 26.januar).map { manuellFeriedag(it) })
-            assertEtterspurteYtelser(1, 1.vedtaksperiode)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertEtterspurteYtelser(2, 1.vedtaksperiode)
+            assertEtterspurteYtelser(2, 1.vedtaksperiode) {
+                håndterOverstyrTidslinje((25.januar til 26.januar).map { manuellFeriedag(it) })
+                håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            }
 
-            håndterYtelser(1.vedtaksperiode)
-            assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
-            assertEquals(2, testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Simulering>().size)
+            val simuleringsbehov = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Simulering> {
+                håndterYtelser(1.vedtaksperiode)
+                assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
+                håndterPåminnelse(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+            }
+            assertEquals(2, simuleringsbehov.size)
 
-            håndterSimulering(1.vedtaksperiode)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            assertEquals(2, testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().size)
+            val godkjenningsbehov = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Godkjenning> {
+                håndterSimulering(1.vedtaksperiode)
+                håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            }
+            assertEquals(2, godkjenningsbehov.size)
         }
     }
 
@@ -1229,7 +1232,8 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
         }
     }
 
-    private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeId: UUID) {
-        assertEquals(expected, testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker>().filter { it.vedtaksperiodeId == vedtaksperiodeId }.size)
+    private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeId: UUID, block: () -> Unit) {
+        val faktiskAntallBehov = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker> { block() }.filter { it.vedtaksperiodeId == vedtaksperiodeId }.size
+        assertEquals(expected, faktiskAntallBehov)
     }
 }
