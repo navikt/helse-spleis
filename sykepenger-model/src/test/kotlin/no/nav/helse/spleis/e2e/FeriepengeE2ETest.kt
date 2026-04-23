@@ -501,12 +501,14 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
     @Test
     fun `Sender ut events etter mottak av kvittering fra oppdrag`() {
         standardOppsett2020()
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020),
-            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
-        )
+        val feriepengebehov = fangDetEnesteFeriepengebehovet {
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2020),
+                datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
+            )
+        }
 
-        val fagsystemIdFeriepenger = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling>().last().event.fagsystemId
+        val fagsystemIdFeriepenger = feriepengebehov.event.fagsystemId
         håndterFeriepengerUtbetalt(fagsystemId = fagsystemIdFeriepenger)
 
         assertTrue(testperson.personlogg.toString().contains("Data for feriepenger fra Oppdrag/UR"))
@@ -573,11 +575,12 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             håndterSøknad(6.juni(2020) til 7.juni(2020))
             håndterInntektsmelding(listOf(6.juni(2020) til 7.juni(2020)))
         }
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020),
-            datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
-        )
-        assertEquals(0, testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling>().size)
+        assertIngenFeriepengebehov {
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2020),
+                datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021)
+            )
+        }
     }
 
     private fun standardOppsettLangPeriode2020() {
@@ -912,12 +915,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         }.also { assertTrue(it.isNotEmpty()) }
     }
 
-    private fun fangAlleFeriepengebehovene(block: () -> Unit): Set<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling> {
-        val før = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling>().toSet()
-        block()
-        val etter = testperson.behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling>().toSet()
-        return (etter - før)
-    }
+    private fun fangAlleFeriepengebehovene(block: () -> Unit): Set<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling> = testperson.behovshåndterer.behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling> { block() }
 
     private fun assertIngenFeriepengebehov(block: () -> Unit) = fangAlleFeriepengebehovene(block).let {
         assertEquals(0, it.size) { "Forventet ingen behov for feriepenger, var ${it.size}" }
