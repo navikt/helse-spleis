@@ -9,23 +9,23 @@ import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.DagpengerV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
+import no.nav.helse.spleis.Behov
+import no.nav.helse.spleis.Behov.Behovstype.Arbeidsavklaringspenger
+import no.nav.helse.spleis.Behov.Behovstype.Arbeidsforhold
+import no.nav.helse.spleis.Behov.Behovstype.Dagpenger
+import no.nav.helse.spleis.Behov.Behovstype.Foreldrepenger
+import no.nav.helse.spleis.Behov.Behovstype.Godkjenning
+import no.nav.helse.spleis.Behov.Behovstype.InntekterForBeregning
+import no.nav.helse.spleis.Behov.Behovstype.InntekterForOpptjeningsvurdering
+import no.nav.helse.spleis.Behov.Behovstype.InntekterForSykepengegrunnlag
+import no.nav.helse.spleis.Behov.Behovstype.Institusjonsopphold
+import no.nav.helse.spleis.Behov.Behovstype.Medlemskap
+import no.nav.helse.spleis.Behov.Behovstype.Omsorgspenger
+import no.nav.helse.spleis.Behov.Behovstype.Opplæringspenger
+import no.nav.helse.spleis.Behov.Behovstype.Pleiepenger
+import no.nav.helse.spleis.Behov.Behovstype.Simulering
+import no.nav.helse.spleis.Behov.Behovstype.Sykepengehistorikk
+import no.nav.helse.spleis.Behov.Behovstype.Utbetaling
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -46,11 +46,11 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
         assertVedtaksperiodeBehov(
             behov,
-            DagpengerV2,
+            Dagpenger,
             InntekterForSykepengegrunnlag,
             InntekterForOpptjeningsvurdering,
             Medlemskap,
-            ArbeidsforholdV2
+            Arbeidsforhold
         )
         assertMedlemskapdetaljer(behov)
         assertInntekterForSykepengegrunnlagdetaljer(behov)
@@ -72,8 +72,8 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
         assertVedtaksperiodeBehov(
             behov,
-            ArbeidsavklaringspengerV2,
-            DagpengerV2,
+            Arbeidsavklaringspenger,
+            Dagpenger,
             Foreldrepenger,
             Institusjonsopphold,
             Omsorgspenger,
@@ -171,17 +171,17 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingdetaljer(behov, true)
     }
 
-    private fun assertVedtaksperiodeBehov(behov: JsonNode, vararg typer: Behovtype) {
+    private fun assertVedtaksperiodeBehov(behov: JsonNode, vararg typer: Behov.Behovstype) {
         assertBehov(behov, *typer)
         assertTrue(behov.path("vedtaksperiodeId").asText().isNotEmpty())
     }
 
-    private fun assertUtbetalingBehov(behov: JsonNode, vararg typer: Behovtype) {
+    private fun assertUtbetalingBehov(behov: JsonNode, vararg typer: Behov.Behovstype) {
         assertBehov(behov, *typer)
         assertTrue(behov.path("utbetalingId").asText().isNotEmpty())
     }
 
-    private fun assertBehov(behov: JsonNode, vararg typer: Behovtype) {
+    private fun assertBehov(behov: JsonNode, vararg typer: Behov.Behovstype) {
         val id = behov.path("@id").asText()
         assertEquals("behov", behov.path("@event_name").asText())
         assertTrue(behov.path("fødselsnummer").asText().isNotEmpty())
@@ -190,78 +190,78 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertDatotid(behov.path("@opprettet").asText())
         assertTrue(id.isNotEmpty())
         assertDoesNotThrow { UUID.fromString(id) }
-        assertTrue(typer.map(Enum<*>::name).containsAll(behov.path("@behov").map(JsonNode::asText)))
+        assertTrue(typer.map(Behov.Behovstype::utgåendeNavn).containsAll(behov.path("@behov").map(JsonNode::asText)))
     }
 
     private fun assertArbeidsavklaringspengerdetaljer(behov: JsonNode) {
-        assertDato(behov.path(ArbeidsavklaringspengerV2.name).path("periodeFom").asText())
-        assertDato(behov.path(ArbeidsavklaringspengerV2.name).path("periodeTom").asText())
+        assertDato(behov.path(Arbeidsavklaringspenger.utgåendeNavn).path("periodeFom").asText())
+        assertDato(behov.path(Arbeidsavklaringspenger.utgåendeNavn).path("periodeTom").asText())
     }
 
     private fun assertDagpengerdetaljer(behov: JsonNode) {
-        assertDato(behov.path(DagpengerV2.name).path("periodeFom").asText())
-        assertDato(behov.path(DagpengerV2.name).path("periodeTom").asText())
+        assertDato(behov.path(Dagpenger.utgåendeNavn).path("periodeFom").asText())
+        assertDato(behov.path(Dagpenger.utgåendeNavn).path("periodeTom").asText())
     }
 
     private fun assertInntekterForSykepengegrunnlagdetaljer(behov: JsonNode) {
-        assertDato(behov.path(InntekterForSykepengegrunnlag.name).path("skjæringstidspunkt").asText())
-        assertÅrMåned(behov.path(InntekterForSykepengegrunnlag.name).path("beregningStart").asText())
-        assertÅrMåned(behov.path(InntekterForSykepengegrunnlag.name).path("beregningSlutt").asText())
+        assertDato(behov.path(InntekterForSykepengegrunnlag.utgåendeNavn).path("skjæringstidspunkt").asText())
+        assertÅrMåned(behov.path(InntekterForSykepengegrunnlag.utgåendeNavn).path("beregningStart").asText())
+        assertÅrMåned(behov.path(InntekterForSykepengegrunnlag.utgåendeNavn).path("beregningSlutt").asText())
     }
 
     private fun assertInntekterForOpptjeningsvurderingdetaljer(behov: JsonNode) {
-        assertDato(behov.path(InntekterForOpptjeningsvurdering.name).path("skjæringstidspunkt").asText())
-        assertÅrMåned(behov.path(InntekterForOpptjeningsvurdering.name).path("beregningStart").asText())
-        assertÅrMåned(behov.path(InntekterForOpptjeningsvurdering.name).path("beregningSlutt").asText())
+        assertDato(behov.path(InntekterForOpptjeningsvurdering.utgåendeNavn).path("skjæringstidspunkt").asText())
+        assertÅrMåned(behov.path(InntekterForOpptjeningsvurdering.utgåendeNavn).path("beregningStart").asText())
+        assertÅrMåned(behov.path(InntekterForOpptjeningsvurdering.utgåendeNavn).path("beregningSlutt").asText())
     }
 
     private fun assertMedlemskapdetaljer(behov: JsonNode) {
-        assertDato(behov.path(Medlemskap.name).path("skjæringstidspunkt").asText())
-        assertDato(behov.path(Medlemskap.name).path("medlemskapPeriodeFom").asText())
-        assertDato(behov.path(Medlemskap.name).path("medlemskapPeriodeTom").asText())
+        assertDato(behov.path(Medlemskap.utgåendeNavn).path("skjæringstidspunkt").asText())
+        assertDato(behov.path(Medlemskap.utgåendeNavn).path("medlemskapPeriodeFom").asText())
+        assertDato(behov.path(Medlemskap.utgåendeNavn).path("medlemskapPeriodeTom").asText())
     }
 
     private fun assertArbeidsforholdV2detaljer(behov: JsonNode) {
-        assertDato(behov.path(ArbeidsforholdV2.name).path("skjæringstidspunkt").asText())
+        assertDato(behov.path(Arbeidsforhold.utgåendeNavn).path("skjæringstidspunkt").asText())
     }
 
     private fun assertForeldrepengerdetaljer(behov: JsonNode) {
-        assertDato(behov.path(Foreldrepenger.name).path("foreldrepengerFom").asText())
-        assertDato(behov.path(Foreldrepenger.name).path("foreldrepengerTom").asText())
+        assertDato(behov.path(Foreldrepenger.utgåendeNavn).path("foreldrepengerFom").asText())
+        assertDato(behov.path(Foreldrepenger.utgåendeNavn).path("foreldrepengerTom").asText())
     }
 
     private fun assertInstitusjonsoppholddetaljer(behov: JsonNode) {
-        assertDato(behov.path(Institusjonsopphold.name).path("institusjonsoppholdFom").asText())
-        assertDato(behov.path(Institusjonsopphold.name).path("institusjonsoppholdTom").asText())
+        assertDato(behov.path(Institusjonsopphold.utgåendeNavn).path("institusjonsoppholdFom").asText())
+        assertDato(behov.path(Institusjonsopphold.utgåendeNavn).path("institusjonsoppholdTom").asText())
     }
 
     private fun assertOmsorgspengerdetaljer(behov: JsonNode) {
-        assertDato(behov.path(Omsorgspenger.name).path("omsorgspengerFom").asText())
-        assertDato(behov.path(Omsorgspenger.name).path("omsorgspengerTom").asText())
+        assertDato(behov.path(Omsorgspenger.utgåendeNavn).path("omsorgspengerFom").asText())
+        assertDato(behov.path(Omsorgspenger.utgåendeNavn).path("omsorgspengerTom").asText())
     }
 
     private fun assertOpplæringspengerdetaljer(behov: JsonNode) {
-        assertDato(behov.path(Opplæringspenger.name).path("opplæringspengerFom").asText())
-        assertDato(behov.path(Opplæringspenger.name).path("opplæringspengerTom").asText())
+        assertDato(behov.path(Opplæringspenger.utgåendeNavn).path("opplæringspengerFom").asText())
+        assertDato(behov.path(Opplæringspenger.utgåendeNavn).path("opplæringspengerTom").asText())
     }
 
     private fun assertPleiepengerdetaljer(behov: JsonNode) {
-        assertDato(behov.path(Pleiepenger.name).path("pleiepengerFom").asText())
-        assertDato(behov.path(Pleiepenger.name).path("pleiepengerTom").asText())
+        assertDato(behov.path(Pleiepenger.utgåendeNavn).path("pleiepengerFom").asText())
+        assertDato(behov.path(Pleiepenger.utgåendeNavn).path("pleiepengerTom").asText())
     }
 
     private fun assertInntekterForBeregning(behov: JsonNode) {
-        assertDato(behov.path(InntekterForBeregning.name).path("fom").asText())
-        assertDato(behov.path(InntekterForBeregning.name).path("tom").asText())
+        assertDato(behov.path(InntekterForBeregning.utgåendeNavn).path("fom").asText())
+        assertDato(behov.path(InntekterForBeregning.utgåendeNavn).path("tom").asText())
     }
 
     private fun assertSykepengehistorikkdetaljer(behov: JsonNode) {
-        assertDato(behov.path(Sykepengehistorikk.name).path("historikkFom").asText())
-        assertDato(behov.path(Sykepengehistorikk.name).path("historikkTom").asText())
+        assertDato(behov.path(Sykepengehistorikk.utgåendeNavn).path("historikkFom").asText())
+        assertDato(behov.path(Sykepengehistorikk.utgåendeNavn).path("historikkTom").asText())
     }
 
     private fun assertSimuleringdetaljer(behov: JsonNode) {
-        val simulering = behov.path(Simulering.name)
+        val simulering = behov.path(Simulering.utgåendeNavn)
         assertTrue(behov.path("utbetalingId").asText().isNotEmpty())
         assertDato(simulering.path("maksdato").asText())
         assertTrue(simulering.path("saksbehandler").asText().isNotEmpty())
@@ -269,7 +269,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     private fun assertGodkjenningdetaljer(behov: JsonNode, erSelvstendig: Boolean, arbeidssituasjon: String) {
-        val godkjenning = behov.path(Godkjenning.name)
+        val godkjenning = behov.path(Godkjenning.utgåendeNavn)
         assertTrue(behov.path("utbetalingId").asText().isNotEmpty())
         assertDato(godkjenning.path("periodeFom").asText())
         assertDato(godkjenning.path("periodeTom").asText())
@@ -322,7 +322,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
 }
 
 private fun assertUtbetalingdetaljer(behov: JsonNode, erAnnullering: Boolean = false) {
-    val utbetaling = behov.path(Utbetaling.name)
+    val utbetaling = behov.path(Utbetaling.utgåendeNavn)
     if (!erAnnullering) assertDato(utbetaling.path("maksdato").asText())
     assertTrue(utbetaling.path("saksbehandler").asText().isNotEmpty())
     assertOppdragdetaljer(utbetaling, erAnnullering)

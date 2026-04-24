@@ -8,7 +8,7 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Feriepengeutbetaling
+import no.nav.helse.spleis.Behov.Behovstype.Feriepengeutbetaling
 import no.nav.helse.september
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage

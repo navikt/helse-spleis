@@ -36,22 +36,22 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as Hendelseperiode
 import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.DagpengerV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SelvstendigForsikring
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
+import no.nav.helse.spleis.Behov.Behovstype.Arbeidsavklaringspenger
+import no.nav.helse.spleis.Behov.Behovstype.Arbeidsforhold
+import no.nav.helse.spleis.Behov.Behovstype.Dagpenger
+import no.nav.helse.spleis.Behov.Behovstype.Foreldrepenger
+import no.nav.helse.spleis.Behov.Behovstype.Godkjenning
+import no.nav.helse.spleis.Behov.Behovstype.InntekterForBeregning
+import no.nav.helse.spleis.Behov.Behovstype.InntekterForSykepengegrunnlag
+import no.nav.helse.spleis.Behov.Behovstype.Institusjonsopphold
+import no.nav.helse.spleis.Behov.Behovstype.Medlemskap
+import no.nav.helse.spleis.Behov.Behovstype.Omsorgspenger
+import no.nav.helse.spleis.Behov.Behovstype.Opplæringspenger
+import no.nav.helse.spleis.Behov.Behovstype.Pleiepenger
+import no.nav.helse.spleis.Behov.Behovstype.SelvstendigForsikring
+import no.nav.helse.spleis.Behov.Behovstype.Simulering
+import no.nav.helse.spleis.Behov.Behovstype.Sykepengehistorikk
+import no.nav.helse.spleis.Behov.Behovstype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spill_av_im.Forespørsel
@@ -89,6 +89,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
+import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 
 internal abstract class AbstractEndToEndMediatorTest {
     internal companion object {
@@ -537,8 +538,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Pleiepenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Omsorgspenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Opplæringspenger))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsavklaringspengerV2))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, DagpengerV2))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Arbeidsavklaringspenger))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Dagpenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Institusjonsopphold))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForBeregning))
         val behov = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger)
@@ -612,7 +613,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         orgnummer: String = "SELVSTENDIG"
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Arbeidsforhold))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag))
         val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
         val skjæringstidspunktFraBehov = behov.path("Medlemskap").path("skjæringstidspunkt").asLocalDate()
@@ -637,7 +638,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         skjæringstidspunkt: LocalDate = 1.januar,
         orgnummer: String = ORGNUMMER,
         arbeidsforhold: List<Arbeidsforhold> = listOf(
-            Arbeidsforhold(orgnummer, 1.januar(2010), null, Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT)
+            Arbeidsforhold(orgnummer, 1.januar(2010), null, ORDINÆRT)
         ),
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning> = sykepengegrunnlag(
@@ -646,7 +647,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         ),
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Arbeidsforhold))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag))
         val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
         val skjæringstidspunktFraBehov = behov.path("Medlemskap").path("skjæringstidspunkt").asLocalDate()

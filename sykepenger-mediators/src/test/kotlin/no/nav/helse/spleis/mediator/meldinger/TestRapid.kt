@@ -11,8 +11,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.SentMessage
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import java.util.UUID
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.finn
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.varsler
 import org.junit.jupiter.api.fail
@@ -135,14 +135,14 @@ internal class TestRapid : RapidsConnection() {
         private val tilstanderUtenForkastede
             get() = tilstander.filter { it.key !in forkastedeVedtaksperiodeIder }
 
-        private fun alleBehovsmeldingerSomInneholder(behovstype: Aktivitet.Behov.Behovtype, filter: (behovsmelding: JsonNode) -> Boolean = { true }) = mutableListOf<JsonNode>().apply {
+        private fun alleBehovsmeldingerSomInneholder(behovstype: Behov.Behovstype, filter: (behovsmelding: JsonNode) -> Boolean = { true }) = mutableListOf<JsonNode>().apply {
             events("behov") { behovsmelding ->
                 val etterspurteBehov = behovsmelding.path("@behov").map { it.asText() }
-                if (behovstype.name in etterspurteBehov && filter(behovsmelding)) this.add(behovsmelding)
+                if (behovstype.utgåendeNavn in etterspurteBehov && filter(behovsmelding)) this.add(behovsmelding)
             }
         }.toList()
 
-        private fun sisteBehovsmeldingSomInneholder(behovstype: Aktivitet.Behov.Behovtype, filter: (behovsmelding: JsonNode) -> Boolean = { true }) = alleBehovsmeldingerSomInneholder(behovstype, filter).lastOrNull() ?: fail("Finner ingen behovsmeldinger som inneholder ${behovstype.name}")
+        private fun sisteBehovsmeldingSomInneholder(behovstype: Behov.Behovstype, filter: (behovsmelding: JsonNode) -> Boolean = { true }) = alleBehovsmeldingerSomInneholder(behovstype, filter).lastOrNull() ?: fail("Finner ingen behovsmeldinger som inneholder ${behovstype.name}")
 
         private fun events(name: String, onEach: (JsonNode) -> Unit) = messages.forEachIndexed { indeks, _ ->
             val message = melding(indeks)
@@ -177,20 +177,20 @@ internal class TestRapid : RapidsConnection() {
         fun tilstanderUtenForkastede(vedtaksperiodeId: UUID) = tilstanderUtenForkastede[vedtaksperiodeId]?.toList() ?: emptyList()
         fun forkastedeTilstander(vedtaksperiodeId: UUID) = forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()
 
-        fun harEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
+        fun harEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Behov.Behovstype) =
             alleBehovsmeldingerSomInneholder(behovtype) { behovsmelding ->
                 behovsmelding.path("vedtaksperiodeId").asText() == vedtaksperiodeId(vedtaksperiodeIndeks).toString()
             }.isNotEmpty()
 
-        fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Aktivitet.Behov.Behovtype) =
+        fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Behov.Behovstype) =
             sisteBehovsmeldingSomInneholder(behovtype) { behovsmelding ->
                 behovsmelding.path("vedtaksperiodeId").asText() == vedtaksperiodeId(vedtaksperiodeIndeks).toString()
             }
 
-        fun etterspurteBehov(behovtype: Aktivitet.Behov.Behovtype) =
+        fun etterspurteBehov(behovtype: Behov.Behovstype) =
             sisteBehovsmeldingSomInneholder(behovtype)
 
-        fun alleEtterspurteBehov(behovtype: Aktivitet.Behov.Behovtype) =
+        fun alleEtterspurteBehov(behovtype: Behov.Behovstype) =
             alleBehovsmeldingerSomInneholder(behovtype)
 
         fun varsel(vedtaksperiodeId: UUID, varselkode: Varselkode) = varsler.finn(vedtaksperiodeId, varselkode)

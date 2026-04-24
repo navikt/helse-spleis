@@ -8,7 +8,6 @@ import no.nav.helse.desember
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.mediator.TestMessageFactory
-import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.spleis.mediator.TestMessageFactory.Subsumsjon
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 
 internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
 
@@ -255,8 +255,8 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             skjæringstidspunkt = fom,
             orgnummer = a1,
             arbeidsforhold = listOf(
-                TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                TestMessageFactory.Arbeidsforhold(a2, fom.minusMonths(1), null, Arbeidsforholdtype.ORDINÆRT)
+                TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null, ORDINÆRT),
+                TestMessageFactory.Arbeidsforhold(a2, fom.minusMonths(1), null, ORDINÆRT)
             ),
             inntekterForSykepengegrunnlag = sykepengegrunnlag(
                 fom, listOf(

@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
+import no.nav.helse.spleis.Behov.Behovstype.Sykepengehistorikk
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals

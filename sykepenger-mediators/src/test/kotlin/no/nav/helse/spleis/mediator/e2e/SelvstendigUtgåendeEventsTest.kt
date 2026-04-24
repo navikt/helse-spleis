@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -116,7 +117,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         testRapid.sendTestMessage(sendtSøknad)
 
         // If the mediator asks for sykepengehistorikk first, reply with utbetalingshistorikk so flow continues
-        if (testRapid.inspektør.harEtterspurteBehov(0, no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk)) {
+        if (testRapid.inspektør.harEtterspurteBehov(0, Behov.Behovstype.Sykepengehistorikk)) {
             val (_, utbetalingshistorikkMsg) = meldingsfabrikk.lagUtbetalingshistorikk(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(0),
                 yrkesaktivitetstype = "SELVSTENDIG",
@@ -125,8 +126,8 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             testRapid.sendTestMessage(utbetalingshistorikkMsg)
         }
 
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(0, no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap))
-        val medlemskapBehov = testRapid.inspektør.etterspurteBehov(0, no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap)
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(0, Behov.Behovstype.Medlemskap))
+        val medlemskapBehov = testRapid.inspektør.etterspurteBehov(0, Behov.Behovstype.Medlemskap)
         val skjæringstidspunkt = medlemskapBehov.path("Medlemskap").path("skjæringstidspunkt").asLocalDate()
         val yrkesaktivitetstype = medlemskapBehov.path("yrkesaktivitetstype").asText()
         val behandlingId = medlemskapBehov.path("behandlingId").asText().toUUID()
@@ -151,7 +152,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         )
         testRapid.sendTestMessage(ytelserMsg)
 
-        val simuleringBehovListe = testRapid.inspektør.alleEtterspurteBehov(no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering)
+        val simuleringBehovListe = testRapid.inspektør.alleEtterspurteBehov(Behov.Behovstype.Simulering)
         simuleringBehovListe.forEach { behov ->
             val simBehandlingId = behov.path("behandlingId").asText().toUUID()
             val utbetalingId = UUID.fromString(behov.path("utbetalingId").asText())
@@ -170,8 +171,8 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             testRapid.sendTestMessage(simuleringMsg)
         }
 
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(0, no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning))
-        val godkjenningBehov = testRapid.inspektør.etterspurteBehov(0, no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning)
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(0, Behov.Behovstype.Godkjenning))
+        val godkjenningBehov = testRapid.inspektør.etterspurteBehov(0, Behov.Behovstype.Godkjenning)
         val godkjenningBehandlingId = godkjenningBehov.path("behandlingId").asText().toUUID()
         val godkjenningUtbetalingId = UUID.fromString(godkjenningBehov.path("utbetalingId").asText())
         val (_, godkjennMsg) = meldingsfabrikk.lagUtbetalingsgodkjenning(
@@ -189,7 +190,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         )
         testRapid.sendTestMessage(godkjennMsg)
 
-        val utbetalingsBehovListe = testRapid.inspektør.alleEtterspurteBehov(no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
+        val utbetalingsBehovListe = testRapid.inspektør.alleEtterspurteBehov(Behov.Behovstype.Utbetaling)
         utbetalingsBehovListe.forEach { behov ->
             val (_, utbetalingMsg) = meldingsfabrikk.lagUtbetaling(
                 fagsystemId = behov.path("Utbetaling").path("fagsystemId").asText(),

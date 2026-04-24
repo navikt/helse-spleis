@@ -76,6 +76,7 @@ internal class DatadelingMediatorTest {
 
     @Test
     fun `publiserer behov-aktiviteter`() {
+        // TODO: Tenk på denne da, det gir nok ikke mening å logge behov til aktivitetslogg, men bør kanskje logge som info?
         aktivitetslogg.behov(Aktivitet.Behov.Behovtype.Godkjenning, "melding")
         datadelingMediator.ferdigstill(testRapid)
         assertEquals(1, testRapid.inspektør.antall())
