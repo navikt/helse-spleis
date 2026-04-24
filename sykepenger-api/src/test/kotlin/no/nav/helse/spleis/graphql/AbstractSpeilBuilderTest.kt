@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
-import java.util.concurrent.ConcurrentLinkedDeque
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg
@@ -31,13 +30,15 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.EventBus
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Person
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.IdInnhenter
 import no.nav.helse.spleis.speil.serializePersonForSpeil
+import no.nav.helse.spleis.testhelpers.Behovssamler
+import no.nav.helse.spleis.testhelpers.Behovssamler.Companion.yrkesaktivitetstypeOgOrgnummer
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.testhelpers.PersonHendelsefabrikk
 import no.nav.helse.spleis.testhelpers.TestObservatør
@@ -80,7 +81,7 @@ internal abstract class AbstractSpeilBuilderTest {
     private lateinit var observatør: TestObservatør
     private lateinit var spekemat: Spekemat
     private lateinit var hendelselogg: Aktivitetslogg
-    private val ubesvarteBehov = ConcurrentLinkedDeque<Aktivitet.Behov>()
+    private val behovssamler = Behovssamler()
 
     private fun createTestPerson(creator: (Regelverkslogg) -> Person) {
         observatør = TestObservatør()
@@ -89,6 +90,7 @@ internal abstract class AbstractSpeilBuilderTest {
         eventBus = EventBus().apply {
             register(observatør)
             register(spekemat)
+            register(behovssamler)
         }
     }
 
@@ -115,12 +117,10 @@ internal abstract class AbstractSpeilBuilderTest {
     protected fun <T : Hendelse> T.håndter(håndter: Person.(EventBus, T, IAktivitetslogg) -> Unit) = apply {
         hendelselogg = Aktivitetslogg()
         person.håndter(eventBus, this, hendelselogg)
-        ubesvarteBehov.addAll(hendelselogg.behov)
 
         observatør.ventendeReplays().forEach { (orgnr, vedtaksperiodeId) ->
             hendelselogg = Aktivitetslogg()
             person.håndterInntektsmeldingerReplay(eventBus, fabrikker.getValue(orgnr).lagInntektsmeldingReplayUtført(vedtaksperiodeId), hendelselogg)
-            ubesvarteBehov.addAll(hendelselogg.behov)
         }
     }
 
@@ -216,7 +216,7 @@ internal abstract class AbstractSpeilBuilderTest {
     private fun håndterSøknad(søknad: Søknad) {
         søknad.håndter(Person::håndterSøknad)
 
-        val behov = hendelselogg.infotrygdhistorikkbehov()
+        val behov = infotrygdhistorikkbehov()
         if (behov != null) håndterUtbetalingshistorikk(behov.vedtaksperiodeId, orgnummer = behov.orgnummer)
     }
 
@@ -338,7 +338,7 @@ internal abstract class AbstractSpeilBuilderTest {
     }
 
     protected fun håndterVilkårsgrunnlag(inntekter: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT), arbeidsforhold: List<Pair<String, LocalDate>> = listOf(a1 to EPOCH)) {
-        val behov = hendelselogg.vilkårsgrunnlagbehov() ?: error("Fant ikke vilkårsgrunnlagbehov")
+        val behov = vilkårsgrunnlagbehov() ?: error("Fant ikke vilkårsgrunnlagbehov")
         val inntekterForOpptjeningsvurdering = when (behov.yrkesaktivitetstype) {
             "SELVSTENDIG",
             "JORDBRUKER" -> InntekterForOpptjeningsvurdering(emptyList())
@@ -415,25 +415,23 @@ internal abstract class AbstractSpeilBuilderTest {
     }
 
     protected fun håndterYtelser() {
-        val ytelsebehov = hendelselogg.ytelserbehov() ?: error("Fant ikke ytelserbehov")
+        val ytelsebehov = ytelserbehov() ?: error("Fant ikke ytelserbehov")
         val ytelser = fabrikker.getValue(ytelsebehov.orgnummer).lagYtelser(vedtaksperiodeId = ytelsebehov.vedtaksperiodeId)
         ytelser.håndter(Person::håndterYtelser)
     }
 
-    protected fun håndterSimulering() {
-        val simuleringer = simuleringbehov() ?: error("Fant ikke simuleringsbehov")
-        simuleringer.forEach { behov ->
-            behov.oppdrag.forEach {
-                val simulering = fabrikker.getValue(behov.orgnummer).lagSimulering(
-                    vedtaksperiodeId = behov.vedtaksperiodeId,
-                    utbetalingId = behov.utbetalingId,
-                    fagsystemId = it.fagsystemId,
-                    fagområde = it.fagområde,
-                    simuleringOK = true,
-                    simuleringsresultat = null
-                )
-                simulering.håndter(Person::håndterSimulering)
-            }
+    protected fun håndterSimulering(behov: () -> Simuleringbehov = { simuleringbehov() ?: error("Fant ikke simuleringsbehov") }) {
+        val behov = behov()
+        behov.oppdrag.forEach {
+            val simulering = fabrikker.getValue(behov.orgnummer).lagSimulering(
+                vedtaksperiodeId = behov.vedtaksperiodeId,
+                utbetalingId = behov.utbetalingId,
+                fagsystemId = it.fagsystemId,
+                fagområde = it.fagområde,
+                simuleringOK = true,
+                simuleringsresultat = null
+            )
+            simulering.håndter(Person::håndterSimulering)
         }
     }
 
@@ -447,11 +445,7 @@ internal abstract class AbstractSpeilBuilderTest {
 
     protected fun håndterYtelserTilGodkjenning() {
         håndterYtelser()
-        try {
-            håndterSimulering()
-        } catch (err: IllegalStateException) {
-            // ok at simulering ikke er forespurt
-        }
+        simuleringbehov()?.let { simuleringsbehov -> håndterSimulering { simuleringsbehov } }
     }
 
     protected fun håndterOverstyrTidslinje(dager: List<ManuellOverskrivingDag>, meldingsreferanseId: UUID = UUID.randomUUID(), orgnummer: String = a1) {
@@ -538,7 +532,7 @@ internal abstract class AbstractSpeilBuilderTest {
     }
 
     protected fun håndterUtbetalingsgodkjenning(utbetalingGodkjent: Boolean = true) {
-        val behov = hendelselogg.godkjenningbehov() ?: error("Fant ikke godkjenningsbehov")
+        val behov = godkjenningbehov() ?: error("Fant ikke godkjenningsbehov")
         val utbetalingsgodkjenning = fabrikker.getValue(behov.orgnummer).lagUtbetalingsgodkjenning(
             vedtaksperiodeId = behov.vedtaksperiodeId,
             behandlingId = behov.behandlingId,
@@ -550,7 +544,7 @@ internal abstract class AbstractSpeilBuilderTest {
     }
 
     protected fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT): Utbetalingbehov {
-        val behov = hendelselogg.utbetalingbehov() ?: error("Fant ikke utbetalingbehov")
+        val behov = utbetalingbehov() ?: error("Fant ikke utbetalingbehov")
         behov.oppdrag.forEach {
             val utbetaling = fabrikker.getValue(behov.orgnummer).lagUtbetalinghendelse(
                 vedtaksperiodeId = behov.vedtaksperiodeId,
@@ -585,114 +579,78 @@ internal abstract class AbstractSpeilBuilderTest {
             .håndter(Person::håndterAnnulerUtbetaling)
     }
 
-    private fun ønsketBehov(ønsket: Set<Aktivitet.Behov.Behovtype>): List<Aktivitet.Behov>? {
-        return ubesvarteBehov
-            .filter { it.type in ønsket }
-            .takeIf { it.size >= ønsket.size }
-            ?.also {
-                ubesvarteBehov.clear()
-            }
+    private fun infotrygdhistorikkbehov() = behovssamler.sisteEventuelle<EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent>()?.let {
+        val (_, orgnummer) = it.yrkesaktivitetssporing.yrkesaktivitetstypeOgOrgnummer()
+        Infotrygdhistorikkbehov(
+            vedtaksperiodeId = it.vedtaksperiodeId,
+            orgnummer = orgnummer
+        )
     }
 
-    private fun IAktivitetslogg.infotrygdhistorikkbehov() =
-        ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Sykepengehistorikk))?.single()?.let {
-            ubesvarteBehov.remove(it)
-            Infotrygdhistorikkbehov(
-                vedtaksperiodeId = UUID.fromString(it.alleKontekster.getValue("vedtaksperiodeId")),
-                orgnummer = it.alleKontekster.getValue("organisasjonsnummer")
-            )
-        }
-
-    private fun IAktivitetslogg.vilkårsgrunnlagbehov() =
-        ønsketBehov(setOf(Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag, Aktivitet.Behov.Behovtype.ArbeidsforholdV2, Aktivitet.Behov.Behovtype.Medlemskap))?.let {
-            ubesvarteBehov.removeAll(it)
-            val (vedtaksperiodeId, behovene) = it.groupBy { UUID.fromString(it.alleKontekster.getValue("vedtaksperiodeId")) }.entries.single()
-            Vilkårsgrunnlagbehov(
-                vedtaksperiodeId = vedtaksperiodeId,
-                yrkesaktivitetstype = behovene.first().alleKontekster.getValue("yrkesaktivitetstype"),
-                orgnummer = behovene.first().alleKontekster.getValue("organisasjonsnummer"),
-                skjæringstidspunkt = LocalDate.parse(behovene.first().detaljer().getValue("skjæringstidspunkt") as String)
-            )
-        }
-
-    private fun IAktivitetslogg.ytelserbehov() = ønsketBehov(
-        setOf(
-            Aktivitet.Behov.Behovtype.Foreldrepenger,
-            Aktivitet.Behov.Behovtype.Pleiepenger,
-            Aktivitet.Behov.Behovtype.Omsorgspenger,
-            Aktivitet.Behov.Behovtype.Opplæringspenger,
-            Aktivitet.Behov.Behovtype.Institusjonsopphold,
-            Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2,
-            Aktivitet.Behov.Behovtype.DagpengerV2
+    private fun vilkårsgrunnlagbehov() = behovssamler.sisteEventuelle<EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent>()?.let {
+        val (yrkesaktivitetstype, orgnummer) = it.yrkesaktivitetssporing.yrkesaktivitetstypeOgOrgnummer()
+        Vilkårsgrunnlagbehov(
+            vedtaksperiodeId = it.vedtaksperiodeId,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            orgnummer = orgnummer,
+            skjæringstidspunkt = it.skjæringstidspunkt
         )
-    )
-        ?.let {
-            ubesvarteBehov.removeAll(it)
-            val (vedtaksperiodeId, behovene) = it.groupBy { UUID.fromString(it.alleKontekster.getValue("vedtaksperiodeId")) }.entries.single()
-            Ytelserbehov(
-                vedtaksperiodeId = vedtaksperiodeId,
-                yrkesaktivitetstype = it.first().alleKontekster.getValue("yrkesaktivitetstype"),
-                orgnummer = it.first().alleKontekster.getValue("organisasjonsnummer")
-            )
-        }
+    }
 
-    private fun simuleringbehov() =
-        ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Simulering))
-            ?.let {
-                ubesvarteBehov.removeAll(it)
-                it.groupBy { UUID.fromString(it.alleKontekster.getValue("utbetalingId")) }.map { (utbetalingId, oppdrag) ->
-                    val vedtaksperiodeId = UUID.fromString(oppdrag.first().alleKontekster.getValue("vedtaksperiodeId"))
-                    val yrkesaktivitetstype = it.first().alleKontekster.getValue("yrkesaktivitetstype")
-                    val orgnummer = oppdrag.first().alleKontekster.getValue("organisasjonsnummer")
-                    Simuleringbehov(
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        yrkesaktivitetstype = yrkesaktivitetstype,
-                        orgnummer = orgnummer,
-                        utbetalingId = utbetalingId,
-                        oppdrag = oppdrag.map {
-                            Oppdragbehov(
-                                fagområde = it.detaljer().getValue("fagområde") as String,
-                                fagsystemId = it.detaljer().getValue("fagsystemId") as String,
-                            )
-                        }
-                    )
-                }
-            }
+    private fun ytelserbehov() = behovssamler.sisteEventuelle<EventSubscription.TrengerInformasjonTilBeregningEvent>()?.let {
+        val (yrkesaktivitetstype, orgnummer) = it.yrkesaktivitetssporing.yrkesaktivitetstypeOgOrgnummer()
+        Ytelserbehov(
+            vedtaksperiodeId = it.vedtaksperiodeId,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            orgnummer = orgnummer
+        )
+    }
 
-    private fun IAktivitetslogg.godkjenningbehov() = ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Godkjenning))?.single()?.let {
-        ubesvarteBehov.remove(it)
+    private fun simuleringbehov(): Simuleringbehov? {
+        val (behov1, behov2) = behovssamler.simuleringsbehov()
+        if (behov1 == null) return null
+        val (yrkesaktivitetstype, orgnummer) = behov1.yrkesaktivitetssporing.yrkesaktivitetstypeOgOrgnummer()
+
+        return Simuleringbehov(
+            vedtaksperiodeId = behov1.vedtaksperiodeId,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            orgnummer = orgnummer,
+            utbetalingId = behov1.utbetalingId,
+            oppdrag = listOfNotNull(behov1, behov2).map { Oppdragbehov(
+                fagområde = it.oppdragsdetaljer.fagområde,
+                fagsystemId = it.oppdragsdetaljer.fagsystemId
+            )}
+        )
+    }
+
+    private fun godkjenningbehov() = behovssamler.sisteEventuelle<EventSubscription.GodkjenningEvent>()?.let {
+        val (yrkesaktivitetstype, orgnummer) = it.yrkesaktivitetssporing.yrkesaktivitetstypeOgOrgnummer()
         Godkjenningbehov(
-            vedtaksperiodeId = UUID.fromString(it.alleKontekster.getValue("vedtaksperiodeId")),
-            yrkesaktivitetstype = it.alleKontekster.getValue("yrkesaktivitetstype"),
-            orgnummer = it.alleKontekster.getValue("organisasjonsnummer"),
-            behandlingId = UUID.fromString(it.alleKontekster.getValue("behandlingId")),
-            utbetalingId = UUID.fromString(it.alleKontekster.getValue("utbetalingId"))
+            vedtaksperiodeId = it.vedtaksperiodeId,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            orgnummer = orgnummer,
+            behandlingId = it.behandlingId,
+            utbetalingId = it.utbetalingId
         )
     }
 
-    private fun IAktivitetslogg.utbetalingbehov() =
-        ønsketBehov(setOf(Aktivitet.Behov.Behovtype.Utbetaling))
-            ?.let {
-                ubesvarteBehov.removeAll(it)
-                val (utbetalingId, oppdrag) = it.groupBy { UUID.fromString(it.alleKontekster.getValue("utbetalingId")) }.entries.single()
-                val vedtaksperiodeId = UUID.fromString(oppdrag.first().alleKontekster.getValue("vedtaksperiodeId"))
-                val behandlingId = UUID.fromString(oppdrag.first().alleKontekster.getValue("behandlingId"))
-                val yrkesaktivitetstype = oppdrag.first().alleKontekster.getValue("yrkesaktivitetstype")
-                val orgnummer = oppdrag.first().alleKontekster.getValue("organisasjonsnummer")
-                Utbetalingbehov(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    behandlingId = behandlingId,
-                    yrkesaktivitetstype = yrkesaktivitetstype,
-                    orgnummer = orgnummer,
-                    utbetalingId = utbetalingId,
-                    oppdrag = oppdrag.map {
-                        Oppdragbehov(
-                            fagområde = it.detaljer().getValue("fagområde") as String,
-                            fagsystemId = it.detaljer().getValue("fagsystemId") as String,
-                        )
-                    }
-                )
-            }
+    private fun utbetalingbehov(): Utbetalingbehov? {
+        val (behov1, behov2) = behovssamler.utbetalingsbehov()
+        if (behov1 == null) return null
+        val (yrkesaktivitetstype, orgnummer) = behov1.yrkesaktivitetssporing.yrkesaktivitetstypeOgOrgnummer()
+
+        return Utbetalingbehov(
+            vedtaksperiodeId = behov1.vedtaksperiodeId,
+            behandlingId = behov1.behandlingId,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            orgnummer = orgnummer,
+            utbetalingId = behov1.utbetalingId,
+            oppdrag = listOfNotNull(behov1, behov2).map { Oppdragbehov(
+                fagområde = it.oppdragsdetaljer.fagområde,
+                fagsystemId = it.oppdragsdetaljer.fagsystemId
+            ) }
+        )
+    }
 
     data class Infotrygdhistorikkbehov(
         val vedtaksperiodeId: UUID,
