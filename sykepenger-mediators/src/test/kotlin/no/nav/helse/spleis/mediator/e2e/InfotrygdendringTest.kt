@@ -77,8 +77,8 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
     }
 
     private fun assertSykepengehistorikkdetaljer(behov: JsonNode) {
-        assertDato(behov.path(Sykepengehistorikk.name).path("historikkFom").asText())
-        assertDato(behov.path(Sykepengehistorikk.name).path("historikkTom").asText())
+        assertDato(behov.path(Sykepengehistorikk.utgåendeNavn).path("historikkFom").asText())
+        assertDato(behov.path(Sykepengehistorikk.utgåendeNavn).path("historikkTom").asText())
     }
 
     private fun assertDato(tekst: String) {
@@ -99,7 +99,7 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
         assertDatotid(behov.path("@opprettet").asText())
         assertTrue(id.isNotEmpty())
         Assertions.assertDoesNotThrow { UUID.fromString(id) }
-        assertEquals(Sykepengehistorikk.name, behov.path("@behov").firstOrNull()?.asText())
+        assertEquals(Sykepengehistorikk.utgåendeNavn, behov.path("@behov").firstOrNull()?.asText())
     }
 
 }

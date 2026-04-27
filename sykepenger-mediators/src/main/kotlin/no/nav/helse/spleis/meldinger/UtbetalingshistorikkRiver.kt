@@ -6,7 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import java.time.LocalDateTime
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
+import no.nav.helse.spleis.Behov.Behovstype.Sykepengehistorikk
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
@@ -40,7 +40,7 @@ internal class UtbetalingshistorikkRiver(
 
     internal companion object {
         fun validerSykepengehistorikk(message: JsonMessage) {
-            message.requireArray("@løsning.${Sykepengehistorikk.name}") {
+            message.requireArray("@løsning.${Sykepengehistorikk.utgåendeNavn}") {
                 requireKey("statslønn")
                 requireArray("inntektsopplysninger") {
                     require("sykepengerFom", JsonNode::asLocalDate)

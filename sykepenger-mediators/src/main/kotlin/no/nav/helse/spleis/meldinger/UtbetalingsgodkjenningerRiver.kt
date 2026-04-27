@@ -5,7 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+import no.nav.helse.spleis.Behov.Behovstype.Godkjenning
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
@@ -21,11 +21,11 @@ internal class UtbetalingsgodkjenningerRiver(
         message.require("vedtaksperiodeId") { it.asText().toUUID() }
         message.require("behandlingId") { it.asText().toUUID() }
         message.require("utbetalingId") { it.asText().toUUID() }
-        message.requireKey("@løsning.${Godkjenning.name}.godkjent")
-        message.requireKey("@løsning.${Godkjenning.name}.saksbehandlerIdent")
-        message.requireKey("@løsning.${Godkjenning.name}.saksbehandlerEpost")
-        message.require("@løsning.${Godkjenning.name}.godkjenttidspunkt", JsonNode::asLocalDateTime)
-        message.requireKey("@løsning.${Godkjenning.name}.automatiskBehandling")
+        message.requireKey("@løsning.${Godkjenning.utgåendeNavn}.godkjent")
+        message.requireKey("@løsning.${Godkjenning.utgåendeNavn}.saksbehandlerIdent")
+        message.requireKey("@løsning.${Godkjenning.utgåendeNavn}.saksbehandlerEpost")
+        message.require("@løsning.${Godkjenning.utgåendeNavn}.godkjenttidspunkt", JsonNode::asLocalDateTime)
+        message.requireKey("@løsning.${Godkjenning.utgåendeNavn}.automatiskBehandling")
     }
 
     override fun createMessage(packet: JsonMessage) = UtbetalingsgodkjenningMessage(

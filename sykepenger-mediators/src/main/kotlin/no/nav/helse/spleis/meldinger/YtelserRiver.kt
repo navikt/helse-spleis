@@ -4,15 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.DagpengerV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForBeregning
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SelvstendigForsikring
+import no.nav.helse.spleis.Behov.Behovstype.Arbeidsavklaringspenger
+import no.nav.helse.spleis.Behov.Behovstype.Dagpenger
+import no.nav.helse.spleis.Behov.Behovstype.Foreldrepenger
+import no.nav.helse.spleis.Behov.Behovstype.InntekterForBeregning
+import no.nav.helse.spleis.Behov.Behovstype.Institusjonsopphold
+import no.nav.helse.spleis.Behov.Behovstype.Omsorgspenger
+import no.nav.helse.spleis.Behov.Behovstype.Opplæringspenger
+import no.nav.helse.spleis.Behov.Behovstype.Pleiepenger
+import no.nav.helse.spleis.Behov.Behovstype.SelvstendigForsikring
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
@@ -27,9 +27,9 @@ internal class YtelserRiver(
         Omsorgspenger,
         Opplæringspenger,
         Institusjonsopphold,
-        ArbeidsavklaringspengerV2,
+        Arbeidsavklaringspenger,
         InntekterForBeregning,
-        DagpengerV2
+        Dagpenger
     )
 
     override val riverName = "Ytelser"
@@ -38,43 +38,43 @@ internal class YtelserRiver(
         message.requireKey("vedtaksperiodeId")
 
         // Foreldrepenger (& Svangerskapspenger)
-        message.requireKey("@løsning.${Foreldrepenger.name}")
-        message.interestedInArray("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse.perioder") {
+        message.requireKey("@løsning.${Foreldrepenger.utgåendeNavn}")
+        message.interestedInArray("@løsning.${Foreldrepenger.utgåendeNavn}.Foreldrepengeytelse.perioder") {
             validerGradertPeriode()
         }
-        message.interestedInArray("@løsning.${Foreldrepenger.name}.Svangerskapsytelse.perioder") {
+        message.interestedInArray("@løsning.${Foreldrepenger.utgåendeNavn}.Svangerskapsytelse.perioder") {
             validerGradertPeriode()
         }
 
         // Kapittel 9 ytelser
-        message.requireArrayEllerObjectMedArray("@løsning.${Pleiepenger.name}", "perioder") {
+        message.requireArrayEllerObjectMedArray("@løsning.${Pleiepenger.utgåendeNavn}", "perioder") {
             validerGradertPeriode()
         }
-        message.requireArrayEllerObjectMedArray("@løsning.${Omsorgspenger.name}", "perioder") {
+        message.requireArrayEllerObjectMedArray("@løsning.${Omsorgspenger.utgåendeNavn}", "perioder") {
             validerGradertPeriode()
         }
-        message.requireArrayEllerObjectMedArray("@løsning.${Opplæringspenger.name}", "perioder") {
+        message.requireArrayEllerObjectMedArray("@løsning.${Opplæringspenger.utgåendeNavn}", "perioder") {
             validerGradertPeriode()
         }
 
         // Dagpenger & AAP
-        message.requireArray("@løsning.${DagpengerV2.name}.meldekortperioder") {
+        message.requireArray("@løsning.${Dagpenger.utgåendeNavn}.meldekortperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
 
-        message.requireArray("@løsning.${ArbeidsavklaringspengerV2.name}.utbetalingsperioder") {
+        message.requireArray("@løsning.${Arbeidsavklaringspenger.utgåendeNavn}.utbetalingsperioder") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
 
         // Ting som ikke har noe med ytelser å gjøre
-        message.requireArrayEllerObjectMedArray("@løsning.${Institusjonsopphold.name}", "perioder") {
+        message.requireArrayEllerObjectMedArray("@løsning.${Institusjonsopphold.utgåendeNavn}", "perioder") {
             require("startdato", JsonNode::asLocalDate)
             interestedIn("faktiskSluttdato") { it.asLocalDate() }
         }
 
-        message.requireArray("@løsning.${InntekterForBeregning.name}.inntekter") {
+        message.requireArray("@løsning.${InntekterForBeregning.utgåendeNavn}.inntekter") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
             require("inntektskilde", {
@@ -85,7 +85,7 @@ internal class YtelserRiver(
             interestedIn("årlig", JsonNode::asDouble)
         }
 
-        message.interestedInArrayEllerObjectMedArray("@løsning.${SelvstendigForsikring.name}", "forsikringer") {
+        message.interestedInArrayEllerObjectMedArray("@løsning.${SelvstendigForsikring.utgåendeNavn}", "forsikringer") {
             require("startdato", JsonNode::asLocalDate)
             require("forsikringstype", JsonNode::asText)
             require("premiegrunnlag", JsonNode::asInt)

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Feriepengeutbetaling
+import no.nav.helse.spleis.Behov.Behovstype.Feriepengeutbetaling
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
@@ -21,16 +21,16 @@ internal class FeriepengeutbetalingerRiver(
 
     init {
         river.precondition { message ->
-            message.forbidValue("@løsning.${Feriepengeutbetaling.name}.status", "MOTTATT")
+            message.forbidValue("@løsning.${Feriepengeutbetaling.utgåendeNavn}.status", "MOTTATT")
         }
     }
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("@løsning.${Feriepengeutbetaling.name}")
-        message.requireAny("@løsning.${Feriepengeutbetaling.name}.status", gyldigeStatuser)
-        message.requireKey("${Feriepengeutbetaling.name}.fagsystemId", "utbetalingId", "@løsning.${Feriepengeutbetaling.name}.beskrivelse")
-        message.requireKey("@løsning.${Feriepengeutbetaling.name}.avstemmingsnøkkel")
-        message.require("@løsning.${Feriepengeutbetaling.name}.overføringstidspunkt", JsonNode::asLocalDateTime)
+        message.requireKey("@løsning.${Feriepengeutbetaling.utgåendeNavn}")
+        message.requireAny("@løsning.${Feriepengeutbetaling.utgåendeNavn}.status", gyldigeStatuser)
+        message.requireKey("${Feriepengeutbetaling.utgåendeNavn}.fagsystemId", "utbetalingId", "@løsning.${Feriepengeutbetaling.utgåendeNavn}.beskrivelse")
+        message.requireKey("@løsning.${Feriepengeutbetaling.utgåendeNavn}.avstemmingsnøkkel")
+        message.require("@løsning.${Feriepengeutbetaling.utgåendeNavn}.overføringstidspunkt", JsonNode::asLocalDateTime)
     }
 
     override fun createMessage(packet: JsonMessage) = FeriepengeutbetalingMessage(

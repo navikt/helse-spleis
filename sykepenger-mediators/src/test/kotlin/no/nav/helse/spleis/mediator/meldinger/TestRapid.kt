@@ -142,7 +142,7 @@ internal class TestRapid : RapidsConnection() {
             }
         }.toList()
 
-        private fun sisteBehovsmeldingSomInneholder(behovstype: Behov.Behovstype, filter: (behovsmelding: JsonNode) -> Boolean = { true }) = alleBehovsmeldingerSomInneholder(behovstype, filter).lastOrNull() ?: fail("Finner ingen behovsmeldinger som inneholder ${behovstype.name}")
+        private fun sisteBehovsmeldingSomInneholder(behovstype: Behov.Behovstype, filter: (behovsmelding: JsonNode) -> Boolean = { true }) = alleBehovsmeldingerSomInneholder(behovstype, filter).lastOrNull() ?: fail("Finner ingen behovsmeldinger som inneholder ${behovstype.utgåendeNavn}")
 
         private fun events(name: String, onEach: (JsonNode) -> Unit) = messages.forEachIndexed { indeks, _ ->
             val message = melding(indeks)

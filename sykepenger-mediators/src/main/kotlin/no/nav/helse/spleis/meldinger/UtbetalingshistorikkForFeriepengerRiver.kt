@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger
+import no.nav.helse.spleis.Behov.Behovstype.SykepengehistorikkForFeriepenger
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
@@ -33,21 +33,21 @@ internal class UtbetalingshistorikkForFeriepengerRiver(
 
     internal companion object {
         fun validerSykepengehistorikk(message: JsonMessage) {
-            message.requireKey("${SykepengehistorikkForFeriepenger.name}.historikkFom")
-            message.require("${SykepengehistorikkForFeriepenger.name}.datoForSisteFeriepengekjøringIInfotrygd", JsonNode::asLocalDate)
-            message.requireKey("@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengerSkalBeregnesManuelt")
-            message.requireArray("@løsning.${SykepengehistorikkForFeriepenger.name}.utbetalinger") {
+            message.requireKey("${SykepengehistorikkForFeriepenger.utgåendeNavn}.historikkFom")
+            message.require("${SykepengehistorikkForFeriepenger.utgåendeNavn}.datoForSisteFeriepengekjøringIInfotrygd", JsonNode::asLocalDate)
+            message.requireKey("@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.feriepengerSkalBeregnesManuelt")
+            message.requireArray("@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.utbetalinger") {
                 interestedIn("fom", JsonNode::asLocalDate)
                 interestedIn("tom", JsonNode::asLocalDate)
                 requireKey("dagsats", "utbetalingsGrad", "orgnummer")
                 requireAny("typeKode", listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "O", "S", ""))
             }
-            message.requireArray("@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengehistorikk") {
+            message.requireArray("@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.feriepengehistorikk") {
                 interestedIn("fom", JsonNode::asLocalDate)
                 interestedIn("tom", JsonNode::asLocalDate)
                 requireKey("beløp", "orgnummer")
             }
-            message.requireKey("@løsning.${SykepengehistorikkForFeriepenger.name}.arbeidskategorikoder")
+            message.requireKey("@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.arbeidskategorikoder")
         }
     }
 }
