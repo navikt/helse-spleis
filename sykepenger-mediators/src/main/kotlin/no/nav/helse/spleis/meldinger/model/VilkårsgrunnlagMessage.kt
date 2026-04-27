@@ -13,10 +13,10 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
+import no.nav.helse.spleis.Behov.Behovstype.Arbeidsforhold
+import no.nav.helse.spleis.Behov.Behovstype.InntekterForOpptjeningsvurdering
+import no.nav.helse.spleis.Behov.Behovstype.InntekterForSykepengegrunnlag
+import no.nav.helse.spleis.Behov.Behovstype.Medlemskap
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
@@ -29,13 +29,13 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
 
     private val yrkesaktivitetssporing = packet.yrkesaktivitetssporing
 
-    internal val inntekterForSykepengegrunnlag = packet.mapSkatteopplysninger("@løsning.${InntekterForSykepengegrunnlag.name}")
+    internal val inntekterForSykepengegrunnlag = packet.mapSkatteopplysninger("@løsning.${InntekterForSykepengegrunnlag.utgåendeNavn}")
 
-    internal val inntekterForOpptjeningsvurdering = packet.mapSkatteopplysninger("@løsning.${InntekterForOpptjeningsvurdering.name}")
+    internal val inntekterForOpptjeningsvurdering = packet.mapSkatteopplysninger("@løsning.${InntekterForOpptjeningsvurdering.utgåendeNavn}")
 
     internal val arbeidsforhold = packet.mapArbeidsforhold()
 
-    internal val medlemskapstatus = when (packet["@løsning.${Medlemskap.name}.resultat.svar"].asText()) {
+    internal val medlemskapstatus = when (packet["@løsning.${Medlemskap.utgåendeNavn}.resultat.svar"].asText()) {
         "JA" -> Medlemskapsvurdering.Medlemskapstatus.Ja
         "NEI" -> Medlemskapsvurdering.Medlemskapstatus.Nei
         "UAVKLART_MED_BRUKERSPORSMAAL" -> Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål
@@ -43,10 +43,10 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
     }
 
     private val skjæringstidspunkter = listOfNotNull(
-        packet["${InntekterForSykepengegrunnlag.name}.skjæringstidspunkt"].asLocalDate(),
-        packet["${InntekterForOpptjeningsvurdering.name}.skjæringstidspunkt"].asLocalDate(),
-        packet["${ArbeidsforholdV2.name}.skjæringstidspunkt"].asLocalDate(),
-        packet["${Medlemskap.name}.skjæringstidspunkt"].asLocalDate(),
+        packet["${InntekterForSykepengegrunnlag.utgåendeNavn}.skjæringstidspunkt"].asLocalDate(),
+        packet["${InntekterForOpptjeningsvurdering.utgåendeNavn}.skjæringstidspunkt"].asLocalDate(),
+        packet["${Arbeidsforhold.utgåendeNavn}.skjæringstidspunkt"].asLocalDate(),
+        packet["${Medlemskap.utgåendeNavn}.skjæringstidspunkt"].asLocalDate(),
     )
 
     private val vilkårsgrunnlag
@@ -70,7 +70,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
     }
 
     private fun JsonMessage.mapArbeidsforhold() =
-        mapArbeidsforhold(getArray("@løsning.${ArbeidsforholdV2.name}", "arbeidsforhold"))
+        mapArbeidsforhold(getArray("@løsning.${Arbeidsforhold.utgåendeNavn}", "arbeidsforhold"))
 
     private fun JsonMessage.mapSkatteopplysninger(key: String) =
         mapSkatteopplysninger(getArray(key, "inntekter"))

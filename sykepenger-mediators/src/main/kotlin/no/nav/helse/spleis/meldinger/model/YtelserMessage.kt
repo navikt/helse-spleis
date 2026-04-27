@@ -21,7 +21,7 @@ import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.spleis.Behov.Behovstype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
@@ -40,32 +40,32 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val yrkesaktivitetssporing = packet.yrkesaktivitetssporing
 
-    private val foreldrepengerytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Foreldrepengeytelse.perioder"]
+    private val foreldrepengerytelse = packet["@løsning.${Behovstype.Foreldrepenger.utgåendeNavn}.Foreldrepengeytelse.perioder"]
         .takeIf(JsonNode::isArray)?.map(::asGradertPeriode) ?: emptyList()
-    private val svangerskapsytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Svangerskapsytelse.perioder"]
+    private val svangerskapsytelse = packet["@løsning.${Behovstype.Foreldrepenger.utgåendeNavn}.Svangerskapsytelse.perioder"]
         .takeIf(JsonNode::isArray)?.map(::asGradertPeriode) ?: emptyList()
 
     internal val foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepengerytelse)
     internal val svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapsytelse)
 
     internal val pleiepenger =
-        Pleiepenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovtype.Pleiepenger.name}", "perioder", ::asGradertPeriode))
+        Pleiepenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Pleiepenger.utgåendeNavn}", "perioder", ::asGradertPeriode))
 
     internal val omsorgspenger =
-        Omsorgspenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovtype.Omsorgspenger.name}", "perioder", ::asGradertPeriode))
+        Omsorgspenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Omsorgspenger.utgåendeNavn}", "perioder", ::asGradertPeriode))
 
     internal val opplæringspenger =
-        Opplæringspenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovtype.Opplæringspenger.name}", "perioder", ::asGradertPeriode))
+        Opplæringspenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Opplæringspenger.utgåendeNavn}", "perioder", ::asGradertPeriode))
 
     internal val institusjonsopphold =
-        Institusjonsopphold(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovtype.Institusjonsopphold.name}", "perioder") {
+        Institusjonsopphold(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Institusjonsopphold.utgåendeNavn}", "perioder") {
             Institusjonsoppholdsperiode(
                 it.path("startdato").asLocalDate(),
                 it.path("faktiskSluttdato").asOptionalLocalDate()
             )
         })
 
-    internal val inntekterForBeregning = InntekterForBeregning(packet["@løsning.${Behovtype.InntekterForBeregning.name}.inntekter"].map {
+    internal val inntekterForBeregning = InntekterForBeregning(packet["@løsning.${Behovstype.InntekterForBeregning.utgåendeNavn}.inntekter"].map {
         InntekterForBeregning.Inntektsperiode(
             inntektskilde = it.path("inntektskilde").asText(),
             periode = it.path("fom").asLocalDate() til it.path("tom").asLocalDate(),
@@ -82,11 +82,11 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     })
 
     internal val arbeidsavklaringspengerV2 = Arbeidsavklaringspenger(
-        packet["@løsning.${Behovtype.ArbeidsavklaringspengerV2.name}.utbetalingsperioder"]
+        packet["@løsning.${Behovstype.Arbeidsavklaringspenger.utgåendeNavn}.utbetalingsperioder"]
             .map { Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) })
 
     internal val selvstendigForsikring = when (yrkesaktivitetssporing) {
-        Behandlingsporing.Yrkesaktivitet.Selvstendig -> packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovtype.SelvstendigForsikring.name}", "forsikringer") {
+        Behandlingsporing.Yrkesaktivitet.Selvstendig -> packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.SelvstendigForsikring.utgåendeNavn}", "forsikringer") {
             SelvstendigForsikring(
                 virkningsdato = it.path("startdato").asLocalDate(),
                 opphørsdato = it.path("sluttdato").asOptionalLocalDate(),
@@ -103,7 +103,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     }
 
     internal val dagpengerV2 = Dagpenger(
-        packet["@løsning.${Behovtype.DagpengerV2.name}.meldekortperioder"]
+        packet["@løsning.${Behovstype.Dagpenger.utgåendeNavn}.meldekortperioder"]
             .map {
                 Periode(
                     it.path("fom").asLocalDate(),

@@ -8,7 +8,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.Year
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger
+import no.nav.helse.spleis.Behov.Behovstype.SykepengehistorikkForFeriepenger
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
@@ -17,10 +17,10 @@ internal class UtbetalingshistorikkForFeriepengerMessage(
     packet: JsonMessage,
     override val meldingsporing: Meldingsporing
 ) : BehovMessage(packet) {
-    private val skalBeregnesManuelt = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengerSkalBeregnesManuelt"].asBoolean()
-    private val datoForSisteFeriepengekjøringIInfotrygd = packet["${SykepengehistorikkForFeriepenger.name}.datoForSisteFeriepengekjøringIInfotrygd"].asLocalDate()
+    private val skalBeregnesManuelt = packet["@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.feriepengerSkalBeregnesManuelt"].asBoolean()
+    private val datoForSisteFeriepengekjøringIInfotrygd = packet["${SykepengehistorikkForFeriepenger.utgåendeNavn}.datoForSisteFeriepengekjøringIInfotrygd"].asLocalDate()
 
-    private val utbetalinger = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.utbetalinger"]
+    private val utbetalinger = packet["@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.utbetalinger"]
         .filter(::erGyldigPeriode)
         .mapNotNull { utbetaling ->
             val fom = utbetaling["fom"].asLocalDate()
@@ -44,7 +44,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(
             }
         }
 
-    private val feriepengehistorikk = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.feriepengehistorikk"]
+    private val feriepengehistorikk = packet["@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.feriepengehistorikk"]
         .map { feriepenge ->
             UtbetalingshistorikkForFeriepenger.Feriepenger(
                 orgnummer = feriepenge["orgnummer"].asText(),
@@ -54,7 +54,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(
             )
         }
 
-    private val arbeidskategorikoder = packet["@løsning.${SykepengehistorikkForFeriepenger.name}.arbeidskategorikoder"]
+    private val arbeidskategorikoder = packet["@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.arbeidskategorikoder"]
         .map {
             val fom = it["fom"].asLocalDate()
             val tom = it["tom"].asLocalDate()
@@ -66,7 +66,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(
         }
         .let(UtbetalingshistorikkForFeriepenger::Arbeidskategorikoder)
 
-    private val opptjeningsår = packet["${SykepengehistorikkForFeriepenger.name}.historikkFom"]
+    private val opptjeningsår = packet["${SykepengehistorikkForFeriepenger.utgåendeNavn}.historikkFom"]
         .asLocalDate()
         .let(Year::from)
 

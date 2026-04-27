@@ -6,7 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.spleis.Behov.Behovstype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
@@ -20,10 +20,10 @@ internal class SimuleringMessage(packet: JsonMessage, override val meldingsporin
 
     private val fagsystemId = packet["Simulering.fagsystemId"].asText()
     private val fagområde = packet["Simulering.fagområde"].asText()
-    private val status = valueOf(packet["@løsning.${Behovtype.Simulering.name}.status"].asText())
+    private val status = valueOf(packet["@løsning.${Behovstype.Simulering.utgåendeNavn}.status"].asText())
     private val simuleringOK = status == OK
-    private val melding = if (!simuleringOK) packet["@løsning.${Behovtype.Simulering.name}.feilmelding"].asText() + " (status=$status)" else ""
-    private val simuleringResultat = if (simuleringOK) packet["@løsning.${Behovtype.Simulering.name}.simulering"].let {
+    private val melding = if (!simuleringOK) packet["@løsning.${Behovstype.Simulering.utgåendeNavn}.feilmelding"].asText() + " (status=$status)" else ""
+    private val simuleringResultat = if (simuleringOK) packet["@løsning.${Behovstype.Simulering.utgåendeNavn}.simulering"].let {
         SimuleringResultatDto(
             totalbeløp = it.path("totalBelop").asInt(),
             perioder = it.path("periodeList").map { periode ->

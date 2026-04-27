@@ -5,7 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
+import no.nav.helse.spleis.Behov.Behovstype.Godkjenning
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
@@ -16,11 +16,11 @@ internal class UtbetalingsgodkjenningMessage(packet: JsonMessage, override val m
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().toUUID()
     private val behandlingId = packet["behandlingId"].asText().toUUID()
     private val behandlingsporing = packet.yrkesaktivitetssporing
-    private val saksbehandler = packet["@løsning.${Godkjenning.name}.saksbehandlerIdent"].asText()
-    private val saksbehandlerEpost = packet["@løsning.${Godkjenning.name}.saksbehandlerEpost"].asText()
-    private val godkjenttidspunkt = packet["@løsning.${Godkjenning.name}.godkjenttidspunkt"].asLocalDateTime()
-    private val utbetalingGodkjent = packet["@løsning.${Godkjenning.name}.godkjent"].asBoolean()
-    private val automatiskBehandling = packet["@løsning.${Godkjenning.name}.automatiskBehandling"].asBoolean()
+    private val saksbehandler = packet["@løsning.${Godkjenning.utgåendeNavn}.saksbehandlerIdent"].asText()
+    private val saksbehandlerEpost = packet["@løsning.${Godkjenning.utgåendeNavn}.saksbehandlerEpost"].asText()
+    private val godkjenttidspunkt = packet["@løsning.${Godkjenning.utgåendeNavn}.godkjenttidspunkt"].asLocalDateTime()
+    private val utbetalingGodkjent = packet["@løsning.${Godkjenning.utgåendeNavn}.godkjent"].asBoolean()
+    private val automatiskBehandling = packet["@løsning.${Godkjenning.utgåendeNavn}.automatiskBehandling"].asBoolean()
 
     private val utbetalingsgodkjenning
         get() = Utbetalingsgodkjenning(

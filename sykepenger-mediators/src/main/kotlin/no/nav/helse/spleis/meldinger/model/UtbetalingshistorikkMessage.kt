@@ -9,7 +9,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
+import no.nav.helse.spleis.Behov.Behovstype.Sykepengehistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -22,7 +22,7 @@ import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
 
     companion object {
-        internal fun JsonMessage.utbetalinger() = this["@løsning.${Sykepengehistorikk.name}"]
+        internal fun JsonMessage.utbetalinger() = this["@løsning.${Sykepengehistorikk.utgåendeNavn}"]
             .flatMap { it.path("utbetalteSykeperioder") }
             .filter(::erGyldigPeriode)
             .mapNotNull { utbetaling ->
