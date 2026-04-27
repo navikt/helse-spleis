@@ -7,33 +7,35 @@ data class Behov(
     val type: Behovstype,
     val input: Map<String, Any>
 ) {
-    enum class Behovstype(val utgåendeNavn: String) {
-        Sykepengehistorikk("Sykepengehistorikk"),
+    sealed interface Behovstype {
+        val utgåendeNavn: String
+
+        data object Sykepengehistorikk: Behovstype { override val utgåendeNavn = "Sykepengehistorikk" }
         // Denne (SykepengehistorikkForFeriepenger) er litt special. Behovet sendes ut fra
         // feriepengejobben og vi håndterer bare løsningen i Spleis
-        SykepengehistorikkForFeriepenger("SykepengehistorikkForFeriepenger"),
+        data object SykepengehistorikkForFeriepenger: Behovstype { override val utgåendeNavn = "SykepengehistorikkForFeriepenger" }
 
-        Foreldrepenger("Foreldrepenger"),
-        Pleiepenger("Pleiepenger"),
-        Omsorgspenger("Omsorgspenger"),
-        Opplæringspenger("Opplæringspenger"),
-        Institusjonsopphold("Institusjonsopphold"),
+        data object Foreldrepenger: Behovstype { override val utgåendeNavn = "Foreldrepenger" }
+        data object Pleiepenger: Behovstype { override val utgåendeNavn = "Pleiepenger" }
+        data object Omsorgspenger: Behovstype { override val utgåendeNavn = "Omsorgspenger" }
+        data object Opplæringspenger: Behovstype { override val utgåendeNavn = "Opplæringspenger" }
+        data object Institusjonsopphold: Behovstype { override val utgåendeNavn = "Institusjonsopphold" }
 
-        Godkjenning("Godkjenning"),
-        Simulering("Simulering"),
-        Utbetaling("Utbetaling"),
-        Feriepengeutbetaling("Feriepengeutbetaling"),
+        data object Godkjenning: Behovstype { override val utgåendeNavn = "Godkjenning" }
+        data object Simulering: Behovstype { override val utgåendeNavn = "Simulering" }
+        data object Utbetaling: Behovstype { override val utgåendeNavn = "Utbetaling" }
+        data object Feriepengeutbetaling: Behovstype { override val utgåendeNavn = "Feriepengeutbetaling" }
 
-        InntekterForSykepengegrunnlag("InntekterForSykepengegrunnlag"),
-        InntekterForOpptjeningsvurdering("InntekterForOpptjeningsvurdering"),
-        InntekterForBeregning("InntekterForBeregning"),
+        data object InntekterForSykepengegrunnlag: Behovstype { override val utgåendeNavn = "InntekterForSykepengegrunnlag" }
+        data object InntekterForOpptjeningsvurdering: Behovstype { override val utgåendeNavn = "InntekterForOpptjeningsvurdering" }
+        data object InntekterForBeregning: Behovstype { override val utgåendeNavn = "InntekterForBeregning" }
 
-        Dagpenger("DagpengerV2"),
-        Arbeidsavklaringspenger("ArbeidsavklaringspengerV2"),
-        Medlemskap("Medlemskap"),
-        Arbeidsforhold("ArbeidsforholdV2"),
+        data object Dagpenger: Behovstype { override val utgåendeNavn = "DagpengerV2" }
+        data object Arbeidsavklaringspenger: Behovstype { override val utgåendeNavn = "ArbeidsavklaringspengerV2" }
+        data object Medlemskap: Behovstype { override val utgåendeNavn = "Medlemskap" }
+        data object Arbeidsforhold: Behovstype { override val utgåendeNavn = "ArbeidsforholdV2" }
 
-        SelvstendigForsikring("SelvstendigForsikring")
+        data object SelvstendigForsikring: Behovstype { override val utgåendeNavn = "SelvstendigForsikring" }
     }
 
     companion object {
