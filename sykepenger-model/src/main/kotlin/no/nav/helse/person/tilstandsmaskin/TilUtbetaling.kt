@@ -67,23 +67,31 @@ private fun trengerUtbetaling(
     utbetalingsbehov(aktivitetsloggMedUtbetalingkontekst, utbetaling.arbeidsgiverOppdrag, saksbehandler, maksdato)
     utbetalingsbehov(aktivitetsloggMedUtbetalingkontekst, utbetaling.personOppdrag, saksbehandler, maksdato)
 
-    oppdragsdetaljer(utbetaling.arbeidsgiverOppdrag, maksdato)?.let { eventBus.utbetal(
-        yrkesaktivitetssporing = yrkesaktivitetssporing,
-        vedtaksperiodeId = vedtaksperiodeId,
-        behandlingId = forrigeBehandling.id,
-        utbetalingId = utbetaling.id,
-        oppdragsdetaljer = it,
-        saksbehandler = saksbehandler
-    )}
+    oppdragsdetaljer(utbetaling.arbeidsgiverOppdrag, maksdato)?.let {
+        eventBus.utbetal(
+            yrkesaktivitetssporing = yrkesaktivitetssporing,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = forrigeBehandling.id,
+            utbetalingId = utbetaling.id,
+            oppdragsdetaljer = it,
+            saksbehandler = saksbehandler
+        )
+        val aktivitetsloggMedOppdragkontekst = aktivitetsloggMedUtbetalingkontekst.kontekst(utbetaling.arbeidsgiverOppdrag)
+        aktivitetsloggMedOppdragkontekst.info("Sender ut event om at det skal utbetales til arbeidsgiver")
+    }
 
-    oppdragsdetaljer(utbetaling.personOppdrag, maksdato)?.let { eventBus.utbetal(
-        yrkesaktivitetssporing = yrkesaktivitetssporing,
-        vedtaksperiodeId = vedtaksperiodeId,
-        behandlingId = forrigeBehandling.id,
-        utbetalingId = utbetaling.id,
-        oppdragsdetaljer = it,
-        saksbehandler = saksbehandler
-    )}
+    oppdragsdetaljer(utbetaling.personOppdrag, maksdato)?.let {
+        eventBus.utbetal(
+            yrkesaktivitetssporing = yrkesaktivitetssporing,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = forrigeBehandling.id,
+            utbetalingId = utbetaling.id,
+            oppdragsdetaljer = it,
+            saksbehandler = saksbehandler
+        )
+        val aktivitetsloggMedOppdragkontekst = aktivitetsloggMedUtbetalingkontekst.kontekst(utbetaling.personOppdrag)
+        aktivitetsloggMedOppdragkontekst.info("Sender ut event om at det skal utbetales til sykmeldt")
+    }
 }
 
 private fun utbetalingsbehov(aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag, saksbehandler: String, maksdato: LocalDate?) {

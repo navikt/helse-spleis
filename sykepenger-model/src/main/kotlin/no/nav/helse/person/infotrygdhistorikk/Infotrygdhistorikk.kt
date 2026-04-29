@@ -57,12 +57,14 @@ internal class Infotrygdhistorikk private constructor(
     internal fun initiell(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, tidligsteDato: LocalDate, vedtaksperiodeId: UUID, yrkesaktivitetsporing: Behandlingsporing.Yrkesaktivitet) {
         val oppfriskningsperiode = oppfriskningsperiode(tidligsteDato)
         eventBus.trengerInitiellHistorikkFraInfotrygd(oppfriskningsperiode, vedtaksperiodeId, yrkesaktivitetsporing)
+        aktivitetslogg.info("Sender ut event om at vi trenger initiell historikk fra Infotrygd")
         utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode)
     }
 
     internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, tidligsteDato: LocalDate) {
         val oppfriskningsperiode = oppfriskningsperiode(tidligsteDato)
         eventBus.trengerOppdatertHistorikkFraInfotrygd(oppfriskningsperiode)
+        aktivitetslogg.info("Sender ut event om at vi trenger oppdatert historikk fra Infotrygd")
         utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode)
     }
 

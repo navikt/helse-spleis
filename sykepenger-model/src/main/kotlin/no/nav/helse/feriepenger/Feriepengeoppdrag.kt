@@ -47,6 +47,12 @@ data class Feriepengeoppdrag(
         if (!skalSendeOppdrag) return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Feriepengerendringskode.UEND)
         aktivitetsloggMedOppdragkontekst.behov(Behovtype.Feriepengeutbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer())
+
+        val mottaker = when (fagområde) {
+            Feriepengerfagområde.SykepengerRefusjon -> "arbeidsgiver"
+            Feriepengerfagområde.Sykepenger -> "sykmeldt"
+        }
+        aktivitetsloggMedOppdragkontekst.info("Sender ut event om at det skal utbetales feriepenger til $mottaker for organisasjonsnummer ${arbeidstaker.organisasjonsnummer}")
         eventBus.utbetalFeriepenger(utbetalFeriepengerEvent(arbeidstaker, utbetalingId))
     }
 

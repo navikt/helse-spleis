@@ -29,21 +29,29 @@ internal fun trengerSimulering(vedtaksperiode: Vedtaksperiode, eventBus: EventBu
     simuleringsbehov(aktivitetsloggMedUtbetalingkontekst, utbetaling.arbeidsgiverOppdrag, vedtaksperiode.behandlinger.maksdato.maksdato)
     simuleringsbehov(aktivitetsloggMedUtbetalingkontekst, utbetaling.personOppdrag, vedtaksperiode.behandlinger.maksdato.maksdato)
 
-    oppdragsdetaljer(utbetaling.arbeidsgiverOppdrag, vedtaksperiode.behandlinger.maksdato.maksdato)?.let { eventBus.simuler(
-        yrkesaktivitetssporing = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype,
-        vedtaksperiodeId = vedtaksperiode.id,
-        behandlingId = vedtaksperiode.behandlinger.sisteBehandlingId,
-        utbetalingId = utbetaling.id,
-        oppdragsdetaljer = it
-    )}
+    oppdragsdetaljer(utbetaling.arbeidsgiverOppdrag, vedtaksperiode.behandlinger.maksdato.maksdato)?.let {
+        eventBus.simuler(
+            yrkesaktivitetssporing = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype,
+            vedtaksperiodeId = vedtaksperiode.id,
+            behandlingId = vedtaksperiode.behandlinger.sisteBehandlingId,
+            utbetalingId = utbetaling.id,
+            oppdragsdetaljer = it
+        )
+        val aktivitetsloggMedOppdragkontekst = aktivitetsloggMedUtbetalingkontekst.kontekst(utbetaling.arbeidsgiverOppdrag)
+        aktivitetsloggMedOppdragkontekst.info("Sender ut event om at utbetalingen til arbeidsgiver skal simuleres")
+    }
 
-    oppdragsdetaljer(utbetaling.personOppdrag, vedtaksperiode.behandlinger.maksdato.maksdato)?.let { eventBus.simuler(
-        yrkesaktivitetssporing = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype,
-        vedtaksperiodeId = vedtaksperiode.id,
-        behandlingId = vedtaksperiode.behandlinger.sisteBehandlingId,
-        utbetalingId = utbetaling.id,
-        oppdragsdetaljer = it
-    )}
+    oppdragsdetaljer(utbetaling.personOppdrag, vedtaksperiode.behandlinger.maksdato.maksdato)?.let {
+        eventBus.simuler(
+            yrkesaktivitetssporing = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype,
+            vedtaksperiodeId = vedtaksperiode.id,
+            behandlingId = vedtaksperiode.behandlinger.sisteBehandlingId,
+            utbetalingId = utbetaling.id,
+            oppdragsdetaljer = it
+        )
+        val aktivitetsloggMedOppdragkontekst = aktivitetsloggMedUtbetalingkontekst.kontekst(utbetaling.personOppdrag)
+        aktivitetsloggMedOppdragkontekst.info("Sender ut event om at utbetalingen til sykmeldt skal simuleres")
+    }
 }
 
 private fun simuleringsbehov(aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag, maksdato: LocalDate) {

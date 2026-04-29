@@ -2959,7 +2959,7 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunkt = skjæringstidspunkt,
             trengerInformasjonOmSelvstendigForsikring = yrkesaktivitet.yrkesaktivitetstype is Selvstendig
         )
-
+        aktivitetslogg.info("Sender ut event om at vi trenger informasjon til beregning")
         eventBus.trengerInformasjonTilBeregning(event)
     }
 
@@ -2986,6 +2986,7 @@ internal class Vedtaksperiode private constructor(
             )
         )
 
+        aktivitetslogg.info("Sender ut event om at vi trenger informasjon til vilkårsprøving")
         eventBus.trengerInformasjonTilVilkårsprøving(event)
     }
 
@@ -3060,6 +3061,7 @@ internal class Vedtaksperiode private constructor(
         val utbetaling = checkNotNull(behandlinger.utbetaling) { "Forventer å ha en utbetaling når vi skal sende godkjenningsbehov" }
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(utbetaling)
         Aktivitet.Behov.godkjenning(aktivitetsloggMedUtbetalingkontekst, utkastTilVedtakBuilder.buildGodkjenningsbehov())
+        aktivitetsloggMedUtbetalingkontekst.info("Sender ut event om at vi trenger godkjenning")
         eventBus.trengerGodkjenning(utkastTilVedtakBuilder.buildGodkjenningEvent())
     }
 
