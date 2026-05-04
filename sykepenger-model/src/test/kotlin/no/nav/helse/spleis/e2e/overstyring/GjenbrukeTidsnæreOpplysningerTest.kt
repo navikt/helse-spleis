@@ -32,8 +32,12 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mandag
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
+import no.nav.helse.person.inntekt.InntektsgrunnlagView
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -45,10 +49,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVU
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
-import no.nav.helse.person.inntekt.InntektsgrunnlagView
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -56,13 +56,13 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
-import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
@@ -1165,6 +1165,17 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT, forventetKildeId = inntektsmeldingId, forventetKorrigertInntekt = overstyring2Inntekt, forventetOmregnetÅrsinntekt = overstyring2Inntekt)
             }
+        }
+    }
+
+    @Test
+    fun `skal ikke være varsel om gjenbruk av inntekt hvor arbeidsgiver opplyser om annen AGP enn det søknaden tilsier`() {
+        a1 {
+            håndterSøknad(2.januar til 16.januar)
+            håndterSøknad(17.januar til 31.januar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
         }
     }
 
