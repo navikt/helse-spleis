@@ -11,7 +11,8 @@ class Maksdatoberegning(
     private val syttiårsdagen: LocalDate,
     private val dødsdato: LocalDate?,
     regler: MaksimumSykepengedagerregler,
-    private val historisktidslinje: Utbetalingstidslinje
+    private val historisktidslinje: Utbetalingstidslinje,
+    private val avslåttDag: (dato: LocalDate, begrunnelse: Begrunnelse) -> Unit = { _, _ -> }
 ) {
     companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26 * 7
@@ -116,6 +117,7 @@ class Maksdatoberegning(
             OppholdFri,
             Syk -> error("Forventer ikke avslag i tilstand $state")
         }
+        avslåttDag(dag, begrunnelse)
         sisteVurdering = sisteVurdering.medAvslåttDag(dag, begrunnelse)
     }
 

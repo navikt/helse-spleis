@@ -68,7 +68,7 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
             nyttVedtak(juli)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.juli til 31.juli)
             assertEquals(27.juni(2019), inspektør.sisteMaksdato(1.vedtaksperiode).maksdato)
-            // TODO: Hadde det vært mulig med et varsel her montro?
+            assertInfo("Utbetalt 42 dager i Infotrygd i perioden 01-02-2018 til 30-03-2018. Skulle vært avslått pga. SykepengedagerOppbrukt", 1.vedtaksperiode.filter())
         }
     }
 

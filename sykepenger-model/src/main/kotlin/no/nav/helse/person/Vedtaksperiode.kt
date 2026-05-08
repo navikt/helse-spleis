@@ -119,6 +119,7 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.AvslåtteDagerUtbetaltIInfotrygdObservatør
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklarteInntekter
@@ -1574,10 +1575,13 @@ internal class Vedtaksperiode private constructor(
         // - pluss alle som overlapper: Dette er bare for å få med "mursteinssnutene" (f.eks 10.-31.jan på A1 beregener, og 1.-31.jan på A2, så må vi vå med oss 1-9.jan)
         // ettersom vi etterpå kun beholder det som gjelder frem til dagen før vedtaksperioden som beregnes
         // .. også klaskes alt fra Infotrygd inn også da
+        val infotrygdtidslinje = person.infotrygdhistorikk.utbetalingstidslinje()
         val historisktidslinje = person.vedtaksperioder { it.periode.endInclusive < periode.start || it.periode.overlapperMed(periode) }
             .map { it.behandlinger.utbetalingstidslinje() }
-            .fold(person.infotrygdhistorikk.utbetalingstidslinje(), Utbetalingstidslinje::plus)
+            .fold(infotrygdtidslinje, Utbetalingstidslinje::plus)
             .fremTilOgMed(periode.start.forrigeDag)
+
+        val avslåtteDagerUtbetaltIInfotrygdObservatør = AvslåtteDagerUtbetaltIInfotrygdObservatør(infotrygdtidslinje)
 
         val andreYtelserTidslinje = ytelser.andreYtelser()
         val beregnetTidslinjePerVedtaksperiode = filtrerUtbetalingstidslinjer(
@@ -1593,8 +1597,10 @@ internal class Vedtaksperiode private constructor(
             historisktidslinje = historisktidslinje,
             perioderMedMinimumSykdomsgradVurdertOK = person.minimumSykdomsgradsvurdering.perioder,
             regler = person.regler,
-            andreYtelser = { dato -> andreYtelserTidslinje[dato] ?: 0.prosent }
+            andreYtelser = { dato -> andreYtelserTidslinje[dato] ?: 0.prosent },
+            avslåttDag = avslåtteDagerUtbetaltIInfotrygdObservatør::avslåttDag
         )
+        avslåtteDagerUtbetaltIInfotrygdObservatør.valider(aktivitetslogg)
         // steg 4.1: lag beregnede behandlinger
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
         lagBeregnetBehandlinger(perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder, forsikring)

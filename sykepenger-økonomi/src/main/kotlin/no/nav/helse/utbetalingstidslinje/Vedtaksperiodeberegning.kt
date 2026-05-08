@@ -26,14 +26,16 @@ fun filtrerUtbetalingstidslinjer(
     historisktidslinje: Utbetalingstidslinje,
     perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
     regler: MaksimumSykepengedagerregler,
-    andreYtelser: (dato: LocalDate) -> Prosentdel
+    andreYtelser: (dato: LocalDate) -> Prosentdel,
+    avslåttDag: (dato: LocalDate, begrunnelse: Begrunnelse) -> Unit = { _, _ -> }
 ): List<BeregnetPeriode> {
     val maksdatoberegning = Maksdatoberegning(
         sekstisyvårsdagen = sekstisyvårsdagen,
         syttiårsdagen = syttiårsdagen,
         dødsdato = dødsdato,
         regler = regler,
-        historisktidslinje = historisktidslinje
+        historisktidslinje = historisktidslinje,
+        avslåttDag = avslåttDag
     )
 
     val beregnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver
