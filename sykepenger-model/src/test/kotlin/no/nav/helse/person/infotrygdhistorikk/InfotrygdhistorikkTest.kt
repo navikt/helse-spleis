@@ -392,13 +392,12 @@ internal class InfotrygdhistorikkTest {
     ) {
         resetSeed(1.januar)
         val aktivitetslogg = Aktivitetslogg()
-        val behovsoppsamler = Behovsoppsamler.opprettBehovsoppsamler()
+        val behovsoppsamler = Behovsoppsamler.FraEventBus()
         val eventBus = EventBus().apply {
             register(behovsoppsamler)
         }
         val behovFør = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.OppdatertHistorikkFraInfotrygd>().toSet()
         setup(historikk, eventBus, aktivitetslogg)
-        (behovsoppsamler as? Behovsoppsamler.FraAktivitetslogg)?.registrerFra(aktivitetslogg)
         val nyeBehov = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.OppdatertHistorikkFraInfotrygd>().toSet() - behovFør
 
         assertions(historikk, nyeBehov, aktivitetslogg)

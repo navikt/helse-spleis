@@ -597,8 +597,7 @@ internal class HendelseMediator(
         val aktivitetslogg = Aktivitetslogg().kontekst(message)
 
         val subsumsjonMediator = SubsumsjonMediator(message, versjonAvKode)
-        val behovMediator = BehovMediator(sikkerLogg)
-        val personMediator = PersonMediator(message, behovMediator)
+        val personMediator = PersonMediator(message)
         val datadelingMediator = DatadelingMediator(aktivitetslogg, message)
 
         val eventBus = EventBus()
@@ -607,7 +606,7 @@ internal class HendelseMediator(
         person(personidentifikator, message, context, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person ->
             handler(eventBus, person, aktivitetslogg)
         }
-        ferdigstill(context, eventBus, personMediator, subsumsjonMediator, datadelingMediator, message, aktivitetslogg, behovMediator)
+        ferdigstill(context, eventBus, personMediator, subsumsjonMediator, datadelingMediator, aktivitetslogg)
     }
 
     private fun personHverkenFunnetEllerOpprettet(context: MessageContext, message: HendelseMessage) {
@@ -643,9 +642,7 @@ internal class HendelseMediator(
         personMediator: PersonMediator,
         subsumsjonMediator: SubsumsjonMediator,
         datadelingMediator: DatadelingMediator,
-        message: HendelseMessage,
         aktivitetslogg: Aktivitetslogg,
-        behovMediator: BehovMediator
     ) {
         personMediator.ferdigstill(context, eventBus)
         subsumsjonMediator.ferdigstill(subsumsjonsproducer)
@@ -653,7 +650,6 @@ internal class HendelseMediator(
         if (aktivitetslogg.aktiviteter.isEmpty()) return
         if (aktivitetslogg.harFunksjonelleFeil()) sikkerLogg.info("aktivitetslogg inneholder errors:\n$aktivitetslogg")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n$aktivitetslogg")
-        behovMediator.håndter(context, message, aktivitetslogg)
     }
 }
 

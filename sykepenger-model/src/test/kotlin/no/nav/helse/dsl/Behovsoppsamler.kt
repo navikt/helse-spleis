@@ -1,13 +1,9 @@
 package no.nav.helse.dsl
 
 import java.time.LocalDate
-import java.time.Year
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.person. EventSubscription
-import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.spill_av_im.FørsteFraværsdag
@@ -37,7 +33,7 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
             harForespurtArbeidsgiverperiode = EventSubscription.Arbeidsgiverperiode in event.opplysninger.forespurteOpplysninger
         )))
 
-    fun loggUbesvarteBehov() {
+    fun  loggUbesvarteBehov() {
         log.log("Etter testen er det ${behovsdetaljer.size} behov uten svar: [${behovsdetaljer.joinToString { "${it::class.simpleName}"  }}]")
     }
 
@@ -143,216 +139,7 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
         ): Behovsdetaljer
     }
 
-    companion object {
-        fun opprettBehovsoppsamler(deferredLog: DeferredLog = DeferredLog()) = when (Toggle.BehovFraEventBus.enabled) {
-            true -> FraEventBus(deferredLog)
-            false -> FraAktivitetslogg(deferredLog)
-        }
-    }
-
-    class FraAktivitetslogg(log: DeferredLog): Behovsoppsamler(log) {
-        internal fun registrerFra(aktivitetslogg: Aktivitetslogg) {
-            aktivitetslogg.behov
-                .groupBy { it.kontekster }
-                .forEach { (kontekster, behovMedSammeKontekster) ->
-                    val kontekstMap = kontekster.fold(emptyMap<String, String>()) { result, item -> result + item.kontekstMap }
-                    val behovMap = behovMedSammeKontekster.groupBy({ it.type.name }, { it.detaljer() })
-                    val meldingMap = kontekstMap + behovMap
-
-                    val vedtaksperiodeId = meldingMap["vedtaksperiodeId"]?.let { UUID.fromString(it.toString()) }
-                    val behandlingId = meldingMap["behandlingId"]?.let { UUID.fromString(it.toString()) }
-                    val utbetalingId = meldingMap["utbetalingId"]?.let { UUID.fromString(it.toString()) }
-
-                    val behovene = behovMap.keys.map { Aktivitet.Behov.Behovtype.valueOf(it) }
-                    val behovsdetaljer = when (behovene.first()) {
-                        Aktivitet.Behov.Behovtype.Sykepengehistorikk -> when (vedtaksperiodeId) {
-                            null -> Behovsdetaljer.OppdatertHistorikkFraInfotrygd(
-                                periode = no.nav.helse.hendelser.Periode(
-                                    fom = (behovMap.getValue("Sykepengehistorikk").single()["historikkFom"] as String).let { LocalDate.parse(it) },
-                                    tom = (behovMap.getValue("Sykepengehistorikk").single()["historikkTom"] as String).let { LocalDate.parse(it) }
-                                ),
-                            )
-                            else -> Behovsdetaljer.InitiellHistorikFraInfotrygd(
-                                vedtaksperiodeId = vedtaksperiodeId,
-                                yrkesaktivitetssporing = meldingMap.yrkesaktivitetssporing()
-                            )
-                        }
-                        Aktivitet.Behov.Behovtype.Godkjenning -> {
-                            val behovInput = behovMap.getValue("Godkjenning").single()
-                            val yrkesaktivitetssporing = meldingMap.yrkesaktivitetssporing()
-                            val sykepengegrunnlagsfakta = behovInput.getValue("sykepengegrunnlagsfakta") as Map<String, Any>
-
-                            Behovsdetaljer.Godkjenning(
-                                vedtaksperiodeId = checkNotNull(vedtaksperiodeId),
-                                behandlingId = checkNotNull(behandlingId),
-                                utbetalingId = checkNotNull(utbetalingId),
-                                event = EventSubscription.GodkjenningEvent(
-                                    yrkesaktivitetssporing = yrkesaktivitetssporing,
-                                    vedtaksperiodeId = checkNotNull(vedtaksperiodeId),
-                                    behandlingId = checkNotNull(behandlingId),
-                                    utbetalingId = checkNotNull(utbetalingId),
-                                    periode = no.nav.helse.hendelser.Periode(
-                                        fom = (behovInput["periodeFom"] as String).let { LocalDate.parse(it) },
-                                        tom = (behovInput["periodeTom"] as String).let { LocalDate.parse(it) }
-                                    ),
-                                    vilkårsgrunnlagId = (behovInput.getValue("vilkårsgrunnlagId") as String).let { UUID.fromString(it) },
-                                    skjæringstidspunkt = (behovInput.getValue("skjæringstidspunkt") as String).let { LocalDate.parse(it) },
-                                    førstegangsbehandling = behovInput.getValue("førstegangsbehandling") as Boolean,
-                                    utbetalingtype = behovInput.getValue("utbetalingtype") as String,
-                                    inntektskilde = behovInput.getValue("inntektskilde") as String,
-                                    periodetype = behovInput.getValue("periodetype") as String,
-                                    tags = behovInput.getValue("tags") as Set<String>,
-                                    orgnummereMedRelevanteArbeidsforhold = behovInput.getValue("orgnummereMedRelevanteArbeidsforhold") as Set<String>,
-                                    kanAvvises = behovInput.getValue("kanAvvises") as Boolean,
-                                    relevanteSøknader = (behovInput.getValue("relevanteSøknader") as Set<UUID>),
-                                    perioderMedSammeSkjæringstidspunkt = (behovInput.getValue("perioderMedSammeSkjæringstidspunkt") as List<Map<String, String>>).map { EventSubscription.GodkjenningEvent.PeriodeMedSammeSkjæringstidspunkt(
-                                        periode = no.nav.helse.hendelser.Periode(
-                                            fom = it.getValue("fom").let { LocalDate.parse(it) },
-                                            tom = it.getValue("tom").let { LocalDate.parse(it) }
-                                        ),
-                                        vedtaksperiodeId = it.getValue("vedtaksperiodeId").let { UUID.fromString(it) },
-                                        behandlingId = it.getValue("behandlingId").let { UUID.fromString(it) },
-                                    )},
-                                    forbrukteSykedager = behovInput.getValue("forbrukteSykedager") as Int,
-                                    gjenståendeSykedager = behovInput.getValue("gjenståendeSykedager") as Int,
-                                    foreløpigBeregnetSluttPåSykepenger = (behovInput.getValue("foreløpigBeregnetSluttPåSykepenger") as String).let { LocalDate.parse(it) },
-                                    arbeidssituasjon = behovInput.getValue("arbeidssituasjon") as String,
-                                    utbetalingsdager = (behovInput.getValue("utbetalingsdager") as List<Map<String, Any>>).map { EventSubscription.Utbetalingsdag(
-                                        dato = (it.getValue("dato") as String).let { LocalDate.parse(it) },
-                                        type = (it.getValue("type") as String).let { EventSubscription.Utbetalingsdag.Dagtype.valueOf(it) },
-                                        beløpTilArbeidsgiver = it.getValue("beløpTilArbeidsgiver") as Int,
-                                        beløpTilBruker = it.getValue("beløpTilBruker") as Int,
-                                        sykdomsgrad = it.getValue("sykdomsgrad") as Int,
-                                        dekningsgrad = it.getValue("dekningsgrad") as Int,
-                                        begrunnelser = (it.getValue("begrunnelser") as List<String>).takeUnless { it.isEmpty() }?.map { EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.valueOf(it) }
-                                    )},
-                                    sykepengegrunnlagsfakta = when (yrkesaktivitetssporing) {
-                                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                                        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> when (sykepengegrunnlagsfakta.getValue("fastsatt") as String?) {
-                                            "EtterHovedregel" -> EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel(
-                                                sykepengegrunnlag = sykepengegrunnlagsfakta.getValue("sykepengegrunnlag") as Double,
-                                                seksG = sykepengegrunnlagsfakta.getValue("6G") as Double,
-                                                arbeidsgivere = (sykepengegrunnlagsfakta.getValue("arbeidsgivere") as List<Map<String, Any>>).map { EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel.Arbeidsgiver(
-                                                    arbeidsgiver = it.getValue("arbeidsgiver") as String,
-                                                    omregnetÅrsinntekt = it.getValue("omregnetÅrsinntekt") as Double,
-                                                    inntektskilde = it.getValue("inntektskilde") as String
-                                                )}
-                                            )
-                                            "EtterSkjønn" -> EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn(
-                                                sykepengegrunnlag = sykepengegrunnlagsfakta.getValue("sykepengegrunnlag") as Double,
-                                                seksG = sykepengegrunnlagsfakta.getValue("6G") as Double,
-                                                arbeidsgivere = (sykepengegrunnlagsfakta.getValue("arbeidsgivere") as List<Map<String, Any>>).map { EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn.Arbeidsgiver(
-                                                    arbeidsgiver = it.getValue("arbeidsgiver") as String,
-                                                    omregnetÅrsinntekt = it.getValue("omregnetÅrsinntekt") as Double,
-                                                    skjønnsfastsatt = it.getValue("skjønnsfastsatt") as Double
-                                                )}
-                                            )
-                                            "IInfotrygd" -> EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerFraInfotrygd(
-                                                sykepengegrunnlag = sykepengegrunnlagsfakta.getValue("sykepengegrunnlag") as Double,
-                                                seksG = sykepengegrunnlagsfakta.getValue("6G") as Double,
-                                            )
-                                            else -> error("Ukjent fastsatt-type")
-                                        }
-                                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel(
-                                            sykepengegrunnlag = sykepengegrunnlagsfakta.getValue("sykepengegrunnlag") as Double,
-                                            seksG = sykepengegrunnlagsfakta.getValue("6G") as Double,
-                                            pensjonsgivendeInntekter = ((sykepengegrunnlagsfakta.getValue("selvstendig") as Map<String, Any>).getValue("pensjonsgivendeInntekter") as List<Map<String, Any>>).map { EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel.PensjonsgivendeInntekt(
-                                                årstall = Year.of(it.getValue("årstall") as Int),
-                                                beløp = it.getValue("beløp") as Double
-                                            )},
-                                            beregningsgrunnlag = (sykepengegrunnlagsfakta.getValue("selvstendig") as Map<String, Any>).getValue("beregningsgrunnlag") as Double
-                                        )
-                                        Behandlingsporing.Yrkesaktivitet.Frilans -> error("Støtter ikke frilanser ennå")
-                                    }
-                                )
-                            )
-                        }
-                        Aktivitet.Behov.Behovtype.Simulering -> Behovsdetaljer.Simulering(
-                            vedtaksperiodeId = checkNotNull(vedtaksperiodeId),
-                            utbetalingId = checkNotNull(utbetalingId),
-                            fagsystemId = behovMap.getValue("Simulering").single().getValue("fagsystemId") as String,
-                            fagområde = behovMap.getValue("Simulering").single().getValue("fagområde") as String
-                        )
-                        Aktivitet.Behov.Behovtype.Utbetaling -> {
-                            val behovInput = behovMap.getValue("Utbetaling").single()
-                            Behovsdetaljer.Utbetaling(
-                                vedtaksperiodeId = checkNotNull(vedtaksperiodeId),
-                                behandlingId = checkNotNull(behandlingId),
-                                utbetalingId = checkNotNull(utbetalingId),
-                                fagområde = behovInput.getValue("fagområde") as String,
-                                fagsystemId = behovInput.getValue("fagsystemId") as String,
-                                organisasjonsnummer = meldingMap.getValue("organisasjonsnummer") as String,
-                                maksdato = (behovInput["maksdato"] as? String)?.let { LocalDate.parse(it) },
-                                linjer = ((behovInput.getValue("linjer")) as List<Map<String, *>>).map { Behovsdetaljer.Utbetaling.Linje(it["statuskode"] as? String) }
-                            )
-                        }
-                        Aktivitet.Behov.Behovtype.Feriepengeutbetaling -> {
-                            val behovInput = behovMap.getValue("Feriepengeutbetaling").single()
-                            val linje = (behovInput.getValue("linjer") as List<Map<String, Any>>).single()
-                            Behovsdetaljer.Feriepengeutbetaling(
-                                utbetalingId = checkNotNull(utbetalingId),
-                                event = EventSubscription.UtbetalFeriepengerEvent(
-                                    mottaker = behovInput.getValue("mottaker") as String,
-                                    organisasjonsnummer = meldingMap.getValue("organisasjonsnummer") as String,
-                                    utbetalingId = checkNotNull(utbetalingId),
-                                    fagområde = behovInput.getValue("fagområde") as String,
-                                    fagsystemId = behovInput.getValue("fagsystemId") as String,
-                                    endringskode = behovInput.getValue("endringskode") as String,
-                                    linje = EventSubscription.UtbetalFeriepengerEvent.Linje(
-                                        periode = no.nav.helse.hendelser.Periode(
-                                            fom = (linje.getValue("fom") as String).let { LocalDate.parse(it) },
-                                            tom = (linje.getValue("tom") as String).let { LocalDate.parse(it) }
-                                        ),
-                                        sats = linje.getValue("sats") as Int,
-                                        endringskode = linje.getValue("endringskode") as String,
-                                        delytelseId = linje.getValue("delytelseId") as Int,
-                                        refDelytelseId = linje["refDelytelseId"] as Int?,
-                                        refFagsystemId = linje["refFagsystemId"] as String?,
-                                        statuskode = linje["statuskode"] as String?,
-                                        datoStatusFom =  (linje["datoStatusFom"] as String?)?.let { LocalDate.parse(it) },
-                                        klassekode = linje.getValue("klassekode") as String
-                                    )
-                                )
-                            )
-                        }
-                        Aktivitet.Behov.Behovtype.Foreldrepenger,
-                        Aktivitet.Behov.Behovtype.Pleiepenger,
-                        Aktivitet.Behov.Behovtype.Omsorgspenger,
-                        Aktivitet.Behov.Behovtype.Opplæringspenger,
-                        Aktivitet.Behov.Behovtype.DagpengerV2,
-                        Aktivitet.Behov.Behovtype.ArbeidsavklaringspengerV2,
-                        Aktivitet.Behov.Behovtype.Institusjonsopphold,
-                        Aktivitet.Behov.Behovtype.InntekterForBeregning,
-                        Aktivitet.Behov.Behovtype.SelvstendigForsikring -> when (Aktivitet.Behov.Behovtype.SelvstendigForsikring in behovene) {
-                            true -> Behovsdetaljer.InformasjonTilBeregningAvSelvstendig(checkNotNull(vedtaksperiodeId))
-                            false -> Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker(checkNotNull(vedtaksperiodeId))
-                        }
-
-                        Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag,
-                        Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering,
-                        Aktivitet.Behov.Behovtype.Medlemskap,
-                        Aktivitet.Behov.Behovtype.ArbeidsforholdV2 -> Behovsdetaljer.InformasjonTilVilkårsprøving(checkNotNull(vedtaksperiodeId))
-
-                        Aktivitet.Behov.Behovtype.Dødsinfo -> error("Spleis sender ikke ut behov om Dødsinfo")
-                        Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger -> error("Spleis sender ikke ut behov om SykepengehistorikkForFeriepenger")
-                    }
-
-                    registrer(behovsdetaljer)
-                }
-        }
-
-        private companion object {
-            fun Map<String, Any>.yrkesaktivitetssporing() = when (val yrkesaktivitetstype = get("yrkesaktivitetstype") as String?) {
-                "SELVSTENDIG" -> Behandlingsporing.Yrkesaktivitet.Selvstendig
-                "FRILANS" -> Behandlingsporing.Yrkesaktivitet.Frilans
-                "ARBEIDSLEDIG" -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-                "ARBEIDSTAKER" -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(getValue("organisasjonsnummer") as String)
-                else -> error("Ukjent yrkesaktivitetstype $yrkesaktivitetstype")
-            }
-        }
-    }
-
-    class FraEventBus(log: DeferredLog): Behovsoppsamler(log) {
+    class FraEventBus(log: DeferredLog = DeferredLog()): Behovsoppsamler(log) {
         override fun utbetal(event: EventSubscription.UtbetalingEvent) =
             registrer(Behovsdetaljer.Utbetaling(
                 vedtaksperiodeId = event.vedtaksperiodeId,

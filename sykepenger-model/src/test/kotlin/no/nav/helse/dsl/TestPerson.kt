@@ -84,7 +84,7 @@ internal class TestPerson(
 
     private lateinit var forrigeAktivitetslogg: Aktivitetslogg
     internal val personlogg = Aktivitetslogg()
-    private val behovsoppsamler = Behovsoppsamler.opprettBehovsoppsamler(deferredLog)
+    private val behovsoppsamler = Behovsoppsamler.FraEventBus(deferredLog)
     internal val behovshåndterer = Behovshåndterer(behovsoppsamler)
     private val varslersamler = Varslersamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk()
@@ -126,7 +126,6 @@ internal class TestPerson(
                 hendelse = this,
                 operasjon = {
                     person.håndter(eventBus, this, forrigeAktivitetslogg)
-                    (behovsoppsamler as? Behovsoppsamler.FraAktivitetslogg)?.registrerFra(forrigeAktivitetslogg)
                 },
                 håndterInntektsmeldingerReplay = { it.håndter(Person::håndterInntektsmeldingerReplay) },
                 håndterInitiellHistorikkFraInfotrygd = { it.håndter(Person::håndterUtbetalingshistorikk) }

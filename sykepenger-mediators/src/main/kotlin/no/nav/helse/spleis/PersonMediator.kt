@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.KollektivJordbruksforsikring
 import no.nav.helse.hendelser.SelvstendigForsikring
@@ -27,8 +26,7 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
 internal class PersonMediator(
-    private val message: HendelseMessage,
-    private val behovslytter: Behovslytter
+    private val message: HendelseMessage
 ) {
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -86,36 +84,29 @@ internal class PersonMediator(
                     is EventSubscription.NyInformasjonIInfotrygdEvent -> mapNyInformasjonIInfotrygdEvent(event)
                 }
             }
-            .mapNotNull { jsonMessage -> mapTilPakke(jsonMessage) }
+            .map { jsonMessage -> mapTilPakke(jsonMessage) }
             .sendUtgåendeMeldinger(context)
     }
 
     private fun LocalDateTime.tilUtc() = atZone(ZoneId.systemDefault()).toInstant()
 
-    private fun mapTilPakke(jsonMessage: JsonMessage): Pakke? {
+    private fun mapTilPakke(jsonMessage: JsonMessage): Pakke {
         jsonMessage.requireKey("@event_name", "@opprettet")
         val outgoingMessage = jsonMessage.apply {
             this["fødselsnummer"] = message.meldingsporing.fødselsnummer
             this["@opprettetUTC"] = jsonMessage["@opprettet"].asLocalDateTime().tilUtc()
         }.toJson()
         val eventName = jsonMessage["@event_name"].asText()
-        if (eventName == "behov") {
-            behovslytter.behovsmeldingFraEventBus(outgoingMessage)
-
-            when (Toggle.BehovFraEventBus.enabled) {
+        return Pakke(message.meldingsporing.fødselsnummer, outgoingMessage) {
+            when (eventName.lowercase() == "behov") {
                 true -> {
                     jsonMessage.requireKey("@behov")
                     val behov = jsonMessage["@behov"].map { it.asText() }
-                    // TODO: Hmm, per i dag så sendes behov helt til slutt - må det det? Eller er det bare tilfeldig?
-                    sikkerLogg.info("sender behov fra eventbus for {}:\n{}", behov, outgoingMessage)
+                    sikkerLogg.info("sender behov (${behov.joinToString()}):\n\t$outgoingMessage")
                 }
-                false -> {
-                    sikkerLogg.info("Her hadde vi sendt behov fra eventbus, og hen hadde sett slik ut:\n\t$outgoingMessage")
-                    return null
-                }
+                false -> sikkerLogg.info("sender $eventName:\n\t$outgoingMessage")
             }
         }
-        return Pakke(message.meldingsporing.fødselsnummer, eventName, outgoingMessage)
     }
 
     private fun List<Pakke>.sendUtgåendeMeldinger(context: MessageContext) {
@@ -1122,11 +1113,11 @@ internal class PersonMediator(
 
     private data class Pakke(
         private val fødselsnummer: String,
-        private val eventName: String,
         private val blob: String,
+        private val førSending: () -> Unit
     ) {
         fun tilUtgåendeMelding(): OutgoingMessage {
-            sikkerLogg.info("sender $eventName: $blob")
+            førSending()
             return OutgoingMessage(
                 body = blob,
                 key = fødselsnummer
