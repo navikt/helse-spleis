@@ -9,7 +9,6 @@ import no.nav.helse.dto.serialisering.FeriepengeoppdragUtDto
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -46,7 +45,6 @@ data class Feriepengeoppdrag(
         val aktivitetsloggMedOppdragkontekst = aktivitetslogg.kontekst(this)
         if (!skalSendeOppdrag) return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Feriepengerendringskode.UEND)
-        aktivitetsloggMedOppdragkontekst.behov(Behovtype.Feriepengeutbetaling, "Trenger å sende utbetaling til Oppdrag", behovdetaljer())
 
         val mottaker = when (fagområde) {
             Feriepengerfagområde.SykepengerRefusjon -> "arbeidsgiver"
@@ -104,18 +102,6 @@ data class Feriepengeoppdrag(
     }
 
     override fun toSpesifikkKontekst() = SpesifikkKontekst("Feriepengeoppdrag", mapOf("fagsystemId" to fagsystemId))
-
-    private fun behovdetaljer(): Map<String, Any> {
-        checkNotNull(linje) { "forventer at oppdraget har en linje" }
-        return mapOf(
-            "mottaker" to mottaker,
-            "fagområde" to "$fagområde",
-            "linjer" to listOf(linje.behovdetaljer()),
-            "fagsystemId" to fagsystemId,
-            "endringskode" to "$endringskode",
-            "saksbehandler" to "SPLEIS"
-        )
-    }
 
     private fun utbetalFeriepengerEvent(arbeidstaker: Arbeidstaker, utbetalingId: UUID) = EventSubscription.UtbetalFeriepengerEvent(
         mottaker = mottaker,

@@ -11,7 +11,6 @@ data class Aktivitetslogg(
     val aktiviteter: MutableList<Aktivitet> = mutableListOf()
 ) : IAktivitetslogg {
 
-    val behov get() = aktiviteter.filterIsInstance<Behov>()
     val info get() = aktiviteter.filterIsInstance<Info>()
     val varsel get() = aktiviteter.filterIsInstance<Varsel>()
     val funksjonellFeil get() = aktiviteter.filterIsInstance<FunksjonellFeil>()
@@ -23,11 +22,6 @@ data class Aktivitetslogg(
 
     override fun varsel(kode: Varselkode) {
         add(kode.varsel(kontekster.toSpesifikk()))
-    }
-
-    override fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) {
-        // TODO: Fjern funksjonen helt.
-        //add(Behov.opprett(type, kontekster.toSpesifikk(), melding, detaljer))
     }
 
     override fun funksjonellFeil(kode: Varselkode) {

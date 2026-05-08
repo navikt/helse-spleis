@@ -11,10 +11,8 @@ import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
@@ -64,9 +62,6 @@ private fun trengerUtbetaling(
 
     val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(utbetaling)
 
-    utbetalingsbehov(aktivitetsloggMedUtbetalingkontekst, utbetaling.arbeidsgiverOppdrag, saksbehandler, maksdato)
-    utbetalingsbehov(aktivitetsloggMedUtbetalingkontekst, utbetaling.personOppdrag, saksbehandler, maksdato)
-
     oppdragsdetaljer(utbetaling.arbeidsgiverOppdrag, maksdato)?.let {
         eventBus.utbetal(
             yrkesaktivitetssporing = yrkesaktivitetssporing,
@@ -91,46 +86,6 @@ private fun trengerUtbetaling(
         )
         val aktivitetsloggMedOppdragkontekst = aktivitetsloggMedUtbetalingkontekst.kontekst(utbetaling.personOppdrag)
         aktivitetsloggMedOppdragkontekst.info("Sender ut event om at det skal utbetales til sykmeldt")
-    }
-}
-
-private fun utbetalingsbehov(aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag, saksbehandler: String, maksdato: LocalDate?) {
-    val utbetalingstype = when (oppdrag.fagområde) {
-        Fagområde.SykepengerRefusjon -> "arbeidsgiverutbetaling"
-        Fagområde.Sykepenger -> "personutbetaling"
-    }
-
-    utbetalingsbehovdetaljer(oppdrag, saksbehandler, maksdato)?.also {
-        aktivitetslogg
-            .kontekst(oppdrag)
-            .behov(Behovtype.Utbetaling, "Trenger å sende $utbetalingstype til Oppdrag", it)
-    }
-}
-
-internal fun utbetalingsbehovdetaljer(oppdrag: Oppdrag, saksbehandler: String, maksdato: LocalDate?): Map<String, Any>? {
-    when (oppdrag.endringskode) {
-        Endringskode.UEND -> return null
-        Endringskode.NY,
-        Endringskode.ENDR -> when (oppdrag.status) {
-            Oppdragstatus.AKSEPTERT,
-            Oppdragstatus.AKSEPTERT_MED_FEIL,
-            Oppdragstatus.FEIL -> return null
-
-            Oppdragstatus.AVVIST,
-            Oppdragstatus.OVERFØRT,
-            null -> {
-                val linjerMedEndring = oppdrag.linjerMedEndring().takeIf { it.isNotEmpty() } ?: return null
-                val maksdatomap = maksdato?.let { mapOf("maksdato" to maksdato.toString()) } ?: emptyMap()
-                return mapOf(
-                    "mottaker" to oppdrag.mottaker,
-                    "fagområde" to oppdrag.fagområde.verdi,
-                    "linjer" to linjerMedEndring.map(Utbetalingslinje::behovdetaljer),
-                    "fagsystemId" to oppdrag.fagsystemId,
-                    "endringskode" to "${oppdrag.endringskode}",
-                    "saksbehandler" to saksbehandler
-                ) + maksdatomap
-            }
-        }
     }
 }
 
@@ -159,24 +114,6 @@ internal fun oppdragsdetaljer(oppdrag: Oppdrag, maksdato: LocalDate?): EventSubs
         }
     }
 }
-
-private fun Utbetalingslinje.behovdetaljer() = mapOf<String, Any?>(
-    "fom" to fom.toString(),
-    "tom" to tom.toString(),
-    "satstype" to "DAG",
-    "sats" to beløp,
-    "grad" to grad.toDouble(), // backwards-compatibility mot andre systemer som forventer double: må gjennomgås
-    "stønadsdager" to stønadsdager(),
-    "totalbeløp" to totalbeløp(),
-    "endringskode" to endringskode.toString(),
-    "delytelseId" to delytelseId,
-    "refDelytelseId" to refDelytelseId,
-    "refFagsystemId" to refFagsystemId,
-    "statuskode" to statuskode,
-    "datoStatusFom" to datoStatusFom?.toString(),
-    "klassekode" to klassekode.verdi,
-    "datoKlassifikFom" to fom.toString(),
-)
 
 private fun Utbetalingslinje.oppdragsdetaljerLinje() = EventSubscription.Oppdragsdetaljer.Linje(
     periode = fom til tom,

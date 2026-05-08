@@ -53,20 +53,6 @@ data class Feriepengeutbetalingslinje(
 
     override fun toString() = "$fom til $tom $endringskode ${datoStatusFom?.let { "opphører fom $it" }}"
 
-    fun behovdetaljer() = mapOf<String, Any?>(
-        "fom" to fom.toString(),
-        "tom" to tom.toString(),
-        "satstype" to "ENG",
-        "sats" to beløp,
-        "endringskode" to endringskode.toString(),
-        "delytelseId" to delytelseId,
-        "refDelytelseId" to refDelytelseId,
-        "refFagsystemId" to refFagsystemId,
-        "statuskode" to statuskode,
-        "datoStatusFom" to datoStatusFom?.toString(),
-        "klassekode" to klassekode.verdi
-    )
-
     fun utbetalFeriepengerEventLinje() = EventSubscription.UtbetalFeriepengerEvent.Linje(
         periode = fom til tom,
         sats = beløp,

@@ -89,20 +89,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrTidslinje
 import no.nav.helse.person.Dokumentsporing.Companion.søknad
 import no.nav.helse.person.Venteårsak.Companion.fordi
-import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspengerV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpengerV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForBeregning
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForOpptjeningsvurdering
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.selvstendigForsikring
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -2927,22 +2913,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun trengerYtelser(aktivitetslogg: IAktivitetslogg, eventBus: EventBus) {
         val søkevinduFamilieytelser = periode.familieYtelserPeriode
-        foreldrepenger(aktivitetslogg, søkevinduFamilieytelser)
-        pleiepenger(aktivitetslogg, søkevinduFamilieytelser)
-        omsorgspenger(aktivitetslogg, søkevinduFamilieytelser)
-        opplæringspenger(aktivitetslogg, søkevinduFamilieytelser)
-        institusjonsopphold(aktivitetslogg, periode)
-        arbeidsavklaringspengerV2(aktivitetslogg, periode.start.minusMonths(6), periode.endInclusive)
-        dagpengerV2(aktivitetslogg, periode.start.minusMonths(2), periode.endInclusive)
         val (beregningsperiode, _) = perioderSomMåHensyntasVedBeregning()
-        inntekterForBeregning(aktivitetslogg, beregningsperiode)
-
-        when (yrkesaktivitet.yrkesaktivitetstype) {
-            Arbeidsledig,
-            is Arbeidstaker,
-            Frilans -> {}
-            Selvstendig -> selvstendigForsikring(aktivitetslogg, this.skjæringstidspunkt)
-        }
 
         val event = EventSubscription.TrengerInformasjonTilBeregningEvent(
             vedtaksperiodeId = id,
@@ -2965,10 +2936,6 @@ internal class Vedtaksperiode private constructor(
 
     internal fun trengerVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg, eventBus: EventBus) {
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
-        inntekterForSykepengegrunnlag(aktivitetslogg, skjæringstidspunkt, beregningSlutt.minusMonths(2), beregningSlutt)
-        inntekterForOpptjeningsvurdering(aktivitetslogg, skjæringstidspunkt, beregningSlutt, beregningSlutt)
-        arbeidsforhold(aktivitetslogg, skjæringstidspunkt)
-        medlemskap(aktivitetslogg, skjæringstidspunkt, periode.start, periode.endInclusive)
 
         val event = EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent(
             vedtaksperiodeId = id,
@@ -3060,7 +3027,6 @@ internal class Vedtaksperiode private constructor(
 
         val utbetaling = checkNotNull(behandlinger.utbetaling) { "Forventer å ha en utbetaling når vi skal sende godkjenningsbehov" }
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(utbetaling)
-        Aktivitet.Behov.godkjenning(aktivitetsloggMedUtbetalingkontekst, utkastTilVedtakBuilder.buildGodkjenningsbehov())
         aktivitetsloggMedUtbetalingkontekst.info("Sender ut event om at vi trenger godkjenning")
         eventBus.trengerGodkjenning(utkastTilVedtakBuilder.buildGodkjenningEvent())
     }

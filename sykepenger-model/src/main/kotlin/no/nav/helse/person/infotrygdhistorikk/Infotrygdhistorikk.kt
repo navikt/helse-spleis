@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.EventBus
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -58,14 +57,12 @@ internal class Infotrygdhistorikk private constructor(
         val oppfriskningsperiode = oppfriskningsperiode(tidligsteDato)
         eventBus.trengerInitiellHistorikkFraInfotrygd(oppfriskningsperiode, vedtaksperiodeId, yrkesaktivitetsporing)
         aktivitetslogg.info("Sender ut event om at vi trenger initiell historikk fra Infotrygd")
-        utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode)
     }
 
     internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, tidligsteDato: LocalDate) {
         val oppfriskningsperiode = oppfriskningsperiode(tidligsteDato)
         eventBus.trengerOppdatertHistorikkFraInfotrygd(oppfriskningsperiode)
         aktivitetslogg.info("Sender ut event om at vi trenger oppdatert historikk fra Infotrygd")
-        utbetalingshistorikk(aktivitetslogg, oppfriskningsperiode)
     }
 
     private fun oppfriskningsperiode(tidligsteDato: LocalDate): Periode {
