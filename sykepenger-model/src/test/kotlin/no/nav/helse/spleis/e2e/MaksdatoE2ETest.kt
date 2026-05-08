@@ -10,13 +10,13 @@ import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -28,13 +28,49 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class MaksdatoE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `utbetalt utover maks i Infotrygd - Spleis teller rett`() {
+        a1 {
+            // OK utbetalt i Infotrygd (248 dager)
+            val utbetaltTilMaksIInfotrygd = 1.januar(2017) til 13.desember(2017)
+            assertEquals(248, listOf(utbetaltTilMaksIInfotrygd).utbetalingsdager())
+
+            // 26 uker (182 dager) opphold gir egentlig ny rett 14.juni (2018)
+            assertEquals(182, (14.desember(2017) til 13.juni).count())
+
+            // Men det utbetales 42 dager utover maks i Infotryd
+            val utbetaltUtoverMaksIInfotrygd = 1.februar til 31.mars
+            assertEquals(42, listOf(utbetaltUtoverMaksIInfotrygd).utbetalingsdager())
+            assertEquals(290, listOf(utbetaltTilMaksIInfotrygd, utbetaltUtoverMaksIInfotrygd).utbetalingsdager())
+
+            // Når saksbehandler ikke er klar over at det er utbetalt utover maks i Infotrygd så tror de at ny rett inntreffer
+            // 26 uker etter siste utbetaling i Infotrygd, altså 30.september (2018)
+            assertEquals(182, (1.april til 29.september).count())
+
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                ArbeidsgiverUtbetalingsperiode(a1, utbetaltTilMaksIInfotrygd.start, utbetaltTilMaksIInfotrygd.endInclusive),
+                ArbeidsgiverUtbetalingsperiode(a1, utbetaltUtoverMaksIInfotrygd.start, utbetaltUtoverMaksIInfotrygd.endInclusive)
+            )
+
+            // .. Så når vi får søknad for juli forventer saksbehandler at vi skal avslå perioden,
+            // men vi foreslårm utbetaling fordi det er ny rett 14.juni
+
+            nyttVedtak(juli)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.juli til 31.juli)
+            assertEquals(27.juni(2019), inspektør.sisteMaksdato(1.vedtaksperiode).maksdato)
+            // TODO: Hadde det vært mulig med et varsel her montro?
+        }
+    }
 
     @Test
     fun `Korrekt maksdato ved mursteinspølser og lave inntekter`() {
@@ -279,6 +315,11 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
                 "Disse periodene skal kastes ut pr nå"
             }
         }
+    }
+
+    private fun List<Periode>.utbetalingsdager() = grupperSammenhengendePerioder().fold(0) { sum, periode ->
+        // ukerdager() tar ikke med tom, så plusser på en dag for å få utbetalingsdager
+        sum + periode.oppdaterTom(periode.endInclusive.plusDays(1)).ukedager()
     }
 
     private fun TestPerson.TestArbeidsgiver.forlengVedtakUtenUtbetaling(periode: Periode) {
