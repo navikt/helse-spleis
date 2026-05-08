@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -158,27 +157,6 @@ internal class AktivitetsloggTest {
         hendelse2.info("info message")
         hendelse2.funksjonellFeil(RV_VT_1)
         assertEquals(5, aktivitetslogg.aktiviteter.size)
-    }
-
-    @Test
-    fun `Behov kan ha detaljer`() {
-        val hendelse1 = aktivitetslogg
-            .kontekst(person)
-        val param1 = "value"
-        val param2 = LocalDate.now()
-        hendelse1.behov(
-            Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning", mapOf(
-            "param1" to param1,
-            "param2" to param2
-        )
-        )
-
-        assertEquals(1, aktivitetslogg.behov.size)
-        assertEquals(1, aktivitetslogg.behov.first().alleKontekster.size)
-        assertEquals(2, aktivitetslogg.behov.first().detaljer().size)
-        assertEquals("Person 1", aktivitetslogg.behov.first().alleKontekster["Person"])
-        assertEquals(param1, aktivitetslogg.behov.first().detaljer()["param1"])
-        assertEquals(param2, aktivitetslogg.behov.first().detaljer()["param2"])
     }
 
     @Test

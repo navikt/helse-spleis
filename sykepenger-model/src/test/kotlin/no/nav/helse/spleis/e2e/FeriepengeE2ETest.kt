@@ -489,7 +489,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             )
         }
 
-        assertTrue(testperson.personlogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
+        assertTrue(testperson.personlogg.toString().contains("Sender ut event om at det skal utbetales feriepenger"))
 
         with(behov) {
             assertEquals("SPLEIS", event.saksbehandler)

@@ -26,7 +26,8 @@ data class Aktivitetslogg(
     }
 
     override fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) {
-        add(Behov.opprett(type, kontekster.toSpesifikk(), melding, detaljer))
+        // TODO: Fjern funksjonen helt.
+        //add(Behov.opprett(type, kontekster.toSpesifikk(), melding, detaljer))
     }
 
     override fun funksjonellFeil(kode: Varselkode) {

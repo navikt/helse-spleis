@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -72,13 +71,6 @@ internal class DatadelingMediatorTest {
         assertEquals(1, testRapid.inspektør.antall())
         val aktiviteter = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"]
         assertEquals(3, aktiviteter.size())
-    }
-
-    @Test
-    fun `publiserer behov-aktiviteter`() {
-        aktivitetslogg.behov(Aktivitet.Behov.Behovtype.Godkjenning, "melding")
-        datadelingMediator.ferdigstill(testRapid)
-        assertEquals(1, testRapid.inspektør.antall())
     }
 
     @Test
