@@ -11,7 +11,9 @@ on:
       - '.github/workflows/spleis-opprydding-dev.yml'
       - 'deploy/dev-opprydding.yml'
       - 'Dockerfile'
-
+  schedule:
+    - cron: '0 3 * * 3'
+      timezone: 'Europe/Oslo'
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:

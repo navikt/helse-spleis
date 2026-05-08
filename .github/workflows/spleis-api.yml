@@ -19,7 +19,9 @@ on:
     - '.github/workflows/**'
     - 'deploy/dev-api.yml'
     - 'deploy/prod-api.yml'
-
+  schedule:
+    - cron: '0 3 * * 3'
+      timezone: 'Europe/Oslo'
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

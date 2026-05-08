@@ -17,7 +17,9 @@ on:
       - 'deploy/prod-alertmanagerconfig.yml'
     branches:
       - main
-
+  schedule:
+    - cron: '0 3 * * 3'
+      timezone: 'Europe/Oslo'
 jobs:
   build:
     name: build docker image
