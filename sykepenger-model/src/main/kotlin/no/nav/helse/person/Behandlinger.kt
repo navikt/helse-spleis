@@ -43,6 +43,7 @@ import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.bestemDager
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.bestemSkjæringstidspunkt
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.eksterneIder
+import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingIder
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.EventSubscription.AnalytiskDatapakkeEvent
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
@@ -275,6 +276,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun byggUtkastTilVedtak(builder: UtkastTilVedtakBuilder, behandling: Behandling?): UtkastTilVedtakBuilder {
         if (behandlinger.grunnbeløpsregulert()) builder.grunnbeløpsregulert()
         builder.relevanteSøknader(søknadIder())
+        builder.relevanteInntektsmeldinger(inntektsmeldingIder())
         (behandling ?: sisteBehandling).byggUtkastTilVedtak(builder)
         return builder
     }
@@ -381,6 +383,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun hendelseIder() = behandlinger.dokumentsporing
     internal fun eksterneIderUUID() = behandlinger.dokumentsporing.eksterneIder().map { it.id }.toSet()
     internal fun søknadIder() = behandlinger.dokumentsporing.søknadIder()
+    internal fun inntektsmeldingIder() = behandlinger.dokumentsporing.inntektsmeldingIder().map { it.id }.toSet()
 
     fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
         behandlinger.any { it.dokumentHåndtert(dokumentsporing) }

@@ -23,7 +23,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         val søknadId = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(
+        val (inntektsmeldingId, _) = sendInntektsmelding(
             listOf(Periode(fom = 3.januar, tom = 18.januar)),
             førsteFraværsdag = 3.januar
         )
@@ -44,7 +44,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
   "fom": "2018-01-03",
   "tom": "2018-01-26",
   "skjæringstidspunkt": "2018-01-03",
-  "hendelser": [ "$søknadId" ],
+  "hendelser": [ "$søknadId", "$inntektsmeldingId" ],
   "sykepengegrunnlagsfakta": {
     "fastsatt": "EtterHovedregel",
     "omregnetÅrsinntektTotalt": 372000.0,
@@ -70,7 +70,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         val søknadId = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(
+        val (inntektsmeldingId, _) = sendInntektsmelding(
             listOf(Periode(fom = 3.januar, tom = 18.januar)),
             førsteFraværsdag = 3.januar,
             beregnetInntekt = 45000.00
@@ -93,7 +93,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
   "fom": "2018-01-03",
   "tom": "2018-01-26",
   "skjæringstidspunkt": "2018-01-03",
-  "hendelser": [ "$søknadId" ],
+  "hendelser": [ "$søknadId", "$inntektsmeldingId" ],
   "sykepengegrunnlagsfakta": {
     "fastsatt": "EtterSkjønn",
     "omregnetÅrsinntektTotalt": 540000.0,
@@ -151,7 +151,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        val (innteksmeldingId, _) = sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -178,7 +178,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
   "tom": "2018-01-31",
   "skjæringstidspunkt": "2018-01-03",
   "hendelser": [
-    "$søknadId"
+    "$søknadId", "$innteksmeldingId"
   ],
   "sykepengegrunnlagsfakta": {
     "fastsatt": "EtterHovedregel",
