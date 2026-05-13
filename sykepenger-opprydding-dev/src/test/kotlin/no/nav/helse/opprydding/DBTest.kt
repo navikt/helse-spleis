@@ -6,7 +6,11 @@ import com.github.navikt.tbd_libs.test_support.TestDataSource
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 
-val databaseContainer = DatabaseContainers.container("spleis-opprydding-dev", CleanupStrategy.tables("person, melding"))
+val databaseContainer = DatabaseContainers.container(
+    appnavn = "spleis-opprydding-dev",
+    cleanupStrategy = CleanupStrategy.tables("person, melding"),
+    postgresVersjon = 17,
+)
 
 internal abstract class DBTest {
     protected lateinit var dataSource: TestDataSource
