@@ -32,7 +32,7 @@ dependencies {
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 }
 
-val copyJars = tasks.create("copy-jars") {
+val copyJars = tasks.register("copy-jars") {
     doLast {
         configurations.runtimeClasspath.get().forEach {
             val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
@@ -63,7 +63,10 @@ tasks.withType<Test> {
     systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "8")
 }
 
-tasks.create("remove_spleis_mediators_db_container", DockerRemoveContainer::class) {
+docker {
+    url = "unix://${System.getProperty("user.home")}/.colima/default/docker.sock"
+}
+tasks.register("remove_spleis_mediators_db_container", DockerRemoveContainer::class) {
     targetContainerId("spleis-mediators")
     dependsOn(":sykepenger-mediators:test")
     setProperty("force", true)

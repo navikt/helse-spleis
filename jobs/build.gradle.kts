@@ -23,7 +23,7 @@ dependencies {
 }
 
 tasks {
-    val copyJars = create("copy-jars") {
+    val copyJars = register("copy-jars") {
         doLast {
             configurations.runtimeClasspath.get().forEach {
                 val file = File("${layout.buildDirectory.get()}/libs/${it.name}")

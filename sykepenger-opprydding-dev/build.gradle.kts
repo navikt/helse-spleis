@@ -38,10 +38,12 @@ tasks.named<Jar>("jar") {
         }
     }
     finalizedBy(":sykepenger-opprydding-dev:remove_spleis_opprydding_db_container")
-
 }
 
-tasks.create("remove_spleis_opprydding_db_container", DockerRemoveContainer::class) {
+docker {
+    url = "unix://${System.getProperty("user.home")}/.colima/default/docker.sock"
+}
+tasks.register("remove_spleis_opprydding_db_container", DockerRemoveContainer::class) {
     targetContainerId("spleis-opprydding-dev")
     dependsOn(":sykepenger-opprydding-dev:test")
     setProperty("force", true)

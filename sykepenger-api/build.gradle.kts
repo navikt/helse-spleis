@@ -59,7 +59,7 @@ dependencies {
 }
 
 tasks {
-    val copyJars = create("copy-jars") {
+    val copyJars = register("copy-jars") {
         doLast {
             configurations.runtimeClasspath.get().forEach {
                 val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
@@ -90,7 +90,10 @@ tasks {
     }
 }
 
-tasks.create("remove_spleis_api_db_container", DockerRemoveContainer::class) {
+docker {
+    url = "unix://${System.getProperty("user.home")}/.colima/default/docker.sock"
+}
+tasks.register("remove_spleis_api_db_container", DockerRemoveContainer::class) {
     targetContainerId("spleis-api")
     dependsOn(":sykepenger-api:test")
     setProperty("force", true)
