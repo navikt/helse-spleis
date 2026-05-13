@@ -41,7 +41,7 @@ tasks.named<Jar>("jar") {
 }
 
 docker {
-    url = "unix://${System.getProperty("user.home")}/.colima/default/docker.sock"
+    url = System.getenv("DOCKER_HOST") ?: "unix://${System.getProperty("user.home")}/.colima/default/docker.sock"
 }
 tasks.register("remove_spleis_opprydding_db_container", DockerRemoveContainer::class) {
     targetContainerId("spleis-opprydding-dev")
