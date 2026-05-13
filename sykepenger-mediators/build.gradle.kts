@@ -63,10 +63,9 @@ tasks.withType<Test> {
     systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "8")
 }
 
-val defaultDockerSocket = "/var/run/docker.sock"
 docker {
     url =
-        if (file(defaultDockerSocket).exists()) defaultDockerSocket
+        if (System.getenv("CI") == "true") "unix:///var/run/docker.sock"
         else "unix://${System.getProperty("user.home")}/.colima/default/docker.sock"
 }
 tasks.register("remove_spleis_mediators_db_container", DockerRemoveContainer::class) {

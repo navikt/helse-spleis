@@ -90,10 +90,9 @@ tasks {
     }
 }
 
-val defaultDockerSocket = "/var/run/docker.sock"
 docker {
     url =
-        if (file(defaultDockerSocket).exists()) defaultDockerSocket
+        if (System.getenv("CI") == "true") "unix:///var/run/docker.sock"
         else "unix://${System.getProperty("user.home")}/.colima/default/docker.sock"
 }
 tasks.register("remove_spleis_api_db_container", DockerRemoveContainer::class) {
