@@ -64,9 +64,19 @@ tasks.withType<Test> {
 }
 
 docker {
-    url =
-        if (System.getenv("CI") == "true") "unix:///var/run/docker.sock"
-        else "unix://${System.getProperty("user.home")}/.colima/default/docker.sock"
+    url = if (System.getenv("CI") == "true") {
+        "unix:///var/run/docker.sock"
+    } else {
+        val home = System.getProperty("user.home")
+        val candidates = listOf(
+            "$home/.colima/default/docker.sock",       // Colima
+            "/var/run/docker.sock",                    // Docker Desktop (Linux) / standard
+            "$home/.docker/run/docker.sock",           // Docker Desktop (macOS)
+        )
+        val socket = candidates.firstOrNull { File(it).exists() }
+            ?: error("No Docker socket found. Is Docker running?")
+        "unix://$socket"
+    }
 }
 tasks.register("remove_spleis_mediators_db_container", DockerRemoveContainer::class) {
     targetContainerId("spleis-mediators")
