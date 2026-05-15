@@ -113,10 +113,14 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
 
         if (vedtaksperiode.behandlinger.dagerNavOvertarAnsvar.isNotEmpty()) return opplysninger // Trenger hvert fall ikke opplysninger om arbeidsgiverperiode dersom Nav har overtatt ansvar for den ✋
 
+        val dagerUtenNavAnsvar = vedtaksperiode.behandlinger.ventedager().dagerUtenNavAnsvar
+
         return opplysninger.apply {
-            val sisteDelAvAgp = vedtaksperiode.behandlinger.ventedager().dagerUtenNavAnsvar.dager.lastOrNull()
+            val sisteDelAvAgp = dagerUtenNavAnsvar.dager.lastOrNull()
             // Vi "trenger" jo aldri AGP, men spør om vi perioden overlapper/er rett etter beregnet AGP
             if (sisteDelAvAgp?.overlapperMed(vedtaksperiode.periode) == true || sisteDelAvAgp?.erRettFør(vedtaksperiode.periode) == true) {
+                add(EventSubscription.Arbeidsgiverperiode)
+            } else if (dagerUtenNavAnsvar.periode != null && vedtaksperiode.yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(dagerUtenNavAnsvar.periode).lastOrNull { it != vedtaksperiode }?.tilstand == AvsluttetUtenUtbetaling) {
                 add(EventSubscription.Arbeidsgiverperiode)
             }
         }

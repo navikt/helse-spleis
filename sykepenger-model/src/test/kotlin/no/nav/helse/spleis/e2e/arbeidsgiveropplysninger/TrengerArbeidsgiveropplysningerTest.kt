@@ -8,10 +8,10 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
@@ -539,6 +539,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         val expectedForespurteOpplysninger = setOf(
             EventSubscription.Inntekt,
             EventSubscription.Refusjon,
+            EventSubscription.Arbeidsgiverperiode
         )
 
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.opplysninger.forespurteOpplysninger)
@@ -1016,7 +1017,11 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `dersom kort periode allerede har fått inntektsmelding trenger ikke neste periode å be om AGP`() {
+    fun `dersom kort periode allerede har fått inntektsmelding trenger ikke neste periode å be om AGP, men vi gjør det likevel`() {
+        // Denne situasjonen vil være veldig sjelden etter at Altinn 2 og de gamle API'ene slås av 15.juni 26 (om en måned i skrivende stund) ++
+        // Etter de gamle greiene slås av, kan det fortsatt skje gjennom selvbestemt arbeidsgiveropplysning.
+        // Det var et ordentlig hack å skrive seg rundt det, og case'et er veldig minimalt. Samlet vurdering er at det er bedre å be om AGP i denne situasjonen
+        // enn å ha den janky koden.
         nyPeriode(1.januar til 16.januar, a1)
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         nyPeriode(18.januar til 31.januar, a1)
@@ -1024,6 +1029,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         val expectedForespurteOpplysninger = setOf(
             EventSubscription.Inntekt,
             EventSubscription.Refusjon,
+            EventSubscription.Arbeidsgiverperiode
         )
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().opplysninger
         assertEquals(expectedForespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
