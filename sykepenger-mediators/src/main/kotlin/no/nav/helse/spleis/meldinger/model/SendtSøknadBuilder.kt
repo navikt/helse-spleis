@@ -101,6 +101,10 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
         perioder.add(Ferie(fom, tom))
     }
 
+    override fun meldingTilNavDager(fom: LocalDate, tom: LocalDate) = apply {
+        perioder.add(Søknadsperiode.MeldingTilNavDager(fom, tom))
+    }
+
     override fun utlandsopphold(fom: LocalDate, tom: LocalDate) = apply {
         perioder.add(Utlandsopphold(fom, tom))
     }

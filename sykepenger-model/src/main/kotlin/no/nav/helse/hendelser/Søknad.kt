@@ -41,6 +41,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_29
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_30
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_56
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_YS_1
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -53,6 +54,7 @@ import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 class Søknad(
     meldingsreferanseId: MeldingsreferanseId,
@@ -303,7 +305,7 @@ class Søknad(
 
         internal companion object {
             fun sykdomsperiode(liste: List<Søknadsperiode>) =
-                søknadsperiode(liste.filterIsInstance<Sykdom>())
+                søknadsperiode(liste.filter { it is Sykdom || it is MeldingTilNavDager })
 
             fun List<Søknadsperiode>.inneholderDagerEtter(sisteSykdomsdato: LocalDate) =
                 any { it.periode.endInclusive > sisteSykdomsdato }
@@ -320,6 +322,7 @@ class Søknad(
                             is Permisjon -> "permisjon"
                             is Sykdom -> "sykdom"
                             is Utlandsopphold -> "utlandsopphold"
+                            is MeldingTilNavDager -> "meldingTilNavDager"
                         }
                     )
                 }
@@ -359,6 +362,14 @@ class Søknad(
         class Ferie(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
             override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde)
+        }
+
+        class MeldingTilNavDager(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
+            override fun sykdomstidslinje(avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
+                Sykdomstidslinje.meldingTilNavdager(periode.start, periode.endInclusive, 100.prosent, kilde)
+
+            override fun valider(søknad: Søknad, aktivitetslogg: IAktivitetslogg) =
+                aktivitetslogg.varsel(RV_SØ_56)
         }
 
         class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {

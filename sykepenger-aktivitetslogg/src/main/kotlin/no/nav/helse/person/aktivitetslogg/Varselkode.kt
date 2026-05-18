@@ -80,6 +80,7 @@ enum class Varselkode(
     RV_SØ_54("Arbeidstakersøknad har en potensiell selvstendigghost"),
 
     RV_SØ_55("Selvstendigsøknad hvor bruker har oppgitt arbeidssituasjon jordbruker"),
+    RV_SØ_56("Selvstendigsøknad hvor bruker har oppgitt melding til Nav dager"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne.", avviklet = true),

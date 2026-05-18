@@ -19,6 +19,9 @@ import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.MeldingTilNavDager
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.somPeriode
@@ -65,6 +68,36 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
 internal class SelvstendigTest : AbstractDslTest() {
+
+    @Test
+    fun `Søknad som oppgir melding til Nav dager`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(MeldingTilNavDager(1.januar, 4.januar), Sykdom(5.januar, 31.januar, 100.prosent))
+            assertEquals("MMMMSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+            assertVarsel(Varselkode.RV_SØ_56, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `Søknad som oppgir melding til Nav dager med mellomrom`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(MeldingTilNavDager(1.januar, 4.januar), Arbeid(5.januar, 6.januar), Sykdom(7.januar, 31.januar, 100.prosent))
+            assertEquals("MMMMARH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 7.januar, listOf(7.januar til 22.januar))
+            assertVarsel(Varselkode.RV_SØ_56, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `Søknad som oppgir melding til Nav dager i mer enn 16 dager`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(MeldingTilNavDager(1.januar, 20.januar), Sykdom(21.januar, 31.januar, 100.prosent))
+            assertEquals("MMMMMOO MMMMMOO MMMMMOH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+            assertVarsel(Varselkode.RV_SØ_56, 1.vedtaksperiode.filter())
+        }
+    }
 
     @Test
     fun `Kort søknad fulgt at mere søknad skal utbetales som vanlig`() {

@@ -28,6 +28,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
@@ -48,6 +49,7 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold
+import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import no.nav.helse.spleis.mediator.TestMessageFactory.ArbeidsforholdOverstyrt
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsgiveropplysning
 import no.nav.helse.spleis.mediator.TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning
@@ -74,7 +76,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
-import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 
 internal abstract class AbstractEndToEndMediatorTest {
     internal companion object {
@@ -321,7 +322,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         harOppgittAvvikling: Boolean? = null,
         harOppgittNyIArbeidslivet: Boolean? = null,
         harOppgittVarigEndring: Boolean? = null,
-        harOppgittForsikring: Boolean? = null
+        harOppgittForsikring: Boolean? = null,
+        meldingTilNavDager: List<PeriodeDTO>? = null
     ): UUID {
         val selvstendigHovedspørsmål = mapOf(
             "NARINGSDRIVENDE_VIRKSOMHETEN_AVVIKLET" to (harOppgittAvvikling ?: false),
@@ -342,7 +344,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             ventetid = ventetid,
             arbeidssituasjon = arbeidssituasjon,
             selvstendigHovedspørsmål = selvstendigHovedspørsmål,
-            harOppgittForsikring = harOppgittForsikring
+            harOppgittForsikring = harOppgittForsikring,
+            meldingTilNavDager = meldingTilNavDager
         )
 
         val antallVedtaksperioderFørSøknad = testRapid.inspektør.vedtaksperiodeteller

@@ -20,13 +20,13 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Hendelse
+import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
@@ -325,6 +325,36 @@ internal class TestPerson(
             søknadId: UUID = UUID.randomUUID()
         ) = håndterSøknad(
             Sykdom(periode.start, periode.endInclusive, sykdomsgrad),
+            arbeidssituasjon = arbeidssituasjon,
+            pensjonsgivendeInntekter = pensjonsgivendeInntekter,
+            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
+            fraværFørSykmelding = fraværFørSykmelding,
+            harOppgittAvvikling = harOppgittAvvikling,
+            harOppgittVarigEndring = harOppgittVarigEndring,
+            harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
+            harOppgittOpprettholdtInntekt = harOppgittOpprettholdtInntekt,
+            harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet,
+            søknadId = søknadId
+        )
+
+        internal fun håndterFørstegangssøknadSelvstendig(
+            vararg perioder: Søknad.Søknadsperiode,
+            arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
+            pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> = listOf(
+                Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
+            ),
+            sendtTilNAVEllerArbeidsgiver: Temporal? = null,
+            fraværFørSykmelding: Boolean? = false,
+            harOppgittAvvikling: Boolean? = null,
+            harOppgittVarigEndring: Boolean? = null,
+            harOppgittNyIArbeidslivet: Boolean? = null,
+            harOppgittOpprettholdtInntekt: Boolean? = null,
+            harOppgittOppholdIUtlandet: Boolean? = null,
+            søknadId: UUID = UUID.randomUUID()
+        ) = håndterSøknad(
+            *perioder,
             arbeidssituasjon = arbeidssituasjon,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,

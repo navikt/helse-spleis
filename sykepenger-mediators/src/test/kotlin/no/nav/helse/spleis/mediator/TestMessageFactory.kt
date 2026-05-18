@@ -19,6 +19,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.InntektsAarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.PensjonsgivendeInntektDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SelvstendigNaringsdrivendeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
@@ -26,7 +27,6 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SporsmalDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SvarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.VentetidDTO
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -369,6 +369,7 @@ internal class TestMessageFactory(
         harOppgittForsikring: Boolean? = null,
         selvstendigHovedspørsmål: Map<String, Boolean> = emptyMap(),
         selvstendigNaringsdrivende: SelvstendigNaringsdrivendeDTO? = selvstendigNæringsdrivende(ventetid, selvstendigHovedspørsmål, harOppgittForsikring),
+        meldingTilNavDager: List<PeriodeDTO>? = null
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
         val sendtSøknad = SykepengesoknadDTO(
@@ -398,7 +399,8 @@ internal class TestMessageFactory(
             ),
             sendTilGosys = sendTilGosys,
             egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding,
-            selvstendigNaringsdrivende = selvstendigNaringsdrivende
+            selvstendigNaringsdrivende = selvstendigNaringsdrivende,
+            meldingTilNavDagerFraSykmelding = meldingTilNavDager
         )
         return nyHendelse(
             "sendt_søknad_selvstendig", sendtSøknad.toMapMedFelterFraSpedisjon(
@@ -446,7 +448,6 @@ internal class TestMessageFactory(
                 )
             )
         ),
-        ventetid = VentetidDTO(fom = ventetid.start, tom = ventetid.endInclusive),
         hovedSporsmalSvar = selvstendigHovedspørsmål,
         brukerHarOppgittForsikring = harOppgittForsikring ?: false
     )

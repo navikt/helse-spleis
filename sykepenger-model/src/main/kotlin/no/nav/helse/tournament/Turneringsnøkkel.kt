@@ -31,7 +31,7 @@ internal enum class Turneringsnøkkel {
     Saksbehandlerdag,
     Arbeidsgiverdag_SB,
     Arbeidsdag_SB,
-    Ventetidsdag,
+    MeldingTilNavDag,
     AndreYtelserDag,
     UkjentDag,
     UbestemtDag;
@@ -59,6 +59,7 @@ internal enum class Turneringsnøkkel {
             dag is Sykedag && dag.kommerFra(Søknad::class) -> Sykedag_SØ
             dag is SykHelgedag && dag.kommerFra(Søknad::class) -> SykHelgedag_SØ
             dag is Dag.AndreYtelser -> AndreYtelserDag
+            dag is Dag.MeldingTilNavDag -> MeldingTilNavDag
             dag is Dag.UkjentDag -> UkjentDag
             else -> throw IllegalArgumentException("Ingen turneringsnøkkel definert for ${dag::class.simpleName}")
         }

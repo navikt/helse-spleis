@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
@@ -50,6 +51,9 @@ internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val 
         val harOppgittOppholdIUtlandet = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("NARINGSDRIVENDE_OPPHOLD_I_UTLANDET").takeUnless { it.isMissingOrNull() }?.asBoolean()
         builder.harOppgittOppholdIUtlandet(harOppgittOppholdIUtlandet)
 
+        packet["meldingTilNavDagerFraSykmelding"].takeUnless { it.isMissingOrNull() }?.forEach {
+            builder.meldingTilNavDager(fom = it.path("fom").asLocalDate(), tom = it.path("tom").asLocalDate())
+        }
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)
         mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
     }
