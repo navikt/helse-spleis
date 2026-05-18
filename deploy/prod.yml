@@ -25,7 +25,7 @@ spec:
         - id: elastic
         - id: loki
   replicas:
-    min: 24
+    min: 8
     max: 24
     scalingStrategy:
       kafka:
