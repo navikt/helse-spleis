@@ -295,3 +295,6 @@ spec:
         - team: tbd
           application: spre-forsikringsoppgaver
           access: readwrite
+        - team: tbd
+          application: sp-forsikring
+          access: readwrite
