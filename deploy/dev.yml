@@ -67,6 +67,8 @@ spec:
       value: "true"
     - name: JORDBRUKER
       value: "true"
+    - name: FLERE_ARBEIDSFORHOLD
+      value: "true"
     - name: SELVSTENDIG_FORSIKRING
       value: "true"
     - name: JAVA_TOOL_OPTIONS

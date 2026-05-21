@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.Toggle
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
@@ -38,6 +39,7 @@ internal class DagerFraInntektsmelding(
     mottatt: LocalDateTime,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: BegrunnelseForReduksjonEllerIkkeUtbetalt?,
     private val opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse>,
+    private val harFlereArbeidsforhold: Boolean = false,
     val hendelse: Hendelse
 ) {
     // TODO: kilden må være av en type som arver SykdomshistorikkHendelse; altså BitAvInntektsmelding
@@ -209,6 +211,7 @@ internal class DagerFraInntektsmelding(
             aktivitetslogg.funksjonellFeil(Varselkode.RV_IM_7)
         }
         begrunnelseForReduksjonEllerIkkeUtbetalt?.valider(aktivitetslogg)
+        if (harFlereArbeidsforhold && Toggle.FlereArbeidsforhold.enabled) aktivitetslogg.varsel(Varselkode.RV_IM_28)
         validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(aktivitetslogg, gammelAgp)
     }
 

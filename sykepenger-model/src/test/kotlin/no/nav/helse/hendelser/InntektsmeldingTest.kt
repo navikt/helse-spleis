@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.util.*
 import no.nav.helse.desember
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.hendelser.Inntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.fraInnteksmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
@@ -15,6 +16,7 @@ import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -429,6 +431,33 @@ internal class InntektsmeldingTest {
         aktivitetslogg.assertVarsel(RV_IM_3)
     }
 
+    @Test
+    fun `flere arbeidsforhold gir varsel når toggle er aktivert`() {
+        Toggle.FlereArbeidsforhold.enable {
+            inntektsmelding(listOf(1.januar til 16.januar), harFlereArbeidsforhold = true)
+            dager.valider(aktivitetslogg, vedtaksperiodeId = UUID.randomUUID())
+            aktivitetslogg.assertVarsel(Varselkode.RV_IM_28)
+        }
+    }
+
+    @Test
+    fun `flere arbeidsforhold gir ikke varsel når toggle er deaktivert`() {
+        Toggle.FlereArbeidsforhold.disable {
+            inntektsmelding(listOf(1.januar til 16.januar), harFlereArbeidsforhold = true)
+            dager.valider(aktivitetslogg, vedtaksperiodeId = UUID.randomUUID())
+            aktivitetslogg.assertIngenVarsler()
+        }
+    }
+
+    @Test
+    fun `ingen varsel for flere arbeidsforhold når flagget er false`() {
+        Toggle.FlereArbeidsforhold.enable {
+            inntektsmelding(listOf(1.januar til 16.januar), harFlereArbeidsforhold = false)
+            dager.valider(aktivitetslogg, vedtaksperiodeId = UUID.randomUUID())
+            aktivitetslogg.assertIngenVarsler()
+        }
+    }
+
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         refusjonBeløp: Inntekt = 1000.månedlig,
@@ -436,7 +465,8 @@ internal class InntektsmeldingTest {
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         refusjonOpphørsdato: LocalDate? = null,
         endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        harFlereArbeidsforhold: Boolean = false
     ) {
         aktivitetslogg = Aktivitetslogg()
         inntektsmelding = hendelsefabrikk.lagInntektsmelding(
@@ -444,7 +474,8 @@ internal class InntektsmeldingTest {
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = førsteFraværsdag,
             refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            harFlereArbeidsforhold = harFlereArbeidsforhold
         )
         dager = inntektsmelding.dager()
     }

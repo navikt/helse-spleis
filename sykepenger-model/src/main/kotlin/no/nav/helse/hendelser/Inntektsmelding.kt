@@ -32,7 +32,8 @@ class Inntektsmelding(
     internal val opphørAvNaturalytelser: List<OpphørAvNaturalytelse>,
     internal val førsteFraværsdag: LocalDate?,
     mottatt: LocalDateTime,
-    internal val arbeidsforholdId: String? // tmp-løsning for å prøve å glemme inntektsmeldinger med arbeidsforholdId
+    internal val arbeidsforholdId: String?, // tmp-løsning for å prøve å glemme inntektsmeldinger med arbeidsforholdId
+    internal val harFlereArbeidsforhold: Boolean = false
 ) : Hendelse {
 
     override val metadata = HendelseMetadata(
@@ -51,6 +52,7 @@ class Inntektsmelding(
             mottatt = metadata.registrert,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             opphørAvNaturalytelser = opphørAvNaturalytelser,
+            harFlereArbeidsforhold = harFlereArbeidsforhold,
             hendelse = this
         )
     }

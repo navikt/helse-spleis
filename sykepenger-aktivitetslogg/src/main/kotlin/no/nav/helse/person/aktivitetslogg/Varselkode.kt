@@ -114,6 +114,7 @@ enum class Varselkode(
     RV_IM_25("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden grunnet ferie eller avspasering"),
     RV_IM_26("Portalinntektsmelding peker ikke på en aktiv vedtaksperiode", avviklet = true),
     RV_IM_27("Inntektsopplysninger fra inntektsmelding er manuelt knyttet til perioden"),
+    RV_IM_28("Inntektsmeldingen oppgir flere arbeidsforhold"),
 
     // AO: Arbeidsgiveropplysninger
     RV_AO_1("Arbeidsgiveropplysninger for forkastet periode"),
