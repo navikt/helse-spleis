@@ -255,7 +255,7 @@ internal class Yrkesaktivitet private constructor(
             aktivitetslogg: IAktivitetslogg,
             eventBus: EventBus
         ) {
-            forEach {
+            filter { it.yrkesaktivitetstype is Arbeidstaker }.forEach {
                 it.utbetalFeriepenger(
                     personidentifikator = personidentifikator,
                     feriepengeberegner = feriepengeberegner,
