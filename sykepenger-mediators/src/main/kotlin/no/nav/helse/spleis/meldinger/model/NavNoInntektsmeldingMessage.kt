@@ -39,6 +39,7 @@ internal class NavNoInntektsmeldingMessage(
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
+    private val harFlereArbeidsforhold = packet["harFlereArbeidsforhold"].takeUnless(JsonNode::isMissingOrNull)?.asBoolean() ?: false
 
     private val arbeidsgiveropplysninger get() = Arbeidsgiveropplysninger(
         meldingsreferanseId = meldingsporing.id,
@@ -54,7 +55,8 @@ internal class NavNoInntektsmeldingMessage(
             refusjon = refusjon,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             opphørAvNaturalytelser = opphørAvNaturalytelser
-        )
+        ),
+        harFlereArbeidsforhold = harFlereArbeidsforhold
     )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

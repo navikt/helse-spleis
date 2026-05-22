@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.TestPerson
@@ -729,5 +730,50 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 DokumentType.AndreYtelser -> false
             } }
         assertEquals(forventet.toSet(), faktisk.toSet())
+    }
+
+    @Test
+    fun `flere arbeidsforhold gir varsel når toggle er aktivert`() {
+        Toggle.FlereArbeidsforhold.enable {
+            a1 {
+                håndterSøknad(januar)
+                håndterArbeidsgiveropplysninger(
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                    harFlereArbeidsforhold = true
+                )
+                assertVarsler(listOf(Varselkode.RV_IM_28), 1.vedtaksperiode.filter())
+            }
+        }
+    }
+
+    @Test
+    fun `flere arbeidsforhold gir ikke varsel når toggle er deaktivert`() {
+        Toggle.FlereArbeidsforhold.disable {
+            a1 {
+                håndterSøknad(januar)
+                håndterArbeidsgiveropplysninger(
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                    harFlereArbeidsforhold = true
+                )
+                assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            }
+        }
+    }
+
+    @Test
+    fun `ingen varsel for flere arbeidsforhold når flagget er false`() {
+        Toggle.FlereArbeidsforhold.enable {
+            a1 {
+                håndterSøknad(januar)
+                håndterArbeidsgiveropplysninger(
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                    harFlereArbeidsforhold = false
+                )
+                assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            }
+        }
     }
 }

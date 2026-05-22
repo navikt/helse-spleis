@@ -168,7 +168,8 @@ class Arbeidsgiveropplysninger(
     registrert: LocalDateTime,
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     val vedtaksperiodeId: UUID,
-    val opplysninger: List<Arbeidsgiveropplysning>
+    val opplysninger: List<Arbeidsgiveropplysning>,
+    val harFlereArbeidsforhold: Boolean = false
 ) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
 
     init {
@@ -190,7 +191,8 @@ class KorrigerteArbeidsgiveropplysninger(
     registrert: LocalDateTime,
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     val vedtaksperiodeId: UUID,
-    val opplysninger: List<Arbeidsgiveropplysning>
+    val opplysninger: List<Arbeidsgiveropplysning>,
+    val harFlereArbeidsforhold: Boolean = false
 ) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
 
     init {

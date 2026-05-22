@@ -859,6 +859,10 @@ internal class Vedtaksperiode private constructor(
             return null
         }
 
+        if (arbeidsgiveropplysninger.harFlereArbeidsforhold && Toggle.FlereArbeidsforhold.enabled) {
+            aktivitetsloggMedVedtaksperiodekontekst.varsel(Varselkode.RV_IM_28)
+        }
+
         val eventyr = listOf(
             nullstillEgenmeldingsdagerIArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, inntektsmeldingDager(arbeidsgiveropplysninger.metadata.meldingsreferanseId)),
             håndterOppgittArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst),
@@ -878,6 +882,10 @@ internal class Vedtaksperiode private constructor(
         if (korrigerteArbeidsgiveropplysninger.vedtaksperiodeId != id) return null
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         check(tilstand !is AvventerInntektsmelding) { "Mottok Korrigerende arbeidsgiveropplysninger i AvventerInntektsmelding " }
+
+        if (korrigerteArbeidsgiveropplysninger.harFlereArbeidsforhold && Toggle.FlereArbeidsforhold.enabled) {
+            aktivitetsloggMedVedtaksperiodekontekst.varsel(Varselkode.RV_IM_28)
+        }
 
         val eventyr = listOf(
             håndterOppgittRefusjon(eventBus, korrigerteArbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst, ubrukteRefusjonsopplysninger),

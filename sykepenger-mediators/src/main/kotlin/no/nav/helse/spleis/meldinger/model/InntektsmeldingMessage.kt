@@ -37,7 +37,6 @@ internal class InntektsmeldingMessage(
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
     private val arbeidsforholdId = packet["arbeidsforholdId"].takeIf(JsonNode::isTextual)?.asText()
-    private val harFlereArbeidsforhold = packet["harFlereArbeidsforhold"].takeUnless(JsonNode::isMissingOrNull)?.asBoolean() ?: false
 
     private val inntektsmelding get() = Inntektsmelding(
         meldingsreferanseId = meldingsporing.id,
@@ -51,8 +50,7 @@ internal class InntektsmeldingMessage(
         opphørAvNaturalytelser = opphørAvNaturalytelser,
         førsteFraværsdag = førsteFraværsdag,
         mottatt = mottatt,
-        arbeidsforholdId = arbeidsforholdId?.takeIf { it.trim().isNotEmpty() },
-        harFlereArbeidsforhold = harFlereArbeidsforhold
+        arbeidsforholdId = arbeidsforholdId?.takeIf { it.trim().isNotEmpty() }
     )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

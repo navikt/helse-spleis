@@ -168,7 +168,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         id: UUID = UUID.randomUUID(),
         mottatt: LocalDateTime = LocalDateTime.now(),
         arbeidsforholdId: String? = null,
-        harFlereArbeidsforhold: Boolean = false,
     ) = Inntektsmelding(
         meldingsreferanseId = MeldingsreferanseId(id),
         refusjon = refusjon,
@@ -180,7 +179,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         førsteFraværsdag = førsteFraværsdag,
         mottatt = mottatt,
         arbeidsforholdId = arbeidsforholdId,
-        harFlereArbeidsforhold = harFlereArbeidsforhold,
     )
 
     internal fun lagArbeidsgiveropplysninger(

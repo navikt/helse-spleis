@@ -449,7 +449,8 @@ internal class TestPerson(
             opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
             id: UUID = UUID.randomUUID(),
-            mottatt: LocalDateTime = LocalDateTime.now()
+            mottatt: LocalDateTime = LocalDateTime.now(),
+            harFlereArbeidsforhold: Boolean = false
         ): UUID {
             val arbeidsgiveropplysninger = Arbeidsgiveropplysninger(
                 meldingsreferanseId = MeldingsreferanseId(id),
@@ -465,7 +466,8 @@ internal class TestPerson(
                     arbeidsgiverperioder = arbeidsgiverperioder,
                     begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                     opphørAvNaturalytelser = opphørAvNaturalytelser
-                )
+                ),
+                harFlereArbeidsforhold = harFlereArbeidsforhold
             )
 
             observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.toTypedArray())
