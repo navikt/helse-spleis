@@ -4,11 +4,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
+import kotlin.math.absoluteValue
+import net.logstash.logback.argument.StructuredArguments.value
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
+import no.nav.helse.dto.serialisering.FeriepengeUtDto
 import no.nav.helse.dto.serialisering.UbrukteRefusjonsopplysningerUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Regelverkslogg
@@ -107,6 +110,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
 import no.nav.helse.utbetalingstidslinje.Ventetidberegner
 import no.nav.helse.økonomi.Prosentdel.Companion.HundreProsent
+import org.slf4j.LoggerFactory
 
 internal class Yrkesaktivitet private constructor(
     private val person: Person,
@@ -165,6 +169,8 @@ internal class Yrkesaktivitet private constructor(
     )
 
     internal companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
         internal fun List<Yrkesaktivitet>.finn(behandlingsporing: Behandlingsporing) =
             find { it.yrkesaktivitetstype.erLik(behandlingsporing) }
 
@@ -255,7 +261,7 @@ internal class Yrkesaktivitet private constructor(
             aktivitetslogg: IAktivitetslogg,
             eventBus: EventBus
         ) {
-            filter { it.yrkesaktivitetstype is Arbeidstaker }.forEach {
+            val dtos = filter { it.yrkesaktivitetstype is Arbeidstaker }.map {
                 it.utbetalFeriepenger(
                     personidentifikator = personidentifikator,
                     feriepengeberegner = feriepengeberegner,
@@ -264,6 +270,25 @@ internal class Yrkesaktivitet private constructor(
                     eventBus = eventBus
                 )
             }
+            debugLoggFeriepenger(dtos, personidentifikator)
+        }
+
+        private fun debugLoggFeriepenger(
+            dtos: List<FeriepengeUtDto>,
+            personidentifikator: Personidentifikator
+        ) {
+            val totaltTilArbeidsgiver = dtos.sumOf { it.oppdrag.totalbeløp }
+            val totaltTilPerson = dtos.sumOf { it.personoppdrag.totalbeløp }
+            val quadruppeltRettsgebyr = 5380
+            sikkerLogg.debug(
+                buildString {
+                    append("Feriepenger totalt for person: $totaltTilPerson")
+                    if (totaltTilPerson < 0) append(" (minusbeløp for personen, potensielt tilbakekreving av feriepenger)")
+                    if (totaltTilArbeidsgiver == 0 && totaltTilPerson < 0) append("\nDet trekkes tilbake penger for person, ingen endring for arbeidsgiver")
+                    if (totaltTilArbeidsgiver == 0 && totaltTilPerson < 0 && totaltTilPerson.absoluteValue > quadruppeltRettsgebyr) append("\nTilbakekreving aktuelt, $totaltTilPerson er større enn $quadruppeltRettsgebyr (fire ganger rettsgebyret)")
+                },
+                value("fødselsnummer", personidentifikator)
+            )
         }
 
         internal fun Iterable<Yrkesaktivitet>.avventerSøknad(periode: Periode) = this
@@ -393,7 +418,7 @@ internal class Yrkesaktivitet private constructor(
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
         aktivitetslogg: IAktivitetslogg,
         eventBus: EventBus
-    ) {
+    ): FeriepengeUtDto {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
 
         val feriepengeutbetaling = Feriepengeutbetaling.Builder(
@@ -408,6 +433,7 @@ internal class Yrkesaktivitet private constructor(
             feriepengeutbetalinger.add(feriepengeutbetaling)
             feriepengeutbetaling.overfør(aktivitetsloggMedArbeidsgiverkontekst, eventBus, checkNotNull(yrkesaktivitetstype as? Arbeidstaker))
         }
+        return feriepengeutbetaling.dto()
     }
 
     internal fun håndterSykmelding(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg) {

@@ -10,5 +10,6 @@ data class FeriepengeoppdragUtDto(
     val linjer: List<FeriepengeutbetalingslinjeUtDto>,
     val fagsystemId: String,
     val endringskode: FeriepengerendringskodeDto,
-    val tidsstempel: LocalDateTime
+    val tidsstempel: LocalDateTime,
+    val totalbeløp: Int
 )

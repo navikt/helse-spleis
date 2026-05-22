@@ -126,7 +126,8 @@ data class Feriepengeoppdrag(
             Feriepengerendringskode.UEND -> FeriepengerendringskodeDto.UEND
             Feriepengerendringskode.ENDR -> FeriepengerendringskodeDto.ENDR
         },
-        tidsstempel = tidsstempel
+         tidsstempel = tidsstempel,
+        totalbeløp = totalbeløp
     )
 }
 
