@@ -115,11 +115,11 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.AvslåtteDagerUtbetaltIInfotrygdObservatør
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.AvslåtteDagerUtbetaltIInfotrygdObservatør
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklarteInntekter
@@ -716,9 +716,12 @@ internal class Vedtaksperiode private constructor(
         return Revurderingseventyr.inntektFraInntektsmelding(inntektsmelding, periode)
     }
 
-    internal fun håndterInntektsopplysningerFraLagretInntektsmelding(eventBus: EventBus, inntektsopplysningerFraLagretInnteksmelding: InntektsopplysningerFraLagretInnteksmelding, aktivitetslogg: IAktivitetslogg) {
+    internal fun håndterInntektsopplysningerFraLagretInntektsmelding(eventBus: EventBus, inntektsopplysningerFraLagretInnteksmelding: InntektsopplysningerFraLagretInnteksmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (tilstand !is AvventerInntektsmelding) return aktivitetsloggMedVedtaksperiodekontekst.info("Håndterer ikke inntektsopplysninger fra lagret inntektsmelding i tilstand ${tilstand::class.simpleName}")
+        if (tilstand !is AvventerInntektsmelding) {
+            aktivitetsloggMedVedtaksperiodekontekst.info("Håndterer ikke inntektsopplysninger fra lagret inntektsmelding i tilstand ${tilstand::class.simpleName}")
+            return null
+        }
 
         behandlinger.håndterFaktaavklartInntekt(
             behandlingEventBus = eventBus.behandlingEventBus,
@@ -742,7 +745,7 @@ internal class Vedtaksperiode private constructor(
             organisasjonsnummer = yrkesaktivitet.organisasjonsnummer,
             vedtaksperioderMedSammeFørsteFraværsdag = yrkesaktivitet.vedtaksperioderMedSammeFørsteFraværsdag(this).vedtaksperioder.map { it.id }
         )
-        person.gjenopptaBehandling(aktivitetslogg)
+        return Revurderingseventyr.inntektsopplysningerFraLagretInntektsmelding(inntektsopplysningerFraLagretInnteksmelding, periode)
     }
 
     private fun inntektsmeldingHåndtert(eventBus: EventBus, inntektsmelding: Inntektsmelding) {

@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -236,7 +236,8 @@ class Person private constructor(
     fun håndterInntektsopplysningerFraLagretInntektsmelding(eventBus: EventBus, inntektsopplysningerFraLagretInnteksmelding: InntektsopplysningerFraLagretInnteksmelding, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler inntektsopplysninger fra lagret inntektmelding")
         val arbeidsgiver = finnYrkesaktivitet(inntektsopplysningerFraLagretInnteksmelding.behandlingsporing)
-        arbeidsgiver.håndterInntektsopplysningerFraLagretInntektsmelding(eventBus, inntektsopplysningerFraLagretInnteksmelding, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr = arbeidsgiver.håndterInntektsopplysningerFraLagretInntektsmelding(eventBus, inntektsopplysningerFraLagretInnteksmelding, aktivitetsloggMedPersonkontekst)
+        if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, inntektsopplysningerFraLagretInnteksmelding, aktivitetsloggMedPersonkontekst)
     }
 

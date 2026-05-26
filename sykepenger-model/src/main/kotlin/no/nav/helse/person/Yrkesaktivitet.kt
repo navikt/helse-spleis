@@ -663,9 +663,9 @@ internal class Yrkesaktivitet private constructor(
         return periodeSomSkalHåndtereInntektFraInntektsmelding.håndterInntektFraInntektsmelding(eventBus, inntektsmelding, aktivitetslogg)
     }
 
-    internal fun håndterInntektsopplysningerFraLagretInntektsmelding(eventBus: EventBus, inntektsopplysningerFraLagretInnteksmelding: InntektsopplysningerFraLagretInnteksmelding, aktivitetslogg: IAktivitetslogg) {
+    internal fun håndterInntektsopplysningerFraLagretInntektsmelding(eventBus: EventBus, inntektsopplysningerFraLagretInnteksmelding: InntektsopplysningerFraLagretInnteksmelding, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        vedtaksperioder.firstOrNull { it.id == inntektsopplysningerFraLagretInnteksmelding.vedtaksperiodeId }?.håndterInntektsopplysningerFraLagretInntektsmelding(eventBus, inntektsopplysningerFraLagretInnteksmelding, aktivitetsloggMedArbeidsgiverkontekst)
+        return vedtaksperioder.firstOrNull { it.id == inntektsopplysningerFraLagretInnteksmelding.vedtaksperiodeId }?.håndterInntektsopplysningerFraLagretInntektsmelding(eventBus, inntektsopplysningerFraLagretInnteksmelding, aktivitetsloggMedArbeidsgiverkontekst)
     }
 
     private fun håndterReplayAvInntektsmelding(eventBus: EventBus, inntektsmeldinger: List<Inntektsmelding>, aktivitetslogg: IAktivitetslogg, vedtaksperiodeIdForReplay: UUID): Revurderingseventyr? {

@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -113,16 +112,6 @@ internal class InntektsopplysningerFraLagretInnteksmeldingTest: AbstractDslTest(
                 refusjon = INNTEKT
             )
             assertVarsler(2.vedtaksperiode, RV_IM_27)
-            assertForventetFeil(
-                forklaring = "Ettersom det er en annen periode som skal videre først må man påminne den som er neste til behandling",
-                nå = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_REVURDERING)
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
-                }
-            )
-            håndterPåminnelse(1.vedtaksperiode, TilstandType.AVVENTER_REVURDERING, flagg = setOf("ønskerReberegning"))
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
         }
     }
