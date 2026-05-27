@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiver
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiverperiode
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Forkasting
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Grunnbeløpsregulering
+import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.HarFlereArbeidsforhold
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.InntektFraInntektsmelding
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.InntektsmeldingSomAldriKom
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.InntektsopplysningerFraLagretInntektsmelding
@@ -50,6 +51,7 @@ class Revurderingseventyr private constructor(
         fun inntektsmeldingSomAldriKom(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(InntektsmeldingSomAldriKom, periode.start, periode, hendelse)
         fun inntektFraInntektsmelding(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(InntektFraInntektsmelding, periode.start, periode, hendelse)
         fun inntektsopplysningerFraLagretInntektsmelding(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(InntektsopplysningerFraLagretInntektsmelding, periode.start, periode, hendelse)
+        fun harFlereArbeidsforhold(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(HarFlereArbeidsforhold, periode.start, periode, hendelse)
 
         fun tidligsteEventyr(a: Revurderingseventyr?, b: Revurderingseventyr?) = when {
             b == null || (a != null && a.periodeForEndring.start <= b.periodeForEndring.start) -> a
@@ -151,6 +153,10 @@ class Revurderingseventyr private constructor(
 
         data object InntektsopplysningerFraLagretInntektsmelding : RevurderingÅrsak {
             override fun navn(): String = "INNTEKTSOPPLYSNINGER_FRA_LAGRET_INNTEKTSMELDING"
+        }
+
+        data object HarFlereArbeidsforhold : RevurderingÅrsak {
+            override fun navn(): String = "HAR_FLERE_ARBEIDSFORHOLD"
         }
 
         data object Reberegning : RevurderingÅrsak {

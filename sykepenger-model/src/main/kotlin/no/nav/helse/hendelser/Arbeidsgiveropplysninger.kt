@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.Companion.valider
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_28
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -39,6 +40,10 @@ sealed interface Arbeidsgiveropplysning {
 
     data class UtbetaltDelerAvArbeidsgiverperioden(private val begrunnelse: Begrunnelse, val utbetaltTilOgMed: LocalDate) : Arbeidsgiveropplysning {
         internal fun valider(aktivitetslogg: IAktivitetslogg) = begrunnelse.valider(aktivitetslogg)
+    }
+
+    data object HarFlereArbeidsforhold: Arbeidsgiveropplysning {
+        internal fun valider(aktivitetslogg: IAktivitetslogg) = aktivitetslogg.varsel(RV_IM_28)
     }
 
     data object IkkeNyArbeidsgiverperiode : Arbeidsgiveropplysning
@@ -117,7 +122,8 @@ sealed interface Arbeidsgiveropplysning {
             refusjon: Inntektsmelding.Refusjon?,
             arbeidsgiverperioder: List<Periode>?,
             begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
-            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse>
+            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse>,
+            harFlereArbeidsforhold: Boolean
         ): List<Arbeidsgiveropplysning> {
             val oppgittInntekt = beregnetInntekt
                 ?.takeUnless { it < INGEN }
@@ -135,7 +141,8 @@ sealed interface Arbeidsgiveropplysning {
                 oppgittArbeidsgiverperiode,
                 refusjon?.somOppgittRefusjon(),
                 begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(arbeidsgiverperioder ?: emptyList()),
-                oppgittOpphørAvNaturalytelser
+                oppgittOpphørAvNaturalytelser,
+                HarFlereArbeidsforhold.takeIf { harFlereArbeidsforhold }
             )
         }
 

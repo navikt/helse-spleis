@@ -1,10 +1,13 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import no.nav.helse.august
+import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
+import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Companion.fraInntektsmelding
 import no.nav.helse.hendelser.Dagtype
@@ -45,10 +48,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Behovsoppsamler
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.enesteGodkjenningsbehovSomFølgeAv
 import no.nav.helse.sykdomstidslinje.Dag
@@ -86,23 +85,25 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `omgjøre kort periode etter mottatt im - med eldre utbetalt periode`() = a1 {
-        nyttVedtak(januar)
-        nyPeriode(10.august til 20.august)
-        håndterInntektsmelding(
-            listOf(1.august til 16.august),
-            beregnetInntekt = INNTEKT
-        )
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
+    fun `omgjøre kort periode etter mottatt im - med eldre utbetalt periode`() {
+        a1 {
+            nyttVedtak(januar)
+            nyPeriode(10.august til 20.august)
+            håndterInntektsmelding(
+                listOf(1.august til 16.august),
+                beregnetInntekt = INNTEKT
+            )
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
 
-        val førsteUtbetaling = inspektør.utbetaling(0)
-        inspektør.utbetaling(1).also { utbetalingInspektør ->
-            assertNotEquals(førsteUtbetaling.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
-            assertNotEquals(førsteUtbetaling.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-            assertNotEquals(førsteUtbetaling.personOppdrag.inspektør.fagsystemId(), utbetalingInspektør.personOppdrag.inspektør.fagsystemId())
-            assertEquals(1.august til 20.august, utbetalingInspektør.periode)
+            val førsteUtbetaling = inspektør.utbetaling(0)
+            inspektør.utbetaling(1).also { utbetalingInspektør ->
+                assertNotEquals(førsteUtbetaling.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
+                assertNotEquals(førsteUtbetaling.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+                assertNotEquals(førsteUtbetaling.personOppdrag.inspektør.fagsystemId(), utbetalingInspektør.personOppdrag.inspektør.fagsystemId())
+                assertEquals(1.august til 20.august, utbetalingInspektør.periode)
+            }
         }
     }
 
@@ -1360,7 +1361,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
                     refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
                     arbeidsgiverperioder = listOf(1.januar til 16.januar),
                     begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre",
-                    opphørAvNaturalytelser = emptyList()
+                    opphørAvNaturalytelser = emptyList(),
+                    harFlereArbeidsforhold = false
                 ).toTypedArray()
             )
         }

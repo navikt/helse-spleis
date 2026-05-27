@@ -39,6 +39,7 @@ internal class NavNoInntektsmeldingMessage(
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
+    private val harFlereArbeidsforhold = packet["harFlereArbeidsforhold"].takeUnless { it.isMissingOrNull() }?.asBoolean() ?: false
 
     private val arbeidsgiveropplysninger get() = Arbeidsgiveropplysninger(
         meldingsreferanseId = meldingsporing.id,
@@ -53,7 +54,8 @@ internal class NavNoInntektsmeldingMessage(
             arbeidsgiverperioder = arbeidsgiverperioder.sortedBy { it.start },
             refusjon = refusjon,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            opphørAvNaturalytelser = opphørAvNaturalytelser
+            opphørAvNaturalytelser = opphørAvNaturalytelser,
+            harFlereArbeidsforhold = harFlereArbeidsforhold,
         )
     )
 

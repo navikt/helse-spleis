@@ -169,7 +169,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
-        mottatt: LocalDateTime = LocalDateTime.now()
+        mottatt: LocalDateTime = LocalDateTime.now(),
+        harFlereArbeidsforhold: Boolean = false,
     ) = Arbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
@@ -181,7 +182,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             beregnetInntekt = beregnetInntekt,
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            refusjon = refusjon
+            refusjon = refusjon,
+            harFlereArbeidsforhold = harFlereArbeidsforhold
         )
     )
 
@@ -193,7 +195,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
-        mottatt: LocalDateTime = LocalDateTime.now()
+        mottatt: LocalDateTime = LocalDateTime.now(),
+        harFlereArbeidsforhold: Boolean = false,
     ) = KorrigerteArbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
@@ -205,7 +208,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             beregnetInntekt = beregnetInntekt,
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            refusjon = refusjon
+            refusjon = refusjon,
+            harFlereArbeidsforhold = harFlereArbeidsforhold
         )
     )
 

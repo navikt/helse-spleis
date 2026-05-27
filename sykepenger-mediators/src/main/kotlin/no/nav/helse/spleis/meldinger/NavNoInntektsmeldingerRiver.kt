@@ -15,7 +15,7 @@ internal class NavNoInntektsmeldingerRiver(
 
     override fun validate(message: JsonMessage) {
         standardInntektsmeldingvalidering(message)
-        message.interestedIn("beregnetInntekt")
+        message.interestedIn("beregnetInntekt", "harFlereArbeidsforhold")
         message.requireKey("vedtaksperiodeId")
     }
 

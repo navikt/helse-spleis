@@ -41,6 +41,8 @@ internal class NavNoSelvbestemtInntektsmeldingMessage(
     private val begrunnelseForReduksjonEllerIkkeUtbetalt =
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
+    private val harFlereArbeidsforhold = packet["harFlereArbeidsforhold"].takeUnless { it.isMissingOrNull() }?.asBoolean() ?: false
+
 
     private val korrigerteArbeidsgiveropplysninger get() = KorrigerteArbeidsgiveropplysninger(
         meldingsreferanseId = meldingsporing.id,
@@ -53,7 +55,8 @@ internal class NavNoSelvbestemtInntektsmeldingMessage(
             arbeidsgiverperioder = arbeidsgiverperioder,
             refusjon = refusjon,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            opphørAvNaturalytelser = opphørAvNaturalytelser
+            opphørAvNaturalytelser = opphørAvNaturalytelser,
+            harFlereArbeidsforhold = harFlereArbeidsforhold,
         )
     )
 

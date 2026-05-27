@@ -871,7 +871,8 @@ internal class Vedtaksperiode private constructor(
             håndterIkkeUtbetaltArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
             håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
             håndterUtbetaltDelerAvArbeidsgiverperioden(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
-            håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
+            håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterHarFlereArbeidsforhold(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
         )
 
         return håndterArbeidsgiveropplysninger(eventBus, eventyr, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
@@ -886,7 +887,8 @@ internal class Vedtaksperiode private constructor(
             håndterOppgittRefusjon(eventBus, korrigerteArbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst, ubrukteRefusjonsopplysninger),
             håndterOppgittInntekt(eventBus, korrigerteArbeidsgiveropplysninger, inntektshistorikk, aktivitetsloggMedVedtaksperiodekontekst),
             håndterKorrigertArbeidsgiverperiode(eventBus, korrigerteArbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
-            håndterKorrigertOpphørAvNaturalytelser(eventBus, korrigerteArbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
+            håndterKorrigertOpphørAvNaturalytelser(eventBus, korrigerteArbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterHarFlereArbeidsforhold(korrigerteArbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
         )
 
         return håndterArbeidsgiveropplysninger(eventBus, eventyr, korrigerteArbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
@@ -1187,6 +1189,12 @@ internal class Vedtaksperiode private constructor(
         if (arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OpphørAvNaturalytelser>().isEmpty()) return emptyList()
         aktivitetslogg.funksjonellFeil(RV_IM_7)
         return emptyList()
+    }
+
+    private fun <T> håndterHarFlereArbeidsforhold(arbeidsgiveropplysninger: T, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+        val harFlereArbeidsforhold = arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.HarFlereArbeidsforhold>().singleOrNull() ?: return emptyList()
+        harFlereArbeidsforhold.valider(aktivitetslogg)
+        return listOf(Revurderingseventyr.harFlereArbeidsforhold(arbeidsgiveropplysninger, periode))
     }
 
     private fun håndterKorrigertOpphørAvNaturalytelser(eventBus: EventBus, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {

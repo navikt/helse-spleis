@@ -41,6 +41,8 @@ internal class NavNoKorrigertInntektsmeldingMessage(
     private val begrunnelseForReduksjonEllerIkkeUtbetalt =
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
+    private val harFlereArbeidsforhold = packet["harFlereArbeidsforhold"].takeUnless { it.isMissingOrNull() }?.asBoolean() ?: false
+
 
     private val korrigerteArbeidsgiveropplysninger
         get() = KorrigerteArbeidsgiveropplysninger(
@@ -54,7 +56,8 @@ internal class NavNoKorrigertInntektsmeldingMessage(
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 refusjon = refusjon,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                opphørAvNaturalytelser = opphørAvNaturalytelser
+                opphørAvNaturalytelser = opphørAvNaturalytelser,
+                harFlereArbeidsforhold = harFlereArbeidsforhold,
             )
         )
 
