@@ -1,7 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.Year
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
 import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
@@ -34,6 +34,13 @@ internal data class SelvstendigFaktaavklartInntekt(
                 }
             }
     }
+
+    fun medAnvendtGrunnbeløp(nyttGrunnbeløp: Inntekt): SelvstendigFaktaavklartInntekt = SelvstendigFaktaavklartInntekt(
+        id = UUID.randomUUID(),
+        inntektsdata = inntektsdata,
+        pensjonsgivendeInntekter = pensjonsgivendeInntekter,
+        anvendtGrunnbeløp = nyttGrunnbeløp,
+    )
 
     val normalinntekt = normalinntekt(anvendtGrunnbeløp)
     val beregningsgrunnlag = beregningsgrunnlag(anvendtGrunnbeløp)

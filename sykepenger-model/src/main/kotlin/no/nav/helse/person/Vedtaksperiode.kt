@@ -2247,7 +2247,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndterOverstyrInntektsgrunnlag(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         if (!overstyrInntektsgrunnlag.erRelevant(skjæringstidspunkt)) return null
         val grunnlag = vilkårsgrunnlag ?: return null
-        if (grunnlag.erArbeidsgiverRelevant(yrkesaktivitet.organisasjonsnummer) != true) return null
+        if (!grunnlag.inneholderInntekterFor(yrkesaktivitet)) return null
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         // i praksis double-dispatch, kotlin-style

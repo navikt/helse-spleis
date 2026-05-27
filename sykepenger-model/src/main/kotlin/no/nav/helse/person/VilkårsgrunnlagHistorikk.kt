@@ -118,6 +118,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal abstract fun view(): VilkårsgrunnlagView
 
         internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = inntektsgrunnlag.erArbeidsgiverRelevant(organisasjonsnummer)
+        internal fun inneholderInntekterFor(yrkesaktivitet: Yrkesaktivitet) = inntektsgrunnlag.inneholderInntekterFor(yrkesaktivitet)
 
         final override fun toSpesifikkKontekst() = SpesifikkKontekst(
             kontekstType = "vilkårsgrunnlag",
@@ -280,7 +281,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return Grunnlagsdata(
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
                 inntektsgrunnlag = inntektsgrunnlag,
-                opptjening = opptjening ?: this.opptjening!!,
+                opptjening = opptjening ?: this.opptjening,
                 medlemskapstatus = medlemskapstatus,
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID()

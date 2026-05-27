@@ -4,6 +4,7 @@ import no.nav.helse.dto.deserialisering.SelvstendigInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.SelvstendigInntektsopplysningUtDto
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
+import no.nav.helse.økonomi.Inntekt
 
 internal data class SelvstendigInntektsopplysning(
     val faktaavklartInntekt: SelvstendigFaktaavklartInntekt,
@@ -11,6 +12,11 @@ internal data class SelvstendigInntektsopplysning(
 ) {
     val fastsattÅrsinntekt = faktaavklartInntekt.normalinntekt
     val beregningsgrunnlag = faktaavklartInntekt.beregningsgrunnlag
+
+    internal fun medAnvendtGrunnbeløp(grunnbeløp: Inntekt) = SelvstendigInntektsopplysning(
+        faktaavklartInntekt = faktaavklartInntekt.medAnvendtGrunnbeløp(grunnbeløp),
+        skjønnsmessigFastsatt = skjønnsmessigFastsatt
+    )
 
     internal companion object {
         internal fun SelvstendigInntektsopplysning.berik(builder: UtkastTilVedtakBuilder) =

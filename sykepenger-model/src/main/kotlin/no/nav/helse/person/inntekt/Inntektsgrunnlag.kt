@@ -8,24 +8,26 @@ import no.nav.helse.etterlevelse.PensjonsgivendeInntektSubsumsjon
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-35 ledd 2`
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.ArbeidstakerOpptjening
+import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.håndterArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.håndterKorrigerteInntekter
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.rullTilbakeEventuellSkjønnsmessigFastsettelse
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vurderArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.skjønnsfastsett
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.totalOmregnetÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.vurderArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
@@ -35,7 +37,7 @@ import no.nav.helse.økonomi.Inntekt
 internal class Inntektsgrunnlag(
     private val skjæringstidspunkt: LocalDate,
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-    val selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
+    selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
     val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
     private val vurdertInfotrygd: Boolean,
     `6G`: Inntekt? = null
@@ -45,13 +47,18 @@ internal class Inntektsgrunnlag(
         arbeidsgiverInntektsopplysninger.validerSkjønnsmessigAltEllerIntet()
     }
 
+    val selvstendigInntektsopplysning: SelvstendigInntektsopplysning? = when (`6G`) {
+        null -> selvstendigInntektsopplysning?.medAnvendtGrunnbeløp(Grunnbeløp.`1G`.beløp(skjæringstidspunkt, LocalDate.now()))
+        else -> selvstendigInntektsopplysning
+    }
+
     private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
 
     // sum av alle inntekter foruten skjønnsmessig fastsatt beløp; da brukes inntekten den fastsatte
     private val omregnetÅrsinntekt = arbeidsgiverInntektsopplysninger.totalOmregnetÅrsinntekt()
 
     // summen av alle inntekter
-    val beregningsgrunnlag = selvstendigInntektsopplysning?.beregningsgrunnlag ?: arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt()
+    val beregningsgrunnlag = this.selvstendigInntektsopplysning?.beregningsgrunnlag ?: arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt()
     val sykepengegrunnlag = beregningsgrunnlag.coerceAtMost(this.`6G`)
     private val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (beregningsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
@@ -230,7 +237,8 @@ internal class Inntektsgrunnlag(
         arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
         selvstendigInntektsopplysning = selvstendigInntektsopplysning,
         deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
-        vurdertInfotrygd = vurdertInfotrygd
+        vurdertInfotrygd = vurdertInfotrygd,
+        `6G` = null
     )
 
     internal fun grunnbeløpsregulering(): Inntektsgrunnlag? {
@@ -241,6 +249,13 @@ internal class Inntektsgrunnlag(
 
     internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) }
+
+    internal fun inneholderInntekterFor(yrkesaktivitet: Yrkesaktivitet) = when (yrkesaktivitet.yrkesaktivitetstype) {
+        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> erArbeidsgiverRelevant(yrkesaktivitet.organisasjonsnummer)
+        Behandlingsporing.Yrkesaktivitet.Selvstendig -> selvstendigInntektsopplysning != null
+        Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> false
+        Behandlingsporing.Yrkesaktivitet.Frilans -> false
+    }
 
     internal fun berik(builder: UtkastTilVedtakBuilder) {
         builder.sykepengegrunnlag(
