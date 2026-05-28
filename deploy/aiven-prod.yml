@@ -21,22 +21,10 @@ spec:
           application: dataprodukt-forstegangsbehandling
           access: readwrite
         - team: tbd
-          application: dataprodukt-iverksettelser
-          access: readwrite
-        - team: tbd
-          application: dataprodukt-annulleringer
-          access: readwrite
-        - team: tbd
-          application: dataprodukt-arbeidsgiveropplysninger
-          access: readwrite
-        - team: tbd
           application: spre-subsumsjon
           access: readwrite
         - team: tbd
           application: spennende
-          access: readwrite
-        - team: tbd
-          application: spissnok
           access: readwrite
         - team: tbd
           application: behovsakkumulator
@@ -54,13 +42,7 @@ spec:
           application: spare
           access: readwrite
         - team: tbd
-          application: sparker-alt
-          access: write
-        - team: tbd
           application: sparkel-aareg
-          access: readwrite
-        - team: tbd
-          application: sparkel-arena
           access: readwrite
         - team: tbd
           application: sparkel-egenansatt
@@ -82,9 +64,6 @@ spec:
           access: readwrite
         - team: tbd
           application: sparkel-personinfo
-          access: readwrite
-        - team: tbd
-          application: sparkel-pleiepenger
           access: readwrite
         - team: tbd
           application: sparkel-sykepengeperioder
@@ -114,22 +93,10 @@ spec:
           application: spesialist
           access: readwrite
         - team: tbd
-          application: spesialist-sidegig
-          access: readwrite
-        - team: tbd
           application: spinnvill
           access: readwrite
         - team: tbd
-          application: spotter
-          access: readwrite
-        - team: tbd
           application: spetakkel
-          access: readwrite
-        - team: tbd
-          application: spill-av
-          access: readwrite
-        - team: tbd
-          application: spoler
           access: readwrite
         - team: tbd
           application: spleis
@@ -162,9 +129,6 @@ spec:
           application: spre-oppgaver
           access: readwrite
         - team: tbd
-          application: spre-stonadsstatistikk
-          access: readwrite
-        - team: tbd
           application: sparkel-sputnik
           access: readwrite
         - team: tbd
@@ -178,9 +142,6 @@ spec:
           access: readwrite
         - team: tbd
           application: sparkel-oppgave-endret
-          access: readwrite
-        - team: tbd
-          application: sparkel-identer
           access: readwrite
         - team: tbd
           application: sparkel-skjermet-endret
