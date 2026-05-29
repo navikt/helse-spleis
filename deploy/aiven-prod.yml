@@ -123,9 +123,6 @@ spec:
           application: spre-gosys
           access: readwrite
         - team: tbd
-          application: spre-gosys-pdf
-          access: readwrite
-        - team: tbd
           application: spre-oppgaver
           access: readwrite
         - team: tbd
