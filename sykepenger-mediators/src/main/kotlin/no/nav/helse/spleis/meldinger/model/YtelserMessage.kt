@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import java.util.*
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
+import no.nav.helse.hendelser.Forsikringsvurdering
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Institusjonsopphold
@@ -102,6 +105,21 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
         Behandlingsporing.Yrkesaktivitet.Frilans -> null
     }
 
+    internal val forsikringsvurdering = packet["@løsning.${Behovstype.Forsikringsvurdering.utgåendeNavn}"]
+        .takeUnless { it.isMissingOrNull() }
+        ?.let { løsningJson ->
+            Forsikringsvurdering(
+                forsikringsvurderingId = UUID.fromString(løsningJson["forsikringsvurderingId"].asText()),
+                harForsikring = løsningJson["harForsikring"].asBoolean(),
+                dekning = løsningJson["dekning"].takeUnless { it.isMissingOrNull() }?.let { dekningJson ->
+                    Forsikringsvurdering.Dekning(
+                        grad = dekningJson["grad"].asInt(),
+                        fraDag = dekningJson["fraDag"].asInt()
+                    )
+                }
+            )
+        }
+
     internal val dagpengerV2 = Dagpenger(
         packet["@løsning.${Behovstype.Dagpenger.utgåendeNavn}.meldekortperioder"]
             .map {
@@ -130,7 +148,8 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             arbeidsavklaringspenger = arbeidsavklaringspengerV2,
             dagpenger = dagpengerV2,
             inntekterForBeregning = inntekterForBeregning,
-            selvstendigForsikring = selvstendigForsikring
+            selvstendigForsikring = selvstendigForsikring,
+            forsikringsvurdering = forsikringsvurdering,
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

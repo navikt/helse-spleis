@@ -10,6 +10,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
@@ -29,6 +30,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SvarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Forsikringsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as HendelsePeriode
@@ -961,6 +963,7 @@ internal class TestMessageFactory(
         dagpengerV2: Dagpenger = Dagpenger(emptyList()),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
         selvstendigForsikring: List<SelvstendigForsikring> = emptyList(),
+        forsikringsvurdering: Forsikringsvurdering? = null,
         arbeidsavklaringspengerV2: Arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         orgnummer: String = organisasjonsnummer,
         yrkesaktivitetstype: String = "ARBEIDSTAKER"
@@ -977,6 +980,9 @@ internal class TestMessageFactory(
         )
         if (yrkesaktivitetstype == "SELVSTENDIG") {
             behovliste.add("SelvstendigForsikring")
+        }
+        if (yrkesaktivitetstype == "SELVSTENDIG" && Toggle.NyttForsikringsbehov.enabled) {
+            behovliste.add("Forsikringsvurdering")
         }
 
         return lagBehovMedLøsning(
@@ -1065,6 +1071,7 @@ internal class TestMessageFactory(
                     }
                 ))
                 .plus(selvstendigForsikringer(selvstendigForsikring, yrkesaktivitetstype))
+                .plus(forsikringsvurdering(forsikringsvurdering, yrkesaktivitetstype))
         )
     }
 
@@ -1077,6 +1084,24 @@ internal class TestMessageFactory(
                     "sluttdato" to forsikring.opphørsdato,
                     "startdato" to forsikring.virkningsdato,
                     "premiegrunnlag" to forsikring.premiegrunnlag.årlig
+                )
+            }
+        )
+    }
+
+    fun forsikringsvurdering(forsikringsvurdering: Forsikringsvurdering?, yrkesaktivitetstype: String): Map<String, Any> {
+        if (forsikringsvurdering == null || yrkesaktivitetstype != "SELVSTENDIG" || Toggle.NyttForsikringsbehov.disabled) return emptyMap()
+        return mapOf(
+            Behov.Behovstype.Forsikringsvurdering.utgåendeNavn to forsikringsvurdering.let { forsikringsvurdering ->
+                mapOf(
+                    "forsikringsvurderingId" to forsikringsvurdering.forsikringsvurderingId.toString(),
+                    "harForsikring" to forsikringsvurdering.harForsikring,
+                    "dekning" to forsikringsvurdering.dekning?.let { dekning ->
+                        mapOf(
+                            "grad" to dekning.grad,
+                            "fraDag" to dekning.fraDag
+                        )
+                    }
                 )
             }
         )

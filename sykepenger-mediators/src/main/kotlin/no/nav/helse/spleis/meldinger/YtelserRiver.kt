@@ -7,6 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.Behov.Behovstype.Arbeidsavklaringspenger
 import no.nav.helse.spleis.Behov.Behovstype.Dagpenger
 import no.nav.helse.spleis.Behov.Behovstype.Foreldrepenger
+import no.nav.helse.spleis.Behov.Behovstype.Forsikringsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForBeregning
 import no.nav.helse.spleis.Behov.Behovstype.Institusjonsopphold
 import no.nav.helse.spleis.Behov.Behovstype.Omsorgspenger
@@ -90,6 +91,16 @@ internal class YtelserRiver(
             require("forsikringstype", JsonNode::asText)
             require("premiegrunnlag", JsonNode::asInt)
             interestedIn("sluttdato", JsonNode::asLocalDate)
+        }
+
+        message.interestedIn("@løsning.${Forsikringsvurdering.utgåendeNavn}") {
+            message.requireKey(
+                "@løsning.${Forsikringsvurdering.utgåendeNavn}.forsikringsvurderingId",
+                "@løsning.${Forsikringsvurdering.utgåendeNavn}.harForsikring"
+            )
+            message.interestedIn("@løsning.${Forsikringsvurdering.utgåendeNavn}.dekning") {
+                message.requireKey("@løsning.${Forsikringsvurdering.utgåendeNavn}.dekning.grad", "@løsning.${Forsikringsvurdering.utgåendeNavn}.dekning.fraDag")
+            }
         }
     }
 

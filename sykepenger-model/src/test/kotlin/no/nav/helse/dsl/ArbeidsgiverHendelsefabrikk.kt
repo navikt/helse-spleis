@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
+import no.nav.helse.hendelser.Forsikringsvurdering
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
@@ -285,7 +286,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         dagpengerV2: List<Periode> = emptyList(),
         inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
         selvstendigForsikring: SelvstendigForsikring? = null,
-        andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList()
+        andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList(),
+        forsikringsvurdering: Forsikringsvurdering? = null,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -314,7 +316,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             dagpenger = Dagpenger(dagpengerV2),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             selvstendigForsikring = selvstendigForsikring,
-            andreYtelser = AndreYtelser(andreYtelser)
+            andreYtelser = AndreYtelser(andreYtelser),
+            forsikringsvurdering = forsikringsvurdering,
         )
     }
 

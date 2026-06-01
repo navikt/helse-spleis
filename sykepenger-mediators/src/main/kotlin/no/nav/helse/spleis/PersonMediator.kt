@@ -7,7 +7,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.ForsikringBasertPåForsikringsvurdering
 import no.nav.helse.hendelser.KollektivJordbruksforsikring
 import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.arbeidssituasjonForsikringstype
@@ -716,7 +718,12 @@ internal class PersonMediator(
             )),
             Behov(Behov.Behovstype.SelvstendigForsikring, mapOf(
                 "skjæringstidspunkt" to event.skjæringstidspunkt
-            )).takeIf { event.trengerInformasjonOmSelvstendigForsikring }
+            )).takeIf { event.trengerInformasjonOmSelvstendigForsikring },
+            Behov(
+                Behov.Behovstype.Forsikringsvurdering, mapOf(
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "spesielleYrkesgrupper" to emptyList<String>()
+            )).takeIf { event.trengerInformasjonOmSelvstendigForsikring && Toggle.NyttForsikringsbehov.enabled }
         )
 
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
@@ -1067,6 +1074,7 @@ internal class PersonMediator(
                 "arbeidssituasjonForsikringstype" to forsikring.arbeidssituasjonForsikringstype()
             )
 
+            is ForsikringBasertPåForsikringsvurdering,
             null -> {}
         }
         return JsonMessage.newMessage("benyttet_grunnlagsdata_for_beregning", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, benyttetGrunnlagsdataForBeregning.toMap()))

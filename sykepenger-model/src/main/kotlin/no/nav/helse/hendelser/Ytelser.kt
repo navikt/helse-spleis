@@ -2,8 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
-import kotlin.text.uppercase
+import java.util.*
 import no.nav.helse.Tidslinje
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -29,6 +28,7 @@ class Ytelser(
     private val dagpenger: Dagpenger,
     private val inntekterForBeregning: InntekterForBeregning,
     private val selvstendigForsikring: SelvstendigForsikring?,
+    val forsikringsvurdering: Forsikringsvurdering?,
     private val andreYtelser: AndreYtelser = AndreYtelser(emptyList())
 ) : Hendelse {
     override val metadata = LocalDateTime.now().let { nå ->

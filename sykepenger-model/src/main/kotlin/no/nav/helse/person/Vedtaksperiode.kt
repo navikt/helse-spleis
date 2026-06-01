@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
@@ -44,6 +44,7 @@ import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.Forsikring
+import no.nav.helse.hendelser.ForsikringBasertPåForsikringsvurdering
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
@@ -1580,7 +1581,7 @@ internal class Vedtaksperiode private constructor(
         // steg 2: lag utbetalingstidslinjer for alle vedtaksperiodene
         val (beregningsperiode, perioderSomMåHensyntasVedBeregning) = perioderSomMåHensyntasVedBeregning()
         val inntektsperioder = ytelser.inntektsendringer()
-        val forsikring = ytelser.selvstendigForsikring() ?: kanskjeKollektivForsikring()
+        val forsikring = ytelser.forsikringsvurdering?.let(ForsikringBasertPåForsikringsvurdering::fraLøsning) ?: ytelser.selvstendigForsikring() ?: kanskjeKollektivForsikring()
         val uberegnetTidslinjePerArbeidsgiver = lagArbeidsgiverberegning(
             beregningsperiode = beregningsperiode,
             vedtaksperioder = perioderSomMåHensyntasVedBeregning,
@@ -1748,7 +1749,8 @@ internal class Vedtaksperiode private constructor(
 
             Selvstendig ->
                 when (forsikring) {
-                    is SelvstendigForsikring ->
+                    is SelvstendigForsikring,
+                    is ForsikringBasertPåForsikringsvurdering ->
                         if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
                         else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_6)
 

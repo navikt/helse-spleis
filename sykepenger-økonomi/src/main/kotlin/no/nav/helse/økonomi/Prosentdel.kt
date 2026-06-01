@@ -38,6 +38,7 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal) : Compara
             return Prosentdel(ratio)
         }
         val Number.prosent get() = Prosentdel(this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc))
+        val Int.riktigProsent get() = Prosentdel(BigDecimal(this).divide(HUNDRE_PROSENT, mc))
 
         fun gjenopprett(dto: ProsentdelDto) = Prosentdel(dto.prosentDesimal.toBigDecimal(mc))
     }

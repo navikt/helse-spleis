@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Forsikring
+import no.nav.helse.hendelser.ForsikringBasertPåForsikringsvurdering
 import no.nav.helse.hendelser.KollektivJordbruksforsikring
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
@@ -108,8 +109,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     // den siste behandlingen uavhengig er tilstand
     private val sisteBehandling get() = behandlinger.last()
+
     // den siste behandlingen, hvis den er åpen for endring. dvs. ikke fattet vedtak eller annullert
     private val åpenBehandling get() = sisteBehandling.takeIf { it.erÅpenForEndring() }
+
     // alle tidligere behandlinger der en beslutning er tatt
     private val tidligereBehandlinger get() = åpenBehandling?.let { behandlinger.dropLast(1) } ?: behandlinger
     val forrigeBehandling get() = tidligereBehandlinger.last()
@@ -183,7 +186,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 null -> 80.prosent
 
                 KollektivJordbruksforsikring,
-                is SelvstendigForsikring -> forsikring.dekningsgrad()
+                is SelvstendigForsikring,
+                is ForsikringBasertPåForsikringsvurdering -> forsikring.dekningsgrad()
             }
 
             Arbeidssituasjon.ANNET,
@@ -290,7 +294,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun leggTilAnnullering(behandlingEventBus: BehandlingEventBus, annullering: Utbetaling, vurdering: Utbetaling.Vurdering, aktivitetslogg: IAktivitetslogg) {
         val forrigeVedtak = tidligereBehandlinger.last()
-        checkNotNull(åpenBehandling).leggTilAnnullering(behandlingEventBus, annullering, vurdering,  forrigeVedtak, aktivitetslogg)
+        checkNotNull(åpenBehandling).leggTilAnnullering(behandlingEventBus, annullering, vurdering, forrigeVedtak, aktivitetslogg)
     }
 
     internal fun beregnetBehandling(beregning: BeregnetBehandling, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) {
@@ -415,7 +419,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal fun håndterFaktaavklartInntekt(behandlingEventBus: BehandlingEventBus, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, dokumentsporing: Dokumentsporing, aktivitetslogg: IAktivitetslogg) {
-        check(arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) { "Inntekt med kilde ${arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class.simpleName} skal ikke lagres på behandlingen!"}
+        check(arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) { "Inntekt med kilde ${arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class.simpleName} skal ikke lagres på behandlingen!" }
         checkNotNull(åpenBehandling).håndterFaktaavklartInntekt(behandlingEventBus, arbeidstakerFaktaavklartInntekt, dokumentsporing, aktivitetslogg)
     }
 
@@ -714,6 +718,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 aktivitetslogg = aktivitetslogg
             )
         }
+
         internal fun nullstillEgenmeldingsdager(
             behandlingEventBus: BehandlingEventBus,
             yrkesaktivitet: Yrkesaktivitet,
@@ -1126,13 +1131,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             if (this.skjæringstidspunkt != skjæringstidspunktSomBeregner) return false
             if (!this.periode.overlapperMed(periodeSomBeregner)) return false
 
-            check(this.periode.start >= periodeSomBeregner.start) { """
+            check(this.periode.start >= periodeSomBeregner.start) {
+                """
                 Hva i huleste heita har skjedd her??
                 Perioden som beregner er $periodeSomBeregner,
                 og hen skal beregne utbetaling for ${this.periode}??
                 At vi kun beregner utbetalinger fra og med ${periodeSomBeregner.start}
                 er et premiss for at resten skal henge sammen
-            """ }
+            """
+            }
 
             return when (this.tilstand) {
                 Tilstand.UberegnetRevurdering -> true
@@ -1213,6 +1220,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     tilstand.vedtakAvvist(this@Behandling, behandlingEventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
                     return true
                 }
+
                 Tilstand.BeregnetRevurdering -> {
                     aktivitetslogg.varsel(RV_UT_24)
                     tilstand.vedtakAvvist(this@Behandling, behandlingEventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
@@ -1282,6 +1290,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Behandlingsporing.Yrkesaktivitet.Frilans -> null
 
                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (val forsikring = beregning.forsikring) {
+                    is ForsikringBasertPåForsikringsvurdering,
                     is SelvstendigForsikring -> when (forsikring.navOvertarAnsvarForVentetid()) {
                         true -> dagerUtenNavAnsvar.dager
                         false -> emptyList()
@@ -1657,6 +1666,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun håndterUtbetalinghendelse(behandling: Behandling, behandlingEventBus: BehandlingEventBus, hendelse: UtbetalingHendelse, aktivitetslogg: IAktivitetslogg) {
                 error("forventer ikke å håndtere utbetalinghendelse i tilstand ${this.javaClass.simpleName}")
             }
+
             fun validerFerdigBehandlet(behandling: Behandling, meldingsreferanseId: MeldingsreferanseId, aktivitetslogg: IAktivitetslogg) {
                 behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} burde vært ferdig behandlet, men står i tilstand ${behandling.tilstand::class.simpleName}")
             }

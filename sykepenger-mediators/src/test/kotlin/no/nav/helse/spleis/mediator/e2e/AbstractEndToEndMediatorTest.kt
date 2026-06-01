@@ -23,6 +23,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
@@ -32,6 +33,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Forsikringsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as Hendelseperiode
@@ -520,6 +522,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         dagpengerV2: Dagpenger = Dagpenger(emptyList()),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
         selvstendigForsikring: List<SelvstendigForsikring> = emptyList(),
+        forsikringsvurdering: Forsikringsvurdering? = null,
         orgnummer: String = ORGNUMMER
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Foreldrepenger))
@@ -534,6 +537,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
         val behandlingId = behov.path("behandlingId").asText().toUUID()
         assertEquals(yrkesaktivitetstype == "SELVSTENDIG", testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.SelvstendigForsikring))
+        assertEquals(yrkesaktivitetstype == "SELVSTENDIG" && Toggle.NyttForsikringsbehov.enabled, testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Forsikringsvurdering))
         val (_, message) = meldingsfabrikk.lagYtelser(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             behandlingId = behandlingId,
@@ -545,6 +549,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             dagpengerV2 = dagpengerV2,
             inntekterForBeregning = inntekterForBeregning,
             selvstendigForsikring = selvstendigForsikring,
+            forsikringsvurdering = forsikringsvurdering,
             orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstype
         )
@@ -561,10 +566,11 @@ internal abstract class AbstractEndToEndMediatorTest {
         dagpengerV2: Dagpenger = Dagpenger(emptyList()),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
         selvstendigForsikring: List<SelvstendigForsikring> = emptyList(),
+        forsikringsvurdering: Forsikringsvurdering? = null,
         orgnummer: String = "SELVSTENDIG"
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.SelvstendigForsikring))
-        sendYtelser(vedtaksperiodeIndeks, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpengerV2, inntekterForBeregning, selvstendigForsikring, orgnummer)
+        sendYtelser(vedtaksperiodeIndeks, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpengerV2, inntekterForBeregning, selvstendigForsikring, forsikringsvurdering, orgnummer)
     }
 
     private fun sendUtbetalingshistorikk(
