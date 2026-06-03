@@ -125,6 +125,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal val arbeidssituasjon get() = sisteBehandling.arbeidssituasjon
     internal val utbetaling get() = sisteBehandling.utbetaling()
 
+    internal val avslagstidslinje get() = sisteBehandling.avslagstidslinje
+
     internal fun harFattetVedtak() = tidligereBehandlinger.lastOrNull()?.erFattetVedtak() == true
     internal fun erTidligereVilkårsprøvd() = åpenBehandling?.erTidligereVilkårsprøvd() == true || tidligereBehandlinger.any { it.erTidligereVilkårsprøvd() }
 
@@ -201,7 +203,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
             dekningsgrad = dekningsgrad,
             ventetid = sisteBehandling.dagerUtenNavAnsvar.periode,
-            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
+            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+            avslagstidslinje = avslagstidslinje
         )
     }
 
@@ -427,6 +430,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         hendelseSykdomstidslinje: Sykdomstidslinje,
         egenmeldingsdagerAndrePerioder: List<Periode>,
         dagerNavOvertarAnsvar: List<Periode>?,
+        avslagstidslinje: Avslagstidslinje?,
         aktivitetslogg: IAktivitetslogg,
         validering: () -> Unit
     ) {
@@ -437,6 +441,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             hendelseSykdomstidslinje = hendelseSykdomstidslinje,
             egenmeldingsdagerAndrePerioder = egenmeldingsdagerAndrePerioder,
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+            avslagstidslinje = avslagstidslinje,
             aktivitetslogg = aktivitetslogg
         )
         validering()
@@ -513,6 +518,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val korrigertInntekt get() = endringer.last().korrigertInntekt
         val inntektsjusteringer get() = endringer.last().inntektjusteringer
         val behandlingOpprettetTidspunkt: LocalDateTime get() = endringer.first().tidsstempel
+        val avslagstidslinje get() = endringer.last().avslagstidslinje
 
         constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde)
 
@@ -663,6 +669,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             hendelseSykdomstidslinje: Sykdomstidslinje,
             egenmeldingsdagerAndrePerioder: List<Periode>,
             dagerNavOvertarAnsvar: List<Periode>?,
+            avslagstidslinje: Avslagstidslinje?,
             aktivitetslogg: IAktivitetslogg
         ) {
             val hendelseSykdomstidslinjeFremTilOgMed = hendelseSykdomstidslinje.fremTilOgMed(periode.endInclusive)
@@ -673,6 +680,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     .copy(
                         dokumentsporing = dokumentsporing,
                         dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: gjeldende.dagerNavOvertarAnsvar,
+                        avslagstidslinje = avslagstidslinje ?: gjeldende.avslagstidslinje
                     )
             } else {
                 val oppdatertPeriode = periode.oppdaterFom(hendelseperiode)
@@ -693,6 +701,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         skjæringstidspunkter = alleSkjæringstidspunkter,
                         dagerUtenNavAnsvar = dagerUtenNavAnsvar,
                         dagerNavOvertarAnsvar = dagerNavOvertarAnsvar ?: gjeldende.dagerNavOvertarAnsvar,
+                        avslagstidslinje = avslagstidslinje ?: gjeldende.avslagstidslinje,
                         sykdomstidslinje = sykdomstidslinje,
                         periode = oppdatertPeriode,
                         refusjonstidslinje = gjeldende.refusjonstidslinje.fyll(oppdatertPeriode)
@@ -824,6 +833,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val egenmeldingsdager: List<Periode>,
             val dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaring,
             val dagerNavOvertarAnsvar: List<Periode>,
+            val avslagstidslinje: Avslagstidslinje,
             val maksdatoresultat: Maksdatoresultat,
             val inntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
             val faktaavklartInntekt: FaktaavklartInntekt?,
@@ -922,6 +932,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         skjæringstidspunkt = dto.skjæringstidspunkt,
                         skjæringstidspunkter = dto.skjæringstidspunkter,
                         dagerUtenNavAnsvar = DagerUtenNavAnsvaravklaring.gjenopprett(dto.dagerUtenNavAnsvar),
+                        avslagstidslinje = Avslagstidslinje(),
                         egenmeldingsdager = dto.egenmeldingsdager.map { Periode.gjenopprett(it) },
                         dagerNavOvertarAnsvar = dto.dagerNavOvertarAnsvar.map { Periode.gjenopprett(it) },
                         maksdatoresultat = dto.maksdatoresultat.let { Maksdatoresultat.gjenopprett(it) },
@@ -1505,6 +1516,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             dagerUtenNavAnsvar = DagerUtenNavAnsvaravklaring(false, emptyList()),
                             egenmeldingsdager = egenmeldingsdager,
                             dagerNavOvertarAnsvar = emptyList(),
+                            avslagstidslinje = Avslagstidslinje(),
                             maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                             inntektjusteringer = emptyMap(),
                             faktaavklartInntekt = faktaavklartInntekt,

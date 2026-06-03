@@ -554,7 +554,15 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterHistorikkÅpenBehandling(eventBus: EventBus, hendelse: OverstyrTidslinje, aktivitetslogg: IAktivitetslogg): Revurderingseventyr {
         val dagerNavOvertarAnsvar = behandlinger.dagerNavOvertarAnsvar
-        oppdaterHistorikk(eventBus, overstyrTidslinje(hendelse.metadata.meldingsreferanseId), hendelse.sykdomstidslinje, aktivitetslogg, hendelse.dagerNavOvertarAnsvar(dagerNavOvertarAnsvar)) {
+        val avslagstidslinje = behandlinger.avslagstidslinje
+        oppdaterHistorikk(
+            eventBus,
+            overstyrTidslinje(hendelse.metadata.meldingsreferanseId),
+            hendelse.sykdomstidslinje,
+            aktivitetslogg,
+            hendelse.dagerNavOvertarAnsvar(dagerNavOvertarAnsvar),
+            hendelse.avslagstidslinje(avslagstidslinje)
+        ) {
             // ingen validering å gjøre :(
         }
         aktivitetslogg.info("Igangsetter overstyring av tidslinje")
@@ -2547,6 +2555,7 @@ internal class Vedtaksperiode private constructor(
         hendelseSykdomstidslinje: Sykdomstidslinje,
         aktivitetslogg: IAktivitetslogg,
         dagerNavOvertarAnsvar: List<Periode>? = null,
+        avslagstidslinje: Avslagstidslinje? = null,
         validering: () -> Unit
     ) {
         val haddeFlereSkjæringstidspunkt = behandlinger.harFlereSkjæringstidspunkt()
@@ -2557,6 +2566,7 @@ internal class Vedtaksperiode private constructor(
             hendelseSykdomstidslinje = hendelseSykdomstidslinje,
             egenmeldingsdagerAndrePerioder = yrkesaktivitet.egenmeldingsperioderUnntatt(this),
             dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+            avslagstidslinje = avslagstidslinje,
             aktivitetslogg = aktivitetslogg,
             validering = validering
         )

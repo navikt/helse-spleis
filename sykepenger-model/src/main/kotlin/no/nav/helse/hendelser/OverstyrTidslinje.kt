@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.nesteDag
+import no.nav.helse.person.Avslagstidslinje
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.AAP
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Dagpenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
@@ -13,6 +14,7 @@ import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Opplæringspen
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 data class ManuellOverskrivingDag(
@@ -30,7 +32,7 @@ data class ManuellOverskrivingDag(
 enum class Dagtype {
     Sykedag, Feriedag, ArbeidIkkeGjenopptattDag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, SykedagNav,
     Foreldrepengerdag, AAPdag, Omsorgspengerdag, Pleiepengerdag, Svangerskapspengerdag, Opplaringspengerdag, Dagpengerdag,
-    MeldingTilNavdag;
+    MeldingTilNavdag, AvslåttMeldingTilNavdag;
 
     companion object {
         val gyldigeTyper = entries.map { it.name }
@@ -159,6 +161,12 @@ class OverstyrTidslinje(
                     grad = 100.prosent,
                     kilde = kilde
                 )
+
+                Dagtype.AvslåttMeldingTilNavdag -> Sykdomstidslinje.arbeidsdager(
+                    førsteDato = it.dato,
+                    sisteDato = it.dato,
+                    kilde = kilde
+                )
             }
         }.reduce(Sykdomstidslinje::plus)
         periode = checkNotNull(sykdomstidslinje.periode()) {
@@ -172,6 +180,25 @@ class OverstyrTidslinje(
             .filterNot { dag -> dager.any { overstyrtDag -> dag == overstyrtDag.dato } }
 
         return (utenDagerSaksbehandlerHarEndretPå + dagerNavOvertarAnsvar).grupperSammenhengendePerioder()
+    }
+
+    internal fun avslagstidslinje(eksisterendeAvslagstidslinje: Avslagstidslinje): Avslagstidslinje {
+
+        val avslåtteMeldingTilNavdager = dager
+            .filter { it.type == Dagtype.AvslåttMeldingTilNavdag }
+            .map { it.dato }
+            .grupperSammenhengendePerioder()
+
+        val nyAvslagstidslinje = Avslagstidslinje(
+            *avslåtteMeldingTilNavdager.associateWith {
+                Avslagstidslinje.Avslagsdag(
+                    begrunnelser = listOf(Begrunnelse.MeldingTilNavDagUtenforVentetid), // TODO: Legg på riktig begrunnelse her
+                    kilde = "Saksbehandler"
+                )
+            }.toList().toTypedArray()
+        )
+
+        return eksisterendeAvslagstidslinje + nyAvslagstidslinje
     }
 
     internal fun vurdertTilOgMed(dato: LocalDate) {

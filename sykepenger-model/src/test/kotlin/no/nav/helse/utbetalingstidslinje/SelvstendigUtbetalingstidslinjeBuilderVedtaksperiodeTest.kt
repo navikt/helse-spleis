@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.Avslagstidslinje
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
@@ -65,7 +66,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
     private lateinit var utbetalingstidslinje: Utbetalingstidslinje
     private val perioder: MutableList<PeriodeUtenNavAnsvar> = mutableListOf()
 
-    private fun undersøke(tidslinje: Sykdomstidslinje, dagerNavOvertarAnsvar: List<Periode> = emptyList()) {
+    private fun undersøke(tidslinje: Sykdomstidslinje, dagerNavOvertarAnsvar: List<Periode> = emptyList(), avslagstidslinje: Avslagstidslinje = Avslagstidslinje()) {
         val ventetidberegner = Ventetidberegner()
         val ventetider = ventetidberegner.result(tidslinje)
         perioder.addAll(ventetider)
@@ -73,7 +74,8 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
         val builder = SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
             dekningsgrad = 80.prosent,
             ventetid = ventetider.lastOrNull()?.dagerUtenAnsvar?.singleOrNull(),
-            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar
+            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+            avslagstidslinje = avslagstidslinje
         )
 
         utbetalingstidslinje = builder.result(tidslinje, 31000.månedlig, Beløpstidslinje())
