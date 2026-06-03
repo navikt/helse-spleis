@@ -12,6 +12,7 @@ import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
+import no.nav.helse.dto.AvslagstidslinjeDto
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
@@ -107,6 +108,7 @@ import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
+import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.BegrunnelseData
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 
 data class PersonData(
@@ -952,6 +954,7 @@ data class PersonData(
                     val dagerUtenNavAnsvar: PeriodeUtenNavAnsvarData,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val egenmeldingsdager: List<PeriodeData>,
+                    val avslagstidslinje: AvslagstidslinjeData,
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
                     val faktaavklartInntekt: FaktaavklartInntektData?,
@@ -984,6 +987,7 @@ data class PersonData(
                         dagerUtenNavAnsvar = dagerUtenNavAnsvar.tilDto(),
                         dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { it.tilDto() },
                         egenmeldingsdager = egenmeldingsdager.map { it.tilDto() },
+                        avslagstidslinje = avslagstidslinje.tilDto(),
                         maksdatoresultat = maksdatoresultat.tilDto(),
                         inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
                             InntektskildeDto(inntektskilde) to beløpstidslinje.tilDto()
@@ -992,6 +996,20 @@ data class PersonData(
                         korrigertInntekt = korrigertInntekt?.tilDto(),
                         beregningId = beregningId
                     )
+
+                    data class AvslagstidslinjeData(
+                        val perioder: List<AvslagstidslinjedagData>,
+                    ) {
+                        data class AvslagstidslinjedagData(
+                            val begrunnelser: List<BegrunnelseData>,
+                            val kilde: String,
+                            val perioder: PeriodeData
+                        ) {
+                            fun tilDto() = AvslagstidslinjeDto.AvslagstidslinjedagDto(begrunnelser.map { it.tilDto() }, kilde, perioder.tilDto())
+                        }
+
+                        fun tilDto() = AvslagstidslinjeDto(perioder = perioder.map { it.tilDto() })
+                    }
 
                     data class PeriodeUtenNavAnsvarData(
                         val ferdigAvklart: Boolean,

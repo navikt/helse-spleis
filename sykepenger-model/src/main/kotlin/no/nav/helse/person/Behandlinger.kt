@@ -932,7 +932,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         skjæringstidspunkt = dto.skjæringstidspunkt,
                         skjæringstidspunkter = dto.skjæringstidspunkter,
                         dagerUtenNavAnsvar = DagerUtenNavAnsvaravklaring.gjenopprett(dto.dagerUtenNavAnsvar),
-                        avslagstidslinje = Avslagstidslinje(),
+                        avslagstidslinje = Avslagstidslinje.gjenopprett(dto.avslagstidslinje),
                         egenmeldingsdager = dto.egenmeldingsdager.map { Periode.gjenopprett(it) },
                         dagerNavOvertarAnsvar = dto.dagerNavOvertarAnsvar.map { Periode.gjenopprett(it) },
                         maksdatoresultat = dto.maksdatoresultat.let { Maksdatoresultat.gjenopprett(it) },
@@ -1084,6 +1084,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     refusjonstidslinje = this.refusjonstidslinje.dto(),
                     dagerUtenNavAnsvar = this.dagerUtenNavAnsvar.dto(),
                     dagerNavOvertarAnsvar = this.dagerNavOvertarAnsvar.map { it.dto() },
+                    avslagstidslinje = this.avslagstidslinje.dto(),
                     egenmeldingsdager = this.egenmeldingsdager.map { it.dto() },
                     maksdatoresultat = this.maksdatoresultat.dto(),
                     inntektjusteringer = this.inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->

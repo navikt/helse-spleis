@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.Tidslinje
+import no.nav.helse.dto.AvslagstidslinjeDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Avslagstidslinje.Avslagsdag
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -14,16 +15,26 @@ internal class Avslagstidslinje(
         val kilde: String
     )
 
-    //fun dto() = AvslåtteDagerDto(dager.map { it.dto() })
-
+    fun dto() = AvslagstidslinjeDto(gruppér().map { (periode, avslagsdag) ->
+        AvslagstidslinjeDto.AvslagstidslinjedagDto(
+            begrunnelser = avslagsdag.begrunnelser.map { it.dto() },
+            kilde = avslagsdag.kilde,
+            periode = periode.dto()
+        )
+    })
     override fun opprett(vararg perioder: Pair<Periode, Avslagsdag>): Avslagstidslinje {
         return Avslagstidslinje(*perioder)
     }
 
-    //companion object {
-    //    fun gjenopprett(dto: AvslåtteDagerDto) =
-    //        Avslagstidslinje(
-    //            dto.dager.map { Periode.gjenopprett(it) }
-    //        )
-    //}
+    companion object {
+        fun gjenopprett(dto: AvslagstidslinjeDto) =
+            Avslagstidslinje(
+                *dto.perioder.map { dag ->
+                    Periode(dag.periode.fom, dag.periode.tom) to Avslagsdag(
+                        begrunnelser = dag.begrunnelser.map { Begrunnelse.gjenopprett(it) },
+                        kilde = dag.kilde
+                    )
+                }.toTypedArray()
+            )
+    }
 }

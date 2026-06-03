@@ -285,7 +285,7 @@ sealed class Begrunnelse {
     data object NyVilkårsprøvingNødvendig : Begrunnelse()
 
     companion object {
-        internal fun gjenopprett(dto: BegrunnelseDto): Begrunnelse {
+        fun gjenopprett(dto: BegrunnelseDto): Begrunnelse {
             return when (dto) {
                 BegrunnelseDto.SykepengedagerOppbrukt -> SykepengedagerOppbrukt
                 BegrunnelseDto.AndreYtelserAap -> AndreYtelserAap

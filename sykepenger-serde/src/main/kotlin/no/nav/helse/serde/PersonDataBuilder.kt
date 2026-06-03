@@ -3,6 +3,7 @@ package no.nav.helse.serde
 import java.time.LocalDate
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvsenderDto
+import no.nav.helse.dto.AvslagstidslinjeDto
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
@@ -70,6 +71,7 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingData.InntektsmeldingKildeDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.ArbeidssituasjonData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.AvslagstidslinjeData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData.PeriodeUtenNavAnsvarData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK
@@ -106,9 +108,9 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Tilstan
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_REVURDERING
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_SIMULERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData.SELVSTENDIG_START
@@ -533,6 +535,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     dokumentsporing = dokumentsporing.tilPersonData(),
     dagerUtenNavAnsvar = dagerUtenNavAnsvar.tilPersonData(),
     dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+    avslagstidslinje = avslagstidslinje.tilPersonData(),
     egenmeldingsdager = egenmeldingsdager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     maksdatoresultat = maksdatoresultat.tilPersonData(),
     inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
@@ -541,6 +544,16 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     faktaavklartInntekt = faktaavklartInntekt?.tilPersonData(),
     korrigertInntekt = korrigertInntekt?.tilPersonData(),
     beregningId = beregningId
+)
+
+private fun AvslagstidslinjeDto.tilPersonData() = AvslagstidslinjeData(
+    perioder = this.perioder.map { it ->
+        AvslagstidslinjeData.AvslagstidslinjedagData(
+            begrunnelser = it.begrunnelser.map { it.tilPersonData() },
+            kilde = it.kilde,
+            perioder = PersonData.ArbeidsgiverData.PeriodeData(it.periode.fom, it.periode.tom)
+        )
+    }
 )
 
 private fun DagerUtenNavAnsvaravklaringDto.tilPersonData() = PeriodeUtenNavAnsvarData(

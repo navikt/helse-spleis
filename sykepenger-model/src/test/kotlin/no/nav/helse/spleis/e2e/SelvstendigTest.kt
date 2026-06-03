@@ -86,6 +86,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertEquals("ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
 
+            assertGjenoppbygget(dto())
         }
     }
 
@@ -102,7 +103,6 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            val d = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.first()
             assertEquals("ARR ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
 
