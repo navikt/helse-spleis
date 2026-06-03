@@ -954,7 +954,7 @@ data class PersonData(
                     val dagerUtenNavAnsvar: PeriodeUtenNavAnsvarData,
                     val dagerNavOvertarAnsvar: List<PeriodeData>,
                     val egenmeldingsdager: List<PeriodeData>,
-                    val avslagstidslinje: AvslagstidslinjeData,
+                    val avslagstidslinje: AvslagstidslinjeData? = null, // TODO: Fjern muligheten til å være null etter alle behandlinger har fått avslagstidslinje, etter 10.07.2026
                     val maksdatoresultat: MaksdatoresultatData,
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
                     val faktaavklartInntekt: FaktaavklartInntektData?,
@@ -987,7 +987,7 @@ data class PersonData(
                         dagerUtenNavAnsvar = dagerUtenNavAnsvar.tilDto(),
                         dagerNavOvertarAnsvar = dagerNavOvertarAnsvar.map { it.tilDto() },
                         egenmeldingsdager = egenmeldingsdager.map { it.tilDto() },
-                        avslagstidslinje = avslagstidslinje.tilDto(),
+                        avslagstidslinje = avslagstidslinje?.tilDto() ?: AvslagstidslinjeDto(emptyList()), // TODO: Fjern nullable håndteringen etter alle behandlinger har fått avslagstidslinje, etter 10.07.2026
                         maksdatoresultat = maksdatoresultat.tilDto(),
                         inntektjusteringer = inntektjusteringer.map { (inntektskilde, beløpstidslinje) ->
                             InntektskildeDto(inntektskilde) to beløpstidslinje.tilDto()
