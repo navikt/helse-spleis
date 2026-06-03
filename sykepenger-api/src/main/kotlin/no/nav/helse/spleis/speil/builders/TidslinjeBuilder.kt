@@ -3,6 +3,7 @@ package no.nav.helse.spleis.speil.builders
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.math.roundToInt
+import no.nav.helse.dto.AvslagstidslinjeDto
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
@@ -23,7 +24,8 @@ import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagUtenGrad
 internal class SykdomstidslinjeBuilder(
     private val dto: SykdomstidslinjeDto,
     periode: PeriodeDto,
-    private val dagerNavOvertarAnsvar: List<PeriodeDto>
+    private val dagerNavOvertarAnsvar: List<PeriodeDto>,
+    private val avslagstidslinje: AvslagstidslinjeDto
 ) {
     private val tidslinje by lazy {
         (periode.fom.datesUntil(periode.tom.plusDays(1)).map { dag ->
@@ -102,7 +104,7 @@ internal class SykdomstidslinjeBuilder(
 
             is SykdomstidslinjeDagDto.ArbeidsdagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.ARBEIDSDAG,
+                type = if (avslagstidslinje.perioder.any { dag -> it.dato in (dag.periode.fom..dag.periode.tom) }) SykdomstidslinjedagType.AVSLÅTT_MELDING_TIL_NAV_DAG else SykdomstidslinjedagType.ARBEIDSGIVERDAG,
                 kilde = it.kilde.tilKildeDTO(),
                 grad = null
             )

@@ -45,6 +45,29 @@ import org.junit.jupiter.api.Test
 internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
+    fun `Avslått melding til Nav dag mappes riktig`() {
+        håndterSøknadSelvstendig(2.januar til 31.januar, 2.januar til 17.januar)
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        håndterSimulering()
+
+        håndterOverstyrTidslinje((1.januar til 2.januar).map {
+            ManuellOverskrivingDag(it, Dagtype.MeldingTilNavdag, 100)
+        }, orgnummer = selvstendig)
+        håndterOverstyrTidslinje((1.januar til 2.januar).map {
+            ManuellOverskrivingDag(it, Dagtype.AvslåttMeldingTilNavdag, 100)
+        }, orgnummer = selvstendig)
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        håndterSimulering()
+
+        val tidslinje = speilApi().arbeidsgivere.first().generasjoner.first().perioder.first().sammenslåttTidslinje.first()
+        assertEquals(1.januar, tidslinje.dagen)
+        assertEquals(SykdomstidslinjedagType.AVSLÅTT_MELDING_TIL_NAV_DAG, tidslinje.sykdomstidslinjedagtype)
+        assertEquals(UtbetalingstidslinjedagType.AvvistDag, tidslinje.utbetalingstidslinjedagtype)
+    }
+
+    @Test
     fun `Skjæringstidspunkt er etter ny g, men før virkningstidspunkt for gyldigSomMinsteinntektKrav`() {
         håndterSøknad(28.mai(2025) til 13.juni(2025))
         håndterArbeidsgiveropplysninger(listOf(28.mai(2025) til 12.juni(2025)), beregnetInntekt = 64000.årlig)

@@ -5273,6 +5273,11 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "AvslattMeldingTilNavDag",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "Feriedag",
           "description" : null,
           "isDeprecated" : false,

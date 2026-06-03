@@ -108,7 +108,12 @@ internal class SpeilGenerasjonerBuilder(
 
     private fun mapUberegnetPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto, periodetilstand: Periodetilstand? = null): UberegnetPeriode {
         val sisteEndring = generasjon.endringer.last()
-        val sykdomstidslinje = SykdomstidslinjeBuilder(sisteEndring.sykdomstidslinje, sisteEndring.periode, sisteEndring.dagerNavOvertarAnsvar).build()
+        val sykdomstidslinje = SykdomstidslinjeBuilder(
+            sisteEndring.sykdomstidslinje,
+            sisteEndring.periode,
+            sisteEndring.dagerNavOvertarAnsvar,
+            sisteEndring.avslagstidslinje
+        ).build()
         val utbetalingstidslinje = UtbetalingstidslinjeBuilder(sisteEndring.utbetalingstidslinje).build()
         return UberegnetPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
@@ -166,7 +171,12 @@ internal class SpeilGenerasjonerBuilder(
         val utbetalingstidslinje = UtbetalingstidslinjeBuilder(sisteEndring.utbetalingstidslinje).build()
         val skjæringstidspunkt = sisteEndring.skjæringstidspunkt
         val sisteSykepengedag = utbetalingstidslinje.sisteNavDag()?.dato ?: sisteEndring.periode.tom
-        val sykdomstidslinje = SykdomstidslinjeBuilder(sisteEndring.sykdomstidslinje, sisteEndring.periode, sisteEndring.dagerNavOvertarAnsvar).build()
+        val sykdomstidslinje = SykdomstidslinjeBuilder(
+            sisteEndring.sykdomstidslinje,
+            sisteEndring.periode,
+            sisteEndring.dagerNavOvertarAnsvar,
+            sisteEndring.avslagstidslinje
+        ).build()
         return BeregnetPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
             behandlingId = generasjon.id,

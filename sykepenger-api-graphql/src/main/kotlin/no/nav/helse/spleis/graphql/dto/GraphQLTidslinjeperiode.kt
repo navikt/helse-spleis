@@ -21,6 +21,7 @@ enum class GraphQLSykdomsdagtype {
     Arbeidsdag,
     Arbeidsgiverdag,
     MeldingTilNavDag,
+    AvslattMeldingTilNavDag,
     Feriedag,
     ArbeidIkkeGjenopptattDag,
     ForeldetSykedag,
