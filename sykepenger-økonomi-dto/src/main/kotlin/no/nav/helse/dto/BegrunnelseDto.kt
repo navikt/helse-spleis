@@ -7,6 +7,7 @@ sealed class BegrunnelseDto {
     data object MinimumInntektOver67 : BegrunnelseDto()
     data object EgenmeldingUtenforArbeidsgiverperiode : BegrunnelseDto()
     data object MeldingTilNavDagUtenforVentetid : BegrunnelseDto()
+    data object AvslåttMeldingTilNavDag : BegrunnelseDto()
     data object AndreYtelserForeldrepenger : BegrunnelseDto()
     data object AndreYtelserAap : BegrunnelseDto()
     data object AndreYtelserOmsorgspenger : BegrunnelseDto()

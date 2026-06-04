@@ -1338,6 +1338,7 @@ data class PersonData(
             MinimumInntektOver67,
             EgenmeldingUtenforArbeidsgiverperiode,
             MeldingTilNavDagUtenforVentetid,
+            AvslåttMeldingTilNavDag,
             MinimumSykdomsgrad,
             AndreYtelserAap,
             AndreYtelserDagpenger,
@@ -1372,6 +1373,7 @@ data class PersonData(
                 ManglerOpptjening -> BegrunnelseDto.ManglerOpptjening
                 Over70 -> BegrunnelseDto.Over70
                 NyVilkårsprøvingNødvendig -> BegrunnelseDto.NyVilkårsprøvingNødvendig
+                AvslåttMeldingTilNavDag -> BegrunnelseDto.AvslåttMeldingTilNavDag
             }
         }
 

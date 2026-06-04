@@ -365,6 +365,8 @@ interface EventSubscription {
             MinimumInntekt,
             MinimumInntektOver67,
             EgenmeldingUtenforArbeidsgiverperiode,
+            MeldingTilNavDagUtenforVentetid,
+            AvslåttMeldingTilNavDag,
             AndreYtelserAap,
             AndreYtelserDagpenger,
             AndreYtelserForeldrepenger,
@@ -384,7 +386,8 @@ interface EventSubscription {
                     is Begrunnelse.SykepengedagerOppbruktOver67 -> SykepengedagerOppbruktOver67
                     is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
                     is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
-                    is Begrunnelse.MeldingTilNavDagUtenforVentetid -> EgenmeldingUtenforArbeidsgiverperiode // TODO: Map til MeldingTilNavDagUtenforVentetid
+                    is Begrunnelse.MeldingTilNavDagUtenforVentetid -> MeldingTilNavDagUtenforVentetid
+                    is Begrunnelse.AvslåttMeldingTilNavDag -> AvslåttMeldingTilNavDag
                     is Begrunnelse.MinimumInntekt -> MinimumInntekt
                     is Begrunnelse.MinimumInntektOver67 -> MinimumInntektOver67
                     is Begrunnelse.EtterDødsdato -> EtterDødsdato
@@ -712,6 +715,8 @@ interface EventSubscription {
                             EksternBegrunnelseDTO.ManglerMedlemskap -> "ManglerMedlemskap"
                             EksternBegrunnelseDTO.ManglerOpptjening -> "ManglerOpptjening"
                             EksternBegrunnelseDTO.Over70 -> "Over70"
+                            EksternBegrunnelseDTO.MeldingTilNavDagUtenforVentetid -> "MeldingTilNavDagUtenforVentetid"
+                            EksternBegrunnelseDTO.AvslåttMeldingTilNavDag -> "AvslåttMeldingTilNavDag"
                         }
                     } ?: emptyList())
                 )

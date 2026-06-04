@@ -489,6 +489,8 @@ internal class PersonMediator(
                     EksternBegrunnelseDTO.ManglerMedlemskap -> "ManglerMedlemskap"
                     EksternBegrunnelseDTO.ManglerOpptjening -> "ManglerOpptjening"
                     EksternBegrunnelseDTO.Over70 -> "Over70"
+                    EksternBegrunnelseDTO.MeldingTilNavDagUtenforVentetid -> "MeldingTilNavDagUtenforVentetid"
+                    EksternBegrunnelseDTO.AvslåttMeldingTilNavDag -> "AvslåttMeldingTilNavDag"
                 }
             }
         )

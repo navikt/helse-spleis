@@ -5490,6 +5490,16 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "AvslattMeldingTilNavDag",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "MeldingTilNavDagUtenforVentetid",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "AndreYtelser",
           "description" : null,
           "isDeprecated" : false,

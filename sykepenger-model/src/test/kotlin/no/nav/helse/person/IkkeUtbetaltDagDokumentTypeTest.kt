@@ -24,7 +24,9 @@ internal class IkkeUtbetaltDagDokumentTypeTest {
             "AndreYtelserOmsorgspenger",
             "AndreYtelserOpplaringspenger",
             "AndreYtelserPleiepenger",
-            "AndreYtelserSvangerskapspenger"
+            "AndreYtelserSvangerskapspenger",
+            "AvslåttMeldingTilNavDag",
+            "MeldingTilNavDagUtenforVentetid"
         )
         EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.entries.forEach { begrunnelse ->
             assertTrue(begrunnelserSomSpreGosysKjennerTil.contains(begrunnelse.name)) {

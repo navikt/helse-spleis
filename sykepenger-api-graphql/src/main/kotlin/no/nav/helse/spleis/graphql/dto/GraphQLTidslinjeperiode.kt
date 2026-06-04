@@ -68,6 +68,8 @@ enum class GraphQLBegrunnelse {
     MinimumInntekt,
     MinimumInntektOver67,
     EgenmeldingUtenforArbeidsgiverperiode,
+    AvslattMeldingTilNavDag,
+    MeldingTilNavDagUtenforVentetid,
     AndreYtelser,
     MinimumSykdomsgrad,
     EtterDodsdato,

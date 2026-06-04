@@ -719,6 +719,7 @@ data class SpannerPersonDto(
             MinimumInntektOver67,
             EgenmeldingUtenforArbeidsgiverperiode,
             MeldingTilNavDagUtenforVentetid,
+            AvslåttMeldingTilNavDag,
             MinimumSykdomsgrad,
             AndreYtelserAap,
             AndreYtelserDagpenger,
@@ -1493,6 +1494,7 @@ private fun BegrunnelseDto.tilPersonData() = when (this) {
     BegrunnelseDto.AndreYtelserSvangerskapspenger -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AndreYtelserSvangerskapspenger
     BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.EgenmeldingUtenforArbeidsgiverperiode
     BegrunnelseDto.MeldingTilNavDagUtenforVentetid -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.MeldingTilNavDagUtenforVentetid
+    BegrunnelseDto.AvslåttMeldingTilNavDag -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.AvslåttMeldingTilNavDag
     BegrunnelseDto.EtterDødsdato -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.EtterDødsdato
     BegrunnelseDto.ManglerMedlemskap -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.ManglerMedlemskap
     BegrunnelseDto.ManglerOpptjening -> SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData.ManglerOpptjening
