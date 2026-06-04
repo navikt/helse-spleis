@@ -55,7 +55,7 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
             ManuellOverskrivingDag(it, Dagtype.MeldingTilNavdag, 100)
         }, orgnummer = selvstendig)
         håndterOverstyrTidslinje((1.januar til 2.januar).map {
-            ManuellOverskrivingDag(it, Dagtype.AvslåttMeldingTilNavdag, 100)
+            ManuellOverskrivingDag(it, Dagtype.AvslattMeldingTilNavdag, 100)
         }, orgnummer = selvstendig)
         håndterVilkårsgrunnlag()
         håndterYtelser()

@@ -78,7 +78,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            håndterOverstyrTidslinje((1.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.AvslåttMeldingTilNavdag, grad = 80) })
+            håndterOverstyrTidslinje((1.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.AvslattMeldingTilNavdag, grad = 80) })
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -98,7 +98,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            håndterOverstyrTidslinje((29.desember(2017) til 1.januar).map { ManuellOverskrivingDag(it, Dagtype.AvslåttMeldingTilNavdag, grad = 80) })
+            håndterOverstyrTidslinje((29.desember(2017) til 1.januar).map { ManuellOverskrivingDag(it, Dagtype.AvslattMeldingTilNavdag, grad = 80) })
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

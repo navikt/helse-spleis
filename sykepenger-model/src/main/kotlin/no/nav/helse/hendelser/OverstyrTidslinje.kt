@@ -32,7 +32,7 @@ data class ManuellOverskrivingDag(
 enum class Dagtype {
     Sykedag, Feriedag, ArbeidIkkeGjenopptattDag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, SykedagNav,
     Foreldrepengerdag, AAPdag, Omsorgspengerdag, Pleiepengerdag, Svangerskapspengerdag, Opplaringspengerdag, Dagpengerdag,
-    MeldingTilNavdag, AvslåttMeldingTilNavdag;
+    MeldingTilNavdag, AvslattMeldingTilNavdag;
 
     companion object {
         val gyldigeTyper = entries.map { it.name }
@@ -162,7 +162,7 @@ class OverstyrTidslinje(
                     kilde = kilde
                 )
 
-                Dagtype.AvslåttMeldingTilNavdag -> Sykdomstidslinje.arbeidsdager(
+                Dagtype.AvslattMeldingTilNavdag -> Sykdomstidslinje.arbeidsdager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde
@@ -185,7 +185,7 @@ class OverstyrTidslinje(
     internal fun avslagstidslinje(eksisterendeAvslagstidslinje: Avslagstidslinje): Avslagstidslinje {
 
         val avslåtteMeldingTilNavdager = dager
-            .filter { it.type == Dagtype.AvslåttMeldingTilNavdag }
+            .filter { it.type == Dagtype.AvslattMeldingTilNavdag }
             .map { it.dato }
             .grupperSammenhengendePerioder()
 
