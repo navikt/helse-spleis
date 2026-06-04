@@ -12,7 +12,7 @@ internal object Entrypoint {
 
     fun start() {
         println("## Velkommen til spleis sine DbScripts!")
-        println(" - Husk at du alltid kan skrive 'exit' for å putte en kniven i sideflesket mitt 🔪")
+        println(" - Husk at du alltid kan skrive 'exit' for å putte en kniv i sideflesket mitt 🔪")
         println()
 
         println("Hvordan vil du koble deg til databasen?")
