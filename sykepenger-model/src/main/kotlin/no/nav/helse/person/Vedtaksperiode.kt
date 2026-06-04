@@ -920,6 +920,11 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg.info("Det er rester igjen etter håndtering av dager ($antallDagerIgjen dager)")
         }
 
+        if (!behandlinger.dagerUtenNavAnsvar.dager.flatten().containsAll(oppgittArbeidgiverperiode.perioder.flatten())) {
+            aktivitetslogg.varsel(Varselkode.RV_IM_3)
+            aktivitetslogg.info(melding = "Beregnet agp ${behandlinger.dagerUtenNavAnsvar.dager} mens arbeidsgiver opplyser om ${oppgittArbeidgiverperiode.perioder}")
+        }
+
         return eventyr
     }
 

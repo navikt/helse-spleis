@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -49,6 +48,7 @@ import no.nav.helse.person.EventSubscription.Refusjon
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
@@ -246,10 +246,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                     skjæringstidspunkt = 17.februar,
                     sykmeldingsperioder = listOf(17.februar til 28.februar),
                     egenmeldingsperioder = listOf(10.februar.somPeriode()),
-                    førsteFraværsdager = listOf(EventSubscription.FørsteFraværsdag(
-                        arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                        førsteFraværsdag = 17.februar
-                    )),
+                    førsteFraværsdager = listOf(
+                        EventSubscription.FørsteFraværsdag(
+                            arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                            førsteFraværsdag = 17.februar
+                        )
+                    ),
                     forespurteOpplysninger = setOf(Inntekt, Refusjon)
                 )
             )
@@ -278,6 +280,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         }
     }
 
@@ -332,7 +335,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar))
             )
-            assertVarsler(1.vedtaksperiode, RV_IM_24)
+            assertVarsler(1.vedtaksperiode, RV_IM_24, RV_IM_3)
         }
     }
 
@@ -623,7 +626,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`()  {
+    fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`() {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
             håndterArbeidsgiveropplysninger(listOf(2.januar til 17.januar), vedtaksperiodeId = 2.vedtaksperiode)
@@ -632,6 +635,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
             assertInfo("Håndterer ikke arbeidsgiverperiode i AVSLUTTET", 1.vedtaksperiode.filter())
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
             val forespørselFebruar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode }
             assertEquals(0, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Arbeidsgiverperiode>().size)
             assertEquals(0, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Inntekt>().size)
@@ -644,7 +648,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`()  {
+    fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`() {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
             håndterArbeidsgiveropplysninger(emptyList(), vedtaksperiodeId = 2.vedtaksperiode)
@@ -698,6 +702,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittArbeidgiverperiode(listOf(10.oktober(2025) til 16.oktober(2025)))
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         }
     }
 
@@ -709,11 +714,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
             håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(20.januar til 4.februar), vedtaksperiodeId = 2.vedtaksperiode)
             assertEquals("SSSSSHH SSSSSHH SSAAAHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
-            assertForventetFeil(
-                forklaring = "i denne situasjonen blir ikke første vedtaksperiode fylt med arbeidsdager og vi får ikke noe varsel om uenighet om agp",
-                nå = {  },
-                ønsket = { assertVarsler(2.vedtaksperiode, Varselkode.RV_IM_3) }
-            )
+            assertVarsler(2.vedtaksperiode, RV_IM_3)
         }
     }
 
@@ -730,21 +731,24 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     private fun TestPerson.TestArbeidsgiver.assertDokumentsporingPåSisteBehandling(vedtaksperiode: UUID, vararg forventet: Dokumentsporing) {
         val faktisk = inspektør.vedtaksperioder(vedtaksperiode).behandlinger.behandlinger
             .last().endringer
-            .map { it.dokumentsporing }.filter { when (it.dokumentType) {
-                DokumentType.InntektsmeldingInntekt,
-                DokumentType.InntektsmeldingRefusjon,
-                DokumentType.InntektsmeldingDager -> true
-                DokumentType.Søknad,
-                DokumentType.Sykmelding,
-                DokumentType.InntektFraAOrdningen,
-                DokumentType.OverstyrTidslinje,
-                DokumentType.OverstyrInntekt,
-                DokumentType.OverstyrRefusjon,
-                DokumentType.OverstyrArbeidsgiveropplysninger,
-                DokumentType.OverstyrArbeidsforhold,
-                DokumentType.SkjønnsmessigFastsettelse,
-                DokumentType.AndreYtelser -> false
-            } }
+            .map { it.dokumentsporing }.filter {
+                when (it.dokumentType) {
+                    DokumentType.InntektsmeldingInntekt,
+                    DokumentType.InntektsmeldingRefusjon,
+                    DokumentType.InntektsmeldingDager -> true
+
+                    DokumentType.Søknad,
+                    DokumentType.Sykmelding,
+                    DokumentType.InntektFraAOrdningen,
+                    DokumentType.OverstyrTidslinje,
+                    DokumentType.OverstyrInntekt,
+                    DokumentType.OverstyrRefusjon,
+                    DokumentType.OverstyrArbeidsgiveropplysninger,
+                    DokumentType.OverstyrArbeidsforhold,
+                    DokumentType.SkjønnsmessigFastsettelse,
+                    DokumentType.AndreYtelser -> false
+                }
+            }
         assertEquals(forventet.toSet(), faktisk.toSet())
     }
 }

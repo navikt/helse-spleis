@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e.refusjon
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -11,7 +11,6 @@ import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
@@ -160,7 +159,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             )
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-            assertVarsler(emptyList(), 2.vedtaksperiode.filter()) // Ingen har jo håndtert disse dagene, så ikke noe varsel
+            assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter()) // Ingen har jo håndtert disse dagene, så ikke noe varsel
         }
     }
 
@@ -186,11 +185,13 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             )
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
-                arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT,
-                    refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN))
-                ))
+                arbeidsgiveropplysninger = listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = INNTEKT,
+                        refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN))
+                    )
+                )
             )
 
             val ubrukteRefusjonsopplysninger2 = inspektør.ubrukteRefusjonsopplysninger

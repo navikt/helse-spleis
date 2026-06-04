@@ -53,6 +53,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractDslTest() {
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
 
             håndterYtelser(2.vedtaksperiode)
             assertVarsel(Varselkode.RV_IT_14, 2.vedtaksperiode.filter())

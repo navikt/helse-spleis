@@ -730,7 +730,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `uenighet i agp kan delvis bli utbetalt automatisk`()  {
+    fun `uenighet i agp kan ikke lenger bli delvis utbetalt automatisk`()  {
         a1 {
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent)) // En periode arbeidsgiver har glemt/ikke fått med seg
             håndterSøknad(Sykdom(22.januar, 5.februar, 100.prosent))
@@ -749,7 +749,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 22.januar, listOf(1.januar til 15.januar, 22.januar til 22.januar))
             assertEquals("PNNNNHH NNNNNHH N", inspektør.utbetalingstidslinjer(2.vedtaksperiode).toString())
 
-            assertVarsler(emptyList(), 2.vedtaksperiode.filter())
+            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         }
     }
 
@@ -924,6 +924,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(5.vedtaksperiode)
             håndterYtelser(5.vedtaksperiode)
 
+            assertVarsel(RV_IM_3, 5.vedtaksperiode.filter())
             assertForventetFeil(
                 forklaring = "Inntektsmelding forteller _implisitt_ at 1.jan-30.jan er arbeidsdager. Dagene henger igjen som sykedager i modellen." +
                     "De spredte sykedagene er innenfor 16 dager fra hverandre, slik at de teller med i samme arbeidsgiverperiodetelling." +
@@ -954,6 +955,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
+            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -1063,7 +1065,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 vedtaksperiodeId = 2.vedtaksperiode
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-            assertVarsler(emptyList(), 2.vedtaksperiode.filter())
+            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
 
@@ -1714,7 +1716,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             assertTrue((1.januar til 7.januar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
             assertTrue((8.januar til 20.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag || tidslinje[it] is Dag.Arbeidsgiverdag || tidslinje[it] is Dag.ArbeidsgiverHelgedag })
             assertTrue((21.januar til 23.januar).all { tidslinje[it] is Dag.UkjentDag })
-            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertEquals(8.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -2800,6 +2802,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             assertEquals(8.februar til 20.mars, inspektør.periode(2.vedtaksperiode))
             assertEquals("UARR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSHH SS", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         }
     }
 

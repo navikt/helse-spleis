@@ -615,6 +615,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             assertEquals("HH SSSSSHH SAAAARR AAA", inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).toShortString())
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
+            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         }
     }
 

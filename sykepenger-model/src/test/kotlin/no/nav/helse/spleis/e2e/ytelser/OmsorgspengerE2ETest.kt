@@ -88,7 +88,7 @@ internal class OmsorgspengerE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
             håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(GradertPeriode(3.februar til 20.februar, 100)))
             assertVarsel(Varselkode.RV_AY_7, 1.vedtaksperiode.filter())
