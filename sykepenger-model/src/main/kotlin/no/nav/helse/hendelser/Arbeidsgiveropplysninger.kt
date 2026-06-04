@@ -16,6 +16,7 @@ sealed interface Arbeidsgiveropplysning {
     data class OppgittArbeidgiverperiode(val perioder: List<Periode>) : Arbeidsgiveropplysning {
         init {
             check(perioder.isNotEmpty()) { "Må være minst en periode med agp!" }
+            check(perioder.flatten().size <= 16) { "Tøysete med en agp mer enn 16" }
         }
     }
 

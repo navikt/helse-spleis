@@ -177,7 +177,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(
                     3.januar til 3.januar,
-                    5.januar til 20.januar
+                    5.januar til 19.januar
                 ),
                 vedtaksperiodeId = 3.vedtaksperiode
             )
@@ -202,7 +202,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(
                     3.januar til 3.januar,
-                    5.januar til 20.januar
+                    5.januar til 19.januar
                 ),
                 vedtaksperiodeId = 2.vedtaksperiode
             )
@@ -380,7 +380,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
             håndterSøknad(Sykdom(17.januar(2020), 10.februar(2020), 100.prosent))
             håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100.prosent))
             håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(Periode(17.januar(2020), 2.februar(2020))),
+                arbeidsgiverperioder = listOf(Periode(17.januar(2020), 1.februar(2020))),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)

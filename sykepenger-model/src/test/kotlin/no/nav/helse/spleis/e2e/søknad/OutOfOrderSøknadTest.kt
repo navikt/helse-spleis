@@ -48,7 +48,7 @@ internal class OutOfOrderSøknadTest : AbstractDslTest() {
             nyPeriode(3.mars til 26.mars, a1)
             håndterArbeidsgiveropplysninger(
                 1.vedtaksperiode,
-                Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(3.mars til 19.mars)),
+                Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(3.mars til 18.mars)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
                 Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
             )

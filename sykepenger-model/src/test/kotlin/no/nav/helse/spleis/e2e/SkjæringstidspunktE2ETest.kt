@@ -204,7 +204,7 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
         }
         a2 {
             håndterArbeidsgiveropplysninger(
-                listOf(25.januar til 10.februar),
+                listOf(25.januar til 9.februar),
                 beregnetInntekt = 16000.månedlig,
                 vedtaksperiodeId = 1.vedtaksperiode
             )
@@ -296,7 +296,7 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
         }
         a2 {
             håndterArbeidsgiveropplysninger(
-                listOf(25.januar til 10.februar),
+                listOf(25.januar til 9.februar),
                 beregnetInntekt = 16000.månedlig,
                 vedtaksperiodeId = 1.vedtaksperiode
             )

@@ -602,13 +602,13 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
                 Arbeid(20.februar, 28.februar)
             )
             håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(10.februar til 26.februar),
+                arbeidsgiverperioder = listOf(10.februar til 25.februar),
                 vedtaksperiodeId = 2.vedtaksperiode
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
-            assertEquals("HH SSSSSHH SUUUUGG UAA", inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).toShortString())
+            assertEquals("HH SSSSSHH SUUUUGG AAA", inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).toShortString())
             håndterOverstyrTidslinje((20..26).map { ManuellOverskrivingDag(it.februar, Dagtype.Arbeidsdag) })
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

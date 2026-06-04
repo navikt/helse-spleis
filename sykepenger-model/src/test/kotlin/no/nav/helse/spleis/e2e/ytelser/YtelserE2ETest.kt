@@ -264,7 +264,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
         }
         a2 {
             håndterArbeidsgiveropplysninger(
-                listOf(28.januar til 13.februar),
+                listOf(28.januar til 12.februar),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
         }

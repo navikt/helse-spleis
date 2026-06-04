@@ -2278,7 +2278,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar))
             håndterSøknad(Sykdom(8.januar, 23.februar, 100.prosent))
             håndterArbeidsgiveropplysninger(
-                listOf(Periode(3.januar, 7.januar), Periode(15.januar, 20.januar), Periode(23.januar, 28.januar)),
+                listOf(Periode(3.januar, 7.januar), Periode(15.januar, 20.januar), Periode(23.januar, 27.januar)),
                 vedtaksperiodeId = 2.vedtaksperiode
             )
 
