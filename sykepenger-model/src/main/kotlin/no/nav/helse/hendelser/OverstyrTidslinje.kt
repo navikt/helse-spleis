@@ -192,7 +192,7 @@ class OverstyrTidslinje(
         val nyAvslagstidslinje = Avslagstidslinje(
             *avslåtteMeldingTilNavdager.associateWith {
                 Avslagstidslinje.Avslagsdag(
-                    begrunnelser = listOf(Begrunnelse.MeldingTilNavDagUtenforVentetid), // TODO: Legg på riktig begrunnelse her
+                    begrunnelser = listOf(Begrunnelse.AvslåttMeldingTilNavDag),
                     kilde = "Saksbehandler"
                 )
             }.toList().toTypedArray()
