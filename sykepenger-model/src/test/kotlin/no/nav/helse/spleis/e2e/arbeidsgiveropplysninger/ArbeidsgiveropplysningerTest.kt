@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -697,6 +698,22 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittArbeidgiverperiode(listOf(10.oktober(2025) til 16.oktober(2025)))
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        }
+    }
+
+    @Test
+    fun `Arbeidsgiver er veldig uenig med arbeidsgiverperioden`() {
+        a1 {
+            håndterSøknad(1.januar til 16.januar)
+            håndterSøknad(17.januar til 17.februar)
+            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+            håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(20.januar til 4.februar), vedtaksperiodeId = 2.vedtaksperiode)
+            assertEquals("SSSSSHH SSSSSHH SSAAAHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+            assertForventetFeil(
+                forklaring = "i denne situasjonen blir ikke første vedtaksperiode fylt med arbeidsdager og vi får ikke noe varsel om uenighet om agp",
+                nå = {  },
+                ønsket = { assertVarsler(2.vedtaksperiode, Varselkode.RV_IM_3) }
+            )
         }
     }
 
