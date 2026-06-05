@@ -1,4 +1,4 @@
-package no.nav.helse.spleis.e2e
+package no.nav.helse.spleis.e2e.selvstendig
 
 import java.time.Year
 import no.nav.helse.dsl.AbstractDslTest

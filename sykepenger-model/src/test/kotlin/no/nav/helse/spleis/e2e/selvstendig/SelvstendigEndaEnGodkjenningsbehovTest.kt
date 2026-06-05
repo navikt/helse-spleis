@@ -1,4 +1,4 @@
-package no.nav.helse.spleis.e2e
+package no.nav.helse.spleis.e2e.selvstendig
 
 import java.time.LocalDate
 import no.nav.helse.Toggle
@@ -13,6 +13,8 @@ import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.assertGodkjenningsbehov
+import no.nav.helse.spleis.e2e.enesteGodkjenningsbehovSomFølgeAv
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Test
 
@@ -24,7 +26,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelser(1.vedtaksperiode)
-            val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
+            val godkjenningsbehov =  `enesteGodkjenningsbehovSomFølgeAv`({1.vedtaksperiode }) {
                 håndterSimulering(1.vedtaksperiode)
             }
             assertGodkjenningsbehov(
@@ -334,5 +336,5 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
     }
 
     private fun utbetalingsdag(dato: LocalDate, type: String, beløpTilBruker: Int, sykdomsgrad: Int, dekningsgrad: Int, begrunnelser: List<String> = emptyList()) =
-        utbetalingsdag(dato, type, 0, beløpTilBruker, sykdomsgrad, dekningsgrad, begrunnelser)
+        no.nav.helse.spleis.e2e.utbetalingsdag(dato, type, 0, beløpTilBruker, sykdomsgrad, dekningsgrad, begrunnelser)
 }
