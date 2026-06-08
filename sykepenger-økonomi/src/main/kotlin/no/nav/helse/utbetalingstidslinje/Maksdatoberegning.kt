@@ -265,6 +265,10 @@ class Maksdatoberegning(
         }
 
         object ForGammel : State {
+            override fun avvistDag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
+                over70(avgrenser, dagen)
+            }
+
             override fun betalbarDag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 over70(avgrenser, dagen)
             }

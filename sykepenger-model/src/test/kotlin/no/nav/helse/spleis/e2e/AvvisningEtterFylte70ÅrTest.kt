@@ -3,12 +3,15 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
+import no.nav.helse.erHelg
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
@@ -17,6 +20,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTOR
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -95,6 +99,76 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractDslTest() {
             assertEquals(16, arbeidsgiverperiodedager.size)
             assertTrue(avvisteDager.all { it.begrunnelser == listOf(EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.Over70) })
             assertTrue(arbeidsgiverperiodedager.all { it.begrunnelser == null })
+        }
+    }
+
+    @Test
+    fun `Skal kun få avvist pga 70, selv om man også ville fått avvist pga MinimumInntektOver67 om man var 69`() {
+        medFødselsdato(FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
+        a1 {
+            håndterSykmelding(februar)
+            håndterSøknad(februar)
+            håndterArbeidsgiveropplysninger(
+                arbeidsgiverperioder = listOf(1.februar til 16.februar),
+                beregnetInntekt = 10000.månedlig,
+                vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+            val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+
+            assertEquals(8, avvisteDager.size)
+
+            val periodenEtterAGP = 17.februar til 28.februar
+            periodenEtterAGP.filter { !it.erHelg() }.forEach { dato ->
+                assertEquals(listOf(
+                    EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumInntektOver67,
+                    EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.Over70
+                ), avvisteDager.first { it.dato == dato }.begrunnelser)
+            }
+
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_SV_1)
+        }
+    }
+
+    @Test
+    fun `Skal kun få avvist pga 70 for siste del av perioden, selv om man også har fått avvist for MinimumInntektOver67 ved skjæringstidspunktet`() {
+        medFødselsdato(FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
+        a1 {
+            håndterSykmelding(15.desember(2017) til 15.januar)
+            håndterSøknad(15.desember(2017) til 15.januar)
+            håndterArbeidsgiveropplysninger(
+                arbeidsgiverperioder = listOf(15.desember(2017) til 30.desember(2017)),
+                beregnetInntekt = 10000.månedlig,
+                vedtaksperiodeId = 1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+            val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+
+            assertEquals(11, avvisteDager.size)
+
+            val før70 = 31.desember(2017) til 9.januar
+            val etter70 = 10.januar til 15.januar
+
+            avvisteDager.filter { it.dato in før70 }
+
+            før70.filter { !it.erHelg() }.forEach { dato ->
+                assertEquals(listOf(
+                    EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumInntektOver67,
+                ), avvisteDager.first { it.dato == dato }.begrunnelser)
+            }
+
+            etter70.filter { !it.erHelg() }.forEach { dato ->
+                assertEquals(listOf(
+                    EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumInntektOver67,
+                    EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.Over70
+                ), avvisteDager.first { it.dato == dato }.begrunnelser)
+            }
+
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_SV_1)
         }
     }
 
