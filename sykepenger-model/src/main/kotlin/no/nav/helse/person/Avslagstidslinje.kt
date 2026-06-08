@@ -13,7 +13,9 @@ internal class Avslagstidslinje(
     data class Avslagsdag(
         val begrunnelser: List<Begrunnelse>,
         val kilde: String
-    )
+    ) {
+        init { require(begrunnelser.isNotEmpty()) { "Det må settes minst én begrunnelse for avslagsdag." } }
+    }
 
     fun dto() = AvslagstidslinjeDto(gruppér().map { (periode, avslagsdag) ->
         AvslagstidslinjeDto.AvslagstidslinjedagDto(

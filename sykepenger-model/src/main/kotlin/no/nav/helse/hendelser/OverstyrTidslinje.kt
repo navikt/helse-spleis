@@ -68,7 +68,7 @@ class OverstyrTidslinje(
         sykdomstidslinje = dager.map {
             when (it.type) {
                 Dagtype.Sykedag,
-                 Dagtype.SykedagNav -> Sykdomstidslinje.sykedager(
+                Dagtype.SykedagNav -> Sykdomstidslinje.sykedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     grad = it.grad!!.prosent, // Sykedager må ha grad
@@ -104,7 +104,9 @@ class OverstyrTidslinje(
                     sisteDato = it.dato,
                     grad = 100.prosent,
                     kilde = kilde
-                )
+                ).also {
+                    require(behandlingsporing is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) { "Kun arbeidstakere kan ha egenmeldingsdager" }
+                }
 
                 Dagtype.Foreldrepengerdag -> Sykdomstidslinje.andreYtelsedager(
                     førsteDato = it.dato,
@@ -160,13 +162,17 @@ class OverstyrTidslinje(
                     sisteDato = it.dato,
                     grad = 100.prosent,
                     kilde = kilde
-                )
+                ).also {
+                    require(behandlingsporing is Behandlingsporing.Yrkesaktivitet.Selvstendig) { "kun selvstendig næringsdrivende kan ha melding til nav dager" }
+                }
 
                 Dagtype.AvslattMeldingTilNavdag -> Sykdomstidslinje.arbeidsdager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde
-                )
+                ).also {
+                    require(behandlingsporing is Behandlingsporing.Yrkesaktivitet.Selvstendig) { "kun selvstendig næringsdrivende kan ha avslått melding til nav dager" }
+                }
             }
         }.reduce(Sykdomstidslinje::plus)
         periode = checkNotNull(sykdomstidslinje.periode()) {
