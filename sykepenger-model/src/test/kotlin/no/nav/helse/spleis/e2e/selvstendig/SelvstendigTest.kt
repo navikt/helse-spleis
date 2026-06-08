@@ -6,7 +6,6 @@ import kotlin.reflect.KClass
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
-import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -69,45 +68,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
 internal class SelvstendigTest : AbstractDslTest() {
-
-    @Test
-    fun `overstyring til avslått melding til Navdag`() {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(MeldingTilNavDager(1.januar, 1.januar), Sykdom(2.januar, 31.januar, 100.prosent))
-            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-
-            håndterOverstyrTidslinje((1.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.AvslattMeldingTilNavdag, grad = 80) })
-            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-
-            assertEquals("ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
-
-            assertGjenoppbygget(dto())
-        }
-    }
-
-    @Test
-    fun `overstyring fra MeldingTilNavDag til avslått melding til Nav dag over helg`() {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(MeldingTilNavDager(29.desember(2017), 1.januar), Sykdom(2.januar, 31.januar, 100.prosent))
-            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-
-            håndterOverstyrTidslinje((29.desember(2017) til 1.januar).map { ManuellOverskrivingDag(it, Dagtype.AvslattMeldingTilNavdag, grad = 80) })
-            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-
-            assertEquals("ARR ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
-
-        }
-    }
 
     @Test
     fun `Søknad som oppgir melding til Nav dager`() {

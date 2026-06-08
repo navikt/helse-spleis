@@ -17,7 +17,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class AvslåttMeldingTilNavdag : AbstractDslTest() {
+internal class AvslåttMeldingTilNavdagTest : AbstractDslTest() {
 
     @Test
     fun `overstyring til avslått melding til Navdag`() {
