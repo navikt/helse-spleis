@@ -862,7 +862,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 egenmeldingsdager = egenmeldingsdager,
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                 maksdatoresultat = maksdatoresultat,
-                beregningId = beregningId
+                beregningId = beregningId,
+                avslagstidslinje = avslagstidslinje
             )
 
             companion object {
@@ -2100,6 +2101,7 @@ internal data class BehandlingendringView(
     val dokumentsporing: Dokumentsporing,
     val utbetalingstidslinje: Utbetalingstidslinje,
     val refusjonstidslinje: Beløpstidslinje,
+    val avslagstidslinje: Avslagstidslinje,
     val skjæringstidspunkt: LocalDate,
     val skjæringstidspunkter: List<LocalDate>,
     val dagerNavOvertarAnsvar: List<Periode>,

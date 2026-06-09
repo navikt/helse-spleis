@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.selvstendig
 
 import java.time.LocalDate
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
@@ -12,6 +13,7 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.Avslagstidslinje
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -59,6 +61,7 @@ internal class AvslåttMeldingTilNavdagTest : AbstractDslTest() {
 
             assertEquals("MSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+            assertEquals(Avslagstidslinje(), inspektør.vedtaksperioder(1.vedtaksperiode).avslagstidslinje)
             with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
                 assertEquals(emptyList<LocalDate>(), avvistedatoer)
             }
@@ -70,6 +73,7 @@ internal class AvslåttMeldingTilNavdagTest : AbstractDslTest() {
 
             assertEquals("ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
+            assertEquals(Avslagstidslinje(1.januar.somPeriode() to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Saksbehandler")), inspektør.vedtaksperioder(1.vedtaksperiode).avslagstidslinje)
             with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
                 assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag), begrunnelse(1.januar))
                 assertEquals(listOf(1. januar), avvistedatoer)
@@ -85,6 +89,18 @@ internal class AvslåttMeldingTilNavdagTest : AbstractDslTest() {
             with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
                 assertEquals(emptyList<LocalDate>(), avvistedatoer)
             }
+
+            assertForventetFeil(
+                forklaring = "Nå er det litt tilfeldig at dette fungerer. Det er bare fordi vi ser etter avslagsbegrunnelser når det er en arbeidsdag på sykdomstidslinjen, men ligger fortsatt på behandlingen.",
+                nå = {
+                    val feil = Avslagstidslinje(1.januar.somPeriode() to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Saksbehandler"))
+                    assertEquals(feil, inspektør.vedtaksperioder(1.vedtaksperiode).avslagstidslinje)
+                },
+                ønsket = {
+                    val riktig = Avslagstidslinje()
+                    assertEquals(riktig, inspektør.vedtaksperioder(1.vedtaksperiode).avslagstidslinje)
+                }
+            )
         }
     }
 
