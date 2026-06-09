@@ -9,10 +9,6 @@ import java.time.ZoneId
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.ForsikringBasertPåForsikringsvurdering
-import no.nav.helse.hendelser.KollektivJordbruksforsikring
-import no.nav.helse.hendelser.SelvstendigForsikring
-import no.nav.helse.hendelser.arbeidssituasjonForsikringstype
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.Arbeidsgiverperiode
@@ -72,7 +68,6 @@ internal class PersonMediator(
                     is EventSubscription.VedtaksperiodeOpprettet -> mapVedtaksperiodeOpprettet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperiodePåminnetEvent -> mapVedtaksperiodePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.VedtaksperioderVenterEvent -> mapVedtaksperioderVenter(event)
-                    is EventSubscription.BenyttetGrunnlagsdataForBeregningEvent -> mapBenyttetGrunnlagsdataForBeregning(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.SelvstendigIngenDagerIgjenEvent -> mapSelvstendigIngenDagerIgjen(event) // ✅ Er selvstendig-spesifikk, så den er grei
                     is EventSubscription.SelvstendigUtbetaltEtterVentetidEvent -> mapSelvstendigUtbetaltEtterVentetid(event) // ✅ Er selvstendig-spesifikk, så den er grei
                     is EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent -> mapTrengerInformasjonTilVilkårsprøving(event)
@@ -1049,35 +1044,6 @@ internal class PersonMediator(
         )
         if (event.`6G` != null) utkastTilVedtak["sykepengegrunnlagsfakta"] = mapOf("6G" to event.`6G`)
         return JsonMessage.newMessage("utkast_til_vedtak", utkastTilVedtak.toMap())
-    }
-
-    private fun mapBenyttetGrunnlagsdataForBeregning(event: EventSubscription.BenyttetGrunnlagsdataForBeregningEvent): JsonMessage {
-        val benyttetGrunnlagsdataForBeregning: MutableMap<String, Any> = mutableMapOf(
-            "behandlingId" to event.behandlingId,
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "fom" to event.periode.start,
-            "tom" to event.periode.endInclusive,
-            "behandlingOpprettetTidspunkt" to event.behandlingOpprettetTidspunkt.tilUtc()
-        )
-
-        when (val forsikring = event.forsikring) {
-            is SelvstendigForsikring -> benyttetGrunnlagsdataForBeregning["forsikring"] = mapOf(
-                "dekningsgrad" to forsikring.dekningsgrad().toDouble(),
-                "navOvertarAnsvarForVentetid" to forsikring.navOvertarAnsvarForVentetid(),
-                "premiegrunnlag" to forsikring.premiegrunnlag.årlig.toInt(),
-                "arbeidssituasjonForsikringstype" to forsikring.arbeidssituasjonForsikringstype()
-            )
-
-            KollektivJordbruksforsikring -> benyttetGrunnlagsdataForBeregning["forsikring"] = mapOf(
-                "dekningsgrad" to forsikring.dekningsgrad().toDouble(),
-                "navOvertarAnsvarForVentetid" to forsikring.navOvertarAnsvarForVentetid(),
-                "arbeidssituasjonForsikringstype" to forsikring.arbeidssituasjonForsikringstype()
-            )
-
-            is ForsikringBasertPåForsikringsvurdering,
-            null -> {}
-        }
-        return JsonMessage.newMessage("benyttet_grunnlagsdata_for_beregning", byggMedYrkesaktivitet(event.yrkesaktivitetssporing, benyttetGrunnlagsdataForBeregning.toMap()))
     }
 
     /** Legger alltid til yrkesaktivitetstype, men legger kun til organisasjonsnummer for Arbeidstaker **/

@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Forsikring
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -228,12 +227,6 @@ class EventBus {
     internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent) {
         _events.add(vedtaksperiodeAnnullertEvent)
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
-    }
-
-    internal fun benyttetGrunnlagsdataForBeregning(behandlingId: UUID, vedtaksperiodeId: UUID, yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, periode: Periode, behandlingOpprettetTidspunkt: LocalDateTime, forsikring: Forsikring?) {
-        val event = EventSubscription.BenyttetGrunnlagsdataForBeregningEvent(behandlingId, vedtaksperiodeId, yrkesaktivitetssporing, periode, behandlingOpprettetTidspunkt, forsikring)
-        _events.add(event)
-        observers.forEach { it.benyttetGrunnlagsdataForBeregning(event) }
     }
 
     internal fun trengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent) {

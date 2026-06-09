@@ -45,9 +45,3 @@ data class SelvstendigForsikring (
         Forsikringstype.HundreProsentFraDagSytten -> false
     }
 }
-
-fun Forsikring.arbeidssituasjonForsikringstype() = when (this) {
-    is KollektivJordbruksforsikring -> "KollektivJordbruksforsikring"
-    is SelvstendigForsikring -> "SelvstendigForsikring"
-    else -> error("Nei takk") // TODO: Bare la denne være? Dette skal jo bort.
-}

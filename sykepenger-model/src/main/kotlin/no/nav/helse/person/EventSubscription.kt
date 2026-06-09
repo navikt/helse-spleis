@@ -9,7 +9,6 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.feriepenger.Feriepengeoppdrag
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Forsikring
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype
 import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO
@@ -787,15 +786,6 @@ interface EventSubscription {
         val behandlingId: UUID
     ) : Event
 
-    data class BenyttetGrunnlagsdataForBeregningEvent(
-        val behandlingId: UUID,
-        val vedtaksperiodeId: UUID,
-        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
-        val periode: Periode,
-        val behandlingOpprettetTidspunkt: LocalDateTime,
-        val forsikring: Forsikring?
-    ) : Event
-
     data class TrengerInformasjonTilVilkårsprøvingEvent(
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
@@ -952,7 +942,6 @@ interface EventSubscription {
     fun behandlingUtført() {}
     fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: VedtaksperiodeAnnullertEvent) {}
     fun utkastTilVedtak(event: UtkastTilVedtakEvent) {}
-    fun benyttetGrunnlagsdataForBeregning(event: BenyttetGrunnlagsdataForBeregningEvent) {}
     fun trengerInformasjonTilVilkårsprøving(event: TrengerInformasjonTilVilkårsprøvingEvent) {}
     fun trengerInformasjonTilBeregning(event: TrengerInformasjonTilBeregningEvent) {}
     fun trengerInitiellHistorikkFraInfotrygd(event: TrengerInitiellHistorikkFraInfotrygdEvent) {}

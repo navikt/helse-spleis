@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
@@ -1629,9 +1629,6 @@ internal class Vedtaksperiode private constructor(
         // steg 4.1: lag beregnede behandlinger
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
         lagBeregnetBehandlinger(perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder, forsikring)
-
-        // gir beskjed om hvilken grunnlagsdata som ble brukt i beregningen for behandlingen
-        eventBus.benyttetGrunnlagsdataForBeregning(behandlinger.sisteBehandlingId, id, yrkesaktivitet.yrkesaktivitetstype, periode, behandlinger.sisteBehandlingOpprettTidspunkt, forsikring)
 
         /* steg 4.2 lag utbetalinger */
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
