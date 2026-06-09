@@ -65,13 +65,25 @@ class OverstyrTidslinje(
         .map { it.dato }
 
     init {
+        fun Sykdomstidslinje.arbeidstakerspesifikk(type: String) = this.also {
+            check(behandlingsporing is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) {
+                "$type er spesifikk for Arbeidstakere. Kan ikke brukes for ${behandlingsporing::class.simpleName}"
+            }
+        }
+
+        fun Sykdomstidslinje.selvstendigspesifikk(type: String) = this.also {
+            check(behandlingsporing is Behandlingsporing.Yrkesaktivitet.Selvstendig) {
+                "$type er spesifikk for Selvstendig. Kan ikke brukes for ${behandlingsporing::class.simpleName}"
+            }
+        }
+
         sykdomstidslinje = dager.map {
             when (it.type) {
                 Dagtype.Sykedag,
                 Dagtype.SykedagNav -> Sykdomstidslinje.sykedager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
-                    grad = it.grad!!.prosent, // Sykedager må ha grad
+                    grad = checkNotNull(it.grad) { "Sykedag og SykedagNav må ha grad" }.prosent,
                     kilde = kilde
                 )
 
@@ -79,19 +91,19 @@ class OverstyrTidslinje(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde
-                )
+                ).arbeidstakerspesifikk("Ferie")
 
                 Dagtype.ArbeidIkkeGjenopptattDag -> Sykdomstidslinje.arbeidIkkeGjenopptatt(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde
-                )
+                ).arbeidstakerspesifikk("Arbeid ikke gjenopptatt")
 
                 Dagtype.Permisjonsdag -> Sykdomstidslinje.permisjonsdager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde
-                )
+                ).arbeidstakerspesifikk("Permisjon")
 
                 Dagtype.Arbeidsdag -> Sykdomstidslinje.arbeidsdager(
                     førsteDato = it.dato,
@@ -104,9 +116,7 @@ class OverstyrTidslinje(
                     sisteDato = it.dato,
                     grad = 100.prosent,
                     kilde = kilde
-                ).also {
-                    require(behandlingsporing is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) { "Kun arbeidstakere kan ha egenmeldingsdager" }
-                }
+                ).arbeidstakerspesifikk("Egenmelding")
 
                 Dagtype.Foreldrepengerdag -> Sykdomstidslinje.andreYtelsedager(
                     førsteDato = it.dato,
@@ -162,23 +172,20 @@ class OverstyrTidslinje(
                     sisteDato = it.dato,
                     grad = 100.prosent,
                     kilde = kilde
-                ).also {
-                    require(behandlingsporing is Behandlingsporing.Yrkesaktivitet.Selvstendig) { "kun selvstendig næringsdrivende kan ha melding til nav dager" }
-                }
+                ).selvstendigspesifikk("Melding til Nav")
 
                 Dagtype.AvslattMeldingTilNavdag -> Sykdomstidslinje.arbeidsdager(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde
-                ).also {
-                    require(behandlingsporing is Behandlingsporing.Yrkesaktivitet.Selvstendig) { "kun selvstendig næringsdrivende kan ha avslått melding til nav dager" }
-                }
+                ).selvstendigspesifikk("Avslått melding til Nav")
             }
         }.reduce(Sykdomstidslinje::plus)
         periode = checkNotNull(sykdomstidslinje.periode()) {
             "Overstyr tidslinje må ha minst én overstyrt dag"
         }
     }
+
 
     internal fun dagerNavOvertarAnsvar(eksisterendeDagerNavOvertarAnsvar: List<Periode>): List<Periode> {
         val utenDagerSaksbehandlerHarEndretPå = eksisterendeDagerNavOvertarAnsvar
