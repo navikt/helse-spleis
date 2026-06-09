@@ -1,14 +1,18 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
 import no.nav.helse.Tidslinje
 import no.nav.helse.dto.AvslagstidslinjeDto
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.Avslagstidslinje.Avslagsdag
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
 internal class Avslagstidslinje(
     vararg perioder: Pair<Periode, Avslagsdag>
 ) : Tidslinje<Avslagsdag, Avslagstidslinje>(*perioder) {
+
+    internal constructor(dato: LocalDate, avslagsdag: Avslagsdag): this(*arrayOf(dato.somPeriode() to avslagsdag))
 
     data class Avslagsdag(
         val begrunnelser: List<Begrunnelse>,
@@ -24,6 +28,7 @@ internal class Avslagstidslinje(
             periode = periode.dto()
         )
     })
+
     override fun opprett(vararg perioder: Pair<Periode, Avslagsdag>): Avslagstidslinje {
         return Avslagstidslinje(*perioder)
     }

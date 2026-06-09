@@ -196,20 +196,22 @@ class OverstyrTidslinje(
     }
 
     internal fun avslagstidslinje(eksisterendeAvslagstidslinje: Avslagstidslinje): Avslagstidslinje {
-
-        val avslåtteMeldingTilNavdager = dager
-            .filter { it.type == Dagtype.AvslattMeldingTilNavdag }
-            .map { it.dato }
-            .grupperSammenhengendePerioder()
-
-        val nyAvslagstidslinje = Avslagstidslinje(
-            *avslåtteMeldingTilNavdager.associateWith {
-                Avslagstidslinje.Avslagsdag(
-                    begrunnelser = listOf(Begrunnelse.AvslåttMeldingTilNavDag),
+        val nyAvslagstidslinje = dager
+            .associateWith { manuellOverskrivingDag ->
+                // Her kan man slå seg løs med nye avslagsdagtyper og tilhørende begrunnelser
+                when (manuellOverskrivingDag.type) {
+                    Dagtype.AvslattMeldingTilNavdag -> listOf(Begrunnelse.AvslåttMeldingTilNavDag)
+                    else -> null
+                }
+            }
+            .mapNotNull { (manuellOverskrivingDag, avslagsbegrunnelser) ->
+                if (avslagsbegrunnelser == null) null else Avslagstidslinje(manuellOverskrivingDag.dato, Avslagstidslinje.Avslagsdag(
+                    begrunnelser = avslagsbegrunnelser,
                     kilde = "Saksbehandler"
-                )
-            }.toList().toTypedArray()
-        )
+                ))
+            }.takeUnless { it.isEmpty() }
+            ?.reduce(Avslagstidslinje::plus)
+            ?: Avslagstidslinje()
 
         return eksisterendeAvslagstidslinje + nyAvslagstidslinje
     }
