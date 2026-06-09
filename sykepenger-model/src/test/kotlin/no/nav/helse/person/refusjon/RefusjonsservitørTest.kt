@@ -2,6 +2,7 @@ package no.nav.helse.person.refusjon
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.somPeriode
@@ -65,6 +66,26 @@ internal class RefusjonsservitørTest {
         assertNull(ubrukteRefusjonsopplysninger[17.januar])
 
         assertEquals(listOf(26.januar til 31.januar), ubrukteRefusjonsopplysninger[16.januar]!!.perioderMedBeløp)
+    }
+
+    @Test
+    fun `Fjerner ubrukte refusjonsopplysninger ved korrigerende refusjonsopplysninger`() {
+        val refusjonstidslinjeSomDekkesAvVedtaksperiode = Beløpstidslinje.fra(januar, 100.daglig, kilde)
+        val refusjonstidslinjeSomStrekkerSegUtoverVedtaksperiode = Beløpstidslinje.fra(1.februar.somPeriode(), 0.daglig, kilde)
+        val servitørFraInntektsmelding = Refusjonsservitør.fra(refusjonstidslinjeSomDekkesAvVedtaksperiode + refusjonstidslinjeSomStrekkerSegUtoverVedtaksperiode, setOf(1.januar))
+        servitørFraInntektsmelding.servér(1.januar, januar)
+
+        val servitørPåYrkesaktivitetsNivå = Refusjonsservitør()
+        servitørFraInntektsmelding.servér(servitørPåYrkesaktivitetsNivå, Aktivitetslogg())
+        assertEquals(listOf(1.februar.somPeriode()), servitørPåYrkesaktivitetsNivå[1.januar]!!.perioderMedBeløp)
+
+        val korrigerendeInntektsmelding = Beløpstidslinje.fra(1.januar.somPeriode(), 100.daglig, kilde)
+        val servitørFraKorrigerendeInntektsmelding = Refusjonsservitør.fra(korrigerendeInntektsmelding, setOf(1.januar))
+        servitørFraKorrigerendeInntektsmelding.servér(1.januar, januar)
+
+        servitørFraKorrigerendeInntektsmelding.servér(servitørPåYrkesaktivitetsNivå, Aktivitetslogg())
+        assertNull(servitørPåYrkesaktivitetsNivå[1.januar])
+
     }
 
     private companion object {

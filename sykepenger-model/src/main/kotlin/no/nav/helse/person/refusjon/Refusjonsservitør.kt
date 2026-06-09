@@ -23,6 +23,11 @@ internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = empt
         refusjonsrester[dato] = refusjonsrester.getOrDefault(dato, Beløpstidslinje()).tilOgMed(førsteDagIDenNyeTidslinjen.forrigeDag) + beløpstidslinje
     }
 
+    private fun fjern(dato: LocalDate) {
+        refusjonstidslinjer.remove(dato)
+        refusjonsrester.remove(dato)
+    }
+
     // jeg vil bare se hva som kommer etterpå
     internal fun dessertmeny(startdato: LocalDate, periode: Periode): Beløpstidslinje {
         val søkevindu = startdato til periode.endInclusive
@@ -47,10 +52,15 @@ internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = empt
 
     // Serverer våre rester til en annen servitør
     internal fun servér(other: Refusjonsservitør, aktivitetslogg: IAktivitetslogg) {
-        this.refusjonsrester.filterValues { it.isNotEmpty() }.forEach { (dato, beløpstidslinje) ->
-            val perioderMedBeløp = beløpstidslinje.filterIsInstance<Beløpsdag>().map { it.dato }.grupperSammenhengendePerioder()
-            aktivitetslogg.info("Refusjonsservitøren har rester for ${dato.format(formatter)} etter servering: ${perioderMedBeløp.joinToString()}")
-            other.leggTil(dato, beløpstidslinje)
+        this.refusjonstidslinjer.forEach { (dato, _) ->
+            val rester = refusjonsrester[dato]?.takeUnless { it.isEmpty() }
+            if (rester != null) {
+                val perioderMedBeløp = rester.filterIsInstance<Beløpsdag>().map { it.dato }.grupperSammenhengendePerioder()
+                aktivitetslogg.info("Refusjonsservitøren har rester for ${dato.format(formatter)} etter servering: ${perioderMedBeløp.joinToString()}")
+                other.leggTil(dato, rester)
+            } else {
+                other.fjern(dato)
+            }
         }
     }
 

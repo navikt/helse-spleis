@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -13,11 +12,12 @@ import no.nav.helse.januar
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNull
 
 internal class InntektsmeldingMedRefusjonsopplForPerioderViEnnåIkkeHarMottatTest : AbstractDslTest() {
 
     @Test
-    fun `håndterer ikke korrigerte refusjonsopplysinger frem i tid som sier at det er refusjon allikevel`() {
+    fun `håndterer korrigerte refusjonsopplysinger frem i tid som sier at det er refusjon allikevel`() {
         a1 {
             nyttVedtak(
                 periode = januar,
@@ -35,16 +35,8 @@ internal class InntektsmeldingMedRefusjonsopplForPerioderViEnnåIkkeHarMottatTes
                     opphørsdato = null,
                 )
             )
-            val reviderteOpplysninger = inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar)
-            assertForventetFeil(
-                forklaring = "vi håndterer ikke korrigerte refusjonsopplysinger frem i tid som sier at det er refusjon allikevel",
-                nå = {
-                    assertBeløpstidslinje(reviderteOpplysninger, 1.februar.somPeriode(), INGEN)
-                },
-                ønsket = {
-                    assertBeløpstidslinje(reviderteOpplysninger, 1.februar.somPeriode(), INNTEKT)
-                }
-            )
+            val reviderteOpplysninger = inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer[1.januar]
+            assertNull(reviderteOpplysninger)
         }
     }
 }

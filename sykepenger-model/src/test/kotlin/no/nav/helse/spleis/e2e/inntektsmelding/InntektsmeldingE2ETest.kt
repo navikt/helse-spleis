@@ -1,18 +1,22 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime.MIN
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.den
 import no.nav.helse.desember
+import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
+import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
@@ -52,14 +56,27 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.person.tilstandsmaskin.TilstandType.*
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.søndag
@@ -379,39 +396,6 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             assertVarsler(listOf(RV_IM_8, RV_IM_24), 1.vedtaksperiode.filter())
             assertVarsler(listOf(RV_IM_8, RV_IM_24), 2.vedtaksperiode.filter())
             assertVarsler(listOf(RV_IM_8), 3.vedtaksperiode.filter())
-        }
-    }
-
-    @Test
-    fun `oppgir refusjonopplysninger frem i tid, og så ombestemmer de seg`() {
-        a1 {
-            håndterSøknad(januar)
-            val arbeidsgiver1 = håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 1.januar,
-                refusjon = Refusjon(25_000.månedlig, 31.januar),
-                beregnetInntekt = 25_000.månedlig,
-            )
-            assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver1.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
-            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), INGEN, arbeidsgiver1.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
-
-            val arbeidsgiver2 = håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 1.januar,
-                refusjon = Refusjon(25_000.månedlig, null),
-                beregnetInntekt = 25_000.månedlig,
-            )
-            assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
-            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-            assertForventetFeil(
-                forklaring = "Dette fungerer jo ikke",
-                ønsket = {
-                    assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
-                },
-                nå = {
-                    assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
-                }
-            )
         }
     }
 
