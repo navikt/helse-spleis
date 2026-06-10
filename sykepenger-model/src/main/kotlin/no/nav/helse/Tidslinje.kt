@@ -29,6 +29,8 @@ abstract class Tidslinje<T, SELF: Tidslinje<T, SELF>> private constructor(
         return opprett(*resultat.somArray)
     }
 
+    operator fun minus(periode: Periode): SELF = opprett(*this.dager.filterNot { it.key in periode }.somArray)
+
     override fun equals(other: Any?): Boolean {
         val andre = other as? Tidslinje<T, SELF> ?: return false
         if (dager.keys != andre.dager.keys) return false

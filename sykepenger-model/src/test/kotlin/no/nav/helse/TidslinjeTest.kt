@@ -140,4 +140,19 @@ internal class TidslinjeTest {
             }
         }
     }
+
+    @Test
+    fun `fjerne dager fra tidslinjen`() {
+        val tidslinje = TestTidslinje(januar to 1)
+
+        assertEquals(TestTidslinje(), tidslinje - januar)
+
+        val beholdtSnuteOgHale =
+            TestTidslinje((1.januar til 2.januar) to 1) +
+            TestTidslinje(31.januar.somPeriode() to 1)
+
+        assertEquals(beholdtSnuteOgHale, tidslinje - (3.januar til 30.januar))
+
+        assertEquals(tidslinje, tidslinje - februar)
+    }
 }
