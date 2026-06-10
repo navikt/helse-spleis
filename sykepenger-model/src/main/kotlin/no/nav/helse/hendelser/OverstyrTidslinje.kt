@@ -3,6 +3,8 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.OverstyrTidslinje.Avslagsvurdering.SkalAvslås
+import no.nav.helse.hendelser.OverstyrTidslinje.Avslagsvurdering.SkalIkkeAvslås
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Avslagstidslinje
@@ -195,25 +197,41 @@ class OverstyrTidslinje(
         return (utenDagerSaksbehandlerHarEndretPå + dagerNavOvertarAnsvar).grupperSammenhengendePerioder()
     }
 
+    private sealed interface Avslagsvurdering {
+        val dato: LocalDate
+        data class SkalAvslås(override val dato: LocalDate, val begrunnelser: List<Begrunnelse>): Avslagsvurdering
+        data class SkalIkkeAvslås(override val dato: LocalDate): Avslagsvurdering
+    }
+
     internal fun avslagstidslinje(eksisterendeAvslagstidslinje: Avslagstidslinje): Avslagstidslinje {
-        val nyAvslagstidslinje = dager
-            .associateWith { manuellOverskrivingDag ->
+        val vurderinger = dager
+            .map { manuellOverskrivingDag ->
                 // Her kan man slå seg løs med nye avslagsdagtyper og tilhørende begrunnelser
                 when (manuellOverskrivingDag.type) {
-                    Dagtype.AvslattMeldingTilNavdag -> listOf(Begrunnelse.AvslåttMeldingTilNavDag)
-                    else -> null
+                    Dagtype.AvslattMeldingTilNavdag -> SkalAvslås(manuellOverskrivingDag.dato, listOf(Begrunnelse.AvslåttMeldingTilNavDag))
+
+                    // For dager som er overstyrt til noe annet enn avslagsdager må vi fjerne eventuelle avslagsdager fra eksisterendeAvslagstidslinje
+                    else -> SkalIkkeAvslås(manuellOverskrivingDag.dato)
                 }
             }
-            .mapNotNull { (manuellOverskrivingDag, avslagsbegrunnelser) ->
-                if (avslagsbegrunnelser == null) null else Avslagstidslinje(manuellOverskrivingDag.dato, Avslagstidslinje.Avslagsdag(
-                    begrunnelser = avslagsbegrunnelser,
+
+        val avslagstidslinjeHensyntattNyeAvslagsdager = vurderinger
+            .filterIsInstance<SkalAvslås>()
+            .fold(eksisterendeAvslagstidslinje) { avslagstidslinje, skalAvslås ->
+                avslagstidslinje + Avslagstidslinje(skalAvslås.dato, Avslagstidslinje.Avslagsdag(
+                    begrunnelser = skalAvslås.begrunnelser,
                     kilde = "Saksbehandler"
                 ))
-            }.takeUnless { it.isEmpty() }
-            ?.reduce(Avslagstidslinje::plus)
-            ?: Avslagstidslinje()
+            }
 
-        return eksisterendeAvslagstidslinje + nyAvslagstidslinje
+        // Fjerner dager som potensielt var avslag før (på eksisterendeAvslagstidslinje)
+        return vurderinger
+            .filterIsInstance<SkalIkkeAvslås>()
+            .map { it.dato }
+            .grupperSammenhengendePerioder()
+            .fold(avslagstidslinjeHensyntattNyeAvslagsdager) { avslagstidslinje, skalIkkeAvslås ->
+                avslagstidslinje - skalIkkeAvslås
+            }
     }
 
     internal fun vurdertTilOgMed(dato: LocalDate) {
