@@ -36,57 +36,59 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
     override fun result(sykdomstidslinje: Sykdomstidslinje, inntekt: Inntekt, inntektjusteringer: Beløpstidslinje): Utbetalingstidslinje {
         val builder = Utbetalingstidslinje.Builder()
         sykdomstidslinje.forEach { dag ->
-            val erVentetid = ventetid?.contains(dag.dato) == true
-            val avslagsbegrunnelser = avslagstidslinje[dag.dato]?.begrunnelser ?: emptyList()
-            when (dag) {
-                is Dag.Arbeidsdag ->
-                    if (avslagsbegrunnelser.isEmpty()) arbeidsdag(builder, dag.dato, inntekt, inntektjusteringer)
-                    else avvistDag(builder, dag.dato, 0.prosent, avslagsbegrunnelser, inntekt, inntektjusteringer)
-
-                is Dag.ForeldetSykedag -> foreldetdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                is Dag.FriskHelgedag -> arbeidsdag(builder, dag.dato, inntekt, inntektjusteringer)
-                is Dag.SykHelgedag -> when (erVentetid) {
-                    true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                    false -> helg(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                }
-                is Dag.Sykedag -> when (erVentetid) {
-                    true -> when (navSkalUtbetaleVentetidsDag(dag.dato)) {
-                        true -> forsikringsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                        false -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                    }
-                    false -> navDag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                }
-                is Dag.MeldingTilNavDag -> when (erVentetid) {
-                    true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                    else -> avvistDag(builder, dag.dato, 0.prosent, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt, inntektjusteringer)
-                }
-                is Dag.MeldingTilNavHelgedag -> when (erVentetid) {
-                    true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                    false -> avvistDag(builder, dag.dato, 0.prosent, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt, inntektjusteringer)
-                }
-                is Dag.AndreYtelser -> {
-                    val begrunnelse = when (dag.ytelse) {
-                        Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap
-                        Dag.AndreYtelser.AnnenYtelse.Dagpenger -> Begrunnelse.AndreYtelserDagpenger
-                        Dag.AndreYtelser.AnnenYtelse.Foreldrepenger -> Begrunnelse.AndreYtelserForeldrepenger
-                        Dag.AndreYtelser.AnnenYtelse.Omsorgspenger -> Begrunnelse.AndreYtelserOmsorgspenger
-                        Dag.AndreYtelser.AnnenYtelse.Opplæringspenger -> Begrunnelse.AndreYtelserOpplaringspenger
-                        Dag.AndreYtelser.AnnenYtelse.Pleiepenger -> Begrunnelse.AndreYtelserPleiepenger
-                        Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger -> Begrunnelse.AndreYtelserSvangerskapspenger
-                    }
-                    avvistDag(builder, dag.dato, 0.prosent, begrunnelse, inntekt, inntektjusteringer)
-                }
-
-                is Dag.ArbeidIkkeGjenopptattDag,
-                is Dag.Arbeidsgiverdag,
-                is Dag.ArbeidsgiverHelgedag,
-                is Dag.Permisjonsdag,
-                is Dag.ProblemDag,
-                is Dag.Feriedag,
-                is Dag.UkjentDag -> error("Forventer ikke ${dag::class.simpleName} i utbetalingstidslinjen for selvstendig næringsdrivende")
+            when (val avslagsdag = avslagstidslinje[dag.dato]) {
+                null -> builder.leggTil(dag, inntekt, inntektjusteringer)
+                else -> avvistDag(builder, dag.dato, dag.sykdomsgrad(), avslagsdag.begrunnelser, inntekt, inntektjusteringer)
             }
         }
         return builder.build()
+    }
+
+    private fun Utbetalingstidslinje.Builder.leggTil(dag: Dag, inntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
+        val erVentetid = ventetid?.contains(dag.dato) == true
+        when (dag) {
+            is Dag.Arbeidsdag -> arbeidsdag(this, dag.dato, inntekt, inntektjusteringer)
+            is Dag.ForeldetSykedag -> foreldetdag(this, dag.dato, dag.grad, inntekt, inntektjusteringer)
+            is Dag.FriskHelgedag -> arbeidsdag(this, dag.dato, inntekt, inntektjusteringer)
+            is Dag.SykHelgedag -> when (erVentetid) {
+                true -> ventetidsdag(this, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                false -> helg(this, dag.dato, dag.grad, inntekt, inntektjusteringer)
+            }
+            is Dag.Sykedag -> when (erVentetid) {
+                true -> when (navSkalUtbetaleVentetidsDag(dag.dato)) {
+                    true -> forsikringsdag(this, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                    false -> ventetidsdag(this, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                }
+                false -> navDag(this, dag.dato, dag.grad, inntekt, inntektjusteringer)
+            }
+            is Dag.MeldingTilNavDag -> when (erVentetid) {
+                true -> ventetidsdag(this, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                else -> avvistDag(this, dag.dato, dag.grad, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt, inntektjusteringer)
+            }
+            is Dag.MeldingTilNavHelgedag -> when (erVentetid) {
+                true -> ventetidsdag(this, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                false -> avvistDag(this, dag.dato, dag.grad, Begrunnelse.MeldingTilNavDagUtenforVentetid, inntekt, inntektjusteringer)
+            }
+            is Dag.AndreYtelser -> {
+                val begrunnelse = when (dag.ytelse) {
+                    Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap
+                    Dag.AndreYtelser.AnnenYtelse.Dagpenger -> Begrunnelse.AndreYtelserDagpenger
+                    Dag.AndreYtelser.AnnenYtelse.Foreldrepenger -> Begrunnelse.AndreYtelserForeldrepenger
+                    Dag.AndreYtelser.AnnenYtelse.Omsorgspenger -> Begrunnelse.AndreYtelserOmsorgspenger
+                    Dag.AndreYtelser.AnnenYtelse.Opplæringspenger -> Begrunnelse.AndreYtelserOpplaringspenger
+                    Dag.AndreYtelser.AnnenYtelse.Pleiepenger -> Begrunnelse.AndreYtelserPleiepenger
+                    Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger -> Begrunnelse.AndreYtelserSvangerskapspenger
+                }
+                avvistDag(this, dag.dato, 0.prosent, begrunnelse, inntekt, inntektjusteringer)
+            }
+            is Dag.ArbeidIkkeGjenopptattDag,
+            is Dag.Arbeidsgiverdag,
+            is Dag.ArbeidsgiverHelgedag,
+            is Dag.Permisjonsdag,
+            is Dag.ProblemDag,
+            is Dag.Feriedag,
+            is Dag.UkjentDag -> error("Forventer ikke ${dag::class.simpleName} i utbetalingstidslinjen for selvstendig næringsdrivende")
+        }
     }
 
     private fun navSkalUtbetaleVentetidsDag(dato: LocalDate): Boolean {
@@ -120,6 +122,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
     private fun avvistDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, begrunnelse: Begrunnelse, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
         builder.addAvvistDag(dato, medInntektHvisFinnes(dato, grad, næringsinntekt, inntektjusteringer).ikkeBetalt(), listOf(begrunnelse))
     }
+
     private fun avvistDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, begrunnelser: List<Begrunnelse>, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
         builder.addAvvistDag(dato, medInntektHvisFinnes(dato, grad, næringsinntekt, inntektjusteringer).ikkeBetalt(), begrunnelser)
     }

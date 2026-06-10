@@ -107,19 +107,21 @@ internal class AvslåttMeldingTilNavdagTest : AbstractDslTest() {
             }
             assertEquals(Avslagstidslinje(), inspektør.vedtaksperioder(1.vedtaksperiode).avslagstidslinje)
 
-            håndterOverstyrTidslinje((29.desember(2017) til 1.januar).map { ManuellOverskrivingDag(it, Dagtype.AvslattMeldingTilNavdag) })
+            val avslagsperiode = (29.desember(2017) til 1.januar)
+            håndterOverstyrTidslinje(avslagsperiode.map { ManuellOverskrivingDag(it, Dagtype.AvslattMeldingTilNavdag) })
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
             assertEquals("ARR ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
-            assertEquals(Avslagstidslinje((29.desember(2017) til 1.januar) to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Saksbehandler")), inspektør.vedtaksperioder(1.vedtaksperiode).avslagstidslinje)
+            assertEquals(Avslagstidslinje(avslagsperiode to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Saksbehandler")), inspektør.vedtaksperioder(1.vedtaksperiode).avslagstidslinje)
 
             with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
-                assertEquals(listOf(29.desember(2017), 1. januar), avvistedatoer)
-                assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag), begrunnelse(1.januar))
-                assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag), begrunnelse(29.desember(2017)))
+                assertEquals(avslagsperiode.iterator().asSequence().toList(), avvistedatoer)
+                avvistedatoer.forEach { dato ->
+                    assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag), begrunnelse(dato))
+                }
             }
         }
     }

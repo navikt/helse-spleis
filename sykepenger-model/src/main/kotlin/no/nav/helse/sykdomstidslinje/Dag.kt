@@ -23,6 +23,7 @@ import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Opplæringspen
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger
 import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal typealias BesteStrategy = (Dag, Dag) -> Dag
 
@@ -111,6 +112,25 @@ sealed class Dag(
     override fun hashCode() = dato.hashCode() * 37 + kilde.hashCode() * 41 + this::class.hashCode()
 
     override fun toString() = "${this::class.java.simpleName} ($dato) $kilde"
+
+    internal fun sykdomsgrad() = when (this) {
+        is ArbeidsgiverHelgedag -> grad
+        is Arbeidsgiverdag -> grad
+        is ForeldetSykedag -> grad
+        is MeldingTilNavDag -> grad
+        is MeldingTilNavHelgedag -> grad
+        is SykHelgedag -> grad
+        is Sykedag -> grad
+        // Dager uten sykdomsgrad
+        is AndreYtelser,
+        is ArbeidIkkeGjenopptattDag,
+        is Arbeidsdag,
+        is Feriedag,
+        is FriskHelgedag,
+        is Permisjonsdag,
+        is ProblemDag,
+        is UkjentDag -> 0.prosent
+    }
 
     internal class UkjentDag(
         dato: LocalDate,
