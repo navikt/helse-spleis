@@ -15,6 +15,7 @@ import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.Inn
 import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.InntektsopplysningskildeData.INFOTRYGD
 import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.SkatteopplysningData
 import no.nav.helse.dto.SpannerPersonDto.UtbetalingData
+import no.nav.helse.dto.SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData
 import no.nav.helse.dto.SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData
@@ -341,7 +342,9 @@ data class SpannerPersonDto(
             val personOppdrag: OppdragData?,
             val inntektjusteringer: Map<String, BeløpstidslinjeData>,
             val faktaavklartInntekt: FaktaavklartInntektData?,
-            val korrigertInntekt: KorrigertInntektsopplysningData?
+            val korrigertInntekt: KorrigertInntektsopplysningData?,
+            val beregningId: UUID,
+            val avslagstidslinje: AvslagstidslinjeData
         )
 
         data class VedtaksperiodeData(
@@ -382,7 +385,9 @@ data class SpannerPersonDto(
                         egenmeldingsdager = gjeldendeEndring.egenmeldingsdager,
                         inntektjusteringer = gjeldendeEndring.inntektjusteringer,
                         faktaavklartInntekt = gjeldendeEndring.faktaavklartInntekt,
-                        korrigertInntekt = gjeldendeEndring.korrigertInntekt
+                        korrigertInntekt = gjeldendeEndring.korrigertInntekt,
+                        beregningId = gjeldendeEndring.beregningId,
+                        avslagstidslinje = gjeldendeEndring.avslagstidslinje
                     )
                 }
             }
@@ -554,7 +559,8 @@ data class SpannerPersonDto(
                     val inntektjusteringer: Map<String, BeløpstidslinjeData>,
                     val faktaavklartInntekt: FaktaavklartInntektData?,
                     val korrigertInntekt: KorrigertInntektsopplysningData?,
-                    val beregningId: UUID
+                    val beregningId: UUID,
+                    val avslagstidslinje: AvslagstidslinjeData
                 )
 
                 data class PeriodeUtenNavAnsvarData(
@@ -774,6 +780,9 @@ data class SpannerPersonDto(
 
     data class BeløpstidslinjeData(val perioder: List<BeløpstidslinjeperiodeData>)
     data class BeløpstidslinjeperiodeData(val fom: LocalDate, val tom: LocalDate, val dagligBeløp: Double, val meldingsreferanseId: UUID, val avsender: AvsenderData, val tidsstempel: LocalDateTime)
+
+    data class AvslagstidslinjeData(val perioder: List<AvslagstidslinjeperiodeData>)
+    data class AvslagstidslinjeperiodeData(val fom: LocalDate, val tom: LocalDate, val begrunnelser: List<BegrunnelseData>)
 
     sealed interface FaktaavklartInntektData {
         val id: UUID
@@ -1342,7 +1351,8 @@ private fun BehandlingendringUtDto.tilPersonData() =
         }.toMap(),
         faktaavklartInntekt = this.faktaavklartInntekt?.tilPersonData(),
         korrigertInntekt = this.korrigertInntekt?.tilPersonData(),
-        beregningId = this.beregningId
+        beregningId = this.beregningId,
+        avslagstidslinje = this.avslagstidslinje.tilPersonData()
     )
 
 private fun DagerUtenNavAnsvaravklaringDto.tilPersonData() = PeriodeUtenNavAnsvarData(
@@ -1840,6 +1850,16 @@ private fun BeløpstidslinjeDto.tilPersonData() = SpannerPersonDto.Beløpstidsli
             meldingsreferanseId = it.kilde.meldingsreferanseId.id,
             avsender = it.kilde.avsender.tilPersonData(),
             tidsstempel = it.kilde.tidsstempel
+        )
+    }
+)
+
+private fun AvslagstidslinjeDto.tilPersonData() = SpannerPersonDto.AvslagstidslinjeData(
+    perioder = this.perioder.map {
+        SpannerPersonDto.AvslagstidslinjeperiodeData(
+            fom = it.periode.fom,
+            tom = it.periode.tom,
+            begrunnelser = it.begrunnelser.map { it.tilPersonData() }
         )
     }
 )
