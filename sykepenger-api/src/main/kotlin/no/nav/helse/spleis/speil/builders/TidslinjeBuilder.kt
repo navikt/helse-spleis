@@ -104,7 +104,7 @@ internal class SykdomstidslinjeBuilder(
 
             is SykdomstidslinjeDagDto.ArbeidsdagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = if (avslagstidslinje.perioder.any { dag -> it.dato in (dag.periode.fom..dag.periode.tom) }) SykdomstidslinjedagType.AVSLÅTT_MELDING_TIL_NAV_DAG else SykdomstidslinjedagType.ARBEIDSGIVERDAG,
+                type = if (avslagstidslinje.perioder.any { dag -> it.dato in (dag.periode.fom..dag.periode.tom) }) SykdomstidslinjedagType.AVSLÅTT_MELDING_TIL_NAV_DAG else SykdomstidslinjedagType.ARBEIDSDAG,
                 kilde = it.kilde.tilKildeDTO(),
                 grad = null
             )
