@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlin.math.roundToInt
 import no.nav.helse.dto.AvslagstidslinjeDto
+import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
@@ -41,6 +42,15 @@ internal class SykdomstidslinjeBuilder(
             )
         })
     }
+
+    private fun avslagsdagEller(dato: LocalDate, eller:() -> SykdomstidslinjedagType) =
+        when (avslagstidslinje.perioder.firstOrNull { dato in (it.periode.fom .. it.periode.tom) }?.begrunnelser) {
+            listOf(BegrunnelseDto.AvslåttMeldingTilNavDag) -> SykdomstidslinjedagType.AVSLÅTT_MELDING_TIL_NAV_DAG
+            else -> eller()
+        }
+
+    private fun sykedagNavEller(dato: LocalDate, eller: SykdomstidslinjedagType) =
+        if (dagerNavOvertarAnsvar.any { dato in (it.fom .. it.tom) }) SykdomstidslinjedagType.SYKEDAG_NAV else eller
 
     private fun tilDagDto(it: SykdomstidslinjeDagDto): Sykdomstidslinjedag {
         return when (it) {
@@ -97,42 +107,42 @@ internal class SykdomstidslinjeBuilder(
 
             is SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.ARBEID_IKKE_GJENOPPTATT_DAG,
+                type = avslagsdagEller(it.dato) { SykdomstidslinjedagType.ARBEID_IKKE_GJENOPPTATT_DAG },
                 kilde = it.kilde.tilKildeDTO(),
                 grad = null
             )
 
             is SykdomstidslinjeDagDto.ArbeidsdagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = if (avslagstidslinje.perioder.any { dag -> it.dato in (dag.periode.fom..dag.periode.tom) }) SykdomstidslinjedagType.AVSLÅTT_MELDING_TIL_NAV_DAG else SykdomstidslinjedagType.ARBEIDSDAG,
+                type = avslagsdagEller(it.dato) { SykdomstidslinjedagType.ARBEIDSDAG },
                 kilde = it.kilde.tilKildeDTO(),
                 grad = null
             )
 
             is SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.ARBEIDSGIVERDAG,
+                type = avslagsdagEller(it.dato) { SykdomstidslinjedagType.ARBEIDSGIVERDAG },
                 kilde = it.kilde.tilKildeDTO(),
                 grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
 
             is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = if (dagerNavOvertarAnsvar.any { (fom, tom) -> it.dato in (fom..tom) }) SykdomstidslinjedagType.SYKEDAG_NAV else SykdomstidslinjedagType.ARBEIDSGIVERDAG,
+                type = avslagsdagEller(it.dato) { sykedagNavEller(it.dato, SykdomstidslinjedagType.ARBEIDSGIVERDAG) },
                 kilde = it.kilde.tilKildeDTO(),
                 grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
 
             is SykdomstidslinjeDagDto.MeldingTilNavDagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = if (dagerNavOvertarAnsvar.any { (fom, tom) -> it.dato in (fom..tom) }) SykdomstidslinjedagType.SYKEDAG_NAV else SykdomstidslinjedagType.MELDING_TIL_NAV_DAG,
+                type = avslagsdagEller(it.dato) { sykedagNavEller(it.dato, SykdomstidslinjedagType.MELDING_TIL_NAV_DAG) },
                 kilde = it.kilde.tilKildeDTO(),
                 grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
 
             is SykdomstidslinjeDagDto.MeldingTilNavHelgedagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.MELDING_TIL_NAV_DAG,
+                type = avslagsdagEller(it.dato) { SykdomstidslinjedagType.MELDING_TIL_NAV_DAG },
                 kilde = it.kilde.tilKildeDTO(),
                 grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
@@ -140,56 +150,56 @@ internal class SykdomstidslinjeBuilder(
 
             is SykdomstidslinjeDagDto.FeriedagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.FERIEDAG,
+                type = avslagsdagEller(it.dato) { SykdomstidslinjedagType.FERIEDAG },
                 kilde = it.kilde.tilKildeDTO(),
                 grad = null
             )
 
             is SykdomstidslinjeDagDto.ForeldetSykedagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.FORELDET_SYKEDAG,
+                type = avslagsdagEller(it.dato) { SykdomstidslinjedagType.FORELDET_SYKEDAG },
                 kilde = it.kilde.tilKildeDTO(),
                 grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
 
             is SykdomstidslinjeDagDto.FriskHelgedagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.FRISK_HELGEDAG,
+                type = avslagsdagEller(it.dato) { SykdomstidslinjedagType.FRISK_HELGEDAG },
                 kilde = it.kilde.tilKildeDTO(),
                 grad = null
             )
 
             is SykdomstidslinjeDagDto.PermisjonsdagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.PERMISJONSDAG,
+                type = avslagsdagEller(it.dato) { SykdomstidslinjedagType.PERMISJONSDAG },
                 kilde = it.kilde.tilKildeDTO(),
                 grad = null
             )
 
             is SykdomstidslinjeDagDto.ProblemDagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.UBESTEMTDAG,
+                type = avslagsdagEller(it.dato) { SykdomstidslinjedagType.UBESTEMTDAG },
                 kilde = it.kilde.tilKildeDTO(),
                 grad = null
             )
 
             is SykdomstidslinjeDagDto.SykHelgedagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.SYK_HELGEDAG,
+                type = avslagsdagEller(it.dato) { SykdomstidslinjedagType.SYK_HELGEDAG },
                 kilde = it.kilde.tilKildeDTO(),
                 grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
 
             is SykdomstidslinjeDagDto.SykedagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = if (dagerNavOvertarAnsvar.any { (fom, tom) -> it.dato in (fom..tom) }) SykdomstidslinjedagType.SYKEDAG_NAV else SykdomstidslinjedagType.SYKEDAG,
+                type = avslagsdagEller(it.dato) { sykedagNavEller(it.dato, SykdomstidslinjedagType.SYKEDAG)},
                 kilde = it.kilde.tilKildeDTO(),
                 grad = (it.grad.prosentDesimal * 100).roundToInt()
             )
 
             is SykdomstidslinjeDagDto.UkjentDagDto -> Sykdomstidslinjedag(
                 dagen = it.dato,
-                type = SykdomstidslinjedagType.ARBEIDSDAG,
+                type = avslagsdagEller(it.dato) { SykdomstidslinjedagType.ARBEIDSDAG},
                 kilde = it.kilde.tilKildeDTO(),
                 grad = null
             )
