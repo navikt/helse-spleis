@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
@@ -69,11 +68,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
         periode.forEach { dato ->
             val avslagsdag = utbetalingstidslinje[dato] as? Utbetalingsdag.AvvistDag
             assertNotNull(avslagsdag)
-            assertForventetFeil(
-                forklaring = "Dagen skal ikke være avslått både på avslagstidslinjen og 'maskinelt' avslått.",
-                nå = { assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag), avslagsdag.begrunnelser) },
-                ønsket = { assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag, Begrunnelse.AndreYtelserPleiepenger), avslagsdag.begrunnelser) }
-            )
+            assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag, Begrunnelse.AndreYtelserPleiepenger), avslagsdag.begrunnelser)
         }
     }
 
