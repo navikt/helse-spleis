@@ -16,6 +16,7 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Avslagstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.resetSeed
@@ -248,7 +249,8 @@ internal class ArbeidsgiverberegningTest {
             refusjonstidslinje = Beløpstidslinje.fra(
                 januar, INNTEKT,
                 Kilde(MeldingsreferanseId(UUID.randomUUID()), Avsender.ARBEIDSGIVER, LocalDateTime.now())
-            )
+            ),
+            avslagstidslinje = Avslagstidslinje()
         )
     }
 

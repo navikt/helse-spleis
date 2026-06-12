@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.nesteDag
+import no.nav.helse.person.Avslagstidslinje
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -198,7 +199,8 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         val builder = ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.dagerUtenAnsvar }.grupperSammenhengendePerioder(),
             dagerNavOvertarAnsvar = emptyList(),
-            refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje()
+            refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),
+            avslagstidslinje = Avslagstidslinje()
         )
 
         val utbetalingstidslinje = builder.result(tidslinje, 31000.månedlig, Beløpstidslinje())

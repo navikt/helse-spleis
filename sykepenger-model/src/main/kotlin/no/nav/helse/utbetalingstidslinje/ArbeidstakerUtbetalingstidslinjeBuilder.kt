@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Avslagstidslinje
 import no.nav.helse.person.DagerUtenNavAnsvaravklaring
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -32,7 +33,8 @@ internal interface UtbetalingstidslinjeBuilder {
 internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
     private val arbeidsgiverperiode: List<Periode>,
     private val dagerNavOvertarAnsvar: List<Periode>,
-    private val refusjonstidslinje: Beløpstidslinje
+    private val refusjonstidslinje: Beløpstidslinje,
+    private val avslagstidslinje: Avslagstidslinje
 ) : UtbetalingstidslinjeBuilder {
     internal fun medInntektHvisFinnes(
         dato: LocalDate,

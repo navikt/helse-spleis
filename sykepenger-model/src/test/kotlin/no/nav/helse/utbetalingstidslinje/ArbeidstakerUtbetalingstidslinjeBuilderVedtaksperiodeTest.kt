@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.Avslagstidslinje
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -39,6 +40,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiodeTest {
         ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
             arbeidsgiverperiode = listOf(1.januar til 16.januar),
             dagerNavOvertarAnsvar = emptyList(),
-            refusjonstidslinje = Beløpstidslinje()
+            refusjonstidslinje = Beløpstidslinje(),
+            avslagstidslinje = Avslagstidslinje()
         )
 }

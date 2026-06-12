@@ -173,7 +173,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         return ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
             arbeidsgiverperiode = sisteBehandling.dagerUtenNavAnsvar.dager,
             dagerNavOvertarAnsvar = sisteBehandling.dagerNavOvertarAnsvar,
-            refusjonstidslinje = sisteBehandling.refusjonstidslinje
+            refusjonstidslinje = sisteBehandling.refusjonstidslinje,
+            avslagstidslinje = sisteBehandling.avslagstidslinje
         )
     }
 
