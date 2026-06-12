@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
@@ -7,10 +8,13 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Avslagstidslinje
 import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.M
 import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.YF
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -19,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
+
     @Test
     fun `melding til nav dager`() {
         undersøke(16.M + 15.S, dagerNavOvertarAnsvar = listOf(1.januar til 16.januar))
@@ -57,6 +62,21 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
         )
     }
 
+    @Test
+    fun `En dag som både er avslått på avslagstidslinjen og 'maskinelt' avslått`() {
+        val periode = 1.januar til 10.januar
+        undersøke(10.YF(Pleiepenger), avslagstidslinje = Avslagstidslinje(periode to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Test")))
+        periode.forEach { dato ->
+            val avslagsdag = utbetalingstidslinje[dato] as? Utbetalingsdag.AvvistDag
+            assertNotNull(avslagsdag)
+            assertForventetFeil(
+                forklaring = "Dagen skal ikke være avslått både på avslagstidslinjen og 'maskinelt' avslått.",
+                nå = { assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag), avslagsdag.begrunnelser) },
+                ønsket = { assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag, Begrunnelse.AndreYtelserPleiepenger), avslagsdag.begrunnelser) }
+            )
+        }
+    }
+
     @BeforeEach
     fun setup() {
         reset()
@@ -80,15 +100,6 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
 
         utbetalingstidslinje = builder.result(tidslinje, 31000.månedlig, Beløpstidslinje())
         inspektør = utbetalingstidslinje.inspektør
-    }
-
-    // undersøker forskjellige tidslinjer som skal ha samme funksjonelle betydning
-    private fun undersøkeLike(vararg tidslinje: () -> Sykdomstidslinje, dagerNavOvertarAnsvar: List<Periode> = emptyList(), assertBlock: () -> Unit) {
-        tidslinje.forEach {
-            undersøke(resetSeed(tidslinjegenerator = it), dagerNavOvertarAnsvar = dagerNavOvertarAnsvar)
-            assertBlock()
-            reset()
-        }
     }
 
     private fun reset() {
