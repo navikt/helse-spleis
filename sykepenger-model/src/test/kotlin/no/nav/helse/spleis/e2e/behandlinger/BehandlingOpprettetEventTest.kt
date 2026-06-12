@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.behandlinger
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.reflect.KClass
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -287,6 +288,30 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
                 EventSubscription.VedtaksperiodeAnnullertEvent::class,
                 EventSubscription.VedtaksperiodeForkastetEvent::class
             ))
+        }
+    }
+
+    @Test
+    fun `Korrigerte søknader kommer i behandling_opprettet`() {
+        a1 {
+            val søknadId1 = UUID.randomUUID()
+            val søknadId2 = UUID.randomUUID()
+            håndterSøknad(1.januar til 16.januar, søknadId = søknadId1)
+            håndterSøknad(1.januar til 16.januar, søknadId = søknadId2)
+
+            assertEquals(2, observatør.behandlingOpprettetEventer.size)
+            assertEquals(setOf(søknadId1), observatør.behandlingOpprettetEventer.first().søknadIder)
+
+
+            assertForventetFeil(
+                forklaring = "SøknadID'en bli ikke lagt til før etter behandling_opprettet er sendt",
+                nå = {
+                    assertEquals(setOf(søknadId1), observatør.behandlingOpprettetEventer.last().søknadIder)
+                },
+                ønsket = {
+                    assertEquals(setOf(søknadId1, søknadId2), observatør.behandlingOpprettetEventer.last().søknadIder)
+                }
+            )
         }
     }
 
