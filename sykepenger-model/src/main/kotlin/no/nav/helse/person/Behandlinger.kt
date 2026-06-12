@@ -553,7 +553,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Tilstand.VedtakFattet,
                 Tilstand.VedtakIverksatt -> error("Kan ikke opprette ny behandling i tilstand $tilstand")
             }
-            behandlingEventBus.nyBehandling(id, periode, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type, endringer.dokumentsporing.søknadIder())
+
+            val søknadIder = when (kilde.avsender) {
+                Avsender.SYKMELDT -> endringer.dokumentsporing.søknadIder() + kilde.meldingsreferanseId
+                Avsender.ARBEIDSGIVER,
+                Avsender.SAKSBEHANDLER,
+                Avsender.SYSTEM -> endringer.dokumentsporing.søknadIder()
+            }
+
+            behandlingEventBus.nyBehandling(id, periode, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type, søknadIder)
         }
 
         override fun toString() = "$periode - $tilstand"

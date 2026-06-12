@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.behandlinger
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.reflect.KClass
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -68,7 +67,8 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
     fun revurdering() {
         a1 {
             nyttVedtak(januar, 100.prosent)
-            håndterSøknad(Sykdom(1.januar, 31.januar, 80.prosent))
+            val søknadId2 = UUID.randomUUID()
+            håndterSøknad(Sykdom(1.januar, 31.januar, 80.prosent), søknadId = søknadId2)
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer
             assertEquals(2, behandlingOpprettetEventer.size)
             val førsteEvent = behandlingOpprettetEventer.first()
@@ -77,7 +77,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             assertEquals(EventSubscription.BehandlingOpprettetEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
-                søknadIder = setOf(førsteEvent.kilde.meldingsreferanseId),
+                søknadIder = setOf(førsteEvent.kilde.meldingsreferanseId, søknadId2),
                 behandlingId = andreEvent.behandlingId,
                 type = EventSubscription.BehandlingOpprettetEvent.Type.Revurdering,
                 fom = 1.januar,
@@ -302,16 +302,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             assertEquals(2, observatør.behandlingOpprettetEventer.size)
             assertEquals(setOf(søknadId1), observatør.behandlingOpprettetEventer.first().søknadIder)
 
-
-            assertForventetFeil(
-                forklaring = "SøknadID'en bli ikke lagt til før etter behandling_opprettet er sendt",
-                nå = {
-                    assertEquals(setOf(søknadId1), observatør.behandlingOpprettetEventer.last().søknadIder)
-                },
-                ønsket = {
-                    assertEquals(setOf(søknadId1, søknadId2), observatør.behandlingOpprettetEventer.last().søknadIder)
-                }
-            )
+            assertEquals(setOf(søknadId1, søknadId2), observatør.behandlingOpprettetEventer.last().søknadIder)
         }
     }
 
