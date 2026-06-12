@@ -13,6 +13,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.Avslagstidslinje
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG
@@ -30,6 +31,7 @@ import no.nav.helse.testhelpers.YO
 import no.nav.helse.testhelpers.YOL
 import no.nav.helse.testhelpers.YP
 import no.nav.helse.testhelpers.YS
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -915,6 +917,28 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(Begrunnelse.AndreYtelserPleiepenger, inspektør.begrunnelse(21.januar).single())
         assertEquals(Begrunnelse.AndreYtelserSvangerskapspenger, inspektør.begrunnelse(22.januar).single())
         assertEquals(Begrunnelse.AndreYtelserOpplaringspenger, inspektør.begrunnelse(23.januar).single())
+    }
+
+    @Test
+    fun `En dag som både er avslått på avslagstidslinjen og 'maskinelt' avslått`() {
+        val sykdomstidslinje = 16.S + 15.YF(Pleiepenger)
+        val periodeSomSkalAvlåsMedToBegrunnelser = 18.januar til 30.januar
+
+        undersøke(sykdomstidslinje, avslagstidslinje = Avslagstidslinje(periodeSomSkalAvlåsMedToBegrunnelser to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.Over70), "Test")))
+
+        val syttendeJanuar = utbetalingstidslinje[17.januar] as? Utbetalingsdag.AvvistDag
+        assertNotNull(syttendeJanuar)
+        assertEquals(listOf(Begrunnelse.AndreYtelserPleiepenger), syttendeJanuar.begrunnelser)
+
+        periodeSomSkalAvlåsMedToBegrunnelser.forEach { dato ->
+            val avslagsdag = utbetalingstidslinje[dato] as? Utbetalingsdag.AvvistDag
+            assertNotNull(avslagsdag)
+            assertEquals(listOf(Begrunnelse.Over70, Begrunnelse.AndreYtelserPleiepenger), avslagsdag.begrunnelser)
+        }
+
+        val trettiførsteJanuar = utbetalingstidslinje[31.januar] as? Utbetalingsdag.AvvistDag
+        assertNotNull(trettiførsteJanuar)
+        assertEquals(listOf(Begrunnelse.AndreYtelserPleiepenger), trettiførsteJanuar.begrunnelser)
     }
 
     private lateinit var teller: Arbeidsgiverperiodeteller

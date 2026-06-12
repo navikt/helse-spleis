@@ -55,35 +55,56 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         )
     }
 
+    private fun Utbetalingstidslinje.Builder.avslagsdagEller(dato: LocalDate, sykdomsgrad: Prosentdel, inntekt: Inntekt, inntektjusteringer: Beløpstidslinje, eller: () -> Unit) = when (val avslagsdag = avslagstidslinje[dato]) {
+        null -> eller()
+        else -> avvistDag(this, dato, sykdomsgrad, avslagsdag.begrunnelser, inntekt, inntektjusteringer)
+    }
+
+    private fun Utbetalingstidslinje.Builder.avslagsdag(dato: LocalDate, sykdomsgrad: Prosentdel, inntekt: Inntekt, inntektjusteringer: Beløpstidslinje, begrunnelser: List<Begrunnelse>) {
+        check(begrunnelser.isNotEmpty()) { "Forventer at det finnes begrunnelser for avslagsdag" }
+        val avslagsbegrunnelser = (avslagstidslinje[dato]?.begrunnelser ?: emptyList()) + begrunnelser
+        avvistDag(this, dato, sykdomsgrad, avslagsbegrunnelser, inntekt, inntektjusteringer)
+    }
+
     override fun result(sykdomstidslinje: Sykdomstidslinje, inntekt: Inntekt, inntektjusteringer: Beløpstidslinje): Utbetalingstidslinje {
         val builder = Utbetalingstidslinje.Builder()
         sykdomstidslinje.forEach { dag ->
             when (dag) {
                 /** <potensielt arbeidsgiverperiode-dager> **/
-                is Dag.ArbeidsgiverHelgedag -> {
+                is Dag.ArbeidsgiverHelgedag -> builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                     else helg(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                 }
 
                 is Dag.Arbeidsgiverdag -> {
-                    if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                    else avvistDag(builder, dag.dato, dag.grad, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode, inntekt, inntektjusteringer)
+                    if (erAGP(dag.dato)) builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
+                        arbeidsgiverperiodedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                    }
+                    else builder.avslagsdag(dag.dato, dag.grad, inntekt, inntektjusteringer, listOf(Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode))
                 }
 
-                is Dag.Sykedag -> {
+                is Dag.Sykedag -> builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedagEllerNavAnsvar(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                     else navDag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                 }
 
-                is Dag.SykHelgedag -> {
+                is Dag.SykHelgedag -> builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                     else helg(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                 }
 
                 is Dag.AndreYtelser -> {
                     // andreytelse-dagen er fridag hvis den overlapper med en agp-dag, eller om vedtaksperioden ikke har noen agp -- fordi andre ytelsen spiser opp alt
-                    if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, 0.prosent, inntekt, inntektjusteringer)
-                    else if (arbeidsgiverperiode.isEmpty() || dag.dato < arbeidsgiverperiode.first().start) fridag(builder, dag.dato, inntekt, inntektjusteringer)
+                    if (erAGP(dag.dato)) {
+                        builder.avslagsdagEller(dag.dato, 0.prosent, inntekt, inntektjusteringer) {
+                            arbeidsgiverperiodedag(builder, dag.dato, 0.prosent, inntekt, inntektjusteringer)
+                        }
+                    }
+                    else if (arbeidsgiverperiode.isEmpty() || dag.dato < arbeidsgiverperiode.first().start) {
+                        builder.avslagsdagEller(dag.dato, 0.prosent, inntekt, inntektjusteringer) {
+                            fridag(builder, dag.dato, inntekt, inntektjusteringer)
+                        }
+                    }
                     else {
                         val begrunnelse = when (dag.ytelse) {
                             Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap
@@ -94,39 +115,42 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                             Dag.AndreYtelser.AnnenYtelse.Pleiepenger -> Begrunnelse.AndreYtelserPleiepenger
                             Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger -> Begrunnelse.AndreYtelserSvangerskapspenger
                         }
-                        avvistDag(builder, dag.dato, 0.prosent, begrunnelse, inntekt, inntektjusteringer)
+                        builder.avslagsdag(dag.dato, 0.prosent, inntekt, inntektjusteringer, listOf(begrunnelse))
                     }
                 }
 
-                is Dag.Feriedag -> {
+                is Dag.Feriedag -> builder.avslagsdagEller(dag.dato, 0.prosent, inntekt, inntektjusteringer) {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, 0.prosent, inntekt, inntektjusteringer)
                     else fridag(builder, dag.dato, inntekt, inntektjusteringer)
                 }
 
-                is Dag.ForeldetSykedag -> {
+                is Dag.ForeldetSykedag -> builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                     else builder.addForeldetDag(dag.dato, medInntektHvisFinnes(dag.dato, dag.grad, inntekt, inntektjusteringer).ikkeBetalt())
                 }
 
-                is Dag.ArbeidIkkeGjenopptattDag -> {
+                is Dag.ArbeidIkkeGjenopptattDag -> builder.avslagsdagEller(dag.dato, 0.prosent, inntekt, inntektjusteringer) {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, 0.prosent, inntekt, inntektjusteringer)
                     else fridag(builder, dag.dato, inntekt, inntektjusteringer)
                 }
 
-                is Dag.Permisjonsdag -> {
+                is Dag.Permisjonsdag -> builder.avslagsdagEller(dag.dato, 0.prosent, inntekt, inntektjusteringer) {
                     if (erAGP(dag.dato)) arbeidsgiverperiodedag(builder, dag.dato, 0.prosent, inntekt, inntektjusteringer)
                     else fridag(builder, dag.dato, inntekt, inntektjusteringer)
                 }
                 /** </potensielt arbeidsgiverperiode-dager> **/
 
-                is Dag.Arbeidsdag -> arbeidsdag(builder, dag.dato, inntekt, inntektjusteringer)
-                is Dag.FriskHelgedag -> arbeidsdag(builder, dag.dato, inntekt, inntektjusteringer)
-                is Dag.ProblemDag -> {
+                is Dag.Arbeidsdag,
+                is Dag.FriskHelgedag -> builder.avslagsdagEller(dag.dato, 0.prosent, inntekt, inntektjusteringer) {
+                    arbeidsdag(builder, dag.dato, inntekt, inntektjusteringer)
+                }
+
+                is Dag.ProblemDag -> builder.avslagsdagEller(dag.dato, 0.prosent, inntekt, inntektjusteringer) {
                     // den andre builderen kaster egentlig exception her, men trenger vi det –– sånn egentlig?
                     fridag(builder, dag.dato, inntekt, inntektjusteringer)
                 }
 
-                is Dag.UkjentDag -> {
+                is Dag.UkjentDag -> builder.avslagsdagEller(dag.dato, 0.prosent, inntekt, inntektjusteringer) {
                     // todo: pga strekking av egenmeldingsdager fra søknad så har vi vedtaksperioder med ukjentdager
                     // error("Forventer ikke å finne en ukjentdag i en vedtaksperiode")
                     when (dag.dato.erHelg()) {
@@ -155,8 +179,8 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         builder.addArbeidsgiverperiodedag(dato, medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer).ikkeBetalt())
     }
 
-    private fun avvistDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, begrunnelse: Begrunnelse, fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
-        builder.addAvvistDag(dato, medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer).ikkeBetalt(), listOf(begrunnelse))
+    private fun avvistDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, begrunnelser: List<Begrunnelse>, fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
+        builder.addAvvistDag(dato, medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer).ikkeBetalt(), begrunnelser)
     }
 
     private fun helg(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, fastsattÅrsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {
