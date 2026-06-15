@@ -209,3 +209,6 @@ spec:
         - team: tbd
           application: sparkel-dagpenger
           access: readwrite
+        - team: tbd
+          application: sp-forsikring
+          access: readwrite
