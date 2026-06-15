@@ -710,9 +710,6 @@ internal class PersonMediator(
                 "fom" to event.beregningsperiode.start,
                 "tom" to event.beregningsperiode.endInclusive
             )),
-            Behov(Behov.Behovstype.SelvstendigForsikring, mapOf(
-                "skjæringstidspunkt" to event.skjæringstidspunkt
-            )).takeIf { event.trengerInformasjonOmSelvstendigForsikring },
             Behov(
                 Behov.Behovstype.Forsikringsvurdering, mapOf(
                 "skjæringstidspunkt" to event.skjæringstidspunkt,

@@ -563,7 +563,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         forsikringsvurdering: Forsikringsvurdering? = null,
         orgnummer: String = "SELVSTENDIG"
     ) {
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.SelvstendigForsikring))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Forsikringsvurdering))
         sendYtelser(vedtaksperiodeIndeks, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpengerV2, inntekterForBeregning, forsikringsvurdering, orgnummer)
     }
 
