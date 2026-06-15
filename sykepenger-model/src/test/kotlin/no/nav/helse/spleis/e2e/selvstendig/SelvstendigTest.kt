@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.selvstendig
 
 import java.time.LocalDate
 import java.time.Year
+import java.util.UUID
 import kotlin.reflect.KClass
 import no.nav.helse.Toggle
 import no.nav.helse.april
@@ -15,9 +16,9 @@ import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Forsikringsvurdering
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.MeldingTilNavDager
@@ -1102,11 +1103,10 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
-                selvstendigForsikring = SelvstendigForsikring(
-                    virkningsdato = 10.oktober(2017),
-                    opphørsdato = null,
-                    type = SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn,
-                    premiegrunnlag = 450000.årlig
+                forsikringsvurdering = Forsikringsvurdering(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    harForsikring = true,
+                    dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1)
                 )
             )
 
@@ -1141,11 +1141,10 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
-                selvstendigForsikring = SelvstendigForsikring(
-                    virkningsdato = 10.oktober(2017),
-                    opphørsdato = null,
-                    type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagSytten,
-                    premiegrunnlag = 450000.årlig
+                forsikringsvurdering = Forsikringsvurdering(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    harForsikring = true,
+                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17)
                 )
             )
 
@@ -1177,14 +1176,12 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
-                selvstendigForsikring = SelvstendigForsikring(
-                    virkningsdato = 10.oktober(2017),
-                    opphørsdato = null,
-                    type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagEn,
-                    premiegrunnlag = 450000.årlig
+                forsikringsvurdering = Forsikringsvurdering(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    harForsikring = true,
+                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1)
                 )
             )
-
             val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
             utbetalingstidslinje.subset(1.januar til 16.januar).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class, 100) }
 
@@ -1213,11 +1210,10 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
-                selvstendigForsikring = SelvstendigForsikring(
-                    virkningsdato = 10.oktober(2017),
-                    opphørsdato = null,
-                    type = SelvstendigForsikring.Forsikringstype.HundreProsentFraDagEn,
-                    premiegrunnlag = 450000.årlig
+                forsikringsvurdering = Forsikringsvurdering(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    harForsikring = true,
+                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1)
                 )
             )
             assertForkastetPeriodeTilstander(

@@ -6,9 +6,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import java.util.*
+import java.util.UUID
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
-import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.Forsikringsvurdering
@@ -20,7 +19,6 @@ import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
-import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
@@ -88,23 +86,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
         packet["@løsning.${Behovstype.Arbeidsavklaringspenger.utgåendeNavn}.utbetalingsperioder"]
             .map { Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) })
 
-    internal val selvstendigForsikring = when (yrkesaktivitetssporing) {
-        Behandlingsporing.Yrkesaktivitet.Selvstendig -> packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.SelvstendigForsikring.utgåendeNavn}", "forsikringer") {
-            SelvstendigForsikring(
-                virkningsdato = it.path("startdato").asLocalDate(),
-                opphørsdato = it.path("sluttdato").asOptionalLocalDate(),
-                type = SelvstendigForsikring.Forsikringstype.valueOf(it.path("forsikringstype").asText()),
-                premiegrunnlag = it.path("premiegrunnlag").asInt().årlig
-            )
-        }.also { forsikringer ->
-            if (forsikringer.size > 1) sikkerlogg.warn("Mottok mer enn én selvstendig forsikring i melding ${meldingsporing.id}")
-        }.firstOrNull()
-
-        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
-        Behandlingsporing.Yrkesaktivitet.Frilans -> null
-    }
-
     internal val forsikringsvurdering = packet["@løsning.${Behovstype.Forsikringsvurdering.utgåendeNavn}"]
         .takeUnless { it.isMissingOrNull() }
         ?.let { løsningJson ->
@@ -148,7 +129,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             arbeidsavklaringspenger = arbeidsavklaringspengerV2,
             dagpenger = dagpengerV2,
             inntekterForBeregning = inntekterForBeregning,
-            selvstendigForsikring = selvstendigForsikring,
             forsikringsvurdering = forsikringsvurdering,
         )
 

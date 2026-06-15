@@ -13,7 +13,6 @@ import no.nav.helse.spleis.Behov.Behovstype.Institusjonsopphold
 import no.nav.helse.spleis.Behov.Behovstype.Omsorgspenger
 import no.nav.helse.spleis.Behov.Behovstype.Opplæringspenger
 import no.nav.helse.spleis.Behov.Behovstype.Pleiepenger
-import no.nav.helse.spleis.Behov.Behovstype.SelvstendigForsikring
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
@@ -84,13 +83,6 @@ internal class YtelserRiver(
             interestedIn("daglig", JsonNode::asDouble)
             interestedIn("måndelig", JsonNode::asDouble)
             interestedIn("årlig", JsonNode::asDouble)
-        }
-
-        message.interestedInArrayEllerObjectMedArray("@løsning.${SelvstendigForsikring.utgåendeNavn}", "forsikringer") {
-            require("startdato", JsonNode::asLocalDate)
-            require("forsikringstype", JsonNode::asText)
-            require("premiegrunnlag", JsonNode::asInt)
-            interestedIn("sluttdato", JsonNode::asLocalDate)
         }
 
         message.interestedIn("@løsning.${Forsikringsvurdering.utgåendeNavn}") {

@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
@@ -24,12 +24,9 @@ import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Forsikring
-import no.nav.helse.hendelser.ForsikringBasertPåForsikringsvurdering
-import no.nav.helse.hendelser.KollektivJordbruksforsikring
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.UtbetalingHendelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.vurdering
@@ -179,24 +176,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal fun utbetalingstidslinjeBuilderForSelvstendig(forsikring: Forsikring?): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
-        val dekningsgrad = when (val arbeidssituasjon = sisteBehandling.arbeidssituasjon) {
-            Arbeidssituasjon.BARNEPASSER,
-
-            Arbeidssituasjon.JORDBRUKER,
-            Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> when (forsikring) {
-                null -> 80.prosent
-
-                KollektivJordbruksforsikring,
-                is SelvstendigForsikring,
-                is ForsikringBasertPåForsikringsvurdering -> forsikring.dekningsgrad()
-            }
-
-            Arbeidssituasjon.ANNET,
-            Arbeidssituasjon.FISKER,
-            Arbeidssituasjon.ARBEIDSTAKER,
-            Arbeidssituasjon.ARBEIDSLEDIG,
-            Arbeidssituasjon.FRILANSER -> error("Har ikke implementert dekningsgrad for $arbeidssituasjon")
-        }
+        val dekningsgrad = forsikring?.dekningsgrad() ?: 80.prosent
 
         val dagerNavOvertarAnsvar = when (forsikring?.navOvertarAnsvarForVentetid()) {
             true -> behandlinger.last().dagerUtenNavAnsvar.dager
@@ -1299,15 +1279,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 is Arbeidstaker,
                 Behandlingsporing.Yrkesaktivitet.Frilans -> null
 
-                Behandlingsporing.Yrkesaktivitet.Selvstendig -> when (val forsikring = beregning.forsikring) {
-                    is ForsikringBasertPåForsikringsvurdering,
-                    is SelvstendigForsikring -> when (forsikring.navOvertarAnsvarForVentetid()) {
-                        true -> dagerUtenNavAnsvar.dager
-                        false -> emptyList()
-                    }
-
-                    KollektivJordbruksforsikring -> emptyList()
-                    null -> null
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> beregning.forsikring?.let {
+                    if (it.navOvertarAnsvarForVentetid()) dagerUtenNavAnsvar.dager
+                    else emptyList()
                 }
             } ?: dagerNavOvertarAnsvar
 

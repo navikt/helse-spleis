@@ -53,7 +53,6 @@ import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
-import no.nav.helse.hendelser.KollektivJordbruksforsikring
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -68,7 +67,6 @@ import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.annullering
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
-import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Sykmelding
@@ -1562,17 +1560,6 @@ internal class Vedtaksperiode private constructor(
         return (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.opptjening?.harTilstrekkeligAntallOpptjeningsdager() ?: true
     }
 
-    private fun kanskjeKollektivForsikring(): Forsikring? = when (behandlinger.arbeidssituasjon) {
-        Endring.Arbeidssituasjon.JORDBRUKER -> KollektivJordbruksforsikring
-        Endring.Arbeidssituasjon.ARBEIDSTAKER,
-        Endring.Arbeidssituasjon.ARBEIDSLEDIG,
-        Endring.Arbeidssituasjon.FRILANSER,
-        Endring.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
-        Endring.Arbeidssituasjon.BARNEPASSER,
-        Endring.Arbeidssituasjon.FISKER,
-        Endring.Arbeidssituasjon.ANNET -> null
-    }
-
     private fun håndterYtelser(eventBus: EventBus, ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk, nesteSimuleringtilstand: Vedtaksperiodetilstand, nesteGodkjenningtilstand: Vedtaksperiodetilstand) {
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
@@ -1581,7 +1568,7 @@ internal class Vedtaksperiode private constructor(
         // steg 2: lag utbetalingstidslinjer for alle vedtaksperiodene
         val (beregningsperiode, perioderSomMåHensyntasVedBeregning) = perioderSomMåHensyntasVedBeregning()
         val inntektsperioder = ytelser.inntektsendringer()
-        val forsikring = ytelser.forsikringsvurdering?.let(ForsikringBasertPåForsikringsvurdering::fraLøsning) ?: ytelser.selvstendigForsikring() ?: kanskjeKollektivForsikring()
+        val forsikring = ytelser.forsikringsvurdering?.let(ForsikringBasertPåForsikringsvurdering::fraLøsning)
         val uberegnetTidslinjePerArbeidsgiver = lagArbeidsgiverberegning(
             beregningsperiode = beregningsperiode,
             vedtaksperioder = perioderSomMåHensyntasVedBeregning,
@@ -1744,17 +1731,10 @@ internal class Vedtaksperiode private constructor(
             Frilans -> {
             }
 
-            Selvstendig ->
-                when (forsikring) {
-                    is SelvstendigForsikring,
-                    is ForsikringBasertPåForsikringsvurdering ->
-                        if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
-                        else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_6)
-
-                    KollektivJordbruksforsikring,
-                    null -> {
-                    }
-                }
+            Selvstendig -> forsikring?.let {
+                if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
+                else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_6)
+            }
         }
         if (!harOpptjening) aktivitetslogg.varsel(RV_OV_1)
 

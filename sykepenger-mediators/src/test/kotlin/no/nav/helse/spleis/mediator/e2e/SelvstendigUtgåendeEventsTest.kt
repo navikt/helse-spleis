@@ -8,16 +8,14 @@ import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.Forsikringsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.november
 import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -211,7 +209,14 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendVilkårsgrunnlagSelvstendig(0)
-        sendYtelserSelvstendig(0, selvstendigForsikring = listOf(SelvstendigForsikring(1.november(2017), null, SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, 450_000.årlig)))
+        sendYtelserSelvstendig(
+            vedtaksperiodeIndeks = 0,
+            forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingId = UUID.randomUUID(),
+                harForsikring = true,
+                dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1)
+            )
+        )
         sendSimuleringSelvstendig(0)
         sendUtbetalingsgodkjenningSelvstendig(0)
         sendUtbetaling()
@@ -228,7 +233,14 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendVilkårsgrunnlagSelvstendig(0)
-        sendYtelserSelvstendig(0, selvstendigForsikring = listOf(SelvstendigForsikring(1.november(2017), null, SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, 450_000.årlig)))
+        sendYtelserSelvstendig(
+            vedtaksperiodeIndeks = 0,
+            forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingId = UUID.randomUUID(),
+                harForsikring = true,
+                dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1)
+            )
+        )
         sendSimuleringSelvstendig(0)
         sendUtbetalingsgodkjenningSelvstendig(0)
         sendUtbetaling()
@@ -236,7 +248,12 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 2.februar, tom = 1.mars, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 2.februar, tom = 1.mars, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
-        sendYtelserSelvstendig(1, selvstendigForsikring = listOf(SelvstendigForsikring(1.november(2017), null, SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, 450_000.årlig)))
+        sendYtelserSelvstendig(vedtaksperiodeIndeks = 1,
+            forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingId = UUID.randomUUID(),
+                harForsikring = true,
+                dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1)
+            ))
         sendSimuleringSelvstendig(1)
         sendUtbetalingsgodkjenningSelvstendig(1)
         sendUtbetaling()
@@ -271,7 +288,14 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 10.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 10.januar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendVilkårsgrunnlagSelvstendig(0)
-        sendYtelserSelvstendig(0, selvstendigForsikring = listOf(SelvstendigForsikring(1.november(2017), null, SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, 450_000.årlig)))
+        sendYtelserSelvstendig(
+            vedtaksperiodeIndeks = 0,
+            forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingId = UUID.randomUUID(),
+                harForsikring = true,
+                dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1)
+            )
+        )
         sendSimuleringSelvstendig(0)
         sendUtbetalingsgodkjenningSelvstendig(0)
         sendUtbetaling()
@@ -279,7 +303,14 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 11.januar, tom = 31.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 31.januar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
-        sendYtelserSelvstendig(1, selvstendigForsikring = listOf(SelvstendigForsikring(1.november(2017), null, SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, 450_000.årlig)))
+        sendYtelserSelvstendig(
+            vedtaksperiodeIndeks = 1,
+            forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingId = UUID.randomUUID(),
+                harForsikring = true,
+                dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1)
+            )
+        )
         sendSimuleringSelvstendig(1)
         sendUtbetalingsgodkjenningSelvstendig(1)
         sendUtbetaling()
@@ -293,7 +324,14 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), sendtNav = 1.januar.atStartOfDay(), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendDødsmelding(25.januar)
         sendVilkårsgrunnlagSelvstendig(0)
-        sendYtelserSelvstendig(0, selvstendigForsikring = listOf(SelvstendigForsikring(1.november(2017), null, SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn, 450_000.årlig)))
+        sendYtelserSelvstendig(
+            vedtaksperiodeIndeks = 0,
+            forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingId = UUID.randomUUID(),
+                harForsikring = true,
+                dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1)
+            )
+        )
         sendSimuleringSelvstendig(0)
         sendUtbetalingsgodkjenningSelvstendig(0)
         sendUtbetaling()

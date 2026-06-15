@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.e2e
 
+import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
+import no.nav.helse.hendelser.Forsikringsvurdering
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -28,24 +30,33 @@ internal class JordbrukerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `jordbruker har 100 prosent dekningsgrad og egen klassekode`() = Toggle.Jordbruker.enable {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
-            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-            håndterYtelserSelvstendig(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+    fun `jordbruker har 100 prosent dekningsgrad og egen klassekode`() = Toggle.SelvstendigForsikring.enable {
+        Toggle.Jordbruker.enable {
+            selvstendig {
+                håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
+                håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+                håndterYtelserSelvstendig(
+                    1.vedtaksperiode,
+                    forsikringsvurdering = Forsikringsvurdering(
+                        forsikringsvurderingId = UUID.randomUUID(),
+                        harForsikring = true,
+                        dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17)
+                    )
+                )
+                håndterSimulering(1.vedtaksperiode)
+                assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
 
-            inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
-                assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
-                assertEquals(1, utbetalinginspektør.personOppdrag.size)
-                utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
-                    assertEquals(17.januar til 31.januar, linje.periode)
-                    assertEquals(1771, linje.beløp)
-                    assertEquals(Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk, linje.klassekode)
+                inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
+                    assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
+                    assertEquals(1, utbetalinginspektør.personOppdrag.size)
+                    utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
+                        assertEquals(17.januar til 31.januar, linje.periode)
+                        assertEquals(1771, linje.beløp)
+                        assertEquals(Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk, linje.klassekode)
+                    }
                 }
+                assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_55, Varselkode.RV_AN_6)
             }
-            assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_55)
         }
     }
 }

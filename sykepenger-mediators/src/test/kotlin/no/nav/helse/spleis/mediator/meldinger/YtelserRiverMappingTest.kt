@@ -2,29 +2,27 @@ package no.nav.helse.spleis.mediator.meldinger
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
+import no.nav.helse.hendelser.Forsikringsvurdering
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Pleiepenger
-import no.nav.helse.hendelser.SelvstendigForsikring
-import no.nav.helse.hendelser.SelvstendigForsikring.Forsikringstype.ÅttiProsentFraDagEn
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.juni
-import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -46,11 +44,11 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
 
     @Test
     fun `Mapping ved løsninger uten løsning på forsikring`() {
-        val json = fjernLøsninger(medObject, "SelvstendigForsikring")
+        val json = fjernLøsninger(medObject, "Forsikringsvurdering")
         sendJson(json).assertForventetInnhold(forsikring = null)
     }
 
-    private fun YtelserMessage.assertForventetInnhold(forsikring: SelvstendigForsikring? = forventetForsikring) {
+    private fun YtelserMessage.assertForventetInnhold(forsikring: Forsikringsvurdering? = forventetForsikring) {
         assertEquals(forventetPleiepenger, this.pleiepenger)
         assertEquals(forventetForeldrepenger, this.foreldrepenger)
         assertEquals(forventetSvangerskapspenger, this.svangerskapspenger)
@@ -60,7 +58,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
         assertEquals(forventetInntekterForBeregning, this.inntekterForBeregning)
         assertEquals(forventetArbeidsavklaringspenger, this.arbeidsavklaringspengerV2)
         assertEquals(forventetDagpenger, this.dagpengerV2)
-        assertEquals(forsikring, this.selvstendigForsikring)
+        assertEquals(forsikring, this.forsikringsvurdering)
     }
 
     private fun fjernLøsninger(json: String, vararg fjern: String): String {
@@ -81,7 +79,12 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
         private val forventetInntekterForBeregning = InntekterForBeregning(listOf(InntekterForBeregning.Inntektsperiode("heihei", 1.april til 30.april, 100.daglig)))
         private val forventetArbeidsavklaringspenger = Arbeidsavklaringspenger(listOf(1.mars til 31.mars))
         private val forventetDagpenger = Dagpenger(listOf(1.februar til 28.februar))
-        private val forventetForsikring = SelvstendigForsikring(5.mai, 5.mai(2019), type = ÅttiProsentFraDagEn, premiegrunnlag = 500_000.årlig)
+        private val forventetForsikring = Forsikringsvurdering(
+            forsikringsvurderingId = UUID.fromString("abebbf72-2bef-473d-aabb-c5314bcc5ea3"),
+            harForsikring = true,
+            dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1)
+        )
+
 
         @Language("JSON")
         private val medArray = """
@@ -96,7 +99,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
             "DagpengerV2",
-            "SelvstendigForsikring"
+            "Forsikringsvurdering"
           ],
           "fødselsnummer": "20014812238",
           "yrkesaktivitetstype": "SELVSTENDIG",
@@ -179,14 +182,14 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
                 }
               ]
             },
-            "SelvstendigForsikring": [
-              {
-                "forsikringstype": "ÅttiProsentFraDagEn",
-                "sluttdato": "2019-05-05",
-                "startdato": "2018-05-05",
-                "premiegrunnlag": 500000.0
+            "Forsikringsvurdering": {
+              "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
+              "harForsikring": true,
+              "dekning": {
+                "grad": 80,
+                "fraDag": 1
               }
-            ]
+            }
           },
           "@final": true,
           "@besvart": "2026-03-16T10:46:53.61518",
@@ -210,7 +213,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
             "DagpengerV2",
-            "SelvstendigForsikring"
+            "Forsikringsvurdering"
           ],
           "fødselsnummer": "20014812238",
           "yrkesaktivitetstype": "SELVSTENDIG",
@@ -301,15 +304,13 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
                 }
               ]
             },
-            "SelvstendigForsikring": {
-              "forsikringer": [
-                  {
-                    "forsikringstype": "ÅttiProsentFraDagEn",
-                    "sluttdato": "2019-05-05",
-                    "startdato": "2018-05-05",
-                    "premiegrunnlag": 500000.0
-                  }
-              ]
+            "Forsikringsvurdering": {
+              "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
+              "harForsikring": true,
+              "dekning": {
+                "grad": 80,
+                "fraDag": 1
+              }
             }
           },
           "@final": true,

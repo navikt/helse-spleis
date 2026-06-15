@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.Tidslinje
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -27,7 +27,6 @@ class Ytelser(
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger,
     private val inntekterForBeregning: InntekterForBeregning,
-    private val selvstendigForsikring: SelvstendigForsikring?,
     val forsikringsvurdering: Forsikringsvurdering?,
     private val andreYtelser: AndreYtelser = AndreYtelser(emptyList())
 ) : Hendelse {
@@ -68,8 +67,6 @@ class Ytelser(
 
         return !aktivitetslogg.harFunksjonelleFeil()
     }
-
-    internal fun selvstendigForsikring(): SelvstendigForsikring? = selvstendigForsikring
 
     internal fun inntektsendringer(): Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje> {
         val kilde = Kilde(metadata.meldingsreferanseId, SYSTEM, LocalDateTime.now())

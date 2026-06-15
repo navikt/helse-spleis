@@ -40,7 +40,6 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
@@ -285,7 +284,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         dagpengerV2: List<Periode> = emptyList(),
         inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
-        selvstendigForsikring: SelvstendigForsikring? = null,
         andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList(),
         forsikringsvurdering: Forsikringsvurdering? = null,
     ): Ytelser {
@@ -315,7 +313,6 @@ internal class ArbeidsgiverHendelsefabrikk(
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspengerV2),
             dagpenger = Dagpenger(dagpengerV2),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
-            selvstendigForsikring = selvstendigForsikring,
             andreYtelser = AndreYtelser(andreYtelser),
             forsikringsvurdering = forsikringsvurdering,
         )

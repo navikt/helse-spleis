@@ -36,7 +36,6 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
@@ -280,7 +279,6 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         inntekterForBeregning: List<Inntektsperiode> = emptyList(),
         dagpengerV2: List<Periode> = emptyList(),
-        selvstendigForsikring: SelvstendigForsikring? = null,
         forsikringsvurdering: Forsikringsvurdering? = null,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
@@ -309,7 +307,6 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspengerV2),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             dagpenger = Dagpenger(dagpengerV2),
-            selvstendigForsikring = selvstendigForsikring,
             forsikringsvurdering = forsikringsvurdering,
         )
     }

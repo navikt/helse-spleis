@@ -33,7 +33,6 @@ import no.nav.helse.hendelser.Forsikringsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as HendelsePeriode
-import no.nav.helse.hendelser.SelvstendigForsikring
 import no.nav.helse.januar
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.Behov
@@ -961,7 +960,6 @@ internal class TestMessageFactory(
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
         dagpengerV2: Dagpenger = Dagpenger(emptyList()),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
-        selvstendigForsikring: List<SelvstendigForsikring> = emptyList(),
         forsikringsvurdering: Forsikringsvurdering? = null,
         arbeidsavklaringspengerV2: Arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         orgnummer: String = organisasjonsnummer,
@@ -978,7 +976,6 @@ internal class TestMessageFactory(
             "DagpengerV2"
         )
         if (yrkesaktivitetstype == "SELVSTENDIG") {
-            behovliste.add("SelvstendigForsikring")
             behovliste.add("Forsikringsvurdering")
         }
 
@@ -1067,22 +1064,7 @@ internal class TestMessageFactory(
                         )
                     }
                 ))
-                .plus(selvstendigForsikringer(selvstendigForsikring, yrkesaktivitetstype))
                 .plus(forsikringsvurdering(forsikringsvurdering, yrkesaktivitetstype))
-        )
-    }
-
-    fun selvstendigForsikringer(selvstendigForsikringer: List<SelvstendigForsikring>, yrkesaktivitetstype: String): Map<String, Any> {
-        if (yrkesaktivitetstype != "SELVSTENDIG") return emptyMap()
-        return mapOf(
-            Behov.Behovstype.SelvstendigForsikring.utgåendeNavn to selvstendigForsikringer.map { forsikring ->
-                mapOf(
-                    "forsikringstype" to forsikring.type,
-                    "sluttdato" to forsikring.opphørsdato,
-                    "startdato" to forsikring.virkningsdato,
-                    "premiegrunnlag" to forsikring.premiegrunnlag.årlig
-                )
-            }
         )
     }
 
