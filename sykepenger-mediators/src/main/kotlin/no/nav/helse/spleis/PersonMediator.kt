@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
@@ -718,7 +717,7 @@ internal class PersonMediator(
                 Behov.Behovstype.Forsikringsvurdering, mapOf(
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
                 "spesielleYrkesgrupper" to emptyList<String>()
-            )).takeIf { event.trengerInformasjonOmSelvstendigForsikring && Toggle.NyttForsikringsbehov.enabled }
+            )).takeIf { event.trengerInformasjonOmSelvstendigForsikring }
         )
 
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer

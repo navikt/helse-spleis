@@ -23,7 +23,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
@@ -537,7 +536,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
         val behandlingId = behov.path("behandlingId").asText().toUUID()
         assertEquals(yrkesaktivitetstype == "SELVSTENDIG", testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.SelvstendigForsikring))
-        assertEquals(yrkesaktivitetstype == "SELVSTENDIG" && Toggle.NyttForsikringsbehov.enabled, testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Forsikringsvurdering))
+        assertEquals(yrkesaktivitetstype == "SELVSTENDIG", testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Forsikringsvurdering))
         val (_, message) = meldingsfabrikk.lagYtelser(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             behandlingId = behandlingId,

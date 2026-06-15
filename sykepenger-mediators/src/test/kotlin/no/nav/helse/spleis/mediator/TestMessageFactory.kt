@@ -10,7 +10,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
@@ -980,8 +979,6 @@ internal class TestMessageFactory(
         )
         if (yrkesaktivitetstype == "SELVSTENDIG") {
             behovliste.add("SelvstendigForsikring")
-        }
-        if (yrkesaktivitetstype == "SELVSTENDIG" && Toggle.NyttForsikringsbehov.enabled) {
             behovliste.add("Forsikringsvurdering")
         }
 
@@ -1090,7 +1087,7 @@ internal class TestMessageFactory(
     }
 
     fun forsikringsvurdering(forsikringsvurdering: Forsikringsvurdering?, yrkesaktivitetstype: String): Map<String, Any> {
-        if (forsikringsvurdering == null || yrkesaktivitetstype != "SELVSTENDIG" || Toggle.NyttForsikringsbehov.disabled) return emptyMap()
+        if (forsikringsvurdering == null || yrkesaktivitetstype != "SELVSTENDIG") return emptyMap()
         return mapOf(
             Behov.Behovstype.Forsikringsvurdering.utgåendeNavn to forsikringsvurdering.let { forsikringsvurdering ->
                 mapOf(
