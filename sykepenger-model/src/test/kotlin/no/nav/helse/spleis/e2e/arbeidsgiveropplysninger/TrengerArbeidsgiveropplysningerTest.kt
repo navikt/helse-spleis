@@ -29,6 +29,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
@@ -38,6 +39,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTOR
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.TestObservatør
@@ -1043,6 +1045,33 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
+    @Test
+    fun `Vi sender ut unødvendig forespørsel når en AUU utbetales i infotrygd`() {
+        a1 {
+            nyPeriode(1.januar til 16.januar)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(PersonUtbetalingsperiode(a1, 2.januar, 31.januar)))
+            assertEquals(1.vedtaksperiode, observatør.overlappendeInfotrygdperioder.last().overlappendeInfotrygdperioder.single().vedtaksperiodeId)
+            assertEquals("AVSLUTTET_UTEN_UTBETALING", observatør.overlappendeInfotrygdperioder.last().overlappendeInfotrygdperioder.single().vedtaksperiodetilstand)
+
+            assertForventetFeil(
+                forklaring = "Vi sender ut unødvendig forespørsel når en AUU utbetales i infotrygd",
+                nå = {
+                    assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode })
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+                    håndterAnmodningOmForkasting(1.vedtaksperiode)
+                    assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+                },
+                ønsket = {
+                    assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode })
+                    assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+                    håndterAnmodningOmForkasting(1.vedtaksperiode)
+
+                }
+            )
+        }
     }
 
     private fun nyeVedtakMedUlikFom(sykefraværHosArbeidsgiver: Map<String, Periode>) {
