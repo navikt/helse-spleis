@@ -1319,7 +1319,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     fun `allerede utbetalt i Infotrygd uten utbetaling etterpå`() = a1 {
         nyPeriode(2.januar til 17.januar)
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 17.januar))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
     }
 
     @Test

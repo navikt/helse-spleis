@@ -1047,33 +1047,6 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
-    @Test
-    fun `Vi sender ut unødvendig forespørsel når en AUU utbetales i infotrygd`() {
-        a1 {
-            nyPeriode(1.januar til 16.januar)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(PersonUtbetalingsperiode(a1, 2.januar, 31.januar)))
-            assertEquals(1.vedtaksperiode, observatør.overlappendeInfotrygdperioder.last().overlappendeInfotrygdperioder.single().vedtaksperiodeId)
-            assertEquals("AVSLUTTET_UTEN_UTBETALING", observatør.overlappendeInfotrygdperioder.last().overlappendeInfotrygdperioder.single().vedtaksperiodetilstand)
-
-            assertForventetFeil(
-                forklaring = "Vi sender ut unødvendig forespørsel når en AUU utbetales i infotrygd",
-                nå = {
-                    assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode })
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-                    håndterAnmodningOmForkasting(1.vedtaksperiode)
-                    assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-                },
-                ønsket = {
-                    assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode })
-                    assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-                    håndterAnmodningOmForkasting(1.vedtaksperiode)
-
-                }
-            )
-        }
-    }
-
     private fun nyeVedtakMedUlikFom(sykefraværHosArbeidsgiver: Map<String, Periode>) {
         val ag1Periode = sykefraværHosArbeidsgiver[a1]!!
         val ag2Periode = sykefraværHosArbeidsgiver[a2]!!

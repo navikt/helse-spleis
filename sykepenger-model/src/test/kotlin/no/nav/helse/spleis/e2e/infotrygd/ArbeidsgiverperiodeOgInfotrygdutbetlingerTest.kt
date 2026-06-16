@@ -13,6 +13,8 @@ import no.nav.helse.mandag
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -26,7 +28,8 @@ internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest: AbstractDslTest() 
             arbeidsgiverperiodeVed(vedtaksperiode = januar, infotrygdutbetaling = 1.januar)
         )
         a1 {
-            observatør.assertEtterspurt(1.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class)
+            assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+            assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 

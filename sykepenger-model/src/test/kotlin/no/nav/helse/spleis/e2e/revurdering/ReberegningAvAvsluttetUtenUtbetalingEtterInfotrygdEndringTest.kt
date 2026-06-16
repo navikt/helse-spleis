@@ -5,6 +5,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -12,6 +13,7 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -20,6 +22,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -28,13 +31,13 @@ import org.junit.jupiter.api.Test
 internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : AbstractDslTest() {
 
     @Test
-    fun `AUU med infotrygdperiode rett før skal omgjøres`() {
+    fun `AUU med infotrygdperiode rett før skal forkastes`() {
         a1 {
             håndterSykmelding(5.januar til 20.januar)
             håndterSøknad(Sykdom(5.januar, 20.januar, 100.prosent))
             nullstillTilstandsendringer()
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 4.januar))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
             assertIngenOverlappendeInfotrygdutbetaling()
         }
     }
@@ -65,7 +68,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
             håndterSøknad(Sykdom(5.januar, 20.januar, 100.prosent))
             nullstillTilstandsendringer()
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 5.januar, 20.januar))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
             assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode, "AVSLUTTET_UTEN_UTBETALING")
         }
     }
@@ -77,7 +80,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
             håndterSøknad(Sykdom(5.januar, 20.januar, 100.prosent))
             nullstillTilstandsendringer()
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 5.januar, 15.januar))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
             assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode, "AVSLUTTET_UTEN_UTBETALING")
         }
     }
@@ -110,15 +113,15 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
     }
 
     @Test
-    fun `ny søknad medfører infotrygdhistorikk som overlapper helt med gammelt`() {
+    fun `ny søknad medfører infotrygdhistorikk som overlapper helt med gammelt, forkaster alt`() {
         a1 {
             håndterSykmelding(5.januar til 20.januar)
             håndterSøknad(Sykdom(5.januar, 20.januar, 100.prosent))
             nullstillTilstandsendringer()
             håndterSøknad(Sykdom(1.januar(2023), 31.januar(2023), 100.prosent))
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 5.januar, 20.januar))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
             assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode, "AVSLUTTET_UTEN_UTBETALING")
         }
     }

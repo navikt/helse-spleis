@@ -62,8 +62,18 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, hendelse)
     }
 
+    private fun Vedtaksperiode.infotrygdutbetalingPåvirkerArbeidsgiverperioden() = person.infotrygdhistorikk.betaltePerioder(yrkesaktivitet.organisasjonsnummer).any {
+        it.erRettFør(periode) || it.overlapperMed(periode)
+    }
+
     override fun replayUtført(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
         if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, hendelse)) return
+
+        if (vedtaksperiode.kanForkastes() && vedtaksperiode.infotrygdutbetalingPåvirkerArbeidsgiverperioden()) {
+            aktivitetslogg.info("Forkaster periode fordi infotrygdutbetaling påvirker arbeidsgiverperioden")
+            vedtaksperiode.forkast(eventBus, hendelse, aktivitetslogg)
+            return
+        }
         sendTrengerArbeidsgiveropplysninger(vedtaksperiode, eventBus)
     }
 

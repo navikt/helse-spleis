@@ -265,9 +265,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             val id = UUID.randomUUID()
-            håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 5.januar
-            )), id = id)
-            inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
+            håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 5.januar)), id = id)
+            inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)
                 behandlinger.last().let {
