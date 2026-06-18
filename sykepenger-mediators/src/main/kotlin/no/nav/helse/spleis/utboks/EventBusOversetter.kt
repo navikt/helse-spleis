@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.Arbeidsgiverperiode
@@ -21,7 +22,8 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 internal class EventBusOversetter(private val eventBus: EventBus, private val message: HendelseMessage) {
     private val personidentifikator = Personidentifikator(message.meldingsporing.fødselsnummer)
 
-    internal fun jsonMessages() = eventBus.events
+    private fun utgående() =
+        eventBus.events
         .map { event ->
             // ✅ Sier om det er ryddet opp i meldingen når det gjelder å kun sende "organisasjonsnummer" ut for Arbeidstaker
             when (event) {
@@ -70,6 +72,7 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 is EventSubscription.NyInformasjonIInfotrygdEvent -> mapNyInformasjonIInfotrygdEvent(event)
             }
         }
+    internal fun jsonMessages() = utgående().map { it.jsonMessage() }
 
     private val Behandlingsporing.Yrkesaktivitet.somOrganisasjonsnummer
         get() = when (this) {
@@ -87,8 +90,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
         }
 
-    private fun mapInntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapInntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent): Utgående {
+        return utgående(
             "inntektsmelding_før_søknad",
             mapOf(
                 "inntektsmeldingId" to event.inntektsmeldingId,
@@ -98,8 +101,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapInntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapInntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent): Utgående {
+        return utgående(
             "inntektsmelding_ikke_håndtert",
             mapOf(
                 "inntektsmeldingId" to event.meldingsreferanseId,
@@ -110,8 +113,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapInntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapInntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent): Utgående {
+        return utgående(
             "inntektsmelding_håndtert", mapOf(
             "inntektsmeldingId" to event.meldingsreferanseId,
             "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
@@ -122,8 +125,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapSøknadHåndtert(event: EventSubscription.SøknadHåndtertEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapSøknadHåndtert(event: EventSubscription.SøknadHåndtertEvent): Utgående {
+        return utgående(
             "søknad_håndtert",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
@@ -135,8 +138,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapVedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapVedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent): Utgående {
+        return utgående(
             "vedtaksperiode_annullert",
             byggMedYrkesaktivitet(
                 vedtaksperiodeAnnullertEvent.yrkesaktivitetssporing,
@@ -150,8 +153,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapOverlappendeInfotrygdperioder(event: EventSubscription.OverlappendeInfotrygdperioder): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapOverlappendeInfotrygdperioder(event: EventSubscription.OverlappendeInfotrygdperioder): Utgående {
+        return utgående(
             "overlappende_infotrygdperioder",
             mapOf(
                 "infotrygdhistorikkHendelseId" to event.infotrygdhistorikkHendelseId,
@@ -178,8 +181,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapVedtaksperiodePåminnet(event: EventSubscription.VedtaksperiodePåminnetEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapVedtaksperiodePåminnet(event: EventSubscription.VedtaksperiodePåminnetEvent): Utgående {
+        return utgående(
             "vedtaksperiode_påminnet",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
@@ -195,8 +198,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapVedtaksperiodeIkkePåminnet(event: EventSubscription.VedtaksperiodeIkkePåminnetEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapVedtaksperiodeIkkePåminnet(event: EventSubscription.VedtaksperiodeIkkePåminnetEvent): Utgående {
+        return utgående(
             "vedtaksperiode_ikke_påminnet",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
@@ -208,8 +211,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapUtbetalingAnnullert(event: EventSubscription.UtbetalingAnnullertEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapUtbetalingAnnullert(event: EventSubscription.UtbetalingAnnullertEvent): Utgående {
+        return utgående(
             "utbetaling_annullert",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
@@ -227,8 +230,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapPlanlagtAnnullering(event: EventSubscription.PlanlagtAnnulleringEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapPlanlagtAnnullering(event: EventSubscription.PlanlagtAnnulleringEvent): Utgående {
+        return utgående(
             "planlagt_annullering",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
@@ -244,8 +247,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapUtbetalingEndret(event: EventSubscription.UtbetalingEndretEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapUtbetalingEndret(event: EventSubscription.UtbetalingEndretEvent): Utgående {
+        return utgående(
             "utbetaling_endret",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
@@ -278,8 +281,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
             "totalbeløp" to this.totalbeløp
         )
 
-    private fun mapVedtaksperiodeNyUtbetaling(event: EventSubscription.VedtaksperiodeNyUtbetalingEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapVedtaksperiodeNyUtbetaling(event: EventSubscription.VedtaksperiodeNyUtbetalingEvent): Utgående {
+        return utgående(
             "vedtaksperiode_ny_utbetaling",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
@@ -291,8 +294,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapOverstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapOverstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt): Utgående {
+        return utgående(
             "overstyring_igangsatt",
             mapOf(
                 "revurderingId" to UUID.randomUUID(),
@@ -316,8 +319,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
             ))
     }
 
-    private fun mapUtbetalingUtbetalt(event: EventSubscription.UtbetalingUtbetaltEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapUtbetalingUtbetalt(event: EventSubscription.UtbetalingUtbetaltEvent): Utgående {
+        return utgående(
             "utbetaling_utbetalt",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
@@ -344,8 +347,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapUtbetalingUtenUtbetaling(event: EventSubscription.UtbetalingUtenUtbetalingEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapUtbetalingUtenUtbetaling(event: EventSubscription.UtbetalingUtenUtbetalingEvent): Utgående {
+        return utgående(
             "utbetaling_uten_utbetaling",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
@@ -443,8 +446,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
             }
         )
 
-    private fun mapFeriepengerUtbetalt(event: EventSubscription.FeriepengerUtbetaltEvent): JsonMessage =
-        JsonMessage.newMessage(
+    private fun mapFeriepengerUtbetalt(event: EventSubscription.FeriepengerUtbetaltEvent): Utgående =
+        utgående(
             "feriepenger_utbetalt",
             mapOf(
                 "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
@@ -463,8 +466,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
             "totalbeløp" to this.totalbeløp
         )
 
-    private fun mapVedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapVedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent): Utgående {
+        return utgående(
             "vedtaksperiode_endret",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
@@ -482,8 +485,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapVedtaksperioderVenter(event: EventSubscription.VedtaksperioderVenterEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapVedtaksperioderVenter(event: EventSubscription.VedtaksperioderVenterEvent): Utgående {
+        return utgående(
             "vedtaksperioder_venter", mapOf(
             "vedtaksperioder" to event.vedtaksperioder.map { event ->
                 mapOf(
@@ -510,8 +513,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         ))
     }
 
-    private fun mapVedtaksperiodeOpprettet(event: EventSubscription.VedtaksperiodeOpprettet): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapVedtaksperiodeOpprettet(event: EventSubscription.VedtaksperiodeOpprettet): Utgående {
+        return utgående(
             "vedtaksperiode_opprettet",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
@@ -525,8 +528,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapVedtaksperiodeForkastet(event: EventSubscription.VedtaksperiodeForkastetEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapVedtaksperiodeForkastet(event: EventSubscription.VedtaksperiodeForkastetEvent): Utgående {
+        return utgående(
             "vedtaksperiode_forkastet",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
@@ -547,8 +550,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
             ))
     }
 
-    private fun mapBehandlingOpprettet(event: EventSubscription.BehandlingOpprettetEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapBehandlingOpprettet(event: EventSubscription.BehandlingOpprettetEvent): Utgående {
+        return utgående(
             "behandling_opprettet",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
@@ -570,8 +573,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapBehandlingForkastet(event: EventSubscription.BehandlingForkastetEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapBehandlingForkastet(event: EventSubscription.BehandlingForkastetEvent): Utgående {
+        return utgående(
             "behandling_forkastet",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
@@ -584,8 +587,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapBehandlingLukket(event: EventSubscription.BehandlingLukketEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapBehandlingLukket(event: EventSubscription.BehandlingLukketEvent): Utgående {
+        return utgående(
             "behandling_lukket",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
@@ -597,7 +600,7 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapTrengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent): JsonMessage {
+    private fun mapTrengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent): Utgående {
         val behov = listOf(
             Behov(Behov.Behovstype.InntekterForSykepengegrunnlag, mapOf(
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
@@ -620,7 +623,7 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
 
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
-        return behov.somJsonMessage(message.meldingsporing.id,mapOf(
+        return behov.utgående(message.meldingsporing.id,mapOf(
             "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
             "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
@@ -628,7 +631,7 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         ))
     }
 
-    private fun mapTrengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent): JsonMessage {
+    private fun mapTrengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent): Utgående {
         val behov = listOfNotNull(
             Behov(Behov.Behovstype.Foreldrepenger, mapOf(
                 "foreldrepengerFom" to event.periodeForForeldrepenger.start,
@@ -670,7 +673,7 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
 
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
-        return behov.somJsonMessage(message.meldingsporing.id,mapOf(
+        return behov.utgående(message.meldingsporing.id,mapOf(
             "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
             "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
@@ -678,25 +681,25 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         ))
     }
 
-    private fun mapTrengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent): JsonMessage {
+    private fun mapTrengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent): Utgående {
         return listOf(Behov(Behov.Behovstype.Sykepengehistorikk, mapOf(
             "historikkFom" to event.periode.start,
             "historikkTom" to event.periode.endInclusive,
-        ))).somJsonMessage(message.meldingsporing.id, mapOf(
+        ))).utgående(message.meldingsporing.id, mapOf(
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
             "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype
         ))
     }
 
-    private fun mapTrengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent): JsonMessage {
+    private fun mapTrengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent): Utgående {
         return listOf(Behov(Behov.Behovstype.Sykepengehistorikk, mapOf(
             "historikkFom" to event.periode.start,
             "historikkTom" to event.periode.endInclusive
-        ))).somJsonMessage(message.meldingsporing.id)
+        ))).utgående(message.meldingsporing.id)
     }
 
-    private fun mapUtbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent): JsonMessage {
+    private fun mapUtbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent): Utgående {
         return listOf(Behov(Behov.Behovstype.Feriepengeutbetaling, mapOf(
             "mottaker" to event.mottaker,
             "fagområde" to event.fagområde,
@@ -716,7 +719,7 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
             "fagsystemId" to event.fagsystemId,
             "endringskode" to event.endringskode,
             "saksbehandler" to event.saksbehandler
-        ))).somJsonMessage(message.meldingsporing.id,mapOf(
+        ))).utgående(message.meldingsporing.id,mapOf(
             "yrkesaktivitetstype" to "ARBEIDSTAKER",
             "organisasjonsnummer" to event.organisasjonsnummer,
             "utbetalingId" to event.utbetalingId,
@@ -752,9 +755,9 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         else -> it.plus("maksdato" to maksdatoen)
     } }
 
-    private fun mapUtbetaling(event: EventSubscription.UtbetalingEvent): JsonMessage {
+    private fun mapUtbetaling(event: EventSubscription.UtbetalingEvent): Utgående {
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
-        return listOf(Behov(Behov.Behovstype.Utbetaling, event.oppdragsdetaljer.somMap(event.saksbehandler))).somJsonMessage(message.meldingsporing.id,mapOf(
+        return listOf(Behov(Behov.Behovstype.Utbetaling, event.oppdragsdetaljer.somMap(event.saksbehandler))).utgående(message.meldingsporing.id,mapOf(
             "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
             "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
@@ -764,9 +767,9 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         ))
     }
 
-    private fun mapSimulering(event: EventSubscription.SimuleringEvent): JsonMessage {
+    private fun mapSimulering(event: EventSubscription.SimuleringEvent): Utgående {
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
-        return listOf(Behov(Behov.Behovstype.Simulering, event.oppdragsdetaljer.somMap(event.saksbehandler))).somJsonMessage(message.meldingsporing.id,mapOf(
+        return listOf(Behov(Behov.Behovstype.Simulering, event.oppdragsdetaljer.somMap(event.saksbehandler))).utgående(message.meldingsporing.id,mapOf(
             "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
             "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
@@ -776,9 +779,9 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         ))
     }
 
-    private fun mapGodkjenning(event: EventSubscription.GodkjenningEvent): JsonMessage {
+    private fun mapGodkjenning(event: EventSubscription.GodkjenningEvent): Utgående {
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
-        return listOf(Behov(Behov.Behovstype.Godkjenning, event.behovInput)).somJsonMessage(message.meldingsporing.id,mapOf(
+        return listOf(Behov(Behov.Behovstype.Godkjenning, event.behovInput)).utgående(message.meldingsporing.id,mapOf(
             "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
             "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
@@ -788,10 +791,10 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
     }
 
     private fun mapNyInformasjonIInfotrygdEvent(event: EventSubscription.NyInformasjonIInfotrygdEvent) =
-        JsonMessage.newMessage("ny_informasjon_i_infotrygd", mapOf("fom" to event.fraOgMed))
+        utgående("ny_informasjon_i_infotrygd", mapOf("fom" to event.fraOgMed))
 
-    private fun mapAvsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapAvsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent): Utgående {
+        return utgående(
             "avsluttet_uten_vedtak",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
@@ -807,8 +810,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapAvsluttetMedVedtak(event: EventSubscription.AvsluttetMedVedtakEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapAvsluttetMedVedtak(event: EventSubscription.AvsluttetMedVedtakEvent): Utgående {
+        return utgående(
             "avsluttet_med_vedtak",
             mapOf(
                 "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
@@ -850,8 +853,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapSelvstendigUtbetaltEtterVentetid(event: EventSubscription.SelvstendigUtbetaltEtterVentetidEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapSelvstendigUtbetaltEtterVentetid(event: EventSubscription.SelvstendigUtbetaltEtterVentetidEvent): Utgående {
+        return utgående(
             "selvstendig_utbetalt_etter_ventetid",
             mapOf(
                 "yrkesaktivitetstype" to Behandlingsporing.Yrkesaktivitet.Selvstendig.somYrkesaktivitetstype,
@@ -861,8 +864,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapSelvstendigIngenDagerIgjen(event: EventSubscription.SelvstendigIngenDagerIgjenEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapSelvstendigIngenDagerIgjen(event: EventSubscription.SelvstendigIngenDagerIgjenEvent): Utgående {
+        return utgående(
             "selvstendig_ingen_dager_igjen",
             mapOf(
                 "yrkesaktivitetstype" to Behandlingsporing.Yrkesaktivitet.Selvstendig.somYrkesaktivitetstype,
@@ -872,8 +875,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapAnalytiskDatapakke(event: EventSubscription.AnalytiskDatapakkeEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapAnalytiskDatapakke(event: EventSubscription.AnalytiskDatapakkeEvent): Utgående {
+        return utgående(
             "analytisk_datapakke",
             mapOf(
                 "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
@@ -900,15 +903,15 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapSykefraværstilfelleIkkeFunnet(event: EventSubscription.SykefraværstilfelleIkkeFunnet): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapSykefraværstilfelleIkkeFunnet(event: EventSubscription.SykefraværstilfelleIkkeFunnet): Utgående {
+        return utgående(
             "sykefraværstilfelle_ikke_funnet",
             mapOf("skjæringstidspunkt" to event.skjæringstidspunkt)
         )
     }
 
-    private fun mapSkatteinntekterLagtTilGrunn(event: EventSubscription.SkatteinntekterLagtTilGrunnEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapSkatteinntekterLagtTilGrunn(event: EventSubscription.SkatteinntekterLagtTilGrunnEvent): Utgående {
+        return utgående(
             "skatteinntekter_lagt_til_grunn",
             mapOf(
                 "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
@@ -926,12 +929,12 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
             ))
     }
 
-    private fun mapTrengerInntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent): JsonMessage {
-        return JsonMessage.newMessage("trenger_inntektsmelding_replay", event.opplysninger.tilJsonMap())
+    private fun mapTrengerInntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent): Utgående {
+        return utgående("trenger_inntektsmelding_replay", event.opplysninger.tilJsonMap())
     }
 
-    private fun mapTrengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent): JsonMessage {
-        return JsonMessage.newMessage("trenger_opplysninger_fra_arbeidsgiver", event.opplysninger.tilJsonMap())
+    private fun mapTrengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent): Utgående {
+        return utgående("trenger_opplysninger_fra_arbeidsgiver", event.opplysninger.tilJsonMap())
     }
 
     private fun EventSubscription.TrengerArbeidsgiveropplysninger.tilJsonMap(): Map<String, Any> {
@@ -971,8 +974,8 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapTrengerIkkeArbeidsgiveropplysninger(event: EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun mapTrengerIkkeArbeidsgiveropplysninger(event: EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent): Utgående {
+        return utgående(
             "trenger_ikke_opplysninger_fra_arbeidsgiver",
             mapOf<String, Any>(
                 "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
@@ -982,7 +985,7 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
         )
     }
 
-    private fun mapUtkastTilVedtak(event: EventSubscription.UtkastTilVedtakEvent): JsonMessage {
+    private fun mapUtkastTilVedtak(event: EventSubscription.UtkastTilVedtakEvent): Utgående {
         val utkastTilVedtak = mutableMapOf(
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "behandlingId" to event.behandlingId,
@@ -991,7 +994,7 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
             "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
         )
         if (event.`6G` != null) utkastTilVedtak["sykepengegrunnlagsfakta"] = mapOf("6G" to event.`6G`)
-        return JsonMessage.newMessage("utkast_til_vedtak", utkastTilVedtak.toMap())
+        return utgående("utkast_til_vedtak", utkastTilVedtak.toMap())
     }
 
     /** Legger alltid til yrkesaktivitetstype, men legger kun til organisasjonsnummer for Arbeidstaker **/
@@ -1033,5 +1036,23 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
     private fun arbeidstakerInfotrygdMap(sykepengegrunnlagsfakta: FastsattIInfotrygd): Map<String, Any> = mapOf(
         "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
         "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt
+    )
+
+    private fun utgående(eventName: String, innhold: Map<String, Any>) = Utgående(
+        jsonMessage = { JsonMessage.newMessage(eventName, innhold) },
+        utgåendeMelding = { UtgåendeMelding.nyRapidmelding(personidentifikator, eventName, innhold) }
+    )
+
+    private fun List<Behov>.utgående(
+        meldingsreferanseId: MeldingsreferanseId,
+        extra: Map<String, Any> = emptyMap()
+    ) = Utgående(
+        jsonMessage = { this.somJsonMessage(meldingsreferanseId, extra) },
+        utgåendeMelding = { UtgåendeMelding.nyttBehov(personidentifikator, meldingsreferanseId, this, extra) }
+    )
+
+    private data class Utgående(
+        val jsonMessage: () -> JsonMessage,
+        val utgåendeMelding: () -> UtgåendeMelding
     )
 }
