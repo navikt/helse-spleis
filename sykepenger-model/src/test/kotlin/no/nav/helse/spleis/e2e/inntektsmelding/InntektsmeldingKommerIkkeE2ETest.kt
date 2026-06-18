@@ -171,8 +171,8 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                 ønsket = { // ??
                     assertEquals(1.januar til 25.januar, inspektør.periode(1.vedtaksperiode))
                     assertEquals("UAAAARR AAAAARR SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-                    assertEquals(5.februar til 31.mars, inspektør.periode(2.vedtaksperiode))
-                    assertEquals("UAAAARR AAAAARR UAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+                    assertEquals(26.januar til 31.mars, inspektør.periode(2.vedtaksperiode))
+                    assertEquals("ARR AAAAARR UAAAARR AAAAARR UAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
 
                     assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, forventetSkjæringstidspunkt = 15.januar,
                         forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar,  5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
@@ -182,6 +182,48 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                         forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar,  5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
                         forventetEgenmeldinger = emptyList())
                 })
+        }
+    }
+
+    @Test
+    fun `IM med tilsvarende opplysninger oppfører seg som ønsket for egenmeldingsdager fra SM i testen over`() {
+        a1 {
+            håndterSøknad(15.januar til 25.januar, egenmeldinger = listOf(1.januar.somPeriode()))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, forventetSkjæringstidspunkt = 15.januar,
+                forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar), forventetEgenmeldinger = listOf(1.januar.somPeriode()))
+
+            håndterSøknad(mars, egenmeldinger = listOf(20.januar.somPeriode(), 5.februar.somPeriode(), 19.februar.somPeriode()))
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, forventetSkjæringstidspunkt = 15.januar,
+                forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar,  5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                forventetEgenmeldinger = listOf(1.januar.somPeriode()))
+
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, forventetSkjæringstidspunkt = 1.mars,
+                forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar,  5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                forventetEgenmeldinger = listOf(20.januar.somPeriode(), 5.februar.somPeriode(), 19.februar.somPeriode()))
+
+            assertEquals(15.januar til 25.januar, inspektør.periode(1.vedtaksperiode))
+            assertEquals(mars, inspektør.periode(2.vedtaksperiode))
+
+            //håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 2.vedtaksperiode, arbeidsgiverperioder = listOf(
+                1.januar.somPeriode(), 15.januar til 25.januar, 5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars)
+            )
+
+            assertEquals(1.januar til 25.januar, inspektør.periode(1.vedtaksperiode))
+            assertEquals("UAAAARR AAAAARR SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(26.januar til 31.mars, inspektør.periode(2.vedtaksperiode))
+            assertEquals("ARR AAAAARR UAAAARR AAAAARR UAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, forventetSkjæringstidspunkt = 15.januar,
+                forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar,  5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                forventetEgenmeldinger = emptyList()) // fordi nå ligger de på sykdomstidslinjen
+
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, forventetSkjæringstidspunkt = 1.mars,
+                forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar,  5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                forventetEgenmeldinger = emptyList())
         }
     }
 
