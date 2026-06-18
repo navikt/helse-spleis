@@ -73,6 +73,7 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
             }
         }
     internal fun jsonMessages() = utgående().map { it.jsonMessage() }
+    internal fun utgåendeMeldinger() = utgående().map { it.utgåendeMelding() }
 
     private val Behandlingsporing.Yrkesaktivitet.somOrganisasjonsnummer
         get() = when (this) {

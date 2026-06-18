@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.time.LocalDateTime
 import java.time.ZoneId
+import no.nav.helse.Toggle
 import no.nav.helse.person.EventBus
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.utboks.EventBusOversetter
@@ -19,10 +20,30 @@ internal class PersonMediator(
     }
 
     fun ferdigstill(context: MessageContext, eventBus: EventBus) {
-        EventBusOversetter(eventBus, message)
-            .jsonMessages()
-            .map { jsonMessage -> mapTilPakke(jsonMessage) }
-            .sendUtgåendeMeldinger(context)
+        val oversetter = EventBusOversetter(eventBus, message)
+
+        when (Toggle.BrukUtgåendeMelding.enabled) {
+            true -> {
+                oversetter.utgåendeMeldinger()
+                    .map { utgåendeMelding ->
+                        when (utgåendeMelding.eventName) {
+                            "behov" -> {
+                                val behov = utgåendeMelding.json.path("@behov").map { it.asText() }
+                                sikkerLogg.info("sender behov (${behov.joinToString()}):\n\t${utgåendeMelding.json}")
+                            }
+                            else -> sikkerLogg.info("sender ${utgåendeMelding.eventName}:\n\t${utgåendeMelding.json}")
+                        }
+                        OutgoingMessage(body = utgåendeMelding.json.toString(), key = utgåendeMelding.key)
+                    }
+                    .sendUtgåendeMeldinger(context)
+            }
+            false -> {
+                oversetter.jsonMessages()
+                    .map { jsonMessage -> mapTilPakke(jsonMessage) }
+                    .map { pakke -> pakke.somOutgoingMessage() }
+                    .sendUtgåendeMeldinger(context)
+            }
+        }
     }
 
     private fun LocalDateTime.tilUtc() = atZone(ZoneId.systemDefault()).toInstant()
@@ -46,11 +67,11 @@ internal class PersonMediator(
         }
     }
 
-    private fun List<Pakke>.sendUtgåendeMeldinger(context: MessageContext) {
+
+    private fun List<OutgoingMessage>.sendUtgåendeMeldinger(context: MessageContext) {
         if (this.isEmpty()) return
         message.logOutgoingMessages(sikkerLogg, this.size)
-        val outgoingMessages = this.map { it.tilUtgåendeMelding() }
-        val (ok, failed) = context.publish(outgoingMessages)
+        val (ok, failed) = context.publish(this)
 
         if (failed.isEmpty()) return
         val førsteFeil = failed.first().error
@@ -65,7 +86,7 @@ internal class PersonMediator(
         private val blob: String,
         private val førSending: () -> Unit
     ) {
-        fun tilUtgåendeMelding(): OutgoingMessage {
+        fun somOutgoingMessage(): OutgoingMessage {
             førSending()
             return OutgoingMessage(
                 body = blob,
