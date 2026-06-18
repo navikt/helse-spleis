@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.mediator
 
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
@@ -36,6 +35,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
@@ -200,7 +200,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestAnmodningOmForkastingVerdi.remove()
     }
 
-    override fun behandle(message: HendelseMessage, context: MessageContext) {
+    override fun behandle(message: HendelseMessage, context: BehandlingContext) {
         message.behandle(this, context)
     }
 
@@ -208,7 +208,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: NySøknadMessage,
         sykmelding: Sykmelding,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestNySøknadVerdi.set(true)
@@ -218,7 +218,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: NyFrilansSøknadMessage,
         sykmelding: Sykmelding,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestNySøknadFrilansVerdi.set(true)
@@ -228,7 +228,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: NySelvstendigSøknadMessage,
         sykmelding: Sykmelding,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestNySøknadSelvstendigVerdi.set(true)
@@ -238,7 +238,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: NyArbeidsledigSøknadMessage,
         sykmelding: Sykmelding,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestNySøknadArbeidsledigVerdi.set(true)
@@ -248,7 +248,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: NyArbeidsledigTidligereArbeidstakerSøknadMessage,
         sykmelding: Sykmelding,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestNySøknadArbeidsledigVerdi.set(true)
@@ -258,7 +258,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: SendtSøknadFrilansMessage,
         søknad: Søknad,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestSendtSøknadFrilansVerdi.set(true)
@@ -268,7 +268,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: SendtSøknadSelvstendigMessage,
         søknad: Søknad,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestSendtSøknadSelvstendigVerdi.set(true)
@@ -278,7 +278,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: SendtSøknadFiskerMessage,
         søknad: Søknad,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestSendtSøknadSelvstendigVerdi.set(true)
@@ -288,7 +288,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: SendtSøknadAnnetMessage,
         søknad: Søknad,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestSendtSøknadSelvstendigVerdi.set(true)
@@ -298,7 +298,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: SendtSøknadArbeidsledigMessage,
         søknad: Søknad,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestSendtSøknadArbeidsledigVerdi.set(true)
@@ -308,7 +308,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: SendtSøknadArbeidsledigTidligereArbeidstakerMessage,
         søknad: Søknad,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
     }
@@ -317,7 +317,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: SendtSøknadArbeidsgiverMessage,
         søknad: Søknad,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestSendtSøknadArbeidsgiverVerdi.set(true)
@@ -327,38 +327,38 @@ internal class TestHendelseMediator : IHendelseMediator {
         personopplysninger: Personopplysninger,
         message: SendtSøknadNavMessage,
         søknad: Søknad,
-        context: MessageContext,
+        context: BehandlingContext,
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestSendtSøknadVerdi.set(true)
     }
 
-    override fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext) {
+    override fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: BehandlingContext) {
         lestInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsmeldingMeldingsreferanseId: MeldingsreferanseId, context: MessageContext) {}
+    override fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsmeldingMeldingsreferanseId: MeldingsreferanseId, context: BehandlingContext) {}
 
-    override fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext) {
+    override fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: BehandlingContext) {
         lestNavNoSelvbestemtInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: MessageContext) {
+    override fun behandle(message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: BehandlingContext) {
         lestNavNoInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: MessageContext) {
+    override fun behandle(message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: BehandlingContext) {
         lestKorrigertNavNoInntektsmeldingVerdi.set(true)
     }
 
     override fun behandle(
         message: InntektsmeldingerReplayMessage,
         replays: InntektsmeldingerReplay,
-        context: MessageContext
+        context: BehandlingContext
     ) {
     }
 
-    override fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: MessageContext) {
+    override fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: BehandlingContext) {
         lestDødsmeldingVerdi.set(true)
     }
 
@@ -367,104 +367,104 @@ internal class TestHendelseMediator : IHendelseMediator {
         message: IdentOpphørtMessage,
         identOpphørt: IdentOpphørt,
         gamleIdenter: Set<Personidentifikator>,
-        context: MessageContext
+        context: BehandlingContext
     ) {
     }
 
-    override fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse, context: MessageContext) {
+    override fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse, context: BehandlingContext) {
         lestPåminnelseVerdi.set(true)
     }
 
-    override fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse, context: MessageContext) {
+    override fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse, context: BehandlingContext) {
         lestPersonpåminnelseVerdi.set(true)
     }
 
-    override fun behandle(message: GjenopptaBehandlingMessage, gjenopptaBehandling: GjenopptaBehandling, context: MessageContext) {
+    override fun behandle(message: GjenopptaBehandlingMessage, gjenopptaBehandling: GjenopptaBehandling, context: BehandlingContext) {
     }
 
     override fun behandle(
         message: AnmodningOmForkastingMessage,
         anmodning: AnmodningOmForkasting,
-        context: MessageContext
+        context: BehandlingContext
     ) {
         lestAnmodningOmForkastingVerdi.set(true)
     }
 
-    override fun behandle(message: UtbetalingshistorikkMessage, utbetalingshistorikk: Utbetalingshistorikk, context: MessageContext) {
+    override fun behandle(message: UtbetalingshistorikkMessage, utbetalingshistorikk: Utbetalingshistorikk, context: BehandlingContext) {
         lestUtbetalingshistorikkVerdi.set(true)
     }
 
-    override fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger, context: MessageContext) {
+    override fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger, context: BehandlingContext) {
         lestUtbetalingshistorikkForFeriepengerVerdi.set(true)
     }
 
-    override fun behandle(message: YtelserMessage, ytelser: Ytelser, context: MessageContext) {
+    override fun behandle(message: YtelserMessage, ytelser: Ytelser, context: BehandlingContext) {
         lestYtelserVerdi.set(true)
     }
 
-    override fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag, context: MessageContext) {
+    override fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag, context: BehandlingContext) {
         lestVilkårsgrunnlagVerdi.set(true)
     }
 
-    override fun behandle(message: UtbetalingsgodkjenningMessage, utbetalingsgodkjenning: Utbetalingsgodkjenning, context: MessageContext) {
+    override fun behandle(message: UtbetalingsgodkjenningMessage, utbetalingsgodkjenning: Utbetalingsgodkjenning, context: BehandlingContext) {
         lestUtbetalingsgodkjenningVerdi.set(true)
     }
 
-    override fun behandle(message: FeriepengeutbetalingMessage, utbetaling: FeriepengeutbetalingHendelse, context: MessageContext) {
+    override fun behandle(message: FeriepengeutbetalingMessage, utbetaling: FeriepengeutbetalingHendelse, context: BehandlingContext) {
     }
 
-    override fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse, context: MessageContext) {
+    override fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse, context: BehandlingContext) {
         lestUtbetalingVerdi.set(true)
     }
 
-    override fun behandle(message: SimuleringMessage, simulering: Simulering, context: MessageContext) {
+    override fun behandle(message: SimuleringMessage, simulering: Simulering, context: BehandlingContext) {
         lestSimuleringVerdi.set(true)
     }
 
-    override fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling, context: MessageContext) {
+    override fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling, context: BehandlingContext) {
         lestAnnullerUtbetalingVerdi.set(true)
     }
 
-    override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, context: MessageContext) {
+    override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, context: BehandlingContext) {
         lestAvstemmingVerdi.set(true)
     }
 
-    override fun behandle(message: MigrateMessage, migrate: Migrate, context: MessageContext) {
+    override fun behandle(message: MigrateMessage, migrate: Migrate, context: BehandlingContext) {
         lestMigrateVerdi.set(true)
     }
 
-    override fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: MessageContext) {
+    override fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: BehandlingContext) {
         lestOverstyrTidslinjeVerdi.set(true)
     }
 
-    override fun behandle(message: OverstyrArbeidsgiveropplysningerMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext) {
+    override fun behandle(message: OverstyrArbeidsgiveropplysningerMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: BehandlingContext) {
         lestOverstyrArbeidsgiveropplysningserVerdi.set(true)
     }
 
-    override fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: MessageContext) {
+    override fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: BehandlingContext) {
         lestOverstyrArbeidsforholdVerdi.set(true)
     }
 
-    override fun behandle(message: GrunnbeløpsreguleringMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext) {
+    override fun behandle(message: GrunnbeløpsreguleringMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: BehandlingContext) {
         lestGrunnbeløpsreguleringVerdi.set(true)
     }
 
     override fun behandle(
         message: InfotrygdendringMessage,
         infotrygdEndring: Infotrygdendring,
-        context: MessageContext
+        context: BehandlingContext
     ) {
         lestInfotrygdendringVerdi.set(true)
     }
 
-    override fun behandle(message: InntektsendringerMessage, inntektsendringer: Inntektsendringer, context: MessageContext) {
+    override fun behandle(message: InntektsendringerMessage, inntektsendringer: Inntektsendringer, context: BehandlingContext) {
         lestInntektsendringerVerdi.set(true)
     }
 
     override fun behandle(
         message: UtbetalingshistorikkEtterInfotrygdendringMessage,
         utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring,
-        context: MessageContext
+        context: BehandlingContext
     ) {
         utbetalingshistorikkEtterInfotrygdendringMessageVerdi.set(true)
     }
@@ -472,7 +472,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     override fun behandle(
         message: ForkastSykmeldingsperioderMessage,
         forkastSykmeldingsperioder: ForkastSykmeldingsperioder,
-        context: MessageContext
+        context: BehandlingContext
     ) {
         lestForkastSykmeldingsperioderMessageVerdi.set(true)
     }
@@ -480,21 +480,21 @@ internal class TestHendelseMediator : IHendelseMediator {
     override fun behandle(
         message: AvbruttSøknadMessage,
         avbruttSøknad: AvbruttSøknad,
-        context: MessageContext
+        context: BehandlingContext
     ) {
     }
 
     override fun behandle(
         message: SkjønnsmessigFastsettelseMessage,
         skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse,
-        context: MessageContext
+        context: BehandlingContext
     ) {
     }
 
     override fun behandle(
         message: MinimumSykdomsgradVurdertMessage,
         minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding,
-        context: MessageContext
+        context: BehandlingContext
     ) {
     }
 }

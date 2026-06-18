@@ -3,8 +3,8 @@ package no.nav.helse.spleis.meldinger.model
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.Behov.Behovstype.Utbetaling
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -37,7 +37,7 @@ internal class UtbetalingMessage(packet: JsonMessage, override val meldingsporin
             overføringstidspunkt = overføringstidspunkt
         )
 
-    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
         if (status == Oppdragstatus.OVERFØRT) return // sender bare inn kvitteringer til modellen
         mediator.behandle(this, utbetaling, context)
     }

@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
 import no.nav.helse.hendelser.AnmodningOmForkasting
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
@@ -21,7 +21,7 @@ internal class AnmodningOmForkastingMessage(packet: JsonMessage, override val me
         force = force
     )
 
-    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
         mediator.behandle(this, anmodning, context)
     }
 }

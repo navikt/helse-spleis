@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.Year
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.Behov.Behovstype.SykepengehistorikkForFeriepenger
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -87,7 +87,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(
             datoForSisteFeriepengekjøringIInfotrygd = datoForSisteFeriepengekjøringIInfotrygd
         )
 
-    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
         mediator.behandle(this, utbetalingshistorikkForFeriepenger(), context)
     }
 }

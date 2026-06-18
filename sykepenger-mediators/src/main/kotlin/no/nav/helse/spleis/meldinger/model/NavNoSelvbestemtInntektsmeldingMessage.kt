@@ -7,12 +7,12 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDateTime
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -60,7 +60,7 @@ internal class NavNoSelvbestemtInntektsmeldingMessage(
         )
     )
 
-    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
         mediator.behandle(this, korrigerteArbeidsgiveropplysninger, context)
     }
 }

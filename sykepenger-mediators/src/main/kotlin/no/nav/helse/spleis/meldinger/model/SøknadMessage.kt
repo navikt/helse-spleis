@@ -5,8 +5,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
 
@@ -18,7 +18,7 @@ internal sealed class SøknadMessage(
 
     private val sykmeldingSkrevet = packet["sykmeldingSkrevet"].asLocalDateTime()
 
-    final override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+    final override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
         val personopplysninger = Personopplysninger(
             personidentifikator = Personidentifikator(meldingsporing.fødselsnummer),
             fødselsdato = packet["fødselsdato"].asLocalDate(),
@@ -28,7 +28,7 @@ internal sealed class SøknadMessage(
         _behandle(mediator, personopplysninger, packet, context)
     }
 
-    protected abstract fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: MessageContext)
+    protected abstract fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: BehandlingContext)
 
     private fun bygg() {
         builder.fødselsdato(packet["fødselsdato"].asLocalDate())

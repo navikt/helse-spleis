@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.db.HendelseRepository
@@ -19,7 +19,7 @@ internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivit
     internal val navn = packet["@event_name"].asText()
     protected val opprettet = packet["@opprettet"].asLocalDateTime()
 
-    internal abstract fun behandle(mediator: IHendelseMediator, context: MessageContext)
+    internal abstract fun behandle(mediator: IHendelseMediator, context: BehandlingContext)
 
     final override fun toSpesifikkKontekst() =
         SpesifikkKontekst(kontekstnavn, mapOf(

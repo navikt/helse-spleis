@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
@@ -11,7 +11,7 @@ internal class MinimumSykdomsgradVurdertMessage(packet: JsonMessage, override va
     private val perioderMedMinimumSykdomsgradVurdertIkkeOK = packet["perioderMedMinimumSykdomsgradVurdertIkkeOk"].map(::asPeriode)
 
 
-    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
         mediator.behandle(
             this,
             MinimumSykdomsgradsvurderingMelding(

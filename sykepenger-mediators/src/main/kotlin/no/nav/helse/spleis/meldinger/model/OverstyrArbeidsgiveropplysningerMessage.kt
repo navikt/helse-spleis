@@ -6,7 +6,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.etterlevelse.Bokstav
@@ -21,6 +20,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.inntekt.Inntektsdata
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.meldingsreferanseId
@@ -32,7 +32,7 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
     private val arbeidsgiveropplysninger = packet.arbeidsgiveropplysninger(skjæringstidspunkt)
     private val refusjonstidslinjer = packet.refusjonstidslinjer()
 
-    override fun behandle(mediator: IHendelseMediator, context: MessageContext) =
+    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) =
         mediator.behandle(this, OverstyrArbeidsgiveropplysninger(
             meldingsreferanseId = meldingsporing.id,
             skjæringstidspunkt = skjæringstidspunkt,

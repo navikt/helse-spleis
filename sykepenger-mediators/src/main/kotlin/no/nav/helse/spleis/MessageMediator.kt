@@ -187,12 +187,13 @@ internal class MessageMediator(
     override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
         try {
             measureTime {
+                val behandlingContext = BehandlingContext(messageContext = context)
                 messageRecognized = true
                 message.logRecognized(log, sikkerLogg)
                 if (hendelseRepository.erBehandlet(message.meldingsporing.id)) return message.logDuplikat(sikkerLogg)
 
                 hendelseRepository.lagreMelding(message)
-                hendelseMediator.behandle(message, context)
+                hendelseMediator.behandle(message, behandlingContext)
                 hendelseRepository.markerSomBehandlet(message.meldingsporing.id)
                 context.kvitterUt(message)
             }.also { result ->

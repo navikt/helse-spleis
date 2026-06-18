@@ -3,8 +3,8 @@ package no.nav.helse.spleis.meldinger.model
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.Utbetalingsgodkjenning
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.Behov.Behovstype.Godkjenning
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -36,7 +36,7 @@ internal class UtbetalingsgodkjenningMessage(packet: JsonMessage, override val m
                 automatiskBehandling = automatiskBehandling
         )
 
-    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
         mediator.behandle(this, utbetalingsgodkjenning, context)
     }
 }

@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.util.UUID
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
@@ -22,6 +21,7 @@ import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.Behov.Behovstype
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -132,7 +132,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             forsikringsvurdering = forsikringsvurdering,
         )
 
-    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
         mediator.behandle(this, ytelser, context)
     }
 
