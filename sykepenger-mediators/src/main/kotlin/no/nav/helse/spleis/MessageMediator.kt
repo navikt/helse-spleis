@@ -111,6 +111,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMes
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import no.nav.helse.spleis.utboks.Utboks
 import org.slf4j.LoggerFactory
 
 internal class MessageMediator(
