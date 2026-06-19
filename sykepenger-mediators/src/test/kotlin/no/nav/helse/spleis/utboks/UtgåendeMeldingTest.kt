@@ -63,6 +63,17 @@ class UtgåendeMeldingTest {
     }
 
     @Test
+    fun `Mapper rapidmelding uten fødselsnummer`() {
+        val melding = UtgåendeMelding.nyRapidmelding(
+            eventName = "fungerende-event-uten-fnr",
+            innhold = mapOf("a" to "b")
+        )
+        melding.assertStandardfelter("fungerende-event-uten-fnr", medFødselsnummer = false)
+        assertEquals("b", melding.json.path("a").asText())
+        assertEquals(UtgåendeMelding.Mottaker.RAPID, melding.mottaker)
+    }
+
+    @Test
     fun `Mapper subsumsjonmelding`() {
         val melding = UtgåendeMelding.nySubsumsjonsmelding(
             personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
@@ -101,14 +112,14 @@ class UtgåendeMeldingTest {
         @OptIn(ExperimentalUuidApi::class)
         internal fun nyUuidv7() = Uuid.generateV7().toString()
 
-        private fun UtgåendeMelding.assertStandardfelter(eventName: String) {
+        private fun UtgåendeMelding.assertStandardfelter(eventName: String, medFødselsnummer: Boolean = true) {
             assertDoesNotThrow {
                 val opprettet = LocalDateTime.parse(json.path("@opprettet").asText())
                 val opprettetUTC = Instant.parse(json.path("@opprettetUTC").asText())
                 assertEquals(opprettetUTC, opprettet.atZone(ZoneId.systemDefault()).toInstant())
             }
             assertEquals(eventName, json.path("@event_name").asText())
-            assertEquals(UNG_PERSON_FNR_2018, json.path("fødselsnummer").asText())
+            if (medFødselsnummer) assertEquals(UNG_PERSON_FNR_2018, json.path("fødselsnummer").asText())
         }
     }
 }

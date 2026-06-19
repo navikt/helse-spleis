@@ -41,28 +41,31 @@ data class UtgåendeMelding(
 
         @OptIn(ExperimentalUuidApi::class)
         private fun nyUuidv7() = Uuid.generateV7().toString()
-        private fun standardfelter(personidentifikator: Personidentifikator): Map<String, Any> {
+        private fun standardfelter(personidentifikator: Personidentifikator?): Map<String, Any> {
             val opprettet = LocalDateTime.now(ZoneId.systemDefault())
             val opprettetUTC = opprettet.atZone(ZoneId.systemDefault()).toInstant()
-            return mapOf(
-                "fødselsnummer" to "$personidentifikator",
+            val tidsstempler = mapOf(
                 "@opprettet" to "$opprettet",
                 "@opprettetUTC" to "$opprettetUTC"
             )
+            return when (personidentifikator) {
+                null -> tidsstempler
+                else -> tidsstempler + ("fødselsnummer" to personidentifikator.toString())
+            }
         }
 
-        private fun ny(personidentifikator: Personidentifikator, eventName: String, innhold: Map<String, Any>, mottaker: Mottaker): UtgåendeMelding {
-            val id = nyUuidv7()
+        private fun ny(personidentifikator: Personidentifikator?, eventName: String, innhold: Map<String, Any>, mottaker: Mottaker): UtgåendeMelding {
             val innholdMedStandardfelter = innhold + standardfelter(personidentifikator)
-            val json = JsonMessage.newMessage(eventName, innholdMedStandardfelter) { id }.toJson()
+            val json = JsonMessage.newMessage(eventName, innholdMedStandardfelter) { nyUuidv7() }.toJson()
             return UtgåendeMelding(
-                key = personidentifikator.toString(),
+                key = personidentifikator?.toString(),
                 json = json,
                 mottaker = mottaker
             )
         }
 
         fun nyRapidmelding(personidentifikator: Personidentifikator, eventName: String, innhold: Map<String, Any>) = ny(personidentifikator, eventName, innhold, Mottaker.RAPID)
+        fun nyRapidmelding(eventName: String, innhold: Map<String, Any>) = ny(null, eventName, innhold, Mottaker.RAPID)
         fun nySubsumsjonsmelding(personidentifikator: Personidentifikator, innhold: Map<String, Any>) = ny(personidentifikator, "subsumsjon", innhold, Mottaker.SUBSUMSJON)
         fun nyttBehov(
             personidentifikator: Personidentifikator,
