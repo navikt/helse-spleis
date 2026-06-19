@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test
 internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
 
     @Test
-    fun `unødvendig revurdering fordi ingen innvirkning`() {
+    fun `unødvendig revurdering av periode 2 fordi periode 1 ikke påvirker maksdatotellingen for periode 2`() {
         a1 {
             nyttVedtak(januar.i(2017))
             nyttVedtak(januar.i(2018))
@@ -43,6 +43,25 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
     }
 
     @Test
+    fun `unødvendig revurdering av periode fordi IT-utbetaling ett år tidligere ikke påvirker maksdatotellingen for perioden`() {
+        a1 {
+            nyttVedtak(januar.i(2018))
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
+                ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2016), 31.desember(2016)))
+            )
+            assertForventetFeil(
+                nå = {
+                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
+                },
+                ønsket = {
+                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+                }
+            )
+        }
+    }
+
+    @Test
     fun `revurdering på tvers av 26 ukers gap pga forskyving av maksdato`() {
         medMaksSykedager(15) // NB: Setter maksdato til 15 dager for å lettere kunne teste
         a1 {
@@ -52,7 +71,10 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
                 ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 11.desember(2017)))
             )
             nyttVedtak(januar)
-            nyttVedtak(14.juli til 17.august)
+
+            assertEquals(3, inspektør.utbetalingstidslinjer(2.vedtaksperiode).inspektør.avvistDagTeller)
+
+            nyttVedtak(13.juli til 17.august) // 11.juli-13,14(lør),15(søn).juli kan for testen funke som f.o.m., siden vi har 3 avviste dager på slutten av forrige(?)
 
             assertEquals(0, inspektør.utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
 
