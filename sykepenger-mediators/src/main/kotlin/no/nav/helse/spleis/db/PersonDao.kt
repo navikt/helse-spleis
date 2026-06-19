@@ -51,7 +51,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         dataSource.connection {
             transaction {
                 val (personId, person) = hentPersonEllerOpprettNy(this, regelverkslogg, hendelseRepository, personidentifikator, lagNyPerson, historiskeFolkeregisteridenter)
-                    ?: return@transaction behandlingContext.lagreMeldingerIUtboks(this, message)
+                    ?: return@transaction behandlingContext.lagreMeldingerIUtboks(this)
 
                 knyttPersonTilHistoriskeIdenter(this, personId, personidentifikator, historiskeFolkeregisteridenter)
 
@@ -62,7 +62,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
 
                 oppdaterAvstemmingtidspunkt(this, message, personidentifikator)
                 oppdaterPersonversjon(this, personId, serialisertPerson.skjemaVersjon, serialisertPerson.json)
-                behandlingContext.lagreMeldingerIUtboks(this, message)
+                behandlingContext.lagreMeldingerIUtboks(this)
             }
         }
     }
