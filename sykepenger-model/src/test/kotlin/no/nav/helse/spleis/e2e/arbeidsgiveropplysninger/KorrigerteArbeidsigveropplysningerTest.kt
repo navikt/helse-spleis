@@ -15,6 +15,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbe
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
@@ -30,6 +31,15 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
+
+    @Test
+    fun `mottar selvbestemt inntektsmelding`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT * 1.25))
+            assertVarsler(1.vedtaksperiode, RV_AO_3)
+        }
+    }
 
     @Test
     fun `opplyser om korrigerert inntekt på en allerede utbetalt periode`() {

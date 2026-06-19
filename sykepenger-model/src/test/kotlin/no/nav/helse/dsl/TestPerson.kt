@@ -253,6 +253,12 @@ internal class TestPerson(
             return hendelse.metadata.meldingsreferanseId.id
         }
 
+        internal fun håndterSelvbestemtArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
+            val hendelse = arbeidsgiverHendelsefabrikk.lagKorrigerteArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger, selvbestemt = true)
+            hendelse.håndter(Person::håndterKorrigerteArbeidsgiveropplysninger)
+            return hendelse.metadata.meldingsreferanseId.id
+        }
+
         internal fun håndterSøknad(
             vararg perioder: Søknad.Søknadsperiode,
             egenmeldinger: List<Periode> = emptyList(),

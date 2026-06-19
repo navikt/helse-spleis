@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.Companion.valider
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_28
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.økonomi.Inntekt
@@ -198,7 +199,8 @@ class KorrigerteArbeidsgiveropplysninger(
     registrert: LocalDateTime,
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     val vedtaksperiodeId: UUID,
-    val opplysninger: List<Arbeidsgiveropplysning>
+    val opplysninger: List<Arbeidsgiveropplysning>,
+    val varselkode: Varselkode
 ) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
 
     init {

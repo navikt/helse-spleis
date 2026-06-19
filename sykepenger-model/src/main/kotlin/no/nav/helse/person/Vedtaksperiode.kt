@@ -1131,7 +1131,9 @@ internal class Vedtaksperiode private constructor(
             TilInfotrygd -> error("Forventer ikke å håndtere inntekt i tilstand $tilstand")
         }
 
-        if (hendelse is KorrigerteArbeidsgiveropplysninger) aktivitetslogg.varsel(RV_IM_4)
+        (hendelse as? KorrigerteArbeidsgiveropplysninger)?.also { korrigert ->
+            aktivitetslogg.varsel(korrigert.varselkode)
+        }
 
         behandlinger.håndterFaktaavklartInntekt(
             behandlingEventBus = eventBus.behandlingEventBus,

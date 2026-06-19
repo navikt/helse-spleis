@@ -119,6 +119,7 @@ enum class Varselkode(
     // AO: Arbeidsgiveropplysninger
     RV_AO_1("Arbeidsgiveropplysninger for forkastet periode"),
     RV_AO_2("Arbeidsgiveropplysninger for periode som allerede har opplysninger"),
+    RV_AO_3("Mottatt selvbestemte arbeidsgiveropplysninger"),
 
     // ST: Sykdomstidslinje
     RV_ST_1("Sykdomstidslinjen inneholder ustøttet dag.", avviklet = true),

@@ -49,6 +49,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -197,12 +198,14 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         id: UUID = UUID.randomUUID(),
         mottatt: LocalDateTime = LocalDateTime.now(),
         harFlereArbeidsforhold: Boolean = false,
+        selvbestemt: Boolean = false
     ) = KorrigerteArbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
         registrert = mottatt.plusSeconds(1),
         behandlingsporing = behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         vedtaksperiodeId = vedtaksperiodeId,
+        varselkode = if (selvbestemt) Varselkode.RV_AO_3 else Varselkode.RV_IM_4,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,

@@ -270,6 +270,7 @@ internal abstract class AbstractSpeilBuilderTest {
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         refusjon: Inntektsmelding.Refusjon? = Inntektsmelding.Refusjon(beregnetInntekt, null),
         meldingsreferanseId: UUID = UUID.randomUUID(),
+        selvbestemt: Boolean = false
     ): UUID {
         val hendelse = fabrikker.getValue(orgnummer).lagKorrigerendeArbeidsgiveropplysninger(
             arbeidsgiverperioder = arbeidsgiverperioder,
@@ -277,6 +278,7 @@ internal abstract class AbstractSpeilBuilderTest {
             vedtaksperiodeId = vedtaksperiode.vedtaksperiode(orgnummer),
             refusjon = refusjon,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            selvbestemt = selvbestemt,
             id = meldingsreferanseId,
         )
         hendelse.håndter(Person::håndterKorrigerteArbeidsgiveropplysninger)
