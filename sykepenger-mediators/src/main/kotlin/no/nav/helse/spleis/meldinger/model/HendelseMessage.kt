@@ -50,12 +50,6 @@ internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivit
     protected open fun additionalTracinginfo(packet: JsonMessage): Map<String, Any> = emptyMap()
 
     internal fun toJson() = packet.toJson()
-    internal fun somKvittering(): String = """{
-        "@event_name": "melding_om_melding_håndtert",
-        "originalt_event_name" : "$navn",
-        "original_id" : "${meldingsporing.id.id}",
-        "fødselsnummer" : "${meldingsporing.fødselsnummer}"
-    }""".trimIndent()
 }
 
 internal fun asPeriode(jsonNode: JsonNode): Periode {

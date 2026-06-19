@@ -3,6 +3,7 @@ package no.nav.helse.spleis.utboks
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.sql.Connection
+import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
@@ -16,6 +17,14 @@ internal class Utboks {
 
     fun lagre(connection: Connection, message: HendelseMessage) {
         check(!connection.autoCommit) { "Meldingene må lagres ned i samme transaksjon som personen lagres ned." }
+        nyMelding(UtgåendeMelding.nyRapidmelding(
+            personidentifikator = Personidentifikator(message.meldingsporing.fødselsnummer),
+            eventName = "melding_om_melding_håndtert",
+            innhold = mapOf(
+                "originalt_event_name" to "${message.navn}",
+                "original_id" to "${message.meldingsporing.id.id}"
+            )
+        ))
         tilstand = Tilstand.Lukket
         sikkerLogg.info("Lagrer ${utgåendeMeldinger.size} meldinger fra utboksen")
         // TODO: Lagre i db
