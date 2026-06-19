@@ -5,13 +5,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
+import no.nav.helse.spleis.utboks.UtgåendeMelding
 
 class Avstemmer(person: PersonUtDto) {
     private companion object {
@@ -23,12 +24,11 @@ class Avstemmer(person: PersonUtDto) {
 
     private val melding = mapTilMelding(person)
 
-    //TODO: Fjern når vi har kjørt avstmming Speilvendt vil ha
-    fun getMaxOpprettetBehandling(): LocalDateTime {
-        return melding.arbeidsgivere.flatMap { it.vedtaksperioder }
-            .flatMap { it.behandlinger }.maxOf { it.behandlingOpprettet }
-    }
-    fun tilJsonMessage() = JsonMessage.newMessage("person_avstemt", mapper.convertValue(melding))
+    fun tilUtgåendeMelding(personidentifikator: Personidentifikator) = UtgåendeMelding.nyRapidmelding(
+        personidentifikator = personidentifikator,
+        eventName = "person_avstemt",
+        innhold = mapper.convertValue(melding)
+    )
 
     private fun mapTilMelding(person: PersonUtDto): AvstemmerDto {
         return AvstemmerDto(

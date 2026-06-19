@@ -1,6 +1,5 @@
 package no.nav.helse.spleis
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
@@ -91,6 +90,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMes
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.slf4j.LoggerFactory
 
 // Understands how to communicate messages to other objects
@@ -423,9 +423,7 @@ internal class HendelseMediator(
         person(personidentifikator, message, context, emptySet(), Regelverkslogg.EmptyLog, null) { person ->
             val dto = person.dto()
             val avstemmer = Avstemmer(dto)
-            context.messageContext.publish(avstemmer.tilJsonMessage().toJson().also {
-                sikkerLogg.info("sender person_avstemt:\n$it")
-            })
+            context.leggIUtboks { personidentifikator -> avstemmer.tilUtgåendeMelding(personidentifikator)}
         }
     }
 
@@ -477,13 +475,11 @@ internal class HendelseMediator(
             if (støtterIdentbytte) {
                 person.håndterIdentOpphørt(eventBus, identOpphørt, aktivitetslogg, nyPersonidentifikator)
             }
-            context.messageContext.publish(
-                JsonMessage.newMessage(
-                    "slackmelding", mapOf(
-                    "melding" to "Det er en person som har byttet ident."
-                )
-                ).toJson()
-            )
+            context.leggIUtboks { personidentifikator -> UtgåendeMelding.nyRapidmelding(
+                personidentifikator = personidentifikator,
+                eventName = "slackmelding",
+                innhold = mapOf("melding" to "Det er en person som har byttet ident.")
+            )}
         }
     }
 
@@ -609,13 +605,15 @@ internal class HendelseMediator(
     }
 
     private fun personHverkenFunnetEllerOpprettet(context: BehandlingContext, message: HendelseMessage) {
-        val json = JsonMessage.newMessage("melding_om_melding_ikke_håndtert_fordi_person_ikke_funnet", mapOf(
-            "fødselsnummer" to message.meldingsporing.fødselsnummer,
-            "originalt_event_name" to "${message.navn}",
-            "original_id" to "${message.meldingsporing.id.id}",
-        )).toJson()
-        sikkerLogg.info("fant ikke person ${message.meldingsporing.fødselsnummer}, oppretter heller ingen ny person:\n\t$json")
-        context.messageContext.publish(message.meldingsporing.fødselsnummer, json)
+        sikkerLogg.info("fant ikke person ${message.meldingsporing.fødselsnummer}, oppretter heller ingen ny person.")
+        context.leggIUtboks { personidentifikator -> UtgåendeMelding.nyRapidmelding(
+            eventName = "melding_om_melding_ikke_håndtert_fordi_person_ikke_funnet",
+            personidentifikator = personidentifikator,
+            innhold = mapOf(
+                "originalt_event_name" to "${message.navn}",
+                "original_id" to "${message.meldingsporing.id.id}"
+            )
+        )}
     }
 
     private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>, regelverkslogg: Regelverkslogg, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
