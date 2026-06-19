@@ -16,10 +16,10 @@ import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.intellij.lang.annotations.Language
-import org.slf4j.LoggerFactory
 
 internal class PersonDao(private val dataSource: DataSource, private val STØTTER_IDENTBYTTE: Boolean) {
 
@@ -29,6 +29,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         historiskeFolkeregisteridenter: Set<Personidentifikator>,
         message: HendelseMessage,
         hendelseRepository: HendelseRepository,
+        behandlingContext: BehandlingContext,
         lagNyPerson: () -> Person?,
         håndterPerson: (Person) -> Unit
     ) {
@@ -50,7 +51,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         dataSource.connection {
             transaction {
                 val (personId, person) = hentPersonEllerOpprettNy(this, regelverkslogg, hendelseRepository, personidentifikator, lagNyPerson, historiskeFolkeregisteridenter)
-                    ?: return@transaction
+                    ?: return@transaction behandlingContext.lagreMeldingerIUtboks(this, message)
 
                 knyttPersonTilHistoriskeIdenter(this, personId, personidentifikator, historiskeFolkeregisteridenter)
 
@@ -61,6 +62,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
 
                 oppdaterAvstemmingtidspunkt(this, message, personidentifikator)
                 oppdaterPersonversjon(this, personId, serialisertPerson.skjemaVersjon, serialisertPerson.json)
+                behandlingContext.lagreMeldingerIUtboks(this, message)
             }
         }
     }

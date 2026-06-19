@@ -625,6 +625,7 @@ internal class HendelseMediator(
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
             message = message,
             hendelseRepository = hendelseRepository,
+            behandlingContext = context,
             lagNyPerson = {
                 when (val nyPerson = personopplysninger?.person(regelverkslogg)) {
                     null -> null.also { personHverkenFunnetEllerOpprettet(context, message) }

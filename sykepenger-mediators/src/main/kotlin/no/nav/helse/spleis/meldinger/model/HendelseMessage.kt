@@ -30,10 +30,6 @@ internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivit
         repository.lagreMelding(this, Personidentifikator(meldingsporing.fødselsnummer), meldingsporing.id, toJson())
     }
 
-    internal fun logReplays(logger: Logger, size: Int) {
-        logger.info("som følge av $navn id=${meldingsporing.id} sendes $size meldinger for replay for fnr=${meldingsporing.fødselsnummer}")
-    }
-
     internal fun logOutgoingMessages(logger: Logger, size: Int) {
         logger.info("som følge av $navn id=${meldingsporing.id} sendes $size meldinger på rapid for fnr=${meldingsporing.fødselsnummer}")
     }
@@ -49,12 +45,6 @@ internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivit
 
     internal fun secureDiagnosticinfo() = mapOf(
         "fødselsnummer" to meldingsporing.fødselsnummer
-    )
-
-    internal fun tracinginfo() = additionalTracinginfo(packet) + mapOf(
-        "event_name" to navn,
-        "id" to meldingsporing.id,
-        "opprettet" to opprettet
     )
 
     protected open fun additionalTracinginfo(packet: JsonMessage): Map<String, Any> = emptyMap()
