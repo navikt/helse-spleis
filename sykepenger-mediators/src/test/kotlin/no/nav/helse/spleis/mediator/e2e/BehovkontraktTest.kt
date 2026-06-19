@@ -14,6 +14,7 @@ import no.nav.helse.spleis.Behov.Behovstype.Arbeidsavklaringspenger
 import no.nav.helse.spleis.Behov.Behovstype.Arbeidsforhold
 import no.nav.helse.spleis.Behov.Behovstype.Dagpenger
 import no.nav.helse.spleis.Behov.Behovstype.Foreldrepenger
+import no.nav.helse.spleis.Behov.Behovstype.Forsikringsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.Godkjenning
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForBeregning
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForOpptjeningsvurdering
@@ -46,7 +47,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
         assertVedtaksperiodeBehov(
             behov,
-            Dagpenger,
             InntekterForSykepengegrunnlag,
             InntekterForOpptjeningsvurdering,
             Medlemskap,
@@ -56,6 +56,30 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertInntekterForSykepengegrunnlagdetaljer(behov)
         assertInntekterForOpptjeningsvurderingdetaljer(behov)
         assertArbeidsforholdV2detaljer(behov)
+    }
+
+    @Test
+    fun `vilkårsgrunnlag - selvstendig`() {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendSelvstendigsøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            ventetid = 3.januar til 18.januar,
+            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE
+        )
+        val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
+        assertVedtaksperiodeBehov(
+            behov,
+            InntekterForSykepengegrunnlag,
+            InntekterForOpptjeningsvurdering,
+            Medlemskap,
+            Arbeidsforhold,
+            Forsikringsvurdering
+        )
+        assertMedlemskapdetaljer(behov)
+        assertInntekterForSykepengegrunnlagdetaljer(behov)
+        assertInntekterForOpptjeningsvurderingdetaljer(behov)
+        assertArbeidsforholdV2detaljer(behov)
+        assertForsikringsvurderingdetaljer(behov)
     }
 
     @Test
@@ -223,6 +247,10 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
 
     private fun assertArbeidsforholdV2detaljer(behov: JsonNode) {
         assertDato(behov.path(Arbeidsforhold.utgåendeNavn).path("skjæringstidspunkt").asText())
+    }
+
+    private fun assertForsikringsvurderingdetaljer(behov: JsonNode) {
+        assertDato(behov.path(Forsikringsvurdering.utgåendeNavn).path("skjæringstidspunkt").asText())
     }
 
     private fun assertForeldrepengerdetaljer(behov: JsonNode) {

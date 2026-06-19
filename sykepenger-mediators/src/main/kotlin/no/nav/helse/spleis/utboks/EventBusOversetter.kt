@@ -598,7 +598,7 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
     }
 
     private fun mapTrengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent): UtgåendeMelding {
-        val behov = listOf(
+        val behov = listOfNotNull(
             Behov(Behov.Behovstype.InntekterForSykepengegrunnlag, mapOf(
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
                 "beregningStart" to event.beregningsperiodeForSykepengegrunnlagsvurdering.start,
@@ -616,7 +616,14 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
                 "medlemskapPeriodeFom" to event.periodeForMedlemskapsvurdering.start,
                 "medlemskapPeriodeTom" to event.periodeForMedlemskapsvurdering.endInclusive
-            ))
+            )
+            ),
+            Behov(
+                Behov.Behovstype.Forsikringsvurdering, mapOf(
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "spesielleYrkesgrupper" to emptyList<String>()
+            )
+            ).takeIf { event.yrkesaktivitetssporing.somYrkesaktivitetstype == "SELVSTENDIG" }
         )
 
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
