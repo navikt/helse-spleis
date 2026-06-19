@@ -111,6 +111,8 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMes
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import no.nav.helse.spleis.utboks.Utboks.Companion.fireAndForget
+import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.slf4j.LoggerFactory
 
 internal class MessageMediator(
@@ -291,11 +293,13 @@ internal class MessageMediator(
     private fun MessageContext.sendPåSlack(message: HendelseMessage) {
         val googleUrl = "<https://console.cloud.google.com/logs/query;query=resource.labels.container_name:%22spleis%22%0AjsonPayload.message:%22${message.meldingsporing.id.id}%22;duration=P1D?project=tbd-prod-eacd|${message.navn}>"
         val melding = "\n\nEn $googleUrl får Spleis til å gå ned!!"
-        val slackmelding = JsonMessage.newMessage("slackmelding", mapOf(
-            "melding" to "$melding\n\n - Deres erbødig SPleis :spleis-realistisk:",
-            "level" to "ERROR"
-        )).toJson()
-        publish(slackmelding)
+        fireAndForget(UtgåendeMelding.nyRapidmelding(
+            eventName = "slackmelding",
+            innhold = mapOf(
+                "melding" to "$melding\n\n - Deres erbødig SPleis :spleis-realistisk:",
+                "level" to "ERROR"
+            )
+        ))
     }
 
     private fun severeErrorHandler(err: Exception, message: HendelseMessage, context: MessageContext) {

@@ -78,7 +78,8 @@ internal class Utboks {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
         // Sendes utom utboks, "uviktige" meldinger, eller annet som gjør at de ikke kan/ikke gir mening å sendes via utboks
-        internal fun MessageContext.fireAndForget(melding: UtgåendeMelding) =
+        internal fun MessageContext.fireAndForget(melding: UtgåendeMelding) = try {
             this.publish(listOf(OutgoingMessage(key = melding.key, body = melding.json.toString())))
+        } catch (_: Exception) {}
     }
 }

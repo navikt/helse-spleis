@@ -9,6 +9,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import java.time.LocalDateTime
+import no.nav.helse.spleis.utboks.Utboks.Companion.fireAndForget
+import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 
@@ -36,7 +38,7 @@ internal class MonitoreringRiver(
                 .filter { it.skalSjekke(nå) }
                 .mapNotNull { it.sjekk() }
                 .forEach { (level, melding) ->
-                    context.publish(slackmelding(melding, level, systemParticipatingServices))
+                    context.fireAndForget(slackmelding(melding, level, systemParticipatingServices))
                 }
             sikkerlogg.info("Gjennomført alle monitoreringssjekker $nå")
         } catch (throwable: Throwable) {
@@ -46,14 +48,13 @@ internal class MonitoreringRiver(
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        private fun slackmelding(melding: String, level: Level, systemParticipatingServices: JsonNode): String {
-            return JsonMessage.newMessage(
-                "slackmelding", mapOf(
+        private fun slackmelding(melding: String, level: Level, systemParticipatingServices: JsonNode) = UtgåendeMelding.nyRapidmelding(
+            eventName = "slackmelding",
+            innhold = mapOf(
                 "melding" to melding,
                 "level" to level,
                 "system_participating_services" to systemParticipatingServices
             )
-            ).toJson()
-        }
+        )
     }
 }
