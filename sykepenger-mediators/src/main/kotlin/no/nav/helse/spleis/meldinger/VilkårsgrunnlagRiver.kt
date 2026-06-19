@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.Behov.Behovstype.Arbeidsforhold
+import no.nav.helse.spleis.Behov.Behovstype.Forsikringsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForOpptjeningsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForSykepengegrunnlag
 import no.nav.helse.spleis.Behov.Behovstype.Medlemskap
@@ -57,6 +58,8 @@ internal class VilkårsgrunnlagRiver(
             require("ansattSiden", JsonNode::asLocalDate)
             interestedIn("ansattTil", JsonNode::asLocalDate)
         }
+
+        message.interestedIn("@løsning.${Forsikringsvurdering.utgåendeNavn}.forsikringsvurderingId")
     }
 
     override fun createMessage(packet: JsonMessage) = VilkårsgrunnlagMessage(

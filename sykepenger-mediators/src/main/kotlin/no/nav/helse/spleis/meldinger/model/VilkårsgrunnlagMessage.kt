@@ -6,6 +6,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -14,6 +16,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.Behov.Behovstype.Arbeidsforhold
+import no.nav.helse.spleis.Behov.Behovstype.Forsikringsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForOpptjeningsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForSykepengegrunnlag
 import no.nav.helse.spleis.Behov.Behovstype.Medlemskap
@@ -34,6 +37,8 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
     internal val inntekterForOpptjeningsvurdering = packet.mapSkatteopplysninger("@løsning.${InntekterForOpptjeningsvurdering.utgåendeNavn}")
 
     internal val arbeidsforhold = packet.mapArbeidsforhold()
+
+    internal val forsikringsvurderingId = packet["@løsning.${Forsikringsvurdering.utgåendeNavn}.forsikringsvurderingId"].takeUnless { it.isMissingOrNull() }?.asText()?.toUUID()
 
     internal val medlemskapstatus = when (packet["@løsning.${Medlemskap.utgåendeNavn}.resultat.svar"].asText()) {
         "JA" -> Medlemskapsvurdering.Medlemskapstatus.Ja
