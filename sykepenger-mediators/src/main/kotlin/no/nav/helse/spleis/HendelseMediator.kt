@@ -90,6 +90,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMes
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import no.nav.helse.spleis.utboks.EventBusOversetter
 import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.slf4j.LoggerFactory
 
@@ -592,7 +593,6 @@ internal class HendelseMediator(
         val aktivitetslogg = Aktivitetslogg().kontekst(message)
 
         val subsumsjonMediator = SubsumsjonMediator(message, versjonAvKode)
-        val personMediator = PersonMediator(message)
         val datadelingMediator = DatadelingMediator(aktivitetslogg, message)
 
         val eventBus = EventBus()
@@ -600,8 +600,9 @@ internal class HendelseMediator(
 
         person(personidentifikator, message, context, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person ->
             handler(eventBus, person, aktivitetslogg)
+            leggIUtboks(context, message, eventBus)
         }
-        ferdigstill(context, eventBus, personMediator, subsumsjonMediator, datadelingMediator, aktivitetslogg)
+        ferdigstill(context, subsumsjonMediator, datadelingMediator, aktivitetslogg)
     }
 
     private fun personHverkenFunnetEllerOpprettet(context: BehandlingContext, message: HendelseMessage) {
@@ -634,15 +635,19 @@ internal class HendelseMediator(
         )
     }
 
+    private fun leggIUtboks(context: BehandlingContext, message: HendelseMessage, eventBus: EventBus) {
+        EventBusOversetter(eventBus, message).utgåendeMeldinger()
+            .map { utgåendeMelding ->
+                context.leggIUtboks { utgåendeMelding }
+            }
+    }
+
     private fun ferdigstill(
         context: BehandlingContext,
-        eventBus: EventBus,
-        personMediator: PersonMediator,
         subsumsjonMediator: SubsumsjonMediator,
         datadelingMediator: DatadelingMediator,
         aktivitetslogg: Aktivitetslogg,
     ) {
-        personMediator.ferdigstill(context.messageContext, eventBus)
         subsumsjonMediator.ferdigstill(subsumsjonsproducer)
         datadelingMediator.ferdigstill(context.messageContext)
         if (aktivitetslogg.aktiviteter.isEmpty()) return
