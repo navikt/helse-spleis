@@ -75,12 +75,19 @@ class UtgåendeMeldingTest {
 
     @Test
     fun `Mapper subsumsjonmelding`() {
-        val melding = UtgåendeMelding.nySubsumsjonsmelding(
-            personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
-            innhold = mapOf("paragraf" to "1")
-        )
-        melding.assertStandardfelter("subsumsjon")
+        val melding = UtgåendeMelding.nySubsumsjonsmelding(Personidentifikator(UNG_PERSON_FNR_2018)) { id ->
+            mapOf(
+                "paragraf" to "1",
+                "subsumsjon" to mapOf(
+                    "fodselsnummer" to UNG_PERSON_FNR_2018,
+                    "id" to id
+                )
+            )
+        }
+        melding.assertStandardfelter("subsumsjon", medFødselsnummer = false)
         assertEquals("1", melding.json.path("paragraf").asText())
+        assertEquals(UNG_PERSON_FNR_2018, melding.json.path("subsumsjon").path("fodselsnummer").asText())
+        assertEquals(UUID.fromString(melding.json.path("@id").asText()), UUID.fromString(melding.json.path("subsumsjon").path("id").asText()))
         assertEquals(UtgåendeMelding.Mottaker.SUBSUMSJON, melding.mottaker)
     }
 
@@ -113,6 +120,7 @@ class UtgåendeMeldingTest {
         internal fun nyUuidv7() = Uuid.generateV7().toString()
 
         private fun UtgåendeMelding.assertStandardfelter(eventName: String, medFødselsnummer: Boolean = true) {
+            assertDoesNotThrow { UUID.fromString(json.path("@id").asText()) }
             assertDoesNotThrow {
                 val opprettet = LocalDateTime.parse(json.path("@opprettet").asText())
                 val opprettetUTC = Instant.parse(json.path("@opprettetUTC").asText())

@@ -66,7 +66,18 @@ data class UtgåendeMelding(
 
         fun nyRapidmelding(personidentifikator: Personidentifikator, eventName: String, innhold: Map<String, Any>) = ny(personidentifikator, eventName, innhold, Mottaker.RAPID)
         fun nyRapidmelding(eventName: String, innhold: Map<String, Any>) = ny(null, eventName, innhold, Mottaker.RAPID)
-        fun nySubsumsjonsmelding(personidentifikator: Personidentifikator, innhold: Map<String, Any>) = ny(personidentifikator, "subsumsjon", innhold, Mottaker.SUBSUMSJON)
+
+        fun nySubsumsjonsmelding(personidentifikator: Personidentifikator, innhold: (id: String) -> Map<String, Any>): UtgåendeMelding {
+            val id = nyUuidv7()
+            val innholdMedStandardfelter = innhold(id) + standardfelter(personidentifikator)
+            val json = JsonMessage.newMessage("subsumsjon", innholdMedStandardfelter) { id }.toJson()
+            return UtgåendeMelding(
+                key = personidentifikator.toString(),
+                json = json,
+                mottaker = Mottaker.SUBSUMSJON
+            )
+        }
+
         fun nyttBehov(
             personidentifikator: Personidentifikator,
             meldingsreferanseId: MeldingsreferanseId, // TODO: Dette feltet er sendt på alle behov, men tror ingen sparkel-apper bruker det, må sjekkes opp i!
