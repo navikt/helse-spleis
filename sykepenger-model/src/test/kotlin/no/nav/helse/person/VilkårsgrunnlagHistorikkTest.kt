@@ -63,7 +63,8 @@ internal class VilkårsgrunnlagHistorikkTest {
                 opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-                vilkårsgrunnlagId = UUID.randomUUID()
+                vilkårsgrunnlagId = UUID.randomUUID(),
+                forsikringsvurderingId = null,
             )
         }
         val grunnlag1Januar = grunnlagMedSkjæringstidspunkt(1.januar)
@@ -91,7 +92,8 @@ internal class VilkårsgrunnlagHistorikkTest {
                 opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-                vilkårsgrunnlagId = UUID.randomUUID()
+                vilkårsgrunnlagId = UUID.randomUUID(),
+                forsikringsvurderingId = null,
             )
         )
 
@@ -115,7 +117,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
+            forsikringsvurderingId = null,
         )
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
@@ -140,7 +143,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
+            forsikringsvurderingId = null,
         )
 
         vilkårsgrunnlag.valider(
@@ -162,7 +166,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
+            forsikringsvurderingId = null,
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -172,7 +177,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
+            forsikringsvurderingId = null,
         )
         vilkårsgrunnlag1.valider(
             Aktivitetslogg(),
@@ -209,7 +215,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
+            forsikringsvurderingId = null,
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -219,7 +226,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
+            forsikringsvurderingId = null,
         )
 
         vilkårsgrunnlag1.valider(
@@ -249,7 +257,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
+            forsikringsvurderingId = null,
         )
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
@@ -273,7 +282,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
+            forsikringsvurderingId = null,
         )
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),

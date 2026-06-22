@@ -67,7 +67,8 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
                 inntekter = inntekterForSykepengegrunnlag
             ),
             inntekterForOpptjeningsvurdering = no.nav.helse.hendelser.InntekterForOpptjeningsvurdering(inntekter = inntekterForOpptjeningsvurdering),
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
+            forsikringsvurderingId = forsikringsvurderingId,
         )
 
     override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {

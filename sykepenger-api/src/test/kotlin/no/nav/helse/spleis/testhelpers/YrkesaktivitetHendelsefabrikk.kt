@@ -267,7 +267,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
         )
     }
 

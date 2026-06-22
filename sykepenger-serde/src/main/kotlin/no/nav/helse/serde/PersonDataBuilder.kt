@@ -938,7 +938,11 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagE
         is VilkårsgrunnlagUtDto.Spleis -> this.meldingsreferanseId?.id
         else -> null
     },
-    vilkårsgrunnlagId = this.vilkårsgrunnlagId
+    vilkårsgrunnlagId = this.vilkårsgrunnlagId,
+    forsikringsvurderingId = when (this) {
+        is VilkårsgrunnlagUtDto.Spleis -> this.forsikringsvurderingId
+        else -> null
+    }
 )
 
 private fun OpptjeningUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.OpptjeningData(

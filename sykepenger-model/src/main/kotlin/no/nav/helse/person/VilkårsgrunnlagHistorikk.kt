@@ -231,7 +231,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         opptjening: ArbeidstakerOpptjening?,
         val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         val meldingsreferanseId: MeldingsreferanseId?,
-        vilkårsgrunnlagId: UUID
+        vilkårsgrunnlagId: UUID,
+        val forsikringsvurderingId: UUID?,
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjening) {
 
         override fun view() = GrunnlagsdataView(
@@ -276,7 +277,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             inntektsgrunnlag: Inntektsgrunnlag,
             opptjening: ArbeidstakerOpptjening?,
             subsumsjonslogg: Subsumsjonslogg,
-            nyttSkjæringstidspunkt: LocalDate?
+            nyttSkjæringstidspunkt: LocalDate?,
         ): Grunnlagsdata {
             return Grunnlagsdata(
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
@@ -284,7 +285,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 opptjening = opptjening ?: this.opptjening,
                 medlemskapstatus = medlemskapstatus,
                 meldingsreferanseId = meldingsreferanseId,
-                vilkårsgrunnlagId = UUID.randomUUID()
+                vilkårsgrunnlagId = UUID.randomUUID(),
+                forsikringsvurderingId = forsikringsvurderingId,
             )
         }
 
@@ -303,7 +305,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 Medlemskapsvurdering.Medlemskapstatus.VetIkke -> MedlemskapsvurderingDto.VetIkke
                 Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> MedlemskapsvurderingDto.UavklartMedBrukerspørsmål
             },
-            meldingsreferanseId = meldingsreferanseId?.dto()
+            meldingsreferanseId = meldingsreferanseId?.dto(),
+            forsikringsvurderingId = forsikringsvurderingId,
         )
 
         internal companion object {
@@ -319,7 +322,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                         MedlemskapsvurderingDto.UavklartMedBrukerspørsmål -> Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål
                         MedlemskapsvurderingDto.VetIkke -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
                     },
-                    meldingsreferanseId = dto.meldingsreferanseId?.let { MeldingsreferanseId.gjenopprett(it) }
+                    meldingsreferanseId = dto.meldingsreferanseId?.let { MeldingsreferanseId.gjenopprett(it) },
+                    forsikringsvurderingId = dto.forsikringsvurderingId,
                 )
             }
         }

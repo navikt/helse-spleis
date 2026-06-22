@@ -537,7 +537,8 @@ internal class TestPerson(
             skatteinntekter: List<Pair<String, Inntekt>>,
             arbeidsforhold: List<Triple<String, LocalDate, LocalDate?>> = skatteinntekter.map { (orgnr, _) -> Triple(orgnr, LocalDate.EPOCH, null) },
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null
+            inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
+            forsikringsvurderingId: UUID? = null
         ) {
             val skjæringstidspunkt = inspektør.skjæringstidspunkt(vedtaksperiodeId)
             val opptjeningsinntekter = inntekterForOpptjeningsvurdering?.let {
@@ -551,7 +552,8 @@ internal class TestPerson(
                 arbeidsforhold = arbeidsforhold.map { (orgnr, fom, tom) ->
                     Vilkårsgrunnlag.Arbeidsforhold(orgnr, fom, tom, type = Arbeidsforholdtype.ORDINÆRT)
                 },
-                skjæringstidspunkt = skjæringstidspunkt
+                skjæringstidspunkt = skjæringstidspunkt,
+                forsikringsvurderingId = forsikringsvurderingId
             )
         }
 
@@ -626,7 +628,8 @@ internal class TestPerson(
             inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
             arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
             inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = null,
-            skjæringstidspunkt: LocalDate = inspektør.skjæringstidspunkt(vedtaksperiodeId)
+            skjæringstidspunkt: LocalDate = inspektør.skjæringstidspunkt(vedtaksperiodeId),
+            forsikringsvurderingId: UUID? = null
         ) {
             val inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering ?: run {
 
@@ -646,7 +649,8 @@ internal class TestPerson(
                 medlemskapstatus,
                 arbeidsforhold,
                 inntektsvurderingForSykepengegrunnlag,
-                inntekterForOpptjeningsvurdering
+                inntekterForOpptjeningsvurdering,
+                forsikringsvurderingId
             ).håndter(Person::håndterVilkårsgrunnlag)
         }
 

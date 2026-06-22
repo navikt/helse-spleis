@@ -28,7 +28,8 @@ class Vilkårsgrunnlag(
     private val medlemskapsvurdering: Medlemskapsvurdering,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
-    private val arbeidsforhold: List<Arbeidsforhold>
+    private val arbeidsforhold: List<Arbeidsforhold>,
+    val forsikringsvurderingId: UUID?
 ) : Hendelse {
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
@@ -104,7 +105,8 @@ class Vilkårsgrunnlag(
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.validert(aktivitetslogg),
             meldingsreferanseId = metadata.meldingsreferanseId,
-            vilkårsgrunnlagId = UUID.randomUUID()
+            vilkårsgrunnlagId = UUID.randomUUID(),
+            forsikringsvurderingId = forsikringsvurderingId,
         )
         return aktivitetslogg
     }

@@ -16,7 +16,8 @@ sealed class VilkårsgrunnlagUtDto {
         override val inntektsgrunnlag: InntektsgrunnlagUtDto,
         val opptjening: OpptjeningUtDto?,
         val medlemskapstatus: MedlemskapsvurderingDto,
-        val meldingsreferanseId: MeldingsreferanseDto?
+        val meldingsreferanseId: MeldingsreferanseDto?,
+        val forsikringsvurderingId: UUID?,
     ) : VilkårsgrunnlagUtDto()
 
     data class Infotrygd(

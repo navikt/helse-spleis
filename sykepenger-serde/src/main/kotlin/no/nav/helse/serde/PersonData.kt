@@ -212,7 +212,8 @@ data class PersonData(
         val opptjening: OpptjeningData?,
         val medlemskapstatus: JsonMedlemskapstatus?,
         val meldingsreferanseId: UUID?,
-        val vilkårsgrunnlagId: UUID
+        val vilkårsgrunnlagId: UUID,
+        val forsikringsvurderingId: UUID?,
     ) {
         fun tilDto() = when (type) {
             GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagInnDto.Infotrygd(
@@ -227,7 +228,8 @@ data class PersonData(
                 inntektsgrunnlag = this.inntektsgrunnlag.tilSpleisDto(),
                 opptjening = this.opptjening?.tilDto(),
                 medlemskapstatus = this.medlemskapstatus!!.tilDto(),
-                meldingsreferanseId = this.meldingsreferanseId?.let { MeldingsreferanseDto(it) }
+                meldingsreferanseId = this.meldingsreferanseId?.let { MeldingsreferanseDto(it) },
+                forsikringsvurderingId = this.forsikringsvurderingId,
             )
         }
 

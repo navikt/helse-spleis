@@ -2,6 +2,7 @@ package no.nav.helse.serde
 
 import java.time.LocalDate
 import java.time.Year
+import java.util.UUID
 import no.nav.helse.EnableFeriepenger
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -24,6 +25,7 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
+import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.februar
@@ -368,6 +370,30 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 }
             }
         }
+    }
+
+    @Test
+    fun `forsikringsvurderingId lagres på vilkårsgrunnlag og overlever serialisering`() {
+        val forsikringsvurderingId = UUID.randomUUID()
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                skatteinntekter = listOf(a1 to INNTEKT),
+                forsikringsvurderingId = forsikringsvurderingId
+            )
+        }
+
+        val dto = dto()
+
+        val spleis = dto.vilkårsgrunnlagHistorikk.historikk
+            .flatMap { it.vilkårsgrunnlag }
+            .filterIsInstance<VilkårsgrunnlagUtDto.Spleis>()
+            .single()
+        assertEquals(forsikringsvurderingId, spleis.forsikringsvurderingId)
+
+        assertGjenoppbygget(dto)
     }
 
     private fun assertVilkårsgrunnlaghistorikk(historikk: VilkårsgrunnlaghistorikkUtDto) {

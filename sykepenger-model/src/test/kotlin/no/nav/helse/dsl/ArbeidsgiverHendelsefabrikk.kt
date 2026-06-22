@@ -262,7 +262,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
-        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
+        forsikringsvurderingId: UUID? = null,
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -272,7 +273,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
-            arbeidsforhold = arbeidsforhold
+            arbeidsforhold = arbeidsforhold,
+            forsikringsvurderingId = forsikringsvurderingId,
         )
     }
 
