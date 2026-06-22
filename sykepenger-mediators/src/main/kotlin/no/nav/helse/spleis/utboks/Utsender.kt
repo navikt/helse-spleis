@@ -2,6 +2,7 @@ package no.nav.helse.spleis.utboks
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.Instant
+import java.util.concurrent.Future
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
@@ -54,12 +55,19 @@ internal abstract class Utsender {
                 }
                 ProducerRecord(topic, utgåendeMelding.key, utgåendeMelding.json.toString())
             }.mapValues { (_, record) ->
-                producer.send(record)
-            }.map { (utgåendeMelding, future) ->
                 try {
-                    Sendingsresultat.Ok(utgåendeMelding,future.get())
+                    Bufferresultat.Sendeklar(producer.send(record))
                 } catch (exception: Exception) {
-                    Sendingsresultat.Feil(utgåendeMelding, exception)
+                    Bufferresultat.Feil(exception)
+                }
+            }.map { (utgåendeMelding, bufferresultat)  ->
+                when (bufferresultat) {
+                    is Bufferresultat.Feil -> Sendingsresultat.Feil(utgåendeMelding, bufferresultat.exception)
+                    is Bufferresultat.Sendeklar -> try {
+                        Sendingsresultat.Ok(utgåendeMelding, bufferresultat.metadata.get())
+                    } catch (exception: Exception) {
+                        Sendingsresultat.Feil(utgåendeMelding, exception)
+                    }
                 }
             }
 
@@ -72,6 +80,11 @@ internal abstract class Utsender {
             }
 
             return ok.map(Sendingsresultat.Ok::utgåendeMelding) to feil.map(Sendingsresultat.Feil::utgåendeMelding)
+        }
+
+        private sealed interface Bufferresultat {
+            data class Sendeklar(val metadata: Future<RecordMetadata>): Bufferresultat
+            data class Feil(val exception: Exception): Bufferresultat
         }
 
         private sealed interface Sendingsresultat {
