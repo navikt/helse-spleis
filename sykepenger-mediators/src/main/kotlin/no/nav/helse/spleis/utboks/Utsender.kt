@@ -75,7 +75,12 @@ internal abstract class Utsender {
             val feil = sendingsresultat.filterIsInstance<Sendingsresultat.Feil>()
 
             if (feil.isNotEmpty()) {
-                sikkerlogg.atLevel(loglevelVedFeil).log("Feil ved sending av meldinger. Forsøkte å sende ${utgåendeMeldinger.size} meldinger. ${ok.size} ble sendt, og ${feil.size} feilet", feil.first().exception)
+                val feilmelding =
+                    "Feil ved sending av ${feil.size} melding(er), ${ok.size} melding(er) gikk ok!\n" +
+                    "Disse meldingene feilet:\n\n" +
+                    feil.joinToString(separator = "\n") { "${it.utgåendeMelding.id}: ${it.exception.message}\n\t${it.utgåendeMelding.json}" }
+
+                sikkerlogg.atLevel(loglevelVedFeil).log(feilmelding, feil.first().exception)
                 vedFeil()
             }
 
