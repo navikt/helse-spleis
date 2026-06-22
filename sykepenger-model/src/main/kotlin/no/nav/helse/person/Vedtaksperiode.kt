@@ -1154,6 +1154,7 @@ internal class Vedtaksperiode private constructor(
         ) ?: return emptyList()
 
         person.lagreVilkårsgrunnlag(nyttGrunnlag)
+        if (hendelse is KorrigerteArbeidsgiveropplysninger) aktivitetslogg.varsel(RV_IM_4)
         return listOf(Revurderingseventyr.inntekt(hendelse, skjæringstidspunkt))
     }
 

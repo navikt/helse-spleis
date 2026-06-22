@@ -5,6 +5,7 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.LovligFravaer
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.StreikEllerLockout
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
@@ -33,11 +34,24 @@ import org.junit.jupiter.api.assertThrows
 internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
 
     @Test
-    fun `mottar selvbestemt inntektsmelding`() {
+    fun `mottar selvbestemt inntektsmelding når vi ikke trenger en`() {
+        a1 {
+            håndterSøknad(1.januar til 16.januar)
+            håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode,
+                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                RedusertUtbetaltBeløpIArbeidsgiverperioden(LovligFravaer),
+                OppgittInntekt(INNTEKT * 1.25)
+            )
+            assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_8)
+        }
+    }
+
+    @Test
+    fun `mottar selvbestemt inntektsmelding som korrigerer eksisterende`() {
         a1 {
             nyttVedtak(januar)
             håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT * 1.25))
-            assertVarsler(1.vedtaksperiode, RV_AO_3)
+            assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_4)
         }
     }
 
