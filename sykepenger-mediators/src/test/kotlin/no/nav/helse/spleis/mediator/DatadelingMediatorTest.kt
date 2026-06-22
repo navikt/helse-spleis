@@ -9,6 +9,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.DatadelingMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
@@ -38,7 +39,7 @@ internal class DatadelingMediatorTest {
     @Test
     fun `datadelingMediator fanger opp nye aktiviteter på hendelsen`() {
         aktivitetslogg.varsel(RV_SØ_1)
-        datadelingMediator.ferdigstill(testRapid)
+        datadelingMediator.ferdigstill()
         assertEquals(1, testRapid.inspektør.antall())
         assertNotNull(testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet"))
     }
@@ -48,7 +49,7 @@ internal class DatadelingMediatorTest {
         aktivitetslogg
             .kontekst(TestKontekst("Person", "Person 1"))
             .info("Dette er en infomelding")
-        datadelingMediator.ferdigstill(testRapid)
+        datadelingMediator.ferdigstill()
         assertEquals(1, testRapid.inspektør.antall())
 
         val info = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"][0]
@@ -66,7 +67,7 @@ internal class DatadelingMediatorTest {
         aktivitetslogg.info("Dette er en infomelding")
         aktivitetslogg.varsel(RV_SØ_1)
         aktivitetslogg.funksjonellFeil(RV_VT_1)
-        datadelingMediator.ferdigstill(testRapid)
+        datadelingMediator.ferdigstill()
 
         assertEquals(1, testRapid.inspektør.antall())
         val aktiviteter = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"]
@@ -79,7 +80,7 @@ internal class DatadelingMediatorTest {
         aktivitetslogg.info("Dette er en infomelding")
         aktivitetslogg.varsel(RV_SØ_1)
         aktivitetslogg.funksjonellFeil(RV_VT_1)
-        datadelingMediator.ferdigstill(testRapid)
+        datadelingMediator.ferdigstill()
 
         val info = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"]
         assertEquals("INFO", info[0]["nivå"].asText())
@@ -92,5 +93,11 @@ internal class DatadelingMediatorTest {
         private val melding: String
     ) : Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
+    }
+
+    private fun DatadelingMediator.ferdigstill() {
+        val behandlingContext = BehandlingContext(testRapid, eksempelmelding)
+        leggIUtboks(behandlingContext)
+        behandlingContext.sendMeldingerIUtboks()
     }
 }

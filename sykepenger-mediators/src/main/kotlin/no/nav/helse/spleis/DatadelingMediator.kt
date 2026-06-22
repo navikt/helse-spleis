@@ -1,11 +1,10 @@
 package no.nav.helse.spleis
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.slf4j.LoggerFactory
 
 internal class DatadelingMediator(
@@ -16,7 +15,7 @@ internal class DatadelingMediator(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    internal fun ferdigstill(context: MessageContext) {
+    internal fun leggIUtboks(context: BehandlingContext) {
         if (aktivitetslogg.aktiviteter.isEmpty()) return
         sikkerlogg.info(
             "Publiserer aktiviteter som følge av hendelse med {}, {}",
@@ -37,7 +36,13 @@ internal class DatadelingMediator(
                 }
             }
         }
-        context.publish(message.meldingsporing.fødselsnummer, aktivitetMap.toJson())
+        context.leggIUtboks { personidentifikator ->
+            UtgåendeMelding.nyRapidmelding(
+                eventName = "aktivitetslogg_ny_aktivitet",
+                personidentifikator = personidentifikator,
+                innhold = mapOf("aktiviteter" to aktivitetMap)
+            )
+        }
     }
 
     private fun aktivitetMap(nivå: String, aktivitet: Aktivitet) =
@@ -53,14 +58,4 @@ internal class DatadelingMediator(
                 )
             }
         )
-
-    private fun Collection<Map<String, Any>>.toJson(): String {
-        return JsonMessage.newMessage(
-            "aktivitetslogg_ny_aktivitet",
-            mapOf(
-                "fødselsnummer" to message.meldingsporing.fødselsnummer,
-                "aktiviteter" to this
-            )
-        ).toJson()
-    }
 }

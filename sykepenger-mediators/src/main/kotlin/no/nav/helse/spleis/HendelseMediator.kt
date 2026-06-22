@@ -600,9 +600,10 @@ internal class HendelseMediator(
 
         person(personidentifikator, message, context, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person ->
             handler(eventBus, person, aktivitetslogg)
-            leggIUtboks(context, message, eventBus)
+            leggIUtboks(context, message, eventBus, datadelingMediator)
         }
-        ferdigstill(context, subsumsjonMediator, datadelingMediator, aktivitetslogg)
+
+        ferdigstill(subsumsjonMediator, aktivitetslogg)
     }
 
     private fun personHverkenFunnetEllerOpprettet(context: BehandlingContext, message: HendelseMessage) {
@@ -635,21 +636,24 @@ internal class HendelseMediator(
         )
     }
 
-    private fun leggIUtboks(context: BehandlingContext, message: HendelseMessage, eventBus: EventBus) {
-        EventBusOversetter(eventBus, message).utgåendeMeldinger()
-            .map { utgåendeMelding ->
-                context.leggIUtboks { utgåendeMelding }
-            }
+    private fun leggIUtboks(
+        context: BehandlingContext,
+        message: HendelseMessage,
+        eventBus: EventBus,
+        datadelingMediator: DatadelingMediator
+    ) {
+        EventBusOversetter(eventBus, message)
+            .utgåendeMeldinger()
+            .map { utgåendeMelding -> context.leggIUtboks { utgåendeMelding } }
+
+        datadelingMediator.leggIUtboks(context)
     }
 
     private fun ferdigstill(
-        context: BehandlingContext,
         subsumsjonMediator: SubsumsjonMediator,
-        datadelingMediator: DatadelingMediator,
         aktivitetslogg: Aktivitetslogg,
     ) {
         subsumsjonMediator.ferdigstill(subsumsjonsproducer)
-        datadelingMediator.ferdigstill(context.messageContext)
         if (aktivitetslogg.aktiviteter.isEmpty()) return
         if (aktivitetslogg.harFunksjonelleFeil()) sikkerLogg.info("aktivitetslogg inneholder errors:\n$aktivitetslogg")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n$aktivitetslogg")
