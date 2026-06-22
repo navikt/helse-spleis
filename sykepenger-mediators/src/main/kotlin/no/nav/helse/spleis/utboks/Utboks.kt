@@ -32,23 +32,32 @@ internal class Utboks {
 
     fun send(messageContext: MessageContext, message: HendelseMessage) {
         sikkerLogg.info("Sender ${utgåendeMeldinger.size} meldinger fra utboksen")
-        utgåendeMeldinger
-            .map { utgåendeMelding ->
-                when (utgåendeMelding.eventName) {
-                    "behov" -> {
-                        val behov = utgåendeMelding.json.path("@behov").map { it.asText() }
-                        sikkerLogg.info("sender behov (${behov.joinToString()}):\n\t${utgåendeMelding.json}")
-                    }
-                    else -> sikkerLogg.info("sender ${utgåendeMelding.eventName}:\n\t${utgåendeMelding.json}")
-                }
-                OutgoingMessage(body = utgåendeMelding.json.toString(), key = utgåendeMelding.key)
-            }.sendOutgoingMessage(messageContext, message)
+        message.logOutgoingMessages(sikkerLogg, utgåendeMeldinger.size)
+        utgåendeMeldinger.loggSending()
+        sendMedMessageContext(messageContext, utgåendeMeldinger)
         // TODO: Marker OK-meldingene sendt i DB
     }
 
-    private fun List<OutgoingMessage>.sendOutgoingMessage(messageContext: MessageContext, message: HendelseMessage) {
+    private fun sendMedMessageContext(messageContext: MessageContext, meldinger: List<UtgåendeMelding>) {
+        meldinger
+            .map { utgåendeMelding -> OutgoingMessage(body = utgåendeMelding.json.toString(), key = utgåendeMelding.key) }
+            .sendOutgoingMessage(messageContext)
+    }
+
+    private fun List<UtgåendeMelding>.loggSending() {
+        forEach { utgåendeMelding ->
+            when (utgåendeMelding.eventName) {
+                "behov" -> {
+                    val behov = utgåendeMelding.json.path("@behov").map { it.asText() }
+                    sikkerLogg.info("sender behov til ${utgåendeMelding.mottaker.name} (${behov.joinToString()}):\n\t${utgåendeMelding.json}")
+                }
+                else -> sikkerLogg.info("sender ${utgåendeMelding.eventName} til ${utgåendeMelding.mottaker.name}:\n\t${utgåendeMelding.json}")
+            }
+        }
+    }
+
+    private fun List<OutgoingMessage>.sendOutgoingMessage(messageContext: MessageContext) {
         if (this.isEmpty()) return
-        message.logOutgoingMessages(sikkerLogg, this.size)
         val (ok, failed) = messageContext.publish(this)
 
         if (failed.isEmpty()) return
