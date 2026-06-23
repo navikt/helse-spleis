@@ -814,7 +814,8 @@ interface EventSubscription {
         val periodeForArbeidsavklaringspenger: Periode,
         val periodeForDagpenger: Periode,
         val beregningsperiode: Periode,
-        // TODO: Fjern disse feltene, det brukes til selvstendig forsikring som skal flyttes til Vilkårsprøving
+        val forsikringsvurderingId: UUID?,
+        // TODO: Fjern disse feltene på sikt med gammelt behov
         val trengerInformasjonOmSelvstendigForsikring: Boolean,
         val skjæringstidspunkt: LocalDate
     ): Event

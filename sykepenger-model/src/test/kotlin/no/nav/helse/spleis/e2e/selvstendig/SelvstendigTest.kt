@@ -1106,7 +1106,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                 forsikringsvurdering = Forsikringsvurdering(
                     forsikringsvurderingId = UUID.randomUUID(),
                     harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1)
+                    dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1),
+                    opphørsdato = null,
                 )
             )
 
@@ -1144,7 +1145,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                 forsikringsvurdering = Forsikringsvurdering(
                     forsikringsvurderingId = UUID.randomUUID(),
                     harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17)
+                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
+                    opphørsdato = null,
                 )
             )
 
@@ -1179,7 +1181,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                 forsikringsvurdering = Forsikringsvurdering(
                     forsikringsvurderingId = UUID.randomUUID(),
                     harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1)
+                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1),
+                    opphørsdato = null,
                 )
             )
             val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
@@ -1213,7 +1216,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                 forsikringsvurdering = Forsikringsvurdering(
                     forsikringsvurderingId = UUID.randomUUID(),
                     harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1)
+                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1),
+                    opphørsdato = null,
                 )
             )
             assertForkastetPeriodeTilstander(

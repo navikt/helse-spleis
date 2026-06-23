@@ -10,6 +10,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.collections.mapOf
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
@@ -36,6 +37,8 @@ import no.nav.helse.hendelser.Periode as HendelsePeriode
 import no.nav.helse.januar
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.Behov
+import no.nav.helse.spleis.Behov.Behovstype
+import no.nav.helse.spleis.Behov.Behovstype.ForsikringsvurderingResultat
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -979,6 +982,10 @@ internal class TestMessageFactory(
             behovliste.add("Forsikringsvurdering")
         }
 
+        if (forsikringsvurdering != null) {
+            behovliste.add("ForsikringsvurderingResultat")
+        }
+
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
@@ -1035,7 +1042,7 @@ internal class TestMessageFactory(
                         "kategori" to data.kategori
                     )
                 },
-                Behov.Behovstype.Arbeidsavklaringspenger.utgåendeNavn to mapOf(
+                Behovstype.Arbeidsavklaringspenger.utgåendeNavn to mapOf(
                     "utbetalingsperioder" to arbeidsavklaringspengerV2.perioder.map { periode ->
                         mapOf(
                             "fom" to periode.start,
@@ -1043,7 +1050,7 @@ internal class TestMessageFactory(
                         )
                     }
                 ),
-                Behov.Behovstype.InntekterForBeregning.utgåendeNavn to mapOf(
+                Behovstype.InntekterForBeregning.utgåendeNavn to mapOf(
                     "inntekter" to inntekterForBeregning.map { data ->
                         mapOf(
                             "fom" to data.fom,
@@ -1056,7 +1063,7 @@ internal class TestMessageFactory(
 
                     }
                 ),
-                Behov.Behovstype.Dagpenger.utgåendeNavn to mapOf(
+                Behovstype.Dagpenger.utgåendeNavn to mapOf(
                     "meldekortperioder" to dagpengerV2.perioder.map { data ->
                         mapOf(
                             "fom" to data.start,
@@ -1065,13 +1072,14 @@ internal class TestMessageFactory(
                     }
                 ))
                 .plus(forsikringsvurdering(forsikringsvurdering, yrkesaktivitetstype))
+                .plus(forsikringsvurderingResultat(forsikringsvurdering, yrkesaktivitetstype))
         )
     }
 
     fun forsikringsvurdering(forsikringsvurdering: Forsikringsvurdering?, yrkesaktivitetstype: String): Map<String, Any> {
         if (forsikringsvurdering == null || yrkesaktivitetstype != "SELVSTENDIG") return emptyMap()
         return mapOf(
-            Behov.Behovstype.Forsikringsvurdering.utgåendeNavn to forsikringsvurdering.let { forsikringsvurdering ->
+            Behovstype.Forsikringsvurdering.utgåendeNavn to forsikringsvurdering.let { forsikringsvurdering ->
                 mapOf(
                     "forsikringsvurderingId" to forsikringsvurdering.forsikringsvurderingId.toString(),
                     "harForsikring" to forsikringsvurdering.harForsikring,
@@ -1086,6 +1094,25 @@ internal class TestMessageFactory(
         )
     }
 
+    fun forsikringsvurderingResultat(forsikringsvurdering: Forsikringsvurdering?, yrkesaktivitetstype: String): Map<String, Any> {
+        if (forsikringsvurdering == null || yrkesaktivitetstype != "SELVSTENDIG") return emptyMap()
+        return mapOf(
+            ForsikringsvurderingResultat.utgåendeNavn to forsikringsvurdering.let { forsikringsvurdering ->
+                mapOf(
+                    "forsikringsvurderingId" to forsikringsvurdering.forsikringsvurderingId.toString(),
+                    "harForsikring" to forsikringsvurdering.harForsikring,
+                    "dekning" to forsikringsvurdering.dekning?.let { dekning ->
+                        mapOf(
+                            "grad" to dekning.grad,
+                            "iVentetid" to (dekning.fraDag == 1)
+                        )
+                    },
+                    "opphørsdato" to forsikringsvurdering.opphørsdato
+                )
+            }
+        )
+    }
+
     fun lagVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         behandlingId: UUID,
@@ -1095,21 +1122,23 @@ internal class TestMessageFactory(
         arbeidsforhold: List<Arbeidsforhold>,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         orgnummer: String = organisasjonsnummer,
-        yrkesaktivitetstype: String = "ARBEIDSTAKER"
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
+        forsikringsvurderingId: UUID?,
     ): Pair<String, String> {
         return lagBehovMedLøsning(
-            behov = listOf(
-                Behov.Behovstype.Medlemskap.utgåendeNavn,
-                Behov.Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn,
-                Behov.Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn,
-                Behov.Behovstype.Arbeidsforhold.utgåendeNavn
+            behov = listOfNotNull(
+                Behovstype.Medlemskap.utgåendeNavn,
+                Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn,
+                Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn,
+                Behovstype.Arbeidsforhold.utgåendeNavn,
+                Behovstype.Forsikringsvurdering.utgåendeNavn.takeIf { forsikringsvurderingId != null }
             ),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
             løsninger = mapOf(
-                Behov.Behovstype.Medlemskap.utgåendeNavn to mapOf<String, Any>(
+                Behovstype.Medlemskap.utgåendeNavn to mapOf<String, Any>(
                     "resultat" to mapOf<String, Any>(
                         "svar" to when (medlemskapstatus) {
                             Medlemskapsvurdering.Medlemskapstatus.Ja -> "JA"
@@ -1119,7 +1148,7 @@ internal class TestMessageFactory(
                         }
                     )
                 ),
-                Behov.Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn to inntekterForSykepengegrunnlag
+                Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn to inntekterForSykepengegrunnlag
                     .map {
                         mapOf(
                             "årMåned" to it.måned,
@@ -1134,7 +1163,7 @@ internal class TestMessageFactory(
                             }
                         )
                     },
-                Behov.Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn to inntekterForOpptjeningsvurdering
+                Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn to inntekterForOpptjeningsvurdering
                     .map {
                         mapOf(
                             "årMåned" to it.måned,
@@ -1149,26 +1178,30 @@ internal class TestMessageFactory(
                             }
                         )
                     },
-                Behov.Behovstype.Arbeidsforhold.utgåendeNavn to arbeidsforhold.map {
+                Behovstype.Arbeidsforhold.utgåendeNavn to arbeidsforhold.map {
                     mapOf(
                         "orgnummer" to it.orgnummer,
                         "ansattSiden" to it.ansattSiden,
                         "ansattTil" to it.ansattTil,
                         "type" to it.type
                     )
-                }
+                },
+            ).plus(
+                if (forsikringsvurderingId != null) mapOf(
+                    Behovstype.Forsikringsvurdering.utgåendeNavn to mapOf("forsikringsvurderingId" to forsikringsvurderingId,)
+                ) else emptyMap()
             ),
             ekstraFelter = mapOf(
-                Behov.Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn to mapOf(
+                Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn to mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt
                 ),
-                Behov.Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn to mapOf(
+                Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn to mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt
                 ),
-                Behov.Behovstype.Arbeidsforhold.utgåendeNavn to mapOf(
+                Behovstype.Arbeidsforhold.utgåendeNavn to mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt
                 ),
-                Behov.Behovstype.Medlemskap.utgåendeNavn to mapOf(
+                Behovstype.Medlemskap.utgåendeNavn to mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt
                 ),
             )

@@ -36,6 +36,7 @@ data class Behov(
         data object Arbeidsforhold: Behovstype { override val utgåendeNavn = "ArbeidsforholdV2" }
 
         data object Forsikringsvurdering: Behovstype { override val utgåendeNavn = "Forsikringsvurdering" }
+        data object ForsikringsvurderingResultat: Behovstype { override val utgåendeNavn = "ForsikringsvurderingResultat" }
     }
 
     companion object {

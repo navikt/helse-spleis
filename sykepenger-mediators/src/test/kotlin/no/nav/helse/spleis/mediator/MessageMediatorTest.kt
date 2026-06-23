@@ -156,7 +156,8 @@ internal class MessageMediatorTest {
                     )
                 ),
                 arbeidsforhold = emptyList(),
-                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+                forsikringsvurderingId = null,
             )
         )
         assertTrue(hendelseMediator.lestVilkårsgrunnlag)

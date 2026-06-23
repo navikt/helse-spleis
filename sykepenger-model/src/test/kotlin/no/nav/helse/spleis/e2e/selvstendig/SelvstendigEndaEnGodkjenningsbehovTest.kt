@@ -105,7 +105,8 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 forsikringsvurdering = Forsikringsvurdering(
                     forsikringsvurderingId = UUID.randomUUID(),
                     harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1)
+                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1),
+                    opphørsdato = null,
                 )
             )
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
@@ -191,7 +192,8 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 forsikringsvurdering = Forsikringsvurdering(
                     forsikringsvurderingId = UUID.randomUUID(),
                     harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17)
+                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
+                    opphørsdato = null,
                 )
             )
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
@@ -278,7 +280,8 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     forsikringsvurdering = Forsikringsvurdering(
                         forsikringsvurderingId = UUID.randomUUID(),
                         harForsikring = true,
-                        dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17)
+                        dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
+                        opphørsdato = null,
                     )
                 )
                 val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {

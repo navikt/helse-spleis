@@ -2,8 +2,10 @@ package no.nav.helse.spleis.mediator.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.Forsikringsvurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -46,8 +48,17 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
             arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
             ventetid = 1.januar til 16.januar
         )
-        sendVilkårsgrunnlagSelvstendig(0)
-        sendYtelserSelvstendig(0)
+        val forsikringsvurderingId = UUID.randomUUID()
+        sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
+        sendYtelserSelvstendig(
+            vedtaksperiodeIndeks = 0,
+            forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingId = forsikringsvurderingId,
+                harForsikring = false,
+                dekning = null,
+                opphørsdato = null,
+            )
+        )
         sendSimuleringSelvstendig(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenningSelvstendig(0)
         sendUtbetaling()

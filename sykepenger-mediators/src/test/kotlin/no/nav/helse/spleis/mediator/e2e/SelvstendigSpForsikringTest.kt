@@ -15,14 +15,16 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
     fun `Selvstendig med forsikringsvurdering går videre når forsikring-toggle er enabled`() = Toggle.SelvstendigForsikring.enable {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
-        sendVilkårsgrunnlagSelvstendig(0, orgnummer = "SELVSTENDIG")
+        val forsikringsvurderingId = UUID.randomUUID()
+        sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
         sendYtelserSelvstendig(
             0,
             orgnummer = "SELVSTENDIG",
             forsikringsvurdering = Forsikringsvurdering(
-                forsikringsvurderingId = UUID.randomUUID(),
+                forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = true,
-                dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1)
+                dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1),
+                opphørsdato = null,
             )
         )
         sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
@@ -41,14 +43,16 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
     fun `Kaster ut selvstendig med forsikringsvurdering når forsikring-toggle er disabled`() = Toggle.SelvstendigForsikring.disable {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
-        sendVilkårsgrunnlagSelvstendig(0, orgnummer = "SELVSTENDIG")
+        val forsikringsvurderingId = UUID.randomUUID()
+        sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
         sendYtelserSelvstendig(
             0,
             orgnummer = "SELVSTENDIG",
             forsikringsvurdering = Forsikringsvurdering(
-                forsikringsvurderingId = UUID.randomUUID(),
+                forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = true,
-                dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1)
+                dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1),
+                opphørsdato = null,
             )
         )
         assertTilstander(

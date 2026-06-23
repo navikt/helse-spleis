@@ -2,7 +2,8 @@ package no.nav.helse.dsl
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.person. EventSubscription
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spill_av_im.Forespørsel
@@ -108,7 +109,7 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
 
         data class InitiellHistorikFraInfotrygd(
             override val vedtaksperiodeId: UUID,
-            val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+            val yrkesaktivitetssporing: Yrkesaktivitet,
             override val id: UUID = UUID.randomUUID()
         ): Behovsdetaljer
 
@@ -161,7 +162,7 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
             registrer(Behovsdetaljer.InitiellHistorikFraInfotrygd(event.vedtaksperiodeId, event.yrkesaktivitetssporing))
         override fun trengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent) =
             registrer(Behovsdetaljer.OppdatertHistorikkFraInfotrygd(event.periode))
-        override fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) = when (event.trengerInformasjonOmSelvstendigForsikring) {
+        override fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) = when (event.yrkesaktivitetssporing is Selvstendig) {
             true -> registrer(Behovsdetaljer.InformasjonTilBeregningAvSelvstendig(event.vedtaksperiodeId))
             false -> registrer(Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker(event.vedtaksperiodeId))
         }
