@@ -534,6 +534,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
         val behandlingId = behov.path("behandlingId").asText().toUUID()
         assertEquals(yrkesaktivitetstype == "SELVSTENDIG", testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Forsikringsvurdering))
+        assertEquals(forsikringsvurdering != null, testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.ForsikringsvurderingResultat))
         val (_, message) = meldingsfabrikk.lagYtelser(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             behandlingId = behandlingId,
@@ -598,11 +599,13 @@ internal abstract class AbstractEndToEndMediatorTest {
     protected fun sendVilkårsgrunnlagSelvstendig(
         vedtaksperiodeIndeks: Int,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        orgnummer: String = "SELVSTENDIG"
+        orgnummer: String = "SELVSTENDIG",
+        forsikringsvurderingId: UUID?
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Medlemskap))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Arbeidsforhold))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.InntekterForSykepengegrunnlag))
+        assertEquals(forsikringsvurderingId != null, testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Forsikringsvurdering))
         val behov = testRapid.inspektør.etterspurteBehov(Behov.Behovstype.Medlemskap)
         val skjæringstidspunktFraBehov = behov.path("Medlemskap").path("skjæringstidspunkt").asLocalDate()
         val yrkesaktivitetstypeFraBehov = behov.path("yrkesaktivitetstype").asText()
@@ -616,7 +619,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             arbeidsforhold = emptyList(),
             medlemskapstatus = medlemskapstatus,
             orgnummer = orgnummer,
-            yrkesaktivitetstype = yrkesaktivitetstypeFraBehov
+            yrkesaktivitetstype = yrkesaktivitetstypeFraBehov,
+            forsikringsvurderingId = forsikringsvurderingId,
         )
         testRapid.sendTestMessage(message)
     }
@@ -655,7 +659,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             arbeidsforhold = (arbeidsforhold),
             medlemskapstatus = medlemskapstatus,
             orgnummer = orgnummer,
-            yrkesaktivitetstype = yrkesaktivitetstypeFraBehov
+            yrkesaktivitetstype = yrkesaktivitetstypeFraBehov,
+            forsikringsvurderingId = null,
         )
         testRapid.sendTestMessage(message)
     }

@@ -44,7 +44,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
 
     @Test
     fun `Mapping ved løsninger uten løsning på forsikring`() {
-        val json = fjernLøsninger(medObject, "Forsikringsvurdering")
+        val json = fjernLøsninger(medObject, "Forsikringsvurdering", "ForsikringsvurderingResultat")
         sendJson(json).assertForventetInnhold(forsikring = null)
     }
 
@@ -59,6 +59,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
         assertEquals(forventetArbeidsavklaringspenger, this.arbeidsavklaringspengerV2)
         assertEquals(forventetDagpenger, this.dagpengerV2)
         assertEquals(forsikring, this.forsikringsvurdering)
+        assertEquals(forsikring, this.forsikringsvurderingResultat)
     }
 
     private fun fjernLøsninger(json: String, vararg fjern: String): String {
@@ -82,7 +83,8 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
         private val forventetForsikring = Forsikringsvurdering(
             forsikringsvurderingId = UUID.fromString("abebbf72-2bef-473d-aabb-c5314bcc5ea3"),
             harForsikring = true,
-            dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1)
+            dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1),
+            opphørsdato = null,
         )
 
 
@@ -99,7 +101,8 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
             "DagpengerV2",
-            "Forsikringsvurdering"
+            "Forsikringsvurdering",
+            "ForsikringsvurderingResultat"
           ],
           "fødselsnummer": "20014812238",
           "yrkesaktivitetstype": "SELVSTENDIG",
@@ -189,6 +192,15 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
                 "grad": 80,
                 "fraDag": 1
               }
+            },
+            "ForsikringsvurderingResultat": {
+              "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
+              "harForsikring": true,
+              "dekning": {
+                "grad": 80,
+                "iVentetid": true
+              },
+              "opphørsdato": null
             }
           },
           "@final": true,
@@ -213,7 +225,8 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
             "DagpengerV2",
-            "Forsikringsvurdering"
+            "Forsikringsvurdering",
+            "ForsikringsvurderingResultat"
           ],
           "fødselsnummer": "20014812238",
           "yrkesaktivitetstype": "SELVSTENDIG",
@@ -311,6 +324,15 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
                 "grad": 80,
                 "fraDag": 1
               }
+            },
+            "ForsikringsvurderingResultat": {
+              "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
+              "harForsikring": true,
+              "dekning": {
+                "grad": 80,
+                "iVentetid": true
+              },
+              "opphørsdato": null
             }
           },
           "@final": true,

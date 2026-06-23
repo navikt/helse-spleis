@@ -10,6 +10,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.collections.mapOf
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
@@ -979,6 +980,10 @@ internal class TestMessageFactory(
             behovliste.add("Forsikringsvurdering")
         }
 
+        if (forsikringsvurdering != null) {
+            behovliste.add("ForsikringsvurderingResultat")
+        }
+
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
@@ -1065,6 +1070,7 @@ internal class TestMessageFactory(
                     }
                 ))
                 .plus(forsikringsvurdering(forsikringsvurdering, yrkesaktivitetstype))
+                .plus(forsikringsvurderingResultat(forsikringsvurdering, yrkesaktivitetstype))
         )
     }
 
@@ -1086,6 +1092,25 @@ internal class TestMessageFactory(
         )
     }
 
+    fun forsikringsvurderingResultat(forsikringsvurdering: Forsikringsvurdering?, yrkesaktivitetstype: String): Map<String, Any> {
+        if (forsikringsvurdering == null || yrkesaktivitetstype != "SELVSTENDIG") return emptyMap()
+        return mapOf(
+            Behov.Behovstype.ForsikringsvurderingResultat.utgåendeNavn to forsikringsvurdering.let { forsikringsvurdering ->
+                mapOf(
+                    "forsikringsvurderingId" to forsikringsvurdering.forsikringsvurderingId.toString(),
+                    "harForsikring" to forsikringsvurdering.harForsikring,
+                    "dekning" to forsikringsvurdering.dekning?.let { dekning ->
+                        mapOf(
+                            "grad" to dekning.grad,
+                            "iVentetid" to (dekning.fraDag == 1)
+                        )
+                    },
+                    "opphørsdato" to forsikringsvurdering.opphørsdato
+                )
+            }
+        )
+    }
+
     fun lagVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         behandlingId: UUID,
@@ -1095,14 +1120,16 @@ internal class TestMessageFactory(
         arbeidsforhold: List<Arbeidsforhold>,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         orgnummer: String = organisasjonsnummer,
-        yrkesaktivitetstype: String = "ARBEIDSTAKER"
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
+        forsikringsvurderingId: UUID?,
     ): Pair<String, String> {
         return lagBehovMedLøsning(
-            behov = listOf(
+            behov = listOfNotNull(
                 Behov.Behovstype.Medlemskap.utgåendeNavn,
                 Behov.Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn,
                 Behov.Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn,
-                Behov.Behovstype.Arbeidsforhold.utgåendeNavn
+                Behov.Behovstype.Arbeidsforhold.utgåendeNavn,
+                Behov.Behovstype.Forsikringsvurdering.utgåendeNavn.takeIf { forsikringsvurderingId != null }
             ),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
@@ -1156,7 +1183,11 @@ internal class TestMessageFactory(
                         "ansattTil" to it.ansattTil,
                         "type" to it.type
                     )
-                }
+                },
+            ).plus(
+                if (forsikringsvurderingId != null) mapOf(
+                    Behov.Behovstype.Forsikringsvurdering.utgåendeNavn to mapOf("forsikringsvurderingId" to forsikringsvurderingId,)
+                ) else emptyMap()
             ),
             ekstraFelter = mapOf(
                 Behov.Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn to mapOf(

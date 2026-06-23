@@ -7,6 +7,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.Forsikringsvurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.spleis.Behov
@@ -14,7 +15,6 @@ import no.nav.helse.spleis.Behov.Behovstype.Arbeidsavklaringspenger
 import no.nav.helse.spleis.Behov.Behovstype.Arbeidsforhold
 import no.nav.helse.spleis.Behov.Behovstype.Dagpenger
 import no.nav.helse.spleis.Behov.Behovstype.Foreldrepenger
-import no.nav.helse.spleis.Behov.Behovstype.Forsikringsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.Godkjenning
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForBeregning
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForOpptjeningsvurdering
@@ -73,7 +73,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             InntekterForOpptjeningsvurdering,
             Medlemskap,
             Arbeidsforhold,
-            Forsikringsvurdering
+            Behov.Behovstype.Forsikringsvurdering
         )
         assertMedlemskapdetaljer(behov)
         assertInntekterForSykepengegrunnlagdetaljer(behov)
@@ -138,8 +138,17 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE
         )
 
-        sendVilkårsgrunnlagSelvstendig(0)
-        sendYtelserSelvstendig(0)
+        val forsikringsvurderingId = UUID.randomUUID()
+        sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
+        sendYtelserSelvstendig(
+            vedtaksperiodeIndeks = 0,
+            forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingId = forsikringsvurderingId,
+                harForsikring = false,
+                dekning = null,
+                opphørsdato = null,
+            )
+        )
         sendSimuleringSelvstendig(0, SimuleringMessage.Simuleringstatus.OK)
         val behov = testRapid.inspektør.etterspurteBehov(Godkjenning)
         assertVedtaksperiodeBehov(behov, Godkjenning)
@@ -250,7 +259,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     private fun assertForsikringsvurderingdetaljer(behov: JsonNode) {
-        assertDato(behov.path(Forsikringsvurdering.utgåendeNavn).path("skjæringstidspunkt").asText())
+        assertDato(behov.path(Behov.Behovstype.Forsikringsvurdering.utgåendeNavn).path("skjæringstidspunkt").asText())
     }
 
     private fun assertForeldrepengerdetaljer(behov: JsonNode) {

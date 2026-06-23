@@ -161,7 +161,7 @@ sealed class Behovsoppsamler(private val log: DeferredLog): EventSubscription {
             registrer(Behovsdetaljer.InitiellHistorikFraInfotrygd(event.vedtaksperiodeId, event.yrkesaktivitetssporing))
         override fun trengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent) =
             registrer(Behovsdetaljer.OppdatertHistorikkFraInfotrygd(event.periode))
-        override fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) = when (event.trengerInformasjonOmSelvstendigForsikring) {
+        override fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) = when (event.yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Selvstendig) {
             true -> registrer(Behovsdetaljer.InformasjonTilBeregningAvSelvstendig(event.vedtaksperiodeId))
             false -> registrer(Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker(event.vedtaksperiodeId))
         }

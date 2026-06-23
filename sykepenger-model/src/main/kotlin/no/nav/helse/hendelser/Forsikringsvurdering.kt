@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.riktigProsent
@@ -26,7 +27,8 @@ data class ForsikringBasertPåForsikringsvurdering(
 data class Forsikringsvurdering(
     val forsikringsvurderingId: UUID,
     val harForsikring: Boolean,
-    val dekning: Dekning?
+    val dekning: Dekning?,
+    val opphørsdato: LocalDate?
 ) {
     data class Dekning(
         val grad: Int,

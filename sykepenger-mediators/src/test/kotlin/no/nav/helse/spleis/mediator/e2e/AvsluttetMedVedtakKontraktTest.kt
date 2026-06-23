@@ -1,9 +1,11 @@
 package no.nav.helse.spleis.mediator.e2e
 
+import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.Forsikringsvurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.spleis.mediator.TestMessageFactory
@@ -208,8 +210,17 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             ventetid = 3.januar til 18.januar
         )
 
-        sendVilkårsgrunnlagSelvstendig(0)
-        sendYtelserSelvstendig(0)
+        val forsikringsvurderingId = UUID.randomUUID()
+        sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
+        sendYtelserSelvstendig(
+            vedtaksperiodeIndeks = 0,
+            forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingId = forsikringsvurderingId,
+                harForsikring = false,
+                dekning = null,
+                opphørsdato = null,
+            )
+        )
         sendSimuleringSelvstendig(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenningSelvstendig(0)
         sendUtbetaling()

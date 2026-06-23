@@ -40,7 +40,8 @@ internal class JordbrukerTest : AbstractDslTest() {
                     forsikringsvurdering = Forsikringsvurdering(
                         forsikringsvurderingId = UUID.randomUUID(),
                         harForsikring = true,
-                        dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17)
+                        dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
+                        opphørsdato = null,
                     )
                 )
                 håndterSimulering(1.vedtaksperiode)

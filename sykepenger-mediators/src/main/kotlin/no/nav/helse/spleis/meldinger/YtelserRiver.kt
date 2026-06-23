@@ -8,6 +8,7 @@ import no.nav.helse.spleis.Behov.Behovstype.Arbeidsavklaringspenger
 import no.nav.helse.spleis.Behov.Behovstype.Dagpenger
 import no.nav.helse.spleis.Behov.Behovstype.Foreldrepenger
 import no.nav.helse.spleis.Behov.Behovstype.Forsikringsvurdering
+import no.nav.helse.spleis.Behov.Behovstype.ForsikringsvurderingResultat
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForBeregning
 import no.nav.helse.spleis.Behov.Behovstype.Institusjonsopphold
 import no.nav.helse.spleis.Behov.Behovstype.Omsorgspenger
@@ -83,6 +84,17 @@ internal class YtelserRiver(
             interestedIn("daglig", JsonNode::asDouble)
             interestedIn("måndelig", JsonNode::asDouble)
             interestedIn("årlig", JsonNode::asDouble)
+        }
+
+        message.interestedIn("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}") {
+            message.requireKey(
+                "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.forsikringsvurderingId",
+                "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.harForsikring"
+            )
+            message.interestedIn("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning") {
+                message.requireKey("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning.grad", "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning.iVentetid")
+            }
+            message.interestedIn("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.opphørsdato")
         }
 
         message.interestedIn("@løsning.${Forsikringsvurdering.utgåendeNavn}") {

@@ -46,7 +46,8 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                     TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
                     TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.FRILANSER)
                 ),
-                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+                forsikringsvurderingId = null,
             )
         )
     }
@@ -76,7 +77,8 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                     )
                 ),
                 arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)),
-                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+                forsikringsvurderingId = null,
             )
         )
     }

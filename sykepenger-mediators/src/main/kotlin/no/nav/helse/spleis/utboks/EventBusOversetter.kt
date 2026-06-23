@@ -669,6 +669,11 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 "fom" to event.beregningsperiode.start,
                 "tom" to event.beregningsperiode.endInclusive
             )),
+            event.forsikringsvurderingId?.let { forsikringsvurderingId ->
+                Behov(Behov.Behovstype.ForsikringsvurderingResultat, mapOf(
+                    "forsikringsvurderingId" to forsikringsvurderingId,
+                ))
+            },
             Behov(
                 Behov.Behovstype.Forsikringsvurdering, mapOf(
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
