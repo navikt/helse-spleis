@@ -97,6 +97,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_27
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_28
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
@@ -1207,8 +1208,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun <T> håndterHarFlereArbeidsforhold(arbeidsgiveropplysninger: T, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
-        val harFlereArbeidsforhold = arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.HarFlereArbeidsforhold>().singleOrNull() ?: return emptyList()
-        harFlereArbeidsforhold.valider(aktivitetslogg)
+        if (arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.HarFlereArbeidsforhold>().isEmpty()) return emptyList()
+        aktivitetslogg.medFeilSomVarslerHvisNødvendig().funksjonellFeil(RV_IM_28)
         return listOf(Revurderingseventyr.harFlereArbeidsforhold(arbeidsgiveropplysninger, periode))
     }
 

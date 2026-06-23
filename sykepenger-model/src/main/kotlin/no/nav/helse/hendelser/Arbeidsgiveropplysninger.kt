@@ -44,9 +44,7 @@ sealed interface Arbeidsgiveropplysning {
         internal fun valider(aktivitetslogg: IAktivitetslogg) = begrunnelse.valider(aktivitetslogg)
     }
 
-    data object HarFlereArbeidsforhold: Arbeidsgiveropplysning {
-        internal fun valider(aktivitetslogg: IAktivitetslogg) = aktivitetslogg.varsel(RV_IM_28)
-    }
+    data object HarFlereArbeidsforhold: Arbeidsgiveropplysning
 
     data object IkkeNyArbeidsgiverperiode : Arbeidsgiveropplysning
 
