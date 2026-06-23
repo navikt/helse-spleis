@@ -268,6 +268,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
             arbeidsforhold = arbeidsforhold,
+            forsikringsvurderingId = null,
         )
     }
 

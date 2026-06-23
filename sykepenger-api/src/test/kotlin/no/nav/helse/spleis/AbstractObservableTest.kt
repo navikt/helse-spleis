@@ -179,6 +179,7 @@ internal abstract class AbstractObservableTest {
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
         inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
         arbeidsforhold = arbeidsforhold,
+        forsikringsvurderingId = null,
     )
 
     protected fun ytelser(
