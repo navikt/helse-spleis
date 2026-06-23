@@ -1202,7 +1202,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> {
         if (arbeidsgiveropplysninger.filterIsInstance<Arbeidsgiveropplysning.OpphørAvNaturalytelser>().isEmpty()) return emptyList()
-        aktivitetslogg.funksjonellFeil(RV_IM_7)
+        aktivitetslogg.medFeilSomVarslerHvisNødvendig().funksjonellFeil(RV_IM_7)
         return emptyList()
     }
 

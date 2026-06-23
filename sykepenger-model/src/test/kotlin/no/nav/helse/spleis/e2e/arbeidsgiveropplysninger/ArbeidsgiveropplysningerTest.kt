@@ -566,6 +566,22 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
+    fun `oppgir at det er opphør av naturalytelser i korrigerende arbeidsgiveropplysninger`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterKorrigerteArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList()),
+                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                OpphørAvNaturalytelser,
+            )
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_IM_7, RV_IM_4)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        }
+    }
+
+    @Test
     fun `oppgir at de har utbetalt redusert beløp med arbeidsgiverperiode flyttet litt frem`() {
         a1 {
             håndterSøknad(januar)
