@@ -533,7 +533,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         val behov = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Foreldrepenger)
         val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
         val behandlingId = behov.path("behandlingId").asText().toUUID()
-        assertEquals(yrkesaktivitetstype == "SELVSTENDIG", testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Forsikringsvurdering))
         assertEquals(forsikringsvurdering != null, testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.ForsikringsvurderingResultat))
         val (_, message) = meldingsfabrikk.lagYtelser(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
@@ -550,22 +549,6 @@ internal abstract class AbstractEndToEndMediatorTest {
             yrkesaktivitetstype = yrkesaktivitetstype
         )
         testRapid.sendTestMessage(message)
-    }
-
-    protected fun sendYtelserSelvstendig(
-        vedtaksperiodeIndeks: Int,
-        pleiepenger: List<PleiepengerTestdata> = emptyList(),
-        omsorgspenger: List<OmsorgspengerTestdata> = emptyList(),
-        opplæringspenger: List<OpplæringspengerTestdata> = emptyList(),
-        institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
-        arbeidsavklaringspengerV2: Arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
-        dagpengerV2: Dagpenger = Dagpenger(emptyList()),
-        inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
-        forsikringsvurdering: Forsikringsvurdering? = null,
-        orgnummer: String = "SELVSTENDIG"
-    ) {
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Forsikringsvurdering))
-        sendYtelser(vedtaksperiodeIndeks, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpengerV2, inntekterForBeregning, forsikringsvurdering, orgnummer)
     }
 
     private fun sendUtbetalingshistorikk(

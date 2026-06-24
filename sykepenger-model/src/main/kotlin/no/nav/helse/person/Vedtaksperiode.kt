@@ -2943,8 +2943,6 @@ internal class Vedtaksperiode private constructor(
             periodeForDagpenger = periode.start.minusMonths(2) til periode.endInclusive,
             beregningsperiode = beregningsperiode,
             forsikringsvurderingId = (vilkårsgrunnlag as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.forsikringsvurderingId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            trengerInformasjonOmSelvstendigForsikring = yrkesaktivitet.yrkesaktivitetstype is Selvstendig
         )
         aktivitetslogg.info("Sender ut event om at vi trenger informasjon til beregning")
         eventBus.trengerInformasjonTilBeregning(event)

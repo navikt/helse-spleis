@@ -140,14 +140,15 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
 
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelserSelvstendig(
+        sendYtelser(
             vedtaksperiodeIndeks = 0,
             forsikringsvurdering = Forsikringsvurdering(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
-            )
+            ),
+            orgnummer = "SELVSTENDIG"
         )
         sendSimuleringSelvstendig(0, SimuleringMessage.Simuleringstatus.OK)
         val behov = testRapid.inspektør.etterspurteBehov(Godkjenning)

@@ -674,11 +674,6 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                     "forsikringsvurderingId" to forsikringsvurderingId,
                 ))
             },
-            Behov(
-                Behov.Behovstype.Forsikringsvurdering, mapOf(
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "spesielleYrkesgrupper" to emptyList<String>()
-            )).takeIf { event.trengerInformasjonOmSelvstendigForsikring }
         )
 
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer

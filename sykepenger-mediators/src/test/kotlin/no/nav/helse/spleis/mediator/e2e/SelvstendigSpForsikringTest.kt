@@ -17,15 +17,15 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelserSelvstendig(
-            0,
-            orgnummer = "SELVSTENDIG",
+        sendYtelser(
+            vedtaksperiodeIndeks = 0,
             forsikringsvurdering = Forsikringsvurdering(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = true,
                 dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1),
                 opphørsdato = null,
-            )
+            ),
+            orgnummer = "SELVSTENDIG"
         )
         sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
         assertTilstander(
@@ -45,15 +45,15 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelserSelvstendig(
-            0,
-            orgnummer = "SELVSTENDIG",
+        sendYtelser(
+            vedtaksperiodeIndeks = 0,
             forsikringsvurdering = Forsikringsvurdering(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = true,
                 dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1),
                 opphørsdato = null,
-            )
+            ),
+            orgnummer = "SELVSTENDIG"
         )
         assertTilstander(
             0,

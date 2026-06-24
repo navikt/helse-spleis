@@ -815,9 +815,6 @@ interface EventSubscription {
         val periodeForDagpenger: Periode,
         val beregningsperiode: Periode,
         val forsikringsvurderingId: UUID?,
-        // TODO: Fjern disse feltene på sikt med gammelt behov
-        val trengerInformasjonOmSelvstendigForsikring: Boolean,
-        val skjæringstidspunkt: LocalDate
     ): Event
 
     data class TrengerInitiellHistorikkFraInfotrygdEvent(

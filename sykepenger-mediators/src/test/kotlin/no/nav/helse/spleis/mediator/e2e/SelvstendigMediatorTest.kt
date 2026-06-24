@@ -103,9 +103,10 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             dekning = null,
             opphørsdato = null,
         )
-        sendYtelserSelvstendig(
+        sendYtelser(
             vedtaksperiodeIndeks = 0,
-            forsikringsvurdering = forsikringsvurdering
+            forsikringsvurdering = forsikringsvurdering,
+            orgnummer = "SELVSTENDIG"
         )
         sendSimuleringSelvstendig(0)
         assertTilstander(
@@ -119,9 +120,10 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         )
 
         sendOverstyringTidslinjeSelvstendig((3.januar til 26.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
-        sendYtelserSelvstendig(
+        sendYtelser(
             vedtaksperiodeIndeks = 0,
-            forsikringsvurdering = forsikringsvurdering
+            forsikringsvurdering = forsikringsvurdering,
+            orgnummer = "SELVSTENDIG"
         )
         sendSimuleringSelvstendig(0)
         sendUtbetalingsgodkjenningSelvstendig(0, true)
@@ -151,14 +153,15 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelserSelvstendig(
+        sendYtelser(
             vedtaksperiodeIndeks = 0,
             forsikringsvurdering = Forsikringsvurdering(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
-            )
+            ),
+            orgnummer = "SELVSTENDIG"
         )
         sendSimuleringSelvstendig(0)
         assertTilstander(
@@ -174,14 +177,15 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendOverstyringTidslinjeSelvstendig((1.januar til 2.januar).map { ManuellOverskrivingDag(it, Dagtype.MeldingTilNavdag) })
 
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelserSelvstendig(
+        sendYtelser(
             vedtaksperiodeIndeks = 0,
             forsikringsvurdering = Forsikringsvurdering(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
-            )
+            ),
+            orgnummer = "SELVSTENDIG"
         )
         sendSimuleringSelvstendig(0)
         sendUtbetalingsgodkjenningSelvstendig(0, true)
@@ -214,14 +218,15 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.BARNEPASSER)
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelserSelvstendig(
+        sendYtelser(
             vedtaksperiodeIndeks = 0,
             forsikringsvurdering = Forsikringsvurdering(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
-            )
+            ),
+            orgnummer = "SELVSTENDIG"
         )
         sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
         sendUtbetalingsgodkjenningSelvstendig(0, orgnummer = "SELVSTENDIG")
@@ -246,14 +251,15 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.BARNEPASSER)
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelserSelvstendig(
+        sendYtelser(
             vedtaksperiodeIndeks = 0,
             forsikringsvurdering = Forsikringsvurdering(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
-            )
+            ),
+            orgnummer = "SELVSTENDIG"
         )
         sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
         assertTilstander(
@@ -267,7 +273,10 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         )
 
         sendOverstyringTidslinjeSelvstendig((3.januar til 26.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) }, orgnummer = "SELVSTENDIG")
-        sendYtelserSelvstendig(0, orgnummer = "SELVSTENDIG")
+        sendYtelser(
+            vedtaksperiodeIndeks = 0,
+            orgnummer = "SELVSTENDIG"
+        )
         sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
         sendUtbetalingsgodkjenningSelvstendig(0, true, orgnummer = "SELVSTENDIG")
         sendUtbetaling()
@@ -326,14 +335,15 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelserSelvstendig(
+        sendYtelser(
             vedtaksperiodeIndeks = 0,
             forsikringsvurdering = Forsikringsvurdering(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
-            )
+            ),
+            orgnummer = "SELVSTENDIG"
         )
         sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
         assertTilstander(
@@ -358,14 +368,15 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         )
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelserSelvstendig(
+        sendYtelser(
             vedtaksperiodeIndeks = 0,
             forsikringsvurdering = Forsikringsvurdering(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
-            )
+            ),
+            orgnummer = "SELVSTENDIG"
         )
         sendSimuleringSelvstendig(0)
         sendUtbetalingsgodkjenningSelvstendig(0)
@@ -394,14 +405,15 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         )
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelserSelvstendig(
+        sendYtelser(
             vedtaksperiodeIndeks = 0,
             forsikringsvurdering = Forsikringsvurdering(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
-            )
+            ),
+            orgnummer = "SELVSTENDIG"
         )
         sendSimuleringSelvstendig(0)
         sendUtbetalingsgodkjenningSelvstendig(0)
@@ -424,14 +436,15 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = periode.start, tom = periode.endInclusive, sykmeldingsgrad = 100)), ventetid = periode.start til periode.start.plusDays(15), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelserSelvstendig(
+        sendYtelser(
             vedtaksperiodeIndeks = 0,
             forsikringsvurdering = Forsikringsvurdering(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
-            )
+            ),
+            orgnummer = "SELVSTENDIG"
         )
         sendSimuleringSelvstendig(0)
         sendUtbetalingsgodkjenningSelvstendig(0)

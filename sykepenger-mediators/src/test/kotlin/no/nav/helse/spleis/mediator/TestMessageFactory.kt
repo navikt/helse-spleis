@@ -976,9 +976,6 @@ internal class TestMessageFactory(
             "InntekterForBeregning",
             "DagpengerV2"
         )
-        if (yrkesaktivitetstype == "SELVSTENDIG") {
-            behovliste.add("Forsikringsvurdering")
-        }
 
         if (forsikringsvurdering != null) {
             behovliste.add("ForsikringsvurderingResultat")
@@ -1069,26 +1066,7 @@ internal class TestMessageFactory(
                         )
                     }
                 ))
-                .plus(forsikringsvurdering(forsikringsvurdering, yrkesaktivitetstype))
                 .plus(forsikringsvurderingResultat(forsikringsvurdering, yrkesaktivitetstype))
-        )
-    }
-
-    fun forsikringsvurdering(forsikringsvurdering: Forsikringsvurdering?, yrkesaktivitetstype: String): Map<String, Any> {
-        if (forsikringsvurdering == null || yrkesaktivitetstype != "SELVSTENDIG") return emptyMap()
-        return mapOf(
-            Behov.Behovstype.Forsikringsvurdering.utgåendeNavn to forsikringsvurdering.let { forsikringsvurdering ->
-                mapOf(
-                    "forsikringsvurderingId" to forsikringsvurdering.forsikringsvurderingId.toString(),
-                    "harForsikring" to forsikringsvurdering.harForsikring,
-                    "dekning" to forsikringsvurdering.dekning?.let { dekning ->
-                        mapOf(
-                            "grad" to dekning.grad,
-                            "fraDag" to dekning.fraDag
-                        )
-                    }
-                )
-            }
         )
     }
 
