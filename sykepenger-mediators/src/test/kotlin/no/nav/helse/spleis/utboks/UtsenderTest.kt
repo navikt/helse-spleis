@@ -25,7 +25,7 @@ class UtsenderTest {
             innhold = mapOf("feil" to "jeg skal feile")
         )
 
-        val okSubumsjon = UtgåendeMelding.nySubsumsjonsmelding(Personidentifikator(UNG_PERSON_FNR_2018)) {
+        val okSubumsjon = UtgåendeMelding.nySubsumsjonsmelding(Personidentifikator(UNG_PERSON_FNR_2018)) { _, _ ->
             mapOf("paragraf" to "1")
         }
 

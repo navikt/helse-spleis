@@ -3,6 +3,7 @@ package no.nav.helse.spleis.utboks
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -75,20 +76,25 @@ class UtgåendeMeldingTest {
 
     @Test
     fun `Mapper subsumsjonmelding`() {
-        val melding = UtgåendeMelding.nySubsumsjonsmelding(Personidentifikator(UNG_PERSON_FNR_2018)) { id ->
+        val melding = UtgåendeMelding.nySubsumsjonsmelding(Personidentifikator(UNG_PERSON_FNR_2018)) { id, tidsstempel ->
             mapOf(
                 "paragraf" to "1",
                 "subsumsjon" to mapOf(
                     "fodselsnummer" to UNG_PERSON_FNR_2018,
-                    "id" to id
+                    "id" to id,
+                    "tidsstempel" to tidsstempel
                 )
             )
         }
-        melding.assertStandardfelter("subsumsjon", medFødselsnummer = false)
+        melding.assertStandardfelter("subsumsjon")
         assertEquals("1", melding.json.path("paragraf").asText())
         assertEquals(UNG_PERSON_FNR_2018, melding.json.path("subsumsjon").path("fodselsnummer").asText())
         assertEquals(UUID.fromString(melding.json.path("@id").asText()), UUID.fromString(melding.json.path("subsumsjon").path("id").asText()))
         assertEquals(UtgåendeMelding.Mottaker.SUBSUMSJON, melding.mottaker)
+
+        val tidsstempelZoned = ZonedDateTime.parse(melding.json.path("subsumsjon").path("tidsstempel").asText())
+        val tidsstempelUtc = Instant.parse(melding.json.path("@opprettetUTC").asText()).atZone(tidsstempelZoned.zone)
+        assertEquals(tidsstempelZoned, tidsstempelUtc)
     }
 
     @Test

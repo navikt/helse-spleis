@@ -7,6 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.UUID
 import kotlin.collections.associate
 import kotlin.collections.plus
@@ -41,12 +42,17 @@ data class UtgåendeMelding(
 
         @OptIn(ExperimentalUuidApi::class)
         private fun nyUuidv7() = Uuid.generateV7().toString()
-        private fun standardfelter(personidentifikator: Personidentifikator?): Map<String, Any> {
-            val opprettet = LocalDateTime.now(ZoneId.systemDefault())
-            val opprettetUTC = opprettet.atZone(ZoneId.systemDefault()).toInstant()
+
+        private class Tidsstempler() {
+            val oslo: LocalDateTime = LocalDateTime.now(ZoneId.systemDefault())
+            val zoned = oslo.atZone(ZoneId.systemDefault())
+            val utc = zoned.toInstant()
+        }
+
+        private fun standardfelter(personidentifikator: Personidentifikator?, tidsstempler: Tidsstempler = Tidsstempler()): Map<String, Any> {
             val tidsstempler = mapOf(
-                "@opprettet" to "$opprettet",
-                "@opprettetUTC" to "$opprettetUTC"
+                "@opprettet" to "${tidsstempler.oslo}",
+                "@opprettetUTC" to "${tidsstempler.utc}"
             )
             return when (personidentifikator) {
                 null -> tidsstempler
@@ -67,9 +73,10 @@ data class UtgåendeMelding(
         fun nyRapidmelding(personidentifikator: Personidentifikator, eventName: String, innhold: Map<String, Any>) = ny(personidentifikator, eventName, innhold, Mottaker.RAPID)
         fun nyRapidmelding(eventName: String, innhold: Map<String, Any>) = ny(null, eventName, innhold, Mottaker.RAPID)
 
-        fun nySubsumsjonsmelding(personidentifikator: Personidentifikator, innhold: (id: String) -> Map<String, Any>): UtgåendeMelding {
+        fun nySubsumsjonsmelding(personidentifikator: Personidentifikator, innhold: (id: String, tidsstempel: ZonedDateTime) -> Map<String, Any>): UtgåendeMelding {
             val id = nyUuidv7()
-            val innholdMedStandardfelter = innhold(id) + standardfelter(personidentifikator)
+            val tidsstempler = Tidsstempler()
+            val innholdMedStandardfelter = innhold(id, tidsstempler.zoned) + standardfelter(personidentifikator, tidsstempler)
             val json = JsonMessage.newMessage("subsumsjon", innholdMedStandardfelter) { id }.toJson()
             return UtgåendeMelding(
                 key = personidentifikator.toString(),
