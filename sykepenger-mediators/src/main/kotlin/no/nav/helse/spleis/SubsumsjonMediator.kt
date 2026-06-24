@@ -1,14 +1,13 @@
 package no.nav.helse.spleis
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import java.time.LocalDateTime
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.spleis.SubsumsjonMediator.SubsumsjonEvent.Companion.paragrafVersjonFormaterer
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
@@ -60,54 +59,53 @@ internal class SubsumsjonMediator(
         subsumsjoner
             .map { subsumsjonMelding(it) }
             .forEach {
-                val jsonbody = it.toJson()
+                val jsonbody = it.json.toString()
                 sikkerLogg.info("som følge av hendelse id=${this.message.meldingsporing.id} sender subsumsjon: $jsonbody")
-                producer.send(message.meldingsporing.fødselsnummer, jsonbody)
+                producer.send(checkNotNull(it.key), jsonbody)
             }
     }
 
-    private fun subsumsjonMelding(event: SubsumsjonEvent): JsonMessage {
-        return JsonMessage.newMessage("subsumsjon", mapOf(
-            "@id" to event.id,
-            "@opprettet" to LocalDateTime.now(),
-            "@forårsaket_av" to mapOf(
-                "id" to message.meldingsporing.id
-            ),
-            "subsumsjon" to buildMap {
-                this["id"] = event.id
-                this["eventName"] = "subsumsjon"
-                this["tidsstempel"] = ZonedDateTime.now()
-                this["versjon"] = "1.1.0"
-                this["kilde"] = "spleis"
-                this["versjonAvKode"] = versjonAvKode
-                this["fodselsnummer"] = event.fødselsnummer
-                this["vedtaksperiodeId"] = event.vedtaksperiodeId
-                this["behandlingId"] = event.behandlingId
-                this["sporing"] = buildMap {
-                    this["organisasjonsnummer"] = listOf(event.organisasjonsnummer)
-                    if (event.vedtaksperiodeId != null) this["vedtaksperiode"] = listOf(event.vedtaksperiodeId.toString())
+    private fun subsumsjonMelding(event: SubsumsjonEvent): UtgåendeMelding {
+        return UtgåendeMelding.nySubsumsjonsmelding(Personidentifikator(event.fødselsnummer)) { id, tidsstempel ->
+            mapOf(
+                "@forårsaket_av" to mapOf(
+                    "id" to message.meldingsporing.id
+                ),
+                "subsumsjon" to buildMap {
+                    this["id"] = id
+                    this["eventName"] = "subsumsjon"
+                    this["tidsstempel"] = tidsstempel
+                    this["versjon"] = "1.1.0"
+                    this["kilde"] = "spleis"
+                    this["versjonAvKode"] = versjonAvKode
+                    this["fodselsnummer"] = event.fødselsnummer
+                    this["vedtaksperiodeId"] = event.vedtaksperiodeId
+                    this["behandlingId"] = event.behandlingId
+                    this["sporing"] = buildMap {
+                        this["organisasjonsnummer"] = listOf(event.organisasjonsnummer)
+                        if (event.vedtaksperiodeId != null) this["vedtaksperiode"] = listOf(event.vedtaksperiodeId.toString())
+                    }
+                    this["lovverk"] = event.lovverk
+                    this["lovverksversjon"] = event.ikrafttredelse
+                    this["paragraf"] = event.paragraf
+                    this["input"] = event.input
+                    this["output"] = event.output
+                    this["utfall"] = event.utfall
+                    if (event.ledd != null) {
+                        this["ledd"] = event.ledd
+                    }
+                    if (event.punktum != null) {
+                        this["punktum"] = event.punktum
+                    }
+                    if (event.bokstav != null) {
+                        this["bokstav"] = event.bokstav
+                    }
                 }
-                this["lovverk"] = event.lovverk
-                this["lovverksversjon"] = event.ikrafttredelse
-                this["paragraf"] = event.paragraf
-                this["input"] = event.input
-                this["output"] = event.output
-                this["utfall"] = event.utfall
-                if (event.ledd != null) {
-                    this["ledd"] = event.ledd
-                }
-                if (event.punktum != null) {
-                    this["punktum"] = event.punktum
-                }
-                if (event.bokstav != null) {
-                    this["bokstav"] = event.bokstav
-                }
-            }
-        ))
+            )
+        }
     }
 
     data class SubsumsjonEvent(
-        val id: UUID = UUID.randomUUID(),
         val fødselsnummer: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID?,
