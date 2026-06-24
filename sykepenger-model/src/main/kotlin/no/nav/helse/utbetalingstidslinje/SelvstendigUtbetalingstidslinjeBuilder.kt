@@ -1,8 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.person.Avslagstidslinje
+import no.nav.helse.person.DagerUtenNavAnsvaravklaring
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Dag
@@ -11,12 +12,12 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Prosentdel.Companion.riktigProsent
 import no.nav.helse.økonomi.Økonomi
 
 internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
-    private val dekningsgrad: Prosentdel,
-    private val ventetid: Periode?,
-    private val dagerNavOvertarAnsvar: List<Periode>,
+    private val forsikringsvurderingResultat: ForsikringsvurderingResultat?,
+    private val dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaring,
     private val avslagstidslinje: Avslagstidslinje
 ) : UtbetalingstidslinjeBuilder {
     private fun medInntektHvisFinnes(dato: LocalDate, grad: Prosentdel, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje): Økonomi {
@@ -27,11 +28,19 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         return Økonomi.inntekt(
             sykdomsgrad = grad,
             aktuellDagsinntekt = næringsinntekt,
-            dekningsgrad = dekningsgrad,
+            dekningsgrad = (
+                forsikringsvurderingResultat
+                    ?.takeUnless { it.erOpphørtPå(dato) }
+                    ?.dekning?.grad
+                    ?: 80
+                ).riktigProsent,
             refusjonsbeløp = INGEN,
             inntektjustering = (inntektjusteringer[dato] as? Beløpsdag)?.beløp ?: INGEN
         )
     }
+
+    private fun ForsikringsvurderingResultat.erOpphørtPå(dato: LocalDate): Boolean =
+        opphørsdato != null && dato > opphørsdato
 
     private fun Utbetalingstidslinje.Builder.avslagsdagEller(dato: LocalDate, sykdomsgrad: Prosentdel, inntekt: Inntekt, inntektjusteringer: Beløpstidslinje, eller: () -> Unit) = when (val avslagsdag = avslagstidslinje[dato]) {
         null -> eller()
@@ -47,7 +56,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
     override fun result(sykdomstidslinje: Sykdomstidslinje, inntekt: Inntekt, inntektjusteringer: Beløpstidslinje): Utbetalingstidslinje {
         val builder = Utbetalingstidslinje.Builder()
         sykdomstidslinje.forEach { dag ->
-            val erVentetid = ventetid?.contains(dag.dato) == true
+            val erVentetid = dagerUtenNavAnsvar.periode?.contains(dag.dato) == true
             when (dag) {
                 is Dag.Arbeidsdag -> builder.avslagsdagEller(dag.dato, 0.prosent, inntekt, inntektjusteringer) {
                     arbeidsdag(builder, dag.dato, inntekt, inntektjusteringer)
@@ -110,7 +119,11 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
     }
 
     private fun navSkalUtbetaleVentetidsDag(dato: LocalDate): Boolean {
-        return dagerNavOvertarAnsvar.any { it.contains(dato) }
+        if (!dagerUtenNavAnsvar.dager.any { dato in it }) return false
+
+        return forsikringsvurderingResultat != null
+            && !forsikringsvurderingResultat.erOpphørtPå(dato)
+            && forsikringsvurderingResultat.dekning?.iVentetid == true
     }
 
     private fun helg(builder: Utbetalingstidslinje.Builder, dato: LocalDate, grad: Prosentdel, næringsinntekt: Inntekt, inntektjusteringer: Beløpstidslinje) {

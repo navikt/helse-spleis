@@ -89,7 +89,6 @@ import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar.Companion.finn
 import no.nav.helse.utbetalingstidslinje.SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.VentedagerForVedtaksperiode
-import no.nav.helse.økonomi.Prosentdel.Companion.riktigProsent
 
 internal class Behandlinger private constructor(behandlinger: List<Behandling>) : Aktivitetskontekst {
     internal constructor() : this(emptyList())
@@ -176,15 +175,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal fun utbetalingstidslinjeBuilderForSelvstendig(forsikringsvurderingResultat: ForsikringsvurderingResultat?): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
-        val dekningsgrad = (forsikringsvurderingResultat?.dekning?.grad ?: 80).riktigProsent
-
-        val dagerNavOvertarAnsvar =
-            behandlinger.last().beregnDagerNavOvertarAnsvarForSelvstendig(forsikringsvurderingResultat)
-
         return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
-            dekningsgrad = dekningsgrad,
-            ventetid = sisteBehandling.dagerUtenNavAnsvar.periode,
-            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+            forsikringsvurderingResultat = forsikringsvurderingResultat,
+            dagerUtenNavAnsvar = sisteBehandling.dagerUtenNavAnsvar,
             avslagstidslinje = avslagstidslinje
         )
     }
