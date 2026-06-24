@@ -34,7 +34,9 @@ internal class Utboks(private val utsender: Utsender) {
         sikkerLogg.info("Sender ${utgåendeMeldinger.size} meldinger fra utboksen")
         message.logOutgoingMessages(sikkerLogg, utgåendeMeldinger.size)
         utgåendeMeldinger.loggSending()
-        sendMedMessageContext(messageContext, utgåendeMeldinger)
+        val (tilRapid, tilSubsumsjon) = utgåendeMeldinger.partition { it.mottaker == UtgåendeMelding.Mottaker.RAPID }
+        sendMedMessageContext(messageContext, tilRapid)
+        utsender.send(tilSubsumsjon)
         // TODO: Marker OK-meldingene sendt i DB
     }
 

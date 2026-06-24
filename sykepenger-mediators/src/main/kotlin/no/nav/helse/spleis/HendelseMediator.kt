@@ -600,7 +600,7 @@ internal class HendelseMediator(
 
         person(personidentifikator, message, context, historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person ->
             handler(eventBus, person, aktivitetslogg)
-            leggIUtboks(context, message, eventBus, datadelingMediator)
+            leggIUtboks(context, message, eventBus, datadelingMediator, subsumsjonMediator)
         }
 
         ferdigstill(subsumsjonMediator, aktivitetslogg)
@@ -640,13 +640,15 @@ internal class HendelseMediator(
         context: BehandlingContext,
         message: HendelseMessage,
         eventBus: EventBus,
-        datadelingMediator: DatadelingMediator
+        datadelingMediator: DatadelingMediator,
+        subsumsjonMediator: SubsumsjonMediator
     ) {
         EventBusOversetter(eventBus, message)
             .utgåendeMeldinger()
             .map { utgåendeMelding -> context.leggIUtboks { utgåendeMelding } }
 
         datadelingMediator.leggIUtboks(context)
+        subsumsjonMediator.leggIUtboks(context)
     }
 
     private fun ferdigstill(

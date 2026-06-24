@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import java.time.format.DateTimeFormatter
 import java.util.*
 import no.nav.helse.Personidentifikator
+import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.spleis.SubsumsjonMediator.SubsumsjonEvent.Companion.paragrafVersjonFormaterer
@@ -53,7 +54,18 @@ internal class SubsumsjonMediator(
         )
     }
 
+    fun leggIUtboks(context: BehandlingContext) {
+        if (Toggle.SubsumsjonsmeldingerViaUtboks.disabled) return
+        if (subsumsjoner.isEmpty()) return
+        subsumsjoner.forEach { subsumsjon ->
+            context.leggIUtboks {
+                subsumsjonMelding(subsumsjon)
+            }
+        }
+    }
+
     fun ferdigstill(producer: Subsumsjonproducer) {
+        if (Toggle.SubsumsjonsmeldingerViaUtboks.enabled) return
         if (subsumsjoner.isEmpty()) return
         logg.info("som følge av hendelse id=${message.meldingsporing.id} sendes ${subsumsjoner.size} subsumsjonsmeldinger på rapid")
         subsumsjoner
