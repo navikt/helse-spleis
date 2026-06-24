@@ -7,7 +7,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
-internal class Utboks {
+internal class Utboks(private val utsender: Utsender) {
     private val utgåendeMeldinger = mutableListOf<UtgåendeMelding>()
     private var tilstand: Tilstand = Tilstand.Åpen
 

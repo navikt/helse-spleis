@@ -1,6 +1,5 @@
 package no.nav.helse.spleis
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.FailedMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
@@ -113,12 +112,14 @@ import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
 import no.nav.helse.spleis.utboks.Utboks.Companion.fireAndForget
 import no.nav.helse.spleis.utboks.UtgåendeMelding
+import no.nav.helse.spleis.utboks.Utsender
 import org.slf4j.LoggerFactory
 
 internal class MessageMediator(
     rapidsConnection: RapidsConnection,
     private val hendelseMediator: IHendelseMediator,
-    private val hendelseRepository: HendelseRepository
+    private val hendelseRepository: HendelseRepository,
+    private val utsender: Utsender
 ) : IMessageMediator {
     private companion object {
         private val log = LoggerFactory.getLogger(MessageMediator::class.java)
@@ -189,7 +190,7 @@ internal class MessageMediator(
     override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
         try {
             measureTime {
-                val behandlingContext = BehandlingContext(context, message)
+                val behandlingContext = BehandlingContext(context, message, utsender)
                 messageRecognized = true
                 message.logRecognized(log, sikkerLogg)
                 if (hendelseRepository.erBehandlet(message.meldingsporing.id)) return message.logDuplikat(sikkerLogg)

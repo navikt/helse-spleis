@@ -15,6 +15,7 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.monitorering.MonitoreringRiver
 import no.nav.helse.spleis.monitorering.RegelmessigAvstemming
+import no.nav.helse.spleis.utboks.Utsender
 
 val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, PrometheusRegistry.defaultRegistry, Clock.SYSTEM)
 
@@ -39,12 +40,18 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
         subsumsjonsproducer = subsumsjonsproducer
     )
 
+    private val utsender = Utsender.KafkaUtsender(factory.createProducer(), vedFeil = {
+        stop()
+        error("Feil ved utsending av utsending. Se sikkerlogg for detaljer.")
+    })
+
     init {
         rapidsConnection.register(this)
         MessageMediator(
             rapidsConnection = rapidsConnection,
             hendelseMediator = hendelseMediator,
-            hendelseRepository = hendelseRepository
+            hendelseRepository = hendelseRepository,
+            utsender = utsender
         )
         MonitoreringRiver(rapidsConnection, RegelmessigAvstemming { personDao.manglerAvstemming() })
     }

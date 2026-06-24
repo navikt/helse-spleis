@@ -6,13 +6,15 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.utboks.Utboks
 import no.nav.helse.spleis.utboks.UtgåendeMelding
+import no.nav.helse.spleis.utboks.Utsender
 
-internal data class BehandlingContext(
+internal class BehandlingContext(
     val messageContext: MessageContext,
-    private val message: HendelseMessage
+    private val message: HendelseMessage,
+    utsender: Utsender
 ) {
     private val personidentifikator = Personidentifikator(message.meldingsporing.fødselsnummer)
-    private val utboks = Utboks()
+    private val utboks = Utboks(utsender)
 
     fun sendMeldingerIUtboks() = utboks.send(messageContext, message)
     fun lagreMeldingerIUtboks(connection: Connection) = utboks.lagre(connection, message)

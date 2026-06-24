@@ -14,6 +14,7 @@ import no.nav.helse.spleis.DatadelingMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
+import no.nav.helse.spleis.utboks.TestUtsender
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -96,7 +97,7 @@ internal class DatadelingMediatorTest {
     }
 
     private fun DatadelingMediator.ferdigstill() {
-        val behandlingContext = BehandlingContext(testRapid, eksempelmelding)
+        val behandlingContext = BehandlingContext(testRapid, eksempelmelding, TestUtsender())
         leggIUtboks(behandlingContext)
         behandlingContext.sendMeldingerIUtboks()
     }

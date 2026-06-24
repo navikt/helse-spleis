@@ -66,6 +66,7 @@ import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel
 import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.spleis.utboks.TestUtsender
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -116,7 +117,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         messageMediator = MessageMediator(
             rapidsConnection = testRapid,
             hendelseMediator = hendelseMediator,
-            hendelseRepository = hendelseRepository
+            hendelseRepository = hendelseRepository,
+            utsender = TestUtsender()
         )
 
         testRapid.observer(InntektsmeldingerReplayObserver(testRapid, dataSource.ds))

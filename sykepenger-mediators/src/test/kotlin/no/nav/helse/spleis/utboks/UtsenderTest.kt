@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.utboks
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import java.time.Instant
 import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FNR_2018
@@ -10,6 +9,8 @@ import no.nav.helse.spleis.utboks.UtgåendeMeldingTest.Companion.nyUuidv7
 import org.junit.jupiter.api.assertThrows
 
 class UtsenderTest {
+
+    private val testUtsender = TestUtsender()
 
     @Test
     fun `Meldinger som går bra, og meldinger som går leit`() {
@@ -35,7 +36,7 @@ class UtsenderTest {
             mottaker = UtgåendeMelding.Mottaker.RAPID
         )
 
-        val (sendt, ok, feil) = enTøyseteUtsender.send(listOf(okMelding, feilMelding, okSubumsjon, okMeldingUtenKey))
+        val (sendt, ok, feil) = testUtsender.send(listOf(okMelding, feilMelding, okSubumsjon, okMeldingUtenKey))
         assertEquals(3, ok.size)
         assertEquals(1, feil.size)
 
@@ -56,26 +57,15 @@ class UtsenderTest {
             val melding2 = melding1.copy()
 
             val error = assertThrows<IllegalStateException> {
-                enTøyseteUtsender.send(listOf(melding1, melding2))
+                testUtsender.send(listOf(melding1, melding2))
             }
 
             assertEquals("Duplikate id'er i utgående meldinger", error.message)
         }
 
         private companion object {
-
             private fun UtgåendeMelding.stappInnSendt(sendt: Instant) = copy(json = json.apply {
                 put("@sendt", sendt.toString())
             })
-
-            private val enTøyseteUtsender = object : Utsender() {
-
-                override fun utførSending(utgåendeMeldinger: List<UtgåendeMelding>, sendt: Instant): Pair<List<UtgåendeMelding>, List<UtgåendeMelding>> {
-                    val (ok, feil) = utgåendeMeldinger.partition { utgåendeMelding ->
-                        utgåendeMelding.json.path("feil").isMissingOrNull()
-                    }
-                    return ok to feil
-                }
-            }
         }
 }
