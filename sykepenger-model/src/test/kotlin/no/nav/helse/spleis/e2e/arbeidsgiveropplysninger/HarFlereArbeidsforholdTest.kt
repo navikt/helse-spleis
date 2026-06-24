@@ -39,7 +39,7 @@ internal class HarFlereArbeidsforholdTest: AbstractDslTest() {
             assertEquals(1.vedtaksperiode, vpForkastetEvent.vedtaksperiodeId)
             assertEquals(emptyList<InntektsmeldingId>(), observatør.inntektsmeldingIkkeHåndtert)
 
-            assertEquals(listOf(imId to 1.vedtaksperiode), observatør.inntektsmeldingHåndtert) // TODO: Sjekk med HAG at det er greit å få denne håndtert-meldingen
+            assertEquals(listOf(imId to 1.vedtaksperiode), observatør.inntektsmeldingHåndtert)
         }
     }
 
