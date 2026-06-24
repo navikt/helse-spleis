@@ -9,7 +9,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
-import no.nav.helse.hendelser.Forsikringsvurdering
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Institusjonsopphold
@@ -89,13 +89,13 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     internal val forsikringsvurderingResultat = packet["@løsning.${Behovstype.ForsikringsvurderingResultat.utgåendeNavn}"]
         .takeUnless { it.isMissingOrNull() }
         ?.let { løsningJson ->
-            Forsikringsvurdering(
+            ForsikringsvurderingResultat(
                 forsikringsvurderingId = UUID.fromString(løsningJson["forsikringsvurderingId"].asText()),
                 harForsikring = løsningJson["harForsikring"].asBoolean(),
                 dekning = løsningJson["dekning"]?.takeUnless { it.isMissingOrNull() }?.let { dekningJson ->
-                    Forsikringsvurdering.Dekning(
+                    ForsikringsvurderingResultat.Dekning(
                         grad = dekningJson["grad"].asInt(),
-                        fraDag = if (dekningJson["iVentetid"].asBoolean()) 1 else 17
+                        iVentetid = dekningJson["iVentetid"].asBoolean()
                     )
                 },
                 opphørsdato = løsningJson["opphørsdato"]?.takeUnless { it.isNull }?.asLocalDate(),
@@ -130,7 +130,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             arbeidsavklaringspenger = arbeidsavklaringspengerV2,
             dagpenger = dagpengerV2,
             inntekterForBeregning = inntekterForBeregning,
-            forsikringsvurdering = forsikringsvurderingResultat,
+            forsikringsvurderingResultat = forsikringsvurderingResultat,
         )
 
     override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {

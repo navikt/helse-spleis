@@ -23,7 +23,7 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsavgjørelse
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
-import no.nav.helse.hendelser.Forsikring
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -89,7 +89,7 @@ import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar.Companion.finn
 import no.nav.helse.utbetalingstidslinje.SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.VentedagerForVedtaksperiode
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Prosentdel.Companion.riktigProsent
 
 internal class Behandlinger private constructor(behandlinger: List<Behandling>) : Aktivitetskontekst {
     internal constructor() : this(emptyList())
@@ -175,15 +175,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         )
     }
 
-    internal fun utbetalingstidslinjeBuilderForSelvstendig(forsikring: Forsikring?): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
-        val dekningsgrad = forsikring?.dekningsgrad() ?: 80.prosent
+    internal fun utbetalingstidslinjeBuilderForSelvstendig(forsikringsvurderingResultat: ForsikringsvurderingResultat?): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode {
+        val dekningsgrad = (forsikringsvurderingResultat?.dekning?.grad ?: 80).riktigProsent
 
-        val dagerNavOvertarAnsvar = when (forsikring?.navOvertarAnsvarForVentetid()) {
-            true -> behandlinger.last().dagerUtenNavAnsvar.dager
-
-            false,
-            null -> emptyList()
-        }
+        val dagerNavOvertarAnsvar =
+            if (forsikringsvurderingResultat?.dekning?.iVentetid == true) {
+                behandlinger.last().dagerUtenNavAnsvar.dager
+            } else {
+                emptyList()
+            }
 
         return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
             dekningsgrad = dekningsgrad,
@@ -1279,10 +1279,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 is Arbeidstaker,
                 Behandlingsporing.Yrkesaktivitet.Frilans -> null
 
-                Behandlingsporing.Yrkesaktivitet.Selvstendig -> beregning.forsikring?.let {
-                    if (it.navOvertarAnsvarForVentetid()) dagerUtenNavAnsvar.dager
-                    else emptyList()
-                }
+                Behandlingsporing.Yrkesaktivitet.Selvstendig ->
+                    beregning.forsikringsvurderingResultat
+                        ?.takeIf { it.harForsikring }
+                        ?.let { forsikring ->
+                            if (forsikring.dekning?.iVentetid == true) dagerUtenNavAnsvar.dager
+                            else emptyList()
+                        }
             } ?: dagerNavOvertarAnsvar
 
             val faktaavklartInntektBruktVedBeregning: FaktaavklartInntekt? = when (yrkesaktivitet) {
@@ -1991,7 +1994,7 @@ internal data class BeregnetBehandling(
     val utbetalingstidslinje: Utbetalingstidslinje,
     val grunnlagsdata: VilkårsgrunnlagElement,
     val alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
-    val forsikring: Forsikring? = null
+    val forsikringsvurderingResultat: ForsikringsvurderingResultat? = null
 ) {
     fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,

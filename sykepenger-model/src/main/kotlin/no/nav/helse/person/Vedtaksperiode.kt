@@ -43,8 +43,7 @@ import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
-import no.nav.helse.hendelser.Forsikring
-import no.nav.helse.hendelser.ForsikringBasertPåForsikringsvurdering
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
@@ -1572,13 +1571,13 @@ internal class Vedtaksperiode private constructor(
         // steg 2: lag utbetalingstidslinjer for alle vedtaksperiodene
         val (beregningsperiode, perioderSomMåHensyntasVedBeregning) = perioderSomMåHensyntasVedBeregning()
         val inntektsperioder = ytelser.inntektsendringer()
-        val forsikring = ytelser.forsikringsvurdering?.let(ForsikringBasertPåForsikringsvurdering::fraLøsning)
+        val forsikringsvurderingResultat = ytelser.forsikringsvurderingResultat
         val uberegnetTidslinjePerArbeidsgiver = lagArbeidsgiverberegning(
             beregningsperiode = beregningsperiode,
             vedtaksperioder = perioderSomMåHensyntasVedBeregning,
             vilkårsgrunnlag = grunnlagsdata,
             inntektsperioder = inntektsperioder,
-            forsikring = forsikring
+            forsikringsvurderingResultat = forsikringsvurderingResultat
         )
         // steg 3: beregn alle utbetalingstidslinjer (avslå dager, beregne maksdato og utbetalingsbeløp)
         val harOpptjening = harOpptjening(grunnlagsdata)
@@ -1619,7 +1618,13 @@ internal class Vedtaksperiode private constructor(
         avslåtteDagerUtbetaltIInfotrygdObservatør.valider(aktivitetslogg)
         // steg 4.1: lag beregnede behandlinger
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
-        lagBeregnetBehandlinger(perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, beregnetTidslinjePerVedtaksperiode, inntektsperioder, forsikring)
+        lagBeregnetBehandlinger(
+            perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor,
+            grunnlagsdata = grunnlagsdata,
+            beregnetTidslinjePerVedtaksperiode = beregnetTidslinjePerVedtaksperiode,
+            inntektsperioder = inntektsperioder,
+            forsikringsvurderingResultat = forsikringsvurderingResultat
+        )
 
         /* steg 4.2 lag utbetalinger */
         perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
@@ -1627,7 +1632,17 @@ internal class Vedtaksperiode private constructor(
         }
 
         // steg 5: lage varsler ved gitte situasjoner
-        vurderVarsler(aktivitetslogg, ytelser, infotrygdhistorikk, perioderDetSkalBeregnesUtbetalingFor, grunnlagsdata, minsteinntektsvurdering, harOpptjening, beregnetTidslinjePerVedtaksperiode, forsikring)
+        vurderVarsler(
+            aktivitetslogg = aktivitetslogg,
+            ytelser = ytelser,
+            infotrygdhistorikk = infotrygdhistorikk,
+            perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor,
+            grunnlagsdata = grunnlagsdata,
+            minsteinntektsvurdering = minsteinntektsvurdering,
+            harOpptjening = harOpptjening,
+            beregnetTidslinjePerVedtaksperiode = beregnetTidslinjePerVedtaksperiode,
+            forsikringsvurderingResultat = forsikringsvurderingResultat
+        )
         // steg 6: subsummere ting
         subsummering(beregningsgrunnlag, minsteinntektsvurdering, uberegnetTidslinjePerArbeidsgiver, beregnetTidslinjePerVedtaksperiode, historisktidslinje)
 
@@ -1644,7 +1659,7 @@ internal class Vedtaksperiode private constructor(
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
         inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje>,
-        forsikring: Forsikring?
+        forsikringsvurderingResultat: ForsikringsvurderingResultat?
     ): List<BeregnetBehandling> {
         if (perioderDetSkalBeregnesUtbetalingFor.isEmpty()) return emptyList()
 
@@ -1665,7 +1680,7 @@ internal class Vedtaksperiode private constructor(
                     alleInntektjusteringer = alleInntektjusteringer
                         .mapValues { (_, inntektjustering) -> inntektjustering.subset(periode).medBeløp() }
                         .filterValues { it.isNotEmpty() },
-                    forsikring = forsikring
+                    forsikringsvurderingResultat = forsikringsvurderingResultat
                 )
             }
     }
@@ -1695,7 +1710,7 @@ internal class Vedtaksperiode private constructor(
         minsteinntektsvurdering: Minsteinntektsvurdering,
         harOpptjening: Boolean,
         beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
-        forsikring: Forsikring?
+        forsikringsvurderingResultat: ForsikringsvurderingResultat?
     ) {
         perioderDetSkalBeregnesUtbetalingFor
             .filter {
@@ -1735,7 +1750,7 @@ internal class Vedtaksperiode private constructor(
             Frilans -> {
             }
 
-            Selvstendig -> forsikring?.let {
+            Selvstendig -> if (forsikringsvurderingResultat?.harForsikring == true) {
                 if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
                 else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_6)
             }
@@ -3223,13 +3238,18 @@ internal class Vedtaksperiode private constructor(
 
     fun slutterEtter(dato: LocalDate) = periode.slutterEtter(dato)
 
-    private fun lagBeregnetBehandling(beregning: BeregnetPeriode, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>, forsikring: Forsikring?): BeregnetBehandling {
+    private fun lagBeregnetBehandling(
+        beregning: BeregnetPeriode,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
+        forsikringsvurderingResultat: ForsikringsvurderingResultat?
+    ): BeregnetBehandling {
         val beregnetBehandling = BeregnetBehandling(
             maksdatoresultat = Maksdatoresultat.oversettFra(beregning.maksdatoresultat),
             utbetalingstidslinje = beregning.utbetalingstidslinje,
             grunnlagsdata = grunnlagsdata,
             alleInntektjusteringer = alleInntektjusteringer,
-            forsikring = forsikring
+            forsikringsvurderingResultat = forsikringsvurderingResultat
         )
         behandlinger.beregnetBehandling(beregnetBehandling, this.yrkesaktivitet.yrkesaktivitetstype)
         return beregnetBehandling
@@ -3825,7 +3845,7 @@ internal fun lagArbeidsgiverberegning(
     vedtaksperioder: List<Vedtaksperiode>,
     vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
     inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje> = emptyMap(),
-    forsikring: Forsikring? = null,
+    forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
 ): List<Arbeidsgiverberegning> {
     return with(ArbeidsgiverberegningBuilder(beregningsperiode)) {
         vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.forEach {
@@ -3843,12 +3863,12 @@ internal fun lagArbeidsgiverberegning(
         inntektsperioder.forEach { (inntektskilde, inntektsjusteringer) ->
             inntektsjusteringer(inntektskilde, inntektsjusteringer)
         }
-        vedtaksperioder.forEach { it.medVedtaksperiode(this, forsikring) }
+        vedtaksperioder.forEach { it.medVedtaksperiode(this, forsikringsvurderingResultat) }
         build()
     }
 }
 
-private fun Vedtaksperiode.medVedtaksperiode(builder: ArbeidsgiverberegningBuilder, forsikring: Forsikring?) {
+private fun Vedtaksperiode.medVedtaksperiode(builder: ArbeidsgiverberegningBuilder, forsikringsvurderingResultat: ForsikringsvurderingResultat?) {
     val yrkesaktivitetstype = when (yrkesaktivitet.yrkesaktivitetstype) {
         Arbeidsledig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig
         is Arbeidstaker -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(yrkesaktivitet.yrkesaktivitetstype.organisasjonsnummer)
@@ -3857,7 +3877,7 @@ private fun Vedtaksperiode.medVedtaksperiode(builder: ArbeidsgiverberegningBuild
     }
     val utbetalingstidslinjeBuilder = when (yrkesaktivitet.yrkesaktivitetstype) {
         is Arbeidstaker -> behandlinger.utbetalingstidslinjeBuilderForArbeidstaker()
-        Selvstendig -> behandlinger.utbetalingstidslinjeBuilderForSelvstendig(forsikring)
+        Selvstendig -> behandlinger.utbetalingstidslinjeBuilderForSelvstendig(forsikringsvurderingResultat)
 
         Arbeidsledig,
         Frilans -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitet.yrkesaktivitetstype::class.simpleName}")

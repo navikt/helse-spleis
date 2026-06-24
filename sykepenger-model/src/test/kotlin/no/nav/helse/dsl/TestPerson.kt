@@ -18,7 +18,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
-import no.nav.helse.hendelser.Forsikringsvurdering
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Infotrygdendring
@@ -665,11 +665,11 @@ internal class TestPerson(
             arbeidsavklaringspengerV2: List<Periode> = emptyList(),
             dagpenger: List<Periode> = emptyList(),
             inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
-            forsikringsvurdering: Forsikringsvurdering? = null,
+            forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
             andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList()
         ) {
             behovshåndterer.bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId)
-            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, andreYtelser, forsikringsvurdering)
+            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, andreYtelser, forsikringsvurderingResultat)
                 .håndter(Person::håndterYtelser)
         }
 

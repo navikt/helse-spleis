@@ -32,7 +32,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Forsikringsvurdering
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as Hendelseperiode
@@ -519,7 +519,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         arbeidsavklaringspengerV2: Arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         dagpengerV2: Dagpenger = Dagpenger(emptyList()),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
-        forsikringsvurdering: Forsikringsvurdering? = null,
+        forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
         orgnummer: String = ORGNUMMER
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Foreldrepenger))
@@ -533,7 +533,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         val behov = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Foreldrepenger)
         val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
         val behandlingId = behov.path("behandlingId").asText().toUUID()
-        assertEquals(forsikringsvurdering != null, testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.ForsikringsvurderingResultat))
+        assertEquals(forsikringsvurderingResultat != null, testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.ForsikringsvurderingResultat))
         val (_, message) = meldingsfabrikk.lagYtelser(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             behandlingId = behandlingId,
@@ -544,7 +544,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             arbeidsavklaringspengerV2 = arbeidsavklaringspengerV2,
             dagpengerV2 = dagpengerV2,
             inntekterForBeregning = inntekterForBeregning,
-            forsikringsvurdering = forsikringsvurdering,
+            forsikringsvurderingResultat = forsikringsvurderingResultat,
             orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstype
         )

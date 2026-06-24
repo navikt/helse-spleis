@@ -27,7 +27,7 @@ class Ytelser(
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger,
     private val inntekterForBeregning: InntekterForBeregning,
-    val forsikringsvurdering: Forsikringsvurdering?,
+    val forsikringsvurderingResultat: ForsikringsvurderingResultat?,
     private val andreYtelser: AndreYtelser = AndreYtelser(emptyList())
 ) : Hendelse {
     override val metadata = LocalDateTime.now().let { nå ->

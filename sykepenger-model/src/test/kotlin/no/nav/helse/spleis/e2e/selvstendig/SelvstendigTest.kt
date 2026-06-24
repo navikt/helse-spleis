@@ -16,7 +16,7 @@ import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.Forsikringsvurdering
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
@@ -1103,10 +1103,10 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
-                forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
                     harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1),
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = null,
                 )
             )
@@ -1142,10 +1142,10 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
-                forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
                     harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
                 )
             )
@@ -1178,10 +1178,10 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
-                forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
                     harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1),
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                 )
             )
@@ -1213,10 +1213,10 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
-                forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
                     harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1),
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                 )
             )

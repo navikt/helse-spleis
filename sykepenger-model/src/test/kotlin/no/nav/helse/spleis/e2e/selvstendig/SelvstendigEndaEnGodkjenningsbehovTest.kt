@@ -6,7 +6,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
-import no.nav.helse.hendelser.Forsikringsvurdering
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.januar
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
@@ -102,10 +102,10 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
-                forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
                     harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1),
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                 )
             )
@@ -189,10 +189,10 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
-                forsikringsvurdering = Forsikringsvurdering(
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
                     harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
                 )
             )
@@ -277,10 +277,10 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
                 håndterYtelserSelvstendig(
                     1.vedtaksperiode,
-                    forsikringsvurdering = Forsikringsvurdering(
+                    forsikringsvurderingResultat = ForsikringsvurderingResultat(
                         forsikringsvurderingId = UUID.randomUUID(),
                         harForsikring = true,
-                        dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
+                        dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                         opphørsdato = null,
                     )
                 )

@@ -4,7 +4,7 @@ import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
-import no.nav.helse.hendelser.Forsikringsvurdering
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import org.junit.jupiter.api.Test
@@ -19,10 +19,10 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
-            forsikringsvurdering = Forsikringsvurdering(
+            forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = true,
-                dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1),
+                dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                 opphørsdato = null,
             ),
             orgnummer = "SELVSTENDIG"
@@ -47,10 +47,10 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
-            forsikringsvurdering = Forsikringsvurdering(
+            forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = true,
-                dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 1),
+                dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                 opphørsdato = null,
             ),
             orgnummer = "SELVSTENDIG"

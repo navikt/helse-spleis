@@ -13,7 +13,7 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
-import no.nav.helse.hendelser.Forsikringsvurdering
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
@@ -283,7 +283,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         inntekterForBeregning: List<Inntektsperiode> = emptyList(),
         dagpengerV2: List<Periode> = emptyList(),
-        forsikringsvurdering: Forsikringsvurdering? = null,
+        forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -311,7 +311,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspengerV2),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             dagpenger = Dagpenger(dagpengerV2),
-            forsikringsvurdering = forsikringsvurdering,
+            forsikringsvurderingResultat = forsikringsvurderingResultat,
         )
     }
 

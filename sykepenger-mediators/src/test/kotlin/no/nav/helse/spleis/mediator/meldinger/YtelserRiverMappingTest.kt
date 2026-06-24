@@ -8,7 +8,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
-import no.nav.helse.hendelser.Forsikringsvurdering
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Institusjonsopphold
@@ -48,7 +48,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
         sendJson(json).assertForventetInnhold(forsikring = null)
     }
 
-    private fun YtelserMessage.assertForventetInnhold(forsikring: Forsikringsvurdering? = forventetForsikring) {
+    private fun YtelserMessage.assertForventetInnhold(forsikring: ForsikringsvurderingResultat? = forventetForsikring) {
         assertEquals(forventetPleiepenger, this.pleiepenger)
         assertEquals(forventetForeldrepenger, this.foreldrepenger)
         assertEquals(forventetSvangerskapspenger, this.svangerskapspenger)
@@ -79,10 +79,10 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
         private val forventetInntekterForBeregning = InntekterForBeregning(listOf(InntekterForBeregning.Inntektsperiode("heihei", 1.april til 30.april, 100.daglig)))
         private val forventetArbeidsavklaringspenger = Arbeidsavklaringspenger(listOf(1.mars til 31.mars))
         private val forventetDagpenger = Dagpenger(listOf(1.februar til 28.februar))
-        private val forventetForsikring = Forsikringsvurdering(
+        private val forventetForsikring = ForsikringsvurderingResultat(
             forsikringsvurderingId = UUID.fromString("abebbf72-2bef-473d-aabb-c5314bcc5ea3"),
             harForsikring = true,
-            dekning = Forsikringsvurdering.Dekning(grad = 80, fraDag = 1),
+            dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
             opphørsdato = null,
         )
 

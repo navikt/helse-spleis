@@ -30,7 +30,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SvarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Forsikringsvurdering
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as HendelsePeriode
@@ -961,7 +961,7 @@ internal class TestMessageFactory(
         institusjonsoppholdsperioder: List<InstitusjonsoppholdTestdata> = emptyList(),
         dagpengerV2: Dagpenger = Dagpenger(emptyList()),
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
-        forsikringsvurdering: Forsikringsvurdering? = null,
+        forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
         arbeidsavklaringspengerV2: Arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         orgnummer: String = organisasjonsnummer,
         yrkesaktivitetstype: String = "ARBEIDSTAKER"
@@ -977,7 +977,7 @@ internal class TestMessageFactory(
             "DagpengerV2"
         )
 
-        if (forsikringsvurdering != null) {
+        if (forsikringsvurderingResultat != null) {
             behovliste.add("ForsikringsvurderingResultat")
         }
 
@@ -1066,21 +1066,21 @@ internal class TestMessageFactory(
                         )
                     }
                 ))
-                .plus(forsikringsvurderingResultat(forsikringsvurdering, yrkesaktivitetstype))
+                .plus(forsikringsvurderingResultat(forsikringsvurderingResultat, yrkesaktivitetstype))
         )
     }
 
-    fun forsikringsvurderingResultat(forsikringsvurdering: Forsikringsvurdering?, yrkesaktivitetstype: String): Map<String, Any> {
-        if (forsikringsvurdering == null || yrkesaktivitetstype != "SELVSTENDIG") return emptyMap()
+    fun forsikringsvurderingResultat(forsikringsvurderingResultat: ForsikringsvurderingResultat?, yrkesaktivitetstype: String): Map<String, Any> {
+        if (forsikringsvurderingResultat == null || yrkesaktivitetstype != "SELVSTENDIG") return emptyMap()
         return mapOf(
-            Behov.Behovstype.ForsikringsvurderingResultat.utgåendeNavn to forsikringsvurdering.let { forsikringsvurdering ->
+            Behov.Behovstype.ForsikringsvurderingResultat.utgåendeNavn to forsikringsvurderingResultat.let { forsikringsvurdering ->
                 mapOf(
                     "forsikringsvurderingId" to forsikringsvurdering.forsikringsvurderingId.toString(),
                     "harForsikring" to forsikringsvurdering.harForsikring,
                     "dekning" to forsikringsvurdering.dekning?.let { dekning ->
                         mapOf(
                             "grad" to dekning.grad,
-                            "iVentetid" to (dekning.fraDag == 1)
+                            "iVentetid" to dekning.iVentetid
                         )
                     },
                     "opphørsdato" to forsikringsvurdering.opphørsdato
