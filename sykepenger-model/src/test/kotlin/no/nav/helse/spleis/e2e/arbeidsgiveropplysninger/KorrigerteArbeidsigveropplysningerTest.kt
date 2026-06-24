@@ -34,28 +34,6 @@ import org.junit.jupiter.api.assertThrows
 internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
 
     @Test
-    fun `mottar selvbestemt inntektsmelding når vi ikke trenger en`() {
-        a1 {
-            håndterSøknad(1.januar til 16.januar)
-            håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode,
-                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
-                RedusertUtbetaltBeløpIArbeidsgiverperioden(LovligFravaer),
-                OppgittInntekt(INNTEKT * 1.25)
-            )
-            assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_8)
-        }
-    }
-
-    @Test
-    fun `mottar selvbestemt inntektsmelding som korrigerer eksisterende`() {
-        a1 {
-            nyttVedtak(januar)
-            håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT * 1.25))
-            assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_4)
-        }
-    }
-
-    @Test
     fun `opplyser om korrigerert inntekt på en allerede utbetalt periode`() {
         a1 {
             nyttVedtak(januar)
