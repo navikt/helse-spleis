@@ -96,16 +96,6 @@ internal class YtelserRiver(
             }
             message.interestedIn("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.opphørsdato")
         }
-
-        message.interestedIn("@løsning.${Forsikringsvurdering.utgåendeNavn}") {
-            message.requireKey(
-                "@løsning.${Forsikringsvurdering.utgåendeNavn}.forsikringsvurderingId",
-                "@løsning.${Forsikringsvurdering.utgåendeNavn}.harForsikring"
-            )
-            message.interestedIn("@løsning.${Forsikringsvurdering.utgåendeNavn}.dekning") {
-                message.requireKey("@løsning.${Forsikringsvurdering.utgåendeNavn}.dekning.grad", "@løsning.${Forsikringsvurdering.utgåendeNavn}.dekning.fraDag")
-            }
-        }
     }
 
     override fun createMessage(packet: JsonMessage) = YtelserMessage(

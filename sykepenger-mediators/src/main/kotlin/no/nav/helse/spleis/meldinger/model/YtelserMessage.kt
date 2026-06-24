@@ -86,22 +86,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
         packet["@løsning.${Behovstype.Arbeidsavklaringspenger.utgåendeNavn}.utbetalingsperioder"]
             .map { Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) })
 
-    internal val forsikringsvurdering = packet["@løsning.${Behovstype.Forsikringsvurdering.utgåendeNavn}"]
-        .takeUnless { it.isMissingOrNull() }
-        ?.let { løsningJson ->
-            Forsikringsvurdering(
-                forsikringsvurderingId = UUID.fromString(løsningJson["forsikringsvurderingId"].asText()),
-                harForsikring = løsningJson["harForsikring"].asBoolean(),
-                dekning = løsningJson["dekning"]?.takeUnless { it.isMissingOrNull() }?.let { dekningJson ->
-                    Forsikringsvurdering.Dekning(
-                        grad = dekningJson["grad"].asInt(),
-                        fraDag = dekningJson["fraDag"].asInt()
-                    )
-                },
-                opphørsdato = null,
-            )
-        }
-
     internal val forsikringsvurderingResultat = packet["@løsning.${Behovstype.ForsikringsvurderingResultat.utgåendeNavn}"]
         .takeUnless { it.isMissingOrNull() }
         ?.let { løsningJson ->
@@ -146,7 +130,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             arbeidsavklaringspenger = arbeidsavklaringspengerV2,
             dagpenger = dagpengerV2,
             inntekterForBeregning = inntekterForBeregning,
-            forsikringsvurdering = forsikringsvurderingResultat ?: forsikringsvurdering,
+            forsikringsvurdering = forsikringsvurderingResultat,
         )
 
     override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {

@@ -44,7 +44,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
 
     @Test
     fun `Mapping ved løsninger uten løsning på forsikring`() {
-        val json = fjernLøsninger(medObject, "Forsikringsvurdering", "ForsikringsvurderingResultat")
+        val json = fjernLøsninger(medObject, "ForsikringsvurderingResultat")
         sendJson(json).assertForventetInnhold(forsikring = null)
     }
 
@@ -58,7 +58,6 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
         assertEquals(forventetInntekterForBeregning, this.inntekterForBeregning)
         assertEquals(forventetArbeidsavklaringspenger, this.arbeidsavklaringspengerV2)
         assertEquals(forventetDagpenger, this.dagpengerV2)
-        assertEquals(forsikring, this.forsikringsvurdering)
         assertEquals(forsikring, this.forsikringsvurderingResultat)
     }
 
@@ -101,7 +100,6 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
             "DagpengerV2",
-            "Forsikringsvurdering",
             "ForsikringsvurderingResultat"
           ],
           "fødselsnummer": "20014812238",
@@ -185,14 +183,6 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
                 }
               ]
             },
-            "Forsikringsvurdering": {
-              "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
-              "harForsikring": true,
-              "dekning": {
-                "grad": 80,
-                "fraDag": 1
-              }
-            },
             "ForsikringsvurderingResultat": {
               "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
               "harForsikring": true,
@@ -225,7 +215,6 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
             "DagpengerV2",
-            "Forsikringsvurdering",
             "ForsikringsvurderingResultat"
           ],
           "fødselsnummer": "20014812238",
@@ -316,14 +305,6 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
                   "tom": "2018-02-28"
                 }
               ]
-            },
-            "Forsikringsvurdering": {
-              "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
-              "harForsikring": true,
-              "dekning": {
-                "grad": 80,
-                "fraDag": 1
-              }
             },
             "ForsikringsvurderingResultat": {
               "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
