@@ -179,11 +179,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val dekningsgrad = (forsikringsvurderingResultat?.dekning?.grad ?: 80).riktigProsent
 
         val dagerNavOvertarAnsvar =
-            if (forsikringsvurderingResultat?.dekning?.iVentetid == true) {
-                behandlinger.last().dagerUtenNavAnsvar.dager
-            } else {
-                emptyList()
-            }
+            behandlinger.last().beregnDagerNavOvertarAnsvarForSelvstendig(forsikringsvurderingResultat)
 
         return SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
             dekningsgrad = dekningsgrad,
@@ -495,15 +491,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val skjæringstidspunkter get() = gjeldende.skjæringstidspunkter
         val maksdato get() = gjeldende.maksdatoresultat
         val dagerNavOvertarAnsvar get() = gjeldende.dagerNavOvertarAnsvar
-        val sykdomstidslinje get() = endringer.last().sykdomstidslinje
-        val refusjonstidslinje get() = endringer.last().refusjonstidslinje
-        val arbeidssituasjon get() = endringer.last().arbeidssituasjon
-        val utbetalingstidslinje get() = endringer.last().utbetalingstidslinje
-        val faktaavklartInntekt get() = endringer.last().faktaavklartInntekt
-        val korrigertInntekt get() = endringer.last().korrigertInntekt
-        val inntektsjusteringer get() = endringer.last().inntektjusteringer
+        val sykdomstidslinje get() = gjeldende.sykdomstidslinje
+        val refusjonstidslinje get() = gjeldende.refusjonstidslinje
+        val arbeidssituasjon get() = gjeldende.arbeidssituasjon
+        val utbetalingstidslinje get() = gjeldende.utbetalingstidslinje
+        val faktaavklartInntekt get() = gjeldende.faktaavklartInntekt
+        val korrigertInntekt get() = gjeldende.korrigertInntekt
+        val inntektsjusteringer get() = gjeldende.inntektjusteringer
         val behandlingOpprettetTidspunkt: LocalDateTime get() = endringer.first().tidsstempel
-        val avslagstidslinje get() = endringer.last().avslagstidslinje
+        val avslagstidslinje get() = gjeldende.avslagstidslinje
 
         constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde)
 
@@ -1010,13 +1006,17 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
             }
 
-            internal fun kopierMedBeregning(beregning: BeregnetBehandling, dagerNavOvertarAnsvar: List<Periode>, faktaavklartInntekt: FaktaavklartInntekt?) = kopierMed(
+            internal fun kopierMedBeregning(
+                beregning: BeregnetBehandling,
+                dagerNavOvertarAnsvar: List<Periode>,
+                faktaavklartInntekt: FaktaavklartInntekt?
+            ) = kopierMed(
                 grunnlagsdata = beregning.grunnlagsdata,
                 utbetalingstidslinje = beregning.utbetalingstidslinje.subset(this.periode),
                 maksdatoresultat = beregning.maksdatoresultat,
                 inntektjusteringer = beregning.alleInntektjusteringer,
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
-                faktaavklartInntekt = faktaavklartInntekt ?: this.faktaavklartInntekt
+                faktaavklartInntekt = faktaavklartInntekt
             )
 
             internal fun kopierMedUtbetaling(utbetaling: Utbetaling) = kopierMed(utbetaling = utbetaling)
@@ -1274,29 +1274,36 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             dokumentsporing in this.dokumentsporing
 
         private fun medBeregning(nesteTilstand: Tilstand, beregning: BeregnetBehandling, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) {
-            val dagerNavOvertarAnsvar = when (yrkesaktivitet) {
-                Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                is Arbeidstaker,
-                Behandlingsporing.Yrkesaktivitet.Frilans -> null
 
-                Behandlingsporing.Yrkesaktivitet.Selvstendig ->
-                    beregning.forsikringsvurderingResultat
-                        ?.takeIf { it.harForsikring }
-                        ?.let { forsikring ->
-                            if (forsikring.dekning?.iVentetid == true) dagerUtenNavAnsvar.dager
-                            else emptyList()
-                        }
-            } ?: dagerNavOvertarAnsvar
-
-            val faktaavklartInntektBruktVedBeregning: FaktaavklartInntekt? = when (yrkesaktivitet) {
-                is Arbeidstaker -> beregning.grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.firstOrNull { it.orgnummer == yrkesaktivitet.organisasjonsnummer }?.faktaavklartInntekt?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }
-                Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                Behandlingsporing.Yrkesaktivitet.Frilans,
-                Behandlingsporing.Yrkesaktivitet.Selvstendig -> null
-            }
-
-            nyEndring(gjeldende.kopierMedBeregning(beregning, dagerNavOvertarAnsvar = dagerNavOvertarAnsvar, faktaavklartInntekt = faktaavklartInntektBruktVedBeregning), nesteTilstand)
+            nyEndring(
+                endring = gjeldende.kopierMedBeregning(
+                    beregning = beregning,
+                    dagerNavOvertarAnsvar =
+                        if (yrkesaktivitet == Behandlingsporing.Yrkesaktivitet.Selvstendig) {
+                            beregnDagerNavOvertarAnsvarForSelvstendig(beregning.forsikringsvurderingResultat)
+                        } else {
+                            gjeldende.dagerNavOvertarAnsvar
+                        },
+                    faktaavklartInntekt =
+                        if (yrkesaktivitet is Arbeidstaker) {
+                            beregning.grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger
+                                .firstOrNull { it.orgnummer == yrkesaktivitet.organisasjonsnummer }
+                                ?.faktaavklartInntekt
+                                ?.takeIf { it.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver }
+                        } else {
+                            null
+                        } ?: gjeldende.faktaavklartInntekt
+                ),
+                nesteTilstand = nesteTilstand
+            )
         }
+
+        fun beregnDagerNavOvertarAnsvarForSelvstendig(forsikringsvurderingResultat: ForsikringsvurderingResultat?): List<Periode> =
+            if (forsikringsvurderingResultat?.dekning?.iVentetid == true) {
+                dagerUtenNavAnsvar.dager
+            } else {
+                emptyList()
+            }
 
         private fun utenBeregning(behandlingEventBus: BehandlingEventBus, aktivitetslogg: IAktivitetslogg, nesteTilstand: Tilstand) {
             gjeldende.utbetaling!!.forkast(behandlingEventBus, aktivitetslogg)
@@ -1308,7 +1315,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             check(endringer.none { it.id == endring.id }) { "Endringer må ha unik ID" }
             check(endringer.none { it.tidsstempel == endring.tidsstempel }) { "Endringer må ha unik tidsstempel" }
             check(endringer.none { it.tidsstempel > endring.tidsstempel }) { "Endringer må ha nyere tidsstempel" }
-            check(endring.beregningId == endringer.last().beregningId) { "Den nye endringen har annen beregningId enn forrige, som ikke burde skje på utsiden av inneværende funksjon" }
+            check(endring.beregningId == gjeldende.beregningId) { "Den nye endringen har annen beregningId enn forrige, som ikke burde skje på utsiden av inneværende funksjon" }
 
             // det skal være ny beregningId når vi går fra Beregnet til en Uberegnet tilstand
             if (this.tilstand.erBeregnet() && !nesteTilstand.erBeregnet()) {
@@ -1345,7 +1352,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         private fun oppdaterMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter: Skjæringstidspunkter, beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>) {
-            val endring = endringer.last().kopierMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar) ?: return
+            val endring = gjeldende.kopierMedNyttSkjæringstidspunkt(beregnetSkjæringstidspunkter, beregnetPerioderUtenNavAnsvar) ?: return
             nyEndring(endring)
         }
 
@@ -1396,7 +1403,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             yrkesaktivitet.låsOpp(periode)
             return Behandling(
                 tilstand = starttilstand,
-                endringer = listOf(endringer.last().kopierUtenBeregning()),
+                endringer = listOf(gjeldende.kopierUtenBeregning()),
                 avsluttet = avsluttet,
                 kilde = behandlingkilde
             )
@@ -1724,7 +1731,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     behandlingEventBus: BehandlingEventBus,
                     aktivitetslogg: IAktivitetslogg
                 ): Behandling? {
-                    behandling.nyEndring(behandling.endringer.last().kopierUtenBeregning(), UberegnetAnnullering)
+                    behandling.nyEndring(behandling.gjeldende.kopierUtenBeregning(), UberegnetAnnullering)
                     return null
                 }
             }
@@ -1818,7 +1825,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     aktivitetslogg: IAktivitetslogg
                 ): Behandling? {
                     behandling.gjeldende.forkastUtbetaling(behandlingEventBus, aktivitetslogg)
-                    behandling.nyEndring(behandling.endringer.last().kopierUtenBeregning(), UberegnetAnnullering)
+                    behandling.nyEndring(behandling.gjeldende.kopierUtenBeregning(), UberegnetAnnullering)
                     return null
                 }
             }
