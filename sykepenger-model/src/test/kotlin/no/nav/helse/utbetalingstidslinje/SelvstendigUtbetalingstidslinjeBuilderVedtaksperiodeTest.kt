@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.util.UUID
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
@@ -27,7 +26,15 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
 
     @Test
     fun `melding til nav dager`() {
-        undersøke(16.M + 15.S, dagerNavOvertarAnsvar = listOf(1.januar til 16.januar))
+        undersøke(
+            tidslinje = 16.M + 15.S,
+            forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                forsikringsvurderingId = UUID.randomUUID(),
+                harForsikring = true,
+                dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
+                opphørsdato = null,
+            )
+        )
         assertEquals(31, inspektør.size)
         assertEquals(16, inspektør.ventetidDagTeller)
         assertEquals(1, perioder.size)
@@ -83,18 +90,22 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
     private lateinit var utbetalingstidslinje: Utbetalingstidslinje
     private val perioder: MutableList<PeriodeUtenNavAnsvar> = mutableListOf()
 
-    private fun undersøke(tidslinje: Sykdomstidslinje, dagerNavOvertarAnsvar: List<Periode> = emptyList(), avslagstidslinje: Avslagstidslinje = Avslagstidslinje()) {
+    private fun undersøke(
+        tidslinje: Sykdomstidslinje,
+        forsikringsvurderingResultat: ForsikringsvurderingResultat = ForsikringsvurderingResultat(
+            forsikringsvurderingId = UUID.randomUUID(),
+            harForsikring = false,
+            dekning = null,
+            opphørsdato = null,
+        ),
+        avslagstidslinje: Avslagstidslinje = Avslagstidslinje()
+    ) {
         val ventetidberegner = Ventetidberegner()
         val ventetider = ventetidberegner.result(tidslinje)
         perioder.addAll(ventetider)
 
         val builder = SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
-            forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                forsikringsvurderingId = UUID.randomUUID(),
-                harForsikring = false,
-                dekning = null,
-                opphørsdato = null,
-            ),
+            forsikringsvurderingResultat = forsikringsvurderingResultat,
             dagerUtenNavAnsvar = DagerUtenNavAnsvaravklaring(true, ventetider.lastOrNull()?.dagerUtenAnsvar.orEmpty()),
             avslagstidslinje = avslagstidslinje
         )
