@@ -54,7 +54,7 @@ internal data class SelvstendigFaktaavklartInntekt(
         anvendtGrunnbeløp = this.anvendtGrunnbeløp.dto()
     )
 
-    fun normalinntekt(anvendtGrunnbeløp: Inntekt) =
+    fun normalinntekt(anvendtGrunnbeløp: Inntekt): Inntekt =
         normalinntekt(pensjonsgivendeInntekter, anvendtGrunnbeløp)
 
     fun beregningsgrunnlag(anvendtGrunnbeløp: Inntekt) =
