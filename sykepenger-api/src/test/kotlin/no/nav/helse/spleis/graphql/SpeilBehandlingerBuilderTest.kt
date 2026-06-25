@@ -350,6 +350,54 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     }
 
     @Test
+    fun `Selvstendig med ny liknet pensjonsgivende inntekt underveis`() {
+        fun pgi(år: Int, næringsinntekt: Int) = PensjonsgivendeInntekt(
+            inntektsår = Year.of(år), næringsinntekt = næringsinntekt.årlig,
+            lønnsinntekt = INGEN,
+            lønnsinntektBarePensjonsdel = INGEN,
+            næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN,
+            erFerdigLignet = true
+        )
+
+        håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar,
+            pensjonsgivendeInntekter = listOf(pgi(2014, 300000), pgi(2015, 300000), pgi(2016, 300000)))
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        håndterSøknadSelvstendig(1.februar til 15.februar,1.januar til 16.januar,
+            pensjonsgivendeInntekter = listOf(pgi(2015, 300000), pgi(2016, 300000), pgi(2017, 600000)))
+
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        val opprinnelig = listOf(
+            PensjonsgivendeInntektDto(årstall=Year.of(2014), beløp=InntektDto(årlig=Årlig(beløp=300000.0), månedligDouble=MånedligDouble(beløp=25000.0), dagligDouble=DagligDouble(beløp=1153.8461538461538), dagligInt=DagligInt(beløp=1153))),
+            PensjonsgivendeInntektDto(årstall=Year.of(2015), beløp=InntektDto(årlig=Årlig(beløp=300000.0), månedligDouble=MånedligDouble(beløp=25000.0), dagligDouble=DagligDouble(beløp=1153.8461538461538), dagligInt=DagligInt(beløp=1153))),
+            PensjonsgivendeInntektDto(årstall=Year.of(2016), beløp=InntektDto(årlig=Årlig(beløp=300000.0), månedligDouble=MånedligDouble(beløp=25000.0), dagligDouble=DagligDouble(beløp=1153.8461538461538), dagligInt=DagligInt(beløp=1153))),
+        )
+
+        generasjoner(organisasjonsnummer = selvstendig) {
+            assertEquals(1, size)
+            0.generasjon {
+                beregnetPeriode(1).also {
+                    assertEquals(1.januar, it.fom)
+                    assertEquals(opprinnelig, it.pensjonsgivendeInntekter)
+                }
+                beregnetPeriode(0).also {
+                    assertEquals(1.februar, it.fom)
+                    assertEquals(opprinnelig, it.pensjonsgivendeInntekter)
+                }
+            }
+        }
+    }
+
+
+    @Test
     fun `Selvstendig næringsdrivende med inntekt under 6G mappes riktig`() {
         håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
         håndterVilkårsgrunnlag()

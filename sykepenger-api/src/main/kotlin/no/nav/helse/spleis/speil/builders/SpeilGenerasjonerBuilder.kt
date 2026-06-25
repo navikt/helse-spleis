@@ -177,6 +177,11 @@ internal class SpeilGenerasjonerBuilder(
             sisteEndring.dagerNavOvertarAnsvar,
             sisteEndring.avslagstidslinje
         ).build()
+
+        val pensjonsgivendeInntekter = sisteEndring.vilkårsgrunnlagId?.let {
+            vilkårsgrunnlaghistorikk.finnSpleisVilkårsgrunnlag(it) ?.pensjonsgivendeInntekter
+        } ?: emptyList()
+
         return BeregnetPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
             behandlingId = generasjon.id,
@@ -200,7 +205,7 @@ internal class SpeilGenerasjonerBuilder(
             periodevilkår = periodevilkår(sisteSykepengedag, sisteEndring.maksdatoresultat, alder, skjæringstidspunkt),
             vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!,
             refusjonstidslinje = mapRefusjonstidslinje(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger, generasjon.id, sisteEndring.refusjonstidslinje),
-            pensjonsgivendeInntekter = (sisteEndring.faktaavklartInntekt as? SelvstendigFaktaavklartInntektUtDto)?.pensjonsgivendeInntekter ?: emptyList(),
+            pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             annulleringskandidater = vedtaksperiode.annulleringskandidater
         )
     }

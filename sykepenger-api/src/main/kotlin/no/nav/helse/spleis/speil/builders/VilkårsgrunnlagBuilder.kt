@@ -3,6 +3,7 @@ package no.nav.helse.spleis.speil.builders
 import java.time.LocalDate
 import java.util.LinkedList
 import java.util.UUID
+import kotlin.collections.List
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
@@ -12,6 +13,7 @@ import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
+import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
 import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
@@ -55,6 +57,7 @@ internal class ISpleisGrunnlag(
     skjæringstidspunkt: LocalDate,
     beregningsgrunnlag: Double,
     inntekter: List<IArbeidsgiverinntekt>,
+    val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>?,
     sykepengegrunnlag: Double,
     id: UUID,
     val overstyringer: Set<UUID>,
@@ -131,6 +134,10 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
     internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
         vilkårsgrunnlagIBruk.all { (_, a) -> a.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) }
 
+    internal fun finnSpleisVilkårsgrunnlag(vilkårsgrunnlagId: UUID) : ISpleisGrunnlag? =
+        tilgjengeligeVilkårsgrunnlag.firstNotNullOf { elementer ->
+            elementer[vilkårsgrunnlagId]
+        } as? ISpleisGrunnlag
 
     internal fun arbeidsgivere() = vilkårsgrunnlagIBruk
         .flatMap { (_, grunnlag) ->
@@ -206,6 +213,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag.årlig.beløp,
             omregnetÅrsinntekt = grunnlagsdata.inntektsgrunnlag.totalOmregnetÅrsinntekt.årlig.beløp,
             inntekter = inntekter(grunnlagsdata.inntektsgrunnlag),
+            pensjonsgivendeInntekter = grunnlagsdata.inntektsgrunnlag.selvstendigInntektsopplysning?.faktaavklartInntekt?.pensjonsgivendeInntekter,
             sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp,
             grunnbeløp = begrensning.grunnbeløp,
             sykepengegrunnlagsgrense = begrensning,
