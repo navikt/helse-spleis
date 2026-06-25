@@ -176,7 +176,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
         registrert = mottatt.plusSeconds(1),
-        behandlingsporing = behandlingsporing,
+        behandlingsporing = behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
@@ -198,14 +198,12 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         id: UUID = UUID.randomUUID(),
         mottatt: LocalDateTime = LocalDateTime.now(),
         harFlereArbeidsforhold: Boolean = false,
-        selvbestemt: Boolean = false
     ) = KorrigerteArbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
         registrert = mottatt.plusSeconds(1),
         behandlingsporing = behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         vedtaksperiodeId = vedtaksperiodeId,
-        varselkode = if (selvbestemt) Varselkode.RV_AO_3 else Varselkode.RV_IM_4,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,

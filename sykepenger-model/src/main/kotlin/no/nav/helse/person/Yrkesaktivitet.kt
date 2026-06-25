@@ -48,6 +48,7 @@ import no.nav.helse.hendelser.Periode.Companion.mursteinsperioder
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
+import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
@@ -596,6 +597,14 @@ internal class Yrkesaktivitet private constructor(
     internal fun håndterKorrigerteArbeidsgiveropplysninger(eventBus: EventBus, arbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         val overstyring = énHåndtert(arbeidsgiveropplysninger) { håndterKorrigerteArbeidsgiveropplysninger(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList(), inntektshistorikk, ubrukteRefusjonsopplysninger) }
+        if (overstyring != null) return overstyring
+        eventBus.emitArbeidsgiveropplysningerIkkeHåndtert(arbeidsgiveropplysninger.metadata.meldingsreferanseId, organisasjonsnummer)
+        return null
+    }
+
+    internal fun håndterSelvbestemteArbeidsgiveropplysninger(eventBus: EventBus, arbeidsgiveropplysninger: SelvbestemteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+        val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
+        val overstyring = énHåndtert(arbeidsgiveropplysninger) { håndterSelvbestemteArbeidsgiveropplysninger(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedArbeidsgiverkontekst, vedtaksperioder.toList(), inntektshistorikk, ubrukteRefusjonsopplysninger) }
         if (overstyring != null) return overstyring
         eventBus.emitArbeidsgiveropplysningerIkkeHåndtert(arbeidsgiveropplysninger.metadata.meldingsreferanseId, organisasjonsnummer)
         return null

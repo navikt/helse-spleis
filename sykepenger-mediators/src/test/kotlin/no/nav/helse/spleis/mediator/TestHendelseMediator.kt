@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Sykmelding
@@ -339,7 +340,7 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsmeldingMeldingsreferanseId: MeldingsreferanseId, context: BehandlingContext) {}
 
-    override fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: BehandlingContext) {
+    override fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, selvbestemteArbeidsgiveropplysninger: SelvbestemteArbeidsgiveropplysninger, context: BehandlingContext) {
         lestNavNoSelvbestemtInntektsmeldingVerdi.set(true)
     }
 

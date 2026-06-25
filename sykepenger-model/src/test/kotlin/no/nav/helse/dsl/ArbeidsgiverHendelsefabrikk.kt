@@ -40,6 +40,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
@@ -52,7 +53,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -202,7 +202,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         vedtaksperiodeId: UUID,
         innsendt: LocalDateTime = LocalDateTime.now(),
         registrert: LocalDateTime = innsendt.plusSeconds(1),
-        selvbestemt: Boolean = false,
         vararg opplysninger: Arbeidsgiveropplysning
     ) = KorrigerteArbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
@@ -211,7 +210,21 @@ internal class ArbeidsgiverHendelsefabrikk(
         behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
         vedtaksperiodeId = vedtaksperiodeId,
         opplysninger = opplysninger.toList(),
-        varselkode = if (selvbestemt) Varselkode.RV_AO_3 else Varselkode.RV_IM_4
+    )
+
+    internal fun lagSelvbestemteArbeidsgiveropplysninger(
+        meldingsreferanseId: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID,
+        innsendt: LocalDateTime = LocalDateTime.now(),
+        registrert: LocalDateTime = innsendt.plusSeconds(1),
+        vararg opplysninger: Arbeidsgiveropplysning
+    ) = SelvbestemteArbeidsgiveropplysninger(
+        meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
+        innsendt = innsendt,
+        registrert = registrert,
+        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+        vedtaksperiodeId = vedtaksperiodeId,
+        opplysninger = opplysninger.toList(),
     )
 
     internal fun lagInntektsmeldingReplay(vedtaksperiodeId: UUID, inntektsmeldinger: List<Inntektsmelding>) =

@@ -11,8 +11,7 @@ import java.time.LocalDateTime
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
-import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
 import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -45,13 +44,12 @@ internal class NavNoSelvbestemtInntektsmeldingMessage(
     private val harFlereArbeidsforhold = packet["harFlereArbeidsforhold"].takeUnless { it.isMissingOrNull() }?.asBoolean() ?: false
 
 
-    private val korrigerteArbeidsgiveropplysninger get() = KorrigerteArbeidsgiveropplysninger(
+    private val selvbestemteArbeidsgiveropplysninger get() = SelvbestemteArbeidsgiveropplysninger(
         meldingsreferanseId = meldingsporing.id,
         innsendt = mottatt,
         registrert = LocalDateTime.now(),
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
         vedtaksperiodeId = vedtaksperiodeId,
-        varselkode = Varselkode.RV_AO_3,
         opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
             beregnetInntekt = beregnetInntekt?.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
@@ -63,7 +61,7 @@ internal class NavNoSelvbestemtInntektsmeldingMessage(
     )
 
     override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
-        mediator.behandle(this, korrigerteArbeidsgiveropplysninger, context)
+        mediator.behandle(this, selvbestemteArbeidsgiveropplysninger, context)
     }
 }
 

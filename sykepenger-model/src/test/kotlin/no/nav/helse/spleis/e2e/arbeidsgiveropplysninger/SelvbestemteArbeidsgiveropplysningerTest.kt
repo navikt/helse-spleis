@@ -11,14 +11,13 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverper
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -31,7 +30,8 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode,
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 RedusertUtbetaltBeløpIArbeidsgiverperioden(LovligFravaer),
-                OppgittInntekt(INNTEKT * 1.25)
+                OppgittInntekt(INNTEKT * 1.25),
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList())
             )
             assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_8)
         }
@@ -41,7 +41,10 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `mottar selvbestemt inntektsmelding som korrigerer eksisterende`() {
         a1 {
             nyttVedtak(januar)
-            håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT * 1.25))
+            håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode,
+                OppgittInntekt(INNTEKT * 1.25),
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList())
+            )
             assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_4)
         }
     }
@@ -54,19 +57,12 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSelvbestemtArbeidsgiveropplysninger(
                 1.vedtaksperiode,
                 OppgittInntekt(INNTEKT),
-                IkkeUtbetaltArbeidsgiverperiode(begrunnelse = Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening)
+                IkkeUtbetaltArbeidsgiverperiode(begrunnelse = Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening),
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList())
             )
             assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_8)
-            assertForventetFeil(
-                nå = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
-                    assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING)
-                    assertEquals(listOf(1.januar til 16.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
-                }
-            )
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING)
+            assertEquals(listOf(1.januar til 16.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
         }
     }
 
@@ -79,18 +75,11 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 OppgittInntekt(INNTEKT),
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList()),
             )
-            assertVarsler(1.vedtaksperiode, RV_AO_3, Varselkode.RV_IM_24)
-            assertForventetFeil(
-                nå = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
-                    assertEquals(listOf(5.januar til 20.januar), inspektør.venteperiode(1.vedtaksperiode))
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING)
-                    assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
-                }
-            )
+            assertVarsler(1.vedtaksperiode, RV_AO_3)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING)
+            assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
         }
     }
 

@@ -7,11 +7,13 @@ import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.til
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -36,6 +38,20 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         val faktiskResultat = trengerOpplysningerEvent.json("vedtaksperiodeId")
 
         JSONAssert.assertEquals(forventetResultatTrengerInntekt, faktiskResultat, JSONCompareMode.STRICT)
+    }
+
+    @Test
+    fun `Tar i mot selvbestemt IM på tidligere AUU`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 17.januar, tom = 27.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 17.januar, tom = 27.januar, sykmeldingsgrad = 100)),
+        )
+        assertTilstand(0, "AVSLUTTET_UTEN_UTBETALING")
+        sendNavNoSelvbestemtInntektsmelding(
+            vedtaksperiodeIndeks = 0,
+            arbeidsgiverperiode = listOf(1.januar til 16.januar),
+        )
+        assertTilstand(0, "AVVENTER_VILKÅRSPRØVING")
     }
 
     @Test

@@ -39,6 +39,7 @@ import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
+import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Sykmelding
@@ -219,6 +220,14 @@ class Person private constructor(
         val revurderingseventyr = arbeidsgiver.håndterKorrigerteArbeidsgiveropplysninger(eventBus, korrigerteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, korrigerteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
+    }
+
+    fun håndterSelvbestemtArbeidsgiveropplysninger(eventBus: EventBus, selvbestemteArbeidsgiveropplysninger: SelvbestemteArbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler de selvbestemte arbeidsgiveropplysningene ${selvbestemteArbeidsgiveropplysninger.joinToString { "${it::class.simpleName}" }}")
+        val arbeidsgiver = finnEllerOpprettYrkesaktivitet(selvbestemteArbeidsgiveropplysninger.behandlingsporing, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr = arbeidsgiver.håndterSelvbestemteArbeidsgiveropplysninger(eventBus, selvbestemteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
+        if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(eventBus, selvbestemteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndterInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) {

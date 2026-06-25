@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Sykmelding
@@ -312,10 +313,10 @@ internal class HendelseMediator(
         }
     }
 
-    override fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: BehandlingContext) {
+    override fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, selvbestemteArbeidsgiveropplysninger: SelvbestemteArbeidsgiveropplysninger, context: BehandlingContext) {
         hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
             HendelseProbe.onNavNoSelvbestemtInntektsmelding()
-            person.håndterKorrigerteArbeidsgiveropplysninger(eventBus, korrigerteArbeidsgiveropplysninger, aktivitetslogg)
+            person.håndterSelvbestemtArbeidsgiveropplysninger(eventBus, selvbestemteArbeidsgiveropplysninger, aktivitetslogg)
         }
     }
 
@@ -765,7 +766,7 @@ internal interface IHendelseMediator {
 
     fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: BehandlingContext)
     fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsmeldingMeldingsreferanseId: MeldingsreferanseId, context: BehandlingContext)
-    fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: BehandlingContext)
+    fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, selvbestemteArbeidsgiveropplysninger: SelvbestemteArbeidsgiveropplysninger, context: BehandlingContext)
     fun behandle(message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: BehandlingContext)
     fun behandle(message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: BehandlingContext)
     fun behandle(message: InntektsmeldingerReplayMessage, replays: InntektsmeldingerReplay, context: BehandlingContext)

@@ -173,7 +173,7 @@ class Arbeidsgiveropplysninger(
     meldingsreferanseId: MeldingsreferanseId,
     innsendt: LocalDateTime,
     registrert: LocalDateTime,
-    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     val vedtaksperiodeId: UUID,
     val opplysninger: List<Arbeidsgiveropplysning>
 ) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
@@ -198,7 +198,28 @@ class KorrigerteArbeidsgiveropplysninger(
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     val vedtaksperiodeId: UUID,
     val opplysninger: List<Arbeidsgiveropplysning>,
-    val varselkode: Varselkode
+) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
+
+    init {
+        opplysninger.valider()
+    }
+
+    override val metadata = HendelseMetadata(
+        meldingsreferanseId = meldingsreferanseId,
+        avsender = ARBEIDSGIVER,
+        innsendt = innsendt,
+        registrert = registrert,
+        automatiskBehandling = false
+    )
+}
+
+class SelvbestemteArbeidsgiveropplysninger(
+    meldingsreferanseId: MeldingsreferanseId,
+    innsendt: LocalDateTime,
+    registrert: LocalDateTime,
+    override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
+    val vedtaksperiodeId: UUID,
+    val opplysninger: List<Arbeidsgiveropplysning>,
 ) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
 
     init {

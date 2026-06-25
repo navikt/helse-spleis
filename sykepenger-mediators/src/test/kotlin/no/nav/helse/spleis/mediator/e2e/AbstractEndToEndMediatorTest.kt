@@ -449,6 +449,30 @@ internal abstract class AbstractEndToEndMediatorTest {
         }
     }
 
+    protected fun sendNavNoSelvbestemtInntektsmelding(
+        arbeidsgiverperiode: List<no.nav.helse.hendelser.Periode>,
+        vedtaksperiodeIndeks: Int,
+        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
+        beregnetInntekt: Double = INNTEKT,
+        opphørsdatoForRefusjon: LocalDate? = null,
+        orgnummer: String = ORGNUMMER,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
+    ): Pair<UUID, String> {
+        val vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)
+        return meldingsfabrikk.lagNavNoSelvbestemtInntektsmelding(
+            arbeidsgiverperiode = arbeidsgiverperiode.map { Periode(it.start, it.endInclusive) },
+            opphørAvNaturalytelser = opphørAvNaturalytelser,
+            beregnetInntekt = beregnetInntekt,
+            opphørsdatoForRefusjon = opphørsdatoForRefusjon,
+            orgnummer = orgnummer,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            vedtaksperiodeId = vedtaksperiodeId
+        ).let { (id, message) ->
+            testRapid.sendTestMessage(message)
+            id.toUUID() to message
+        }
+    }
+
     protected fun sendNyPåminnelse(
         vedtaksperiodeIndeks: Int = -1,
         tilstandType: TilstandType = TilstandType.START,

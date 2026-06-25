@@ -52,7 +52,6 @@ internal class NavNoKorrigertInntektsmeldingMessage(
             registrert = LocalDateTime.now(),
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
             vedtaksperiodeId = vedtaksperiodeId,
-            varselkode = Varselkode.RV_IM_4,
             opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
                 beregnetInntekt = beregnetInntekt?.månedlig,
                 arbeidsgiverperioder = arbeidsgiverperioder,

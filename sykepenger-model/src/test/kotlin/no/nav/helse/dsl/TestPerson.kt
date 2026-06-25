@@ -254,8 +254,8 @@ internal class TestPerson(
         }
 
         internal fun håndterSelvbestemtArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
-            val hendelse = arbeidsgiverHendelsefabrikk.lagKorrigerteArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger, selvbestemt = true)
-            hendelse.håndter(Person::håndterKorrigerteArbeidsgiveropplysninger)
+            val hendelse = arbeidsgiverHendelsefabrikk.lagSelvbestemteArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger)
+            hendelse.håndter(Person::håndterSelvbestemtArbeidsgiveropplysninger)
             return hendelse.metadata.meldingsreferanseId.id
         }
 
