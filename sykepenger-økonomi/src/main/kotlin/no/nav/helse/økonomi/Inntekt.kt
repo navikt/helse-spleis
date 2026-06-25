@@ -14,7 +14,7 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
                 Double.NEGATIVE_INFINITY,
                 Double.NaN
             )
-        ) { "inntekt må være gyldig positivt nummer" }
+        ) { "inntekt må være et gyldig, ikke-negativt tall" }
     }
 
     val månedlig = årlig / 12
