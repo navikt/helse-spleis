@@ -18,6 +18,8 @@ import no.nav.helse.testhelpers.YF
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Prosentdel.Companion.riktigProsent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -78,6 +80,28 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
             val avslagsdag = utbetalingstidslinje[dato] as? Utbetalingsdag.AvvistDag
             assertNotNull(avslagsdag)
             assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag, Begrunnelse.AndreYtelserPleiepenger), avslagsdag.begrunnelser)
+        }
+    }
+
+    @Test
+    fun `100 prosent dekning forsikring utløper i periode, gir forskjellig utbetaling før og etter utløp`() {
+        val opphørsdato = 22.januar
+        val dekningsgradIForsikring = 100
+        undersøke(
+            tidslinje = 16.M + 14.S,
+            forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                forsikringsvurderingId = UUID.randomUUID(),
+                harForsikring = true,
+                dekning = ForsikringsvurderingResultat.Dekning(grad = dekningsgradIForsikring, iVentetid = true),
+                opphørsdato = opphørsdato,
+            )
+        )
+        assertEquals(30, utbetalingstidslinje.size)
+        for (dato in (14.januar til opphørsdato)) {
+            assertEquals(dekningsgradIForsikring.riktigProsent, utbetalingstidslinje.inspektør.dekningsgrad(dato)) { "Frem til opphørsdato skal dekning i utbetaling være 100 %" }
+        }
+        for (dato in opphørsdato.plusDays(1) til 30.januar) {
+            assertEquals(80.prosent, utbetalingstidslinje.inspektør.dekningsgrad(dato)) { "Etter opphørsdato for forsikring skal dekningsgrad være 80 %" }
         }
     }
 

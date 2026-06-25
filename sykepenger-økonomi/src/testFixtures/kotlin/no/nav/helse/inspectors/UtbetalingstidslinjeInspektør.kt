@@ -160,6 +160,7 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     fun grad(dag: LocalDate) = økonomi.getValue(dag).brukAvrundetGrad { grad -> grad }
     fun arbeidsgiverbeløp(dag: LocalDate) = økonomi.getValue(dag).inspektør.arbeidsgiverbeløp
     fun personbeløp(dag: LocalDate) = økonomi.getValue(dag).inspektør.personbeløp
+    fun dekningsgrad(dag: LocalDate) = økonomi.getValue(dag).dekningsgrad
 
     fun totalUtbetaling() = totalUtbetaling
 
