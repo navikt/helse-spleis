@@ -44,7 +44,6 @@ import no.nav.helse.spill_av_im.FørsteFraværsdag
 import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
-import no.nav.helse.spleis.Subsumsjonproducer
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.mediator.TestMessageFactory
@@ -67,6 +66,7 @@ import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.utboks.TestUtsender
+import no.nav.helse.spleis.utboks.UtgåendeMelding.Mottaker.SUBSUMSJON
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -84,7 +84,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         internal val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         internal const val ORGNUMMER = "987654321"
         internal const val INNTEKT = 31000.00
-        private val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
     }
 
     protected val meldingsfabrikk = TestMessageFactory(UNG_PERSON_FNR_2018, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
@@ -93,32 +92,27 @@ internal abstract class AbstractEndToEndMediatorTest {
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var messageMediator: MessageMediator
     protected lateinit var dataSource: TestDataSource
-    protected lateinit var subsumsjoner: MutableList<JsonNode>
+    private val utsender = TestUtsender()
+    protected val subsumsjoner: List<JsonNode> get() = utsender.ok.filter { it.mottaker == SUBSUMSJON }.map { it.json }
 
     @BeforeEach
     fun setupDatabase() {
         dataSource = databaseContainer.nyTilkobling()
 
         testRapid = TestRapid()
-        subsumsjoner = mutableListOf()
         hendelseRepository = HendelseRepository(dataSource.ds)
         hendelseMediator = HendelseMediator(
             hendelseRepository = hendelseRepository,
             personDao = PersonDao(dataSource.ds, STØTTER_IDENTBYTTE = true),
             versjonAvKode = "test-versjon",
-            støtterIdentbytte = true,
-            subsumsjonsproducer = object : Subsumsjonproducer {
-                override fun send(fnr: String, melding: String) {
-                    subsumsjoner.add(objectMapper.readTree(melding))
-                }
-            }
+            støtterIdentbytte = true
         )
 
         messageMediator = MessageMediator(
             rapidsConnection = testRapid,
             hendelseMediator = hendelseMediator,
             hendelseRepository = hendelseRepository,
-            utsender = TestUtsender()
+            utsender = utsender
         )
 
         testRapid.observer(InntektsmeldingerReplayObserver(testRapid, dataSource.ds))

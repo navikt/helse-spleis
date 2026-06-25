@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.mediator.etterlevelse
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import com.networknt.schema.JsonSchemaFactory
@@ -16,10 +14,11 @@ import no.nav.helse.etterlevelse.`§ 8-17 ledd 2`
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.januar
+import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.SubsumsjonMediator
-import no.nav.helse.spleis.Subsumsjonproducer
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
+import no.nav.helse.spleis.utboks.TestUtsender
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -31,7 +30,7 @@ internal class SubsumsjonsmeldingTest {
 
     private lateinit var subsumsjonMediator: SubsumsjonMediator
     private lateinit var testRapid: TestRapid
-    private val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+    private val utsender = TestUtsender()
 
     @BeforeEach
     fun beforeEach() {
@@ -48,15 +47,11 @@ internal class SubsumsjonsmeldingTest {
             listOf(1.januar(2018).somPeriode()),
             MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) }
         )
-        subsumsjonMediator.logg(Regelverksporing("12345678911", "orgnr", UUID.randomUUID(), UUID.randomUUID(), subsumsjonen))
-        val subsumsjoner = buildList<JsonNode> {
-            subsumsjonMediator.ferdigstill(object : Subsumsjonproducer {
-                override fun send(fnr: String, melding: String) {
-                    add(objectMapper.readTree(melding))
-                }
-            })
-        }
-        assertSubsumsjonsmelding(subsumsjoner.first().path("subsumsjon"))
+        subsumsjonMediator.logg(Regelverksporing(fnr, "orgnr", UUID.randomUUID(), UUID.randomUUID(), subsumsjonen))
+
+        subsumsjonMediator.ferdigstill()
+
+        assertSubsumsjonsmelding(utsender.ok.single().json.path("subsumsjon"))
     }
 
     private val schema by lazy {
@@ -71,5 +66,15 @@ internal class SubsumsjonsmeldingTest {
         } catch (_: Exception) {
             LoggerFactory.getLogger(SubsumsjonsmeldingTest::class.java).warn("Kunne ikke kjøre kontrakttest for subsumsjoner. Mangler du internett?")
         }
+    }
+
+    private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
+        it.requireKey("@event_name")
+    }, Meldingsporing(MeldingsreferanseId(UUID.randomUUID()), fnr))
+
+    private fun SubsumsjonMediator.ferdigstill() {
+        val behandlingContext = BehandlingContext(testRapid, eksempelmelding, utsender)
+        leggIUtboks(behandlingContext)
+        behandlingContext.sendMeldingerIUtboks()
     }
 }

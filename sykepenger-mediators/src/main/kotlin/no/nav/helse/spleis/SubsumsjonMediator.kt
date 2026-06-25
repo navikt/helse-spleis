@@ -3,35 +3,16 @@ package no.nav.helse.spleis
 import java.time.format.DateTimeFormatter
 import java.util.*
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.spleis.SubsumsjonMediator.SubsumsjonEvent.Companion.paragrafVersjonFormaterer
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.utboks.UtgåendeMelding
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.slf4j.LoggerFactory
-
-interface Subsumsjonproducer {
-    fun send(fnr: String, melding: String)
-
-    class KafkaSubsumsjonproducer(private val topic: String, private val producer: KafkaProducer<String, String>) : Subsumsjonproducer {
-        override fun send(fnr: String, melding: String) {
-            producer.send(ProducerRecord(topic, fnr, melding))
-        }
-    }
-}
 
 internal class SubsumsjonMediator(
     private val message: HendelseMessage,
     private val versjonAvKode: String
 ) : Regelverkslogg {
-
-    private companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        private val logg = LoggerFactory.getLogger(SubsumsjonMediator::class.java)
-    }
 
     private val subsumsjoner = mutableListOf<SubsumsjonEvent>()
 
@@ -55,26 +36,12 @@ internal class SubsumsjonMediator(
     }
 
     fun leggIUtboks(context: BehandlingContext) {
-        if (Toggle.SubsumsjonsmeldingerViaUtboks.disabled) return
         if (subsumsjoner.isEmpty()) return
         subsumsjoner.forEach { subsumsjon ->
             context.leggIUtboks {
                 subsumsjonMelding(subsumsjon)
             }
         }
-    }
-
-    fun ferdigstill(producer: Subsumsjonproducer) {
-        if (Toggle.SubsumsjonsmeldingerViaUtboks.enabled) return
-        if (subsumsjoner.isEmpty()) return
-        logg.info("som følge av hendelse id=${message.meldingsporing.id} sendes ${subsumsjoner.size} subsumsjonsmeldinger på rapid")
-        subsumsjoner
-            .map { subsumsjonMelding(it) }
-            .forEach {
-                val jsonbody = it.json.toString()
-                sikkerLogg.info("som følge av hendelse id=${this.message.meldingsporing.id} sender subsumsjon: $jsonbody")
-                producer.send(checkNotNull(it.key), jsonbody)
-            }
     }
 
     private fun subsumsjonMelding(event: SubsumsjonEvent): UtgåendeMelding {

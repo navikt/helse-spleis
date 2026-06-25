@@ -10,7 +10,6 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
-import no.nav.helse.spleis.Subsumsjonproducer
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.monitorering.MonitoreringRiver
@@ -30,19 +29,16 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     private val hendelseRepository = HendelseRepository(dataSourceBuilder.dataSource)
     private val personDao = PersonDao(dataSourceBuilder.dataSource, STØTTER_IDENTBYTTE)
 
-    private val subsumsjonsproducer = Subsumsjonproducer.KafkaSubsumsjonproducer("tbd.subsumsjon.v1", factory.createProducer())
-
     private val hendelseMediator = HendelseMediator(
         hendelseRepository = hendelseRepository,
         personDao = personDao,
         versjonAvKode = versjonAvKode(env),
-        støtterIdentbytte = STØTTER_IDENTBYTTE,
-        subsumsjonsproducer = subsumsjonsproducer
+        støtterIdentbytte = STØTTER_IDENTBYTTE
     )
 
     private val utsender = Utsender.KafkaUtsender(factory.createProducer(), vedFeil = {
         stop()
-        error("Feil ved utsending av utsending. Se sikkerlogg for detaljer.")
+        error("Feil ved utsending av meldinger fra utboks. Se sikkerlogg for detaljer.")
     })
 
     init {

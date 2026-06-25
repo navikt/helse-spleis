@@ -101,8 +101,7 @@ internal class HendelseMediator(
     private val hendelseRepository: HendelseRepository,
     private val personDao: PersonDao,
     private val versjonAvKode: String,
-    private val støtterIdentbytte: Boolean = false,
-    private val subsumsjonsproducer: Subsumsjonproducer
+    private val støtterIdentbytte: Boolean = false
 ) : IHendelseMediator {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -603,7 +602,7 @@ internal class HendelseMediator(
             leggIUtboks(context, message, eventBus, datadelingMediator, subsumsjonMediator)
         }
 
-        ferdigstill(subsumsjonMediator, aktivitetslogg)
+        ferdigstill(aktivitetslogg)
     }
 
     private fun personHverkenFunnetEllerOpprettet(context: BehandlingContext, message: HendelseMessage) {
@@ -651,11 +650,7 @@ internal class HendelseMediator(
         subsumsjonMediator.leggIUtboks(context)
     }
 
-    private fun ferdigstill(
-        subsumsjonMediator: SubsumsjonMediator,
-        aktivitetslogg: Aktivitetslogg,
-    ) {
-        subsumsjonMediator.ferdigstill(subsumsjonsproducer)
+    private fun ferdigstill(aktivitetslogg: Aktivitetslogg) {
         if (aktivitetslogg.aktiviteter.isEmpty()) return
         if (aktivitetslogg.harFunksjonelleFeil()) sikkerLogg.info("aktivitetslogg inneholder errors:\n$aktivitetslogg")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n$aktivitetslogg")
