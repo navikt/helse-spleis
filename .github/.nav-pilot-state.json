@@ -1,0 +1,177 @@
+{
+  "collection": "kotlin-backend",
+  "version": "2026.06.25-072030-1ae3959",
+  "scope": "repo",
+  "source_sha": "4babed1",
+  "installed_at": "2026-06-25T08:11:28Z",
+  "files": [
+    {
+      "path": ".github/agents/code-review.agent.md",
+      "hash": "3f32b4e215bca95d"
+    },
+    {
+      "path": ".github/agents/research.agent.md",
+      "hash": "90b7a1685788c5a4"
+    },
+    {
+      "path": ".github/agents/security-champion.agent.md",
+      "hash": "5ccba48b66938fd0"
+    },
+    {
+      "path": ".github/agents/nav-pilot.agent.md",
+      "hash": "f490eb3f9ca1e9a3"
+    },
+    {
+      "path": ".github/skills/api-design/",
+      "hash": "a353aded69a4bd4c"
+    },
+    {
+      "path": ".github/skills/conventional-commit/",
+      "hash": "b81a4898fed3139d"
+    },
+    {
+      "path": ".github/skills/flyway-migration/",
+      "hash": "ebb952121b180fac"
+    },
+    {
+      "path": ".github/skills/java-to-kotlin/",
+      "hash": "c312e45ae07d1e85"
+    },
+    {
+      "path": ".github/skills/kafka/",
+      "hash": "312ab4de91a246fa"
+    },
+    {
+      "path": ".github/skills/kotlin-app-config/",
+      "hash": "9168a07cc0b620c3"
+    },
+    {
+      "path": ".github/skills/ktor-scaffold/",
+      "hash": "68b1ffff9f769c0a"
+    },
+    {
+      "path": ".github/skills/nais/",
+      "hash": "23c3b8a1bab24c72"
+    },
+    {
+      "path": ".github/skills/nav-auth/",
+      "hash": "f244d4e2bef4cfcf"
+    },
+    {
+      "path": ".github/skills/observability-setup/",
+      "hash": "78181a920d929a23"
+    },
+    {
+      "path": ".github/skills/observability-debugging/",
+      "hash": "b01ef3cd48eca1aa"
+    },
+    {
+      "path": ".github/skills/postgresql-review/",
+      "hash": "c0037201dbd465c0"
+    },
+    {
+      "path": ".github/skills/readme-review/",
+      "hash": "8051f0041095f50c"
+    },
+    {
+      "path": ".github/skills/security-review/",
+      "hash": "c74a83a4e61fbf58"
+    },
+    {
+      "path": ".github/skills/security-owasp/",
+      "hash": "6b06f512092bde91"
+    },
+    {
+      "path": ".github/skills/spring-boot-scaffold/",
+      "hash": "c789e103015478c7"
+    },
+    {
+      "path": ".github/skills/threat-model/",
+      "hash": "305fe669dec42981"
+    },
+    {
+      "path": ".github/skills/tokenx-auth/",
+      "hash": "7afa1c42b4e8e859"
+    },
+    {
+      "path": ".github/skills/workstation-security/",
+      "hash": "75749c782af25813"
+    },
+    {
+      "path": ".github/skills/nav-plan/",
+      "hash": "0a160744cf2b4e82"
+    },
+    {
+      "path": ".github/skills/nav-deep-interview/",
+      "hash": "eeb3399ecd4e352c"
+    },
+    {
+      "path": ".github/skills/nav-architecture-review/",
+      "hash": "4618dec566442509"
+    },
+    {
+      "path": ".github/skills/nav-troubleshoot/",
+      "hash": "e9900d58d91ee0ee"
+    },
+    {
+      "path": ".github/skills/terse-mode/",
+      "hash": "133c50e8cd7769d2"
+    },
+    {
+      "path": ".github/instructions/code-review.instructions.md",
+      "hash": "76088d9c7d0e3909"
+    },
+    {
+      "path": ".github/instructions/deliberate-ai-use.instructions.md",
+      "hash": "a0999e3cc902f4f5"
+    },
+    {
+      "path": ".github/instructions/kotlin-ktor.instructions.md",
+      "hash": "495a1016fde29289"
+    },
+    {
+      "path": ".github/instructions/kotlin-spring.instructions.md",
+      "hash": "bdf9d1bfd4121803"
+    },
+    {
+      "path": ".github/instructions/testing.instructions.md",
+      "hash": "4a6a7547a3701ce1"
+    },
+    {
+      "path": ".github/instructions/testing-kotlin.instructions.md",
+      "hash": "13a5a10d86577f84"
+    },
+    {
+      "path": ".github/instructions/github-actions.instructions.md",
+      "hash": "bbef6f3e56b8b3b3"
+    },
+    {
+      "path": ".github/instructions/docker.instructions.md",
+      "hash": "32db7a2f8aaab2ac"
+    },
+    {
+      "path": ".github/instructions/database.instructions.md",
+      "hash": "5b4639fd54c7b4f3"
+    },
+    {
+      "path": ".github/instructions/security-owasp.instructions.md",
+      "hash": "3388700634dd315d"
+    },
+    {
+      "path": ".github/prompts/ktor-endpoint.prompt.md",
+      "hash": "e5a24e1b9e9bc398"
+    },
+    {
+      "path": ".github/prompts/spring-boot-endpoint.prompt.md",
+      "hash": "3e68aab2f5cbe402"
+    },
+    {
+      "path": ".github/prompts/kafka-topic.prompt.md",
+      "hash": "d485c12c7b6d44d6"
+    },
+    {
+      "path": ".github/prompts/nais-manifest.prompt.md",
+      "hash": "8576571223ffef8a"
+    }
+  ]
+}
