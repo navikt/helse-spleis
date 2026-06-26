@@ -34,10 +34,7 @@ internal class SubsumsjonsmeldingTest {
 
     @BeforeEach
     fun beforeEach() {
-        val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
-            it.requireKey("@event_name")
-        }, Meldingsporing(MeldingsreferanseId(UUID.randomUUID()), fnr))
-        subsumsjonMediator = SubsumsjonMediator(eksempelmelding, versjonAvKode)
+        subsumsjonMediator = SubsumsjonMediator(versjonAvKode)
         testRapid = TestRapid()
     }
 

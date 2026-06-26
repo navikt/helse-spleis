@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -17,7 +18,11 @@ import org.slf4j.Logger
 internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivitetskontekst {
     abstract val meldingsporing: Meldingsporing
     internal val navn = packet["@event_name"].asText()
-    protected val opprettet = packet["@opprettet"].asLocalDateTime()
+    internal val opprettet = packet["@opprettet"].asLocalDateTime()
+    internal val behov = when (navn == "behov") {
+        true -> packet["@behov"].filterNot { it.isMissingOrNull() }
+        false -> null
+    }
 
     internal abstract fun behandle(mediator: IHendelseMediator, context: BehandlingContext)
 

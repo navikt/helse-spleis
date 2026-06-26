@@ -10,14 +10,14 @@ import no.nav.helse.spleis.utboks.Utsender
 
 internal class BehandlingContext(
     val messageContext: MessageContext,
-    private val message: HendelseMessage,
+    message: HendelseMessage,
     utsender: Utsender
 ) {
     private val personidentifikator = Personidentifikator(message.meldingsporing.fødselsnummer)
-    private val utboks = Utboks(utsender)
+    private val utboks = Utboks(utsender, message)
 
-    fun sendMeldingerIUtboks() = utboks.send(messageContext, message)
-    fun lagreMeldingerIUtboks(connection: Connection) = utboks.lagre(connection, message)
+    fun sendMeldingerIUtboks() = utboks.send(messageContext)
+    fun lagreMeldingerIUtboks(connection: Connection) = utboks.lagre(connection)
     fun leggIUtboks(block: (personidentifikator: Personidentifikator) -> UtgåendeMelding) {
         utboks.nyMelding(block(personidentifikator))
     }

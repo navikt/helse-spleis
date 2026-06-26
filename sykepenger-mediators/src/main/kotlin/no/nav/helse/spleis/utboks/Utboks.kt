@@ -7,7 +7,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
-internal class Utboks(private val utsender: Utsender) {
+internal class Utboks(private val utsender: Utsender, private val innkommendeMelding: HendelseMessage) {
     private val utgåendeMeldinger = mutableListOf<UtgåendeMelding>()
     private var tilstand: Tilstand = Tilstand.Åpen
 
@@ -15,14 +15,14 @@ internal class Utboks(private val utsender: Utsender) {
         tilstand.nyMelding(melding, this)
     }
 
-    fun lagre(connection: Connection, message: HendelseMessage) {
+    fun lagre(connection: Connection) {
         check(!connection.autoCommit) { "Meldingene må lagres ned i samme transaksjon som personen lagres ned." }
         nyMelding(UtgåendeMelding.nyRapidmelding(
-            personidentifikator = Personidentifikator(message.meldingsporing.fødselsnummer),
+            personidentifikator = Personidentifikator(innkommendeMelding.meldingsporing.fødselsnummer),
             eventName = "melding_om_melding_håndtert",
             innhold = mapOf(
-                "originalt_event_name" to "${message.navn}",
-                "original_id" to "${message.meldingsporing.id.id}"
+                "originalt_event_name" to "${innkommendeMelding.navn}",
+                "original_id" to "${innkommendeMelding.meldingsporing.id.id}"
             )
         ))
         tilstand = Tilstand.Lukket
@@ -30,9 +30,9 @@ internal class Utboks(private val utsender: Utsender) {
         // TODO: Lagre i db
     }
 
-    fun send(messageContext: MessageContext, message: HendelseMessage) {
+    fun send(messageContext: MessageContext) {
         sikkerLogg.info("Sender ${utgåendeMeldinger.size} meldinger fra utboksen")
-        message.logOutgoingMessages(sikkerLogg, utgåendeMeldinger.size)
+        innkommendeMelding.logOutgoingMessages(sikkerLogg, utgåendeMeldinger.size)
         utgåendeMeldinger.loggSending()
         val (tilRapid, tilSubsumsjon) = utgåendeMeldinger.partition { it.mottaker == UtgåendeMelding.Mottaker.RAPID }
         sendMedMessageContext(messageContext, tilRapid)
@@ -75,7 +75,20 @@ internal class Utboks(private val utsender: Utsender) {
 
         data object Åpen: Tilstand {
             override fun nyMelding(melding: UtgåendeMelding, utboks: Utboks) {
-                utboks.utgåendeMeldinger.add(melding)
+                utboks.utgåendeMeldinger.add(melding.copy(
+                    json = melding.json.apply {
+                        putObject("@forårsaket_av").apply {
+                            put("id", utboks.innkommendeMelding.meldingsporing.id.id.toString())
+                            put("opprettet", utboks.innkommendeMelding.opprettet.toString())
+                            put("event_name", utboks.innkommendeMelding.navn)
+                            utboks.innkommendeMelding.behov?.let { behov ->
+                                putArray("behov").apply {
+                                    addAll(behov)
+                                }
+                            }
+                        }
+                    }
+                ))
             }
         }
         data object Lukket: Tilstand {

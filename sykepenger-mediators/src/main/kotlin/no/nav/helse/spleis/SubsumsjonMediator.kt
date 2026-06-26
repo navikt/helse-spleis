@@ -6,11 +6,9 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.spleis.SubsumsjonMediator.SubsumsjonEvent.Companion.paragrafVersjonFormaterer
-import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.utboks.UtgåendeMelding
 
 internal class SubsumsjonMediator(
-    private val message: HendelseMessage,
     private val versjonAvKode: String
 ) : Regelverkslogg {
 
@@ -47,9 +45,6 @@ internal class SubsumsjonMediator(
     private fun subsumsjonMelding(event: SubsumsjonEvent): UtgåendeMelding {
         return UtgåendeMelding.nySubsumsjonsmelding(Personidentifikator(event.fødselsnummer)) { id, tidsstempel ->
             mapOf(
-                "@forårsaket_av" to mapOf(
-                    "id" to message.meldingsporing.id
-                ),
                 "subsumsjon" to buildMap {
                     this["id"] = id
                     this["eventName"] = "subsumsjon"

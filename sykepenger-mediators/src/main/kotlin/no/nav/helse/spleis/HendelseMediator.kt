@@ -592,7 +592,7 @@ internal class HendelseMediator(
     ) {
         val aktivitetslogg = Aktivitetslogg().kontekst(message)
 
-        val subsumsjonMediator = SubsumsjonMediator(message, versjonAvKode)
+        val subsumsjonMediator = SubsumsjonMediator(versjonAvKode)
         val datadelingMediator = DatadelingMediator(aktivitetslogg, message)
 
         val eventBus = EventBus()
