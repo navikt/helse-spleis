@@ -7,18 +7,17 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.Companion.valider
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_28
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 sealed interface Arbeidsgiveropplysning {
-    data class OppgittArbeidgiverperiode(val perioder: List<Periode>) : Arbeidsgiveropplysning {
+    class OppgittArbeidgiverperiode(perioder: List<Periode>) : Arbeidsgiveropplysning {
         init {
             check(perioder.isNotEmpty()) { "Må være minst en periode med agp!" }
             check(perioder.flatten().size <= 16) { "Tøysete med en agp mer enn 16" }
         }
+        val perioder = perioder.sortedBy { it.start }
     }
 
     data class OppgittInntekt(val inntekt: Inntekt) : Arbeidsgiveropplysning {
@@ -157,7 +156,7 @@ sealed interface Arbeidsgiveropplysning {
             if (this == "FerieEllerAvspasering") {
                 return IkkeNyArbeidsgiverperiode
             }
-            val begrunnelse = Arbeidsgiveropplysning.Begrunnelse.valueOf(this)
+            val begrunnelse = Begrunnelse.valueOf(this)
             val antallDager = arbeidsgiverperioder.flatten().size
             return when (antallDager) {
                 0 -> IkkeUtbetaltArbeidsgiverperiode(begrunnelse)

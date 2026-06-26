@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -13,6 +12,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test
 internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
 
     @Test
-    fun `mottar selvbestemt inntektsmelding når vi ikke trenger en`() {
+    fun `mottar selvbestemte arbeidsgiveropplysninger når vi ikke trenger en`() {
         a1 {
             håndterSøknad(1.januar til 16.januar)
             håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode,
@@ -38,7 +38,26 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `mottar selvbestemt inntektsmelding som korrigerer eksisterende`() {
+    fun `mottar selvbestemte arbeidsgiveropplysninger hvor arbeidgiverperioden ikke er sortert kronologisk`() {
+        a1 {
+            håndterSøknad(1.januar til 16.januar)
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittArbeidgiverperiode(
+                    listOf(
+                        5.januar til 18.januar,
+                        2.januar til 3.januar
+                    )
+                ),
+                OppgittInntekt(INNTEKT),
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = INNTEKT, endringer = emptyList())
+            )
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_IM_3, RV_AO_3)
+        }
+    }
+
+    @Test
+    fun `mottar selvbestemte arbeidsgiveropplysninger som korrigerer eksisterende`() {
         a1 {
             nyttVedtak(januar)
             håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode,
@@ -50,7 +69,7 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `selvbestemt inntektsmelding med begrunnelseForIkkeUtbetaltIAGP som treffer en AUU`() {
+    fun `selvbestemte arbeidsgiveropplysninger med begrunnelseForIkkeUtbetaltIAGP som treffer en AUU`() {
         a1 {
             håndterSøknad(1.januar til 16.januar)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
@@ -67,7 +86,7 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `selvbestemt inntektsmelding opplyser om tidligere AGP som gjør at en AUU egentlig skal gi utbetaling`() {
+    fun `selvbestemte arbeidsgiveropplysninger opplyser om tidligere AGP som gjør at en AUU egentlig skal gi utbetaling`() {
         a1 {
             håndterSøknad(5.januar til 20.januar)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
@@ -82,5 +101,4 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertEquals(listOf(1.januar til 16.januar), inspektør.venteperiode(1.vedtaksperiode))
         }
     }
-
 }
