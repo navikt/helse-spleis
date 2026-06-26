@@ -20,26 +20,29 @@ internal class UtboksDaoTest {
     private lateinit var dao: UtboksDao
 
     @BeforeEach
-    internal fun setup() {
+    fun setup() {
         dataSource = databaseContainer.nyTilkobling()
         dao = UtboksDao(dataSource.ds)
     }
 
     @AfterEach
-    internal fun tearDown() {
+    fun tearDown() {
         databaseContainer.droppTilkobling(dataSource)
     }
 
     @Test
     fun `lagrer, sender og henter opp meldinger`() {
         val meldingerTilSykmeldt = listOf(nyMelding(), nyMelding(), nyMelding())
-        val meldingerUtenKey =  nyMelding(key = null)
-        val meldinger = meldingerTilSykmeldt + meldingerUtenKey
+        val meldingUtenKey =  nyMelding(key = null)
+        val meldinger = meldingerTilSykmeldt + meldingUtenKey
         lagre(meldinger)
         assertEquals(meldinger, dao.usendte(personidentifikator))
         sendt(meldingerTilSykmeldt)
-        assertEquals(listOf(meldingerUtenKey), dao.usendte(personidentifikator))
+        assertEquals(listOf(meldingUtenKey), dao.usendte(personidentifikator))
         assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger())
+        sendt(listOf(meldingUtenKey))
+        assertEquals(emptyList<UtgåendeMelding>(), dao.usendte(personidentifikator))
+
     }
 
     @Test
