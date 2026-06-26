@@ -35,7 +35,7 @@ data class UtgåendeMelding(
 
     enum class Mottaker { RAPID, SUBSUMSJON }
 
-    internal constructor(key: String?, json: String, mottaker: Mottaker) : this(key, objectmapper.readValue<ObjectNode>(json), mottaker)
+    constructor(key: String?, json: String, mottaker: Mottaker) : this(key, objectmapper.readValue<ObjectNode>(json), mottaker)
 
     companion object {
         private val objectmapper = jacksonObjectMapper()
