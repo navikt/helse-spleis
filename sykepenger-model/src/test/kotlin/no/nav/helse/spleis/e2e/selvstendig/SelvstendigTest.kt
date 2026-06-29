@@ -32,6 +32,8 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
+import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel.PensjonsgivendeInntekt
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
@@ -55,6 +57,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_TIL_UTBETALI
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.enesteGodkjenningsbehovSomFølgeAv
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
@@ -77,6 +80,50 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertEquals("MMMMSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
             assertVarsel(Varselkode.RV_SØ_56, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `godkjenningsbehov for forlengelse inneholder pensjonsgivende inntekter lagt til grunn, og ikke ev nytt lignet år underveis`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(periode = januar, pensjonsgivendeInntekter = (2014..2016).map { år ->
+                Søknad.PensjonsgivendeInntekt(Year.of(år), 300000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
+            })
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelserSelvstendig(1.vedtaksperiode)
+
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
+            }
+            val spgFakta = godkjenningsbehov.event.sykepengegrunnlagsfakta as EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel
+
+            assertEquals(listOf(
+                PensjonsgivendeInntekt(årstall = Year.of(2014), beløp = 300000.0),
+                PensjonsgivendeInntekt(årstall = Year.of(2015), beløp=300000.0),
+                PensjonsgivendeInntekt(årstall = Year.of(2016), beløp=300000.0)
+            ), spgFakta.pensjonsgivendeInntekter)
+
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstand(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET)
+
+            håndterForlengelsessøknadSelvstendig(periode = februar, pensjonsgivendeInntekter = listOf(
+                Søknad.PensjonsgivendeInntekt(Year.of(2015), 300000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                Søknad.PensjonsgivendeInntekt(Year.of(2016), 300000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                Søknad.PensjonsgivendeInntekt(Year.of(2017), 600000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
+            ))
+            håndterYtelserSelvstendig(2.vedtaksperiode)
+
+            val godkjenningsbehov2 = enesteGodkjenningsbehovSomFølgeAv({ 2.vedtaksperiode }) {
+                håndterSimulering(2.vedtaksperiode)
+            }
+            val spgFakta2 = godkjenningsbehov2.event.sykepengegrunnlagsfakta as EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel
+
+            assertEquals(listOf(
+                PensjonsgivendeInntekt(årstall = Year.of(2014), beløp = 300000.0),
+                PensjonsgivendeInntekt(årstall = Year.of(2015), beløp=300000.0),
+                PensjonsgivendeInntekt(årstall = Year.of(2016), beløp=300000.0)
+            ), spgFakta2.pensjonsgivendeInntekter)
         }
     }
 

@@ -1039,7 +1039,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     .skjæringstidspunkt(skjæringstidspunkt)
                     .utbetalingsinformasjon(utbetaling, utbetalingstidslinje, sykdomstidslinje, refusjonstidslinje)
                     .sykepengerettighet(maksdatoresultat.antallForbrukteDager, maksdatoresultat.gjenståendeDager, maksdatoresultat.maksdato)
-                    .apply { (faktaavklartInntekt as? SelvstendigFaktaavklartInntekt)?.also { pensjonsgivendeInntekter(it.pensjonsgivendeInntekter) } }
+                    .apply {
+                        grunnlagsdata.inntektsgrunnlag.selvstendigInntektsopplysning?.faktaavklartInntekt?.also {
+                            pensjonsgivendeInntekter(it.pensjonsgivendeInntekter)
+                        }
+                    }
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
             }
 
