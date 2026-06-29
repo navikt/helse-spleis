@@ -188,6 +188,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun berik(builder: UtkastTilVedtakBuilder) {
             builder.vilkårsgrunnlagId(vilkårsgrunnlagId)
+            builder.forsikringsvurderingId((this as? Grunnlagsdata)?.forsikringsvurderingId)
             inntektsgrunnlag.berik(builder)
         }
 

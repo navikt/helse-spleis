@@ -62,7 +62,8 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
         "selvstendig" to null
     ),
     arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
-    actualBehov: Behovsoppsamler.Behovsdetaljer.Godkjenning
+    actualBehov: Behovsoppsamler.Behovsdetaljer.Godkjenning,
+    forsikringsvurderingId: UUID? = null,
 ) {
     val benyttetUtbetalingId = UUID.randomUUID()
     val benyttetVilkårsgrunnlagId = UUID.randomUUID()
@@ -70,6 +71,7 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
     val expected = EventSubscription.GodkjenningEvent(
         utbetalingId = benyttetUtbetalingId,
         vilkårsgrunnlagId = benyttetVilkårsgrunnlagId,
+        forsikringsvurderingId = forsikringsvurderingId,
         vedtaksperiodeId = vedtaksperiodeId,
         behandlingId = behandlingId,
         periode = periodeFom til periodeTom,

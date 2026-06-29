@@ -23,7 +23,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
             håndterYtelser(1.vedtaksperiode)
-            val godkjenningsbehov = `enesteGodkjenningsbehovSomFølgeAv`({ 1.vedtaksperiode }) {
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
                 håndterSimulering(1.vedtaksperiode)
             }
             assertGodkjenningsbehov(
@@ -99,11 +99,16 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
     fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov med hundre prosent forsikring fra dag en`() = Toggle.SelvstendigForsikring.enable {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            val forsikringsvurderingId = UUID.randomUUID()
+            håndterVilkårsgrunnlag(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                skatteinntekter = emptyList(),
+                forsikringsvurderingId = forsikringsvurderingId,
+            )
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                    forsikringsvurderingId = UUID.randomUUID(),
+                    forsikringsvurderingId = forsikringsvurderingId,
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
@@ -176,7 +181,8 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                         ),
                 ),
                 inntektskilde = "EN_ARBEIDSGIVER",
-                arbeidssituasjon = Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
+                arbeidssituasjon = Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
+                forsikringsvurderingId = forsikringsvurderingId,
             )
             assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
         }
@@ -186,11 +192,16 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
     fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov med hundre prosent forsikring fra dag sytten`() = Toggle.SelvstendigForsikring.enable {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = emptyList())
+            val forsikringsvurderingId = UUID.randomUUID()
+            håndterVilkårsgrunnlag(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                skatteinntekter = emptyList(),
+                forsikringsvurderingId = forsikringsvurderingId,
+            )
             håndterYtelserSelvstendig(
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                    forsikringsvurderingId = UUID.randomUUID(),
+                    forsikringsvurderingId = forsikringsvurderingId,
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
@@ -263,7 +274,8 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                         ),
                 ),
                 inntektskilde = "EN_ARBEIDSGIVER",
-                arbeidssituasjon = Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE
+                arbeidssituasjon = Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
+                forsikringsvurderingId = forsikringsvurderingId,
             )
             assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
         }
@@ -274,11 +286,16 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
         Toggle.Jordbruker.enable {
             selvstendig {
                 håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
-                håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+                val forsikringsvurderingId = UUID.randomUUID()
+                håndterVilkårsgrunnlag(
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    skatteinntekter = emptyList(),
+                    forsikringsvurderingId = forsikringsvurderingId,
+                )
                 håndterYtelserSelvstendig(
                     1.vedtaksperiode,
                     forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                        forsikringsvurderingId = UUID.randomUUID(),
+                        forsikringsvurderingId = forsikringsvurderingId,
                         harForsikring = true,
                         dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                         opphørsdato = null,
@@ -351,7 +368,8 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                             ),
                     ),
                     inntektskilde = "EN_ARBEIDSGIVER",
-                    arbeidssituasjon = Arbeidssituasjon.JORDBRUKER
+                    arbeidssituasjon = Arbeidssituasjon.JORDBRUKER,
+                    forsikringsvurderingId = forsikringsvurderingId,
                 )
                 assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_55, Varselkode.RV_AN_6)
             }
