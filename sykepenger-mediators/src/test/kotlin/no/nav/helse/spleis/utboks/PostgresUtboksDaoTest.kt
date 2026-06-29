@@ -14,15 +14,15 @@ import org.junit.jupiter.api.Test
 import no.nav.helse.spleis.utboks.UtgåendeMeldingTest.Companion.nyUuidv7
 import org.junit.jupiter.api.Assertions.assertEquals
 
-internal class UtboksDaoTest {
+internal class PostgresUtboksDaoTest {
 
     private lateinit var dataSource: TestDataSource
-    private lateinit var dao: UtboksDao
+    private lateinit var dao: PostgresUtboksDao
 
     @BeforeEach
     fun setup() {
         dataSource = databaseContainer.nyTilkobling()
-        dao = UtboksDao(dataSource.ds)
+        dao = PostgresUtboksDao(dataSource.ds)
     }
 
     @AfterEach
