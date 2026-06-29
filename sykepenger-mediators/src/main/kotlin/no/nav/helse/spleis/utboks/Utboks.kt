@@ -34,11 +34,12 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
     fun send(messageContext: MessageContext) {
         sikkerLogg.info("Sender ${utgåendeMeldinger.size} meldinger fra utboksen")
         innkommendeMelding.logOutgoingMessages(sikkerLogg, utgåendeMeldinger.size)
-        utgåendeMeldinger.loggSending()
 
         if (Toggle.BrukUtsenderTilRapid.enabled) {
-            utsender.send(utgåendeMeldinger)
+            val kvittering = utsender.send(utgåendeMeldinger)
+            kvittering.ok.loggSending()
         } else {
+            utgåendeMeldinger.loggSending()
             val (tilRapid, tilSubsumsjon) = utgåendeMeldinger.partition { it.mottaker == UtgåendeMelding.Mottaker.RAPID }
             sendMedMessageContext(messageContext, tilRapid)
             utsender.send(tilSubsumsjon)

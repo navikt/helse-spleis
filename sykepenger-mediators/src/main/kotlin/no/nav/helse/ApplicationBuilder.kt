@@ -15,6 +15,7 @@ import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.monitorering.MonitoreringRiver
 import no.nav.helse.spleis.monitorering.RegelmessigAvstemming
 import no.nav.helse.spleis.utboks.Utsender
+import org.slf4j.event.Level
 
 val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, PrometheusRegistry.defaultRegistry, Clock.SYSTEM)
 
@@ -36,10 +37,14 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
         støtterIdentbytte = STØTTER_IDENTBYTTE
     )
 
-    private val utsender = Utsender.KafkaUtsender(factory.createProducer(), vedFeil = {
-        stop()
-        error("Feil ved utsending av meldinger fra utboks. Se sikkerlogg for detaljer.")
-    })
+    private val utsender = Utsender.KafkaUtsender(
+        producer = factory.createProducer(),
+        loglevelVedFeil = Level.ERROR,
+        vedFeil = {
+            stop()
+            error("Feil ved utsending av meldinger fra utboks. Se sikkerlogg for detaljer.")
+        }
+    )
 
     init {
         rapidsConnection.register(this)

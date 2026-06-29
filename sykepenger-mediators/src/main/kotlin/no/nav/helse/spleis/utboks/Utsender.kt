@@ -41,8 +41,8 @@ internal abstract class Utsender {
 
     data class KafkaUtsender(
         private val producer: KafkaProducer<String, String>,
-        private val loglevelVedFeil: Level = Level.ERROR,
-        private val vedFeil: () -> Unit = {}
+        private val loglevelVedFeil: Level,
+        private val vedFeil: () -> Unit
     ): Utsender() {
 
         override fun utførSending(utgåendeMeldinger: List<UtgåendeMelding>, sendt: Instant): Pair<List<UtgåendeMelding>, List<UtgåendeMelding>> {
