@@ -52,19 +52,15 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
 
     private fun sendFraDao() {
         // Her henter vi alt for DB, inkludert de vi akkurat lagret ettersom det kan være
-        // andre usendte meldinger for samme person som må sendes før de vi har genrert nå for å sikre rett rekkefølge.
-        val produsertNå = utgåendeMeldinger.map { it.id }.toSet()
-
+        // andre usendte meldinger for samme person som må sendes før de vi har produsert nå for å sikre rett rekkefølge.
         utboksDao.usendte(personidentifikator) { usendteMeldinger ->
-            // For å sjekke at resendingen funker så unnlater vi alltid å sende "vedtaksperioder_venter" med en gang.
-            // .. da skal de sendes neste gang vi håndterer en melding på personen.
-            val sendNå = usendteMeldinger.filterNot { usendtMelding ->
-                usendtMelding.eventName == "vedtaksperioder_venter" && produsertNå.any { it == usendtMelding.id }
-            }
-            sikkerLogg.info("Sender ${sendNå.size} meldinger fra utboksen")
+            sikkerLogg.info("Sender ${usendteMeldinger.size} meldinger fra utboksen")
 
-            utsender.send(sendNå).also { kvittering ->
+            utsender.send(usendteMeldinger).also { kvittering ->
                 kvittering.ok.loggSending()
+
+                // Logger meldinger som ble sendt nå men som ikke ble produsert nå
+                val produsertNå = utgåendeMeldinger.map { it.id }.toSet()
                 val sendtNå = kvittering.ok.map { it.id }.toSet()
                 sendtNå.filterNot { it in produsertNå }.takeUnless { it.isEmpty() }?.let { gamleMeldinger ->
                     sikkerLogg.info("Sendte ${gamleMeldinger.size} melding(er) som ikke ble produsert nå: ${gamleMeldinger.joinToString()}")
