@@ -3,6 +3,8 @@ package no.nav.helse.spleis.utboks
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.Instant
 import java.util.concurrent.Future
+import no.nav.helse.ApplicationBuilder
+import no.nav.helse.Toggle
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
@@ -39,7 +41,7 @@ internal abstract class Utsender {
         val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    data class KafkaUtsender(
+    class KafkaUtsender private constructor(
         private val producer: KafkaProducer<String, String>,
         private val loglevelVedFeil: Level,
         private val vedFeil: () -> Unit
@@ -96,6 +98,16 @@ internal abstract class Utsender {
             val utgåendeMelding: UtgåendeMelding
             data class Ok(override val utgåendeMelding: UtgåendeMelding, val metadata: RecordMetadata): Sendingsresultat
             data class Feil(override val utgåendeMelding: UtgåendeMelding, val exception: Exception): Sendingsresultat
+        }
+
+        internal companion object {
+            fun opprett(producer: KafkaProducer<String, String>, applicationBuilder: ApplicationBuilder) = when (Toggle.BrukUtboks.enabled) {
+                true -> KafkaUtsender(producer, loglevelVedFeil = Level.WARN, vedFeil = { /* gjør ingenting - vil bli forsøkt sendt senere */ })
+                false -> KafkaUtsender(producer, loglevelVedFeil = Level.ERROR, vedFeil = {
+                    applicationBuilder.stop()
+                    error("Feil ved utsending av meldinger fra utboks. Se sikkerlogg for detaljer.")
+                })
+            }
         }
     }
 }

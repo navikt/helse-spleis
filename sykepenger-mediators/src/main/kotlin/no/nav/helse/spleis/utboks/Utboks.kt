@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.sql.Connection
 import no.nav.helse.Personidentifikator
+import no.nav.helse.Toggle
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
@@ -31,15 +32,45 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
         }
         tilstand = Tilstand.Lukket
         sikkerLogg.info("Lagrer ${utgåendeMeldinger.size} meldinger fra utboksen")
-        // TODO: Lagre i db
+
+        if (Toggle.BrukUtboks.enabled) {
+            utboksDao.lagre(connection, utgåendeMeldinger, innkommendeMelding.meldingsporing.id.id)
+        }
     }
 
     fun send() {
-        sikkerLogg.info("Sender ${utgåendeMeldinger.size} meldinger fra utboksen")
         innkommendeMelding.logOutgoingMessages(sikkerLogg, utgåendeMeldinger.size)
-        val kvittering = utsender.send(utgåendeMeldinger)
-        kvittering.ok.loggSending()
-        // TODO: Marker OK-meldingene sendt i DB
+        when (Toggle.BrukUtboks.enabled) {
+            true -> sendFraDao()
+            false -> {
+                sikkerLogg.info("Sender ${utgåendeMeldinger.size} meldinger fra utboksen")
+                val kvittering = utsender.send(utgåendeMeldinger)
+                kvittering.ok.loggSending()
+            }
+        }
+    }
+
+    private fun sendFraDao() {
+        // Her henter vi alt for DB, inkludert de vi akkurat lagret ettersom det kan være
+        // andre usendte meldinger for samme person som må sendes før de vi har genrert nå for å sikre rett rekkefølge.
+        val produsertNå = utgåendeMeldinger.map { it.id }.toSet()
+
+        utboksDao.usendte(personidentifikator) { usendteMeldinger ->
+            // For å sjekke at resendingen funker så unnlater vi alltid å sende "vedtaksperioder_venter" med en gang.
+            // .. da skal de sendes neste gang vi håndterer en melding på personen.
+            val sendNå = usendteMeldinger.filterNot { usendtMelding ->
+                usendtMelding.eventName == "vedtaksperioder_venter" && produsertNå.any { it == usendtMelding.id }
+            }
+            sikkerLogg.info("Sender ${sendNå.size} meldinger fra utboksen")
+
+            utsender.send(sendNå).also { kvittering ->
+                kvittering.ok.loggSending()
+                val sendtNå = kvittering.ok.map { it.id }.toSet()
+                sendtNå.filterNot { it in produsertNå }.takeUnless { it.isEmpty() }?.let { gamleMeldinger ->
+                    sikkerLogg.info("Sendte ${gamleMeldinger.size} melding(er) som ikke ble produsert nå: ${gamleMeldinger.joinToString()}")
+                }
+            }
+        }
     }
 
     private fun List<UtgåendeMelding>.loggSending() {

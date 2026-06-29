@@ -39,14 +39,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
         støtterIdentbytte = STØTTER_IDENTBYTTE
     )
 
-    private val utsender = Utsender.KafkaUtsender(
-        producer = factory.createProducer(),
-        loglevelVedFeil = Level.ERROR,
-        vedFeil = {
-            stop()
-            error("Feil ved utsending av meldinger fra utboks. Se sikkerlogg for detaljer.")
-        }
-    )
+    private val utsender = Utsender.KafkaUtsender.opprett(factory.createProducer(), this)
 
     init {
         rapidsConnection.register(this)
