@@ -594,12 +594,12 @@ interface EventSubscription {
         }
 
         // TODO: Æsj, dette burde bare vært ute i mediator, men i all tid det sendes to steder så er det for kjedelig å mappe dette to steder og
-        val behovInput = mapOf(
+        val behovInput = listOfNotNull(
             "periodeFom" to "${periode.start}",
             "periodeTom" to "${periode.endInclusive}",
             "skjæringstidspunkt" to "$skjæringstidspunkt",
             "vilkårsgrunnlagId" to "$vilkårsgrunnlagId",
-            "forsikringsvurderingId" to "$forsikringsvurderingId",
+            forsikringsvurderingId?.let { "forsikringsvurderingId" to "$it" },
             "periodetype" to periodetype,
             "førstegangsbehandling" to førstegangsbehandling,
             "utbetalingtype" to utbetalingtype,
@@ -672,7 +672,7 @@ interface EventSubscription {
                 )
             },
             "arbeidssituasjon" to arbeidssituasjon
-        )
+        ).toMap()
 
         private companion object {
             private fun Utbetalingsdag.tilBehovMap() =
