@@ -66,6 +66,8 @@ import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.utboks.TestUtsender
+import no.nav.helse.spleis.utboks.TestUtsenderObservatør
+import no.nav.helse.spleis.utboks.UtgåendeMelding
 import no.nav.helse.spleis.utboks.UtgåendeMelding.Mottaker.SUBSUMSJON
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
@@ -99,7 +101,7 @@ internal abstract class AbstractEndToEndMediatorTest {
     fun setupDatabase() {
         dataSource = databaseContainer.nyTilkobling()
 
-        testRapid = TestRapid()
+        testRapid = TestRapid(utsender)
         hendelseRepository = HendelseRepository(dataSource.ds)
         hendelseMediator = HendelseMediator(
             hendelseRepository = hendelseRepository,
@@ -889,7 +891,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertEquals(emptyList<Varsel>(), testRapid.inspektør.varsler())
     }
 
-    private class InntektsmeldingerReplayObserver(private val testRapid: TestRapid, private val dataSource: HikariDataSource) : TestRapid.TestRapidObserver {
+    private class InntektsmeldingerReplayObserver(private val testRapid: TestRapid, private val dataSource: HikariDataSource) : TestRapid.TestRapidObserver, TestUtsenderObservatør {
         private companion object {
             private val log = LoggerFactory.getLogger(InntektsmeldingerReplayObserver::class.java)
             private val objectMapper = jacksonObjectMapper()
@@ -899,6 +901,10 @@ internal abstract class AbstractEndToEndMediatorTest {
         }
 
         private val håndterteInntektsmeldinger = mutableListOf<UUID>()
+
+        override fun okMelding(melding: UtgåendeMelding) {
+            onMessagePublish(melding.json.toString())
+        }
 
         override fun onMessagePublish(message: String) {
             val node = objectMapper.readTree(message)

@@ -15,10 +15,13 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.finn
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.varsler
+import no.nav.helse.spleis.utboks.TestUtsender
+import no.nav.helse.spleis.utboks.TestUtsenderObservatør
+import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.junit.jupiter.api.fail
 import org.slf4j.LoggerFactory
 
-internal class TestRapid : RapidsConnection() {
+internal class TestRapid(private val utstender: TestUtsender = TestUtsender()) : RapidsConnection() {
     private companion object {
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
@@ -31,8 +34,18 @@ internal class TestRapid : RapidsConnection() {
     internal val inspektør get() = RapidInspektør(messages.toList().filterNot { it.second.contains("melding_om_melding_håndtert") })
     private val observers = mutableListOf<TestRapidObserver>()
 
-    internal fun observer(observer: TestRapidObserver) {
+    init {
+        utstender.nyObservatør(object: TestUtsenderObservatør {
+            override fun okMelding(melding: UtgåendeMelding) {
+                if (melding.mottaker == UtgåendeMelding.Mottaker.SUBSUMSJON) return
+                messages.add(melding.key to melding.json.toString())
+            }
+        })
+    }
+
+    internal fun <T> observer(observer: T) where T: TestRapidObserver, T: TestUtsenderObservatør {
         observers.add(observer)
+        utstender.nyObservatør(observer)
     }
 
     internal fun reset() {

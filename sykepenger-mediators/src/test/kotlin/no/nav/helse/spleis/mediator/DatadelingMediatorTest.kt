@@ -23,7 +23,8 @@ import org.junit.jupiter.api.Test
 
 internal class DatadelingMediatorTest {
     private val fødselsnummer = "12345678910"
-    private val testRapid = TestRapid()
+    private val utsender = TestUtsender()
+    private val testRapid = TestRapid(utsender)
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var datadelingMediator: DatadelingMediator
 
@@ -97,7 +98,7 @@ internal class DatadelingMediatorTest {
     }
 
     private fun DatadelingMediator.ferdigstill() {
-        val behandlingContext = BehandlingContext(testRapid, eksempelmelding, TestUtsender())
+        val behandlingContext = BehandlingContext(testRapid, eksempelmelding, utsender)
         leggIUtboks(behandlingContext)
         behandlingContext.sendMeldingerIUtboks()
     }
