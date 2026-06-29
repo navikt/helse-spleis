@@ -28,7 +28,8 @@ data class GraphQLSpleisVilkarsgrunnlag(
     val opptjeningFra: LocalDate,
     val oppfyllerKravOmMinstelonn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
-    val oppfyllerKravOmMedlemskap: Boolean?
+    val oppfyllerKravOmMedlemskap: Boolean?,
+    val forsikringsvurderingId: UUID?,
 ) : GraphQLVilkarsgrunnlag {
     val skjonnsmessigFastsattAarlig: Double? = inntekter.filter { it.deaktivert != true }.mapNotNull { it.skjonnsmessigFastsatt }.takeIf(List<*>::isNotEmpty)?.sumOf { it.belop }
 }

@@ -512,7 +512,8 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
             oppfyllerKravOmMinstelonn = vilkårsgrunnlag.oppfyllerKravOmMinstelønn,
             oppfyllerKravOmOpptjening = vilkårsgrunnlag.oppfyllerKravOmOpptjening,
             oppfyllerKravOmMedlemskap = vilkårsgrunnlag.oppfyllerKravOmMedlemskap,
-            arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map { refusjon -> mapArbeidsgiverRefusjon(refusjon) }
+            arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map { refusjon -> mapArbeidsgiverRefusjon(refusjon) },
+            forsikringsvurderingId = vilkårsgrunnlag.forsikringsvurderingId,
         )
 
         is InfotrygdVilkårsgrunnlag -> GraphQLInfotrygdVilkarsgrunnlag(

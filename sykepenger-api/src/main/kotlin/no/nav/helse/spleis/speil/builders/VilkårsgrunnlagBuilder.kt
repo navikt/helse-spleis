@@ -68,7 +68,8 @@ internal class ISpleisGrunnlag(
     val antallOpptjeningsdagerErMinst: Int,
     val oppfyllerKravOmMinstelønn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
-    val oppfyllerKravOmMedlemskap: Boolean?
+    val oppfyllerKravOmMedlemskap: Boolean?,
+    val forsikringsvurderingId: UUID?,
 ) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id) {
 
     override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag {
@@ -85,7 +86,8 @@ internal class ISpleisGrunnlag(
             opptjeningFra = skjæringstidspunkt.minusDays(antallOpptjeningsdagerErMinst.toLong()),
             oppfyllerKravOmMinstelønn = oppfyllerKravOmMinstelønn,
             oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
-            oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap
+            oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
+            forsikringsvurderingId = forsikringsvurderingId,
         )
     }
 }
@@ -225,7 +227,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             oppfyllerKravOmMinstelønn = oppfyllerMinsteinntekt,
             oppfyllerKravOmOpptjening = grunnlagsdata.opptjening?.erOppfylt ?: true,
             oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
-            id = grunnlagsdata.vilkårsgrunnlagId
+            id = grunnlagsdata.vilkårsgrunnlagId,
+            forsikringsvurderingId = grunnlagsdata.forsikringsvurderingId,
         )
     }
 
