@@ -36,14 +36,12 @@ internal class UtboksDaoTest {
         val meldingUtenKey =  nyMelding(key = null)
         val meldinger = meldingerTilSykmeldt + meldingUtenKey
         lagre(meldinger)
-        assertEquals(meldinger, dao.usendte(personidentifikator))
-        sendt(meldingerTilSykmeldt)
-        assertEquals(listOf(meldingUtenKey), dao.usendte(personidentifikator))
+        assertEquals(meldinger, usendte(personidentifikator))
+        assertEquals(listOf(meldingUtenKey), håndterOgFåTilbakeUsendte(personidentifikator) { meldingerTilSykmeldt })
         assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger())
-        sendt(listOf(meldingUtenKey))
-        assertEquals(emptyList<UtgåendeMelding>(), dao.usendte(personidentifikator))
-
+        assertEquals(emptyList<UtgåendeMelding>(), håndterOgFåTilbakeUsendte(personidentifikator) { listOf(meldingUtenKey) })
     }
+
 
     @Test
     fun `henter personer med usendte meldinger`() {
@@ -56,12 +54,15 @@ internal class UtboksDaoTest {
         val melding3 = nyMelding(personidentifikator3)
         lagre(listOf(melding1, melding2, melding3))
         assertEquals(setOf(personidentifikator1, personidentifikator2, personidentifikator3), dao.personerMedUsendteMeldinger())
-        assertEquals(listOf(melding1), dao.usendte(personidentifikator1))
-        assertEquals(listOf(melding2), dao.usendte(personidentifikator2))
-        assertEquals(listOf(melding3), dao.usendte(personidentifikator3))
-        sendt(listOf(melding2))
+        assertEquals(listOf(melding1), usendte(personidentifikator1))
+        assertEquals(listOf(melding2), usendte(personidentifikator2))
+        assertEquals(listOf(melding3), usendte(personidentifikator3))
+
+        håndterOgFåTilbakeUsendte(personidentifikator2) { listOf(melding2) }
         assertEquals(setOf(personidentifikator1, personidentifikator3), dao.personerMedUsendteMeldinger())
-        sendt(listOf(melding1, melding3))
+
+        håndterOgFåTilbakeUsendte(personidentifikator1) { listOf(melding1) }
+        håndterOgFåTilbakeUsendte(personidentifikator3) { listOf(melding3) }
         assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger())
     }
 
@@ -74,16 +75,36 @@ internal class UtboksDaoTest {
         }
     }
 
-    private fun sendt(meldinger: List<UtgåendeMelding>) {
-        dao.sendt(Kvittering(
-            sendt = Instant.now(),
-            ok = meldinger,
-            feilet = emptyList()
-        ))
+    private fun håndterOgFåTilbakeUsendte(
+        person: Personidentifikator = personidentifikator,
+        sendOgFåTilbakeSendtOk: (meldinger: List<UtgåendeMelding>) -> List<UtgåendeMelding> = { meldinger -> meldinger }
+    ): List<UtgåendeMelding> {
+        dao.usendte(person) { funnedeMeldinger ->
+            val ok = sendOgFåTilbakeSendtOk(funnedeMeldinger)
+            ok.somKvittering()
+        }
+        return usendte(person)
+    }
+
+    private fun usendte(
+        person: Personidentifikator = personidentifikator,
+    ): List<UtgåendeMelding> {
+        lateinit var meldingerEtter: List<UtgåendeMelding>
+        dao.usendte(person, { funnedeMeldinger ->
+            meldingerEtter = funnedeMeldinger
+            ikkeKvitterUtNoenMeldinger
+        })
+        return meldingerEtter
     }
 
     private companion object {
         private val personidentifikator = Personidentifikator("12345678910")
         private fun nyMelding(key: Personidentifikator? = personidentifikator, mottaker: UtgåendeMelding.Mottaker = UtgåendeMelding.Mottaker.RAPID) = UtgåendeMelding(key?.toString(), """{"@id": "${nyUuidv7()}", "@even_name": "test"}""", mottaker)
+        private fun List<UtgåendeMelding>.somKvittering(sendingsTidspunkt: Instant = Instant.now()) = Kvittering(
+            sendt = sendingsTidspunkt,
+            ok = this,
+            feilet = emptyList()
+        )
+        private val ikkeKvitterUtNoenMeldinger get() = emptyList<UtgåendeMelding>().somKvittering()
     }
 }

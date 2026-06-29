@@ -5,8 +5,8 @@ import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.string
 import com.github.navikt.tbd_libs.sql_dsl.stringOrNull
+import com.github.navikt.tbd_libs.sql_dsl.transaction
 import java.sql.Connection
-import java.sql.ResultSet
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.Personidentifikator
@@ -44,36 +44,45 @@ internal class UtboksDao(private val dataSource: DataSource) {
     /**
      * Henter alle usendte meldinger som er for den spesifikke personidentifikatoren,
      * eller som ikke har noen personidentifikator (key is null)
+     * Metode som gjør faktisk sending av meldingen sendes inn og lagrer ned de som ble sendt OK
      */
-    fun usendte(personidentifikator: Personidentifikator): List<UtgåendeMelding> {
+    fun usendte(personidentifikator: Personidentifikator, send: (meldinger: List<UtgåendeMelding>) -> Kvittering) {
         @Language("PostgreSQL")
-        val sql = """
-            SELECT * FROM utboks where sendt is null AND (key = :key OR key is null) FOR UPDATE SKIP LOCKED;
+        val sqlHent = """
+            SELECT lopenummer, key, json, mottaker FROM utboks 
+            WHERE sendt IS NULL AND (key = :key OR key IS NULL) 
+            ORDER BY lopenummer
+            FOR UPDATE SKIP LOCKED;
         """
 
-        return dataSource.connection {
-            prepareStatementWithNamedParameters(sql) {
-                withParameter("key", personidentifikator.toString())
-            }.mapNotNull { row ->
-                row.tilUtgåendeMelding()
+        @Language("PostgreSQL")
+        val sqlMarkerSendt = """
+            UPDATE utboks 
+            SET sendt = :sendt 
+            WHERE id = ANY(:ider)
+        """
+
+        dataSource.connection {
+            transaction {
+                val meldinger = prepareStatementWithNamedParameters(sqlHent) {
+                    withParameter("key", personidentifikator.toString())
+                }.mapNotNull { row ->
+                    UtgåendeMelding(
+                        key = row.stringOrNull("key"),
+                        json = row.string("json"),
+                        mottaker = when (val mottaker = row.string("mottaker")) {
+                            "RAPID" -> UtgåendeMelding.Mottaker.RAPID
+                            "SUBSUMSJON" -> UtgåendeMelding.Mottaker.SUBSUMSJON
+                            else -> error("Mottaker $mottaker har jeg aldri hørt om, den må du eventuelt legge inn.")
+                        }
+                    )
+                }
+                val kvittering= send(meldinger)
+                prepareStatementWithNamedParameters(sqlMarkerSendt) {
+                    withParameter("sendt", kvittering.sendt)
+                    withParameter("ider", kvittering.ok.map { it.id })
+                }.executeUpdate()
             }
-        }
-    }
-
-    /**
-     * Markerer alle meldinger som er sendt OK som sendt i databasen.
-     */
-    fun sendt(kvittering: Kvittering) {
-        @Language("PostgreSQL")
-        val sql = """
-            UPDATE utboks SET sendt = :sendt WHERE id = ANY(:ider)
-        """
-
-        return dataSource.connection {
-            prepareStatementWithNamedParameters(sql) {
-                withParameter("sendt", kvittering.sendt)
-                withParameter("ider", kvittering.ok.map { it.id })
-            }.executeUpdate()
         }
     }
 
@@ -83,24 +92,14 @@ internal class UtboksDao(private val dataSource: DataSource) {
     fun personerMedUsendteMeldinger(): Set<Personidentifikator> {
         @Language("PostgreSQL")
         val sql = """
-            SELECT distinct key FROM utboks where sendt is null
+            SELECT DISTINCT key 
+            FROM utboks 
+            WHERE sendt IS NULL
         """
         return dataSource.connection {
             prepareStatement(sql).mapNotNull { row ->
                 row.stringOrNull("key")?.let { Personidentifikator(it) }
             }.toSet()
         }
-    }
-
-    private companion object {
-        fun ResultSet.tilUtgåendeMelding() = UtgåendeMelding(
-            key = stringOrNull("key"),
-            json = string("json"),
-            mottaker = when (val mottaker = string("mottaker")) {
-                "RAPID" -> UtgåendeMelding.Mottaker.RAPID
-                "SUBSUMSJON" -> UtgåendeMelding.Mottaker.SUBSUMSJON
-                else -> error("Mottaker $mottaker har jeg aldri hørt om, den må du eventuelt legge inn.")
-            }
-        )
     }
 }

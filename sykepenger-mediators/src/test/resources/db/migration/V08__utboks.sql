@@ -1,5 +1,6 @@
 CREATE TABLE utboks (
     id uuid PRIMARY KEY,
+    lopenummer bigint GENERATED ALWAYS AS IDENTITY,
     forarsaket_av uuid NOT NULL, -- Dette er hendelseId'en til hendelsen som forårsaket at denne meldingen ble sendt til utboks
     key text,
     json jsonb NOT NULL,
