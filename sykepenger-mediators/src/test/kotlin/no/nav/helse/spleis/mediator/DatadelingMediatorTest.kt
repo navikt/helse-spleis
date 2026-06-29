@@ -98,7 +98,7 @@ internal class DatadelingMediatorTest {
     }
 
     private fun DatadelingMediator.ferdigstill() {
-        val behandlingContext = BehandlingContext(testRapid, eksempelmelding, utsender)
+        val behandlingContext = BehandlingContext(eksempelmelding, utsender)
         leggIUtboks(behandlingContext)
         behandlingContext.sendMeldingerIUtboks()
     }

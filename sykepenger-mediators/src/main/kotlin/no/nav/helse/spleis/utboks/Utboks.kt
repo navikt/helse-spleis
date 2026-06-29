@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.sql.Connection
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
@@ -36,27 +35,12 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
         // TODO: Lagre i db
     }
 
-    fun send(messageContext: MessageContext) {
+    fun send() {
         sikkerLogg.info("Sender ${utgåendeMeldinger.size} meldinger fra utboksen")
         innkommendeMelding.logOutgoingMessages(sikkerLogg, utgåendeMeldinger.size)
-
-        if (Toggle.BrukUtsenderTilRapid.enabled) {
-            val kvittering = utsender.send(utgåendeMeldinger)
-            kvittering.ok.loggSending()
-        } else {
-            utgåendeMeldinger.loggSending()
-            val (tilRapid, tilSubsumsjon) = utgåendeMeldinger.partition { it.mottaker == UtgåendeMelding.Mottaker.RAPID }
-            sendMedMessageContext(messageContext, tilRapid)
-            utsender.send(tilSubsumsjon)
-        }
-
+        val kvittering = utsender.send(utgåendeMeldinger)
+        kvittering.ok.loggSending()
         // TODO: Marker OK-meldingene sendt i DB
-    }
-
-    private fun sendMedMessageContext(messageContext: MessageContext, meldinger: List<UtgåendeMelding>) {
-        meldinger
-            .map { utgåendeMelding -> OutgoingMessage(body = utgåendeMelding.json.toString(), key = utgåendeMelding.key) }
-            .sendOutgoingMessage(messageContext)
     }
 
     private fun List<UtgåendeMelding>.loggSending() {
@@ -69,18 +53,6 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
                 else -> sikkerLogg.info("sender ${utgåendeMelding.eventName} til ${utgåendeMelding.mottaker.name}:\n\t${utgåendeMelding.json}")
             }
         }
-    }
-
-    private fun List<OutgoingMessage>.sendOutgoingMessage(messageContext: MessageContext) {
-        if (this.isEmpty()) return
-        val (ok, failed) = messageContext.publish(this)
-
-        if (failed.isEmpty()) return
-        val førsteFeil = failed.first().error
-        val feilmelding = "Feil ved sending av ${failed.size} melding(er), ${ok.size} melding(er) gikk ok!\n" +
-            "Disse meldingene feilet:\n" +
-            failed.joinToString(separator = "\n") { "#${it.index}: ${it.error.message}\n\t${it.message}" }
-        throw RuntimeException(feilmelding, førsteFeil)
     }
 
     private sealed interface Tilstand {

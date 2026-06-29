@@ -41,6 +41,7 @@ internal object KontraktAssertions {
         assertOgFjernUUID("@id")
         assertOgFjernLocalDateTime("@opprettet")
         assertOgFjernInstant("@opprettetUTC")
+        assertOgFjernInstant("@sendt")
         assertOgFjern("@forårsaket_av") { check(it.isObject) }
         assertOgFjern("system_read_count") { check(it.isInt) }
         assertOgFjern("system_participating_services") { check(it.isArray) }

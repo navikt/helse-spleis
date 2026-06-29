@@ -70,7 +70,7 @@ internal class SubsumsjonsmeldingTest {
     }, Meldingsporing(MeldingsreferanseId(UUID.randomUUID()), fnr))
 
     private fun SubsumsjonMediator.ferdigstill() {
-        val behandlingContext = BehandlingContext(testRapid, eksempelmelding, utsender)
+        val behandlingContext = BehandlingContext(eksempelmelding, utsender)
         leggIUtboks(behandlingContext)
         behandlingContext.sendMeldingerIUtboks()
     }

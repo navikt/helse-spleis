@@ -429,7 +429,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "@opprettetUTC",
             "system_read_count",
             "system_participating_services",
-            "@forårsaket_av"
+            "@forårsaket_av",
+            "@sendt"
         )
     }
 }
