@@ -9,23 +9,28 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
 internal class Utboks(private val utsender: Utsender, private val innkommendeMelding: HendelseMessage) {
+    private val personidentifikator = Personidentifikator(innkommendeMelding.meldingsporing.fødselsnummer)
     private val utgåendeMeldinger = mutableListOf<UtgåendeMelding>()
     private var tilstand: Tilstand = Tilstand.Åpen
 
-    fun nyMelding(melding: UtgåendeMelding) = apply {
-        tilstand.nyMelding(melding, this)
+    fun nyMelding(block: (personidentifikator: Personidentifikator) -> UtgåendeMelding) {
+        val utgåendeMelding = block(personidentifikator)
+        require(utgåendeMelding.key == null || utgåendeMelding.key == personidentifikator.toString()) { "Kan ikke sende ut meldinger for andre i denne utboksen!" }
+        tilstand.nyMelding(utgåendeMelding, this)
     }
 
     fun lagre(connection: Connection) {
         check(!connection.autoCommit) { "Meldingene må lagres ned i samme transaksjon som personen lagres ned." }
-        nyMelding(UtgåendeMelding.nyRapidmelding(
-            personidentifikator = Personidentifikator(innkommendeMelding.meldingsporing.fødselsnummer),
-            eventName = "melding_om_melding_håndtert",
-            innhold = mapOf(
-                "originalt_event_name" to "${innkommendeMelding.navn}",
-                "original_id" to "${innkommendeMelding.meldingsporing.id.id}"
+        nyMelding {
+            UtgåendeMelding.nyRapidmelding(
+                personidentifikator = personidentifikator,
+                eventName = "melding_om_melding_håndtert",
+                innhold = mapOf(
+                    "originalt_event_name" to "${innkommendeMelding.navn}",
+                    "original_id" to "${innkommendeMelding.meldingsporing.id.id}"
+                )
             )
-        ))
+        }
         tilstand = Tilstand.Lukket
         sikkerLogg.info("Lagrer ${utgåendeMeldinger.size} meldinger fra utboksen")
         // TODO: Lagre i db

@@ -13,12 +13,8 @@ internal class BehandlingContext(
     message: HendelseMessage,
     utsender: Utsender
 ) {
-    private val personidentifikator = Personidentifikator(message.meldingsporing.fødselsnummer)
     private val utboks = Utboks(utsender, message)
-
     fun sendMeldingerIUtboks() = utboks.send(messageContext)
     fun lagreMeldingerIUtboks(connection: Connection) = utboks.lagre(connection)
-    fun leggIUtboks(block: (personidentifikator: Personidentifikator) -> UtgåendeMelding) {
-        utboks.nyMelding(block(personidentifikator))
-    }
+    fun leggIUtboks(block: (personidentifikator: Personidentifikator) -> UtgåendeMelding) = utboks.nyMelding(block)
 }
