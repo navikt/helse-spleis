@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.sql.Connection
 import no.nav.helse.Personidentifikator
+import no.nav.helse.Toggle
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
@@ -34,9 +35,15 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
         sikkerLogg.info("Sender ${utgåendeMeldinger.size} meldinger fra utboksen")
         innkommendeMelding.logOutgoingMessages(sikkerLogg, utgåendeMeldinger.size)
         utgåendeMeldinger.loggSending()
-        val (tilRapid, tilSubsumsjon) = utgåendeMeldinger.partition { it.mottaker == UtgåendeMelding.Mottaker.RAPID }
-        sendMedMessageContext(messageContext, tilRapid)
-        utsender.send(tilSubsumsjon)
+
+        if (Toggle.BrukUtsenderTilRapid.enabled) {
+            utsender.send(utgåendeMeldinger)
+        } else {
+            val (tilRapid, tilSubsumsjon) = utgåendeMeldinger.partition { it.mottaker == UtgåendeMelding.Mottaker.RAPID }
+            sendMedMessageContext(messageContext, tilRapid)
+            utsender.send(tilSubsumsjon)
+        }
+
         // TODO: Marker OK-meldingene sendt i DB
     }
 
