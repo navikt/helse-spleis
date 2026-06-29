@@ -15,6 +15,7 @@ import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.monitorering.MonitoreringRiver
 import no.nav.helse.spleis.monitorering.RegelmessigAvstemming
 import no.nav.helse.spleis.utboks.PostgresUtboksDao
+import no.nav.helse.spleis.utboks.UtboksRetryRiver
 import no.nav.helse.spleis.utboks.Utsender
 import org.slf4j.event.Level
 
@@ -51,6 +52,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
             utboksDao = utboksDao
         )
         MonitoreringRiver(rapidsConnection, RegelmessigAvstemming { personDao.manglerAvstemming() })
+        UtboksRetryRiver(rapidsConnection, utboksDao)
     }
 
     fun start() = rapidsConnection.start()
