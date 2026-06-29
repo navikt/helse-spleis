@@ -3,6 +3,7 @@ package no.nav.helse.spleis.utboks
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.sql.Connection
+import kotlin.system.measureTimeMillis
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -34,7 +35,10 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
         sikkerLogg.info("Lagrer ${utgåendeMeldinger.size} meldinger fra utboksen")
 
         if (Toggle.BrukUtboks.enabled) {
-            utboksDao.lagre(connection, utgåendeMeldinger, innkommendeMelding.meldingsporing.id.id)
+            val tidsbruk = measureTimeMillis {
+                utboksDao.lagre(connection, utgåendeMeldinger, innkommendeMelding.meldingsporing.id.id)
+            }
+            sikkerLogg.info("Brukte ${tidsbruk}ms å lagre meldinger i utboksen.")
         }
     }
 
@@ -53,20 +57,23 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
     private fun sendFraDao() {
         // Her henter vi alt for DB, inkludert de vi akkurat lagret ettersom det kan være
         // andre usendte meldinger for samme person som må sendes før de vi har produsert nå for å sikre rett rekkefølge.
-        utboksDao.usendte(personidentifikator) { usendteMeldinger ->
-            sikkerLogg.info("Sender ${usendteMeldinger.size} meldinger fra utboksen")
+        val tidsbruk = measureTimeMillis {
+            utboksDao.usendte(personidentifikator) { usendteMeldinger ->
+                sikkerLogg.info("Sender ${usendteMeldinger.size} meldinger fra utboksen")
 
-            utsender.send(usendteMeldinger).also { kvittering ->
-                kvittering.ok.loggSending()
+                utsender.send(usendteMeldinger).also { kvittering ->
+                    kvittering.ok.loggSending()
 
-                // Logger meldinger som ble sendt nå men som ikke ble produsert nå
-                val produsertNå = utgåendeMeldinger.map { it.id }.toSet()
-                val sendtNå = kvittering.ok.map { it.id }.toSet()
-                sendtNå.filterNot { it in produsertNå }.takeUnless { it.isEmpty() }?.let { gamleMeldinger ->
-                    sikkerLogg.info("Sendte ${gamleMeldinger.size} melding(er) som ikke ble produsert nå: ${gamleMeldinger.joinToString()}")
+                    // Logger meldinger som ble sendt nå men som ikke ble produsert nå
+                    val produsertNå = utgåendeMeldinger.map { it.id }.toSet()
+                    val sendtNå = kvittering.ok.map { it.id }.toSet()
+                    sendtNå.filterNot { it in produsertNå }.takeUnless { it.isEmpty() }?.let { gamleMeldinger ->
+                        sikkerLogg.info("Sendte ${gamleMeldinger.size} melding(er) som ikke ble produsert nå: ${gamleMeldinger.joinToString()}")
+                    }
                 }
             }
         }
+        sikkerLogg.info("Brukte ${tidsbruk}ms å sende meldinger fra utboksen.")
     }
 
     private fun List<UtgåendeMelding>.loggSending() {
