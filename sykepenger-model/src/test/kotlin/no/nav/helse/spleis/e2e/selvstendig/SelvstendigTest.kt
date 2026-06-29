@@ -1182,6 +1182,50 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
+    fun `foreslår utbetaling på 80 prosent dekning i ventetid frem til forsikringens opphørsdato ved denne type forsikring`() = Toggle.SelvstendigForsikring.enable {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    harForsikring = true,
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
+                    opphørsdato = 7.januar,
+                )
+            )
+
+            val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
+            utbetalingstidslinje.subset(1.januar til 16.januar).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class, 100) }
+
+            inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
+                assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
+                assertEquals(2, utbetalinginspektør.personOppdrag.size)
+                utbetalinginspektør.personOppdrag.first().inspektør.also { linje ->
+                    assertEquals(1.januar til 7.januar, linje.periode)
+                    assertEquals(1417, linje.beløp)
+                    assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
+                }
+                utbetalinginspektør.personOppdrag.last().inspektør.also { linje ->
+                    assertEquals(17.januar til 31.januar, linje.periode)
+                    assertEquals(1417, linje.beløp)
+                    assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
+                }
+            }
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt()
+
+            // Sjekk at forsikringen (dager nav overtar) er lagret på behandlingsendringen
+            assertEquals(listOf(1.januar til 7.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
+
+        }
+    }
+
+    @Test
     fun `foreslår utbetaling på 100 prosent fra dag sytten`() = Toggle.SelvstendigForsikring.enable {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)

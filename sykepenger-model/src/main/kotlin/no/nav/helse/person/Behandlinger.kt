@@ -1297,7 +1297,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         fun beregnDagerNavOvertarAnsvarForSelvstendig(forsikringsvurderingResultat: ForsikringsvurderingResultat?): List<Periode> =
             if (forsikringsvurderingResultat?.dekning?.iVentetid == true) {
-                dagerUtenNavAnsvar.dager
+                dagerUtenNavAnsvar.dager.mapNotNull {
+                    if (forsikringsvurderingResultat.opphørsdato == null) {
+                        it
+                    } else {
+                        it.beholdDagerTil(forsikringsvurderingResultat.opphørsdato)
+                    }
+                }
             } else {
                 emptyList()
             }
