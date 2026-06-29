@@ -65,6 +65,7 @@ import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel
 import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.spleis.utboks.PostgresUtboksDao
 import no.nav.helse.spleis.utboks.TestUtsender
 import no.nav.helse.spleis.utboks.TestUtsenderObservatør
 import no.nav.helse.spleis.utboks.UtgåendeMelding
@@ -114,7 +115,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             rapidsConnection = testRapid,
             hendelseMediator = hendelseMediator,
             hendelseRepository = hendelseRepository,
-            utsender = utsender
+            utsender = utsender,
+            utboksDao = PostgresUtboksDao(dataSource.ds)
         )
 
         testRapid.observer(InntektsmeldingerReplayObserver(testRapid, dataSource.ds))

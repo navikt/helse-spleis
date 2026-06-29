@@ -7,7 +7,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
-internal class Utboks(private val utsender: Utsender, private val innkommendeMelding: HendelseMessage) {
+internal class Utboks(private val utsender: Utsender, private val innkommendeMelding: HendelseMessage, private val utboksDao: UtboksDao) {
     private val personidentifikator = Personidentifikator(innkommendeMelding.meldingsporing.fødselsnummer)
     private val utgåendeMeldinger = mutableListOf<UtgåendeMelding>()
     private var tilstand: Tilstand = Tilstand.Åpen
@@ -19,7 +19,6 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
     }
 
     fun lagre(connection: Connection) {
-        check(!connection.autoCommit) { "Meldingene må lagres ned i samme transaksjon som personen lagres ned." }
         nyMelding {
             UtgåendeMelding.nyRapidmelding(
                 personidentifikator = personidentifikator,

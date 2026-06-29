@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
+import io.mockk.mockk
 import java.net.URI
 import java.util.UUID
 import no.nav.helse.etterlevelse.Regelverksporing
@@ -18,7 +19,9 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.SubsumsjonMediator
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
+import no.nav.helse.spleis.utboks.InMemoryUtboksDao
 import no.nav.helse.spleis.utboks.TestUtsender
+import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -48,7 +51,7 @@ internal class SubsumsjonsmeldingTest {
 
         subsumsjonMediator.ferdigstill()
 
-        assertSubsumsjonsmelding(utsender.ok.single().json.path("subsumsjon"))
+        assertSubsumsjonsmelding(utsender.ok.single { it.mottaker == UtgåendeMelding.Mottaker.SUBSUMSJON }.json.path("subsumsjon"))
     }
 
     private val schema by lazy {
@@ -70,8 +73,9 @@ internal class SubsumsjonsmeldingTest {
     }, Meldingsporing(MeldingsreferanseId(UUID.randomUUID()), fnr))
 
     private fun SubsumsjonMediator.ferdigstill() {
-        val behandlingContext = BehandlingContext(eksempelmelding, utsender)
+        val behandlingContext = BehandlingContext(eksempelmelding, utsender, InMemoryUtboksDao())
         leggIUtboks(behandlingContext)
+        behandlingContext.lagreMeldingerIUtboks(mockk())
         behandlingContext.sendMeldingerIUtboks()
     }
 }

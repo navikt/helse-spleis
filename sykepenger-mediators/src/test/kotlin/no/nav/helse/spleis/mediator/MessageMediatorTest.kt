@@ -14,6 +14,7 @@ import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.spleis.utboks.InMemoryUtboksDao
 import no.nav.helse.spleis.utboks.TestUtsender
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -236,7 +237,8 @@ internal class MessageMediatorTest {
                 rapidsConnection = testRapid,
                 hendelseRepository = mockk(relaxed = true),
                 hendelseMediator = hendelseMediator,
-                utsender = TestUtsender()
+                utsender = TestUtsender(),
+                utboksDao = InMemoryUtboksDao()
             )
         }
     }

@@ -14,6 +14,7 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.monitorering.MonitoreringRiver
 import no.nav.helse.spleis.monitorering.RegelmessigAvstemming
+import no.nav.helse.spleis.utboks.PostgresUtboksDao
 import no.nav.helse.spleis.utboks.Utsender
 import org.slf4j.event.Level
 
@@ -29,6 +30,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     private val STØTTER_IDENTBYTTE = env["IDENTBYTTE"]?.equals("true", ignoreCase = true) == true
     private val hendelseRepository = HendelseRepository(dataSourceBuilder.dataSource)
     private val personDao = PersonDao(dataSourceBuilder.dataSource, STØTTER_IDENTBYTTE)
+    private val utboksDao = PostgresUtboksDao(dataSourceBuilder.dataSource)
 
     private val hendelseMediator = HendelseMediator(
         hendelseRepository = hendelseRepository,
@@ -52,7 +54,8 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
             rapidsConnection = rapidsConnection,
             hendelseMediator = hendelseMediator,
             hendelseRepository = hendelseRepository,
-            utsender = utsender
+            utsender = utsender,
+            utboksDao = utboksDao
         )
         MonitoreringRiver(rapidsConnection, RegelmessigAvstemming { personDao.manglerAvstemming() })
     }

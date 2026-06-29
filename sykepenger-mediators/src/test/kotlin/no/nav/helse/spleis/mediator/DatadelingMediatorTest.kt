@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.mediator
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import io.mockk.mockk
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -14,6 +15,7 @@ import no.nav.helse.spleis.DatadelingMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
+import no.nav.helse.spleis.utboks.InMemoryUtboksDao
 import no.nav.helse.spleis.utboks.TestUtsender
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -98,8 +100,9 @@ internal class DatadelingMediatorTest {
     }
 
     private fun DatadelingMediator.ferdigstill() {
-        val behandlingContext = BehandlingContext(eksempelmelding, utsender)
+        val behandlingContext = BehandlingContext(eksempelmelding, utsender, InMemoryUtboksDao())
         leggIUtboks(behandlingContext)
+        behandlingContext.lagreMeldingerIUtboks(mockk())
         behandlingContext.sendMeldingerIUtboks()
     }
 }

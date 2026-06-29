@@ -111,6 +111,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
 import no.nav.helse.spleis.utboks.Utboks.Companion.fireAndForget
+import no.nav.helse.spleis.utboks.UtboksDao
 import no.nav.helse.spleis.utboks.UtgåendeMelding
 import no.nav.helse.spleis.utboks.Utsender
 import org.slf4j.LoggerFactory
@@ -119,7 +120,8 @@ internal class MessageMediator(
     rapidsConnection: RapidsConnection,
     private val hendelseMediator: IHendelseMediator,
     private val hendelseRepository: HendelseRepository,
-    private val utsender: Utsender
+    private val utsender: Utsender,
+    private val utboksDao: UtboksDao
 ) : IMessageMediator {
     private companion object {
         private val log = LoggerFactory.getLogger(MessageMediator::class.java)
@@ -190,7 +192,7 @@ internal class MessageMediator(
     override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
         try {
             measureTime {
-                val behandlingContext = BehandlingContext(message, utsender)
+                val behandlingContext = BehandlingContext(message, utsender, utboksDao)
                 messageRecognized = true
                 message.logRecognized(log, sikkerLogg)
                 if (hendelseRepository.erBehandlet(message.meldingsporing.id)) return message.logDuplikat(sikkerLogg)
