@@ -32,7 +32,7 @@ class UtsenderTest {
 
         val okMeldingUtenKey = UtgåendeMelding(
             key = null,
-            json = """{"@id": "${nyUuidv7()}"}""",
+            json = """{"@id": "${nyUuidv7()}", "@opprettetUTC":"${Instant.now()}"}""",
             mottaker = UtgåendeMelding.Mottaker.RAPID
         )
 

@@ -99,7 +99,7 @@ internal class PostgresUtboksDaoTest {
 
     private companion object {
         private val personidentifikator = Personidentifikator("12345678910")
-        private fun nyMelding(key: Personidentifikator? = personidentifikator, mottaker: UtgåendeMelding.Mottaker = UtgåendeMelding.Mottaker.RAPID) = UtgåendeMelding(key?.toString(), """{"@id": "${nyUuidv7()}", "@even_name": "test"}""", mottaker)
+        private fun nyMelding(key: Personidentifikator? = personidentifikator, mottaker: UtgåendeMelding.Mottaker = UtgåendeMelding.Mottaker.RAPID) = UtgåendeMelding(key?.toString(), """{"@id": "${nyUuidv7()}", "@even_name": "test", "@opprettetUTC":"${Instant.now()}"}""", mottaker)
         private fun List<UtgåendeMelding>.somKvittering(sendingsTidspunkt: Instant = Instant.now()) = Kvittering(
             sendt = sendingsTidspunkt,
             ok = this,

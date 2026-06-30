@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -24,6 +25,7 @@ data class UtgåendeMelding(
 ) {
     val id = UUID.fromString(json.path("@id").asText())
     val eventName = json.path("@event_name").asText()
+    val opprettet = Instant.parse(json.path("@opprettetUTC").asText())
 
     init {
         check(id.version() == 7) { "id må være en UUIDv7" }

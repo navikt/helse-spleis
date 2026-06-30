@@ -4,6 +4,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeParseException
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -19,11 +20,22 @@ import org.junit.jupiter.api.assertThrows
 class UtgåendeMeldingTest {
 
     @Test
+    fun `Må være en utc timestamp i opprettetUTC`() {
+        assertThrows<DateTimeParseException> {
+            UtgåendeMelding(
+                key = null,
+                json = """{"@id": "${nyUuidv7()}", "@opprettetUTC":"${LocalDateTime.now()}"}""",
+                mottaker = UtgåendeMelding.Mottaker.RAPID
+            )
+        }
+    }
+
+    @Test
     fun `Må være en uuidv7 id`() {
         val error = assertThrows<IllegalStateException> {
             UtgåendeMelding(
                 key = "11234",
-                json = """{"@id": "${UUID.randomUUID()}"}""",
+                json = """{"@id": "${UUID.randomUUID()}", "@opprettetUTC":"${Instant.now()}"}""",
                 mottaker = UtgåendeMelding.Mottaker.RAPID
             )
         }
@@ -35,7 +47,7 @@ class UtgåendeMeldingTest {
         val errorKeyIkkeSatt = assertThrows<IllegalStateException> {
             UtgåendeMelding(
                 key = null,
-                json = """{"@id": "${nyUuidv7()}", "fødselsnummer": "11234"}""",
+                json = """{"@id": "${nyUuidv7()}", "@opprettetUTC":"${Instant.now()}", "fødselsnummer": "11234"}""",
                 mottaker = UtgåendeMelding.Mottaker.RAPID
             )
         }
@@ -44,7 +56,7 @@ class UtgåendeMeldingTest {
         val errorKeySattFeil = assertThrows<IllegalStateException> {
             UtgåendeMelding(
                 key = "11235",
-                json = """{"@id": "${nyUuidv7()}", "fødselsnummer": "11234"}""",
+                json = """{"@id": "${nyUuidv7()}", "@opprettetUTC":"${Instant.now()}", "fødselsnummer": "11234"}""",
                 mottaker = UtgåendeMelding.Mottaker.RAPID
             )
         }
