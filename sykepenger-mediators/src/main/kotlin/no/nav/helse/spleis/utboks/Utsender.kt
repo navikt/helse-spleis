@@ -18,13 +18,15 @@ data class Kvittering(
 )
 
 internal abstract class Utsender {
-    private fun preprosesser(utgåendeMeldinger: List<UtgåendeMelding>, sendt: Instant) = utgåendeMeldinger.map { utgåendeMelding ->
+    private fun preprosesser(utgåendeMeldinger: List<UtgåendeMelding>, sendt: Instant): List<UtgåendeMelding> {
         check(utgåendeMeldinger.distinctBy { it.id }.size == utgåendeMeldinger.size) { "Duplikate id'er i utgående meldinger" }
-        utgåendeMelding.copy(
-            json = utgåendeMelding.json.apply {
-                put("@sendt", sendt.toString())
-            }
-        )
+        return utgåendeMeldinger.map { utgåendeMelding ->
+            utgåendeMelding.copy(
+                json = utgåendeMelding.json.apply {
+                    put("@sendt", sendt.toString())
+                }
+            )
+        }
     }
 
     fun send(utgåendeMelding: List<UtgåendeMelding>): Kvittering {

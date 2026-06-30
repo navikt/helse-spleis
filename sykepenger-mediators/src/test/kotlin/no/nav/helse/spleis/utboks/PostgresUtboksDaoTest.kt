@@ -1,18 +1,21 @@
 package no.nav.helse.spleis.utboks
 
 import com.github.navikt.tbd_libs.sql_dsl.connection
+import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
 import com.github.navikt.tbd_libs.sql_dsl.transaction
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import java.time.Instant
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.mediator.databaseContainer
+import no.nav.helse.spleis.utboks.PostgresUtboksDao.Companion.somUtgåendeMelding
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 import no.nav.helse.spleis.utboks.UtgåendeMeldingTest.Companion.nyUuidv7
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class PostgresUtboksDaoTest {
 
@@ -79,22 +82,31 @@ internal class PostgresUtboksDaoTest {
         person: Personidentifikator = personidentifikator,
         sendOgFåTilbakeSendtOk: (meldinger: List<UtgåendeMelding>) -> List<UtgåendeMelding> = { meldinger -> meldinger }
     ): List<UtgåendeMelding> {
+        lateinit var sendtOk: List<UtgåendeMelding>
         dao.usendte(person) { funnedeMeldinger ->
-            val ok = sendOgFåTilbakeSendtOk(funnedeMeldinger)
-            ok.somKvittering()
+            sendtOk = sendOgFåTilbakeSendtOk(funnedeMeldinger)
+            sendtOk.somKvittering()
         }
+        sjekkAtDisseErSendt(sendtOk)
         return usendte(person)
     }
 
     private fun usendte(
         person: Personidentifikator = personidentifikator,
     ): List<UtgåendeMelding> {
-        lateinit var meldingerEtter: List<UtgåendeMelding>
+        lateinit var usendteMeldinger: List<UtgåendeMelding>
         dao.usendte(person, { funnedeMeldinger ->
-            meldingerEtter = funnedeMeldinger
+            usendteMeldinger = funnedeMeldinger
             ikkeKvitterUtNoenMeldinger
         })
-        return meldingerEtter
+        return usendteMeldinger
+    }
+
+    private fun sjekkAtDisseErSendt(burdeVæreSendt: List<UtgåendeMelding>) {
+        val erSendt = dataSource.ds.connection {
+            prepareStatement("SELECT * from sendt").mapNotNull { row -> row.somUtgåendeMelding() }
+        }
+        assertTrue(erSendt.containsAll(burdeVæreSendt))
     }
 
     private companion object {

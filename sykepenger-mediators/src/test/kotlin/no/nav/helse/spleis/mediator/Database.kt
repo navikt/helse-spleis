@@ -5,6 +5,6 @@ import com.github.navikt.tbd_libs.test_support.DatabaseContainers
 
 val databaseContainer = DatabaseContainers.container(
     appnavn = "spleis-mediators",
-    cleanupStrategy = CleanupStrategy.tables("person, melding, utboks"),
+    cleanupStrategy = CleanupStrategy.tables("person, melding, utboks, sendt"),
     postgresVersjon = 17,
 )
