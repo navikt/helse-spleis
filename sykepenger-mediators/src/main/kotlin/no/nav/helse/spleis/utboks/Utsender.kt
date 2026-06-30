@@ -3,13 +3,10 @@ package no.nav.helse.spleis.utboks
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.Instant
 import java.util.concurrent.Future
-import no.nav.helse.ApplicationBuilder
-import no.nav.helse.Toggle
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.slf4j.LoggerFactory
-import org.slf4j.event.Level
 
 data class Kvittering(
     val sendt: Instant,
@@ -43,10 +40,8 @@ internal abstract class Utsender {
         val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    class KafkaUtsender private constructor(
-        private val producer: KafkaProducer<String, String>,
-        private val loglevelVedFeil: Level,
-        private val vedFeil: () -> Unit
+    data class KafkaUtsender(
+        private val producer: KafkaProducer<String, String>
     ): Utsender() {
 
         override fun utførSending(utgåendeMeldinger: List<UtgåendeMelding>, sendt: Instant): Pair<List<UtgåendeMelding>, List<UtgåendeMelding>> {
@@ -81,11 +76,10 @@ internal abstract class Utsender {
             if (feil.isNotEmpty()) {
                 val feilmelding =
                     "Feil ved sending av ${feil.size} melding(er), ${ok.size} melding(er) gikk ok!\n" +
+                    "Meldingene vil bli forsøkt sendt på nytt senere, så ingen grunn til å få panikk.\n" +
                     "Disse meldingene feilet:\n\n" +
-                    feil.joinToString(separator = "\n") { "${it.utgåendeMelding.id}: ${it.exception.message}\n\t${it.utgåendeMelding.json}" }
-
-                sikkerlogg.atLevel(loglevelVedFeil).log(feilmelding, feil.first().exception)
-                vedFeil()
+                    feil.joinToString(separator = "\n") { "${it.utgåendeMelding.id}: ${it.exception.message}" }
+                sikkerlogg.warn(feilmelding, feil.first().exception)
             }
 
             return ok.map(Sendingsresultat.Ok::utgåendeMelding) to feil.map(Sendingsresultat.Feil::utgåendeMelding)
@@ -100,16 +94,6 @@ internal abstract class Utsender {
             val utgåendeMelding: UtgåendeMelding
             data class Ok(override val utgåendeMelding: UtgåendeMelding, val metadata: RecordMetadata): Sendingsresultat
             data class Feil(override val utgåendeMelding: UtgåendeMelding, val exception: Exception): Sendingsresultat
-        }
-
-        internal companion object {
-            fun opprett(producer: KafkaProducer<String, String>, applicationBuilder: ApplicationBuilder) = when (Toggle.BrukUtboks.enabled) {
-                true -> KafkaUtsender(producer, loglevelVedFeil = Level.WARN, vedFeil = { /* gjør ingenting - vil bli forsøkt sendt senere */ })
-                false -> KafkaUtsender(producer, loglevelVedFeil = Level.ERROR, vedFeil = {
-                    applicationBuilder.stop()
-                    error("Feil ved utsending av meldinger fra utboks. Se sikkerlogg for detaljer.")
-                })
-            }
         }
     }
 }

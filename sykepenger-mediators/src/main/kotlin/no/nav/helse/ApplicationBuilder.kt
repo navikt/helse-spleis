@@ -40,7 +40,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
         støtterIdentbytte = STØTTER_IDENTBYTTE
     )
 
-    private val utsender = Utsender.KafkaUtsender.opprett(factory.createProducer(), this)
+    private val utsender = Utsender.KafkaUtsender(factory.createProducer())
 
     init {
         rapidsConnection.register(this)

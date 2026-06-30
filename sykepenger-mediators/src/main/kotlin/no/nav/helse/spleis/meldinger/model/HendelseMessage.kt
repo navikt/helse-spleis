@@ -35,10 +35,6 @@ internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivit
         repository.lagreMelding(this, Personidentifikator(meldingsporing.fødselsnummer), meldingsporing.id, toJson())
     }
 
-    internal fun logOutgoingMessages(logger: Logger, size: Int) {
-        logger.info("som følge av $navn id=${meldingsporing.id} sendes $size meldinger på rapid for fnr=${meldingsporing.fødselsnummer}")
-    }
-
     internal fun logRecognized(insecureLog: Logger, safeLog: Logger) {
         insecureLog.info("gjenkjente {} med id={}", this::class.simpleName, meldingsporing.id)
         safeLog.info("gjenkjente {} med id={} for fnr={}:\n{}", this::class.simpleName, meldingsporing.id, meldingsporing.fødselsnummer, toJson())

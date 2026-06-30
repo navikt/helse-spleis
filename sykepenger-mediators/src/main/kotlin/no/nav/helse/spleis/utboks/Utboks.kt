@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.sql.Connection
 import kotlin.system.measureTimeMillis
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
@@ -32,38 +31,18 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
             )
         }
         tilstand = Tilstand.Lukket
-        sikkerLogg.info("Lagrer ${utgåendeMeldinger.size} meldinger fra utboksen")
-
-        if (Toggle.BrukUtboks.enabled) {
-            val tidsbruk = measureTimeMillis {
-                utboksDao.lagre(connection, utgåendeMeldinger, innkommendeMelding.meldingsporing.id.id)
-            }
-            sikkerLogg.info("Brukte ${tidsbruk}ms å lagre meldinger i utboksen.")
+        val tidsbruk = measureTimeMillis {
+            utboksDao.lagre(connection, utgåendeMeldinger, innkommendeMelding.meldingsporing.id.id)
         }
+        sikkerLogg.info("Brukte ${tidsbruk}ms å lagre ${utgåendeMeldinger.size} meldinger i utboksen.")
     }
 
     fun send() {
-        innkommendeMelding.logOutgoingMessages(sikkerLogg, utgåendeMeldinger.size)
-        when (Toggle.BrukUtboks.enabled) {
-            true -> sendFraDao()
-            false -> {
-                sikkerLogg.info("Sender ${utgåendeMeldinger.size} meldinger fra utboksen")
-                val kvittering = utsender.send(utgåendeMeldinger)
-                kvittering.ok.loggSending()
-            }
-        }
-    }
-
-    private fun sendFraDao() {
-        // Her henter vi alt for DB, inkludert de vi akkurat lagret ettersom det kan være
-        // andre usendte meldinger for samme person som må sendes før de vi har produsert nå for å sikre rett rekkefølge.
         val tidsbruk = measureTimeMillis {
             utboksDao.usendte(personidentifikator) { usendteMeldinger ->
-                sikkerLogg.info("Sender ${usendteMeldinger.size} meldinger fra utboksen")
-
+                sikkerLogg.info("som følge av ${innkommendeMelding.navn} id=${innkommendeMelding.meldingsporing.id} sendes ${usendteMeldinger.size} meldinger for fnr=${personidentifikator}")
                 utsender.send(usendteMeldinger).also { kvittering ->
                     kvittering.ok.loggSending()
-
                     // Logger meldinger som ble sendt nå men som ikke ble produsert nå
                     val produsertNå = utgåendeMeldinger.map { it.id }.toSet()
                     val sendtNå = kvittering.ok.map { it.id }.toSet()
@@ -74,6 +53,7 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
             }
         }
         sikkerLogg.info("Brukte ${tidsbruk}ms å sende meldinger fra utboksen.")
+
     }
 
     private fun List<UtgåendeMelding>.loggSending() {
