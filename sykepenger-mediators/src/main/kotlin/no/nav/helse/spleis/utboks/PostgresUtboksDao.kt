@@ -38,7 +38,7 @@ internal class PostgresUtboksDao(private val dataSource: DataSource): UtboksDao 
             withParameter("json", meldinger.map { it.json.toString() })
             withParameter("mottaker", meldinger.map { it.mottaker.name })
             withParameter("opprettet") { setArray(it, connection.createArrayOf("timestamptz", meldinger.map { melding -> melding.opprettet }.toTypedArray())) }
-        }.execute()
+        }.use { it.execute() }
     }
 
     override fun usendte(personidentifikator: Personidentifikator, send: (meldinger: List<UtgåendeMelding>) -> Kvittering) {
@@ -73,7 +73,7 @@ internal class PostgresUtboksDao(private val dataSource: DataSource): UtboksDao 
                 prepareStatementWithNamedParameters(sqlFlyttTilSendt) {
                     withParameter("sendt", kvittering.sendt)
                     withParameter("ider", kvittering.ok.map { it.id })
-                }.executeUpdate()
+                }.use { it.execute() }
             }
         }
     }
