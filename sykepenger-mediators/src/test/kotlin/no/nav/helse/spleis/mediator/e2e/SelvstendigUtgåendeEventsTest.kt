@@ -24,7 +24,7 @@ import org.junit.jupiter.api.assertNotNull
 internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `Sender event SelvstendigIngenDagerIgjenEvent når bruker går til maks`() {
+    fun `Sender event SelvstendigIngenDagerIgjenEvent når bruker går til maks med forsikringsvurderingId når man har forsikring`() = Toggle.SelvstendigForsikring.enable {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar(2019), sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar(2019), sykmeldingsgrad = 100)), sendtNav = 1.januar.atStartOfDay(), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()
@@ -33,8 +33,8 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
-                dekning = null,
+                harForsikring = true,
+                dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
             ),
             orgnummer = "SELVSTENDIG"
@@ -50,6 +50,37 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("behandlingId").asText().toUUID(), "Eventet skal inneholde behandlingId")
         assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("skjæringstidspunkt").asLocalDate(), "Eventet skal inneholde skjæringstidspunkt")
         assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("yrkesaktivitetstype").asText(), "Eventet skal inneholde yrkesaktivitetstype")
+        assertEquals(forsikringsvurderingId.toString(), selvstendigIngenDagerIgjenSendtEvent.path("forsikringsvurderingId").asText())
+    }
+
+    @Test
+    fun `Sender event SelvstendigIngenDagerIgjenEvent når bruker går til maks med forsikringsvurderingId når man ikke har forsikring`() {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar(2019), sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar(2019), sykmeldingsgrad = 100)), sendtNav = 1.januar.atStartOfDay(), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        val forsikringsvurderingId = UUID.randomUUID()
+        sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
+        sendYtelser(
+            vedtaksperiodeIndeks = 0,
+            orgnummer = "SELVSTENDIG",
+            forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                forsikringsvurderingId = forsikringsvurderingId,
+                harForsikring = false,
+                dekning = null,
+                opphørsdato = null,
+            )
+        )
+        sendSimuleringSelvstendig(0)
+        sendUtbetalingsgodkjenningSelvstendig(0)
+        sendUtbetaling()
+
+        assertEquals(1, testRapid.inspektør.meldinger("selvstendig_ingen_dager_igjen").size)
+
+        val selvstendigIngenDagerIgjenSendtEvent = testRapid.inspektør.meldinger("selvstendig_ingen_dager_igjen").first()
+
+        assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("behandlingId").asText().toUUID(), "Eventet skal inneholde behandlingId")
+        assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("skjæringstidspunkt").asLocalDate(), "Eventet skal inneholde skjæringstidspunkt")
+        assertNotNull(selvstendigIngenDagerIgjenSendtEvent.path("yrkesaktivitetstype").asText(), "Eventet skal inneholde yrkesaktivitetstype")
+        assertEquals(forsikringsvurderingId.toString(), selvstendigIngenDagerIgjenSendtEvent.path("forsikringsvurderingId").asText())
     }
 
     @Test
@@ -275,6 +306,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         assertNotNull(SelvstendigUtbetaltEtterVentetidEvent.path("behandlingId").asText().toUUID(), "Eventet skal inneholde behandlingId")
         assertNotNull(SelvstendigUtbetaltEtterVentetidEvent.path("skjæringstidspunkt").asLocalDate(), "Eventet skal inneholde skjæringstidspunkt")
         assertNotNull(SelvstendigUtbetaltEtterVentetidEvent.path("yrkesaktivitetstype").asText(), "Eventet skal inneholde yrkesaktivitetstype")
+        assertNotNull(SelvstendigUtbetaltEtterVentetidEvent.path("forsikringsvurderingId").asText(), "Eventet skal inneholde forsikringsvurderingId")
     }
 
     @Test

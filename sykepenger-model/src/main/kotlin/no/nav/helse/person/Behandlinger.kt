@@ -118,7 +118,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal val maksdato get() = sisteBehandling.maksdato
     internal val dagerNavOvertarAnsvar get() = sisteBehandling.dagerNavOvertarAnsvar
-    internal val dagerUtenNavAnsvar get() = behandlinger.last().dagerUtenNavAnsvar
+    internal val dagerUtenNavAnsvar get() = sisteBehandling.dagerUtenNavAnsvar
+    internal val forsikringsvurderingId get() = sisteBehandling.forsikringsvurderingId
     internal val faktaavklartInntekt get() = sisteBehandling.faktaavklartInntekt
     internal val korrigertInntekt get() = sisteBehandling.korrigertInntekt
     internal val arbeidssituasjon get() = sisteBehandling.arbeidssituasjon
@@ -484,6 +485,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val skjæringstidspunkter get() = gjeldende.skjæringstidspunkter
         val maksdato get() = gjeldende.maksdatoresultat
         val dagerNavOvertarAnsvar get() = gjeldende.dagerNavOvertarAnsvar
+        val forsikringsvurderingId get() = (gjeldende.grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.forsikringsvurderingId
         val sykdomstidslinje get() = gjeldende.sykdomstidslinje
         val refusjonstidslinje get() = gjeldende.refusjonstidslinje
         val arbeidssituasjon get() = gjeldende.arbeidssituasjon

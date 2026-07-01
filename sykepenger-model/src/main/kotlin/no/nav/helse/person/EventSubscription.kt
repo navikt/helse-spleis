@@ -741,12 +741,14 @@ interface EventSubscription {
 
     data class SelvstendigIngenDagerIgjenEvent(
         val behandlingId: UUID,
-        val skjæringstidspunkt: LocalDate
+        val skjæringstidspunkt: LocalDate,
+        val forsikringsvurderingId: UUID?
     ) : Event
 
     data class SelvstendigUtbetaltEtterVentetidEvent(
         val behandlingId: UUID,
-        val skjæringstidspunkt: LocalDate
+        val skjæringstidspunkt: LocalDate,
+        val forsikringsvurderingId: UUID?
     ) : Event
 
     data class OverstyringIgangsatt(

@@ -860,22 +860,24 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
     private fun mapSelvstendigUtbetaltEtterVentetid(event: EventSubscription.SelvstendigUtbetaltEtterVentetidEvent): UtgåendeMelding {
         return utgående(
             "selvstendig_utbetalt_etter_ventetid",
-            mapOf(
-                "yrkesaktivitetstype" to Behandlingsporing.Yrkesaktivitet.Selvstendig.somYrkesaktivitetstype,
-                "behandlingId" to event.behandlingId,
-                "skjæringstidspunkt" to event.skjæringstidspunkt
-            )
+            buildMap {
+                put("yrkesaktivitetstype", Behandlingsporing.Yrkesaktivitet.Selvstendig.somYrkesaktivitetstype)
+                put("behandlingId", event.behandlingId)
+                put("skjæringstidspunkt", event.skjæringstidspunkt)
+                event.forsikringsvurderingId?.let { put("forsikringsvurderingId", it) }
+            }
         )
     }
 
     private fun mapSelvstendigIngenDagerIgjen(event: EventSubscription.SelvstendigIngenDagerIgjenEvent): UtgåendeMelding {
         return utgående(
             "selvstendig_ingen_dager_igjen",
-            mapOf(
-                "yrkesaktivitetstype" to Behandlingsporing.Yrkesaktivitet.Selvstendig.somYrkesaktivitetstype,
-                "behandlingId" to event.behandlingId,
-                "skjæringstidspunkt" to event.skjæringstidspunkt
-            )
+            buildMap {
+                put("yrkesaktivitetstype", Behandlingsporing.Yrkesaktivitet.Selvstendig.somYrkesaktivitetstype)
+                put("behandlingId", event.behandlingId)
+                put("skjæringstidspunkt", event.skjæringstidspunkt)
+                event.forsikringsvurderingId?.let { put("forsikringsvurderingId", it) }
+            }
         )
     }
 

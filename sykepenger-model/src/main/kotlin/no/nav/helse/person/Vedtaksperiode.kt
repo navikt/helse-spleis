@@ -2136,7 +2136,8 @@ internal class Vedtaksperiode private constructor(
             eventBus.selvstendigIngenDagerIgjen(
                 EventSubscription.SelvstendigIngenDagerIgjenEvent(
                     behandlingId = behandlinger.sisteBehandlingId,
-                    skjæringstidspunkt = this.skjæringstidspunkt
+                    skjæringstidspunkt = this.skjæringstidspunkt,
+                    forsikringsvurderingId = behandlinger.forsikringsvurderingId
                 )
             )
         }
@@ -2150,7 +2151,8 @@ internal class Vedtaksperiode private constructor(
             eventBus.selvstendigUtbetaltEtterVentetid(
                 EventSubscription.SelvstendigUtbetaltEtterVentetidEvent(
                     behandlingId = behandlinger.sisteBehandlingId,
-                    skjæringstidspunkt = this.skjæringstidspunkt
+                    skjæringstidspunkt = this.skjæringstidspunkt,
+                    forsikringsvurderingId = behandlinger.forsikringsvurderingId
                 )
             )
         }
