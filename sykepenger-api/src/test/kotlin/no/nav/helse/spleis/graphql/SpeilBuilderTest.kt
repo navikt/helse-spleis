@@ -3,9 +3,11 @@ package no.nav.helse.spleis.graphql
 import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
@@ -43,6 +45,48 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
+
+    @Test
+    fun `Ventetidsdag med forsikring mappes riktig`() = Toggle.SelvstendigForsikring.enable {
+        val kildeId = håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
+        val forsikringsvurderingId = UUID.randomUUID()
+        håndterVilkårsgrunnlag(forsikringsvurderingId = forsikringsvurderingId)
+        håndterYtelser(
+            ForsikringsvurderingResultat(
+                forsikringsvurderingId = forsikringsvurderingId,
+                harForsikring = true,
+                dekning = ForsikringsvurderingResultat.Dekning(iVentetid = true, grad = 100),
+                opphørsdato = null
+            )
+        )
+        håndterSimulering()
+
+        val tidslinje = speilApi().arbeidsgivere.first().generasjoner.first().perioder.first().sammenslåttTidslinje
+        val forventetFørstedag = SammenslåttDag(
+            dagen = 1.januar,
+            sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG_NAV,
+            utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.Ventetidsdag,
+            kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Søknad, kildeId),
+            grad = 100,
+            utbetalingsinfo = Utbetalingsinfo(
+                personbeløp = 1771,
+                arbeidsgiverbeløp = 0,
+                totalGrad = 100.0
+            )
+        )
+        assertEquals(forventetFørstedag, tidslinje.first())
+
+        val forventetHelgedagIVentetid = SammenslåttDag(
+            dagen = 6.januar,
+            sykdomstidslinjedagtype = SykdomstidslinjedagType.SYK_HELGEDAG,
+            utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.Ventetidsdag,
+            kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Søknad, kildeId),
+            grad = 100,
+            utbetalingsinfo = null
+        )
+        assertEquals(forventetHelgedagIVentetid, tidslinje[5])
+
+    }
 
     @Test
     fun `Avslått melding til Nav dag mappes riktig`() {

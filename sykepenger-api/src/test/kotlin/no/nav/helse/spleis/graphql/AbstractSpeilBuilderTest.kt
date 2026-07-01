@@ -14,6 +14,7 @@ import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
@@ -333,11 +334,11 @@ internal abstract class AbstractSpeilBuilderTest {
         return meldingsreferanseId
     }
 
-    protected fun håndterVilkårsgrunnlag(arbeidsgivere: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT)) {
-        håndterVilkårsgrunnlag(inntekter = arbeidsgivere, arbeidsforhold = arbeidsgivere.map { (orgnr, _) -> orgnr to EPOCH })
+    protected fun håndterVilkårsgrunnlag(arbeidsgivere: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT), forsikringsvurderingId: UUID? = null) {
+        håndterVilkårsgrunnlag(inntekter = arbeidsgivere, arbeidsforhold = arbeidsgivere.map { (orgnr, _) -> orgnr to EPOCH }, forsikringsvurderingId = forsikringsvurderingId)
     }
 
-    protected fun håndterVilkårsgrunnlag(inntekter: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT), arbeidsforhold: List<Pair<String, LocalDate>> = listOf(a1 to EPOCH)) {
+    protected fun håndterVilkårsgrunnlag(inntekter: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT), arbeidsforhold: List<Pair<String, LocalDate>> = listOf(a1 to EPOCH), forsikringsvurderingId: UUID? = null) {
         val behov = vilkårsgrunnlagbehov() ?: error("Fant ikke vilkårsgrunnlagbehov")
         val inntekterForOpptjeningsvurdering = when (behov.yrkesaktivitetstype) {
             "SELVSTENDIG",
@@ -389,7 +390,8 @@ internal abstract class AbstractSpeilBuilderTest {
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             arbeidsforhold = arbeidsforhold,
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
-            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering
+            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
+            forsikringsvurderingId = forsikringsvurderingId
         )
 
         vilkårsgrunnlagbehov.håndter(Person::håndterVilkårsgrunnlag)
@@ -414,9 +416,9 @@ internal abstract class AbstractSpeilBuilderTest {
         håndterYtelserTilGodkjenning()
     }
 
-    protected fun håndterYtelser() {
+    protected fun håndterYtelser(forsikringsvurderingResultat: ForsikringsvurderingResultat? = null) {
         val ytelsebehov = ytelserbehov() ?: error("Fant ikke ytelserbehov")
-        val ytelser = fabrikker.getValue(ytelsebehov.orgnummer).lagYtelser(vedtaksperiodeId = ytelsebehov.vedtaksperiodeId)
+        val ytelser = fabrikker.getValue(ytelsebehov.orgnummer).lagYtelser(vedtaksperiodeId = ytelsebehov.vedtaksperiodeId, forsikringsvurderingResultat = forsikringsvurderingResultat)
         ytelser.håndter(Person::håndterYtelser)
     }
 

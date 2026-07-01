@@ -248,7 +248,9 @@ internal class UtbetalingstidslinjeBuilder(private val dto: Utbetalingstidslinje
                     dato = it.dato
                 )
 
-                is UtbetalingsdagUtDto.VentetidsdagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.Ventetidsdag, dato = it.dato)
+                is UtbetalingsdagUtDto.VentetidsdagDto ->
+                    if (it.økonomi.utbetalingsgrad.prosentDesimal == 0.00) UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.Ventetidsdag, dato = it.dato)
+                    else mapUtbetalingsdag(it.dato, UtbetalingstidslinjedagType.Ventetidsdag, it.økonomi)
             }
         }
     }

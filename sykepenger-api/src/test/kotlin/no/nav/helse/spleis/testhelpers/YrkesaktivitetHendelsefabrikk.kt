@@ -49,7 +49,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -255,7 +254,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
-        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
+        forsikringsvurderingId: UUID?
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -266,7 +266,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
             arbeidsforhold = arbeidsforhold,
-            forsikringsvurderingId = null,
+            forsikringsvurderingId = forsikringsvurderingId,
         )
     }
 
@@ -281,7 +281,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         inntekterForBeregning: List<Inntektsperiode> = emptyList(),
         dagpengerV2: List<Periode> = emptyList(),
-        forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
+        forsikringsvurderingResultat: ForsikringsvurderingResultat?,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
