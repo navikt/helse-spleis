@@ -19,6 +19,7 @@ import no.nav.helse.spleis.config.ApplicationConfiguration
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
+import no.nav.helse.spleis.dao.SendtDao
 import no.nav.helse.spleis.graphql.Api.installGraphQLApi
 import org.slf4j.LoggerFactory
 
@@ -85,8 +86,9 @@ internal fun Application.lagApplikasjonsmodul(
 
     val hendelseDao = HendelseDao(dataSourceProvider, meterRegistry)
     val personDao = PersonDao(dataSourceProvider, meterRegistry)
+    val sendtDao = SendtDao(dataSourceProvider)
 
-    spannerApi(hendelseDao, personDao)
-    sporingApi(hendelseDao, personDao)
+    spannerApi(hendelseDao, personDao, sendtDao)
+    sporingApi(personDao)
     installGraphQLApi(speedClient, spekematClient, hendelseDao, personDao, meterRegistry)
 }

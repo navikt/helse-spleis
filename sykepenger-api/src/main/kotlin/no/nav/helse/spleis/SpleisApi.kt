@@ -16,9 +16,15 @@ import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
+import no.nav.helse.spleis.dao.SendtDao
+import no.nav.helse.spleis.dao.SendtDao.Companion.responseJson
 import no.nav.helse.spleis.sporing.serializePersonForSporing
 
-internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonDao) {
+internal fun Application.spannerApi(
+    hendelseDao: HendelseDao,
+    personDao: PersonDao,
+    sendtDao: SendtDao
+) {
     routing {
         authenticate {
             post("/api/person-json") {
@@ -47,11 +53,27 @@ internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonD
                     call.respondText(hendelse, ContentType.Application.Json)
                 }
             }
+
+            get("/api/sendte-meldinger/{forarsaketAv}") {
+                withContext(Dispatchers.IO) {
+                    val hendelseId = call.parameters["forarsaketAv"] ?: throw IllegalArgumentException("Kall Mangler forarsaketAv")
+
+                    val forarsaketAv = try {
+                        UUID.fromString(hendelseId)
+                    } catch (_: IllegalArgumentException) {
+                        throw BadRequestException("forarsaketAv skal være en UUID")
+                    }
+
+                    val sendteMeldinger = sendtDao.sendteMeldinger(forarsaketAv)
+
+                    call.respondText(sendteMeldinger.responseJson(), ContentType.Application.Json)
+                }
+            }
         }
     }
 }
 
-internal fun Application.sporingApi(hendelseDao: HendelseDao, personDao: PersonDao) {
+internal fun Application.sporingApi(personDao: PersonDao) {
     routing {
         authenticate {
             get("/api/vedtaksperioder") {
