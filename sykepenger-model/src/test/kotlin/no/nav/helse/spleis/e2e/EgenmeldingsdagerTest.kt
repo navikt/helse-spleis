@@ -18,7 +18,7 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
     @Test
     fun `egenmeldingsdager på forlengelsen av en auu`() {
         a1 {
-            håndterSøknad(3.januar til 18.januar, egenmeldinger = listOf(1.januar til 3.januar))
+            håndterSøknad(3.januar til 18.januar)
             nullstillTilstandsendringer()
             håndterSøknad(19.januar til 31.januar, egenmeldinger = listOf(1.januar til 3.januar))
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar))
