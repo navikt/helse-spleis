@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.hendelser.til
@@ -9,6 +10,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALIN
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import org.junit.jupiter.api.Test
 
 internal class EgenmeldingsdagerTest: AbstractDslTest() {
@@ -16,7 +18,7 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
     @Test
     fun `egenmeldingsdager på forlengelsen av en auu`() {
         a1 {
-            håndterSøknad(3.januar til 18.januar)
+            håndterSøknad(3.januar til 18.januar, egenmeldinger = listOf(1.januar til 3.januar))
             nullstillTilstandsendringer()
             håndterSøknad(19.januar til 31.januar, egenmeldinger = listOf(1.januar til 3.januar))
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar))
@@ -24,6 +26,36 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+        }
+    }
+
+    @Test
+    fun `egenmeldingsdager på førstegangsperioden og forlengelsen`() {
+        a1 {
+            håndterSøknad(3.januar til 23.januar, egenmeldinger = listOf(1.januar til 3.januar))
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), forventetEgenmeldinger = listOf(1.januar til 3.januar))
+            håndterInntektsmelding(arbeidsgiverperioder = listOf(3.januar til 18.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar), forventetEgenmeldinger = emptyList())
+
+            // Vi er i dialog med flex om at de ikke lenger skal sende med egenmeldingsdager på forlengelser, se
+            // https://nav-it.slack.com/archives/C014X6VBFPV/p1782978168869839?thread_ts=1782968778.737149&cid=C014X6VBFPV
+            håndterSøknad(24.januar til 31.januar, egenmeldinger = listOf(1.januar til 3.januar))
+
+            assertForventetFeil(
+                nå = {
+                    assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), forventetEgenmeldinger = emptyList())
+                    assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), forventetEgenmeldinger = listOf(1.januar til 3.januar))
+                },
+                ønsket = {
+                    assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar), forventetEgenmeldinger = emptyList())
+                    assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar), forventetEgenmeldinger = emptyList())
+                }
+            )
         }
     }
 
