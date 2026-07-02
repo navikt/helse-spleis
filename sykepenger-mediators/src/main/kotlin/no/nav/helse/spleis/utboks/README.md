@@ -1,4 +1,4 @@
-# Spleis utboks (KUN SKRUDD PÅ I DEV)
+# Spleis utboks
 
 ## Spleis utboks består av 3 deler.
 
