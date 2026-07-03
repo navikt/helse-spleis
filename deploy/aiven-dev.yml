@@ -248,9 +248,6 @@ spec:
           application: spiskammerset-opprydding-dev
           access: readwrite
         - team: tbd
-          application: spre-forsikringsoppgaver
-          access: readwrite
-        - team: tbd
           application: sp-forsikring
           access: readwrite
         - team: tbd
