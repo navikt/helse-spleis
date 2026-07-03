@@ -59,7 +59,7 @@ spec:
         - application: logging
           namespace: nais-system
         - application: spekemat
-        - application: speed-api-dev-proxy
+        - application: speed-api
   filesFrom:
     - secret: google-sql-helse-spleis-spleis-spleis-api-cf4f5c2c
       mountPath: /var/run/secrets/spleis_sql
@@ -69,11 +69,11 @@ spec:
     - name: SPEKEMAT_SCOPE
       value: "api://dev-gcp.tbd.spekemat/.default"
     - name: SPEED_API_URL
-      value: http://speed-api-dev-proxy
+      value: http://speed-api
     - name: TOKEN_ENDPOINT_ENV_KEY
-      value: SPEED_API_DEV_PROXY_TOKEN_ENDPOINT
-    - name: SPEED_API_DEV_PROXY_TOKEN_ENDPOINT
-      value: http://speed-api-dev-proxy/token
+      value: SPEED_API_TOKEN_ENDPOINT
+    - name: SPEED_API_TOKEN_ENDPOINT
+      value: http://speed-api/token
   observability:
     autoInstrumentation:
       enabled: true
