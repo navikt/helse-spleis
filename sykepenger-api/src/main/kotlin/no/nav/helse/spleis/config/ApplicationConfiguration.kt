@@ -30,7 +30,7 @@ internal class ApplicationConfiguration(meterRegistry: MeterRegistry, env: Map<S
         httpClient = HttpClient.newHttpClient(),
         objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule()),
         tokenProvider = createDefaultAzureTokenClient(
-            tokenEndpoint = URI(env.getValue(env.getValue("TOKEN_ENDPOINT_ENV_KEY"))),
+            tokenEndpoint = URI(env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT")),
             clientId = env.getValue("AZURE_APP_CLIENT_ID"),
             clientSecret = env.getValue("AZURE_APP_CLIENT_SECRET")
         ),

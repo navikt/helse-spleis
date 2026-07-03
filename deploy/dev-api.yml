@@ -68,12 +68,6 @@ spec:
       value: "helse-spleis"
     - name: SPEKEMAT_SCOPE
       value: "api://dev-gcp.tbd.spekemat/.default"
-    - name: SPEED_API_URL
-      value: http://speed-api
-    - name: TOKEN_ENDPOINT_ENV_KEY
-      value: SPEED_API_TOKEN_ENDPOINT
-    - name: SPEED_API_TOKEN_ENDPOINT
-      value: http://speed-api/token
   observability:
     autoInstrumentation:
       enabled: true
