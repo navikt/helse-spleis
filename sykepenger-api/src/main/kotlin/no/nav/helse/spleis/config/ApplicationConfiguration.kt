@@ -34,7 +34,6 @@ internal class ApplicationConfiguration(meterRegistry: MeterRegistry, env: Map<S
             clientId = env.getValue("AZURE_APP_CLIENT_ID"),
             clientSecret = env.getValue("AZURE_APP_CLIENT_SECRET")
         ),
-        baseUrl = env.getValue("SPEED_API_URL")
     )
 
     internal val spekematClient = SpekematClient(
