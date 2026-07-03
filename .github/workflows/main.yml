@@ -4,6 +4,7 @@ on:
   push:
     paths-ignore:
       - 'sykepenger-api/**'
+      - 'deploy/*-api.yml'
       - 'sykepenger-opprydding-dev/**'
       - '.github/workflows/spleis-jobs.yml'
       - '.github/workflows/spleis-opprydding-dev.yml'
