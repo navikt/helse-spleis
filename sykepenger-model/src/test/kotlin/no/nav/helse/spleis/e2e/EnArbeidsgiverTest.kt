@@ -109,9 +109,6 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
                 listOf(19.februar til 6.mars),
                 vedtaksperiodeId = 3.vedtaksperiode
             )
-            assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
-            håndterYtelser(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
@@ -120,7 +117,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
             assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 19.februar, listOf(19.februar til 6.mars))
 
-            assertEquals(4, inspektør.antallUtbetalinger)
+            assertEquals(3, inspektør.antallUtbetalinger)
             val januar = inspektør.utbetaling(0)
             val mars = inspektør.sisteUtbetaling()
             assertNotEquals(januar.korrelasjonsId, mars.korrelasjonsId)

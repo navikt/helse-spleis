@@ -45,22 +45,20 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
             //simulerer at det har gått 3 måneder og vi ikke har fått inntektsmelding
             håndterPåminnelse(1.vedtaksperiode, tilstand = TilstandType.AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsler(1.vedtaksperiode, Varselkode.RV_IV_10)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 5.januar, listOf(1.januar til 16.januar), listOf(1.januar til 4.januar))
-            val error = assertThrows<IllegalStateException> {
-                håndterSelvbestemtArbeidsgiveropplysninger(
-                    1.vedtaksperiode,
-                    OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
-                    OppgittInntekt(INNTEKT),
-                    Arbeidsgiveropplysning.OppgittRefusjon(beløp = INNTEKT, endringer = emptyList())
-                )
-            }
-            assertEquals("Kan ikke opprette ny behandling når det finnes en åpen behandling", error.message)
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                OppgittInntekt(INNTEKT),
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = INNTEKT, endringer = emptyList())
+            )
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar), emptyList())
+            assertVarsler(1.vedtaksperiode, RV_AO_3, Varselkode.RV_IV_10)
         }
     }
 

@@ -100,6 +100,8 @@ sealed class Dag(
 
     internal fun erHelg() = dato.erHelg()
 
+    internal fun erFrisk() = (this is Arbeidsdag) || (this is FriskHelgedag)
+
     internal fun problem(other: Dag, melding: String = "Kan ikke velge mellom ${name()} fra $kilde og ${other.name()} fra ${other.kilde}."): Dag =
         ProblemDag(dato, kilde, other.kilde, melding)
 

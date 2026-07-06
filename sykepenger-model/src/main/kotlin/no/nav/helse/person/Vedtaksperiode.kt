@@ -927,7 +927,7 @@ internal class Vedtaksperiode private constructor(
         val initiell = OppgittArbeidsgiverperiodehåndtering.opprett(oppgittArbeidgiverperiode.perioder, arbeidsgiveropplysninger.metadata)
 
         val rester = vedtaksperioder.fold(initiell) { acc, vedtaksperiode ->
-            val arbeidsgiverperiodetidslinje = acc.sykdomstidslinje(vedtaksperiode.periode)
+            val arbeidsgiverperiodetidslinje = acc.sykdomstidslinje(vedtaksperiode)
             if (arbeidsgiverperiodetidslinje != null) {
                 eventyr.add(vedtaksperiode.håndterBitAvArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, aktivitetslogg, arbeidsgiverperiodetidslinje))
             }
@@ -951,6 +951,8 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val bitAvArbeidsgiverperiode = BitAvArbeidsgiverperiode(arbeidsgiveropplysninger.metadata, arbeidsgiverperiodetidslinje, emptyList())
         when (tilstand) {
+            TilUtbetaling,
+            Avsluttet,
             AvsluttetUtenUtbetaling -> {
                 sørgForNyBehandlingHvisIkkeÅpen(eventBus, arbeidsgiveropplysninger)
                 håndterDager(eventBus, arbeidsgiveropplysninger, bitAvArbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst) {}
@@ -961,15 +963,6 @@ internal class Vedtaksperiode private constructor(
             AvventerBlokkerendePeriode,
             AvventerSøknadForOverlappendePeriode -> {
                 håndterDager(eventBus, arbeidsgiveropplysninger, bitAvArbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst) {}
-            }
-
-            TilUtbetaling,
-            Avsluttet -> {
-                nyBehandling(eventBus, arbeidsgiveropplysninger)
-                // det er oppgitt arbeidsgiverperiode på uventede perioder; mest sannsynlig
-                // har da ikke vedtaksperioden bedt om Arbeidsgiverperiode som opplysning, men vi har fått det likevel
-                aktivitetsloggMedVedtaksperiodekontekst.varsel(RV_IM_24)
-                aktivitetsloggMedVedtaksperiodekontekst.info("Håndterer ikke arbeidsgiverperiode i ${tilstand.type}")
             }
 
             AvventerInntektsopplysningerForAnnenArbeidsgiver,
@@ -1041,15 +1034,17 @@ internal class Vedtaksperiode private constructor(
 
         private val omsluttendePeriode = sykdomstidslinje.periode()
 
-        private fun skalHåndtere(vedtaksperiode: Periode): Boolean {
+        private fun skalHåndtere(sisteIkkearbeidsdag: LocalDate): Boolean {
             if (omsluttendePeriode == null) return false
-            return vedtaksperiode.endInclusive >= omsluttendePeriode.start || vedtaksperiode.endInclusive.erRettFør(omsluttendePeriode.start)
+            return sisteIkkearbeidsdag >= omsluttendePeriode.start || sisteIkkearbeidsdag.erRettFør(omsluttendePeriode.start)
         }
 
-        fun sykdomstidslinje(vedtaksperiode: Periode): Sykdomstidslinje? {
-            if (!skalHåndtere(vedtaksperiode)) return null
-            val sykdomstidslinje = sykdomstidslinje.fremTilOgMed(vedtaksperiode.endInclusive)
-            val snute = if (vedtaksperiode.start < omsluttendePeriode!!.start) Sykdomstidslinje.arbeidsdager(vedtaksperiode.start, omsluttendePeriode.start.forrigeDag, this.sykdomstidslinje.first().kilde) else Sykdomstidslinje()
+        fun sykdomstidslinje(vedtaksperiode: Vedtaksperiode): Sykdomstidslinje? {
+            val sisteIkkearbeidsdag = vedtaksperiode.sykdomstidslinje.lastOrNull { !it.erFrisk() }?.dato?: return null
+            if (!skalHåndtere(sisteIkkearbeidsdag)) return null
+            val periode = vedtaksperiode.periode
+            val sykdomstidslinje = sykdomstidslinje.fremTilOgMed(periode.endInclusive)
+            val snute = if (periode.start < omsluttendePeriode!!.start) Sykdomstidslinje.arbeidsdager(periode.start, omsluttendePeriode.start.forrigeDag, this.sykdomstidslinje.first().kilde) else Sykdomstidslinje()
             return snute.merge(sykdomstidslinje)
         }
 

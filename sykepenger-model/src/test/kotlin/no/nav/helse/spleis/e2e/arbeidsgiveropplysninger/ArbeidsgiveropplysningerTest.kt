@@ -279,7 +279,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
             assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         }
     }
@@ -649,8 +648,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
-            assertInfo("Håndterer ikke arbeidsgiverperiode i AVSLUTTET", 1.vedtaksperiode.filter())
-            assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
             assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
             val forespørselFebruar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode }
             assertEquals(0, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Arbeidsgiverperiode>().size)
