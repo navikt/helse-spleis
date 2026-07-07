@@ -7,6 +7,7 @@ import kotlin.reflect.KClass
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -1293,6 +1294,80 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
+        }
+    }
+
+    @Test
+    fun `Tillegg av melding til Nav dager før forsikringsdager`() = Toggle.SelvstendigForsikring.enable {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    harForsikring = true,
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
+                    opphørsdato = null,
+                )
+            )
+            håndterSimulering(1.vedtaksperiode)
+            håndterOverstyrTidslinje((29.desember(2017) til 31.desember(2017)).map { ManuellOverskrivingDag(it, Dagtype.MeldingTilNavdag) })
+
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    harForsikring = true,
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
+                    opphørsdato = null,
+                )
+            )
+
+
+            assertEquals("MOO SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
+            assertEquals("VVV VVVVVVV VVVVVVH NNNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
+            assertVarsel(Varselkode.RV_AN_6, 1.vedtaksperiode.filter())
+            assertEquals(listOf(1.januar til 13.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+        }
+    }
+
+    @Test
+    fun `Melding til Nav dager midt i forsikringsperioden splitter dager Nav overtar ansvar for`() = Toggle.SelvstendigForsikring.enable {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    harForsikring = true,
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
+                    opphørsdato = null,
+                )
+            )
+            håndterSimulering(1.vedtaksperiode)
+            håndterOverstyrTidslinje((5.januar til 6.januar).map { ManuellOverskrivingDag(it, Dagtype.MeldingTilNavdag) })
+
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    harForsikring = true,
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
+                    opphørsdato = null,
+                )
+            )
+
+            assertVarsel(Varselkode.RV_AN_6, 1.vedtaksperiode.filter())
+            assertEquals(listOf(1.januar til 4.januar, 7.januar til 16.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+            assertEquals("SSSSMOH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
+            assertEquals("VVVVVVV VVVVVVV VVNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
+            assertEquals(0.årlig, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.personbeløp(5.januar))
         }
     }
 

@@ -47,6 +47,63 @@ import org.junit.jupiter.api.Test
 internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
+    fun `Ventetidsdag med forsikring får melding til Nav dag foran som mappes riktig`() = Toggle.SelvstendigForsikring.enable {
+        val søknadId = håndterSøknadSelvstendig(2.januar til 31.januar, 2.januar til 17.januar)
+        val forsikringsvurderingId = UUID.randomUUID()
+        val overstyringId = UUID.randomUUID()
+        håndterVilkårsgrunnlag(forsikringsvurderingId = forsikringsvurderingId)
+        håndterYtelser(
+            ForsikringsvurderingResultat(
+                forsikringsvurderingId = forsikringsvurderingId,
+                harForsikring = true,
+                dekning = ForsikringsvurderingResultat.Dekning(iVentetid = true, grad = 100),
+                opphørsdato = null
+            )
+        )
+        håndterSimulering()
+
+        håndterOverstyrTidslinje((1.januar til 1.januar).map {
+            ManuellOverskrivingDag(it, Dagtype.MeldingTilNavdag, 100)
+        }, orgnummer = selvstendig, meldingsreferanseId = overstyringId)
+
+        håndterVilkårsgrunnlag(forsikringsvurderingId = forsikringsvurderingId)
+        håndterYtelser(
+            ForsikringsvurderingResultat(
+                forsikringsvurderingId = forsikringsvurderingId,
+                harForsikring = true,
+                dekning = ForsikringsvurderingResultat.Dekning(iVentetid = true, grad = 100),
+                opphørsdato = null
+            )
+        )
+        håndterSimulering()
+        val tidslinje = speilApi().arbeidsgivere.first().generasjoner.first().perioder.first().sammenslåttTidslinje
+        val forventetFørstedag = SammenslåttDag(
+            dagen = 1.januar,
+            sykdomstidslinjedagtype = SykdomstidslinjedagType.MELDING_TIL_NAV_DAG,
+            utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.Ventetidsdag,
+            kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Saksbehandler, overstyringId),
+            grad = 100,
+            utbetalingsinfo = null
+        )
+        assertEquals(forventetFørstedag, tidslinje.first())
+
+        val forventetFørsteForsikringsdag = SammenslåttDag(
+            dagen = 2.januar,
+            sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG_NAV,
+            utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.Ventetidsdag,
+            kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Søknad, søknadId),
+            grad = 100,
+            utbetalingsinfo = Utbetalingsinfo(
+                personbeløp = 1771,
+                arbeidsgiverbeløp = 0,
+                totalGrad = 100.0
+            )
+        )
+        assertEquals(forventetFørsteForsikringsdag, tidslinje[1])
+
+    }
+
+    @Test
     fun `Ventetidsdag med forsikring mappes riktig`() = Toggle.SelvstendigForsikring.enable {
         val kildeId = håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
         val forsikringsvurderingId = UUID.randomUUID()

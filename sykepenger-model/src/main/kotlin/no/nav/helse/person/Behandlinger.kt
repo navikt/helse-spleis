@@ -1299,12 +1299,17 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         fun beregnDagerNavOvertarAnsvarForSelvstendig(forsikringsvurderingResultat: ForsikringsvurderingResultat?): List<Periode> =
             if (forsikringsvurderingResultat?.dekning?.iVentetid == true) {
-                dagerUtenNavAnsvar.dager.mapNotNull {
-                    if (forsikringsvurderingResultat.opphørsdato == null) {
-                        it
-                    } else {
-                        it.beholdDagerTil(forsikringsvurderingResultat.opphørsdato)
-                    }
+                dagerUtenNavAnsvar.dager.flatMap { periode ->
+                    periode
+                        .filterNot { dato -> gjeldende.sykdomstidslinje[dato] is Dag.MeldingTilNavDag || gjeldende.sykdomstidslinje[dato] is Dag.MeldingTilNavHelgedag }
+                        .grupperSammenhengendePerioder()
+                        .mapNotNull { filteredPeriode ->
+                            if (forsikringsvurderingResultat.opphørsdato == null) {
+                                filteredPeriode
+                            } else {
+                                filteredPeriode.beholdDagerTil(forsikringsvurderingResultat.opphørsdato)
+                            }
+                        }
                 }
             } else {
                 emptyList()
