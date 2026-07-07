@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
+import com.github.navikt.tbd_libs.sql_dsl.offsetDateTime
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.string
 import com.github.navikt.tbd_libs.sql_dsl.stringOrNull
@@ -19,7 +20,8 @@ data class SendteMeldinger(
 data class SendtMelding(
     val key: String?,
     val json: ObjectNode,
-    val mottaker: String
+    val mottaker: String,
+    val sendt: String
 )
 
 data class SendtDao(private val dataSource: () -> DataSource) {
@@ -27,9 +29,10 @@ data class SendtDao(private val dataSource: () -> DataSource) {
     fun sendteMeldinger(forarsaketAv: UUID): SendteMeldinger {
         @Language("PostgreSQL")
         val sql = """
-            SELECT key, json, mottaker, sendt
+            SELECT lopenummer, key, json, mottaker, sendt
             FROM sendt
             WHERE forarsaket_av = :forarsaket_av
+            ORDER BY lopenummer
         """
 
         val meldinger = dataSource().connection {
@@ -39,7 +42,8 @@ data class SendtDao(private val dataSource: () -> DataSource) {
                 SendtMelding(
                     key = row.stringOrNull("key"),
                     json = row.string("json").let { objectMapper.readTree(it) as ObjectNode },
-                    mottaker = row.string("mottaker")
+                    mottaker = row.string("mottaker"),
+                    sendt = row.offsetDateTime("sendt").toInstant().toString()
                 )
             }
         }

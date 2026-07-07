@@ -43,8 +43,8 @@ internal class SendtDaoTest {
         val forventet = SendteMeldinger(
             antallMeldinger = 2,
             meldinger = listOf(
-                SendtMelding(key = null, json = objectMapper.readTree("""{"testJson": true}""") as ObjectNode, mottaker = "RAPID"),
-                SendtMelding(key = "foo-bar", json = objectMapper.readTree("""{"testSubsumsjon": "oui"}""") as ObjectNode, mottaker = "SUBSUMSJON"),
+                SendtMelding(key = null, json = objectMapper.readTree("""{"testJson": true}""") as ObjectNode, mottaker = "RAPID", sendt1),
+                SendtMelding(key = "foo-bar", json = objectMapper.readTree("""{"testSubsumsjon": "oui"}""") as ObjectNode, mottaker = "SUBSUMSJON", sendt2),
             )
         )
         assertEquals(forventet, dao.sendteMeldinger(forårsaketAv))
@@ -59,14 +59,16 @@ internal class SendtDaoTest {
               "json": {
                 "testJson": true
               },
-              "mottaker": "RAPID"
+              "mottaker": "RAPID",
+              "sendt": "$sendt1"
             },
             {
               "key": "foo-bar",
               "json": {
                 "testSubsumsjon": "oui"
               },
-              "mottaker": "SUBSUMSJON"
+              "mottaker": "SUBSUMSJON",
+              "sendt": "$sendt2"
             }
           ]
         }
@@ -80,8 +82,8 @@ internal class SendtDaoTest {
         val sql = """
             INSERT INTO sendt (id, lopenummer, forarsaket_av, key, json, mottaker, opprettet, sendt)
             VALUES 
-                (gen_random_uuid(), 1, :forarsaket_av, null, '{"testJson": true}'::jsonb, 'RAPID', now(), now()),
-                (gen_random_uuid(), 2, :forarsaket_av, 'foo-bar', '{"testSubsumsjon": "oui"}'::jsonb, 'SUBSUMSJON', now(), now());
+                (gen_random_uuid(), 1, :forarsaket_av, null, '{"testJson": true}'::jsonb, 'RAPID', now(), '$sendt1'::timestamptz),
+                (gen_random_uuid(), 2, :forarsaket_av, 'foo-bar', '{"testSubsumsjon": "oui"}'::jsonb, 'SUBSUMSJON', now(), '$sendt2'::timestamptz);
         """
         dataSource.ds.connection {
             prepareStatementWithNamedParameters(sql) {
@@ -91,6 +93,8 @@ internal class SendtDaoTest {
     }
 
     private companion object {
+        private val sendt1 = "2026-07-07T14:55:44.123456Z"
+        private val sendt2 = "2026-07-07T14:55:44.654321Z"
         private val objectMapper = jacksonObjectMapper()
     }
 }
