@@ -795,6 +795,7 @@ interface EventSubscription {
         val behandlingId: UUID,
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
         val skjæringstidspunkt: LocalDate,
+        val spesielleYrkesgrupper: List<String>,
         val periodeForMedlemskapsvurdering: Periode,
         val beregningsperiodeForOpptjeningsvurdering: Beregningsperiode,
         val beregningsperiodeForSykepengegrunnlagsvurdering: Beregningsperiode

@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
@@ -79,7 +80,27 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertInntekterForSykepengegrunnlagdetaljer(behov)
         assertInntekterForOpptjeningsvurderingdetaljer(behov)
         assertArbeidsforholdV2detaljer(behov)
-        assertForsikringsvurderingdetaljer(behov)
+        assertForsikringsvurderingdetaljer(behov, emptyList())
+    }
+
+    @Test
+    fun `vilkårsgrunnlag - jordbruker`() = Toggle.Jordbruker.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
+        sendSelvstendigsøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            ventetid = 3.januar til 18.januar,
+            arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER
+        )
+        val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
+        assertVedtaksperiodeBehov(
+            behov,
+            InntekterForSykepengegrunnlag,
+            InntekterForOpptjeningsvurdering,
+            Medlemskap,
+            Arbeidsforhold,
+            Behov.Behovstype.Forsikringsvurdering
+        )
+        assertForsikringsvurderingdetaljer(behov, listOf("JORDBRUKER"))
     }
 
     @Test
@@ -259,8 +280,12 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertDato(behov.path(Arbeidsforhold.utgåendeNavn).path("skjæringstidspunkt").asText())
     }
 
-    private fun assertForsikringsvurderingdetaljer(behov: JsonNode) {
+    private fun assertForsikringsvurderingdetaljer(behov: JsonNode, forventedeSpesielleYrkesgrupper: List<String>) {
         assertDato(behov.path(Behov.Behovstype.Forsikringsvurdering.utgåendeNavn).path("skjæringstidspunkt").asText())
+        assertEquals(
+            forventedeSpesielleYrkesgrupper,
+            behov.path(Behov.Behovstype.Forsikringsvurdering.utgåendeNavn).path("spesielleYrkesgrupper").map(JsonNode::asText)
+        )
     }
 
     private fun assertForeldrepengerdetaljer(behov: JsonNode) {
@@ -407,6 +432,5 @@ private fun assertDatotid(tekst: String) {
     assertTrue(tekst.isNotEmpty())
     assertDoesNotThrow { LocalDateTime.parse(tekst) }
 }
-
 
 

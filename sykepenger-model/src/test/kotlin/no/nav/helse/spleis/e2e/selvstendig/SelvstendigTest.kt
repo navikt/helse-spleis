@@ -1488,4 +1488,26 @@ internal class SelvstendigTest : AbstractDslTest() {
             it.økonomi.brukTotalGrad { totalGrad -> assertEquals(expectedTotalgrad, totalGrad) }
         }
     }
+
+    @Test
+    fun `jordbruker får riktig verdi i spesielleYrkesgrupper`() = Toggle.Jordbruker.enable {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
+            assertTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
+
+            val vilkårsprøvingEvent = observatør.trengerInformasjonTilVilkårsprøvingEventer.single()
+            assertEquals(listOf("JORDBRUKER"), vilkårsprøvingEvent.spesielleYrkesgrupper)
+        }
+    }
+
+    @Test
+    fun `selvstendig næringsdrivende får tom liste i spesielleYrkesgrupper`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE)
+            assertTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
+
+            val vilkårsprøvingEvent = observatør.trengerInformasjonTilVilkårsprøvingEventer.single()
+            assertEquals(emptyList<String>(), vilkårsprøvingEvent.spesielleYrkesgrupper)
+        }
+    }
 }

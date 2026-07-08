@@ -621,7 +621,7 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
             Behov(
                 Behov.Behovstype.Forsikringsvurdering, mapOf(
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "spesielleYrkesgrupper" to emptyList<String>()
+                "spesielleYrkesgrupper" to event.spesielleYrkesgrupper
             )
             ).takeIf { event.yrkesaktivitetssporing.somYrkesaktivitetstype == "SELVSTENDIG" }
         )

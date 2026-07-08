@@ -2990,6 +2990,10 @@ internal class Vedtaksperiode private constructor(
             behandlingId = behandlinger.sisteBehandlingId,
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
             skjæringstidspunkt = skjæringstidspunkt,
+            spesielleYrkesgrupper = when (behandlinger.arbeidssituasjon) {
+                Endring.Arbeidssituasjon.JORDBRUKER -> listOf("JORDBRUKER")
+                else -> emptyList()
+            },
             periodeForMedlemskapsvurdering = periode,
             beregningsperiodeForOpptjeningsvurdering = EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent.Beregningsperiode(
                 start = beregningSlutt,

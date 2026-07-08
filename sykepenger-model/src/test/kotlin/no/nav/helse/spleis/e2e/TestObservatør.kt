@@ -43,6 +43,7 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
     val sykefraværstilfelleIkkeFunnet = mutableListOf<EventSubscription.SykefraværstilfelleIkkeFunnet>()
     val analytiskDatapakkeEventer = mutableListOf<EventSubscription.AnalytiskDatapakkeEvent>()
     val selvstendigIngenDagerIgjenEventer = mutableListOf<EventSubscription.SelvstendigIngenDagerIgjenEvent>()
+    val trengerInformasjonTilVilkårsprøvingEventer = mutableListOf<EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent>()
 
     val vedtaksperiodeUtbetalinger = mutableMapOf<String, MutableMap<UUID, List<UUID>>>()
 
@@ -217,6 +218,10 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
 
     override fun sykefraværstilfelleIkkeFunnet(event: EventSubscription.SykefraværstilfelleIkkeFunnet) {
         sykefraværstilfelleIkkeFunnet.add(event)
+    }
+
+    override fun trengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent) {
+        trengerInformasjonTilVilkårsprøvingEventer.add(event)
     }
 
     override fun nyVedtaksperiodeUtbetaling(event: EventSubscription.VedtaksperiodeNyUtbetalingEvent) {
