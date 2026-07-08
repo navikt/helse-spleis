@@ -44,6 +44,7 @@ import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
@@ -1767,7 +1768,7 @@ internal class Vedtaksperiode private constructor(
             Frilans -> {
             }
 
-            Selvstendig -> if (forsikringsvurderingResultat?.harForsikring == true) {
+            Selvstendig -> if (forsikringsvurderingResultat?.harForsikring == true && forsikringsvurderingResultat.forsikringskategori == NAVKJØPT) {
                 if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
                 else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_6)
             }

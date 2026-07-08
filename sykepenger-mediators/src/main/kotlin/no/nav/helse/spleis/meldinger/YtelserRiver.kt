@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.Behov.Behovstype.Arbeidsavklaringspenger
 import no.nav.helse.spleis.Behov.Behovstype.Dagpenger
 import no.nav.helse.spleis.Behov.Behovstype.Foreldrepenger
-import no.nav.helse.spleis.Behov.Behovstype.Forsikringsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.ForsikringsvurderingResultat
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForBeregning
 import no.nav.helse.spleis.Behov.Behovstype.Institusjonsopphold
@@ -95,6 +94,7 @@ internal class YtelserRiver(
                 message.requireKey("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning.grad", "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning.iVentetid")
             }
             message.interestedIn("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.opphørsdato")
+            message.interestedIn("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.forsikringskategori")
         }
     }
 

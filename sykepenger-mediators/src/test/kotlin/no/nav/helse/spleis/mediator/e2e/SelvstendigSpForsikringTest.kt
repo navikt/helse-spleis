@@ -5,6 +5,8 @@ import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.KOLLEKTIV
+import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import org.junit.jupiter.api.Test
@@ -24,6 +26,36 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                 opphørsdato = null,
+                forsikringskategori = NAVKJØPT
+            ),
+            orgnummer = "SELVSTENDIG"
+        )
+        sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
+        assertTilstander(
+            0,
+            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
+            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
+            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
+            "SELVSTENDIG_AVVENTER_HISTORIKK",
+            "SELVSTENDIG_AVVENTER_SIMULERING",
+            "SELVSTENDIG_AVVENTER_GODKJENNING"
+        )
+    }
+
+    @Test
+    fun `Jordbruker med kollektiv forsikring går videre når Jordbruker-toggle er enabled`() = Toggle.Jordbruker.enable {
+        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
+        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
+        val forsikringsvurderingId = UUID.randomUUID()
+        sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
+        sendYtelser(
+            vedtaksperiodeIndeks = 0,
+            forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                forsikringsvurderingId = forsikringsvurderingId,
+                harForsikring = true,
+                dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
+                opphørsdato = null,
+                forsikringskategori = KOLLEKTIV
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -52,6 +84,7 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                 opphørsdato = null,
+                forsikringskategori = NAVKJØPT
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -63,6 +96,5 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
             "SELVSTENDIG_AVVENTER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
-
     }
 }

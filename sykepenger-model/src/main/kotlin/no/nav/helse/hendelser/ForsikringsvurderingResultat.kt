@@ -7,10 +7,15 @@ data class ForsikringsvurderingResultat(
     val forsikringsvurderingId: UUID,
     val harForsikring: Boolean,
     val dekning: Dekning?,
-    val opphørsdato: LocalDate?
+    val opphørsdato: LocalDate?,
+    val forsikringskategori: Forsikringskategori?,
 ) {
     data class Dekning(
         val grad: Int,
         val iVentetid: Boolean,
     )
+    enum class Forsikringskategori {
+        KOLLEKTIV,
+        NAVKJØPT
+    }
 }

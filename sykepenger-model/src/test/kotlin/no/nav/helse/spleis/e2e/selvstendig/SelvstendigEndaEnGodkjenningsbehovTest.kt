@@ -7,6 +7,8 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.KOLLEKTIV
+import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.januar
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
@@ -112,6 +114,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
+                    forsikringskategori = NAVKJØPT,
                 )
             )
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
@@ -205,6 +208,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
+                    forsikringskategori = NAVKJØPT,
                 )
             )
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
@@ -282,97 +286,96 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Godkjenningsbehov for jordbruker ser ut som forventet`() = Toggle.SelvstendigForsikring.enable {
-        Toggle.Jordbruker.enable {
-            selvstendig {
-                håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
-                val forsikringsvurderingId = UUID.randomUUID()
-                håndterVilkårsgrunnlag(
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    skatteinntekter = emptyList(),
+    fun `Godkjenningsbehov for jordbruker ser ut som forventet`() = Toggle.Jordbruker.enable {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
+            val forsikringsvurderingId = UUID.randomUUID()
+            håndterVilkårsgrunnlag(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                skatteinntekter = emptyList(),
+                forsikringsvurderingId = forsikringsvurderingId,
+            )
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = forsikringsvurderingId,
+                    harForsikring = true,
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
+                    opphørsdato = null,
+                    forsikringskategori = KOLLEKTIV,
                 )
-                håndterYtelserSelvstendig(
-                    1.vedtaksperiode,
-                    forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                        forsikringsvurderingId = forsikringsvurderingId,
-                        harForsikring = true,
-                        dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
-                        opphørsdato = null,
-                    )
-                )
-                val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
-                    håndterSimulering(1.vedtaksperiode)
-                }
-                assertGodkjenningsbehov(
-                    actualBehov = godkjenningsbehov,
-                    tags = setOf("Førstegangsbehandling", "Personutbetaling", "Innvilget", "EnArbeidsgiver"),
-                    forbrukteSykedager = 11,
-                    gjenståendeSykedager = 237,
-                    foreløpigBeregnetSluttPåSykepenger = 28.desember,
-                    utbetalingsdager = listOf(
-                        utbetalingsdag(1.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(2.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(3.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(4.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(5.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(6.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(7.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(8.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(9.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(10.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(11.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(12.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(13.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(14.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(15.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(16.januar, "Ventetidsdag", 0, 100, 100),
-                        utbetalingsdag(17.januar, "NavDag", 1771, 100, 100),
-                        utbetalingsdag(18.januar, "NavDag", 1771, 100, 100),
-                        utbetalingsdag(19.januar, "NavDag", 1771, 100, 100),
-                        utbetalingsdag(20.januar, "NavHelgDag", 0, 100, 100),
-                        utbetalingsdag(21.januar, "NavHelgDag", 0, 100, 100),
-                        utbetalingsdag(22.januar, "NavDag", 1771, 100, 100),
-                        utbetalingsdag(23.januar, "NavDag", 1771, 100, 100),
-                        utbetalingsdag(24.januar, "NavDag", 1771, 100, 100),
-                        utbetalingsdag(25.januar, "NavDag", 1771, 100, 100),
-                        utbetalingsdag(26.januar, "NavDag", 1771, 100, 100),
-                        utbetalingsdag(27.januar, "NavHelgDag", 0, 100, 100),
-                        utbetalingsdag(28.januar, "NavHelgDag", 0, 100, 100),
-                        utbetalingsdag(29.januar, "NavDag", 1771, 100, 100),
-                        utbetalingsdag(30.januar, "NavDag", 1771, 100, 100),
-                        utbetalingsdag(31.januar, "NavDag", 1771, 100, 100)
-                    ),
-                    sykepengegrunnlagsfakta = mapOf(
-                        "sykepengegrunnlag" to 460_589.0,
-                        "6G" to 561_804.0,
-                        "fastsatt" to "EtterHovedregel",
-                        "arbeidsgivere" to emptyList<Map<String, Any>>(),
-                        "selvstendig" to mapOf(
-                            "pensjonsgivendeInntekter" to listOf(
-                                mapOf(
-                                    "årstall" to 2017,
-                                    "beløp" to 450_000.0
-                                ),
-                                mapOf(
-                                    "årstall" to 2016,
-                                    "beløp" to 450_000.0
-                                ),
-                                mapOf(
-                                    "årstall" to 2015,
-                                    "beløp" to 450_000.0
-                                )
-                            ),
-                            "beregningsgrunnlag" to 460589.0,
-
-                            ),
-                    ),
-                    inntektskilde = "EN_ARBEIDSGIVER",
-                    arbeidssituasjon = Arbeidssituasjon.JORDBRUKER,
-                    forsikringsvurderingId = forsikringsvurderingId,
-                )
-                assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_55, Varselkode.RV_AN_6)
+            )
+            val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
+                håndterSimulering(1.vedtaksperiode)
             }
+            assertGodkjenningsbehov(
+                actualBehov = godkjenningsbehov,
+                tags = setOf("Førstegangsbehandling", "Personutbetaling", "Innvilget", "EnArbeidsgiver"),
+                forbrukteSykedager = 11,
+                gjenståendeSykedager = 237,
+                foreløpigBeregnetSluttPåSykepenger = 28.desember,
+                utbetalingsdager = listOf(
+                    utbetalingsdag(1.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(2.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(3.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(4.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(5.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(6.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(7.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(8.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(9.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(10.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(11.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(12.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(13.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(14.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(15.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(16.januar, "Ventetidsdag", 0, 100, 100),
+                    utbetalingsdag(17.januar, "NavDag", 1771, 100, 100),
+                    utbetalingsdag(18.januar, "NavDag", 1771, 100, 100),
+                    utbetalingsdag(19.januar, "NavDag", 1771, 100, 100),
+                    utbetalingsdag(20.januar, "NavHelgDag", 0, 100, 100),
+                    utbetalingsdag(21.januar, "NavHelgDag", 0, 100, 100),
+                    utbetalingsdag(22.januar, "NavDag", 1771, 100, 100),
+                    utbetalingsdag(23.januar, "NavDag", 1771, 100, 100),
+                    utbetalingsdag(24.januar, "NavDag", 1771, 100, 100),
+                    utbetalingsdag(25.januar, "NavDag", 1771, 100, 100),
+                    utbetalingsdag(26.januar, "NavDag", 1771, 100, 100),
+                    utbetalingsdag(27.januar, "NavHelgDag", 0, 100, 100),
+                    utbetalingsdag(28.januar, "NavHelgDag", 0, 100, 100),
+                    utbetalingsdag(29.januar, "NavDag", 1771, 100, 100),
+                    utbetalingsdag(30.januar, "NavDag", 1771, 100, 100),
+                    utbetalingsdag(31.januar, "NavDag", 1771, 100, 100)
+                ),
+                sykepengegrunnlagsfakta = mapOf(
+                    "sykepengegrunnlag" to 460_589.0,
+                    "6G" to 561_804.0,
+                    "fastsatt" to "EtterHovedregel",
+                    "arbeidsgivere" to emptyList<Map<String, Any>>(),
+                    "selvstendig" to mapOf(
+                        "pensjonsgivendeInntekter" to listOf(
+                            mapOf(
+                                "årstall" to 2017,
+                                "beløp" to 450_000.0
+                            ),
+                            mapOf(
+                                "årstall" to 2016,
+                                "beløp" to 450_000.0
+                            ),
+                            mapOf(
+                                "årstall" to 2015,
+                                "beløp" to 450_000.0
+                            )
+                        ),
+                        "beregningsgrunnlag" to 460589.0,
+
+                        ),
+                ),
+                inntektskilde = "EN_ARBEIDSGIVER",
+                arbeidssituasjon = Arbeidssituasjon.JORDBRUKER,
+                forsikringsvurderingId = forsikringsvurderingId,
+            )
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_55)
         }
     }
 

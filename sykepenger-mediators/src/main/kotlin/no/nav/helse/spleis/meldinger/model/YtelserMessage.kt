@@ -99,6 +99,13 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
                     )
                 },
                 opphørsdato = løsningJson["opphørsdato"]?.takeUnless { it.isNull }?.asLocalDate(),
+                forsikringskategori = løsningJson["forsikringskategori"]
+                    ?.takeUnless { it.isNull }
+                    ?.asText()
+                    ?.let { verdi ->
+                        ForsikringsvurderingResultat.Forsikringskategori.entries
+                            .firstOrNull { it.name == verdi }
+                    }
             )
         }
 

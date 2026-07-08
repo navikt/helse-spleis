@@ -9,6 +9,7 @@ import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -36,6 +37,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
+                forsikringskategori = null,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -67,6 +69,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
+                forsikringskategori = null,
             )
         )
         sendSimuleringSelvstendig(0)
@@ -94,6 +97,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             harForsikring = false,
             dekning = null,
             opphørsdato = null,
+            forsikringskategori = null,
         )
         sendYtelser(
             vedtaksperiodeIndeks = 0,
@@ -130,6 +134,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
+                forsikringskategori = null,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -154,6 +159,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
+                forsikringskategori = null,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -294,6 +300,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
+                forsikringskategori = NAVKJØPT,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -322,6 +329,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
+                forsikringskategori = NAVKJØPT,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -339,6 +347,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
+                forsikringskategori = NAVKJØPT,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -360,6 +369,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             harForsikring = false,
             dekning = null,
             opphørsdato = null,
+            forsikringskategori = null,
         )
         sendYtelser(
             vedtaksperiodeIndeks = 0,
@@ -399,6 +409,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
+                forsikringskategori = NAVKJØPT,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -416,6 +427,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
+                forsikringskategori = NAVKJØPT,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -440,6 +452,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
+                forsikringskategori = NAVKJØPT,
             ),
             orgnummer = "SELVSTENDIG"
         )

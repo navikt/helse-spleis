@@ -8,6 +8,7 @@ import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
@@ -57,7 +58,8 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(iVentetid = true, grad = 100),
-                opphørsdato = null
+                opphørsdato = null,
+                forsikringskategori = NAVKJØPT
             )
         )
         håndterSimulering()
@@ -72,7 +74,8 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(iVentetid = true, grad = 100),
-                opphørsdato = null
+                opphørsdato = null,
+                forsikringskategori = NAVKJØPT
             )
         )
         håndterSimulering()
@@ -113,7 +116,8 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(iVentetid = true, grad = 100),
-                opphørsdato = null
+                opphørsdato = null,
+                forsikringskategori = NAVKJØPT
             )
         )
         håndterSimulering()

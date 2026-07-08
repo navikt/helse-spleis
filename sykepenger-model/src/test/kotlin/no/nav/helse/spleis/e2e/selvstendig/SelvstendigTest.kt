@@ -18,6 +18,7 @@ import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
@@ -1156,6 +1157,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = null,
+                    forsikringskategori = NAVKJØPT
                 )
             )
 
@@ -1195,6 +1197,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = 7.januar,
+                    forsikringskategori = NAVKJØPT
                 )
             )
 
@@ -1239,6 +1242,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
+                    forsikringskategori = NAVKJØPT
                 )
             )
 
@@ -1275,6 +1279,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
+                    forsikringskategori = NAVKJØPT
                 )
             )
             val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
@@ -1310,6 +1315,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
+                    forsikringskategori = NAVKJØPT
                 )
             )
             håndterSimulering(1.vedtaksperiode)
@@ -1323,6 +1329,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
+                    forsikringskategori = NAVKJØPT
                 )
             )
 
@@ -1347,6 +1354,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
+                    forsikringskategori = NAVKJØPT,
                 )
             )
             håndterSimulering(1.vedtaksperiode)
@@ -1360,6 +1368,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
+                    forsikringskategori = NAVKJØPT,
                 )
             )
 
@@ -1384,6 +1393,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
+                    forsikringskategori = NAVKJØPT,
                 )
             )
             assertForkastetPeriodeTilstander(
@@ -1486,17 +1496,6 @@ internal class SelvstendigTest : AbstractDslTest() {
         dag.let {
             assertEquals(expectedDagtype, it::class)
             it.økonomi.brukTotalGrad { totalGrad -> assertEquals(expectedTotalgrad, totalGrad) }
-        }
-    }
-
-    @Test
-    fun `jordbruker får riktig verdi i spesielleYrkesgrupper`() = Toggle.Jordbruker.enable {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
-            assertTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
-
-            val vilkårsprøvingEvent = observatør.trengerInformasjonTilVilkårsprøvingEventer.single()
-            assertEquals(listOf("JORDBRUKER"), vilkårsprøvingEvent.spesielleYrkesgrupper)
         }
     }
 

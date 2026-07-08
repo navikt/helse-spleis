@@ -10,7 +10,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.collections.mapOf
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
@@ -1083,7 +1082,8 @@ internal class TestMessageFactory(
                             "iVentetid" to dekning.iVentetid
                         )
                     },
-                    "opphørsdato" to forsikringsvurdering.opphørsdato
+                    "opphørsdato" to forsikringsvurdering.opphørsdato,
+                    "forsikringskategori" to forsikringsvurdering.forsikringskategori
                 )
             }
         )

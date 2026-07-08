@@ -57,6 +57,7 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
+                forsikringskategori = null
             ),
             orgnummer = "SELVSTENDIG"
         )

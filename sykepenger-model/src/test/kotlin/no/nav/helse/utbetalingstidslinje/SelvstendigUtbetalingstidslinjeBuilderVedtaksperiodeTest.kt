@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.util.UUID
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
@@ -35,6 +36,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
+                forsikringskategori = NAVKJØPT
             )
         )
         assertEquals(31, inspektør.size)
@@ -94,6 +96,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = dekningsgradIForsikring, iVentetid = true),
                 opphørsdato = opphørsdato,
+                forsikringskategori = NAVKJØPT
             )
         )
         assertEquals(30, utbetalingstidslinje.size)
@@ -121,6 +124,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
             harForsikring = false,
             dekning = null,
             opphørsdato = null,
+            forsikringskategori = NAVKJØPT
         ),
         avslagstidslinje: Avslagstidslinje = Avslagstidslinje()
     ) {
