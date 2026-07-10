@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.Year
+import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
@@ -9,10 +10,12 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.selvstendig
+import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
 import no.nav.helse.etterlevelse.Ledd.LEDD_3
+import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Paragraf.KJENNELSE_2006_4023
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_22_13
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
@@ -27,11 +30,15 @@ import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.KOLLEKTIV
+import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -928,6 +935,179 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                     )
                 )
             )
+        }
+    }
+
+    @Test
+    fun `§ 8-36 ledd 1 bokstav a - Navkjøpt forsikring med 80 prosent dekningsgrad`() {
+        Toggle.SelvstendigForsikring.enable {
+            selvstendig {
+                håndterFørstegangssøknadSelvstendig(januar)
+                håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+                val forsikringsvurderingId = UUID.randomUUID()
+                håndterYtelserSelvstendig(
+                    1.vedtaksperiode,
+                    forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                        forsikringsvurderingId = forsikringsvurderingId,
+                        harForsikring = true,
+                        dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = false),
+                        opphørsdato = null,
+                        forsikringskategori = NAVKJØPT
+                    )
+                )
+
+                assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
+
+                SubsumsjonInspektør(jurist).assertBeregnet(
+                    paragraf = Paragraf.PARAGRAF_8_36,
+                    ledd = Ledd.LEDD_1,
+                    bokstav = Bokstav.BOKSTAV_A,
+                    versjon = 21.juni(2019),
+                    input = mapOf("forsikringsvuderingId" to forsikringsvurderingId.toString()),
+                    output = emptyMap()
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `§ 8-36 ledd 1 bokstav b - Navkjøpt forsikring med 100 prosent dekningsgrad uten ventetid`() {
+        Toggle.SelvstendigForsikring.enable {
+            selvstendig {
+                håndterFørstegangssøknadSelvstendig(januar)
+                håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+                val forsikringsvurderingId = UUID.randomUUID()
+                håndterYtelserSelvstendig(
+                    1.vedtaksperiode,
+                    forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                        forsikringsvurderingId = forsikringsvurderingId,
+                        harForsikring = true,
+                        dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
+                        opphørsdato = null,
+                        forsikringskategori = NAVKJØPT
+                    )
+                )
+
+                assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
+
+                SubsumsjonInspektør(jurist).assertBeregnet(
+                    paragraf = Paragraf.PARAGRAF_8_36,
+                    ledd = Ledd.LEDD_1,
+                    bokstav = Bokstav.BOKSTAV_B,
+                    versjon = 21.juni(2019),
+                    input = mapOf("forsikringsvuderingId" to forsikringsvurderingId.toString()),
+                    output = emptyMap()
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `§ 8-36 ledd 1 bokstav c - Navkjøpt forsikring med 100 prosent dekningsgrad i ventetid`() {
+        Toggle.SelvstendigForsikring.enable {
+            selvstendig {
+                håndterFørstegangssøknadSelvstendig(januar)
+                håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+                val forsikringsvurderingId = UUID.randomUUID()
+                håndterYtelserSelvstendig(
+                    1.vedtaksperiode,
+                    forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                        forsikringsvurderingId = forsikringsvurderingId,
+                        harForsikring = true,
+                        dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
+                        opphørsdato = null,
+                        forsikringskategori = NAVKJØPT
+                    )
+                )
+
+                assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
+
+                SubsumsjonInspektør(jurist).assertBeregnet(
+                    paragraf = Paragraf.PARAGRAF_8_36,
+                    ledd = Ledd.LEDD_1,
+                    bokstav = Bokstav.BOKSTAV_C,
+                    versjon = 21.juni(2019),
+                    input = mapOf("forsikringsvuderingId" to forsikringsvurderingId.toString()),
+                    output = emptyMap()
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `§ 8-36 ledd 1 bokstav c og ledd 4 - Jordbruker med navkjøpt forsikring i ventetid`() {
+        Toggle.SelvstendigForsikring.enable {
+            Toggle.Jordbruker.enable {
+                selvstendig {
+                    håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
+                    håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+                    val forsikringsvurderingId = UUID.randomUUID()
+                    håndterYtelserSelvstendig(
+                        1.vedtaksperiode,
+                        forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                            forsikringsvurderingId = forsikringsvurderingId,
+                            harForsikring = true,
+                            dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
+                            opphørsdato = null,
+                            forsikringskategori = NAVKJØPT
+                        )
+                    )
+
+                    assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_55, Varselkode.RV_AN_6)
+
+                    // Skal få både bokstav C (ventetid)
+                    SubsumsjonInspektør(jurist).assertBeregnet(
+                        paragraf = Paragraf.PARAGRAF_8_36,
+                        ledd = Ledd.LEDD_1,
+                        bokstav = Bokstav.BOKSTAV_C,
+                        versjon = 21.juni(2019),
+                        input = mapOf("forsikringsvuderingId" to forsikringsvurderingId.toString()),
+                        output = emptyMap()
+                    )
+
+                    // Og ledd 4 (spesiell yrkesgruppe jordbruker)
+                    SubsumsjonInspektør(jurist).assertBeregnet(
+                        paragraf = Paragraf.PARAGRAF_8_36,
+                        ledd = Ledd.LEDD_4,
+                        versjon = 21.juni(2019),
+                        input = mapOf("forsikringsvuderingId" to forsikringsvurderingId.toString()),
+                        output = emptyMap()
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `§ 8-36 ledd 4 - Kollektiv forsikring for spesielle yrkesgrupper`() {
+        Toggle.SelvstendigForsikring.enable {
+            Toggle.Jordbruker.enable {
+                selvstendig {
+                    håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
+                    håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+                    val forsikringsvurderingId = UUID.randomUUID()
+                    håndterYtelserSelvstendig(
+                        1.vedtaksperiode,
+                        forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                            forsikringsvurderingId = forsikringsvurderingId,
+                            harForsikring = true,
+                            dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
+                            opphørsdato = null,
+                            forsikringskategori = KOLLEKTIV
+                        )
+                    )
+
+                    assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_55)
+
+                    SubsumsjonInspektør(jurist).assertBeregnet(
+                        paragraf = Paragraf.PARAGRAF_8_36,
+                        ledd = Ledd.LEDD_4,
+                        versjon = 21.juni(2019),
+                        input = mapOf("forsikringsvuderingId" to forsikringsvurderingId.toString()),
+                        output = emptyMap()
+                    )
+                }
+            }
         }
     }
 }

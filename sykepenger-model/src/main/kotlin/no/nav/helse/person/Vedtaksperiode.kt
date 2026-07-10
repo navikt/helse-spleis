@@ -11,6 +11,7 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.erRettFør
+import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
@@ -22,6 +23,8 @@ import no.nav.helse.etterlevelse.`§ 8-13 ledd 2`
 import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav a`
 import no.nav.helse.etterlevelse.`§ 8-29`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 1 punktum 2`
+import no.nav.helse.etterlevelse.`§ 8-36 ledd 1`
+import no.nav.helse.etterlevelse.`§ 8-36 ledd 4`
 import no.nav.helse.etterlevelse.`§ 8-51 ledd 3`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.AnmodningOmForkasting
@@ -44,6 +47,7 @@ import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.KOLLEKTIV
 import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Grunnbeløpsregulering
@@ -80,7 +84,8 @@ import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.mapWithNext
 import no.nav.helse.nesteDag
-import no.nav.helse.person.Behandlinger.Behandling.Endring
+import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
+import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon.JORDBRUKER
 import no.nav.helse.person.Behandlinger.Behandlingkilde
 import no.nav.helse.person.Behandlinger.Companion.berik
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingDager
@@ -229,7 +234,7 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje: Sykdomstidslinje,
         dokumentsporing: Dokumentsporing,
         sykmeldingsperiode: Periode,
-        arbeidssituasjon: Endring.Arbeidssituasjon,
+        arbeidssituasjon: Arbeidssituasjon,
         faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
         regelverkslogg: Regelverkslogg
     ) : this(
@@ -1662,7 +1667,7 @@ internal class Vedtaksperiode private constructor(
             forsikringsvurderingResultat = forsikringsvurderingResultat
         )
         // steg 6: subsummere ting
-        subsummering(beregningsgrunnlag, minsteinntektsvurdering, uberegnetTidslinjePerArbeidsgiver, beregnetTidslinjePerVedtaksperiode, historisktidslinje)
+        subsummering(beregningsgrunnlag, minsteinntektsvurdering, uberegnetTidslinjePerArbeidsgiver, beregnetTidslinjePerVedtaksperiode, historisktidslinje, forsikringsvurderingResultat)
 
         if (aktivitetslogg.harFunksjonelleFeil()) return forkast(eventBus, ytelser, aktivitetslogg)
 
@@ -1790,7 +1795,8 @@ internal class Vedtaksperiode private constructor(
         minsteinntektsvurdering: Minsteinntektsvurdering,
         uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
         beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
-        historisktidslinje: Utbetalingstidslinje
+        historisktidslinje: Utbetalingstidslinje,
+        forsikringsvurderingResultat: ForsikringsvurderingResultat?
     ) {
         val subsumsjonen = Utbetalingstidslinjesubsumsjon(subsumsjonslogg, sykdomstidslinje, behandlinger.utbetalingstidslinje())
         subsumsjonen.subsummer(periode, yrkesaktivitet.yrkesaktivitetstype)
@@ -1805,6 +1811,8 @@ internal class Vedtaksperiode private constructor(
             historisktidslinje = historisktidslinje,
             resultat = behandlinger.maksdato
         )
+
+        subsummerForsikringsvurdering(subsumsjonslogg, forsikringsvurderingResultat, behandlinger.arbeidssituasjon)
     }
 
     internal fun håndterUtbetalingsavgjørelse(eventBus: EventBus, utbetalingsavgjørelse: Behandlingsavgjørelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
@@ -2992,7 +3000,7 @@ internal class Vedtaksperiode private constructor(
             yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
             skjæringstidspunkt = skjæringstidspunkt,
             spesielleYrkesgrupper = when (behandlinger.arbeidssituasjon) {
-                Endring.Arbeidssituasjon.JORDBRUKER -> listOf("JORDBRUKER")
+                JORDBRUKER -> listOf("JORDBRUKER")
                 else -> emptyList()
             },
             periodeForMedlemskapsvurdering = periode,
@@ -3763,6 +3771,49 @@ internal data class VedtaksperiodeView(
 internal val HendelseMetadata.behandlingkilde
     get() =
         Behandlingkilde(meldingsreferanseId, innsendt, registrert, avsender)
+
+private fun subsummerForsikringsvurdering(
+    subsumsjonslogg: Subsumsjonslogg,
+    forsikringsvurderingResultat: ForsikringsvurderingResultat?,
+    arbeidssituasjon: Arbeidssituasjon
+) {
+    if (forsikringsvurderingResultat?.harForsikring != true) return
+
+    val forsikringskategori = forsikringsvurderingResultat.forsikringskategori
+        ?: error("Forsikringskategori kan ikke være null når harForsikring er true")
+    val forsikringsvurderingId = forsikringsvurderingResultat.forsikringsvurderingId.toString()
+
+    when (forsikringskategori) {
+        KOLLEKTIV -> subsumsjonslogg.logg(`§ 8-36 ledd 4`(forsikringsvurderingId))
+        NAVKJØPT -> subsummerNavkjøptForsikring(
+            subsumsjonslogg,
+            forsikringsvurderingResultat.dekning,
+            forsikringsvurderingId,
+            arbeidssituasjon
+        )
+    }
+}
+
+private fun subsummerNavkjøptForsikring(
+    subsumsjonslogg: Subsumsjonslogg,
+    dekning: ForsikringsvurderingResultat.Dekning?,
+    forsikringsvurderingId: String,
+    arbeidssituasjon: Arbeidssituasjon
+) {
+    val bokstav = when (dekning?.grad) {
+        80 -> Bokstav.BOKSTAV_A
+        100 if !dekning.iVentetid -> Bokstav.BOKSTAV_B
+        100 if dekning.iVentetid -> Bokstav.BOKSTAV_C
+        else -> error("Ukjent dekningsgrad: ${dekning?.grad}% (i ventetid: ${dekning?.iVentetid})")
+    }
+
+    subsumsjonslogg.logg(`§ 8-36 ledd 1`(bokstav, forsikringsvurderingId))
+
+    // Jordbrukere med 100% dekning i ventetid får også § 8-36 ledd 4, da de også har kollektiv etter dag 16.
+    if (dekning.grad == 100 && dekning.iVentetid && arbeidssituasjon == JORDBRUKER) {
+        subsumsjonslogg.logg(`§ 8-36 ledd 4`(forsikringsvurderingId))
+    }
+}
 
 private fun sykdomsgradsubsummering(
     subsumsjonslogg: Subsumsjonslogg,

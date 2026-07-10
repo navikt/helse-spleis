@@ -37,7 +37,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = null,
+                forsikringskategori = NAVKJØPT,
             ),
             orgnummer = "SELVSTENDIG"
         )
