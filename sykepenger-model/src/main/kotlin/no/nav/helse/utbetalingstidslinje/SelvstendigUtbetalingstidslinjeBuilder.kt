@@ -57,6 +57,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         val builder = Utbetalingstidslinje.Builder()
         sykdomstidslinje.forEach { dag ->
             val erVentetid = dagerUtenNavAnsvar.periode?.contains(dag.dato) == true
+            val erFørVentetid = dagerUtenNavAnsvar.periode?.starterEtter(dag.dato) == true
             when (dag) {
                 is Dag.Arbeidsdag -> builder.avslagsdagEller(dag.dato, 0.prosent, inntekt, inntektjusteringer) {
                     arbeidsdag(builder, dag.dato, inntekt, inntektjusteringer)
@@ -68,13 +69,13 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                     arbeidsdag(builder, dag.dato, inntekt, inntektjusteringer)
                 }
                 is Dag.SykHelgedag -> builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
-                    when (erVentetid) {
+                    when (erVentetid || erFørVentetid) {
                         true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                         false -> helg(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                     }
                 }
                 is Dag.Sykedag -> builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
-                    when (erVentetid) {
+                    when (erVentetid || erFørVentetid) {
                         true -> when (navSkalUtbetaleVentetidsDag(dag.dato)) {
                             true -> forsikringsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                             false -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)

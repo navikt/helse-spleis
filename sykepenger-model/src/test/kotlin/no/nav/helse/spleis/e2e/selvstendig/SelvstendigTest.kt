@@ -76,6 +76,26 @@ import org.junit.jupiter.params.provider.CsvSource
 internal class SelvstendigTest : AbstractDslTest() {
 
     @Test
+    fun `Overstyr dag i ventetiden til arbeid gir ventetidsdager før arbeid, men ny en ventetid begynner etter arbeidsdagen`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelserSelvstendig(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
+
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag)))
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelserSelvstendig(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 5.januar, listOf(5.januar til 20.januar))
+            assertEquals("SSSASHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
+            assertEquals("VVVAVVV VVVVVVV VVVVVVH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
+        }
+    }
+
+    @Test
     fun `Søknad som oppgir melding til Nav dager`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(MeldingTilNavDager(1.januar, 4.januar), Sykdom(5.januar, 31.januar, 100.prosent))

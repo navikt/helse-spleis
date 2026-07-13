@@ -153,6 +153,9 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     fun starterEtter(other: Periode) =
         this.start > other.endInclusive
 
+    fun starterEtter(other: LocalDate) =
+        this.start > other
+
     fun inneholder(other: Periode) = other in this
 
     fun erRettFør(other: Periode) = erRettFør(other.start)
