@@ -139,7 +139,7 @@ sealed interface Arbeidsgiveropplysning {
                 oppgittInntekt,
                 oppgittArbeidsgiverperiode,
                 refusjon?.somOppgittRefusjon(),
-                begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(arbeidsgiverperioder ?: emptyList()),
+                begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(arbeidsgiverperioder?.sortedBy { it.start } ?: emptyList()),
                 oppgittOpphørAvNaturalytelser,
                 HarFlereArbeidsforhold.takeIf { harFlereArbeidsforhold }
             )
