@@ -41,8 +41,20 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
     utbetalingstype: String = "UTBETALING",
     inntektskilde: String = "EN_ARBEIDSGIVER",
     behandlingId: UUID = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().id,
-    perioderMedSammeSkjæringstidspunkt: List<Map<String, String>> = listOf(
-        mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to behandlingId.toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+    perioderMedSammeSkjæringstidspunkt: List<Map<String, Any>> = listOf(
+        mapOf(
+            "vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to behandlingId.toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString(),
+            "yrkesaktivitet" to if (orgnummer == "SELVSTENDIG") {
+                mapOf(
+                    "yrkesaktivitetstype" to "SELVSTENDIG",
+                )
+            } else {
+                mapOf(
+                    "yrkesaktivitetstype" to "ARBEIDSTAKER",
+                    "organisasjonsnummer" to orgnummer
+                )
+            }
+        )
     ),
     forbrukteSykedager: Int = 11,
     gjenståendeSykedager: Int = 237,
@@ -102,9 +114,19 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
             vedtaksperiodeId = UUID.fromString(it.getValue("vedtaksperiodeId") as String),
             behandlingId = UUID.fromString(it.getValue("behandlingId") as String),
             periode = Periode(
-                fom = it.getValue("fom").let { LocalDate.parse(it) },
-                tom = it.getValue("tom").let { LocalDate.parse(it) }
+                fom = it.getValue("fom").let { LocalDate.parse(it as String) },
+                tom = it.getValue("tom").let { LocalDate.parse(it as String) }
             ),
+            yrkesaktivitet = (it.getValue("yrkesaktivitet") as Map<String,String>).let { ya ->
+                val yrkesaktivitetstype = ya.getValue("yrkesaktivitetstype")
+                when (yrkesaktivitetstype) {
+                    "ARBEIDSTAKER" -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ya.getValue("organisasjonsnummer"))
+                    "SELVSTENDIG" -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+                    "ARBEIDSLEDIG" -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+                    "FRILANS" -> Behandlingsporing.Yrkesaktivitet.Frilans
+                    else -> error("Uventet yrkesaktivtetstype: $yrkesaktivitetstype")
+                }
+            }
         )},
         sykepengegrunnlagsfakta = when (behandlingsporing) {
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig,

@@ -3103,7 +3103,7 @@ internal class Vedtaksperiode private constructor(
         )
         person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .sorted()
-            .associate { it.id to it.behandlinger }
+            .associate { it.id to (it.yrkesaktivitet to it.behandlinger ) }
             .berik(builder)
 
         return behandlinger.byggUtkastTilVedtak(builder, behandling)

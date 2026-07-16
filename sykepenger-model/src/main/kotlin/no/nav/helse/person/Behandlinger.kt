@@ -94,7 +94,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal constructor() : this(emptyList())
 
     companion object {
-        internal fun Map<UUID, Behandlinger>.berik(builder: UtkastTilVedtakBuilder) = mapValues { (_, behandlinger) -> behandlinger.sisteBehandling }.berik(builder)
+        internal fun Map<UUID, Pair<Yrkesaktivitet,Behandlinger>>.berik(builder: UtkastTilVedtakBuilder) = mapValues { (_, yrkesaktivitetOgBehandlinger) -> yrkesaktivitetOgBehandlinger.first to yrkesaktivitetOgBehandlinger.second.sisteBehandling }.berik(builder)
         fun gjenopprett(dto: BehandlingerInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) = Behandlinger(
             behandlinger = dto.behandlinger.map { Behandling.gjenopprett(it, grunnlagsdata, utbetalinger) }
         )
@@ -1576,8 +1576,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 return listOf(forrige.grunnlagsdata!!, gjeldende.grunnlagsdata!!).harUlikeGrunnbeløp()
             }
 
-            internal fun Map<UUID, Behandling>.berik(builder: UtkastTilVedtakBuilder) = forEach { (vedtaksperiodeId, behandling) ->
-                builder.relevantPeriode(vedtaksperiodeId, behandling.id, behandling.skjæringstidspunkt, behandling.periode)
+            internal fun Map<UUID, Pair<Yrkesaktivitet, Behandling>>.berik(builder: UtkastTilVedtakBuilder) = forEach { (vedtaksperiodeId, yrkesaktivitetOgBehandling) ->
+                val yrkesaktivitet = yrkesaktivitetOgBehandling.first.yrkesaktivitetstype
+                val behandling = yrkesaktivitetOgBehandling.second
+                builder.relevantPeriode(vedtaksperiodeId, behandling.id, behandling.skjæringstidspunkt, behandling.periode, yrkesaktivitet)
             }
 
             internal fun gjenopprett(dto: BehandlingInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Behandling {

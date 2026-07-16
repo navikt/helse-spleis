@@ -213,8 +213,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 periodeType = "FORLENGELSE",
                 førstegangsbehandling = false,
                 perioderMedSammeSkjæringstidspunkt = listOf(
-                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
+                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
                 ),
                 forbrukteSykedager = 31,
                 gjenståendeSykedager = 217,
@@ -253,10 +253,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 foreløpigBeregnetSluttPåSykepenger = 28.desember,
                 utbetalingsdager = (1.februar til 10.februar).utbetalingsdager(923, 0),
                 perioderMedSammeSkjæringstidspunkt = listOf(
-                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(), "behandlingId" to 1.vedtaksperiode(a1).sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(), "behandlingId" to 1.vedtaksperiode(a2).sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode(a1).toString(), "behandlingId" to 2.vedtaksperiode(a1).sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 10.februar.toString()),
-                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode(a2).toString(), "behandlingId" to 2.vedtaksperiode(a2).sisteBehandlingId(a2).toString(), "fom" to 1.februar.toString(), "tom" to 10.februar.toString()),
+                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(), "behandlingId" to 1.vedtaksperiode(a1).sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(), "behandlingId" to 1.vedtaksperiode(a2).sisteBehandlingId(a2).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a2), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode(a1).toString(), "behandlingId" to 2.vedtaksperiode(a1).sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.februar.toString(), "tom" to 10.februar.toString()),
+                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode(a2).toString(), "behandlingId" to 2.vedtaksperiode(a2).sisteBehandlingId(a2).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a2), "fom" to 1.februar.toString(), "tom" to 10.februar.toString()),
                 ),
                 sykepengegrunnlagsfakta = mapOf(
                     "sykepengegrunnlag" to 480_000.0,
@@ -374,6 +374,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     mapOf(
                         "vedtaksperiodeId" to 2.vedtaksperiode.toString(),
                         "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(),
+                        "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
                         "fom" to 10.februar.toString(),
                         "tom" to 20.februar.toString()
                     ),
@@ -600,8 +601,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 førstegangsbehandling = false,
                 behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
                 perioderMedSammeSkjæringstidspunkt = listOf(
-                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
+                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
                 ),
                 foreløpigBeregnetSluttPåSykepenger = 25.januar(2019),
                 utbetalingsdager = (1.februar til 28.februar).feriedager(),
@@ -641,7 +642,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 førstegangsbehandling = true,
                 behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().id,
                 perioderMedSammeSkjæringstidspunkt = listOf(
-                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
                 ),
                 utbetalingsdager = standardUtbetalingsdager(715, 0),
                 sykepengegrunnlagsfakta = mapOf(
@@ -737,8 +738,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 inntektskilde = "FLERE_ARBEIDSGIVERE",
                 orgnummere = setOf(a1, a2),
                 perioderMedSammeSkjæringstidspunkt = listOf(
-                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(), "behandlingId" to 1.vedtaksperiode(a1).sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(), "behandlingId" to 1.vedtaksperiode(a2).sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString())
+                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(), "behandlingId" to 1.vedtaksperiode(a1).sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(), "behandlingId" to 1.vedtaksperiode(a2).sisteBehandlingId(a2).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a2), "fom" to 1.januar.toString(), "tom" to 31.januar.toString())
                 ),
                 utbetalingsdager = standardUtbetalingsdager(1080, 0),
                 sykepengegrunnlagsfakta = mapOf(
@@ -957,8 +958,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 førstegangsbehandling = false,
                 behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
                 perioderMedSammeSkjæringstidspunkt = listOf(
-                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
+                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
                 ),
                 foreløpigBeregnetSluttPåSykepenger = 25.januar(2019),
                 utbetalingsdager = (1.februar til 28.februar).feriedager(),
@@ -988,8 +989,8 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 periodeType = "FORLENGELSE",
                 førstegangsbehandling = false,
                 perioderMedSammeSkjæringstidspunkt = listOf(
-                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
+                    mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                    mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
                 ),
                 forbrukteSykedager = 31,
                 gjenståendeSykedager = 217,

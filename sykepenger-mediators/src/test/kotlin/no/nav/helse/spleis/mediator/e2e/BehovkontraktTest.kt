@@ -356,6 +356,15 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             assertTrue(it.path("behandlingId").asText().isNotEmpty())
             assertDato(it.path("fom").asText())
             assertDato(it.path("tom").asText())
+            it.path("yrkesaktivitet").also { ya ->
+                val yaType = ya.path("yrkesaktivitetstype").asText()
+                assertTrue(yaType.isNotEmpty())
+                if (yaType == "ARBEIDSTAKER") {
+                    assertTrue(ya.path("organisasjonsnummer").asText().isNotEmpty())
+                } else {
+                    assertTrue(ya.path("organisasjonsnummer").isMissingNode)
+                }
+            }
         }
         assertEquals(arbeidssituasjon, godkjenning.path("arbeidssituasjon").asText())
         godkjenning.path("sykepengegrunnlagsfakta").also {

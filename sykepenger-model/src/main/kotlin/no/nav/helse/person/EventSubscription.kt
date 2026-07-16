@@ -571,7 +571,8 @@ interface EventSubscription {
         data class PeriodeMedSammeSkjæringstidspunkt(
             val vedtaksperiodeId: UUID,
             val behandlingId: UUID,
-            val periode: Periode
+            val periode: Periode,
+            val yrkesaktivitet: Behandlingsporing.Yrkesaktivitet,
         )
 
         sealed interface Sykepengegrunnlagsfakta {
@@ -591,136 +592,6 @@ interface EventSubscription {
             data class SelvstendigEtterHovedregel(override val sykepengegrunnlag: Double, override val seksG: Double, val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>, val beregningsgrunnlag: Double) : Sykepengegrunnlagsfakta {
                 data class PensjonsgivendeInntekt(val årstall: Year, val beløp: Double)
             }
-        }
-
-        // TODO: Æsj, dette burde bare vært ute i mediator, men i all tid det sendes to steder så er det for kjedelig å mappe dette to steder og
-        val behovInput = listOfNotNull(
-            "periodeFom" to "${periode.start}",
-            "periodeTom" to "${periode.endInclusive}",
-            "skjæringstidspunkt" to "$skjæringstidspunkt",
-            "vilkårsgrunnlagId" to "$vilkårsgrunnlagId",
-            forsikringsvurderingId?.let { "forsikringsvurderingId" to "$it" },
-            "periodetype" to periodetype,
-            "førstegangsbehandling" to førstegangsbehandling,
-            "utbetalingtype" to utbetalingtype,
-            "inntektskilde" to inntektskilde,
-            "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
-            "tags" to tags,
-            "kanAvvises" to kanAvvises,
-            "behandlingId" to "$behandlingId",
-            "relevanteSøknader" to relevanteSøknader,
-            "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt.map {
-                mapOf(
-                    "vedtaksperiodeId" to "${it.vedtaksperiodeId}",
-                    "behandlingId" to "${it.behandlingId}",
-                    "fom" to "${it.periode.start}",
-                    "tom" to "${it.periode.endInclusive}"
-                )
-            },
-            "forbrukteSykedager" to forbrukteSykedager,
-            "gjenståendeSykedager" to gjenståendeSykedager,
-            "foreløpigBeregnetSluttPåSykepenger" to "$foreløpigBeregnetSluttPåSykepenger",
-            "utbetalingsdager" to utbetalingsdager.map { it.tilBehovMap() },
-            "sykepengegrunnlagsfakta" to when (sykepengegrunnlagsfakta) {
-                is Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel -> mapOf(
-                    "sykepengegrunnlag" to sykepengegrunnlagsfakta.sykepengegrunnlag,
-                    "6G" to sykepengegrunnlagsfakta.seksG,
-                    "fastsatt" to "EtterHovedregel",
-                    "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
-                        mapOf(
-                            "arbeidsgiver" to it.arbeidsgiver,
-                            "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                            "inntektskilde" to it.inntektskilde
-                        )
-                    },
-                    "selvstendig" to null
-                )
-                is Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn -> mapOf(
-                    "sykepengegrunnlag" to sykepengegrunnlagsfakta.sykepengegrunnlag,
-                    "6G" to sykepengegrunnlagsfakta.seksG,
-                    "fastsatt" to "EtterSkjønn",
-                    "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
-                        mapOf(
-                            "arbeidsgiver" to it.arbeidsgiver,
-                            "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                            "skjønnsfastsatt" to it.skjønnsfastsatt,
-                            "inntektskilde" to "Saksbehandler",
-                        )
-                    },
-                    "selvstendig" to null
-                )
-                is Sykepengegrunnlagsfakta.ArbeidstakerFraInfotrygd -> mapOf(
-                    "sykepengegrunnlag" to sykepengegrunnlagsfakta.sykepengegrunnlag,
-                    "6G" to sykepengegrunnlagsfakta.seksG,
-                    "fastsatt" to "IInfotrygd",
-                    "selvstendig" to null
-                )
-                is Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel -> mapOf(
-                    "sykepengegrunnlag" to sykepengegrunnlagsfakta.sykepengegrunnlag,
-                    "6G" to sykepengegrunnlagsfakta.seksG,
-                    "fastsatt" to "EtterHovedregel",
-                    "selvstendig" to mapOf(
-                        "pensjonsgivendeInntekter" to sykepengegrunnlagsfakta.pensjonsgivendeInntekter.map {
-                            mapOf(
-                                "årstall" to it.årstall.value,
-                                "beløp" to it.beløp
-                            )
-                        },
-                        "beregningsgrunnlag" to sykepengegrunnlagsfakta.beregningsgrunnlag,
-                    ),
-                    "arbeidsgivere" to emptyList<Map<String, Any>>(), // Selvstendig har ingen arbeidsgivere i sykepengegrunnlaget
-                )
-            },
-            "arbeidssituasjon" to arbeidssituasjon
-        ).toMap()
-
-        private companion object {
-            private fun Utbetalingsdag.tilBehovMap() =
-                mapOf(
-                    "dato" to "${this.dato}",
-                    "type" to when (this.type) {
-                        Dagtype.ArbeidsgiverperiodeDag -> "ArbeidsgiverperiodeDag"
-                        Dagtype.NavDag -> "NavDag"
-                        Dagtype.NavHelgDag -> "NavHelgDag"
-                        Dagtype.Arbeidsdag -> "Arbeidsdag"
-                        Dagtype.Fridag -> "Fridag"
-                        Dagtype.AvvistDag -> "AvvistDag"
-                        Dagtype.UkjentDag -> "UkjentDag"
-                        Dagtype.ForeldetDag -> "ForeldetDag"
-                        Dagtype.Permisjonsdag -> "Permisjonsdag"
-                        Dagtype.Feriedag -> "Feriedag"
-                        Dagtype.ArbeidIkkeGjenopptattDag -> "ArbeidIkkeGjenopptattDag"
-                        Dagtype.AndreYtelser -> "AndreYtelser"
-                        Dagtype.Ventetidsdag -> "Ventetidsdag"
-                    },
-                    "beløpTilArbeidsgiver" to this.beløpTilArbeidsgiver,
-                    "beløpTilBruker" to this.beløpTilBruker,
-                    "sykdomsgrad" to this.sykdomsgrad,
-                    "dekningsgrad" to this.dekningsgrad,
-                    "begrunnelser" to (this.begrunnelser?.map {
-                        when (it) {
-                            EksternBegrunnelseDTO.SykepengedagerOppbrukt -> "SykepengedagerOppbrukt"
-                            EksternBegrunnelseDTO.SykepengedagerOppbruktOver67 -> "SykepengedagerOppbruktOver67"
-                            EksternBegrunnelseDTO.MinimumInntekt -> "MinimumInntekt"
-                            EksternBegrunnelseDTO.MinimumInntektOver67 -> "MinimumInntektOver67"
-                            EksternBegrunnelseDTO.EgenmeldingUtenforArbeidsgiverperiode -> "EgenmeldingUtenforArbeidsgiverperiode"
-                            EksternBegrunnelseDTO.AndreYtelserAap -> "AndreYtelserAap"
-                            EksternBegrunnelseDTO.AndreYtelserDagpenger -> "AndreYtelserDagpenger"
-                            EksternBegrunnelseDTO.AndreYtelserForeldrepenger -> "AndreYtelserForeldrepenger"
-                            EksternBegrunnelseDTO.AndreYtelserOmsorgspenger -> "AndreYtelserOmsorgspenger"
-                            EksternBegrunnelseDTO.AndreYtelserOpplaringspenger -> "AndreYtelserOpplaringspenger"
-                            EksternBegrunnelseDTO.AndreYtelserPleiepenger -> "AndreYtelserPleiepenger"
-                            EksternBegrunnelseDTO.AndreYtelserSvangerskapspenger -> "AndreYtelserSvangerskapspenger"
-                            EksternBegrunnelseDTO.MinimumSykdomsgrad -> "MinimumSykdomsgrad"
-                            EksternBegrunnelseDTO.EtterDødsdato -> "EtterDødsdato"
-                            EksternBegrunnelseDTO.ManglerMedlemskap -> "ManglerMedlemskap"
-                            EksternBegrunnelseDTO.ManglerOpptjening -> "ManglerOpptjening"
-                            EksternBegrunnelseDTO.Over70 -> "Over70"
-                            EksternBegrunnelseDTO.MeldingTilNavDagUtenforVentetid -> "MeldingTilNavDagUtenforVentetid"
-                            EksternBegrunnelseDTO.AvslåttMeldingTilNavDag -> "AvslåttMeldingTilNavDag"
-                        }
-                    } ?: emptyList())
-                )
         }
     }
 

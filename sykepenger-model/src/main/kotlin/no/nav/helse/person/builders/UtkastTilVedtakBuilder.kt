@@ -52,11 +52,11 @@ internal class UtkastTilVedtakBuilder(
         apply { this.pensjonsgivendeInntekter.addAll(pensjonsgivendeInntekter) }
 
     internal fun grunnbeløpsregulert() = apply { tags.add(Tag.Grunnbeløpsregulering) }
-    private data class RelevantPeriode(val vedtaksperiodeId: UUID, val behandlingId: UUID, val skjæringstidspunkt: LocalDate, val periode: Periode)
+    private data class RelevantPeriode(val vedtaksperiodeId: UUID, val behandlingId: UUID, val skjæringstidspunkt: LocalDate, val periode: Periode, val yrkesaktivitet: Behandlingsporing.Yrkesaktivitet)
 
     private val relevantePerioder = mutableSetOf<RelevantPeriode>()
-    internal fun relevantPeriode(vedtaksperiodeId: UUID, behandlingId: UUID, skjæringstidspunkt: LocalDate, periode: Periode) = apply {
-        relevantePerioder.add(RelevantPeriode(vedtaksperiodeId, behandlingId, skjæringstidspunkt, periode))
+    internal fun relevantPeriode(vedtaksperiodeId: UUID, behandlingId: UUID, skjæringstidspunkt: LocalDate, periode: Periode, yrkesaktivitet: Behandlingsporing.Yrkesaktivitet) = apply {
+        relevantePerioder.add(RelevantPeriode(vedtaksperiodeId, behandlingId, skjæringstidspunkt, periode, yrkesaktivitet))
     }
 
     private lateinit var behandlingId: UUID
@@ -189,7 +189,6 @@ internal class UtkastTilVedtakBuilder(
     }
 
     private val build by lazy { Build() }
-    internal fun buildGodkjenningsbehov() = build.godkjenningEvent.behovInput
     internal fun buildGodkjenningEvent() = build.godkjenningEvent
     internal fun buildUtkastTilVedtak() = build.utkastTilVedtak
     internal fun buildAvsluttedMedVedtak() = build.avsluttetMedVedtak(vedtakFattet!!)
@@ -260,7 +259,8 @@ internal class UtkastTilVedtakBuilder(
                 EventSubscription.GodkjenningEvent.PeriodeMedSammeSkjæringstidspunkt(
                     vedtaksperiodeId = it.vedtaksperiodeId,
                     behandlingId = it.behandlingId,
-                    periode = it.periode
+                    periode = it.periode,
+                    yrkesaktivitet = it.yrkesaktivitet,
                 )
             },
             forbrukteSykedager = forbrukteSykedager,
