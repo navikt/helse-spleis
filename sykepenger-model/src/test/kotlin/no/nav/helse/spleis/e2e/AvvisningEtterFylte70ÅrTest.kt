@@ -67,6 +67,43 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractDslTest() {
     }
 
     @Test
+    fun `Utbetaler ikke AGP etter fylte 70`() {
+        medFødselsdato(FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
+        a1 {
+            håndterSykmelding(februar)
+            håndterSøknad(februar)
+
+            håndterArbeidsgiveropplysninger(
+                arbeidsgiverperioder = listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+            )
+
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            //håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            //håndterUtbetalt()
+
+            assertTrue(observatør.utbetalingMedUtbetalingEventer.isEmpty())
+
+            val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+            val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
+            val navDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.NavDag }
+            val navHelgedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.NavHelgDag }
+
+            assertEquals(20, avvisteDager.size)
+            avvisteDager.forEach {
+                assertEquals(listOf(EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.Over70), it.begrunnelser)
+            }
+            assertEquals(4, arbeidsgiverperiodedager.size) // fordi 12 av de er Avviste
+            assertEquals(0, navDager.size)
+            assertEquals(4, navHelgedager.size)
+
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_IM_8)
+        }
+    }
+
+    @Test
     fun `Får ikke plutselig penger igjen etter 26 uker hvis over 70 år`() {
         medFødselsdato(FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
         a1 {

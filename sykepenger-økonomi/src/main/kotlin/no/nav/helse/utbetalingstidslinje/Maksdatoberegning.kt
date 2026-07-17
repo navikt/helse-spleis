@@ -62,7 +62,7 @@ class Maksdatoberegning(
                 when (val dag = beregnetTidslinje[dato]) {
                     is Utbetalingsdag.Arbeidsdag -> state.oppholdsdag(this, dag.dato)
                     is Utbetalingsdag.ArbeidsgiverperiodeDag -> state.oppholdsdag(this, dag.dato)
-                    is Utbetalingsdag.ArbeidsgiverperiodedagNav -> state.oppholdsdag(this, dag.dato)
+                    is Utbetalingsdag.ArbeidsgiverperiodedagNav -> state.betalbarVentetidsdag(this, dag.dato)
                     is Utbetalingsdag.AvvistDag -> state.avvistDag(this, dag.dato)
                     is Utbetalingsdag.ForeldetDag -> state.oppholdsdag(this, dag.dato)
                     is Utbetalingsdag.Fridag -> state.fridag(this, dag.dato)
@@ -129,6 +129,7 @@ class Maksdatoberegning(
     private sealed interface State {
         fun betalbarDag(avgrenser: Maksdatoberegning, dagen: LocalDate)
         fun avvistDag(avgrenser: Maksdatoberegning, dagen: LocalDate) = oppholdsdag(avgrenser, dagen)
+        fun betalbarVentetidsdag(avgrenser: Maksdatoberegning, dagen: LocalDate) = oppholdsdag(avgrenser, dagen)
         fun oppholdsdag(avgrenser: Maksdatoberegning, dagen: LocalDate)
         fun sykdomshelg(avgrenser: Maksdatoberegning, dagen: LocalDate)
         fun fridag(avgrenser: Maksdatoberegning, dagen: LocalDate) = oppholdsdag(avgrenser, dagen)
@@ -277,7 +278,12 @@ class Maksdatoberegning(
                 over70(avgrenser, dagen)
             }
 
-            override fun oppholdsdag(avgrenser: Maksdatoberegning, dagen: LocalDate) {}
+            override fun oppholdsdag(avgrenser: Maksdatoberegning, dagen: LocalDate) { }
+
+            override fun betalbarVentetidsdag(avgrenser: Maksdatoberegning, dagen: LocalDate) {
+                over70(avgrenser, dagen)
+            }
+
             override fun leaving(avgrenser: Maksdatoberegning) = throw IllegalStateException("Kan ikke gå ut fra state ForGammel")
             private fun over70(avgrenser: Maksdatoberegning, dagen: LocalDate) {
                 avgrenser.håndterBetalbarDagEtterMaksdato(dagen)
