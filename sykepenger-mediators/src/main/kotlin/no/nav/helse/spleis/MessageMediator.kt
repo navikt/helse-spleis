@@ -17,6 +17,7 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.AnmodningOmForkastingRiver
 import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 import no.nav.helse.spleis.meldinger.AvbruttArbeidsledigSøknadRiver
+import no.nav.helse.spleis.meldinger.AvbruttFiskerSøknadRiver
 import no.nav.helse.spleis.meldinger.AvbruttFrilansSøknadRiver
 import no.nav.helse.spleis.meldinger.AvbruttJordbrukerSøknadRiver
 import no.nav.helse.spleis.meldinger.AvbruttSelvstendigSøknadRiver
@@ -175,6 +176,7 @@ internal class MessageMediator(
             AvbruttArbeidsledigSøknadRiver(it, this)
             AvbruttSelvstendigSøknadRiver(it, this)
             AvbruttJordbrukerSøknadRiver(it, this)
+            AvbruttFiskerSøknadRiver(it, this)
             AvbruttFrilansSøknadRiver(it, this)
             AnmodningOmForkastingRiver(it, this)
             IdentOpphørtRiver(it, this)
