@@ -132,6 +132,13 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
                 add(EventSubscription.Arbeidsgiverperiode)
             } else if (dagerUtenNavAnsvar.periode != null && vedtaksperiode.yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(dagerUtenNavAnsvar.periode).lastOrNull { it != vedtaksperiode }?.tilstand == AvsluttetUtenUtbetaling) {
                 add(EventSubscription.Arbeidsgiverperiode)
+            } else if (dagerUtenNavAnsvar.periode != null && vedtaksperiode.yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(dagerUtenNavAnsvar.periode).lastOrNull { it != vedtaksperiode } == null) {
+                // Hvis dagerUtenNavAnsvar ikke er knyttet til noen annen vedtaksperiode,
+                // kan det være f.eks. 16-dagers-periode oppgitt på søknaden, etterfulgt av et lite GAP før søknadsperioden
+                // Er det 15 egenmeldingdager, vil det beregnes en dag til på starten av denne perioden, og det vil bli overlapp (som treffer øverste IF'en)
+                if (vedtaksperiode.behandlinger.egenmeldingsdager().any { it.overlapperMed(dagerUtenNavAnsvar.periode) }) { // Kanskje unødvendig extra-IF ?
+                    add(EventSubscription.Arbeidsgiverperiode)
+                }
             }
         }
     }

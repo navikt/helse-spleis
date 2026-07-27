@@ -73,6 +73,15 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
+    fun `Ved 16 egenmeldingsdager i søknad, etterfulgt av lite gap før søknadsperioden, så bør det bes om AGP`()  {
+        a1 {
+            håndterSøknad(18.januar til 10.februar, egenmeldinger = listOf(1.januar til 16.januar))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertEtterspurt(1.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
+        }
+    }
+
+    @Test
     fun `Vi går videre med skatt, så forespørsel bli aldri kvittert ut`() {
         a1 {
             håndterSøknad(1.januar til 31.januar)
