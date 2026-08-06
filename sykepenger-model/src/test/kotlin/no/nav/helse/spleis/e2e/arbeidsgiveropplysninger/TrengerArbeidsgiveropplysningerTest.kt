@@ -29,7 +29,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
@@ -39,7 +38,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTOR
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.TestObservatør
@@ -51,6 +49,30 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
+
+    @Test
+    fun `Gap til ferdig gjennomført agp møter flere arbeidsgivere`() {
+        a1 {
+            håndterSøknad(januar)
+        }
+        a2 {
+            håndterSøknad(5.januar til 20.januar)
+        }
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertEtterspurt(1.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
+        }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
+            håndterSøknad(25.januar til 31.januar)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertForventetFeil(
+                forklaring = "Sjekkes eksplisitt på tilstanden AvsluttetUtenUtbetaling, så ting henger ikke helt sammen når man AvventerAvsluttetUtenUtbetaling pga. annen arbeidsgiver.",
+                nå = { assertEtterspurt(2.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class) },
+                ønsket = { assertEtterspurt(2.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class) }
+            )
+        }
+    }
 
     @Test
     fun `En annen vedtaksperiode håndterer innteksmelding, så forespørsel bli aldri kvittert ut`()  {
