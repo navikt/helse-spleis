@@ -66,11 +66,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
             håndterSøknad(25.januar til 31.januar)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertForventetFeil(
-                forklaring = "Sjekkes eksplisitt på tilstanden AvsluttetUtenUtbetaling, så ting henger ikke helt sammen når man AvventerAvsluttetUtenUtbetaling pga. annen arbeidsgiver.",
-                nå = { assertEtterspurt(2.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class) },
-                ønsket = { assertEtterspurt(2.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class) }
-            )
+            assertEtterspurt(2.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
         }
     }
 

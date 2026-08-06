@@ -121,25 +121,16 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         }
         if (opplysninger.isEmpty()) return emptySet() // Om vi har inntekt og refusjon så er saken biff 🥩
 
+        // ..og nå prøver vi å finne ut om vi skal be om arbeidsgiverperiode eller ikke..
         if (vedtaksperiode.behandlinger.dagerNavOvertarAnsvar.isNotEmpty()) return opplysninger // Trenger hvert fall ikke opplysninger om arbeidsgiverperiode dersom Nav har overtatt ansvar for den ✋
 
-        val dagerUtenNavAnsvar = vedtaksperiode.behandlinger.ventedager().dagerUtenNavAnsvar
+        val agp = vedtaksperiode.behandlinger.ventedager().dagerUtenNavAnsvar.periode ?: return opplysninger // Om agp er null så er vi typisk i en situasjon hvor vi mener agp er gjennomført i Infotrygd (ferdigavklart=true) og vi trenger ikke å spørre om AGP ✋
+        val vedtaksperioderKnyttetTilAgp = vedtaksperiode.yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(agp)
 
-        return opplysninger.apply {
-            val sisteDelAvAgp = dagerUtenNavAnsvar.dager.lastOrNull()
-            // Vi "trenger" jo aldri AGP, men spør om vi perioden overlapper/er rett etter beregnet AGP
-            if (sisteDelAvAgp?.overlapperMed(vedtaksperiode.periode) == true || sisteDelAvAgp?.erRettFør(vedtaksperiode.periode) == true) {
-                add(EventSubscription.Arbeidsgiverperiode)
-            } else if (dagerUtenNavAnsvar.periode != null && vedtaksperiode.yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(dagerUtenNavAnsvar.periode).lastOrNull { it != vedtaksperiode }?.tilstand == AvsluttetUtenUtbetaling) {
-                add(EventSubscription.Arbeidsgiverperiode)
-            } else if (dagerUtenNavAnsvar.periode != null && vedtaksperiode.yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(dagerUtenNavAnsvar.periode).lastOrNull { it != vedtaksperiode } == null) {
-                // Hvis dagerUtenNavAnsvar ikke er knyttet til noen annen vedtaksperiode,
-                // kan det være f.eks. 16-dagers-periode oppgitt på søknaden, etterfulgt av et lite GAP før søknadsperioden
-                // Er det 15 egenmeldingdager, vil det beregnes en dag til på starten av denne perioden, og det vil bli overlapp (som treffer øverste IF'en)
-                if (vedtaksperiode.behandlinger.egenmeldingsdager().any { it.overlapperMed(dagerUtenNavAnsvar.periode) }) { // Kanskje unødvendig extra-IF ?
-                    add(EventSubscription.Arbeidsgiverperiode)
-                }
-            }
+        // Om vi er første vedtaksperiode som skal behandles i Speil så skal vi spørre om arbeidsgiverperiode ✅
+        return when (vedtaksperioderKnyttetTilAgp.first { it.skalArbeidstakerBehandlesISpeil() } == vedtaksperiode) {
+            true -> opplysninger + EventSubscription.Arbeidsgiverperiode
+            false -> opplysninger
         }
     }
 
