@@ -92,6 +92,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             ForsikringsvurderingResultat(
                 forsikringsvurderingId = UUID.fromString(løsningJson["forsikringsvurderingId"].asText()),
                 harForsikring = løsningJson["harForsikring"].asBoolean(),
+                villeHattForsikringOmDenVarBetalt = løsningJson["villeHattForsikringOmDenVarBetalt"].asBoolean(),
                 dekning = løsningJson["dekning"]?.takeUnless { it.isMissingOrNull() }?.let { dekningJson ->
                     ForsikringsvurderingResultat.Dekning(
                         grad = dekningJson["grad"].asInt(),

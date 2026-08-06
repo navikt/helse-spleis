@@ -26,7 +26,8 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT
+                forsikringskategori = NAVKJØPT,
+                villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -55,7 +56,8 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                 opphørsdato = null,
-                forsikringskategori = KOLLEKTIV
+                forsikringskategori = KOLLEKTIV,
+                villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -84,7 +86,8 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT
+                forsikringskategori = NAVKJØPT,
+                villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
         )

@@ -36,7 +36,8 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT
+                forsikringskategori = NAVKJØPT,
+                villeHattForsikringOmDenVarBetalt = false,
             )
         )
         assertEquals(31, inspektør.size)
@@ -96,7 +97,8 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = dekningsgradIForsikring, iVentetid = true),
                 opphørsdato = opphørsdato,
-                forsikringskategori = NAVKJØPT
+                forsikringskategori = NAVKJØPT,
+                villeHattForsikringOmDenVarBetalt = false,
             )
         )
         assertEquals(30, utbetalingstidslinje.size)
@@ -124,7 +126,8 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
             harForsikring = false,
             dekning = null,
             opphørsdato = null,
-            forsikringskategori = NAVKJØPT
+            forsikringskategori = NAVKJØPT,
+            villeHattForsikringOmDenVarBetalt = false,
         ),
         avslagstidslinje: Avslagstidslinje = Avslagstidslinje()
     ) {

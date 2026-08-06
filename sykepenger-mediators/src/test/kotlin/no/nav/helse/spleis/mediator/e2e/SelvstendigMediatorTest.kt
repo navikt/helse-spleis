@@ -103,6 +103,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             dekning = null,
             opphørsdato = null,
             forsikringskategori = null,
+            villeHattForsikringOmDenVarBetalt = false,
         )
         sendYtelser(
             vedtaksperiodeIndeks = 0,
@@ -162,6 +163,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
                 dekning = null,
                 opphørsdato = null,
                 forsikringskategori = null,
+                villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -187,6 +189,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
                 dekning = null,
                 opphørsdato = null,
                 forsikringskategori = null,
+                villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -229,6 +232,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
                 dekning = null,
                 opphørsdato = null,
                 forsikringskategori = null,
+                villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -263,6 +267,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
                 dekning = null,
                 opphørsdato = null,
                 forsikringskategori = null,
+                villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -348,6 +353,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
                 dekning = null,
                 opphørsdato = null,
                 forsikringskategori = null,
+                villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -382,6 +388,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
                 dekning = null,
                 opphørsdato = null,
                 forsikringskategori = null,
+                villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -420,6 +427,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
                 dekning = null,
                 opphørsdato = null,
                 forsikringskategori = null,
+                villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
         )
@@ -452,6 +460,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
                 dekning = null,
                 opphørsdato = null,
                 forsikringskategori = null,
+                villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
         )

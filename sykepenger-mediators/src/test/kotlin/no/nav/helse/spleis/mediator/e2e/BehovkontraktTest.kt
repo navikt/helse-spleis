@@ -169,6 +169,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
                 dekning = null,
                 opphørsdato = null,
                 forsikringskategori = null,
+                villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
         )

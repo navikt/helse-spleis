@@ -115,6 +115,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                     forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
@@ -209,6 +210,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
                     forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
@@ -303,6 +305,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
                     forsikringskategori = KOLLEKTIV,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {

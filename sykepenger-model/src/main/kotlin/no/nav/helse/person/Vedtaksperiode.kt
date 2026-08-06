@@ -1773,9 +1773,16 @@ internal class Vedtaksperiode private constructor(
             Frilans -> {
             }
 
-            Selvstendig -> if (forsikringsvurderingResultat?.harForsikring == true && forsikringsvurderingResultat.forsikringskategori == NAVKJØPT) {
-                if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
-                else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_6)
+            Selvstendig -> {
+                if (forsikringsvurderingResultat?.harForsikring == true && forsikringsvurderingResultat.forsikringskategori == NAVKJØPT) {
+                    if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
+                    else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_6)
+                }
+
+                if(forsikringsvurderingResultat?.villeHattForsikringOmDenVarBetalt == true){
+                    if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_7)
+                    else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_7)
+                }
             }
         }
         if (!harOpptjening) aktivitetslogg.varsel(RV_OV_1)

@@ -1076,6 +1076,7 @@ internal class TestMessageFactory(
                 mapOf(
                     "forsikringsvurderingId" to forsikringsvurdering.forsikringsvurderingId.toString(),
                     "harForsikring" to forsikringsvurdering.harForsikring,
+                    "villeHattForsikringOmDenVarBetalt" to forsikringsvurdering.villeHattForsikringOmDenVarBetalt,
                     "dekning" to forsikringsvurdering.dekning?.let { dekning ->
                         mapOf(
                             "grad" to dekning.grad,

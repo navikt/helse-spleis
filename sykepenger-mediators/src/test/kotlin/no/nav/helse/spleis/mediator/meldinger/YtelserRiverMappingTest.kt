@@ -85,7 +85,8 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             harForsikring = true,
             dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
             opphørsdato = null,
-            forsikringskategori = NAVKJØPT
+            forsikringskategori = NAVKJØPT,
+            villeHattForsikringOmDenVarBetalt = false,
         )
 
 
@@ -188,6 +189,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             "ForsikringsvurderingResultat": {
               "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
               "harForsikring": true,
+              "villeHattForsikringOmDenVarBetalt": false,
               "dekning": {
                 "grad": 80,
                 "iVentetid": true
@@ -312,6 +314,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             "ForsikringsvurderingResultat": {
               "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
               "harForsikring": true,
+              "villeHattForsikringOmDenVarBetalt": false,
               "dekning": {
                 "grad": 80,
                 "iVentetid": true

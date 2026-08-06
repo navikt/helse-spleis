@@ -1177,7 +1177,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT
+                    forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
 
@@ -1204,6 +1205,35 @@ internal class SelvstendigTest : AbstractDslTest() {
         }
     }
 
+
+    @Test
+    fun `gir varsel om ubetalt forsikring når toggle er på`() = Toggle.SelvstendigForsikring.enable {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    harForsikring = false,
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
+                    opphørsdato = null,
+                    forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = true,
+                )
+            )
+
+
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt()
+
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_7)
+
+        }
+    }
+
     @Test
     fun `foreslår utbetaling på 80 prosent dekning i ventetid frem til forsikringens opphørsdato ved denne type forsikring`() = Toggle.SelvstendigForsikring.enable {
         selvstendig {
@@ -1217,7 +1247,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = 7.januar,
-                    forsikringskategori = NAVKJØPT
+                    forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
 
@@ -1262,7 +1293,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT
+                    forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
 
@@ -1299,7 +1331,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT
+                    forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
             val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
@@ -1335,7 +1368,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT
+                    forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
             håndterSimulering(1.vedtaksperiode)
@@ -1349,7 +1383,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT
+                    forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
 
@@ -1375,6 +1410,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                     forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
             håndterSimulering(1.vedtaksperiode)
@@ -1389,6 +1425,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                     forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
 
@@ -1414,6 +1451,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                     forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
             assertForkastetPeriodeTilstander(
@@ -1425,6 +1463,36 @@ internal class SelvstendigTest : AbstractDslTest() {
                 SELVSTENDIG_AVVENTER_HISTORIKK,
                 TIL_INFOTRYGD,
                 varselkode = Varselkode.RV_AN_6
+            )
+        }
+    }
+
+    @Test
+    fun `Kaster ut periode med ubetalt selvstendig forsikring når toggle er av`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    harForsikring = false,
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
+                    opphørsdato = null,
+                    forsikringskategori = NAVKJØPT,
+                    villeHattForsikringOmDenVarBetalt = true,
+                )
+            )
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                SELVSTENDIG_START,
+                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
+                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
+                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
+                SELVSTENDIG_AVVENTER_HISTORIKK,
+                TIL_INFOTRYGD,
+                varselkode = Varselkode.RV_AN_7
             )
         }
     }

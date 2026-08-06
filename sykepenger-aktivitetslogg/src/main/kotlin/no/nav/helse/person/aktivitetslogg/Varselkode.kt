@@ -300,6 +300,7 @@ enum class Varselkode(
     RV_AN_4("Personen har blitt tilbakestilt og kan derfor ha avvik i historikken fra infotrygd.", avviklet = true),
     RV_AN_5("Personen har blitt behandlet på en tidligere ident"),
     RV_AN_6("Bruker har forsikring som selvstendig næringsdrivende"),
+    RV_AN_7("Bruker har en helt ubetalt forsikring"),
 
     // YS: Yrkesskade
     RV_YS_1("Yrkesskade oppgitt i søknaden")

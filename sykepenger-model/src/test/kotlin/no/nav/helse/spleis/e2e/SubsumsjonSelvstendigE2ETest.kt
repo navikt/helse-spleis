@@ -952,7 +952,8 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                         harForsikring = true,
                         dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = false),
                         opphørsdato = null,
-                        forsikringskategori = NAVKJØPT
+                        forsikringskategori = NAVKJØPT,
+                        villeHattForsikringOmDenVarBetalt = false,
                     )
                 )
 
@@ -984,7 +985,8 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                         harForsikring = true,
                         dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                         opphørsdato = null,
-                        forsikringskategori = NAVKJØPT
+                        forsikringskategori = NAVKJØPT,
+                        villeHattForsikringOmDenVarBetalt = false,
                     )
                 )
 
@@ -1016,7 +1018,8 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                         harForsikring = true,
                         dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                         opphørsdato = null,
-                        forsikringskategori = NAVKJØPT
+                        forsikringskategori = NAVKJØPT,
+                        villeHattForsikringOmDenVarBetalt = false,
                     )
                 )
 
@@ -1049,7 +1052,8 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             harForsikring = true,
                             dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                             opphørsdato = null,
-                            forsikringskategori = NAVKJØPT
+                            forsikringskategori = NAVKJØPT,
+                            villeHattForsikringOmDenVarBetalt = false,
                         )
                     )
 
@@ -1093,7 +1097,8 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             harForsikring = true,
                             dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                             opphørsdato = null,
-                            forsikringskategori = KOLLEKTIV
+                            forsikringskategori = KOLLEKTIV,
+                            villeHattForsikringOmDenVarBetalt = false,
                         )
                     )
 

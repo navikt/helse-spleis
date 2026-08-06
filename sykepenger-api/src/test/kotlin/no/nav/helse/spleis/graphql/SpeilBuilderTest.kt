@@ -57,6 +57,7 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
             ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = true,
+                villeHattForsikringOmDenVarBetalt = false,
                 dekning = ForsikringsvurderingResultat.Dekning(iVentetid = true, grad = 100),
                 opphørsdato = null,
                 forsikringskategori = NAVKJØPT
@@ -73,6 +74,7 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
             ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
                 harForsikring = true,
+                villeHattForsikringOmDenVarBetalt = false,
                 dekning = ForsikringsvurderingResultat.Dekning(iVentetid = true, grad = 100),
                 opphørsdato = null,
                 forsikringskategori = NAVKJØPT
@@ -117,7 +119,8 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(iVentetid = true, grad = 100),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT
+                forsikringskategori = NAVKJØPT,
+                villeHattForsikringOmDenVarBetalt = false,
             )
         )
         håndterSimulering()

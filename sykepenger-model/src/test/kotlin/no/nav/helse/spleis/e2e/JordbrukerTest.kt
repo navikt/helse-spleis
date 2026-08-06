@@ -44,7 +44,8 @@ internal class JordbrukerTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
-                    forsikringskategori = KOLLEKTIV
+                    forsikringskategori = KOLLEKTIV,
+                    villeHattForsikringOmDenVarBetalt = false,
                 )
             )
             håndterSimulering(1.vedtaksperiode)
@@ -87,7 +88,8 @@ internal class JordbrukerTest : AbstractDslTest() {
                         harForsikring = true,
                         dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                         opphørsdato = null,
-                        forsikringskategori = NAVKJØPT
+                        forsikringskategori = NAVKJØPT,
+                        villeHattForsikringOmDenVarBetalt = false,
                     )
                 )
                 håndterSimulering(1.vedtaksperiode)

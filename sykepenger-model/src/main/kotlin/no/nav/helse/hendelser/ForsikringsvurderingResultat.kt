@@ -6,6 +6,7 @@ import java.util.UUID
 data class ForsikringsvurderingResultat(
     val forsikringsvurderingId: UUID,
     val harForsikring: Boolean,
+    val villeHattForsikringOmDenVarBetalt: Boolean,
     val dekning: Dekning?,
     val opphørsdato: LocalDate?,
     val forsikringskategori: Forsikringskategori?,
