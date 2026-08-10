@@ -120,6 +120,32 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
+    fun `Skal be om inntekt tross vilkårsprøvd skjæringstidspunkt ved sykdom etter AUU`() {
+        a1 {
+            håndterSøknad(januar)
+        }
+        a2 {
+            håndterSøknad(1.januar til 16.januar)
+        }
+        a1 {
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterSøknad(17.januar til 31.januar)
+            assertForventetFeil(
+                forklaring = "Burde spørre om inntekt her",
+                nå = { assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class) },
+                ønsket = { assertEtterspurt(2.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)}
+            )
+        }
+    }
+
+    @Test
     fun `syk fra ghost samme måned som skjæringstidspunktet`() {
         a1 {
             håndterSøknad(28.januar til 28.februar)
