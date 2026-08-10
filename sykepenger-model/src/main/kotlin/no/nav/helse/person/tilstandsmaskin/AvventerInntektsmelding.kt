@@ -15,6 +15,8 @@ import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
+import no.nav.helse.yearMonth
 
 internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_INNTEKTSMELDING
@@ -110,13 +112,29 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     }
 
 
+    private fun skalEtterspørreInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
+        // En periode på skjæringstidspunktet har en inntekt, så vi trenger ikke å etterspørre inntekt ✋
+        if (vedtaksperiode.kanAvklareInntekt()) return false
+
+        // Skal ikke spørre arbeidsgiver om inntekt dersom første fraværsdag er i annen måned enn skjæringstidspunktet ✋
+        // En eventuell inntekt vi mottar fra arberdisgiver i en slik situasjon vil uansett bli valgt bort til fordel for inntekt fra A-ordningen.
+        // Uklart om HAG håndrer denne situasjonen slik at vi kunne fjernet denne sjekken. Da må den i tilfelle også fjernes fra inntektsturneringen hvor vi velger inntekt fra A-ordningen fremfor inntekt fra arbeidsgiver i en slik situasjon.
+        if (vedtaksperiode.førsteFraværsdag?.yearMonth != vedtaksperiode.skjæringstidspunkt.yearMonth) return false
+
+        val gjeldendeVilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag ?: return true // Om skjæringstidspunktet ikke er tidligere vilkårsprøvd så må vi spørre om inntekt ✅
+
+        // Nå vet vi at vi er vilkårsprøvd & har første fraværsdag samme måned som skjæringstidspunktet.
+        // Om det er skatt som ligger til grunn skal vi spørre om inntekt (dette kan skje i tilfeller hvor arbeidsgiveren før kun var AUU eller blir syk fra ghost)
+        return gjeldendeVilkårsgrunnlag.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.firstOrNull { it.orgnummer == vedtaksperiode.yrkesaktivitet.organisasjonsnummer }?.faktaavklartInntekt?.inntektsopplysningskilde is Arbeidstakerinntektskilde.AOrdningen
+    }
+
     private fun opplysningerViTrenger(vedtaksperiode: Vedtaksperiode): Set<EventSubscription.ForespurtOpplysning> {
         if (!vedtaksperiode.skalArbeidstakerBehandlesISpeil()) return emptySet() // perioden er AUU ✋
 
         if (vedtaksperiode.yrkesaktivitet.vedtaksperioderMedSammeFørsteFraværsdag(vedtaksperiode).før.any { it.skalArbeidstakerBehandlesISpeil() }) return emptySet() // Da har en periode foran oss spurt for oss/ vi har det vi trenger ✋
 
         val opplysninger = mutableSetOf<EventSubscription.ForespurtOpplysning>().apply {
-            if (!vedtaksperiode.harEksisterendeInntekt()) addAll(setOf(EventSubscription.Inntekt, EventSubscription.Refusjon)) // HAG støtter ikke skjema uten refusjon, så når vi først spør om inntekt _må_ vi også spørre om refusjon
+            if (skalEtterspørreInntekt(vedtaksperiode)) addAll(setOf(EventSubscription.Inntekt, EventSubscription.Refusjon)) // HAG støtter ikke skjema uten refusjon, så når vi først spør om inntekt _må_ vi også spørre om refusjon
             if (vedtaksperiode.refusjonstidslinje.isEmpty()) add(EventSubscription.Refusjon) // For de tilfellene vi faktiske trenger refusjon
         }
         if (opplysninger.isEmpty()) return emptySet() // Om vi har inntekt og refusjon så er saken biff 🥩

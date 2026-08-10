@@ -137,11 +137,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(17.januar til 31.januar)
-            assertForventetFeil(
-                forklaring = "Burde spørre om inntekt her",
-                nå = { assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class) },
-                ønsket = { assertEtterspurt(2.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)}
-            )
+            assertEtterspurt(2.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
         }
     }
 
@@ -159,11 +155,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(28.januar til 28.februar)
-            assertForventetFeil(
-                forklaring = "Burde spørre om inntekt her",
-                nå = { assertEtterspurt(1.vedtaksperiode, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class) },
-                ønsket = { assertEtterspurt(1.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)}
-            )
+            assertEtterspurt(1.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
         }
     }
 
