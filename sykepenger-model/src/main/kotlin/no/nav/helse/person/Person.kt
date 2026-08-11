@@ -211,6 +211,7 @@ class Person private constructor(
         val arbeidsgiver = finnEllerOpprettYrkesaktivitet(arbeidsgiveropplysninger.behandlingsporing, aktivitetsloggMedPersonkontekst)
         val revurderingseventyr = arbeidsgiver.håndterArbeidsgiveropplysninger(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        arbeidsgiver.validerArbeidsgiverperiode(arbeidsgiveropplysninger, arbeidsgiveropplysninger.vedtaksperiodeId, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
     }
 
@@ -227,6 +228,7 @@ class Person private constructor(
         val arbeidsgiver = finnEllerOpprettYrkesaktivitet(selvbestemteArbeidsgiveropplysninger.behandlingsporing, aktivitetsloggMedPersonkontekst)
         val revurderingseventyr = arbeidsgiver.håndterSelvbestemteArbeidsgiveropplysninger(eventBus, selvbestemteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        arbeidsgiver.validerArbeidsgiverperiode(selvbestemteArbeidsgiveropplysninger, selvbestemteArbeidsgiveropplysninger.vedtaksperiodeId, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, selvbestemteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
     }
 

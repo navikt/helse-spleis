@@ -927,6 +927,15 @@ internal class Vedtaksperiode private constructor(
         return håndterArbeidsgiveropplysninger(eventBus, eventyr, korrigerteArbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
+    internal fun validerArbeidsgiverperiode(oppgittArbeidsgiverperiode: OppgittArbeidgiverperiode, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        if (!behandlinger.åpenForEndring()) return
+        if (!behandlinger.dagerUtenNavAnsvar.dager.flatten().containsAll(oppgittArbeidsgiverperiode.perioder.flatten())) {
+            aktivitetsloggMedVedtaksperiodekontekst.varsel(Varselkode.RV_IM_3)
+            aktivitetsloggMedVedtaksperiodekontekst.info(melding = "Beregnet agp ${behandlinger.dagerUtenNavAnsvar.dager} mens arbeidsgiver opplyser om ${oppgittArbeidsgiverperiode.perioder}")
+        }
+    }
+
     private fun <T> håndterOppgittArbeidsgiverperiode(eventBus: EventBus, arbeidsgiveropplysninger: T, vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
         val oppgittArbeidgiverperiode = arbeidsgiveropplysninger.filterIsInstance<OppgittArbeidgiverperiode>().singleOrNull() ?: return emptyList()
         val eventyr = mutableListOf<Revurderingseventyr>()
@@ -943,11 +952,6 @@ internal class Vedtaksperiode private constructor(
         val antallDagerIgjen = rester.sykdomstidslinje.count()
         if (antallDagerIgjen > 0) {
             aktivitetslogg.info("Det er rester igjen etter håndtering av dager ($antallDagerIgjen dager)")
-        }
-
-        if (!behandlinger.dagerUtenNavAnsvar.dager.flatten().containsAll(oppgittArbeidgiverperiode.perioder.flatten())) {
-            aktivitetslogg.varsel(Varselkode.RV_IM_3)
-            aktivitetslogg.info(melding = "Beregnet agp ${behandlinger.dagerUtenNavAnsvar.dager} mens arbeidsgiver opplyser om ${oppgittArbeidgiverperiode.perioder}")
         }
 
         return eventyr

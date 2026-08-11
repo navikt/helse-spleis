@@ -95,10 +95,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(agp, vedtaksperiodeId = 2.vedtaksperiode)
             assertEquals(agp, inspektør.venteperiode(1.vedtaksperiode))
             assertEquals(agp, inspektør.venteperiode(2.vedtaksperiode))
-            // Her er det feilaktig RV_IM_3 (uenghet om beregning), vi er jo enig
-            // Grunnen til at det blir feil er at ingen av dagene er i 2.vedtaksperiode, og den har ikke fått oppdatert
-            // agp på behandlingen før overstyringen igangsettes.
-            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         }
     }
 
@@ -657,14 +653,16 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`() {
+    fun `endret arbeidsgiverperiode med NAV_NO som avsendersystem`() {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
-            håndterArbeidsgiveropplysninger(listOf(2.januar til 17.januar), vedtaksperiodeId = 2.vedtaksperiode)
+            val agp = listOf(2.januar til 17.januar)
+            håndterArbeidsgiveropplysninger(agp, vedtaksperiodeId = 2.vedtaksperiode)
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
-            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+            assertEquals(agp, inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(agp, inspektør.venteperiode(2.vedtaksperiode))
             val forespørselFebruar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode }
             assertEquals(0, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Arbeidsgiverperiode>().size)
             assertEquals(0, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Inntekt>().size)
@@ -731,7 +729,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittArbeidgiverperiode(listOf(10.oktober(2025) til 16.oktober(2025)))
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+            assertEquals(listOf(10.oktober(2025) til 25.oktober(2025)), inspektør.venteperiode(2.vedtaksperiode))
         }
     }
 

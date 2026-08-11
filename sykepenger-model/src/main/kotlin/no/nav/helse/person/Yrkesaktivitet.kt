@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
+import kotlin.collections.Collection
 import kotlin.math.absoluteValue
 import net.logstash.logback.argument.StructuredArguments.value
 import no.nav.helse.Personidentifikator
@@ -22,6 +23,8 @@ import no.nav.helse.feriepenger.Feriepengegrunnlagstidslinje
 import no.nav.helse.feriepenger.Feriepengeutbetaling
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsavgjørelse
@@ -577,6 +580,12 @@ internal class Yrkesaktivitet private constructor(
         val revurderingseventyr = håndterReplayAvInntektsmelding(eventBus, replays.inntektsmeldinger, aktivitetsloggMedArbeidsgiverkontekst, replays.vedtaksperiodeId)
         håndter { it.håndterInntektsmeldingerReplay(eventBus, replays, aktivitetsloggMedArbeidsgiverkontekst) }
         return revurderingseventyr
+    }
+
+    internal fun validerArbeidsgiverperiode(opplysninger: Collection<Arbeidsgiveropplysning>, vedtaksperiodeId: UUID, aktivitetslogg: IAktivitetslogg) {
+        val oppgittArbeidsgiverperiode = opplysninger.filterIsInstance<OppgittArbeidgiverperiode>().singleOrNull() ?: return
+        val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
+        vedtaksperioder.singleOrNull { it.id == vedtaksperiodeId }?.validerArbeidsgiverperiode(oppgittArbeidsgiverperiode, aktivitetsloggMedArbeidsgiverkontekst)
     }
 
     internal fun håndterArbeidsgiveropplysninger(eventBus: EventBus, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
