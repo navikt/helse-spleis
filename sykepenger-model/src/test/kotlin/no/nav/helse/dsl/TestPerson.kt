@@ -8,6 +8,7 @@ import java.time.temporal.Temporal
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
+import no.nav.helse.Toggle
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.hendelser.AndreYtelser
@@ -26,11 +27,13 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -48,6 +51,8 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -215,6 +220,7 @@ internal class TestPerson(
         internal val Int.vedtaksperiode get() = vedtaksperiodesamler.vedtaksperiodeId(orgnummer, this - 1)
 
         internal val sisteVedtaksperiode get() = vedtaksperiodesamler.sisteVedtaksperiode(orgnummer)
+        internal val sisteVedtaksperiodeOrNull get() = vedtaksperiodesamler.sisteVedtaksperiodeOrNull(orgnummer)
 
         internal fun håndterSykmelding(periode: Periode) = håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
 
@@ -418,6 +424,7 @@ internal class TestPerson(
             return meldingsreferanseId
         }
 
+        @Deprecated("Bruk håndterArbeidsgiveropplysninger, håndterKorrigerteArbeidsgiveropplysninger eller håndterSelvbestemtArbeidsgiveropplysninger i stedet")
         internal fun håndterInntektsmelding(
             arbeidsgiverperioder: List<Periode>,
             beregnetInntekt: Inntekt = INNTEKT,
@@ -428,18 +435,83 @@ internal class TestPerson(
             id: UUID = UUID.randomUUID(),
             mottatt: LocalDateTime = LocalDateTime.now(),
             arbeidsforholdId: String? = null,
+            vedtaksperiodeId: UUID? = sisteVedtaksperiodeOrNull
         ): UUID {
-            arbeidsgiverHendelsefabrikk.lagInntektsmelding(
-                arbeidsgiverperioder,
-                beregnetInntekt,
-                førsteFraværsdag,
-                refusjon,
-                opphørAvNaturalytelser,
-                begrunnelseForReduksjonEllerIkkeUtbetalt,
-                id,
-                mottatt = mottatt,
-                arbeidsforholdId = arbeidsforholdId
-            ).håndter(Person::håndterInntektsmelding)
+            if (Toggle.KnertInntektsmelding.disabled) {
+                arbeidsgiverHendelsefabrikk.lagInntektsmelding(
+                    arbeidsgiverperioder,
+                    beregnetInntekt,
+                    førsteFraværsdag,
+                    refusjon,
+                    opphørAvNaturalytelser,
+                    begrunnelseForReduksjonEllerIkkeUtbetalt,
+                    id,
+                    mottatt = mottatt,
+                    arbeidsforholdId = arbeidsforholdId
+                ).håndter(Person::håndterInntektsmelding)
+                return id
+            }
+
+            checkNotNull(vedtaksperiodeId) { "VedtaksperiodeId må være satt!" }
+
+            // Forespurte arbeidsgiveropplysninger
+            if (observatør.harForespurtArbeidsgiveropplysninger(vedtaksperiodeId)) {
+                håndterArbeidsgiveropplysninger(
+                    arbeidsgiverperioder = arbeidsgiverperioder,
+                    beregnetInntekt = beregnetInntekt,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    refusjon = refusjon,
+                    opphørAvNaturalytelser = opphørAvNaturalytelser,
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                    id = id,
+                    mottatt = mottatt,
+                    harFlereArbeidsforhold = arbeidsforholdId != null
+                )
+                return id
+            }
+
+            // Selvbestemte arbeidsgiveropplysninger
+            if (observatør.tilstandsendringer.getValue(vedtaksperiodeId).last() in setOf(AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)) {
+                val selvbestemte = SelvbestemteArbeidsgiveropplysninger(
+                    meldingsreferanseId = MeldingsreferanseId(id),
+                    innsendt = mottatt,
+                    registrert = mottatt.plusSeconds(1),
+                    behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                        organisasjonsnummer = this.orgnummer
+                    ),
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
+                        beregnetInntekt = beregnetInntekt,
+                        refusjon = refusjon,
+                        arbeidsgiverperioder = arbeidsgiverperioder,
+                        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                        opphørAvNaturalytelser = opphørAvNaturalytelser,
+                        harFlereArbeidsforhold = arbeidsforholdId != null
+                    )
+                )
+                selvbestemte.håndter(Person::håndterSelvbestemtArbeidsgiveropplysninger)
+                return id
+            }
+
+            // Korrigerte arbeidsgiveropplysninger
+            val korrigerte = KorrigerteArbeidsgiveropplysninger(
+                meldingsreferanseId = MeldingsreferanseId(id),
+                innsendt = mottatt,
+                registrert = mottatt.plusSeconds(1),
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                    organisasjonsnummer = this.orgnummer
+                ),
+                vedtaksperiodeId = vedtaksperiodeId,
+                opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
+                    beregnetInntekt = beregnetInntekt,
+                    refusjon = refusjon,
+                    arbeidsgiverperioder = arbeidsgiverperioder,
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                    opphørAvNaturalytelser = opphørAvNaturalytelser,
+                    harFlereArbeidsforhold = arbeidsforholdId != null
+                )
+            )
+            korrigerte.håndter(Person::håndterKorrigerteArbeidsgiveropplysninger)
             return id
         }
 

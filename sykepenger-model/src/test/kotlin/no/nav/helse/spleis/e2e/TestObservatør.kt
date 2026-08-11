@@ -137,6 +137,8 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
     }
 
     private val trengerArbeidsgiveroppysninger = mutableMapOf<UUID, Set<EventSubscription.ForespurtOpplysning>>()
+
+    internal fun harForespurtArbeidsgiveropplysninger(vedtaksperiodeId: UUID) = trengerArbeidsgiveroppysninger.containsKey(vedtaksperiodeId)
     internal fun forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg oppgitt: Arbeidsgiveropplysning) {
         val forespurt = trengerArbeidsgiveroppysninger[vedtaksperiodeId] ?: error("Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId")
         if (oppgitt.isEmpty()) return
