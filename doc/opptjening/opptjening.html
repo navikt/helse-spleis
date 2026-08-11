@@ -17,8 +17,11 @@
   th { background: var(--bg); }
   .note { background: #fff8e6; border-left: 4px solid #ffb84d; padding: .7rem 1rem; margin: 1rem 0; }
   .kilde { color: #555; font-size: .85em; }
+  figure { margin: 1.5rem 0; }
+  figure svg { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
+  figcaption { font-size: .85em; color: #555; margin-top: .5rem; }
   ol.flyt > li { margin-bottom: .5rem; }
-  @media print { body { margin: 0; max-width: none; } h2 { page-break-after: avoid; } pre, table { page-break-inside: avoid; } }
+  @media print { body { margin: 0; max-width: none; } h2 { page-break-after: avoid; } pre, table, figure { page-break-inside: avoid; } }
 </style>
 </head>
 <body>
@@ -36,6 +39,140 @@
 </ul>
 
 <h2>2. Ende-til-ende-flyt</h2>
+
+<figure>
+<svg viewBox="0 0 900 1140" role="img" aria-labelledby="flytTittel flytBeskrivelse" xmlns="http://www.w3.org/2000/svg">
+  <title id="flytTittel">Flyt for opptjeningsvurdering i Spleis</title>
+  <desc id="flytBeskrivelse">Vedtaksperioden går fra AvventerBlokkerendePeriode til AvventerVilkårsprøving, som sender ut behovene ArbeidsforholdV2, InntekterForOpptjeningsvurdering, InntekterForSykepengegrunnlag og Medlemskap. Løsningen kommer inn som hendelsen Vilkårsgrunnlag, der ArbeidstakerOpptjening bygges og 28-dagerskravet vurderes. Resultatet lagres på vilkårsgrunnlaget og brukes senere i AvventerHistorikk ved beregning, der manglende opptjening gir varsel RV_OV_1 og avviste dager.</desc>
+
+  <defs>
+    <marker id="pil" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5a6570"/>
+    </marker>
+  </defs>
+
+  <style>
+    .boks { stroke-width: 1.5; rx: 6; }
+    .tilstand { fill: #e6f0fa; stroke: #0067c5; }
+    .data     { fill: #fff4e6; stroke: #d97706; }
+    .prosess  { fill: #e9f7ec; stroke: #06893a; }
+    .avvist   { fill: #fdeaea; stroke: #c30000; }
+    .ok       { fill: #e9f7ec; stroke: #06893a; }
+    .t     { font-family: "Source Sans Pro", Segoe UI, Helvetica, Arial, sans-serif; font-size: 13px; fill: #1a1a1a; }
+    .tittel { font-weight: 700; font-size: 14px; }
+    .kode  { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+    .pil   { stroke: #5a6570; stroke-width: 1.6; fill: none; marker-end: url(#pil); }
+    .pilmerke { font-size: 11.5px; fill: #5a6570; }
+  </style>
+
+  <!-- tegnforklaring -->
+  <rect class="boks tilstand" x="20" y="14" width="16" height="14"/>
+  <text class="t" x="42" y="26">Tilstand i tilstandsmaskinen</text>
+  <rect class="boks data" x="250" y="14" width="16" height="14"/>
+  <text class="t" x="272" y="26">Behov / data ut og inn</text>
+  <rect class="boks prosess" x="470" y="14" width="16" height="14"/>
+  <text class="t" x="492" y="26">Logikk i modellen</text>
+
+  <!-- 1: AvventerBlokkerendePeriode -->
+  <rect class="boks tilstand" x="20" y="52" width="340" height="58"/>
+  <text class="t tittel" x="34" y="74">AvventerBlokkerendePeriode</text>
+  <text class="t kode" x="34" y="94">gjenopptaBehandling: vilkårsgrunnlag == null</text>
+  <path class="pil" d="M 190 110 L 190 148"/>
+
+  <!-- 2: AvventerVilkårsprøving -->
+  <rect class="boks tilstand" x="20" y="150" width="340" height="86"/>
+  <text class="t tittel" x="34" y="172">AvventerVilkårsprøving</text>
+  <text class="t" x="34" y="190">(og …VilkårsprøvingRevurdering,</text>
+  <text class="t" x="34" y="206">Selvstendig…)</text>
+  <text class="t kode" x="34" y="226">entering → trengerVilkårsgrunnlag()</text>
+
+  <!-- pil ut til behov -->
+  <path class="pil" d="M 360 180 L 516 180"/>
+  <text class="t pilmerke" x="378" y="172">behov ut</text>
+
+  <!-- behov ut -->
+  <rect class="boks data" x="520" y="112" width="360" height="150"/>
+  <text class="t tittel" x="534" y="134">Behov UT — EventBusOversetter</text>
+  <text class="t kode" x="534" y="156">• ArbeidsforholdV2 { skjæringstidspunkt }</text>
+  <text class="t kode" x="534" y="176">• InntekterForOpptjeningsvurdering</text>
+  <text class="t kode" x="546" y="192">{ beregningStart = beregningSlutt =</text>
+  <text class="t kode" x="546" y="208">måneden før skjæringstidspunktet }</text>
+  <text class="t kode" x="534" y="228">• InntekterForSykepengegrunnlag (3 mnd)</text>
+  <text class="t kode" x="534" y="248">• Medlemskap (+ Forsikringsvurdering)</text>
+
+  <path class="pil" d="M 700 262 L 700 296"/>
+  <text class="t pilmerke" x="712" y="284">sparkel-appene svarer</text>
+
+  <!-- løsning inn -->
+  <rect class="boks data" x="520" y="298" width="360" height="118"/>
+  <text class="t tittel" x="534" y="320">Løsning INN — @løsning</text>
+  <text class="t kode" x="534" y="342">VilkårsgrunnlagRiver validerer arbeidsforhold:</text>
+  <text class="t kode" x="534" y="360">orgnummer, type, ansattSiden, ansattTil</text>
+  <text class="t kode" x="534" y="382">VilkårsgrunnlagMessage mapper til</text>
+  <text class="t kode" x="534" y="400">hendelsen Vilkårsgrunnlag</text>
+
+  <path class="pil" d="M 700 416 L 700 448"/>
+  <path class="pil" d="M 190 236 L 190 448"/>
+
+  <!-- prosess: vilkårsprøving -->
+  <rect class="boks prosess" x="20" y="450" width="860" height="168"/>
+  <text class="t tittel" x="36" y="474">Vilkårsgrunnlag.valider() — her vurderes opptjeningen</text>
+  <text class="t" x="36" y="498">1. opptjeningsgrunnlag(): filtrer bort FRILANSER, grupper arbeidsforhold per orgnummer</text>
+  <text class="t" x="36" y="520">2. ArbeidstakerOpptjening.nyOpptjening(grunnlag, skjæringstidspunkt)</text>
+  <text class="t" x="52" y="540">— bygg sammenhengende ansettelseskjede bakover fra dagen før skjæringstidspunktet</text>
+  <text class="t" x="52" y="558">— oppfylt hvis opptjeningsdager ≥ 28</text>
+  <text class="t" x="36" y="580">3. Subsumsjon § 8-2 ledd 1 logges • RV_OV_3 hvis ingen inntekt måneden før</text>
+  <text class="t" x="36" y="602">4. Opptjeningen lagres på Grunnlagsdata (vilkårsgrunnlaget) • RV_VV_1 / RV_VV_8</text>
+
+  <path class="pil" d="M 190 618 L 190 654"/>
+
+  <!-- AvventerHistorikk -->
+  <rect class="boks tilstand" x="20" y="656" width="340" height="70"/>
+  <text class="t tittel" x="34" y="678">AvventerHistorikk</text>
+  <text class="t kode" x="34" y="700">entering → trengerYtelser()</text>
+  <text class="t kode" x="34" y="718">krever lagret vilkårsgrunnlag</text>
+
+  <path class="pil" d="M 360 690 L 516 690"/>
+  <rect class="boks data" x="520" y="656" width="360" height="70"/>
+  <text class="t tittel" x="534" y="678">Behov UT / løsning INN</text>
+  <text class="t kode" x="534" y="700">Sykepengehistorikk, andre ytelser,</text>
+  <text class="t kode" x="534" y="718">InntekterForBeregning → hendelsen Ytelser</text>
+
+  <path class="pil" d="M 190 726 L 190 762"/>
+  <path class="pil" d="M 700 726 L 700 762"/>
+
+  <!-- prosess: beregning -->
+  <rect class="boks prosess" x="20" y="764" width="860" height="106"/>
+  <text class="t tittel" x="36" y="788">håndterYtelser() — opptjeningen leses ut igjen</text>
+  <text class="t kode" x="36" y="812">harOpptjening = grunnlagsdata.opptjening?.harTilstrekkeligAntallOpptjeningsdager() ?: true</text>
+  <text class="t kode" x="36" y="834">filtrerUtbetalingstidslinjer(… harOpptjening …) → avvisOpptjening(harOpptjening)</text>
+  <text class="t" x="36" y="856">(default true når vilkårsgrunnlaget er fra Infotrygd eller gjelder selvstendig)</text>
+
+  <path class="pil" d="M 225 870 L 225 906"/>
+  <text class="t pilmerke" x="236" y="894">false</text>
+  <path class="pil" d="M 675 870 L 675 906"/>
+  <text class="t pilmerke" x="686" y="894">true</text>
+
+  <rect class="boks avvist" x="20" y="908" width="410" height="86"/>
+  <text class="t tittel" x="34" y="930">Manglende opptjening</text>
+  <text class="t kode" x="34" y="952">varsel RV_OV_1</text>
+  <text class="t kode" x="34" y="972">alle dager avvist: ManglerOpptjening</text>
+
+  <rect class="boks ok" x="470" y="908" width="410" height="86"/>
+  <text class="t tittel" x="484" y="930">Opptjening oppfylt</text>
+  <text class="t kode" x="484" y="952">dagene beholdes</text>
+  <text class="t kode" x="484" y="972">beregningen fortsetter</text>
+
+  <path class="pil" d="M 225 994 L 225 1030 L 430 1030 L 430 1052"/>
+  <path class="pil" d="M 675 994 L 675 1030 L 470 1030 L 470 1052"/>
+
+  <rect class="boks tilstand" x="250" y="1054" width="400" height="58"/>
+  <text class="t tittel" x="264" y="1076">AvventerSimulering / AvventerGodkjenning</text>
+  <text class="t" x="264" y="1096">saken går til saksbehandler uansett utfall</text>
+</svg>
+<figcaption>Figur 1: Tilstandsflyten rundt opptjeningsvurderingen, med behovene som hentes inn og hvor selve vurderingen skjer. <code>OverstyrArbeidsforhold</code> (kapittel 6) bygger opptjeningen på nytt uten å hente nye data.</figcaption>
+</figure>
+
 <ol class="flyt">
   <li><strong>Vedtaksperiode i <code>AvventerVilkårsprøving</code> / <code>AvventerVilkårsprøvingRevurdering</code></strong> kaller <code>Vedtaksperiode.trengerVilkårsgrunnlag(...)</code>, som publiserer <code>TrengerInformasjonTilVilkårsprøvingEvent</code>.
     <span class="kilde">(<code>sykepenger-model/.../person/Vedtaksperiode.kt</code>, <code>.../tilstandsmaskin/AvventerVilkårsprøving.kt</code>)</span></li>
