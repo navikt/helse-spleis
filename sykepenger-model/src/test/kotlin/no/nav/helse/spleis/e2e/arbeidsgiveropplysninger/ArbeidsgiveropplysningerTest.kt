@@ -87,6 +87,22 @@ import org.junit.jupiter.api.Test
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
 
     @Test
+    fun `Arbeidsgiver opplyser om endret agp i forhold til initielt beregnet agp - ingen av dagene ligger i perioden som har spurt om opplysninger`() {
+        a1 {
+            håndterSøknad(2.januar til 17.januar)
+            håndterSøknad(18.januar til 31.januar)
+            val agp = listOf(1.januar til 16.januar)
+            håndterArbeidsgiveropplysninger(agp, vedtaksperiodeId = 2.vedtaksperiode)
+            assertEquals(agp, inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(agp, inspektør.venteperiode(2.vedtaksperiode))
+            // Her er det feilaktig RV_IM_3 (uenghet om beregning), vi er jo enig
+            // Grunnen til at det blir feil er at ingen av dagene er i 2.vedtaksperiode, og den har ikke fått oppdatert
+            // agp på behandlingen før overstyringen igangsettes.
+            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
     fun `Med arbeidsgiveropplysninger kan man opplyse om hullete agp og begrunnelse for reduksjon eller ikke utbetalt`() {
         a1 {
             håndterSøknad(januar)
