@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Opptjening i Spleis</title>
+<style>
+  :root { --border: #c9d3dd; --bg: #f5f7fa; --accent: #0067c5; }
+  body { font-family: "Source Sans Pro", -apple-system, Segoe UI, Helvetica, Arial, sans-serif; line-height: 1.5; color: #222; max-width: 60rem; margin: 2rem auto; padding: 0 1.5rem; }
+  h1 { border-bottom: 3px solid var(--accent); padding-bottom: .3rem; }
+  h2 { margin-top: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: .2rem; }
+  h3 { margin-top: 1.6rem; }
+  code, pre { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: .9em; }
+  code { background: var(--bg); padding: .1rem .3rem; border-radius: 3px; }
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: .8rem; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid var(--border); padding: .45rem .6rem; text-align: left; vertical-align: top; }
+  th { background: var(--bg); }
+  .note { background: #fff8e6; border-left: 4px solid #ffb84d; padding: .7rem 1rem; margin: 1rem 0; }
+  .kilde { color: #555; font-size: .85em; }
+  ol.flyt > li { margin-bottom: .5rem; }
+  @media print { body { margin: 0; max-width: none; } h2 { page-break-after: avoid; } pre, table { page-break-inside: avoid; } }
+</style>
+</head>
+<body>
+
+<h1>Opptjening i Spleis</h1>
+<p>Dette dokumentet beskriver hvordan Spleis avgjør om <strong>opptjeningsvilkåret</strong> (folketrygdloven § 8-2 første ledd) er oppfylt: hvilke behov som sendes ut, hvilke data som kommer inn, hvordan logikken i <code>ArbeidstakerOpptjening</code> regner ut opptjeningsdager, og hva som skjer med resultatet videre.</p>
+<p class="kilde">Utskriftsvennlig: åpne i nettleser og velg «Skriv ut → Lagre som PDF».</p>
+
+<h2>1. Kort oppsummert</h2>
+<ul>
+  <li>Opptjening vurderes <em>per skjæringstidspunkt</em>, i forbindelse med vilkårsprøvingen, og lagres på vilkårsgrunnlaget (<code>Grunnlagsdata.opptjening</code>).</li>
+  <li>Datagrunnlaget er <strong>arbeidsforhold fra Aa-registeret</strong> (behovet <code>ArbeidsforholdV2</code>), supplert av <strong>inntekt måneden før skjæringstidspunktet</strong> (behovet <code>InntekterForOpptjeningsvurdering</code>) som kun gir et varsel.</li>
+  <li>Regelen: sammenhengende ansettelse som strekker seg til og med dagen før skjæringstidspunktet må utgjøre <strong>minst 28 dager</strong>.</li>
+  <li>Er kravet ikke oppfylt: varsel <code>RV_OV_1</code> og alle dager avvises med begrunnelse <code>ManglerOpptjening</code> – saken sendes fortsatt til saksbehandler.</li>
+</ul>
+
+<h2>2. Ende-til-ende-flyt</h2>
+<ol class="flyt">
+  <li><strong>Vedtaksperiode i <code>AvventerVilkårsprøving</code> / <code>AvventerVilkårsprøvingRevurdering</code></strong> kaller <code>Vedtaksperiode.trengerVilkårsgrunnlag(...)</code>, som publiserer <code>TrengerInformasjonTilVilkårsprøvingEvent</code>.
+    <span class="kilde">(<code>sykepenger-model/.../person/Vedtaksperiode.kt</code>, <code>.../tilstandsmaskin/AvventerVilkårsprøving.kt</code>)</span></li>
+  <li><strong><code>EventBusOversetter</code></strong> oversetter eventet til en utgående behovmelding med behovene <code>InntekterForSykepengegrunnlag</code>, <code>InntekterForOpptjeningsvurdering</code>, <code>ArbeidsforholdV2</code>, <code>Medlemskap</code> (+ <code>Forsikringsvurdering</code> for selvstendige).
+    <span class="kilde">(<code>sykepenger-mediators/.../utboks/EventBusOversetter.kt</code>, <code>.../spleis/Behov.kt</code>)</span></li>
+  <li><strong>Eksterne apper (sparkel-*)</strong> løser behovene og legger svarene under <code>@løsning</code>.</li>
+  <li><strong><code>VilkårsgrunnlagRiver</code></strong> validerer løsningen og <strong><code>VilkårsgrunnlagMessage</code></strong> mapper den til hendelsen <code>Vilkårsgrunnlag</code>.
+    <span class="kilde">(<code>sykepenger-mediators/.../meldinger/VilkårsgrunnlagRiver.kt</code>, <code>.../meldinger/model/VilkårsgrunnlagMessage.kt</code>)</span></li>
+  <li><strong><code>Vilkårsgrunnlag.valider(...)</code></strong> bygger <code>ArbeidstakerOpptjening</code>, logger subsumsjon § 8-2 (1) og legger opptjeningen inn i <code>Grunnlagsdata</code>.
+    <span class="kilde">(<code>sykepenger-model/.../hendelser/Vilkårsgrunnlag.kt</code>)</span></li>
+  <li><strong>Ved beregning (<code>Ytelser</code>)</strong> leses <code>opptjening.harTilstrekkeligAntallOpptjeningsdager()</code> ut som <code>harOpptjening</code> og sendes inn i <code>filtrerUtbetalingstidslinjer(...)</code>, samtidig som varsel <code>RV_OV_1</code> legges på hvis kravet ikke er oppfylt.
+    <span class="kilde">(<code>Vedtaksperiode.harOpptjening(...)</code>, <code>sykepenger-økonomi/.../BeregnUtbetalingstidslinje.kt</code>)</span></li>
+</ol>
+
+<h2>3. Behov inn</h2>
+
+<h3>3.1 <code>ArbeidsforholdV2</code> – hoveddatakilden</h3>
+<p>Sendes med:</p>
+<pre>"ArbeidsforholdV2": { "skjæringstidspunkt": &lt;dato&gt; }</pre>
+<p>Forventet løsning (validert i <code>VilkårsgrunnlagRiver</code>):</p>
+<table>
+  <tr><th>Felt</th><th>Krav</th><th>Brukes til</th></tr>
+  <tr><td><code>orgnummer</code></td><td>påkrevd</td><td>gruppering per arbeidsgiver</td></tr>
+  <tr><td><code>type</code></td><td><code>FORENKLET_OPPGJØRSORDNING</code>, <code>FRILANSER</code>, <code>MARITIMT</code> eller <code>ORDINÆRT</code></td><td>frilans filtreres bort fra opptjeningsgrunnlaget</td></tr>
+  <tr><td><code>ansattSiden</code></td><td>påkrevd dato</td><td><code>ansattFom</code></td></tr>
+  <tr><td><code>ansattTil</code></td><td>valgfri dato</td><td><code>ansattTom</code> (<code>null</code> = løpende)</td></tr>
+</table>
+<p>Mappingen i <code>VilkårsgrunnlagMessage.mapArbeidsforhold()</code> forkaster arbeidsforhold med blankt orgnummer og arbeidsforhold der <code>ansattSiden &gt; ansattTil</code>.</p>
+
+<h3>3.2 <code>InntekterForOpptjeningsvurdering</code></h3>
+<pre>"InntekterForOpptjeningsvurdering": {
+  "skjæringstidspunkt": &lt;dato&gt;,
+  "beregningStart": &lt;YearMonth: måneden før skjæringstidspunktet&gt;,
+  "beregningSlutt": &lt;samme måned&gt;
+}</pre>
+<p>Beregningsperioden settes i <code>Vedtaksperiode.trengerVilkårsgrunnlag</code> til <code>YearMonth.from(skjæringstidspunkt).minusMonths(1)</code> både som start og slutt – altså nøyaktig én måned. <code>InntekterForOpptjeningsvurdering</code>-klassen håndhever dette med <code>require(inntekter.antallMåneder() &lt;= 1)</code>.</p>
+<p>Disse inntektene brukes <em>ikke</em> i selve opptjeningsberegningen – kun til å avgjøre om varselet <code>RV_OV_3</code> skal legges på.</p>
+
+<h3>3.3 Øvrige behov i samme melding</h3>
+<p><code>InntekterForSykepengegrunnlag</code> og <code>Medlemskap</code> løses i samme melding, men inngår i andre vilkår. <code>InntekterForSykepengegrunnlag</code> berører opptjening indirekte: skatteopplysningene som lagres tar utgangspunkt i de samme orgnumrene som opptjeningsgrunnlaget (<code>Vilkårsgrunnlag.skatteopplysninger()</code>), og det logges en info-melding dersom det finnes inntekt måneden før i opptjeningsdataene, men ikke i sykepengegrunnlagsdataene.</p>
+
+<h2>4. Fra hendelse til domeneobjekt</h2>
+<p>I <code>Vilkårsgrunnlag</code>:</p>
+<ol>
+  <li><code>arbeidsforhold.opptjeningsgrunnlag()</code> – filtrerer bort <code>FRILANSER</code> (<code>kanBrukes()</code>) og grupperer resten per orgnummer.</li>
+  <li>Hvert arbeidsforhold blir til <code>ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(ansattFom, ansattTom, deaktivert = false)</code>. <code>ansattTom = LocalDate.MAX</code> normaliseres til <code>null</code>.</li>
+  <li><code>ArbeidstakerOpptjening.nyOpptjening(grunnlag, skjæringstidspunkt)</code> bygger opptjeningen.</li>
+  <li>Subsumsjonen <code>§ 8-2 ledd 1</code> logges, og opptjeningen legges på <code>Grunnlagsdata</code>.</li>
+</ol>
+<div class="note">
+  Opptjening bygges kun for <strong>arbeidstaker</strong>. For <strong>selvstendig næringsdrivende</strong> er <code>opptjening = null</code>; opptjening vurderes der ut fra søknadens spørsmål om fravær før sykmelding (<code>Søknad.vurderOpptjeningForSelvstendig</code>: <code>RV_SØ_46</code> ved fravær, <code>RV_OV_4</code> hvis ubesvart), og subsumsjonen <code>§ 8-2 ledd 1 - selvstendig næringsdrivende</code> logges som oppfylt i <code>validerFørstegangsvurderingSelvstendig</code>. Arbeidsledig og frilans som yrkesaktivitet støttes ikke i denne flyten.
+</div>
+
+<h2>5. Logikken i <code>ArbeidstakerOpptjening</code></h2>
+<p class="kilde">Fil: <code>sykepenger-model/src/main/kotlin/no/nav/helse/person/Opptjening.kt</code></p>
+
+<h3>5.1 Datastruktur</h3>
+<pre>ArbeidstakerOpptjening
+ ├── skjæringstidspunkt: LocalDate
+ ├── arbeidsforhold: List&lt;ArbeidsgiverOpptjeningsgrunnlag&gt;
+ │      ├── orgnummer: String
+ │      └── ansattPerioder: List&lt;Arbeidsforhold(ansattFom, ansattTom?, deaktivert)&gt;
+ └── opptjeningsperiode: Periode</pre>
+
+<h3>5.2 Beregning av opptjeningsperioden</h3>
+<p><code>nyOpptjening</code> gjør tre ting:</p>
+<ol>
+  <li><strong>Regner ut opptjeningsperioden</strong> fra alle ansattperioder på tvers av arbeidsgivere (<code>opptjeningsperiode(skjæringstidspunkt)</code>).</li>
+  <li><strong>Beskjærer arbeidsforholdslisten</strong> til dem som inngår i perioden (<code>inngårIOpptjening</code>).</li>
+  <li>Oppretter objektet med perioden og de relevante arbeidsforholdene.</li>
+</ol>
+<p>Selve periodeutregningen (<code>Collection&lt;Arbeidsforhold&gt;.opptjeningsperiode</code>) er kjernen:</p>
+<ol>
+  <li>For hvert arbeidsforhold lages en kandidatperiode via <code>periode(skjæringstidspunkt)</code>:
+    <ul>
+      <li>Er arbeidsforholdet <code>deaktivert</code> → <code>null</code> (teller ikke).</li>
+      <li>Ansettelsesperioden klippes mot <code>LocalDate.MIN … skjæringstidspunkt.forrigeDag</code> – dvs. <strong>selve skjæringstidspunktet teller ikke med</strong>, og ansettelse som først starter på/etter skjæringstidspunktet ignoreres.</li>
+    </ul>
+  </li>
+  <li>Kandidatene sorteres synkende på sluttdato.</li>
+  <li>Startverdien er <strong>dagen før skjæringstidspunktet</strong> som en endagsperiode.</li>
+  <li>Hvis den «seneste» kandidatperioden ikke slutter rett før skjæringstidspunktet, returneres bare endagsperioden – dvs. <strong>1 opptjeningsdag</strong> (ikke ansatt dagen før skjæringstidspunktet ⇒ ikke oppfylt).</li>
+  <li>Ellers utvides perioden bakover ved å slå sammen kandidatperioder som <em>overlapper</em> eller ligger <em>rett før</em> den akkumulerte perioden. Et hull bryter kjeden, og eldre perioder tas ikke med.</li>
+</ol>
+<p><strong>Konsekvens:</strong> opptjeningen er en <em>sammenhengende</em> ansettelseskjede, som gjerne strekker seg på tvers av flere arbeidsgivere, og som må gå helt frem til dagen før skjæringstidspunktet.</p>
+
+<h3>5.3 Vilkåret</h3>
+<pre>private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
+
+opptjeningsdager = opptjeningsperiode.count()
+harTilstrekkeligAntallOpptjeningsdager() = opptjeningsdager &gt;= 28
+erOppfylt() = harTilstrekkeligAntallOpptjeningsdager()</pre>
+<p><code>opptjeningsperiode.count()</code> teller kalenderdager inklusive begge endepunkter.</p>
+
+<h3>5.4 Subsumsjon § 8-2 (1)</h3>
+<table>
+  <tr><th>Felt</th><th>Verdi</th></tr>
+  <tr><td>utfall</td><td><code>VILKAR_OPPFYLT</code> / <code>VILKAR_IKKE_OPPFYLT</code> basert på 28-dagerskravet</td></tr>
+  <tr><td>input.skjæringstidspunkt</td><td>skjæringstidspunktet</td></tr>
+  <tr><td>input.tilstrekkeligAntallOpptjeningsdager</td><td>28</td></tr>
+  <tr><td>input.arbeidsforhold</td><td>liste av <code>{orgnummer, fom, tom}</code> for arbeidsforholdene som inngår</td></tr>
+  <tr><td>output.antallOpptjeningsdager</td><td>antall dager i opptjeningsperioden</td></tr>
+</table>
+<p class="kilde">Definert i <code>sykepenger-etterlevelse-api/.../Subsumsjonslogg.kt</code>, versjon 12.06.2020.</p>
+
+<h3>5.5 Andre spørsmål opptjeningen svarer på</h3>
+<table>
+  <tr><th>Funksjon</th><th>Betydning</th><th>Brukes av</th></tr>
+  <tr><td><code>ansattVedSkjæringstidspunkt(orgnummer)</code></td><td>har arbeidsgiveren en ansattperiode som dekker skjæringstidspunktet</td><td><code>vurderSkifteAvArbeidsgiver</code> → varsel <code>RV_VV_8</code></td></tr>
+  <tr><td><code>startdatoFor(orgnummer)</code></td><td>første dag i den sammenhengende opptjeningsperioden for arbeidsgiveren</td><td><code>måHaRegistrertOpptjeningForArbeidsgivere</code> → varsel <code>RV_VV_1</code>, samt <code>EndretArbeidsgiver.startdato</code></td></tr>
+  <tr><td><code>opptjeningFom()</code></td><td>første dag i opptjeningsperioden</td><td>visning/eksport</td></tr>
+  <tr><td><code>view()</code> / <code>dto()</code></td><td>arbeidsforhold, opptjeningsdager, <code>erOppfylt</code></td><td>serialisering og Speil-API</td></tr>
+</table>
+
+<h2>6. Overstyring: aktivering/deaktivering av arbeidsforhold</h2>
+<p>Saksbehandler kan deaktivere et arbeidsforhold via <code>OverstyrArbeidsforhold</code>. Da kalles <code>ArbeidstakerOpptjening.deaktiver(orgnummer)</code> (eller <code>aktiver</code>), som setter <code>deaktivert</code>-flagget på arbeidsgiverens ansattperioder og <strong>bygger opptjeningen på nytt</strong> med <code>nyOpptjening</code>. Ny subsumsjon logges.</p>
+<p>Merk to nyanser i koden:</p>
+<ul>
+  <li>Deaktiverte arbeidsforhold gir <code>null</code> i <code>periode(...)</code> og teller derfor <strong>ikke</strong> med i opptjeningsdagene.</li>
+  <li>Men <code>inngårIOpptjening</code> returnerer <code>true</code> for deaktiverte arbeidsforhold, slik at de <em>beholdes i listen</em> (og dermed i subsumsjonsgrunnlaget og i visningen) og kan aktiveres igjen senere.</li>
+</ul>
+
+<h2>7. Varsler og konsekvenser</h2>
+<table>
+  <tr><th>Kode</th><th>Tekst</th><th>Når</th></tr>
+  <tr><td><code>RV_OV_1</code></td><td>Perioden er avslått på grunn av manglende opptjening</td><td>ved beregning når <code>harTilstrekkeligAntallOpptjeningsdager()</code> er <code>false</code></td></tr>
+  <tr><td><code>RV_OV_3</code></td><td>Det er ikke registrert inntekt i måneden før skjæringstidspunktet</td><td>i <code>Vilkårsgrunnlag.valider</code> når <code>InntekterForOpptjeningsvurdering</code> ikke har inntekt i måneden før skjæringstidspunktet</td></tr>
+  <tr><td><code>RV_OV_4</code></td><td>Opptjening for selvstendig næringsdrivende er ikke vurdert</td><td>selvstendigsøknad uten svar på fravær før sykmelding</td></tr>
+  <tr><td><code>RV_VV_1</code></td><td>Arbeidsgiver i sykepengegrunnlaget mangler opptjening</td><td>når <code>startdatoFor(orgnummer)</code> er <code>null</code> for en arbeidsgiver i sykepengegrunnlaget</td></tr>
+  <tr><td><code>RV_VV_8</code></td><td>Mistanke om arbeidsgiverbytte</td><td>eneste arbeidsforhold aktivt på skjæringstidspunktet tilhører en annen arbeidsgiver enn den som behandles</td></tr>
+  <tr><td><code>RV_OV_2</code></td><td>Ufullstendige opplysninger fra AA-registeret</td><td><strong>avviklet</strong></td></tr>
+</table>
+<p>Manglende opptjening er ikke en funksjonell feil: perioden går videre til godkjenning, men i <code>filtrerUtbetalingstidslinjer</code> kjøres <code>avvisOpptjening(harOpptjening)</code> som avviser <em>alle</em> dager (<code>LocalDate.MIN … LocalDate.MAX</code>) med begrunnelsen <code>Begrunnelse.ManglerOpptjening</code>.</p>
+<p>Merk også at <code>Vedtaksperiode.harOpptjening(...)</code> defaulter til <code>true</code> når vilkårsgrunnlaget ikke er et <code>Grunnlagsdata</code> med opptjening – f.eks. Infotrygd-vilkårsgrunnlag og selvstendig næringsdrivende.</p>
+
+<h2>8. Persistering og visning</h2>
+<ul>
+  <li><strong>Serialisering:</strong> <code>ArbeidstakerOpptjening.dto()</code> → <code>OpptjeningUtDto(arbeidsforhold, opptjeningsperiode, opptjeningsdager, erOppfylt)</code>; gjenopprettes med <code>ArbeidstakerOpptjening.gjenopprett(skjæringstidspunkt, dto)</code>. Merk at <code>opptjeningsdager</code>/<code>erOppfylt</code> regnes ut på nytt ved gjenoppretting – DTO-feltene er for lesere av JSON.</li>
+  <li><strong>Speil-API:</strong> <code>VilkårsgrunnlagBuilder</code> eksponerer <code>antallOpptjeningsdagerErMinst</code>, <code>opptjeningFra</code> (= <code>skjæringstidspunkt − antallOpptjeningsdager</code>) og <code>oppfyllerKravOmOpptjening</code> på <code>SpleisVilkårsgrunnlag</code>.</li>
+</ul>
+
+<h2>9. Filoversikt</h2>
+<table>
+  <tr><th>Fil</th><th>Rolle</th></tr>
+  <tr><td><code>sykepenger-model/.../person/Opptjening.kt</code></td><td><code>ArbeidstakerOpptjening</code> – all regnelogikk og 28-dagersregelen</td></tr>
+  <tr><td><code>sykepenger-model/.../hendelser/Vilkårsgrunnlag.kt</code></td><td>bygger opptjening fra arbeidsforhold, logger subsumsjon, varsel <code>RV_OV_3</code></td></tr>
+  <tr><td><code>sykepenger-model/.../hendelser/InntekterForOpptjeningsvurdering.kt</code></td><td>inntekt i måneden før skjæringstidspunktet</td></tr>
+  <tr><td><code>sykepenger-model/.../hendelser/OverstyrArbeidsforhold.kt</code></td><td>aktiver/deaktiver arbeidsforhold</td></tr>
+  <tr><td><code>sykepenger-model/.../person/VilkårsgrunnlagHistorikk.kt</code></td><td>lagrer opptjening på <code>Grunnlagsdata</code>, validering ved førstegangsvurdering</td></tr>
+  <tr><td><code>sykepenger-model/.../person/Vedtaksperiode.kt</code></td><td><code>trengerVilkårsgrunnlag</code>, <code>harOpptjening</code>, varsel <code>RV_OV_1</code></td></tr>
+  <tr><td><code>sykepenger-model/.../person/inntekt/ArbeidsgiverInntektsopplysning.kt</code></td><td><code>RV_VV_1</code> og <code>RV_VV_8</code> basert på opptjeningen</td></tr>
+  <tr><td><code>sykepenger-mediators/.../utboks/EventBusOversetter.kt</code></td><td>utgående behov</td></tr>
+  <tr><td><code>sykepenger-mediators/.../meldinger/VilkårsgrunnlagRiver.kt</code></td><td>validering av innkommende løsning</td></tr>
+  <tr><td><code>sykepenger-mediators/.../meldinger/model/VilkårsgrunnlagMessage.kt</code></td><td>mapping av løsning til hendelse</td></tr>
+  <tr><td><code>sykepenger-økonomi/.../BeregnUtbetalingstidslinje.kt</code></td><td><code>avvisOpptjening</code></td></tr>
+  <tr><td><code>sykepenger-etterlevelse-api/.../Subsumsjonslogg.kt</code></td><td>subsumsjonene for § 8-2 (1)</td></tr>
+  <tr><td><code>sykepenger-model/src/test/.../person/OpptjeningTest.kt</code>, <code>.../spleis/e2e/OpptjeningE2ETest.kt</code></td><td>tester som dokumenterer reglene</td></tr>
+</table>
+
+</body>
+</html>
