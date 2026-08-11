@@ -36,6 +36,7 @@
   <li>Datagrunnlaget er <strong>arbeidsforhold fra Aa-registeret</strong> (behovet <code>ArbeidsforholdV2</code>), supplert av <strong>inntekt måneden før skjæringstidspunktet</strong> (behovet <code>InntekterForOpptjeningsvurdering</code>) som kun gir et varsel.</li>
   <li>Regelen: sammenhengende ansettelse som strekker seg til og med dagen før skjæringstidspunktet må utgjøre <strong>minst 28 dager</strong>.</li>
   <li>Er kravet ikke oppfylt: varsel <code>RV_OV_1</code> og alle dager avvises med begrunnelse <code>ManglerOpptjening</code> – saken sendes fortsatt til saksbehandler.</li>
+  <li>Deaktiverer saksbehandler et arbeidsforhold, regnes opptjeningen ut på nytt uten det – og opptjeningen <em>kan</em> dermed bli avslått, se <a href="#deaktivering-8-2">6.1</a>.</li>
 </ul>
 
 <h2>2. Ende-til-ende-flyt</h2>
@@ -294,6 +295,26 @@ erOppfylt() = harTilstrekkeligAntallOpptjeningsdager()</pre>
   <li>Deaktiverte arbeidsforhold gir <code>null</code> i <code>periode(...)</code> og teller derfor <strong>ikke</strong> med i opptjeningsdagene.</li>
   <li>Men <code>inngårIOpptjening</code> returnerer <code>true</code> for deaktiverte arbeidsforhold, slik at de <em>beholdes i listen</em> (og dermed i subsumsjonsgrunnlaget og i visningen) og kan aktiveres igjen senere.</li>
 </ul>
+
+<h3 id="deaktivering-8-2">6.1 Kan opptjening etter § 8-2 bli avslått fordi saksbehandler deaktiverer et arbeidsforhold?</h3>
+<p><strong>Ja – det kan skje, men bare hvis det deaktiverte arbeidsforholdet var det som «bar» opptjeningskjeden.</strong> Deaktivering er ikke bare en markering for sykepengegrunnlaget; opptjeningen regnes ut på nytt uten det deaktiverte arbeidsforholdet.</p>
+<p>Kjeden i koden:</p>
+<ol>
+  <li><code>OverstyrArbeidsforhold</code> → <code>Grunnlagsdata.overstyrArbeidsforhold</code> → <code>ArbeidstakerOpptjening.deaktiver(orgnummer)</code>.</li>
+  <li><code>deaktiver</code> setter <code>deaktivert = true</code> på arbeidsgiverens ansattperioder og kaller <code>nyOpptjening</code>, som regner ut <code>opptjeningsperiode</code> på nytt.</li>
+  <li><code>Arbeidsforhold.periode(...)</code> gir <code>null</code> for deaktiverte arbeidsforhold, så dagene deres faller ut av kjeden.</li>
+  <li>Blir resultatet færre enn 28 dager, gir <code>harTilstrekkeligAntallOpptjeningsdager()</code> <code>false</code>, ny subsumsjon <code>§ 8-2 ledd 1</code> logges med <code>VILKAR_IKKE_OPPFYLT</code>, og ved neste beregning gir <code>Vedtaksperiode</code> varsel <code>RV_OV_1</code> og <code>avvisOpptjening</code> avviser alle dager med <code>ManglerOpptjening</code>.</li>
+</ol>
+<p>Når har det <em>ingen</em> betydning:</p>
+<ul>
+  <li>Hvis andre <strong>aktive</strong> arbeidsforhold dekker den samme sammenhengende perioden frem til dagen før skjæringstidspunktet – opptjeningsperioden regnes på tvers av arbeidsgivere, så det er <em>kjeden</em>, ikke den enkelte arbeidsgiveren, som avgjør.</li>
+  <li>Hvis det deaktiverte arbeidsforholdet uansett ikke bidro med dager (f.eks. avsluttet lenge før skjæringstidspunktet, med hull i kjeden).</li>
+  <li>For selvstendig næringsdrivende og Infotrygd-vilkårsgrunnlag, der <code>opptjening</code> er <code>null</code> og <code>Vedtaksperiode.harOpptjening(...)</code> defaulter til <code>true</code>.</li>
+</ul>
+<div class="note">
+  <p>Merk at deaktivering også slår ut på <code>startdatoFor(orgnummer)</code> og dermed kan gi varsel <code>RV_VV_1</code> for arbeidsgivere i sykepengegrunnlaget, og at avslaget først materialiserer seg ved neste <code>Ytelser</code>-beregning (revurderingen) – ikke i selve overstyringshendelsen.</p>
+  <p class="kilde">Dokumentert i testen <code>OverstyrArbeidsforholdTest.«vi vilkårsprøver krav om opptjening ved overstyring av arbeidsforhold»</code>, der deaktivering av den ene arbeidsgiveren gir <code>RV_OV_1</code> og avviste dager.</p>
+</div>
 
 <h2>7. Varsler og konsekvenser</h2>
 <table>
