@@ -280,13 +280,59 @@ erOppfylt() = harTilstrekkeligAntallOpptjeningsdager()</pre>
 <p class="kilde">Definert i <code>sykepenger-etterlevelse-api/.../Subsumsjonslogg.kt</code>, versjonsdato for subsumsjonen: 12.06.2020.</p>
 
 <h3>5.5 Andre spørsmål opptjeningen svarer på</h3>
+<p>Opptjeningsobjektet er ikke bare 28-dagersregelen: det er også oppslagsregisteret for «hvem var ansatt når». Tabellen under viser <em>når i verdikjeden</em> hver funksjon kalles, og hva svaret brukes til.</p>
 <table>
-  <tr><th>Funksjon</th><th>Betydning</th><th>Brukes av</th></tr>
-  <tr><td><code>ansattVedSkjæringstidspunkt(orgnummer)</code></td><td>har arbeidsgiveren en ansattperiode som dekker skjæringstidspunktet</td><td><code>vurderSkifteAvArbeidsgiver</code> → varsel <code>RV_VV_8</code></td></tr>
-  <tr><td><code>startdatoFor(orgnummer)</code></td><td>første dag i den sammenhengende opptjeningsperioden for arbeidsgiveren</td><td><code>måHaRegistrertOpptjeningForArbeidsgivere</code> → varsel <code>RV_VV_1</code>, samt <code>EndretArbeidsgiver.startdato</code></td></tr>
-  <tr><td><code>opptjeningFom()</code></td><td>første dag i opptjeningsperioden</td><td>visning/eksport</td></tr>
-  <tr><td><code>view()</code> / <code>dto()</code></td><td>arbeidsforhold, opptjeningsdager, <code>erOppfylt</code></td><td>serialisering og Speil-API</td></tr>
+  <tr><th>Funksjon</th><th>Betydning</th><th>Når i verdikjeden</th><th>Hva det brukes til</th></tr>
+  <tr>
+    <td><code>harTilstrekkeligAntallOpptjeningsdager()</code> / <code>erOppfylt()</code></td>
+    <td>er opptjeningskjeden minst 28 dager</td>
+    <td><strong>Ytelser</strong> → <code>Vedtaksperiode.håndterYtelser</code> steg 3, via <code>harOpptjening(grunnlagsdata)</code>. Kalles på nytt ved hver revurdering/omberegning.</td>
+    <td>Sendes inn i <code>filtrerUtbetalingstidslinjer</code> → <code>avvisOpptjening(...)</code> som avviser alle dager med <code>ManglerOpptjening</code>, og gir varsel <code>RV_OV_1</code> i <code>vurderVarsler</code> (steg 5).</td>
+  </tr>
+  <tr>
+    <td><code>startdatoFor(orgnummer)</code></td>
+    <td>første dag i den sammenhengende opptjeningsperioden for <em>denne</em> arbeidsgiveren (<code>null</code> hvis arbeidsgiveren ikke finnes i opptjeningsgrunnlaget)</td>
+    <td>To steder:<br>1) <strong>Vilkårsgrunnlag</strong> (førstegangsvurdering) → <code>Grunnlagsdata.validerFørstegangsvurderingArbeidstaker</code> → <code>måHaRegistrertOpptjeningForArbeidsgivere</code>.<br>2) <strong>OverstyrArbeidsgiveropplysninger</strong> → <code>Grunnlagsdata.håndterKorrigerteInntekter</code>, som fyller <code>EndretArbeidsgiver.startdato</code>.</td>
+    <td>1) Varsel <code>RV_VV_1</code> «arbeidsgiver i sykepengegrunnlaget mangler opptjening» hvis en arbeidsgiver med inntekt ikke finnes i opptjeningen.<br>2) Startdatoen sendes til <code>OverstyrArbeidsgiveropplysninger.subsummer(...)</code> og er <em>påkrevd</em> input i subsumsjonen <code>§ 8-28 (3) bokstav b</code> (nyoppstartet arbeidsforhold).</td>
+  </tr>
+  <tr>
+    <td><code>ansattVedSkjæringstidspunkt(orgnummer)</code></td>
+    <td>har arbeidsgiveren en ansattperiode som dekker selve skjæringstidspunktet (<code>gjelder(...)</code>, uavhengig av opptjeningskjeden)</td>
+    <td><strong>Ytelser</strong> → <code>vurderVarsler</code> → <code>Grunnlagsdata.valider(...)</code> → <code>vurderArbeidsgivere</code> → <code>vurderSkifteAvArbeidsgiver</code>. Kjøres for arbeidstakere ved hver beregning.</td>
+    <td>Varsel <code>RV_VV_8</code> «mistanke om arbeidsgiverbytte» når det eneste arbeidsforholdet som er aktivt på skjæringstidspunktet tilhører en annen arbeidsgiver enn den som behandles.</td>
+  </tr>
+  <tr>
+    <td><code>opptjeningFom()</code></td>
+    <td>første dag i opptjeningsperioden</td>
+    <td>Ikke kalt fra produksjonsflyten i dag – kun fra <code>OpptjeningTest</code>.</td>
+    <td>Dokumenterer/verifiserer periodeutregningen. Tilsvarende informasjon eksporteres via <code>dto()</code> (<code>opptjeningsperiode.fom</code>).</td>
+  </tr>
+  <tr>
+    <td><code>view()</code></td>
+    <td><code>ArbeidstakerOpptjeningView(arbeidsforhold, opptjeningsdager, erOppfylt)</code></td>
+    <td>Kalles fra <code>Grunnlagsdata.view()</code>, som igjen henger under <code>Person.view()</code> – et lesegrensesnitt uten sideeffekter.</td>
+    <td>Inspeksjon i tester (<code>ArbeidstakerOpptjeningInspektør</code>, <code>assertOpptjening...</code>); ikke en del av utgående meldinger.</td>
+  </tr>
+  <tr>
+    <td><code>dto()</code></td>
+    <td><code>OpptjeningUtDto(arbeidsforhold, opptjeningsperiode, opptjeningsdager, erOppfylt)</code></td>
+    <td>Ved <strong>lagring av person</strong> (etter hver hendelse) via <code>Grunnlagsdata.dto()</code> → <code>PersonDataBuilder</code>, og ved oppslag mot <strong>Speil</strong>.</td>
+    <td>Persistering av JSON, og <code>VilkårsgrunnlagBuilder</code> som eksponerer <code>antallOpptjeningsdagerErMinst</code>, <code>opptjeningFra</code> og <code>oppfyllerKravOmOpptjening</code>.</td>
+  </tr>
+  <tr>
+    <td><code>deaktiver(orgnummer)</code> / <code>aktiver(orgnummer)</code></td>
+    <td>ny opptjening der arbeidsgiverens ansattperioder er merket (de)aktivert</td>
+    <td><strong>OverstyrArbeidsforhold</strong> → <code>Vedtaksperiode.håndterOverstyrInntektsgrunnlag</code> → <code>Grunnlagsdata.overstyrArbeidsforhold</code>.</td>
+    <td>Bygger opptjeningen på nytt og logger ny subsumsjon <code>§ 8-2 ledd 1</code>. Utfallet får først praktisk effekt ved neste <code>Ytelser</code>-beregning, se <a href="#deaktivering-8-2">6.1</a>.</td>
+  </tr>
+  <tr>
+    <td><code>subsumsjon</code></td>
+    <td>ferdig bygget subsumsjon for § 8-2 (1)</td>
+    <td>Bygges når objektet opprettes; logges eksplisitt i <code>Vilkårsgrunnlag.valider(...)</code> (førstegangsvurdering) og i <code>overstyrArbeidsforhold(...)</code>.</td>
+    <td>Etterlevelsesloggen (subsumsjonsmeldinger ut på rapid).</td>
+  </tr>
 </table>
+<p class="kilde">Rekkefølgen i praksis: <code>Vilkårsgrunnlag</code> (opptjening bygges, <code>RV_VV_1</code>) → eventuelle overstyringer (<code>startdatoFor</code> til § 8-28-subsumsjon, <code>deaktiver</code>/<code>aktiver</code>) → <code>Ytelser</code> (<code>harTilstrekkeligAntallOpptjeningsdager</code> → <code>RV_OV_1</code> og avviste dager, <code>ansattVedSkjæringstidspunkt</code> → <code>RV_VV_8</code>) → godkjenning/utbetaling.</p>
 
 <h2>6. Overstyring: aktivering/deaktivering av arbeidsforhold</h2>
 <p>Saksbehandler kan deaktivere et arbeidsforhold via <code>OverstyrArbeidsforhold</code>. Da kalles <code>ArbeidstakerOpptjening.deaktiver(orgnummer)</code> (eller <code>aktiver</code>), som setter <code>deaktivert</code>-flagget på arbeidsgiverens ansattperioder og <strong>bygger opptjeningen på nytt</strong> med <code>nyOpptjening</code>. Ny subsumsjon logges.</p>
