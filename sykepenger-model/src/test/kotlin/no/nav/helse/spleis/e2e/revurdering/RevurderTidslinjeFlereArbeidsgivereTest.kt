@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -66,11 +66,9 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 {
             håndterInntektsmelding(listOf(2.januar til 17.januar), beregnetInntekt = 20000.månedlig)
-
-
-
             assertIngenFunksjonelleFeil()
-            assertVarsler(listOf(RV_IM_4), 2.vedtaksperiode.filter())
+            assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }

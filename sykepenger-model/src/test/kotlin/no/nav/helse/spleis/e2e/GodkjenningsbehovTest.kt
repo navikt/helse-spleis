@@ -177,7 +177,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
 
             håndterInntektsmelding(
                 listOf(1.januar til 16.januar),
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "Agp skal utbetales av NAV!!"
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
             )
             assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)

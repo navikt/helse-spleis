@@ -1,6 +1,7 @@
 package no.nav.helse.bugs_showstoppers
 
 import java.time.LocalDateTime
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
@@ -35,6 +36,8 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
@@ -288,6 +291,15 @@ internal class E2EEpic3Test : AbstractDslTest() {
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING
             )
+
+            assertEquals(listOf(
+                10.februar(2020) til 12.februar(2020),
+                27.februar(2020) til 28.februar(2020)
+            ), inspektør.venteperiode(3.vedtaksperiode))
+
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsler(3.vedtaksperiode, RV_IM_3, RV_AO_3)
+            }
         }
     }
 
@@ -437,6 +449,10 @@ internal class E2EEpic3Test : AbstractDslTest() {
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING
             )
+
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsler(1.vedtaksperiode, RV_AO_3)
+            }
         }
     }
 

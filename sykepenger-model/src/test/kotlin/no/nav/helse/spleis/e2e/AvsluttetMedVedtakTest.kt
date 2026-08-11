@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
@@ -20,6 +21,7 @@ import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterH
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterSkjønn
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -250,8 +252,9 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
             val inntektsmeldingId = håndterInntektsmelding(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()),
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "noe"
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
             )
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

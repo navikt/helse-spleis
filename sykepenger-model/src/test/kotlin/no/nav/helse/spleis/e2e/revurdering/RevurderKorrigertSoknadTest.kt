@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -378,24 +379,25 @@ internal class RevurderKorrigertSoknadTest : AbstractDslTest() {
     @Test
     fun `Korrigerende søknad i AvventerVilkårsprøving - setter i gang en overstyring av behandlingen`() {
         a1 {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar))
-        håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar))
+            håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
 
-        håndterInntektsmelding(listOf(31.januar til 15.februar), beregnetInntekt = INNTEKT)
+            håndterInntektsmelding(listOf(31.januar til 15.februar), beregnetInntekt = INNTEKT)
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
-        håndterSøknad(Sykdom(31.januar, 16.februar, 100.prosent))
+            håndterSøknad(Sykdom(31.januar, 16.februar, 100.prosent))
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
 
-        (16..16).forEach {
-            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
-        }
+            (16..16).forEach {
+                assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+            }
         }
     }
 

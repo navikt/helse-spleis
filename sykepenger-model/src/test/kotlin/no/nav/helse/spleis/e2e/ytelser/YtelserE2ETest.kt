@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.ytelser
 
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -137,7 +138,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterInntektsmelding(
                 listOf(1.januar til 16.januar),
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "noe"
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
             ) // Denn må jo være satt da
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -146,6 +147,11 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
+                assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            }
+
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
 
             val forlengelse = 16.januar til 31.januar

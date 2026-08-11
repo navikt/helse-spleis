@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -498,6 +498,7 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
             håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
 
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterSøknad(februar)

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.den
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -14,6 +15,7 @@ import no.nav.helse.januar
 import no.nav.helse.lørdag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
@@ -26,6 +28,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.søndag
 import no.nav.helse.til
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -173,6 +176,13 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
             )
             assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+
+            assertEquals(listOf(
+                1.januar til 5.januar,
+                8.januar til 18.januar
+            ), inspektør.venteperiode(4.vedtaksperiode))
+
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_IM_3, 4.vedtaksperiode.filter())
         }
     }
 }

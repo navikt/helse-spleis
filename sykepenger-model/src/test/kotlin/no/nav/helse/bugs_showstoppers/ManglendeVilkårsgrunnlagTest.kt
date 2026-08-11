@@ -1,5 +1,6 @@
 package no.nav.helse.bugs_showstoppers
 
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
@@ -9,6 +10,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mandag
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -95,6 +97,14 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+
+            assertEquals(listOf(
+                1.januar til 5.januar,
+                8.januar til 8.januar,
+                24.januar til 2.februar
+            ), inspektør.venteperiode(3.vedtaksperiode))
+
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsler(3.vedtaksperiode, RV_IM_3)
         }
     }
 }
