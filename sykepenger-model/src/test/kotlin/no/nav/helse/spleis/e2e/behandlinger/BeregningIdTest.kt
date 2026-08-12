@@ -22,7 +22,7 @@ internal class BeregningIdTest: AbstractDslTest() {
             with(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(7, endringer.size)
+                    assertEquals(6, endringer.size)
                     assertLikBeregningId("IKKE_UTBETALT")
                 }
             }
@@ -33,16 +33,16 @@ internal class BeregningIdTest: AbstractDslTest() {
             with(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(10, endringer.size)
-                    assertNotEquals(endringer[6].beregningId, endringer.last().beregningId)
+                    assertEquals(9, endringer.size)
+                    assertNotEquals(endringer[5].beregningId, endringer.last().beregningId)
                 }
             }
 
             with(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(10, endringer.size)
-                    with(endringer.drop(7)) {
+                    assertEquals(9, endringer.size)
+                    with(endringer.drop(6)) {
                         assertLikBeregningId("IKKE_UTBETALT")
                     }
                 }
@@ -57,7 +57,7 @@ internal class BeregningIdTest: AbstractDslTest() {
             with(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(7, endringer.size)
+                    assertEquals(6, endringer.size)
                     assertLikBeregningId("IKKE_UTBETALT")
                 }
             }
@@ -66,7 +66,7 @@ internal class BeregningIdTest: AbstractDslTest() {
             with(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(7, endringer.size)
+                    assertEquals(6, endringer.size)
                     assertLikBeregningId("UTBETALT")
                 }
             }

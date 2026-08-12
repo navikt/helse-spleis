@@ -36,7 +36,7 @@ internal class RevurderingseventyrEventTest : AbstractDslTest() {
         nyttVedtak(januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
 
-        assertOverstyringIgangsatt("NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "SYKDOMSTIDSLINJE")
+        assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, SYKDOMSTIDSLINJE")
         revurderingIgangsattEvent(nr = 2) {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
@@ -49,7 +49,7 @@ internal class RevurderingseventyrEventTest : AbstractDslTest() {
         tilGodkjenning(januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
 
-        assertOverstyringIgangsatt("NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "SYKDOMSTIDSLINJE")
+        assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, SYKDOMSTIDSLINJE")
         revurderingIgangsattEvent(nr = 2) {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
@@ -114,7 +114,7 @@ internal class RevurderingseventyrEventTest : AbstractDslTest() {
         tilGodkjenning(januar)
         håndterOverstyrInntekt(1.januar, 30000.månedlig)
 
-        assertOverstyringIgangsatt("NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "ARBEIDSGIVEROPPLYSNINGER")
+        assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, ARBEIDSGIVEROPPLYSNINGER")
         revurderingIgangsattEvent(nr = 2) {
             this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
             this medSkjæringstidspunkt 1.januar
@@ -130,7 +130,7 @@ internal class RevurderingseventyrEventTest : AbstractDslTest() {
         val januar = observatør.utbetalteVedtaksperioder.first()
         val februar = observatør.utbetalteVedtaksperioder.last()
 
-        assertOverstyringIgangsatt("NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "NY_PERIODE", "SYKDOMSTIDSLINJE")
+        assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, NY_PERIODE, SYKDOMSTIDSLINJE")
         revurderingIgangsattEvent(nr = 3) {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
@@ -149,7 +149,7 @@ internal class RevurderingseventyrEventTest : AbstractDslTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
-        assertOverstyringIgangsatt("NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "NY_PERIODE", "NY_PERIODE", "KORRIGERT_SØKNAD")
+        assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, NY_PERIODE, NY_PERIODE, KORRIGERT_SØKNAD")
     }
 
     @Test
@@ -157,7 +157,7 @@ internal class RevurderingseventyrEventTest : AbstractDslTest() {
         nyttVedtak(januar)
         håndterSøknad(29.januar til 30.januar)
         håndterOverstyrInntekt(1.januar, 30000.månedlig)
-        assertOverstyringIgangsatt("NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "KORRIGERT_SØKNAD", "ARBEIDSGIVEROPPLYSNINGER")
+        assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, KORRIGERT_SØKNAD, ARBEIDSGIVEROPPLYSNINGER")
     }
 
     @Test
@@ -170,7 +170,7 @@ internal class RevurderingseventyrEventTest : AbstractDslTest() {
             val periodeAG1 = observatør.utbetalteVedtaksperioder.first()
             val periodeAG2 = observatør.utbetalteVedtaksperioder.last()
 
-            assertOverstyringIgangsatt("NY_PERIODE", "NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "INNTEKT_FRA_INNTEKTSMELDING", "ARBEIDSGIVEROPPLYSNINGER")
+            assertOverstyringIgangsatt("NY_PERIODE, NY_PERIODE, ARBEIDSGIVERPERIODE, ARBEIDSGIVERPERIODE, ARBEIDSGIVEROPPLYSNINGER")
             revurderingIgangsattEvent(nr = 4) {
                 this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
                 this medSkjæringstidspunkt 1.januar
@@ -212,7 +212,7 @@ internal class RevurderingseventyrEventTest : AbstractDslTest() {
         val overstyringId = UUID.randomUUID()
         håndterOverstyrInntekt(1.januar, 30000.månedlig, hendelseId = overstyringId)
 
-        assertOverstyringIgangsatt("NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "NY_PERIODE", "NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "NY_PERIODE", "ARBEIDSGIVEROPPLYSNINGER")
+        assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, NY_PERIODE, NY_PERIODE, REFUSJONSOPPLYSNINGER, NY_PERIODE, ARBEIDSGIVEROPPLYSNINGER")
         revurderingIgangsattEvent(nr = 6) {
             this bleForårsaketAv "ARBEIDSGIVEROPPLYSNINGER"
             this medSkjæringstidspunkt 1.januar
@@ -241,7 +241,7 @@ internal class RevurderingseventyrEventTest : AbstractDslTest() {
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Dagtype.Feriedag)))
 
-        assertOverstyringIgangsatt("NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "NY_PERIODE", "NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "NY_PERIODE", "SYKDOMSTIDSLINJE")
+        assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, NY_PERIODE, NY_PERIODE, REFUSJONSOPPLYSNINGER, NY_PERIODE, SYKDOMSTIDSLINJE")
         revurderingIgangsattEvent(nr = 6) {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
             this medSkjæringstidspunkt 1.januar
@@ -250,7 +250,8 @@ internal class RevurderingseventyrEventTest : AbstractDslTest() {
     }
 
     private fun assertOverstyringIgangsatt(vararg event: String) {
-        assertEquals(event.toList(), observatør.overstyringIgangsatt.map { it.årsak })
+        val events = event.flatMap { it.split(", ") }
+        assertEquals(events, observatør.overstyringIgangsatt.map { it.årsak })
     }
 
     private fun revurderingIgangsattEvent(nr: Int = 0, assertBlock: EventSubscription.OverstyringIgangsatt.() -> Unit) {

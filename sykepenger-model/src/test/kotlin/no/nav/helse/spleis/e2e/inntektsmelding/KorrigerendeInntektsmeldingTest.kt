@@ -179,8 +179,8 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
-            assertEquals(listOf("NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "NY_PERIODE", "NY_PERIODE", "ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
+            assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, NY_PERIODE, NY_PERIODE, ARBEIDSGIVERPERIODE")
+
             assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
             assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
         }
@@ -278,8 +278,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
-            assertEquals(listOf("NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "NY_PERIODE", "NY_PERIODE", "ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
+            assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, NY_PERIODE, NY_PERIODE, ARBEIDSGIVERPERIODE")
             assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
 
@@ -329,8 +328,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
-            assertEquals(listOf("NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "INNTEKT_FRA_INNTEKTSMELDING"), overstyringerIgangsatt)
+            assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, INNTEKT_FRA_INNTEKTSMELDING")
             assertVarsler(listOf(RV_IM_24, RV_UT_23), 1.vedtaksperiode.filter())
             assertInntektsgrunnlag(15.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT * 1.1)
@@ -351,8 +349,8 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
-            assertEquals(listOf("NY_PERIODE", "INNTEKT_FRA_INNTEKTSMELDING", "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER"), overstyringerIgangsatt)
+            assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER")
+
             assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
@@ -460,5 +458,10 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         }
+    }
+
+    private fun assertOverstyringIgangsatt(vararg event: String) {
+        val events = event.flatMap { it.split(", ") }
+        assertEquals(events, observatør.overstyringIgangsatt.map { it.årsak })
     }
 }

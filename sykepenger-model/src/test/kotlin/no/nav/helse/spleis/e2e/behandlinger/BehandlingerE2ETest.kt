@@ -11,7 +11,6 @@ import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSi
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
@@ -318,7 +317,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(10, behandling.endringer.size)
+                    assertEquals(9, behandling.endringer.size)
                     assertEquals(TilstandView.BEREGNET, behandling.tilstand)
                 }
             }
@@ -374,7 +373,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(7, behandling.endringer.size)
+                    assertEquals(6, behandling.endringer.size)
                 }
                 behandlinger[1].also { behandling ->
                     assertEquals(2, behandling.endringer.size)
@@ -384,7 +383,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(7, behandling.endringer.size)
+                    assertEquals(6, behandling.endringer.size)
                     assertEquals(VEDTAK_FATTET, behandling.tilstand)
                 }
                 behandlinger[1].also { behandling ->
@@ -745,7 +744,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(1.januar til 25.januar)
             forlengVedtak(26.januar til 10.februar)
-            nyttVedtak(14.februar til 20.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar)) // samme agp, men nytt skjæringstidspunkt
+            nyttVedtak(14.februar til 20.februar, arbeidsgiverperiode = emptyList()) // samme agp, arbeidsgiver blir ikke spurt på nå
 
             nyttVedtak(15.mars til 10.april)
             nyttVedtak(august)

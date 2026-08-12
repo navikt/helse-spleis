@@ -630,7 +630,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     fun `innfører ny arbeidsgiverperiode på en førstegangsbehandling etter tidligere utbetalt`() {
         a1 {
             nyttVedtak(januar)
-            nyttVedtak(14.februar til 10.mars, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            nyttVedtak(14.februar til 10.mars, arbeidsgiverperiode = emptyList())
             nullstillTilstandsendringer()
             val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
             håndterOverstyrTidslinje((14.februar til 16.februar).map { dag ->
@@ -692,7 +692,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     fun `innfører ny arbeidsgiverperiode ved å lage feriedager på en førstegangsbehandling etter tidligere utbetalt`() {
         a1 {
             nyttVedtak(januar)
-            nyttVedtak(14.februar til 10.mars, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            nyttVedtak(14.februar til 10.mars, arbeidsgiverperiode = emptyList())
             nullstillTilstandsendringer()
             val sykepengegrunnlagFør = inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.inntektsgrunnlag ?: fail { "finner ikke vilkårsgrunnlag" }
             håndterOverstyrTidslinje((14.februar til 16.februar).map { dag ->
@@ -848,7 +848,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            nyttVedtak(5.mars til 31.mars, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            nyttVedtak(5.mars til 31.mars, arbeidsgiverperiode = emptyList())
 
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(13.februar, 28.februar))
             assertVarsler(emptyList(), 3.vedtaksperiode.filter())

@@ -1080,7 +1080,7 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
 ): UUID {
     val arbeidsgivere = listOf(this.orgnummer) + ghosts
     val vedtaksperiode = nyPeriode(periode, grad)
-    håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
+    håndterArbeidsgiveropplysninger(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
     håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiode, *arbeidsgivere.toTypedArray())
     håndterYtelser(vedtaksperiode)
     håndterSimulering(vedtaksperiode)

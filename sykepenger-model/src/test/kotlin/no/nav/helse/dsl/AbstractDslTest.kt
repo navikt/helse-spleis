@@ -128,7 +128,7 @@ internal abstract class AbstractDslTest {
         }
         forEach {
             it {
-                håndterInntektsmelding(listOf(periode.start til periode.start.plusDays(15)), beregnetInntekt = inntekt)
+                håndterArbeidsgiveropplysninger(listOf(periode.start til periode.start.plusDays(15)), beregnetInntekt = inntekt)
             }
         }
         (first()){
