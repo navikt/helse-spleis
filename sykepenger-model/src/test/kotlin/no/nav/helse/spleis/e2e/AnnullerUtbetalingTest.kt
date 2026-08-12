@@ -135,12 +135,13 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
             // AUU-en skal utbetales allikevel
-            håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", vedtaksperiodeId = 1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
@@ -176,12 +177,13 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
             // AUU-en skal utbetales allikevel
-            håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", vedtaksperiodeId = 1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
