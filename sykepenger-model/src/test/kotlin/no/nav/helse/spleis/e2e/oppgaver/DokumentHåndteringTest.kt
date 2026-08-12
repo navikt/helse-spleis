@@ -21,7 +21,6 @@ import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
@@ -285,7 +284,6 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             assertEquals(emptyList<Any>(), observatør.inntektsmeldingIkkeHåndtert)
             assertEquals(listOf(søknadId to 1.vedtaksperiode), observatør.søknadHåndtert)
             assertEquals(listOf(im to 1.vedtaksperiode), observatør.inntektsmeldingHåndtert)
-            assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
         }
     }
 

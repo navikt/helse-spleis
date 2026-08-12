@@ -1700,10 +1700,10 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             assertTrue((1.januar til 7.januar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
             assertTrue((8.januar til 20.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag || tidslinje[it] is Dag.Arbeidsgiverdag || tidslinje[it] is Dag.ArbeidsgiverHelgedag })
             assertTrue((21.januar til 23.januar).all { tidslinje[it] is Dag.UkjentDag })
-            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertEquals(8.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertEquals(listOf(8.januar til 20.januar), inspektør.venteperiode(2.vedtaksperiode))
         }
     }
 

@@ -17,6 +17,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -77,7 +78,12 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittInntekt(INNTEKT),
                 Arbeidsgiveropplysning.OppgittRefusjon(beløp = INNTEKT, endringer = emptyList())
             )
-            assertVarsler(1.vedtaksperiode, Varselkode.RV_IM_3, RV_AO_3)
+            assertEquals(listOf(
+                2.januar til 3.januar,
+                5.januar til 16.januar
+            ), inspektør.venteperiode(1.vedtaksperiode))
+
+            assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 

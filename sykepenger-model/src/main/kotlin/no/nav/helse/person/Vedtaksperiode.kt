@@ -929,11 +929,20 @@ internal class Vedtaksperiode private constructor(
 
     internal fun validerArbeidsgiverperiode(oppgittArbeidsgiverperiode: OppgittArbeidgiverperiode, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        if (!behandlinger.åpenForEndring()) return
-        if (!behandlinger.dagerUtenNavAnsvar.dager.flatten().containsAll(oppgittArbeidsgiverperiode.perioder.flatten())) {
+        val beregnetAgp = behandlinger.dagerUtenNavAnsvar.dager.flatten()
+        val oppgittAgp = oppgittArbeidsgiverperiode.perioder.flatten()
+
+        if (beregnetAgp.isEmpty()) {
+            // Vi har typisk bare arbeidsdager på sykdomstidslinjen, men arbeidsgiver har opplyst om en arbeidsgiverperiode.
             aktivitetsloggMedVedtaksperiodekontekst.varsel(Varselkode.RV_IM_3)
-            aktivitetsloggMedVedtaksperiodekontekst.info(melding = "Beregnet agp ${behandlinger.dagerUtenNavAnsvar.dager} mens arbeidsgiver opplyser om ${oppgittArbeidsgiverperiode.perioder}")
+            aktivitetsloggMedVedtaksperiodekontekst.info(melding = "Ingen beregnet agp mens arbeidsgiver opplyser om ${oppgittArbeidsgiverperiode.perioder}")
+            return
         }
+        if (beregnetAgp.containsAll(oppgittAgp)) return
+        if (oppgittAgp.containsAll(beregnetAgp)) return // Selvbestemt IM hvor arbeidsgiver opplyser om fler dager enn vi har fått søknad for enda.
+
+        aktivitetsloggMedVedtaksperiodekontekst.varsel(Varselkode.RV_IM_3)
+        aktivitetsloggMedVedtaksperiodekontekst.info(melding = "Beregnet agp ${behandlinger.dagerUtenNavAnsvar.dager} mens arbeidsgiver opplyser om ${oppgittArbeidsgiverperiode.perioder}")
     }
 
     private fun <T> håndterOppgittArbeidsgiverperiode(eventBus: EventBus, arbeidsgiveropplysninger: T, vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
