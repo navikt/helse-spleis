@@ -3,7 +3,7 @@ include(
     "jobs", "sykepenger-serde", "sykepenger-api", "sykepenger-api-graphql", "sykepenger-api-dto", "sykepenger-model", "sykepenger-model-dto",
     "sykepenger-mediators", "sykepenger-opprydding-dev", "sykepenger-primitiver", "sykepenger-primitiver-dto", "sykepenger-utbetaling",
     "sykepenger-utbetaling-dto", "sykepenger-aktivitetslogg", "sykepenger-aktivitetslogg-dto", "sykepenger-etterlevelse-api",
-    "sykepenger-økonomi", "sykepenger-økonomi-dto"
+    "sykepenger-økonomi", "sykepenger-økonomi-dto", "sykepenger-vilkarsproving"
 )
 
 val rapidsAndRiversVersion = "2026011411051768385145.e8ebad1177b4"
