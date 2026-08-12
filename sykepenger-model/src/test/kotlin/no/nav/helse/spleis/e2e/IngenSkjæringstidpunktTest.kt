@@ -175,12 +175,9 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
-            håndterInntektsmelding(
-                listOf(1.januar til 16.januar),
-                førsteFraværsdag = 5.februar
-            )
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent))
 
             assertEquals(januar, inspektør.periode(1.vedtaksperiode))
@@ -201,12 +198,9 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
-            håndterInntektsmelding(
-                listOf(1.januar til 16.januar),
-                førsteFraværsdag = 5.februar
-            )
             håndterSykmelding(Sykmeldingsperiode(24.februar, 12.mars))
             håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
             håndterSøknad(Sykdom(24.februar, 12.mars, 100.prosent))
 
             assertEquals(januar, inspektør.periode(1.vedtaksperiode))
@@ -228,12 +222,9 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
-            håndterInntektsmelding(
-                listOf(1.januar til 16.januar),
-                førsteFraværsdag = 5.februar
-            )
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent), Ferie(24.februar, 28.februar))
 
             assertEquals(januar, inspektør.periode(1.vedtaksperiode))

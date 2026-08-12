@@ -36,6 +36,7 @@ import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.Arbeidsgiver
 import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.NavDag
 import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.NavHelgDag
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -138,15 +139,12 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
         a1 {
             nyPeriode(1.januar til 10.januar, a1)
             nyPeriode(15.januar til 20.januar, a1)
-            håndterInntektsmelding(
-                listOf(15.januar til 30.januar)
-            )
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(15.januar til 30.januar))
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
             nyPeriode(21.januar til 10.mars, a1)
-            assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
@@ -165,10 +163,10 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-            håndterInntektsmelding(
-                listOf(1.januar til 16.januar)
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                vedtaksperiodeId = 2.vedtaksperiode
             )
-            assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
@@ -192,7 +190,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(4.vedtaksperiode)
             håndterUtbetalt()
 
-            assertVarsler(listOf(RV_IM_3), 3.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IM_3, RV_AO_3), 2.vedtaksperiode.filter())
         }
     }
 

@@ -37,7 +37,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
@@ -95,13 +94,14 @@ internal class E2EEpic3Test : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(8.januar, 9.januar))
             håndterSykmelding(Sykmeldingsperiode(15.januar, 16.januar))
             håndterSøknad(Sykdom(3.januar, 4.januar, 100.prosent))
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(
                     3.januar til 4.januar,
                     8.januar til 9.januar,
                     15.januar til 26.januar
                 )
             )
+            assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
 
             assertTilstander(
                 1.vedtaksperiode,
@@ -131,8 +131,6 @@ internal class E2EEpic3Test : AbstractDslTest() {
                 2.vedtaksperiode,
                 START,
                 AVVENTER_INNTEKTSMELDING,
-                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
-                AVSLUTTET_UTEN_UTBETALING,
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING
             )

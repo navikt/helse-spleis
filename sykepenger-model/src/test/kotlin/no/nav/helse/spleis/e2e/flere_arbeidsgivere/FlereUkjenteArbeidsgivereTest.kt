@@ -65,15 +65,15 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
 
         a2 { assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter()) }
 
+        nullstillTilstandsendringer()
+        val søknad = UUID.randomUUID()
         val im2 = a2 {
+            håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), søknadId = søknad)
             håndterInntektsmelding(
                 listOf(1.mars til 16.mars),
                 beregnetInntekt = inntektA2
             )
         }
-        nullstillTilstandsendringer()
-        val søknad = UUID.randomUUID()
-        a2 { håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), søknadId = søknad) }
 
         a1 {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {

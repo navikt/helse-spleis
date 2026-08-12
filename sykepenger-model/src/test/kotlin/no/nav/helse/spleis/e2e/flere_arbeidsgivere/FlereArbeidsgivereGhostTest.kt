@@ -1,9 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import OpenInSpanner
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -138,7 +136,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterUtbetalt()
         }
         a2 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(mandag den 29.januar til 13.februar)
             )
         }
@@ -807,10 +805,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Sykdom(1.februar, 12.februar, 100.prosent))
-            håndterInntektsmelding(
-                listOf(1.februar til 16.februar)
-            )
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
         a1 {
             håndterSykmelding(Sykmeldingsperiode(13.februar, 28.februar))
@@ -823,6 +817,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Sykdom(13.februar, 28.februar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar))
         }
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)

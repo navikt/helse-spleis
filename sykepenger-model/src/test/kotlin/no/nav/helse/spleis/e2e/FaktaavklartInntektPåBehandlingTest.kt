@@ -43,7 +43,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
     fun `Velger RIKTIG inntekt når en AUU først har fått lagret faktaavkalrt inntekt på behandlignen sin`() {
         a1 {
             håndterSøknad(1.januar til 20.januar)
-            val im1 = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.05)
+            val im1 = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.05)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -51,12 +51,11 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
 
-            val im2 = håndterInntektsmelding(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT * 1.10)
-
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-            assertVarsler(1.vedtaksperiode, RV_IM_24)
+            val im2 = håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT * 1.10)
 
             håndterSøknad(21.januar til 31.januar)
+            assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+
             // Før beregning har vi rett inntekt på behandlingene
             assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
             assertEquals(im2, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
@@ -76,7 +75,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
 
             // Så kommer det en korrigert IM
             val im3 = håndterInntektsmelding(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT * 1.15)
-            assertVarsler(2.vedtaksperiode, RV_IM_4)
+            assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
             // Før beregning har vi rett inntekt på behandlingene
             assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
             assertEquals(im3, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
@@ -88,6 +87,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             assertInntektsgrunnlag(5.januar, 1) {
                 assertInntektsgrunnlag(a1, INNTEKT * 1.15, forventetKildeId = im3)
             }
+            assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
         }
     }
 

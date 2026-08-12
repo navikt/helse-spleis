@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -9,7 +8,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
@@ -194,23 +192,19 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 12.januar, 100.prosent))
-            håndterInntektsmelding(
-                listOf(1.januar til 16.januar),
-            )
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
         a1 {
             håndterSykmelding(Sykmeldingsperiode(13.januar, 31.januar))
         }
         a2 {
             håndterSykmelding(Sykmeldingsperiode(13.januar, 31.januar))
-
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(13.januar, 31.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
         a1 {
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(13.januar, 31.januar, 100.prosent))
         }
         a2 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(13.januar, 31.januar, 100.prosent))
             assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
     }

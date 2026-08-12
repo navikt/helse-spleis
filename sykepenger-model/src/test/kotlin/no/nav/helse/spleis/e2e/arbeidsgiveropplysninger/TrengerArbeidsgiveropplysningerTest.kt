@@ -757,7 +757,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `Periode etter kort gap skal ikke sende forespørsel dersom inntektsmeldingen allerede er mottatt`() {
         a1 {
             nyttVedtak(januar)
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 10.februar
             )

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.den
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -15,7 +14,6 @@ import no.nav.helse.januar
 import no.nav.helse.lørdag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
@@ -28,7 +26,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.søndag
 import no.nav.helse.til
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -74,8 +71,8 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
             )
 
             håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars))
-            håndterInntektsmelding(listOf(3.mars til 18.mars))
             håndterSøknad(3.mars til 26.mars)
+            håndterArbeidsgiveropplysninger(listOf(3.mars til 18.mars))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -120,16 +117,8 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
 
             håndterSykmelding(Sykmeldingsperiode(8.mars, 26.mars))
-            håndterInntektsmelding(
-                listOf(Periode(3.mars, 18.mars))
-            )
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
-            }
-
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-
             håndterSøknad(8.mars til 26.mars)
+            håndterArbeidsgiveropplysninger(listOf(Periode(3.mars, 18.mars)))
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)

@@ -4,7 +4,6 @@ import java.math.BigDecimal
 import java.util.UUID
 import kotlin.collections.single
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Utbetalingshistorikk
@@ -76,15 +75,9 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
 
     fun håndterBehovSomOppstårAutomatisk(
         operasjon: () -> Unit,
-        hendelse: Hendelse,
         håndterInntektsmeldingerReplay: (inntektsmeldingerReplay: InntektsmeldingerReplay) -> Unit,
         håndterInitiellHistorikkFraInfotrygd: (utbetalingshistorikk: Utbetalingshistorikk) -> Unit
     ) {
-        // TODO: Denne må kunne fjernes
-        (hendelse as? Inntektsmelding)?.let { inntektsmelding ->
-            uhåndterteInntektsmeldinger[inntektsmelding.metadata.meldingsreferanseId.id] = Inntektsmeldingdetaljer(inntektsmelding)
-        }
-
         val nyeBehov = alleBehovSomOppstårSomFølgeAv {
             operasjon()
         }

@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -51,7 +50,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             observatør.inntektsmeldingHåndtert.clear()
-            val inntektsmelding = håndterInntektsmelding(
+            val inntektsmelding = håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 10.februar
             )
@@ -68,7 +67,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
         a1 {
             val søknadId1 = UUID.randomUUID()
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), søknadId = søknadId1)
-            val inntektsmelding = håndterInntektsmelding(listOf(1.januar til 16.januar))
+            val inntektsmelding = håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.januar til 16.januar))
             val søknadId2 = UUID.randomUUID()
             håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), søknadId = søknadId2)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -86,14 +85,10 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
         a2 { håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), søknadId = søknadId1A2) }
 
         val inntektsmeldingA1 = a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar)).also {
-                if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
-            }
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.januar til 16.januar))
         }
         val inntektsmeldingA2 = a2 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar)).also {
-                if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
-            }
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.januar til 16.januar))
         }
 
         val søknadId2A1 = UUID.randomUUID()
@@ -576,7 +571,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     fun `inntektsmelding med første fraværsdag utenfor sykdom - ett tidligere vedtak - inntektsmelding ikke håndtert fordi inntekt håndteres ikke`() {
         a1 {
             nyttVedtak(januar)
-            val im2 = håndterInntektsmelding(
+            val im2 = håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.februar,
                 refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null)
@@ -585,7 +580,6 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertTrue(im2 in observatør.inntektsmeldingHåndtert.map(Pair<UUID, *>::first))
-            assertTrue(im2 in observatør.inntektsmeldingIkkeHåndtert)
         }
     }
 
@@ -621,9 +615,8 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     fun `Skal legge til hendelsesid for korrigerende inntektsmelding på alle vedtaksperioder den treffer`() {
         a1 {
             nyPeriode(1.januar til 10.januar)
-            val im1 = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar)))
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             nyPeriode(11.januar til 31.januar)
+            val im1 = MeldingsreferanseId(håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

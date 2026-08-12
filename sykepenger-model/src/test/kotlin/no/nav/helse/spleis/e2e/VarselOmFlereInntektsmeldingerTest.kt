@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -10,8 +9,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -30,13 +28,12 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractDslTest() {
             håndterSøknad(29.mars(2021) til 5.april(2021))
 
             håndterSykmelding(Sykmeldingsperiode(6.april(2021), 16.april(2021)))
-            håndterInntektsmelding(
-                    arbeidsgiverperioder = listOf(22.mars(2021) til 6.april(2021)),
-                    beregnetInntekt = INNTEKT
-            )
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
 
             håndterSøknad(Sykdom(6.april(2021), 16.april(2021), 50.prosent))
+            håndterArbeidsgiveropplysninger(
+                arbeidsgiverperioder = listOf(22.mars(2021) til 6.april(2021)),
+                beregnetInntekt = INNTEKT
+            )
 
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
@@ -55,8 +52,8 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterSøknad(februar)
             håndterArbeidsgiveropplysninger(
-                    arbeidsgiverperioder = listOf(1.februar til 16.februar),
-                    vedtaksperiodeId = 1.vedtaksperiode
+                arbeidsgiverperioder = listOf(1.februar til 16.februar),
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -65,14 +62,14 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars))
-            håndterInntektsmelding(
-                    arbeidsgiverperioder = listOf(1.mars til 16.mars),
-                    beregnetInntekt = INNTEKT
-            )
             håndterSøknad(Sykdom(1.mars, 20.mars, 50.prosent))
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                arbeidsgiverperioder = listOf(1.mars til 16.mars),
+                beregnetInntekt = INNTEKT
+            )
 
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-            assertVarsler(listOf(RV_IM_3), 2.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IM_24, RV_AO_3), 2.vedtaksperiode.filter())
         }
     }
 }

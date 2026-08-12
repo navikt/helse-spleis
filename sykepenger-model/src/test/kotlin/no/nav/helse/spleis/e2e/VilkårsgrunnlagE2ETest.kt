@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import OpenInSpanner
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -65,11 +63,10 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
     fun `Forkaster ikke vilkårsgrunnlag om det er en periode i AUU med samme skjæringstidspunkt som den som blir annullert`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
             nyPeriode(17.januar til 31.januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -113,7 +110,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
     }
 
     @Disabled("Som best jeg klarte gjenskaper dette hendelsesforløp i prod, men det blir en annen tilstand i spannerish enn prod-caset?")
-    @OpenInSpanner
     @Test
     fun `Rare ting skjer med korte perioder, out of order søknader, og inntektsmeldinger fra feil arbeidsgiver`() {
         val sfo = a2

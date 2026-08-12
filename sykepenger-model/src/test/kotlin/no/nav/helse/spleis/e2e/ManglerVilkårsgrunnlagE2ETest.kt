@@ -186,12 +186,10 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             // Arbeidsgiver sender inntektsmelding for forlengelse i Mars _før_ vi møttar søknad.
             // Så lenge det ikke treffer noen vedtaksperiode i Spleis skjer det ingenting.
             // Personen vært frisk 1. & 2.Mars, så er nytt skjæringstidspunkt, men samme arbeidsgiverperiode
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
                 førsteFraværsdag = 5.mars
             )
-            assertInfo("Inntektsmelding før søknad - er relevant for sykmeldingsperioder [05-03-2018 til 31-03-2018]")
-            assertTilstandFørInntektsmeldingHensyntas()
 
             // Når søknaden kommer replayes Inntektsmelding og nå puttes plutselig info fra Inntektsmlding på
             // arbeidsgiver, også lengre tilbake i tid enn vedtaksperioden som blir truffet.

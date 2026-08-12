@@ -5,15 +5,14 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -23,6 +22,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -166,12 +166,12 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         }
         a2 {
             håndterSøknad(Sykdom(1.mars, 16.mars, 100.prosent))
-            håndterInntektsmelding(listOf(1.mars til 16.mars))
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.mars til 16.mars))
         }
 
         a1 {
             håndterSøknad(Sykdom(1.mai, 16.mai, 100.prosent))
-            håndterInntektsmelding(listOf(1.mai til 16.mai))
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.mai til 16.mai))
 
             nullstillTilstandsendringer()
 
@@ -179,12 +179,14 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
                 ArbeidsgiverUtbetalingsperiode(a2, 1.mars, 5.mars),
                 ArbeidsgiverUtbetalingsperiode(a1, 1.mai, 5.mai)
             )
+            assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
 
             assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
         }
         a2 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
         }
     }
 

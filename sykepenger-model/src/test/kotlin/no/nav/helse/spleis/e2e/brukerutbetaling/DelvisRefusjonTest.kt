@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -794,16 +795,13 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterInntektsmelding(
-                emptyList(),
-                førsteFraværsdag = 1.februar
-            )
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterSøknad(februar)
+            håndterSelvbestemtArbeidsgiveropplysninger(emptyList())
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         }
     }

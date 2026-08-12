@@ -124,7 +124,6 @@ internal class TestPerson(
         forrigeAktivitetslogg = Aktivitetslogg(personlogg)
         try {
             behovshåndterer.håndterBehovSomOppstårAutomatisk(
-                hendelse = this,
                 operasjon = {
                     person.håndter(eventBus, this, forrigeAktivitetslogg)
                 },
@@ -242,6 +241,32 @@ internal class TestPerson(
         )
 
         /** <Arbeidsgiveropplysninger> **/
+
+        internal fun håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
+            arbeidsgiverperioder: List<Periode>,
+            beregnetInntekt: Inntekt = INNTEKT,
+            førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
+            begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+            id: UUID = UUID.randomUUID(),
+            mottatt: LocalDateTime = LocalDateTime.now(),
+            arbeidsforholdId: String? = null
+        ): UUID {
+            val inntektsmelding = arbeidsgiverHendelsefabrikk.lagInntektsmelding(
+                arbeidsgiverperioder,
+                beregnetInntekt,
+                førsteFraværsdag,
+                refusjon,
+                opphørAvNaturalytelser,
+                begrunnelseForReduksjonEllerIkkeUtbetalt,
+                id,
+                mottatt = mottatt,
+                arbeidsforholdId = arbeidsforholdId
+            )
+            behovshåndterer.gammelInntektsmelding(inntektsmelding)
+            return id
+        }
 
         internal fun håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder: List<Periode>,
@@ -595,32 +620,6 @@ internal class TestPerson(
             )
                 .håndter(Person::håndterInntektsopplysningerFraLagretInntektsmelding)
             return meldingsreferanseId
-        }
-
-        internal fun håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
-            arbeidsgiverperioder: List<Periode>,
-            beregnetInntekt: Inntekt = INNTEKT,
-            førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
-            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-            begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-            id: UUID = UUID.randomUUID(),
-            mottatt: LocalDateTime = LocalDateTime.now(),
-            arbeidsforholdId: String? = null
-        ): UUID {
-            val inntektsmelding = arbeidsgiverHendelsefabrikk.lagInntektsmelding(
-                arbeidsgiverperioder,
-                beregnetInntekt,
-                førsteFraværsdag,
-                refusjon,
-                opphørAvNaturalytelser,
-                begrunnelseForReduksjonEllerIkkeUtbetalt,
-                id,
-                mottatt = mottatt,
-                arbeidsforholdId = arbeidsforholdId
-            )
-            behovshåndterer.gammelInntektsmelding(inntektsmelding)
-            return id
         }
 
         internal fun assertInntektshistorikkForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {

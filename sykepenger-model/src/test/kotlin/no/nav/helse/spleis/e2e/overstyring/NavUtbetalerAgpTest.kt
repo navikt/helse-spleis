@@ -149,37 +149,6 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
     }
 
     @Test
-    fun `kort periode så gap til neste - korrigert inntektsmelding opplyser om ikke-utbetalt AGP - men er to sykefraværstilfeller`() {
-        a1 {
-            nyPeriode(1.januar til 15.januar, a1)
-            val im1 = håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-            nyPeriode(20.januar til 30.januar, a1)
-            assertEquals(0, observatør.inntektsmeldingHåndtert.size)
-            assertEquals(listOf(im1, im1), observatør.inntektsmeldingIkkeHåndtert)
-            assertEquals(20.januar til 30.januar, inspektør.periode(2.vedtaksperiode))
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-
-            håndterInntektsmelding(
-                listOf(1.januar til 16.januar),
-                førsteFraværsdag = lørdag den 20.januar,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel"
-            )
-            assertEquals(listOf(1.januar til 15.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-            assertEquals(listOf(20.januar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
-
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-
-            assertEquals("SSSSSHH SSSSSHH SU???HH SSSSSHH SS", inspektør.sykdomstidslinje.toShortString())
-            assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
-            assertVarsler(listOf(RV_IM_8), 2.vedtaksperiode.filter())
-        }
-    }
-
-    @Test
     fun `begrunnelse for reduksjon påvirker ikke tidligere arbeidsgiverperiode når første fraværsdag er opplyst`() {
         a1 {
             nyPeriode(1.januar til 4.januar, a1)

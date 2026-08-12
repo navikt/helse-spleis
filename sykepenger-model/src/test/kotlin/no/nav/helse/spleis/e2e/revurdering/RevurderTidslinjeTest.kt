@@ -24,10 +24,8 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -45,7 +43,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING_TIL
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
@@ -873,57 +870,6 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             assertEquals(1, inspektør.avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(2, inspektør.avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
             assertEquals(2, inspektør.avsluttedeUtbetalingerForVedtaksperiode(3.vedtaksperiode).size)
-        }
-    }
-
-    @Test
-    fun `forlengelse samtidig som en aktiv revurdering hvor forlengelsen sin IM flytter skjæringstidspunktet til aktive revurderingen`() {
-        a1 {
-            nyttVedtak(3.januar til 26.januar)
-
-            håndterOverstyrTidslinje((16.januar til 26.januar).map { manuellFeriedag(it) })
-            håndterYtelser(1.vedtaksperiode)
-
-            håndterSykmelding(Sykmeldingsperiode(30.januar, 5.februar))
-            assertEquals("SSSHH SSSSSHH SFFFFFF FFFFF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-            håndterInntektsmelding(
-                listOf(1.januar til 16.januar),
-                førsteFraværsdag = 30.januar
-            )
-
-            assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
-            assertEquals("UUSSSHH SSSSSHH SFFFFFF FFFFF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        }
-        nullstillTilstandsendringer()
-        a1 {
-            håndterSøknad(Sykdom(30.januar, 5.februar, 100.prosent))
-
-            assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            assertVarsler(listOf(RV_IV_7, RV_UT_23, RV_IM_24), 1.vedtaksperiode.filter())
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-
-            håndterVilkårsgrunnlag(2.vedtaksperiode)
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            håndterUtbetalt()
-
-            assertTilstander(
-                2.vedtaksperiode,
-                START,
-                AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET
-            )
         }
     }
 

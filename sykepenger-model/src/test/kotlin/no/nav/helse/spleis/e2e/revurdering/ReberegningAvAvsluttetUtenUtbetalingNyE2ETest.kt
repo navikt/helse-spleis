@@ -70,17 +70,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     fun `arbeidsgiver opplyser om egenmeldinger og bruker opplyser om ferie`() = a1 {
         håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        nullstillTilstandsendringer()
-
-        håndterInntektsmelding(
-            listOf(10.januar til 25.januar),
-            beregnetInntekt = INNTEKT
-        )
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(10.januar, 28.januar, 100.prosent), Ferie(10.januar, 28.januar))
+        håndterSelvbestemtArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
 
         assertEquals("UUUGG UUUUUGG UUUUFFF", inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).toShortString())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)

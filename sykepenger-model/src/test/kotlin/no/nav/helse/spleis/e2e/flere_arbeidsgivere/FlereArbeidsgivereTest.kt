@@ -39,7 +39,6 @@ import no.nav.helse.onsdag
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.GrunnlagsdataView
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -1478,13 +1477,12 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSøknad(1.januar til 16.januar) }
         a2 { håndterSøknad(1.januar til 16.januar) }
         a1 { håndterSykmelding(17.januar til 31.januar) }
-        a2 {
-            håndterSykmelding(17.januar til 31.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
-        }
+        a2 { håndterSykmelding(17.januar til 31.januar) }
         a1 { håndterSøknad(17.januar til 31.januar) }
-        a2 { håndterSøknad(17.januar til 31.januar) }
+        a2 {
+            håndterSøknad(17.januar til 31.januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+        }
         a1 {
             assertTilstander(
                 1.vedtaksperiode,
