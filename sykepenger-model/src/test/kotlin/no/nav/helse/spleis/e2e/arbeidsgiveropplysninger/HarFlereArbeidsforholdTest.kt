@@ -22,7 +22,7 @@ internal class HarFlereArbeidsforholdTest: AbstractDslTest() {
     fun `Får ikke varsel om flere arbeidsforhold når det ikke er flere arbeidsforhold`() {
         a1 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 16.januar), harFlereArbeidsforhold = false)
+            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 16.januar), arbeidsforholdId = "1")
         }
     }
 
@@ -31,7 +31,7 @@ internal class HarFlereArbeidsforholdTest: AbstractDslTest() {
         a1 {
             val søknadId = UUID.randomUUID()
             håndterSøknad(januar, søknadId = søknadId)
-            val imId = håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 16.januar), harFlereArbeidsforhold = true)
+            val imId = håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 16.januar), arbeidsforholdId = "1")
             assertSisteForkastetTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertFunksjonellFeil(RV_IM_28, 1.vedtaksperiode.filter())
             val vpForkastetEvent = observatør.forkastet(1.vedtaksperiode)

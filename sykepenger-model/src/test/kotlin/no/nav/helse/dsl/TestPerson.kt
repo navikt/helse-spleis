@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.AndreYtelser
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
-import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
@@ -27,13 +26,11 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -42,7 +39,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
@@ -245,24 +241,202 @@ internal class TestPerson(
             søknadId = søknadId
         )
 
-        internal fun håndterArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
-            val hendelse = arbeidsgiverHendelsefabrikk.lagArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger)
+        /** <Arbeidsgiveropplysninger> **/
+
+        internal fun håndterArbeidsgiveropplysninger(
+            arbeidsgiverperioder: List<Periode>,
+            beregnetInntekt: Inntekt = INNTEKT,
+            førsteFraværsdag: LocalDate = LocalDate.MAX, // Tøsete parameter for å kune bytte fra håndterInntektsmelding bare med navnskifte
+            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
+            begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+            id: UUID = UUID.randomUUID(),
+            mottatt: LocalDateTime = LocalDateTime.now(),
+            arbeidsforholdId: String? = null,
+            vedtaksperiodeId: UUID = sisteVedtaksperiode
+        ): UUID {
+            val opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
+                beregnetInntekt = beregnetInntekt,
+                refusjon = refusjon,
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                opphørAvNaturalytelser = opphørAvNaturalytelser,
+                harFlereArbeidsforhold = arbeidsforholdId != null
+            )
+            return håndterArbeidsgiveropplysninger(
+                vedtaksperiodeId = vedtaksperiodeId,
+                opplysninger = opplysninger.toTypedArray(),
+                meldingsreferanseId = id,
+                innsendt = mottatt
+            )
+        }
+
+        internal fun håndterKorrigerteArbeidsgiveropplysninger(
+            arbeidsgiverperioder: List<Periode>,
+            beregnetInntekt: Inntekt = INNTEKT,
+            førsteFraværsdag: LocalDate = LocalDate.MAX, // Tøsete parameter for å kune bytte fra håndterInntektsmelding bare med navnskifte
+            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
+            begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+            id: UUID = UUID.randomUUID(),
+            mottatt: LocalDateTime = LocalDateTime.now(),
+            arbeidsforholdId: String? = null,
+            vedtaksperiodeId: UUID = sisteVedtaksperiode
+        ): UUID {
+            val opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
+                beregnetInntekt = beregnetInntekt,
+                refusjon = refusjon,
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                opphørAvNaturalytelser = opphørAvNaturalytelser,
+                harFlereArbeidsforhold = arbeidsforholdId != null
+            )
+            return håndterKorrigerteArbeidsgiveropplysninger(
+                vedtaksperiodeId = vedtaksperiodeId,
+                opplysninger = opplysninger.toTypedArray(),
+                meldingsreferanseId = id,
+                innsendt = mottatt
+            )
+        }
+
+        internal fun håndterSelvbestemtArbeidsgiveropplysninger(
+            arbeidsgiverperioder: List<Periode>,
+            beregnetInntekt: Inntekt = INNTEKT,
+            førsteFraværsdag: LocalDate = LocalDate.MAX, // Tøsete parameter for å kune bytte fra håndterInntektsmelding bare med navnskifte
+            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
+            begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+            id: UUID = UUID.randomUUID(),
+            mottatt: LocalDateTime = LocalDateTime.now(),
+            arbeidsforholdId: String? = null,
+            vedtaksperiodeId: UUID = sisteVedtaksperiode
+        ): UUID {
+            val opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
+                beregnetInntekt = beregnetInntekt,
+                refusjon = refusjon,
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                opphørAvNaturalytelser = opphørAvNaturalytelser,
+                harFlereArbeidsforhold = arbeidsforholdId != null
+            )
+            return håndterSelvbestemtArbeidsgiveropplysninger(
+                vedtaksperiodeId = vedtaksperiodeId,
+                opplysninger = opplysninger.toTypedArray(),
+                meldingsreferanseId = id,
+                innsendt = mottatt
+            )
+        }
+
+        internal fun håndterArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning, meldingsreferanseId: UUID = UUID.randomUUID(), innsendt: LocalDateTime = LocalDateTime.now()): UUID {
+            val hendelse = arbeidsgiverHendelsefabrikk.lagArbeidsgiveropplysninger(
+                vedtaksperiodeId = vedtaksperiodeId,
+                meldingsreferanseId = meldingsreferanseId,
+                innsendt = innsendt,
+                opplysninger = opplysninger
+            )
             observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *hendelse.toTypedArray())
             hendelse.håndter(Person::håndterArbeidsgiveropplysninger)
             return hendelse.metadata.meldingsreferanseId.id
         }
 
-        internal fun håndterKorrigerteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
-            val hendelse = arbeidsgiverHendelsefabrikk.lagKorrigerteArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger)
+        internal fun håndterKorrigerteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning, meldingsreferanseId: UUID = UUID.randomUUID(), innsendt: LocalDateTime = LocalDateTime.now()): UUID {
+            val hendelse = arbeidsgiverHendelsefabrikk.lagKorrigerteArbeidsgiveropplysninger(
+                vedtaksperiodeId = vedtaksperiodeId,
+                meldingsreferanseId = meldingsreferanseId,
+                innsendt = innsendt,
+                opplysninger = opplysninger
+            )
             hendelse.håndter(Person::håndterKorrigerteArbeidsgiveropplysninger)
             return hendelse.metadata.meldingsreferanseId.id
         }
 
-        internal fun håndterSelvbestemtArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning): UUID {
-            val hendelse = arbeidsgiverHendelsefabrikk.lagSelvbestemteArbeidsgiveropplysninger(vedtaksperiodeId = vedtaksperiodeId, opplysninger = opplysninger)
+        internal fun håndterSelvbestemtArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning, meldingsreferanseId: UUID = UUID.randomUUID(), innsendt: LocalDateTime = LocalDateTime.now()): UUID {
+            val hendelse = arbeidsgiverHendelsefabrikk.lagSelvbestemteArbeidsgiveropplysninger(
+                vedtaksperiodeId = vedtaksperiodeId,
+                meldingsreferanseId = meldingsreferanseId,
+                innsendt = innsendt,
+                opplysninger = opplysninger
+            )
             hendelse.håndter(Person::håndterSelvbestemtArbeidsgiveropplysninger)
             return hendelse.metadata.meldingsreferanseId.id
         }
+
+        @Deprecated("Bruk håndterArbeidsgiveropplysninger, håndterKorrigerteArbeidsgiveropplysninger eller håndterSelvbestemtArbeidsgiveropplysninger i stedet")
+        internal fun håndterInntektsmelding(
+            arbeidsgiverperioder: List<Periode>,
+            beregnetInntekt: Inntekt = INNTEKT,
+            førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
+            begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+            id: UUID = UUID.randomUUID(),
+            mottatt: LocalDateTime = LocalDateTime.now(),
+            arbeidsforholdId: String? = null,
+            vedtaksperiodeId: UUID = sisteVedtaksperiode
+        ): UUID {
+            if (Toggle.KnertInntektsmelding.disabled) {
+                arbeidsgiverHendelsefabrikk.lagInntektsmelding(
+                    arbeidsgiverperioder,
+                    beregnetInntekt,
+                    førsteFraværsdag,
+                    refusjon,
+                    opphørAvNaturalytelser,
+                    begrunnelseForReduksjonEllerIkkeUtbetalt,
+                    id,
+                    mottatt = mottatt,
+                    arbeidsforholdId = arbeidsforholdId
+                ).håndter(Person::håndterInntektsmelding)
+                return id
+            }
+
+            // Forespurte arbeidsgiveropplysninger
+            if (observatør.harForespurtArbeidsgiveropplysninger(vedtaksperiodeId)) {
+                return håndterArbeidsgiveropplysninger(
+                    arbeidsgiverperioder = arbeidsgiverperioder,
+                    beregnetInntekt = beregnetInntekt,
+                    førsteFraværsdag = førsteFraværsdag,
+                    refusjon = refusjon,
+                    opphørAvNaturalytelser = opphørAvNaturalytelser,
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                    id = id,
+                    mottatt = mottatt,
+                    arbeidsforholdId = arbeidsforholdId,
+                    vedtaksperiodeId = vedtaksperiodeId
+                )
+            }
+
+            // Selvbestemte arbeidsgiveropplysninger
+            if (observatør.tilstandsendringer.getValue(vedtaksperiodeId).last() in setOf(AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)) {
+                return håndterSelvbestemtArbeidsgiveropplysninger(
+                    arbeidsgiverperioder = arbeidsgiverperioder,
+                    beregnetInntekt = beregnetInntekt,
+                    førsteFraværsdag = førsteFraværsdag,
+                    refusjon = refusjon,
+                    opphørAvNaturalytelser = opphørAvNaturalytelser,
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                    id = id,
+                    mottatt = mottatt,
+                    arbeidsforholdId = arbeidsforholdId,
+                    vedtaksperiodeId = vedtaksperiodeId
+                )
+            }
+
+            // Korrigerte arbeidsgiveropplysninger
+            return håndterKorrigerteArbeidsgiveropplysninger(
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                beregnetInntekt = beregnetInntekt,
+                førsteFraværsdag = førsteFraværsdag,
+                refusjon = refusjon,
+                opphørAvNaturalytelser = opphørAvNaturalytelser,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                id = id,
+                mottatt = mottatt,
+                arbeidsforholdId = arbeidsforholdId,
+                vedtaksperiodeId = vedtaksperiodeId
+            )
+        }
+
+        /** </Arbeidsgiveropplysninger> **/
 
         internal fun håndterSøknad(
             vararg perioder: Søknad.Søknadsperiode,
@@ -449,132 +623,8 @@ internal class TestPerson(
             return id
         }
 
-        @Deprecated("Bruk håndterArbeidsgiveropplysninger, håndterKorrigerteArbeidsgiveropplysninger eller håndterSelvbestemtArbeidsgiveropplysninger i stedet")
-        internal fun håndterInntektsmelding(
-            arbeidsgiverperioder: List<Periode>,
-            beregnetInntekt: Inntekt = INNTEKT,
-            førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
-            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-            begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-            id: UUID = UUID.randomUUID(),
-            mottatt: LocalDateTime = LocalDateTime.now(),
-            arbeidsforholdId: String? = null,
-            vedtaksperiodeId: UUID = sisteVedtaksperiode
-        ): UUID {
-            if (Toggle.KnertInntektsmelding.disabled) {
-                arbeidsgiverHendelsefabrikk.lagInntektsmelding(
-                    arbeidsgiverperioder,
-                    beregnetInntekt,
-                    førsteFraværsdag,
-                    refusjon,
-                    opphørAvNaturalytelser,
-                    begrunnelseForReduksjonEllerIkkeUtbetalt,
-                    id,
-                    mottatt = mottatt,
-                    arbeidsforholdId = arbeidsforholdId
-                ).håndter(Person::håndterInntektsmelding)
-                return id
-            }
-
-            // Forespurte arbeidsgiveropplysninger
-            if (observatør.harForespurtArbeidsgiveropplysninger(vedtaksperiodeId)) {
-                håndterArbeidsgiveropplysninger(
-                    arbeidsgiverperioder = arbeidsgiverperioder,
-                    beregnetInntekt = beregnetInntekt,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    refusjon = refusjon,
-                    opphørAvNaturalytelser = opphørAvNaturalytelser,
-                    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                    id = id,
-                    mottatt = mottatt,
-                    harFlereArbeidsforhold = arbeidsforholdId != null
-                )
-                return id
-            }
-
-            // Selvbestemte arbeidsgiveropplysninger
-            if (observatør.tilstandsendringer.getValue(vedtaksperiodeId).last() in setOf(AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)) {
-                val selvbestemte = SelvbestemteArbeidsgiveropplysninger(
-                    meldingsreferanseId = MeldingsreferanseId(id),
-                    innsendt = mottatt,
-                    registrert = mottatt.plusSeconds(1),
-                    behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                        organisasjonsnummer = this.orgnummer
-                    ),
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
-                        beregnetInntekt = beregnetInntekt,
-                        refusjon = refusjon,
-                        arbeidsgiverperioder = arbeidsgiverperioder,
-                        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                        opphørAvNaturalytelser = opphørAvNaturalytelser,
-                        harFlereArbeidsforhold = arbeidsforholdId != null
-                    )
-                )
-                selvbestemte.håndter(Person::håndterSelvbestemtArbeidsgiveropplysninger)
-                return id
-            }
-
-            // Korrigerte arbeidsgiveropplysninger
-            val korrigerte = KorrigerteArbeidsgiveropplysninger(
-                meldingsreferanseId = MeldingsreferanseId(id),
-                innsendt = mottatt,
-                registrert = mottatt.plusSeconds(1),
-                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                    organisasjonsnummer = this.orgnummer
-                ),
-                vedtaksperiodeId = vedtaksperiodeId,
-                opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
-                    beregnetInntekt = beregnetInntekt,
-                    refusjon = refusjon,
-                    arbeidsgiverperioder = arbeidsgiverperioder,
-                    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                    opphørAvNaturalytelser = opphørAvNaturalytelser,
-                    harFlereArbeidsforhold = arbeidsforholdId != null
-                )
-            )
-            korrigerte.håndter(Person::håndterKorrigerteArbeidsgiveropplysninger)
-            return id
-        }
-
         internal fun assertInntektshistorikkForDato(forventetInntekt: Inntekt?, dato: LocalDate, inspektør: TestArbeidsgiverInspektør) {
             assertEquals(forventetInntekt, inspektør.inntektInspektør.omregnetÅrsinntekt(dato)?.sykepengegrunnlag)
-        }
-
-        internal fun håndterArbeidsgiveropplysninger(
-            arbeidsgiverperioder: List<Periode>,
-            beregnetInntekt: Inntekt = INNTEKT,
-            vedtaksperiodeId: UUID = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.id,
-            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-            begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-            id: UUID = UUID.randomUUID(),
-            mottatt: LocalDateTime = LocalDateTime.now(),
-            harFlereArbeidsforhold: Boolean = false
-        ): UUID {
-            val arbeidsgiveropplysninger = Arbeidsgiveropplysninger(
-                meldingsreferanseId = MeldingsreferanseId(id),
-                innsendt = mottatt,
-                registrert = mottatt.plusSeconds(1),
-                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                    organisasjonsnummer = this.orgnummer
-                ),
-                vedtaksperiodeId = vedtaksperiodeId,
-                opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
-                    beregnetInntekt = beregnetInntekt,
-                    refusjon = refusjon,
-                    arbeidsgiverperioder = arbeidsgiverperioder,
-                    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                    opphørAvNaturalytelser = opphørAvNaturalytelser,
-                    harFlereArbeidsforhold = harFlereArbeidsforhold
-                )
-            )
-
-            observatør.forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId, *arbeidsgiveropplysninger.toTypedArray())
-
-            arbeidsgiveropplysninger.håndter(Person::håndterArbeidsgiveropplysninger)
-            return id
         }
 
         internal fun håndterForkastSykmeldingsperioder(periode: Periode) =

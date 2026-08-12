@@ -386,7 +386,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
         }
         a1 { håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent)) }
         a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
-        a2 { håndterArbeidsgiveropplysninger(listOf(2.januar til 17.januar)) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(2.januar til 17.januar), vedtaksperiodeId = 1.vedtaksperiode) }
         a2 { observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class) }
 
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE) }
@@ -435,8 +435,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
         }
         a1 { håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent)) }
         a2 { håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent)) }
-        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
-        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode) }
         a2 { observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class) }
 
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }

@@ -303,27 +303,6 @@ internal abstract class AbstractDslTest {
             )
         }
 
-    protected fun String.håndterInntektsmeldingPortal(
-        arbeidsgiverperioder: List<Periode>,
-        beregnetInntekt: Inntekt,
-        vedtaksperiodeId: UUID,
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        id: UUID = UUID.randomUUID()
-    ) =
-        this {
-            håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder,
-                beregnetInntekt,
-                vedtaksperiodeId,
-                refusjon,
-                opphørAvNaturalytelser,
-                begrunnelseForReduksjonEllerIkkeUtbetalt,
-                id
-            )
-        }
-
     protected fun String.håndterVilkårsgrunnlag(vedtaksperiodeId: UUID) =
         this { håndterVilkårsgrunnlag(vedtaksperiodeId) }
 
