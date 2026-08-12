@@ -10,14 +10,9 @@ import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.gjenopprettFraJSONtekst
-import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Institusjonsopphold
-import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
@@ -28,7 +23,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.serde.assertPersonEquals
 import no.nav.helse.serde.tilPersonData
@@ -269,129 +263,9 @@ internal abstract class AbstractDslTest {
             ?: error("Det ble ikke opprettet noen vedtaksperiode.")
     }
 
-    protected fun String.håndterSøknad(
-        vararg perioder: Søknad.Søknadsperiode,
-        andreInntektskilder: Boolean = false,
-        arbeidUtenforNorge: Boolean = false,
-        sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
-        sykmeldingSkrevet: LocalDateTime? = null,
-        sendTilGosys: Boolean = false,
-        inntekterFraNyeArbeidsforhold: Boolean = false
-    ) =
-        this { håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys, inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold) }
-
-    protected fun String.håndterInntektsmelding(
-        arbeidsgiverperioder: List<Periode>,
-        beregnetInntekt: Inntekt,
-        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        id: UUID = UUID.randomUUID(),
-        mottatt: LocalDateTime = LocalDateTime.now()
-    ) =
-        this {
-            håndterInntektsmelding(
-                arbeidsgiverperioder,
-                beregnetInntekt,
-                førsteFraværsdag,
-                refusjon,
-                opphørAvNaturalytelser,
-                begrunnelseForReduksjonEllerIkkeUtbetalt,
-                id,
-                mottatt = mottatt
-            )
-        }
-
-    protected fun String.håndterVilkårsgrunnlag(vedtaksperiodeId: UUID) =
-        this { håndterVilkårsgrunnlag(vedtaksperiodeId) }
-
-    protected fun String.håndterVilkårsgrunnlag(vedtaksperiodeId: UUID, medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus) =
-        this { håndterVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus) }
-
-    protected fun String.håndterYtelser(
-        vedtaksperiodeId: UUID,
-        foreldrepenger: List<GradertPeriode> = emptyList(),
-        svangerskapspenger: List<GradertPeriode> = emptyList(),
-        pleiepenger: List<GradertPeriode> = emptyList(),
-        omsorgspenger: List<GradertPeriode> = emptyList(),
-        opplæringspenger: List<GradertPeriode> = emptyList(),
-        institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
-        arbeidsavklaringspengerV2: List<Periode> = emptyList(),
-        dagpenger: List<Periode> = emptyList(),
-    ) =
-        this { håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger) }
-
-    protected fun String.håndterSimulering(vedtaksperiodeId: UUID) =
-        this { håndterSimulering(vedtaksperiodeId) }
-
-    protected fun String.håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true) =
-        this { håndterUtbetalingsgodkjenning(vedtaksperiodeId, godkjent) }
-
-    protected fun String.håndterUtbetalingshistorikkEtterInfotrygdendring(vararg utbetalinger: Infotrygdperiode) =
-        this { håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger) }
-
-    protected fun String.håndterUtbetalt(status: Oppdragstatus) =
-        this { håndterUtbetalt(status) }
-
-    protected fun String.håndterAnnullering(vedtaksperiodeId: UUID) =
-        this { håndterAnnullering(vedtaksperiodeId) }
-
-    protected fun String.håndterIdentOpphørt(nyttFnr: Personidentifikator) =
-        this { håndterIdentOpphørt(nyttFnr) }
-
-    protected fun String.håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
-        this { håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt) }
-
-    protected fun String.håndterGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =
-        this { håndterGrunnbeløpsregulering(skjæringstidspunkt) }
-
     protected fun nullstillTilstandsendringer() = observatør.nullstillTilstandsendringer()
 
-    protected fun String.assertTilstander(id: UUID, vararg tilstander: TilstandType) =
-        this { assertTilstander(id, *tilstander) }
-
-    protected fun String.assertSisteTilstand(id: UUID, tilstand: TilstandType) =
-        this { assertSisteTilstand(id, tilstand) }
-
-    protected fun String.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter) =
-        this { assertIngenFunksjonelleFeil(filter) }
-
-    protected fun String.assertVarsler(varsler: Collection<Varselkode>, filter: AktivitetsloggFilter) =
-        this { assertVarsler(varsler, filter) }
-
-    protected fun String.assertVarsel(warning: String, filter: AktivitetsloggFilter) =
-        this { assertVarsel(warning, filter) }
-
-    protected fun String.assertVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
-        this { assertVarsel(kode, filter) }
-
-    protected fun String.assertFunksjonellFeil(kode: Varselkode, filter: AktivitetsloggFilter) =
-        this { assertFunksjonellFeil(kode, filter) }
-
     internal inline fun <reified R: Behovsoppsamler.Behovsdetaljer> behovSomOppstårSomFølgeAv(block: () -> Unit) = testperson.behovshåndterer.behovSomOppstårSomFølgeAv<R> { block() }
-
-    protected fun String.nyttVedtak(
-        periode: Periode,
-        grad: Prosentdel = 100.prosent,
-        førsteFraværsdag: LocalDate = periode.start,
-        beregnetInntekt: Inntekt = INNTEKT,
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        arbeidsgiverperiode: List<Periode> = emptyList(),
-        status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-        ghosts: List<String>
-    ) =
-        this { nyttVedtak(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, ghosts) }
-
-    protected fun String.tilGodkjenning(
-        periode: Periode,
-        grad: Prosentdel = 100.prosent,
-        førsteFraværsdag: LocalDate = periode.start,
-        beregnetInntekt: Inntekt = INNTEKT,
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        arbeidsgiverperiode: List<Periode> = emptyList()
-    ) =
-        this { tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode) }
 
     protected fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) =
         testperson { håndterOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold) }

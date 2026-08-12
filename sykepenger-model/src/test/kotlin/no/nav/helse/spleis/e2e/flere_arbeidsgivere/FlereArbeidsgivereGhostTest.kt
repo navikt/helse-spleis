@@ -11,6 +11,7 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -101,8 +102,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
         }
-        ghost.tilGodkjenning(10.februar til 28.februar)
         ghost {
+            tilGodkjenning(10.februar til 28.februar)
             assertEquals(10.februar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
         }
         nullstillTilstandsendringer()
