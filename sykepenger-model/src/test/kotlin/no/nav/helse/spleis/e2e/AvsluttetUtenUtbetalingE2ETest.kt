@@ -123,6 +123,9 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
             håndterInntektsmelding(
                 listOf(Periode(3.mars, 18.mars))
             )
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
+            }
 
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
 
@@ -181,8 +184,6 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
                 1.januar til 5.januar,
                 8.januar til 18.januar
             ), inspektør.venteperiode(4.vedtaksperiode))
-
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_IM_3, 4.vedtaksperiode.filter())
         }
     }
 }

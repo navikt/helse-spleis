@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.reflect.KClass
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
@@ -342,7 +343,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent), Arbeid(1.januar, 9.januar))
             håndterSøknad(Sykdom(15.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(15.januar til 29.januar))
-            assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+            assertEquals(listOf(15.januar til 30.januar), inspektør.venteperiode(2.vedtaksperiode))
+            if (Toggle.KnertInntektsmelding.disabled) assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
         }
         a2 {
             håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))

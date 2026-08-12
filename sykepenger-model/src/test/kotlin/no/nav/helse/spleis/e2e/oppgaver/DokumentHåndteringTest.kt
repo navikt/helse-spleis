@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -84,8 +85,16 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
         a1 { håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), søknadId = søknadId1A1) }
         a2 { håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), søknadId = søknadId1A2) }
 
-        val inntektsmeldingA1 = a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        val inntektsmeldingA2 = a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        val inntektsmeldingA1 = a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar)).also {
+                if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            }
+        }
+        val inntektsmeldingA2 = a2 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar)).also {
+                if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            }
+        }
 
         val søknadId2A1 = UUID.randomUUID()
         val søknadId2A2 = UUID.randomUUID()
@@ -632,6 +641,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
         a1 {
             nyPeriode(1.januar til 10.januar)
             val im1 = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar)))
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             nyPeriode(11.januar til 31.januar)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)

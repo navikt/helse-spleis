@@ -103,8 +103,6 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractDslTest() {
                 8.januar til 8.januar,
                 24.januar til 2.februar
             ), inspektør.venteperiode(3.vedtaksperiode))
-
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsler(3.vedtaksperiode, RV_IM_3)
         }
     }
 }

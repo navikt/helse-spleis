@@ -96,6 +96,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
                 listOf(1.august til 16.august),
                 beregnetInntekt = INNTEKT
             )
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -184,6 +185,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
 
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT)
+        if (Toggle.KnertInntektsmelding.enabled) assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
+
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
     }
 
@@ -199,6 +202,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
             listOf(10.januar til 25.januar),
             beregnetInntekt = INNTEKT
         )
+        if (Toggle.KnertInntektsmelding.enabled) assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
+
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -221,6 +226,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT
         )
+        if (Toggle.KnertInntektsmelding.enabled) assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
@@ -237,6 +243,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+        if (Toggle.KnertInntektsmelding.enabled) assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(
@@ -264,6 +271,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT
             )
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
         }
         nullstillTilstandsendringer()
@@ -294,6 +302,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT
         )
+        if (Toggle.KnertInntektsmelding.enabled) assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
+
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -1165,6 +1175,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
             listOf(1.januar til 16.januar),
             beregnetInntekt = beregnetInntektA1
         )
+        if (Toggle.KnertInntektsmelding.enabled) assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
         assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
 
@@ -1261,6 +1272,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent))
 
         håndterInntektsmelding(listOf(2.januar til 17.januar), beregnetInntekt = INNTEKT)
+        if (Toggle.KnertInntektsmelding.enabled) assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 

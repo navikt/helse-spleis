@@ -2,11 +2,11 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
-import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
@@ -29,6 +29,7 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Venteårsak.Companion.VILKÅRSPRØVING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -798,6 +799,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterInntektsmelding(
                 listOf(1.februar til 16.februar)
             )
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
         a1 {
             håndterSykmelding(Sykmeldingsperiode(13.februar, 28.februar))

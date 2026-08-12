@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.util.UUID
 import kotlin.reflect.KClass
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -1073,9 +1074,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         // Etter de gamle greiene slås av, kan det fortsatt skje gjennom selvbestemt arbeidsgiveropplysning.
         // Det var et ordentlig hack å skrive seg rundt det, og case'et er veldig minimalt. Samlet vurdering er at det er bedre å be om AGP i denne situasjonen
         // enn å ha den janky koden.
-        nyPeriode(1.januar til 16.januar, a1)
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        nyPeriode(18.januar til 31.januar, a1)
+        a1 {
+            nyPeriode(1.januar til 16.januar, a1)
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            nyPeriode(18.januar til 31.januar, a1)
+        }
 
         val expectedForespurteOpplysninger = setOf(
             EventSubscription.Inntekt,

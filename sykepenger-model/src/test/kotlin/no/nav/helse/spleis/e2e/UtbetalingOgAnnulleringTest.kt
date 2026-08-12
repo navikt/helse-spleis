@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.a1
@@ -147,9 +148,12 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
                 førsteFraværsdag = 1.februar,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
             )
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
-            assertVarsler(listOf(Varselkode.RV_AY_5, Varselkode.RV_AY_12, RV_IM_8), 1.vedtaksperiode.filter())
+            listOf(Varselkode.RV_AY_5, Varselkode.RV_AY_12, RV_IM_8).forEach {
+                assertVarsel(it, 1.vedtaksperiode.filter())
+            }
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()

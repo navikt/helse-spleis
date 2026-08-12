@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -9,6 +10,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -32,6 +34,8 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractDslTest() {
                     arbeidsgiverperioder = listOf(22.mars(2021) til 6.april(2021)),
                     beregnetInntekt = INNTEKT
             )
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
+
             håndterSøknad(Sykdom(6.april(2021), 16.april(2021), 50.prosent))
 
             håndterVilkårsgrunnlag(3.vedtaksperiode)

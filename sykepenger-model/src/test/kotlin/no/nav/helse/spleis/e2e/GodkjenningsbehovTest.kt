@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.INNTEKT
@@ -243,6 +244,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             }
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertTrue(godkjenningsbehov.event.kanAvvises)
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 

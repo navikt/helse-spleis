@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.e2e
 
 import OpenInSpanner
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
@@ -66,6 +66,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
         a1 {
             nyPeriode(1.januar til 16.januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
             nyPeriode(17.januar til 31.januar)

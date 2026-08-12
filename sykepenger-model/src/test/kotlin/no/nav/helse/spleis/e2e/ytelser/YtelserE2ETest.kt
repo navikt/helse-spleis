@@ -147,10 +147,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
-                assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
-            }
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
 
@@ -624,7 +621,8 @@ internal class YtelserE2ETest : AbstractDslTest() {
         a1 {
             nyPeriode(26.januar til 31.januar)
             håndterInntektsmelding(
-                listOf(1.januar til 16.januar)
+                listOf(1.januar til 16.januar),
+                vedtaksperiodeId = 2.vedtaksperiode
             )
         }
         a2 {

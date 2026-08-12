@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.TestPerson
@@ -63,7 +64,10 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
         }
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a2 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+        }
         a1 {
             assertEquals(13.januar til 26.januar, inspektør.periode(3.vedtaksperiode))
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -85,6 +89,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
         a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

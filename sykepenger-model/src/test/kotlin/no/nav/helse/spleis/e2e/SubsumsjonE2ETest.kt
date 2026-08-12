@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.YearMonth
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -355,12 +356,12 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
     fun `§ 8-3 ledd 1 punktum 2 - er alltid 70 uten NAVdager`() {
         medFødselsdato(LocalDate.of(1948, 1, 1))
         a1 {
-
             håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
             håndterSøknad(1.januar til 16.januar)
             håndterInntektsmelding(
                 listOf(1.januar til 16.januar)
             )
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertForventetFeil(
                 forklaring = "Perioden avsluttes automatisk -- usikker på hva vi ønsker av etterlevelse da",
                 nå = {
@@ -1629,6 +1630,7 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT
             )
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
             SubsumsjonInspektør(jurist).assertFlereIkkeOppfylt(
                 antall = 2,

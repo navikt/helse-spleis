@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -366,6 +367,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             observatør.vedtaksperiodeVenter.clear()
             håndterInntektsmelding(listOf(1.januar til 16.januar))
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertEquals(0, observatør.vedtaksperiodeVenter.size)
@@ -563,10 +565,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                     8.januar til onsdag den 17.januar,
                     // nå blir helgen 20. januar - 21.januar tolket som frisk,
                     // og flytter i praksis skjæringstidspunktet fra 19. januar til 22. januar
-                    mandag den 22.januar til 25.januar
+                    mandag den 22.januar til 27.januar
                 )
             )
-            assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
+            assertEquals(listOf(
+                8.januar til 17.januar,
+                22.januar til 27.januar
+            ), inspektør.venteperiode(3.vedtaksperiode))
         }
         a1 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
@@ -1473,8 +1478,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSøknad(1.januar til 16.januar) }
         a2 { håndterSøknad(1.januar til 16.januar) }
         a1 { håndterSykmelding(17.januar til 31.januar) }
-        a2 { håndterSykmelding(17.januar til 31.januar) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a2 {
+            håndterSykmelding(17.januar til 31.januar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+        }
         a1 { håndterSøknad(17.januar til 31.januar) }
         a2 { håndterSøknad(17.januar til 31.januar) }
         a1 {
@@ -1675,6 +1683,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             nyPeriode(12.januar til 16.januar)
             håndterSøknad(17.januar til 21.januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
@@ -1686,6 +1695,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             nyPeriode(30.januar til 31.januar)
             //Overlappende vedtaksperiode men med senere skjæringstidspunkt enn a1
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 30.januar)
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
         a1 {
             håndterYtelser(2.vedtaksperiode)

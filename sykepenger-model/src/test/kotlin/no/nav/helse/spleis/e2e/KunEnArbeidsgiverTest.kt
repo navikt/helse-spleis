@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -430,6 +431,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar))
             håndterSøknad(Sykdom(3.januar, 7.januar, 100.prosent))
             håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             håndterSøknad(Sykdom(8.januar, 23.februar, 100.prosent))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)

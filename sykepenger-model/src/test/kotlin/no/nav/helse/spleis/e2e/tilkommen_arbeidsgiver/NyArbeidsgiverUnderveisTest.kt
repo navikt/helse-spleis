@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.tilkommen_arbeidsgiver
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
@@ -136,6 +137,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             assertEquals(31.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             håndterInntektsmelding(listOf(31.januar til 15.februar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a1 {

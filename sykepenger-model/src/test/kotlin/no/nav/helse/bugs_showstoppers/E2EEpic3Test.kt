@@ -298,7 +298,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
             ), inspektør.venteperiode(3.vedtaksperiode))
 
             if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsler(3.vedtaksperiode, RV_IM_3, RV_AO_3)
+                assertVarsler(3.vedtaksperiode, RV_AO_3)
             }
         }
     }
