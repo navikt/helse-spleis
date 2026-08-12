@@ -161,12 +161,11 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
 
         // a2 sent til festen
         val id = a2 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar),
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ja"
             )
         }
-        assertEquals(id, observatør.inntektsmeldingIkkeHåndtert.single())
         a2 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -213,12 +212,11 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
 
         // a2 sent til festen
         val imId = MeldingsreferanseId(a2 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar),
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ja"
             )
         })
-        assertEquals(imId.id, observatør.inntektsmeldingIkkeHåndtert.single())
         a2 { håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar)) }
         val søknadId = UUID.randomUUID()
         a2 { håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), søknadId = søknadId) }
@@ -232,6 +230,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
                 setOf(
                     Dokumentsporing.søknad(MeldingsreferanseId(søknadId)),
                     Dokumentsporing.inntektsmeldingDager(imId),
+                    Dokumentsporing.inntektsmeldingRefusjon(imId),
                     Dokumentsporing.inntektsmeldingInntekt(imId)
                 ), inspektør.hendelser(1.vedtaksperiode)
             )
@@ -260,12 +259,11 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
     fun `to arbeidsgivere - ny overlappende førstegangsbehandling hos ag2 som først var antatt å være frisk - men tidlig inntektsmelding`() {
         a1 { håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar)) }
         val imId = MeldingsreferanseId(a2 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar),
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ja"
             )
         })
-        assertEquals(imId.id, observatør.inntektsmeldingIkkeHåndtert.single())
 
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -301,6 +299,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
                 setOf(
                     Dokumentsporing.søknad(MeldingsreferanseId(søknadId)),
                     Dokumentsporing.inntektsmeldingDager(imId),
+                    Dokumentsporing.inntektsmeldingRefusjon(imId),
                     Dokumentsporing.inntektsmeldingInntekt(imId)
                 ), inspektør.hendelser(1.vedtaksperiode)
             )

@@ -511,17 +511,17 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
     fun `ignorer inntektsmelding som er lik tidligere`() {
         a1 {
             val agp = listOf(1.januar til 16.januar)
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 agp,
                 førsteFraværsdag = 1.januar,
                 refusjon = Refusjon(10_000.månedlig, null)
             )
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 agp,
                 førsteFraværsdag = 5.januar,
                 refusjon = Refusjon(20_000.månedlig, null)
             )
-            val im3 = håndterInntektsmelding(
+            val im3 = håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 agp,
                 førsteFraværsdag = 1.januar,
                 refusjon = Refusjon(10_000.månedlig, null)
@@ -619,7 +619,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
     @Test
     fun `langt gap mellom AGP og vedtaksperiode når IM kommer før søknad - inntektsmeldingen er ikke aktuell for replay`() {
         a1 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.mars
             )
@@ -753,7 +753,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
     @Test
     fun `arbeidsgiverperiode slutter på fredag, søknad starter mandag`() {
         a1 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(4.januar til fredag(19.januar))
             )
             håndterSøknad(Sykdom(mandag(22.januar), 31.januar, 100.prosent))
@@ -844,7 +844,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             forlengVedtak(februar)
         }
         a2 {
-            håndterInntektsmelding(listOf(1.oktober til 16.oktober), beregnetInntekt = INNTEKT)
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.oktober til 16.oktober), beregnetInntekt = INNTEKT)
         }
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -854,7 +854,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
     @Test
     fun `Skal ikke bruke inntekt fra gammel inntektsmelding`() {
         a1 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar)
             )
             nyPeriode(april)
@@ -1254,7 +1254,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
     @Test
     fun `Opphør i refusjon som kommer mens førstegangssak er i play kaster perioden`() {
         a1 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.november(2020) til 16.november(2020))
             )
             håndterSøknad(Sykdom(1.november(2020), 20.november(2020), 100.prosent))
@@ -1468,7 +1468,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
     @Test
     fun `Replay av inntektsmelding skal håndteres av periode som trigget replay og etterfølgende perioder 1`() {
         a1 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(1.januar, 10.januar), Periode(21.januar, 26.januar)),
                 førsteFraværsdag = 21.januar
             )
@@ -1500,7 +1500,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
     @Test
     fun `Replay av inntektsmelding skal håndteres av periode som trigget replay og etterfølgende perioder 2`() {
         a1 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(1.januar, 10.januar), Periode(21.januar, 26.januar)),
                 førsteFraværsdag = 21.januar
             )
@@ -1734,7 +1734,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
     fun `Håndterer ikke inntektsmelding to ganger ved replay`() {
         a1 {
             // Happy case av testen med navn: Håndterer ikke inntektsmelding to ganger ved replay - hvor vi har en tidligere periode og gap
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(10.januar til 25.januar),
                 førsteFraværsdag = 10.januar
             )
@@ -2222,7 +2222,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 7.januar))
             håndterSykmelding(Sykmeldingsperiode(8.januar, 23.februar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(3.januar, 18.januar))
             )
             håndterSøknad(Sykdom(3.januar, 7.januar, 100.prosent))
@@ -2455,7 +2455,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
     @Test
     fun `vedtaksperiode i AVSLUTTET_UTEN_UTBETALING burde utvides ved replay av inntektsmelding`() {
         a1 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.januar
             )

@@ -36,7 +36,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
             val im1Mottatt = LocalDateTime.now().minusDays(1)
             val im2Mottatt = im1Mottatt.plusHours(1)
 
-            val im1 = håndterInntektsmelding(listOf(17.januar til 1.februar), mottatt = im1Mottatt)
+            val im1 = håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(17.januar til 1.februar), mottatt = im1Mottatt)
             håndterSøknad(17.januar til 31.januar)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertTrue(im1 in observatør.inntektsmeldingIkkeHåndtert)
@@ -63,7 +63,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
     @Test
     fun `Inntektsmelding med begrunnelseForReduksjon & FF kommer før kort søknad`() {
         a1 {
-            håndterInntektsmelding(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "VilIkke", førsteFraværsdag = 1.januar)
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "VilIkke", førsteFraværsdag = 1.januar)
             nyPeriode(1.januar til 16.januar, a1)
             assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertEquals(listOf(1.januar til 1.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
@@ -74,7 +74,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
     @Test
     fun `Inntektsmelding med begrunnelseForReduksjon & AGP kommer før kort søknad`() {
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "VilIkke")
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "VilIkke")
             nyPeriode(1.januar til 16.januar, a1)
             assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertEquals(listOf(1.januar til 16.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))

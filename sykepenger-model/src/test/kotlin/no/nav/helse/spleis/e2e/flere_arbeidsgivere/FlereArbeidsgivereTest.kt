@@ -598,7 +598,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
         }
         a2 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, beregnetInntekt = INNTEKT)
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, beregnetInntekt = INNTEKT)
             nyPeriode(20.januar til 31.januar)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
@@ -1320,7 +1320,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSykmelding(januar) }
         a2 { håndterSykmelding(januar) }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.januar til 16.januar))
             håndterSøknad(januar)
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
         }
@@ -1651,7 +1651,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
 
         a2 {
-            håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INNTEKT, null))
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.februar til 16.februar), beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INNTEKT, null))
             nyPeriode(februar)
         }
 

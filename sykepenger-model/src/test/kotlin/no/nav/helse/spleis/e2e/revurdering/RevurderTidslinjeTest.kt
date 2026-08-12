@@ -604,7 +604,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
     fun `Avslag fører til feilet revurdering`() {
         a1 {
             håndterSykmelding(januar)
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(1.januar, 16.januar)),
                 førsteFraværsdag = 1.januar
             )
@@ -662,7 +662,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
     fun `annullering av feilet revurdering`() {
         a1 {
             håndterSykmelding(januar)
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(1.januar, 16.januar)),
                 førsteFraværsdag = 1.januar
             )
@@ -1059,7 +1059,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
     fun `revurderer siste utbetalte periode`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(2.januar, 17.januar)),
                 førsteFraværsdag = 2.januar
             )
@@ -1097,7 +1097,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
     fun `oppdager nye utbetalte dager fra infotrygd i revurderingen`() {
         a1 {
             håndterSykmelding(januar)
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(1.januar, 16.januar))
             )
             håndterSøknad(januar)

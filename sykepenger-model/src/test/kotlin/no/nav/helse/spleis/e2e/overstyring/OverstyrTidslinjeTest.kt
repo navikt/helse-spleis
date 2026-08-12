@@ -425,7 +425,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
     fun `kan ikke utbetale overstyrt utbetaling`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(2.januar, 17.januar)),
                 førsteFraværsdag = 2.januar
             )
@@ -452,7 +452,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
     fun `grad over grensen overstyres på enkeltdag`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(2.januar, 17.januar)),
                 førsteFraværsdag = 2.januar
             )
@@ -478,7 +478,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
     fun `grad under grensen blir ikke utbetalt etter overstyring av grad`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(2.januar, 17.januar)),
                 førsteFraværsdag = 2.januar
             )
@@ -504,7 +504,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
     fun `overstyrt til fridager i midten av en periode blir ikke utbetalt`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(2.januar, 17.januar)),
                 førsteFraværsdag = 2.januar
             )
@@ -529,7 +529,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
     fun `Overstyring av sykHelgDag`() {
         a1 {
             håndterSykmelding(januar)
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar)
             )
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(20.januar, 21.januar))

@@ -152,7 +152,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar))
             håndterSykmelding(Sykmeldingsperiode(4.januar, 20.januar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(
                     1.januar til 1.januar,
                     3.januar til 17.januar
@@ -341,7 +341,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(7.januar, 28.januar))
             // Need to extend Arbeidsdag from first Arbeidsgiverperiode to beginning of Vedtaksperiode, considering weekends
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 arbeidsgiverperioder = listOf(Periode(9.januar, 24.januar)),
                 førsteFraværsdag = 9.januar
             )
@@ -460,7 +460,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
     fun `Syk, en arbeidsdag, ferie og syk`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 arbeidsgiverperioder = listOf(
                     Periode(1.januar(2020), 1.januar(2020)),
                     Periode(3.januar(2020), 17.januar(2020))
@@ -502,7 +502,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
     fun `Syk, mange arbeidsdager, syk igjen på en lørdag`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 arbeidsgiverperioder = listOf(
                     Periode(1.januar(2020), 1.januar(2020)),
                     Periode(11.januar(2020), 25.januar(2020))
@@ -844,7 +844,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
     fun `Inntektsmelding utvider ikke perioden med arbeidsdager`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(1.juni, 16.juni)),
                 førsteFraværsdag = 1.juni
             )
@@ -872,7 +872,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
     fun `Avsluttet vedtaksperiode forkastes ikke ved overlapp`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(1.januar, 16.januar)),
                 førsteFraværsdag = 1.januar
             )

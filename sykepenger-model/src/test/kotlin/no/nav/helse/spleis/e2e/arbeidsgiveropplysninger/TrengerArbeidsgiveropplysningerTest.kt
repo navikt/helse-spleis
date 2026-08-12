@@ -748,7 +748,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
 
     @Test
     fun `Skal ikke sende ut forespørsel for en periode som allerede har mottatt inntektsmelding`() {
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a1 { håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.januar til 16.januar)) }
         nyPeriode(januar, a1)
         assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
@@ -771,7 +771,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     @Test
     fun `Skal ikke sende ut forespørsel for en periode som allerede har mottatt inntektsmelding -- selv om håndteringen feiler`() {
         a1 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar),
                 opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "BIL"))
             )
@@ -782,7 +782,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
 
     @Test
     fun `Skal sende ut forespørsel for en periode dersom inntektsmeldingReplay ikke bærer noen frukter`() {
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a1 { håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.januar til 16.januar)) }
         nyPeriode(februar, a1)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }

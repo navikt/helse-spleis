@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
+import OpenInSpanner
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
@@ -187,7 +188,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         // Inntektsmelding fra Ghost vi egentlig ikke trenger, men de sender den allikevel og opplyser om IkkeFravaer...
         // denne vinner over skatt i inntektsturnering
         val ghostIM = ghost {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 beregnetInntekt = 33000.månedlig,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer"
@@ -218,10 +219,10 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         }
         a1 {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
-                assertBeregningsgrunnlag(INNTEKT + 31_000.månedlig)
+                assertBeregningsgrunnlag(INNTEKT + 33_000.månedlig)
                 assertSykepengegrunnlag(561804.årlig)
                 assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, 31_000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(a2, 33_000.månedlig, forventetkilde = Arbeidstakerkilde.Arbeidsgiver)
             }
         }
         ghost {
@@ -229,17 +230,27 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
         a1 {
             håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
         }
         ghost {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, 33000.månedlig, ghostIM.id)
-            assertEquals(setOf(Dokumentsporing.søknad(MeldingsreferanseId(ghostSøknad))), inspektør.hendelser(1.vedtaksperiode))
+            assertEquals(setOf(
+                Dokumentsporing.søknad(MeldingsreferanseId(ghostSøknad)),
+                Dokumentsporing.inntektsmeldingDager(ghostIM),
+                Dokumentsporing.inntektsmeldingRefusjon(ghostIM),
+                Dokumentsporing.inntektsmeldingInntekt(ghostIM),
+            ), inspektør.hendelser(1.vedtaksperiode))
         }
     }
 
@@ -320,7 +331,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         }
         nullstillTilstandsendringer()
         a2 {
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.februar til 16.februar)
             )
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))

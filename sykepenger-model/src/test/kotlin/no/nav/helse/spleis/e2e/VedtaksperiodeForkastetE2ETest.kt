@@ -294,7 +294,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractDslTest() {
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger fra periode der arbeidsgiver har sendt inntektsmelding før vi mottar søknad`() {
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.januar til 16.januar))
             nyPeriode(januar)
             håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
             assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)

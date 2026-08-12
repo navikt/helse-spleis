@@ -300,7 +300,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
     fun `Inntektsmelding kommer før søknad - vi kommer oss videre til AvventerHistorikk pga replay`() {
         a1 {
             håndterSykmelding(januar)
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar)
             )
             håndterSøknad(januar)
@@ -346,7 +346,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
     fun `drawio -- Out of order`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar)
             )
 
@@ -523,7 +523,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
     fun `Periode skal ha utbetaling grunnet inntektsmelding vi mottok før søknad`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(11.januar, 26.januar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(1.januar til 16.januar)
             )
             håndterSøknad(11.januar til 26.januar)

@@ -866,7 +866,7 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
         a1 {
 
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar(2019)))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(1.januar, 16.januar))
             )
             håndterSøknad(Sykdom(1.januar, 31.januar(2019), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))

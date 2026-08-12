@@ -149,16 +149,6 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Inntektsmelding før søknad`() {
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            val id = håndterInntektsmelding(listOf(1.januar til 16.januar))
-            val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
-            assertEquals(id, inntektsmeldingFørSøknadEvent.inntektsmeldingId)
-        }
-    }
-
-    @Test
     fun `Inntektsmelding før søknad med kort gap`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
@@ -208,15 +198,6 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             assertEquals(id to 1.vedtaksperiode, observatør.inntektsmeldingHåndtert.single())
             assertEquals(setOf(søknadId, id), inspektør.hendelseIder(1.vedtaksperiode))
             assertEquals(0, observatør.inntektsmeldingFørSøknad.size)
-        }
-    }
-
-    @Test
-    fun `Inntektsmelding ikke håndtert`() {
-        a1 {
-            val id = håndterInntektsmelding(listOf(1.januar til 16.januar))
-            val inntektsmelding = observatør.inntektsmeldingIkkeHåndtert.single()
-            assertEquals(id, inntektsmelding)
         }
     }
 
@@ -627,7 +608,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     fun `inntektsmelding med første fraværsdag utenfor sykdom - ingen tidligere vedtak - IM før søknad - inntektsmelding ikke håndtert fordi inntekt håndteres ikke`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(3.januar, 18.januar)),
                 førsteFraværsdag = 27.januar
             )

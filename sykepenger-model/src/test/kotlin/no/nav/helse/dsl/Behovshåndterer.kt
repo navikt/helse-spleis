@@ -70,9 +70,9 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
         uhåndterteInntektsmeldinger.remove(event.meldingsreferanseId)
     }
 
-    private fun inntektsmeldingReplayBehovAkkuratNå() = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InntektsmeldingReplay>().toSet()
-
-    private fun initiellHistorikFraInfotrygdBehovAkkuratNå() = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InitiellHistorikFraInfotrygd>().toSet()
+    fun gammelInntektsmelding(inntektsmelding: Inntektsmelding) {
+        uhåndterteInntektsmeldinger[inntektsmelding.metadata.meldingsreferanseId.id] = Inntektsmeldingdetaljer(inntektsmelding)
+    }
 
     fun håndterBehovSomOppstårAutomatisk(
         operasjon: () -> Unit,
@@ -80,6 +80,7 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
         håndterInntektsmeldingerReplay: (inntektsmeldingerReplay: InntektsmeldingerReplay) -> Unit,
         håndterInitiellHistorikkFraInfotrygd: (utbetalingshistorikk: Utbetalingshistorikk) -> Unit
     ) {
+        // TODO: Denne må kunne fjernes
         (hendelse as? Inntektsmelding)?.let { inntektsmelding ->
             uhåndterteInntektsmeldinger[inntektsmelding.metadata.meldingsreferanseId.id] = Inntektsmeldingdetaljer(inntektsmelding)
         }

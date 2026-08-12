@@ -356,7 +356,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
     fun `hensyntar historikk fra infotrygd - får vite om det etter IM`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(1.januar, 16.januar)),
                 førsteFraværsdag = 3.februar
             )
@@ -376,7 +376,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
     fun `hensyntar historikk fra infotrygd - får vite om det etter IM - flere perioder`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(2.februar, 2.februar))
-            håndterInntektsmelding(
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(1.januar, 16.januar)),
                 førsteFraværsdag = 2.februar
             )
@@ -515,7 +515,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
             håndterSykmelding(Sykmeldingsperiode(9.januar, 12.januar))
             håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar))
-            val im = håndterInntektsmelding(
+            val im = håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(
                     1.januar til 5.januar,
                     9.januar til 12.januar,

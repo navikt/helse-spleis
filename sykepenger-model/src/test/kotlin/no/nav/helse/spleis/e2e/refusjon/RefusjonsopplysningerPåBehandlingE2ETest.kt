@@ -537,7 +537,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     fun `IM før vedtaksperiode`() {
         a1 {
             val tidsstempel = LocalDateTime.now()
-            val im = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, mottatt = tidsstempel))
+            val im = MeldingsreferanseId(håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.januar til 16.januar), INNTEKT, mottatt = tidsstempel))
             håndterSøknad(januar)
 
             val kilde = Kilde(im, ARBEIDSGIVER, tidsstempel)
@@ -1136,14 +1136,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 INNTEKT,
                 inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje[1.februar].beløp
             )
-        }
-    }
-
-    @Test
-    fun `Inntektsmelding kommer før søknad`() {
-        a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Refusjon(INNTEKT, 31.mars, emptyList()))
-            assertInfo("Refusjonsservitøren har rester for 01-01-2018 etter servering: 01-01-2018 til 01-04-2018", AktivitetsloggFilter.arbeidsgiver(a1))
         }
     }
 

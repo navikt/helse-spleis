@@ -220,7 +220,6 @@ internal class TestPerson(
         internal val Int.vedtaksperiode get() = vedtaksperiodesamler.vedtaksperiodeId(orgnummer, this - 1)
 
         internal val sisteVedtaksperiode get() = vedtaksperiodesamler.sisteVedtaksperiode(orgnummer)
-        internal val sisteVedtaksperiodeOrNull get() = vedtaksperiodesamler.sisteVedtaksperiodeOrNull(orgnummer)
 
         internal fun håndterSykmelding(periode: Periode) = håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
 
@@ -424,6 +423,32 @@ internal class TestPerson(
             return meldingsreferanseId
         }
 
+        internal fun håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
+            arbeidsgiverperioder: List<Periode>,
+            beregnetInntekt: Inntekt = INNTEKT,
+            førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
+            begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+            id: UUID = UUID.randomUUID(),
+            mottatt: LocalDateTime = LocalDateTime.now(),
+            arbeidsforholdId: String? = null
+        ): UUID {
+            val inntektsmelding = arbeidsgiverHendelsefabrikk.lagInntektsmelding(
+                arbeidsgiverperioder,
+                beregnetInntekt,
+                førsteFraværsdag,
+                refusjon,
+                opphørAvNaturalytelser,
+                begrunnelseForReduksjonEllerIkkeUtbetalt,
+                id,
+                mottatt = mottatt,
+                arbeidsforholdId = arbeidsforholdId
+            )
+            behovshåndterer.gammelInntektsmelding(inntektsmelding)
+            return id
+        }
+
         @Deprecated("Bruk håndterArbeidsgiveropplysninger, håndterKorrigerteArbeidsgiveropplysninger eller håndterSelvbestemtArbeidsgiveropplysninger i stedet")
         internal fun håndterInntektsmelding(
             arbeidsgiverperioder: List<Periode>,
@@ -435,7 +460,7 @@ internal class TestPerson(
             id: UUID = UUID.randomUUID(),
             mottatt: LocalDateTime = LocalDateTime.now(),
             arbeidsforholdId: String? = null,
-            vedtaksperiodeId: UUID? = sisteVedtaksperiodeOrNull
+            vedtaksperiodeId: UUID = sisteVedtaksperiode
         ): UUID {
             if (Toggle.KnertInntektsmelding.disabled) {
                 arbeidsgiverHendelsefabrikk.lagInntektsmelding(
@@ -451,8 +476,6 @@ internal class TestPerson(
                 ).håndter(Person::håndterInntektsmelding)
                 return id
             }
-
-            checkNotNull(vedtaksperiodeId) { "VedtaksperiodeId må være satt!" }
 
             // Forespurte arbeidsgiveropplysninger
             if (observatør.harForespurtArbeidsgiveropplysninger(vedtaksperiodeId)) {
