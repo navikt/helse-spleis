@@ -631,7 +631,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-            håndterInntektsmelding(listOf(12.oktober(2021) til 27.oktober(2021)), INNTEKT)
+            håndterInntektsmelding(listOf(12.oktober(2021) til 27.oktober(2021)), INNTEKT, vedtaksperiodeId = 2.vedtaksperiode)
             assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_IM_3, 3.vedtaksperiode.filter())
 

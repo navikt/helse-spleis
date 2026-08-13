@@ -81,7 +81,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         }
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a2 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -1061,7 +1061,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
                 listOf(
                     17.januar til 20.januar,
                     2.februar til 13.februar
-                )
+                ),
+                vedtaksperiodeId = 2.vedtaksperiode
             )
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)

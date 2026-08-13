@@ -301,7 +301,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             val søknadId4 = UUID.randomUUID()
             håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent), søknadId = søknadId4)
             val søknad4 = MeldingsreferanseId(søknadId4)
-            val im = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar)))
+            val im = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeId = 3.vedtaksperiode))
 
             assertEquals(
                 setOf(

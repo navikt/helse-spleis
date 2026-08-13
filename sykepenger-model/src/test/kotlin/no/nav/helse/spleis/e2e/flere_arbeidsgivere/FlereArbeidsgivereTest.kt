@@ -387,7 +387,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a3 { håndterInntektsmelding(listOf(2.januar til 17.januar)) }
+        a3 { håndterInntektsmelding(listOf(2.januar til 17.januar), vedtaksperiodeId = 1.vedtaksperiode) }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -431,7 +431,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a3 { håndterInntektsmelding(listOf(2.januar til 17.januar)) }
+        a3 { håndterInntektsmelding(listOf(2.januar til 17.januar), vedtaksperiodeId = 1.vedtaksperiode) }
         a3 {
             håndterSøknad(Sykdom(2.januar, 18.januar, 100.prosent), Ferie(18.januar, 18.januar))
         }
@@ -477,7 +477,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             nyPeriode(februar)
         }
         a1 {
-            håndterInntektsmelding(listOf(7.januar til 22.januar))
+            håndterInntektsmelding(listOf(7.januar til 22.januar), vedtaksperiodeId = 1.vedtaksperiode)
         }
         a2 {
             håndterInntektsmelding(listOf(7.januar til 22.januar), førsteFraværsdag = 1.februar)
@@ -1527,7 +1527,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.mai til 16.mai))
         }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

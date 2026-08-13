@@ -451,7 +451,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
 
         håndterSykmelding(Sykmeldingsperiode(4.februar, 28.februar))
         håndterSøknad(Sykdom(4.februar, 28.februar, 100.prosent))
-        håndterInntektsmelding(listOf(19.januar til 3.februar), beregnetInntekt = INNTEKT)
+        håndterInntektsmelding(listOf(19.januar til 3.februar), beregnetInntekt = INNTEKT, vedtaksperiodeId = 2.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)

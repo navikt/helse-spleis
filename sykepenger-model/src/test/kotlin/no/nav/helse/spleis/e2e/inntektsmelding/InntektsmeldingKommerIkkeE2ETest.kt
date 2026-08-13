@@ -59,7 +59,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterSøknad(februar)
             håndterSøknad(mars)
             håndterSøknad(april)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
         }
         a1 {
             håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))

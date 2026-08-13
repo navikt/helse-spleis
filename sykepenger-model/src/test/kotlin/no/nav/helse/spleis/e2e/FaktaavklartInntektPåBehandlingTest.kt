@@ -97,7 +97,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterSøknad(februar)
             nullstillTilstandsendringer()
-            val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
+            val im = håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Arbeidsdag)))
             assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)

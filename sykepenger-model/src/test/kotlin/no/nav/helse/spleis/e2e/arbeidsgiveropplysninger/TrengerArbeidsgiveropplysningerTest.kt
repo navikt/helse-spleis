@@ -223,7 +223,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSøknad(Sykdom(22.januar, 26.januar, 100.prosent))
             håndterSøknad(Sykdom(27.januar, 28.januar, 100.prosent))
             håndterSøknad(Sykdom(29.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeId = 4.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)

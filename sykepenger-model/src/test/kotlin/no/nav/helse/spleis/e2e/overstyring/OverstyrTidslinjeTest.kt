@@ -104,7 +104,8 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSøknad(Sykdom(27.februar, 12.mars, 100.prosent))
             håndterSøknad(Sykdom(13.mars, 31.mars, 100.prosent))
             håndterInntektsmelding(
-                listOf(6.mars til 21.mars)
+                listOf(6.mars til 21.mars),
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)

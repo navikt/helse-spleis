@@ -49,6 +49,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -399,6 +400,13 @@ internal class TestPerson(
             arbeidsforholdId: String? = null,
             vedtaksperiodeId: UUID = sisteVedtaksperiode
         ): UUID {
+            val harForespurtArbeidsgiveropplysninger = observatør.harForespurtArbeidsgiveropplysninger(vedtaksperiodeId)
+            val tilstand = observatør.tilstandsendringer.getValue(vedtaksperiodeId).last()
+
+            if (!harForespurtArbeidsgiveropplysninger && tilstand == AVVENTER_INNTEKTSMELDING) {
+                error("Du har sendt inntektsmelding på feil vedtaksperiode. Er første i rekken i AVVENTER_INNTEKTSMELDING et sammenhengende sykefravær som ber om inntektsmelding.")
+            }
+
             if (Toggle.KnertInntektsmelding.disabled) {
                 arbeidsgiverHendelsefabrikk.lagInntektsmelding(
                     arbeidsgiverperioder,
@@ -415,7 +423,7 @@ internal class TestPerson(
             }
 
             // Forespurte arbeidsgiveropplysninger
-            if (observatør.harForespurtArbeidsgiveropplysninger(vedtaksperiodeId)) {
+            if (harForespurtArbeidsgiveropplysninger) {
                 return håndterArbeidsgiveropplysninger(
                     arbeidsgiverperioder = arbeidsgiverperioder,
                     beregnetInntekt = beregnetInntekt,
@@ -431,7 +439,7 @@ internal class TestPerson(
             }
 
             // Selvbestemte arbeidsgiveropplysninger
-            if (observatør.tilstandsendringer.getValue(vedtaksperiodeId).last() in setOf(AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)) {
+            if (tilstand in setOf(AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)) {
                 return håndterSelvbestemtArbeidsgiveropplysninger(
                     arbeidsgiverperioder = arbeidsgiverperioder,
                     beregnetInntekt = beregnetInntekt,

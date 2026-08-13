@@ -119,7 +119,7 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
         a1 {
             nyPeriode(1.januar til 17.januar)
             nyPeriode(18.januar til 31.januar)
-            håndterInntektsmelding(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", førsteFraværsdag = 19.januar)
+            håndterInntektsmelding(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", førsteFraværsdag = 19.januar, vedtaksperiodeId = 1.vedtaksperiode)
             assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
             assertEquals(listOf(19.januar.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
