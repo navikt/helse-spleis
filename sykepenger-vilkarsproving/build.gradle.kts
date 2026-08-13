@@ -17,6 +17,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(testFixtures(project(":sykepenger-primitiver")))
+    testImplementation("com.github.navikt.tbd-libs:rapids-and-rivers-test:$tbdLibsVersion")
 }
 
 kotlin {
