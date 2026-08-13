@@ -26,13 +26,3 @@ internal class InMemoryVilkårsvurderingRepository : VilkårsvurderingRepository
     override fun <T : Vilkårsvurdering> finn(opptjeningsvurderingId: UUID): T? =
         vurderinger.firstOrNull { it.id == opptjeningsvurderingId } as T?
 }
-
-internal class InMemoryOpptjeningsbehovRepository : OpptjeningsbehovRepository {
-    private val behov = mutableMapOf<UUID, Opptjeningsbehov>()
-
-    override fun finn(behovId: UUID): Opptjeningsbehov? = behov[behovId]
-
-    override fun lagre(behov: Opptjeningsbehov) {
-        this.behov[behov.vilkårsvurderingId ?: UUID.randomUUID()] = behov
-    }
-}

@@ -9,12 +9,10 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.opptjening.application.OpptjeningService
-import no.nav.helse.opptjening.application.Opptjeningsbehov
-import no.nav.helse.opptjening.application.OpptjeningsbehovRepository
 import no.nav.helse.opptjening.application.VurderOpptjeningResultat
 import no.nav.helse.opptjening.domain.Arbeidssituasjon
 
-class OpptjeningsvurderingRiver(rapidsConnection: RapidsConnection, private val opptjeningService: OpptjeningService, private val opptjeningsbehovRepository: OpptjeningsbehovRepository) : River.PacketListener {
+class OpptjeningsvurderingRiver(rapidsConnection: RapidsConnection, private val opptjeningService: OpptjeningService) : River.PacketListener {
     init {
 
         River(rapidsConnection).apply {

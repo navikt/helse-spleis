@@ -3,7 +3,6 @@ package no.nav.helse.opptjening.infra.kafka
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import java.util.UUID
 import no.nav.helse.februar
-import no.nav.helse.opptjening.application.InMemoryOpptjeningsbehovRepository
 import no.nav.helse.opptjening.application.InMemoryVilkårsvurderingRepository
 import no.nav.helse.opptjening.application.OpptjeningService
 import no.nav.helse.opptjening.domain.Kodeverkkode.OPPTJENING_MINST_4_UKER
@@ -17,7 +16,7 @@ internal class OpptjeningsvurderingRiverTest {
 
     private val repository = InMemoryVilkårsvurderingRepository()
     private val rapid = TestRapid().apply {
-        OpptjeningsvurderingRiver(this, OpptjeningService(repository), InMemoryOpptjeningsbehovRepository())
+        OpptjeningsvurderingRiver(this, OpptjeningService(repository))
     }
 
     // For arbeidstakere må vi hente arbeidsforhold før vi kan vurdere, så riveren
