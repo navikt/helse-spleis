@@ -40,7 +40,7 @@ class GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
         val arbeidsforhold = packet.mapArbeidsforhold()
-        opptjeningService.behandleGrunnlagForAutomatiskArbeidstakerOpptjeningsvurdering(arbeidsforhold, packet["@behovId"].asUUID())
+        opptjeningService.behandleGrunnlagForAutomatiskArbeidstakerOpptjeningsvurdering(arbeidsforhold, packet["@behovId"].asUUID(),  KafkaMeldingssender(context))
     }
 
     private fun JsonNode.asUUID() = UUID.fromString(this.asText())

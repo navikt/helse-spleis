@@ -1,6 +1,7 @@
 package no.nav.helse.opptjening.domain
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.til
@@ -12,7 +13,8 @@ sealed class Opptjening: Vilkårsvurdering {
         override val skjæringstidspunkt: LocalDate,
         val saksbehandlerIdent: String,
         val fritekstbegrunnelse: String,
-        override val kodeverkkode: Kodeverkkode
+        override val kodeverkkode: Kodeverkkode,
+        override val id: UUID
     ) : Opptjening()
 
     class AutomatiskVurdering private constructor(
@@ -20,7 +22,8 @@ sealed class Opptjening: Vilkårsvurdering {
         override val skjæringstidspunkt: LocalDate,
         val versjonAvKildekode: String,
         val grunnlagForAutomatiskVurdering: OpptjeningsgrunnlagForAutomatiskVurdering,
-        override val kodeverkkode: Kodeverkkode
+        override val kodeverkkode: Kodeverkkode,
+        override val id: UUID
     ) : Opptjening() {
 
         companion object {
@@ -30,7 +33,8 @@ sealed class Opptjening: Vilkårsvurdering {
                     skjæringstidspunkt = skjæringstidspunkt,
                     versjonAvKildekode = versjonAvKildekode,
                     grunnlagForAutomatiskVurdering = grunnlagForAutomatiskVurdering,
-                    kodeverkkode = grunnlagForAutomatiskVurdering.kodeverkkode(skjæringstidspunkt)
+                    kodeverkkode = grunnlagForAutomatiskVurdering.kodeverkkode(skjæringstidspunkt),
+                    id = UUID.randomUUID()
                 )
             }
 
@@ -39,14 +43,16 @@ sealed class Opptjening: Vilkårsvurdering {
                 skjæringstidspunkt: LocalDate,
                 versjonAvKildekode: String,
                 grunnlagForAutomatiskVurdering: OpptjeningsgrunnlagForAutomatiskVurdering,
-                kodeverkkode: Kodeverkkode
+                kodeverkkode: Kodeverkkode,
+                id: UUID
             ): AutomatiskVurdering {
                 return AutomatiskVurdering(
                     fødselsnummer = fødselsnummer,
                     skjæringstidspunkt = skjæringstidspunkt,
                     versjonAvKildekode = versjonAvKildekode,
                     grunnlagForAutomatiskVurdering = grunnlagForAutomatiskVurdering,
-                    kodeverkkode = kodeverkkode
+                    kodeverkkode = kodeverkkode,
+                    id = id
                 )
             }
         }

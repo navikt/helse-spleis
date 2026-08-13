@@ -5,5 +5,5 @@ import no.nav.helse.opptjening.domain.Vilkårsvurdering
 
 interface VilkårsvurderingRepository {
     fun lagre(vilkårsvurdering: Vilkårsvurdering)
-    fun <T: Vilkårsvurdering> finnVilkårsvurdering(fødselsnummer: String, skjæringstidspunkt: LocalDate): T?
+    fun <T: Vilkårsvurdering> finnNyesteVilkårsvurdering(fødselsnummer: String, skjæringstidspunkt: LocalDate): T?
 }

@@ -1,6 +1,7 @@
 package no.nav.helse.opptjening.domain
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -157,6 +158,7 @@ internal class OpptjeningAutomatiskVurderingTest {
         assertEquals(OPPTJENING_MINST_4_UKER, nyVurdering.kodeverkkode)
 
         val lagretVurdering = AutomatiskVurdering.fraLagring(
+            id =  ID,
             fødselsnummer = FØDSELSNUMMER,
             skjæringstidspunkt = 1.februar,
             versjonAvKildekode = VERSJON_AV_KILDEKODE,
@@ -274,6 +276,7 @@ internal class OpptjeningAutomatiskVurderingTest {
         const val FØDSELSNUMMER = "12029240045"
         const val VERSJON_AV_KILDEKODE = "en-versjon-av-kildekode"
         const val ORGNUMMER = "987654321"
+        val ID = UUID.randomUUID()
 
         fun arbeidsforhold(ansettelseperiode: Periode, orgnummer: String = ORGNUMMER) =
             Arbeidsforhold(orgnummer = orgnummer, ansettelseperiode = ansettelseperiode, type = ORDINÆRT)
