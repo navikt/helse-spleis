@@ -6,35 +6,54 @@ import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.til
 
-sealed class Opptjening: Vilkårsvurdering {
+sealed class Opptjening : Vilkårsvurdering {
 
     class ManuellVurdering(
         override val fødselsnummer: String,
         override val skjæringstidspunkt: LocalDate,
         val saksbehandlerIdent: String,
         val fritekstbegrunnelse: String,
-        override val kodeverkkode: Kodeverkkode,
-        override val id: UUID
-    ) : Opptjening()
+        override val kodeverkkode: Kodeverkkode?,
+        override val id: UUID,
+    ) : Opptjening() {
+        override val erKomplett: Boolean = true
+    }
 
     class AutomatiskVurdering private constructor(
         override val fødselsnummer: String,
         override val skjæringstidspunkt: LocalDate,
         val versjonAvKildekode: String,
-        val grunnlagForAutomatiskVurdering: OpptjeningsgrunnlagForAutomatiskVurdering,
-        override val kodeverkkode: Kodeverkkode,
-        override val id: UUID
+         grunnlagForAutomatiskVurdering: OpptjeningsgrunnlagForAutomatiskVurdering?,
+         kodeverkkode: Kodeverkkode?,
+        override val id: UUID,
+        erKomplett: Boolean
     ) : Opptjening() {
 
+        override var erKomplett: Boolean = erKomplett
+            private set
+
+        var grunnlagForAutomatiskVurdering: OpptjeningsgrunnlagForAutomatiskVurdering? = grunnlagForAutomatiskVurdering
+            private set
+
+        override var kodeverkkode: Kodeverkkode? = kodeverkkode
+            private set
+
+        fun fullfør(grunnlagForAutomatiskVurdering: OpptjeningsgrunnlagForAutomatiskVurdering) {
+            this.grunnlagForAutomatiskVurdering = grunnlagForAutomatiskVurdering
+            kodeverkkode = grunnlagForAutomatiskVurdering.kodeverkkode(skjæringstidspunkt)
+            erKomplett = true
+        }
+
         companion object {
-            fun nyAutomatiskVurdering(fødselsnummer: String, skjæringstidspunkt: LocalDate, versjonAvKildekode: String, grunnlagForAutomatiskVurdering: OpptjeningsgrunnlagForAutomatiskVurdering): AutomatiskVurdering {
+            fun nyAutomatiskVurdering(fødselsnummer: String, skjæringstidspunkt: LocalDate, versjonAvKildekode: String): AutomatiskVurdering {
                 return AutomatiskVurdering(
                     fødselsnummer = fødselsnummer,
                     skjæringstidspunkt = skjæringstidspunkt,
                     versjonAvKildekode = versjonAvKildekode,
-                    grunnlagForAutomatiskVurdering = grunnlagForAutomatiskVurdering,
-                    kodeverkkode = grunnlagForAutomatiskVurdering.kodeverkkode(skjæringstidspunkt),
-                    id = UUID.randomUUID()
+                    grunnlagForAutomatiskVurdering = null,
+                    kodeverkkode = null,
+                    id = UUID.randomUUID(),
+                    erKomplett = false
                 )
             }
 
@@ -44,7 +63,8 @@ sealed class Opptjening: Vilkårsvurdering {
                 versjonAvKildekode: String,
                 grunnlagForAutomatiskVurdering: OpptjeningsgrunnlagForAutomatiskVurdering,
                 kodeverkkode: Kodeverkkode,
-                id: UUID
+                id: UUID,
+                erKomplett: Boolean
             ): AutomatiskVurdering {
                 return AutomatiskVurdering(
                     fødselsnummer = fødselsnummer,
@@ -52,7 +72,8 @@ sealed class Opptjening: Vilkårsvurdering {
                     versjonAvKildekode = versjonAvKildekode,
                     grunnlagForAutomatiskVurdering = grunnlagForAutomatiskVurdering,
                     kodeverkkode = kodeverkkode,
-                    id = id
+                    id = id,
+                    erKomplett = erKomplett
                 )
             }
         }
@@ -62,7 +83,7 @@ sealed class Opptjening: Vilkårsvurdering {
 
             class ForArbeidstaker(
                 val arbeidsforhold: List<Arbeidsforhold>,
-            ): OpptjeningsgrunnlagForAutomatiskVurdering {
+            ) : OpptjeningsgrunnlagForAutomatiskVurdering {
                 override fun kodeverkkode(skjæringstidspunkt: LocalDate): Kodeverkkode {
                     val antallOpptjeningsdagerFørSkjæringstidspunktet = arbeidsforhold.map { it.ansettelseperiode }.grupperSammenhengendePerioderMedHensynTilHelg()
                         .find { skjæringstidspunkt.forrigeDag in it }
@@ -77,7 +98,7 @@ sealed class Opptjening: Vilkårsvurdering {
                 }
             }
 
-            object ForSelvstendigNæringsdrivende: OpptjeningsgrunnlagForAutomatiskVurdering {
+            object ForSelvstendigNæringsdrivende : OpptjeningsgrunnlagForAutomatiskVurdering {
                 override fun kodeverkkode(skjæringstidspunkt: LocalDate): Kodeverkkode {
                     return Kodeverkkode.OPPTJENING_MINST_4_UKER
                 }

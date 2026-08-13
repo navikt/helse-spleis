@@ -1,65 +1,74 @@
 package no.nav.helse.opptjening.application
 
+import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.opptjening.application.VurderOpptjeningResultat.HarVurdering
+import no.nav.helse.opptjening.application.VurderOpptjeningResultat.TrengerArbeidsforhold
 import no.nav.helse.opptjening.domain.Arbeidsforhold
 import no.nav.helse.opptjening.domain.Arbeidssituasjon
 import no.nav.helse.opptjening.domain.Opptjening
 import no.nav.helse.opptjening.domain.Opptjening.AutomatiskVurdering.OpptjeningsgrunnlagForAutomatiskVurdering
 
-class OpptjeningService(private val vilkårsvurderingRepository: VilkårsvurderingRepository, private val opptjeningsbehovRepository: OpptjeningsbehovRepository) {
+class OpptjeningService(
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+) {
 
-    fun vurderOpptjening(opptjeningsbehov: Opptjeningsbehov, meldingssender: Meldingssender) {
-        val fødselsnummer = opptjeningsbehov.fødselsnummer
-        val skjæringstidspunkt = opptjeningsbehov.skjæringstidspunkt
+    fun vurderOpptjening(fødselsnummer: String, skjæringstidspunkt: LocalDate, arbeidssituasjon: Arbeidssituasjon): VurderOpptjeningResultat {
 
-        vilkårsvurderingRepository.finnNyesteVilkårsvurdering<Opptjening>(fødselsnummer, skjæringstidspunkt)?.let {
-            // do something with the vilkårsvurdering
-            // TODO . Vi bør sjekke at logikken på eksisterende vurdering var gjort basert på samme arbeidssiturasjon. Om vi i fremtiden kan endre situasjonen på et skjæringstidspunkt
-            meldingssender.sendOpptjeningsvurderingReferanse(fødselsnummer, skjæringstidspunkt, it.id)
-        } ?: run {
+        val eksisterendeVilkårsvurdering = vilkårsvurderingRepository.finnNyesteVilkårsvurdering<Opptjening>(fødselsnummer, skjæringstidspunkt)
+        eksisterendeVilkårsvurdering?.let {
 
-            // lagre mottatt behov
-            opptjeningsbehovRepository.lagre(opptjeningsbehov)
+            return if (it.erKomplett) {
 
-            when (opptjeningsbehov.arbeidssituasjon) {
+                // TODO: I fremtiden bør vi sjekke at logikken på eksisterende vurdering var gjort basert på samme arbeidssituasjon.
+                //  Om vi i fremtiden kan endre situasjonen på et skjæringstidspunkt
+                HarVurdering(fødselsnummer, skjæringstidspunkt, it.id)
+            } else {
+                // Nytt behov nedover. Mulig jeg ble påminnet av spleis.
+                TrengerArbeidsforhold(fødselsnummer, skjæringstidspunkt)
+            }
+        }
 
-                Arbeidssituasjon.Arbeidstaker -> {
 
-                    meldingssender.sendArbeidsforholdBehov(fødselsnummer)
-                }
-                Arbeidssituasjon.SelvstendigNæringsdrivende -> {
-                    val vurdering = Opptjening.AutomatiskVurdering.nyAutomatiskVurdering(
-                        fødselsnummer = fødselsnummer,
-                        skjæringstidspunkt = skjæringstidspunkt,
-                        versjonAvKildekode = "",
-                        grunnlagForAutomatiskVurdering = OpptjeningsgrunnlagForAutomatiskVurdering.ForSelvstendigNæringsdrivende,
-                    )
-                    opptjeningsbehov.kvitterUt(vurdering.id)
-                    opptjeningsbehovRepository.lagre(opptjeningsbehov)
+        return when (arbeidssituasjon) {
+            Arbeidssituasjon.Arbeidstaker -> TrengerArbeidsforhold(fødselsnummer)
 
-                    vilkårsvurderingRepository.lagre(vurdering)
-                    meldingssender.sendOpptjeningsvurderingReferanse(fødselsnummer, skjæringstidspunkt, vurdering.id)
-                }
+            Arbeidssituasjon.SelvstendigNæringsdrivende -> {
+                val vurdering = Opptjening.AutomatiskVurdering.nyAutomatiskVurdering(
+                    fødselsnummer = fødselsnummer,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    versjonAvKildekode = "",
+                )
+                vurdering.fullfør(grunnlagForAutomatiskVurdering = OpptjeningsgrunnlagForAutomatiskVurdering.ForSelvstendigNæringsdrivende)
+                vilkårsvurderingRepository.lagre(vurdering)
+                HarVurdering(fødselsnummer, skjæringstidspunkt, vurdering.id)
             }
         }
     }
 
-    fun behandleGrunnlagForAutomatiskArbeidstakerOpptjeningsvurdering(arbeidsforhold: List<Arbeidsforhold>, behovId: UUID, meldingssender: Meldingssender) {
-        val behov = opptjeningsbehovRepository.finnUbesvart(behovId) ?: return
-
+    fun behandleGrunnlagForAutomatiskArbeidstakerOpptjeningsvurdering(
+        arbeidsforhold: List<Arbeidsforhold>,
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+    ): UUID {
+/*
         val vurdering = Opptjening.AutomatiskVurdering.nyAutomatiskVurdering(
-            fødselsnummer = behov.fødselsnummer,
-            skjæringstidspunkt = behov.skjæringstidspunkt,
-            versjonAvKildekode = "", //TODO: hent versjon av kildekode
-            grunnlagForAutomatiskVurdering = OpptjeningsgrunnlagForAutomatiskVurdering.ForArbeidstaker(arbeidsforhold = arbeidsforhold)
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            versjonAvKildekode = "", // TODO: hent versjon av kildekode
+            grunnlagForAutomatiskVurdering = OpptjeningsgrunnlagForAutomatiskVurdering.ForArbeidstaker(arbeidsforhold = arbeidsforhold),
         )
 
-        behov.kvitterUt(vurdering.id)
 
         vilkårsvurderingRepository.lagre(vurdering)
-        opptjeningsbehovRepository.lagre(behov)
 
-        meldingssender.sendOpptjeningsvurderingReferanse(behov.fødselsnummer, behov.skjæringstidspunkt, vurdering.id)
+        return vurdering.id
+        */
+ TODO()
+    }
 
+    fun finnOpptjeningsvurderingResultat(opptjeningsvurderingId: UUID): Opptjening {
+        return vilkårsvurderingRepository.finn(opptjeningsvurderingId)
+            ?: error("Fant ikke opptjeningsvurdering med id $opptjeningsvurderingId")
     }
 }

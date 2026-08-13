@@ -139,8 +139,7 @@ internal class OpptjeningAutomatiskVurderingTest {
             fødselsnummer = FØDSELSNUMMER,
             skjæringstidspunkt = 1.februar,
             versjonAvKildekode = VERSJON_AV_KILDEKODE,
-            grunnlagForAutomatiskVurdering = grunnlag
-        )
+        ).also { it.fullfør(grunnlag) }
 
         assertEquals(FØDSELSNUMMER, vurdering.fødselsnummer)
         assertEquals(1.februar, vurdering.skjæringstidspunkt)
@@ -158,12 +157,13 @@ internal class OpptjeningAutomatiskVurderingTest {
         assertEquals(OPPTJENING_MINST_4_UKER, nyVurdering.kodeverkkode)
 
         val lagretVurdering = AutomatiskVurdering.fraLagring(
-            id =  ID,
+            id = ID,
             fødselsnummer = FØDSELSNUMMER,
             skjæringstidspunkt = 1.februar,
             versjonAvKildekode = VERSJON_AV_KILDEKODE,
             grunnlagForAutomatiskVurdering = grunnlag,
-            kodeverkkode = IKKE_OPPTJENING_ARBEID_ELLER_YTELSE
+            kodeverkkode = IKKE_OPPTJENING_ARBEID_ELLER_YTELSE,
+            erKomplett = true
         )
         assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, lagretVurdering.kodeverkkode)
         assertNotEquals(nyVurdering.kodeverkkode, lagretVurdering.kodeverkkode)
@@ -288,8 +288,7 @@ internal class OpptjeningAutomatiskVurderingTest {
             fødselsnummer = FØDSELSNUMMER,
             skjæringstidspunkt = skjæringstidspunkt,
             versjonAvKildekode = VERSJON_AV_KILDEKODE,
-            grunnlagForAutomatiskVurdering = grunnlag
-        )
+        ).also { it.fullfør(grunnlag) }
 
         fun vurderArbeidstaker(skjæringstidspunkt: LocalDate, vararg arbeidsforhold: Arbeidsforhold) =
             nyAutomatiskVurdering(skjæringstidspunkt, ForArbeidstaker(arbeidsforhold.toList())).kodeverkkode

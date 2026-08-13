@@ -40,10 +40,21 @@ class GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
         val arbeidsforhold = packet.mapArbeidsforhold()
-        opptjeningService.behandleGrunnlagForAutomatiskArbeidstakerOpptjeningsvurdering(arbeidsforhold, packet["@behovId"].asUUID(),  KafkaMeldingssender(context))
+
+        //val behov = opptjeningsbehovRepository.finnUbesvart(behovId) ?: return null
+
+/*
+        opptjeningService.behandleGrunnlagForAutomatiskArbeidstakerOpptjeningsvurdering(
+            arbeidsforhold,
+            packet["@behovId"].asUUID(),
+        ) ?: return
+*/
+        //behov.kvitterUt(vurdering.id)
+        //opptjeningsbehovRepository.lagre(behov)
+
+        // TODO: send kommando.fødselsnummer, kommando.skjæringstidspunkt, kommando.vurderingId på river
     }
 
-    private fun JsonNode.asUUID() = UUID.fromString(this.asText())
 
     private fun JsonMessage.mapArbeidsforhold() =
         mapArbeidsforhold(this["@løsning.$behovKey"])

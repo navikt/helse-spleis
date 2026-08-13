@@ -7,5 +7,6 @@ sealed interface Vilkårsvurdering {
     val id: UUID
     val fødselsnummer: String
     val skjæringstidspunkt: LocalDate
-    val kodeverkkode: Kodeverkkode
+    val kodeverkkode: Kodeverkkode?
+    val erKomplett: Boolean
 }
