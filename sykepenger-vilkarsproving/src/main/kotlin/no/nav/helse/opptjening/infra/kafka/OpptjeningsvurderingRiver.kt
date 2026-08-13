@@ -1,5 +1,6 @@
 package no.nav.helse.opptjening.infra.kafka
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
@@ -55,7 +56,7 @@ class OpptjeningsvurderingRiver(rapidsConnection: RapidsConnection, private val 
                     map = mapOf(
                         "skjæringstidspunkt" to skjæringstidspunkt.toString(),
                         "fødselsnummer" to fødselsnummer,
-                        "opprinneligBehov" to packet //TODO vi må være sikker på json eller string her?
+                        "opprinneligBehov" to jacksonObjectMapper().readTree(packet.toJson()) //TODO vi må være sikker på json eller string her?
                     )
                 )
                 context.publish(utgåendeBehov.toJson())
