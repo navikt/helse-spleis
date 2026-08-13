@@ -8,7 +8,9 @@ import no.nav.helse.opptjening.application.OpptjeningService
 import no.nav.helse.opptjening.domain.Kodeverkkode.OPPTJENING_MINST_4_UKER
 import no.nav.helse.opptjening.domain.Opptjening.AutomatiskVurdering
 import org.intellij.lang.annotations.Language
+import com.fasterxml.jackson.databind.node.ObjectNode
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -62,6 +64,24 @@ internal class OpptjeningsvurderingRiverTest {
         assertEquals(1, rapid.inspektør.size)
         val løsning = rapid.inspektør.message(0)
         assertEquals(eksisterende.id.toString(), løsning.path("@løsning").path("Opptjeningsvurdering").path("id").asText())
+    }
+
+    @Test
+    fun `opprinneligBehov er json-objekt med identisk innhold som innkommende behov`() {
+        val innkommendeBehov = opptjeningsvurderingBehov(arbeidssituasjon = "Arbeidstaker")
+        rapid.sendTestMessage(innkommendeBehov)
+
+        val utgående = rapid.inspektør.message(0)
+        val opprinneligBehov = utgående.path("opprinneligBehov")
+
+        assertInstanceOf(ObjectNode::class.java, opprinneligBehov) { "opprinneligBehov skal være et JSON-objekt, ikke en string" }
+
+        val objectMapper = com.fasterxml.jackson.module.kotlin.jacksonObjectMapper()
+        val forventet = objectMapper.readTree(innkommendeBehov)
+        // Rapids beriker meldingen med metadata-felter — vi sjekker at alle opprinnelige felter er bevart
+        forventet.fields().forEach { (key, value) ->
+            assertEquals(value, opprinneligBehov.get(key)) { "Feltet '$key' i opprinneligBehov stemmer ikke" }
+        }
     }
 
     // Riveren skal ikke plukke opp behov som allerede har fått en løsning
