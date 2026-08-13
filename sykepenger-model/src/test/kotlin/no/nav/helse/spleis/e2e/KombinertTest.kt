@@ -1,10 +1,12 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -71,7 +73,11 @@ internal class KombinertTest : AbstractDslTest() {
             håndterSøknad(1.januar til 14.januar)
             håndterSøknad(15.januar til 20.januar)
             håndterSøknad(25.januar til 31.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysningerForForkastetPeriode(2.vedtaksperiode,
+                Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
+            )
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
             assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)

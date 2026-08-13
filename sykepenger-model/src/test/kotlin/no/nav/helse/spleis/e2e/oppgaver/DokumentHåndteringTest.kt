@@ -8,6 +8,7 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -163,7 +164,11 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), utenlandskSykmelding = true)
-            val id = håndterInntektsmelding(listOf(1.januar til 16.januar))
+            val id = håndterArbeidsgiveropplysningerForForkastetPeriode(1.vedtaksperiode,
+                Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
+            )
             val inntektsmelding = observatør.inntektsmeldingIkkeHåndtert.single()
             assertEquals(id, inntektsmelding)
         }

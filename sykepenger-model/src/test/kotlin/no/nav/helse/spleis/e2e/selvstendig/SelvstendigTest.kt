@@ -16,6 +16,7 @@ import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
@@ -1111,7 +1112,11 @@ internal class SelvstendigTest : AbstractDslTest() {
         }
         a1 {
             håndterSøknad(1.januar til 16.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysningerForForkastetPeriode(1.vedtaksperiode,
+                Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
+            )
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
         selvstendig {

@@ -365,6 +365,18 @@ internal class TestPerson(
             return hendelse.metadata.meldingsreferanseId.id
         }
 
+        internal fun håndterArbeidsgiveropplysningerForForkastetPeriode(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning, meldingsreferanseId: UUID = UUID.randomUUID(), innsendt: LocalDateTime = LocalDateTime.now()): UUID {
+            val hendelse = arbeidsgiverHendelsefabrikk.lagArbeidsgiveropplysninger(
+                vedtaksperiodeId = vedtaksperiodeId,
+                meldingsreferanseId = meldingsreferanseId,
+                innsendt = innsendt,
+                opplysninger = opplysninger
+            )
+            check(observatør.forventerArbeidsgiveropplysningerForkastetVedtaksperiode(vedtaksperiodeId)) { "Kan bare brukes ved svar på forespørsler på forkastede vedtaksperioder!" }
+            hendelse.håndter(Person::håndterArbeidsgiveropplysninger)
+            return hendelse.metadata.meldingsreferanseId.id
+        }
+
         internal fun håndterKorrigerteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg opplysninger: Arbeidsgiveropplysning, meldingsreferanseId: UUID = UUID.randomUUID(), innsendt: LocalDateTime = LocalDateTime.now()): UUID {
             val hendelse = arbeidsgiverHendelsefabrikk.lagKorrigerteArbeidsgiveropplysninger(
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -400,12 +412,10 @@ internal class TestPerson(
             arbeidsforholdId: String? = null,
             vedtaksperiodeId: UUID = sisteVedtaksperiode
         ): UUID {
-            val harForespurtArbeidsgiveropplysninger = observatør.harForespurtArbeidsgiveropplysninger(vedtaksperiodeId)
+            val forventerArbeidsgiveropplysninger = observatør.forventerArbeidsgiveropplysninger(vedtaksperiodeId)
+            val kanArbeidsgiveropplysningerKorrigeres = observatør.kanArbeidsgiveropplysningerKorrigeres(vedtaksperiodeId)
             val tilstand = observatør.tilstandsendringer.getValue(vedtaksperiodeId).last()
-
-            if (!harForespurtArbeidsgiveropplysninger && tilstand == AVVENTER_INNTEKTSMELDING) {
-                error("Du har sendt inntektsmelding på feil vedtaksperiode. Er første i rekken i AVVENTER_INNTEKTSMELDING et sammenhengende sykefravær som ber om inntektsmelding.")
-            }
+            val erAvsluttetUtenUtbetaling = tilstand in setOf(AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
 
             if (Toggle.KnertInntektsmelding.disabled) {
                 arbeidsgiverHendelsefabrikk.lagInntektsmelding(
@@ -423,7 +433,7 @@ internal class TestPerson(
             }
 
             // Forespurte arbeidsgiveropplysninger
-            if (harForespurtArbeidsgiveropplysninger) {
+            if (forventerArbeidsgiveropplysninger) {
                 return håndterArbeidsgiveropplysninger(
                     arbeidsgiverperioder = arbeidsgiverperioder,
                     beregnetInntekt = beregnetInntekt,
@@ -438,8 +448,24 @@ internal class TestPerson(
                 )
             }
 
+            // Korrigerte arbeidsgiveropplysninger
+            if (kanArbeidsgiveropplysningerKorrigeres) {
+                return håndterKorrigerteArbeidsgiveropplysninger(
+                    arbeidsgiverperioder = arbeidsgiverperioder,
+                    beregnetInntekt = beregnetInntekt,
+                    førsteFraværsdag = førsteFraværsdag,
+                    refusjon = refusjon,
+                    opphørAvNaturalytelser = opphørAvNaturalytelser,
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                    id = id,
+                    mottatt = mottatt,
+                    arbeidsforholdId = arbeidsforholdId,
+                    vedtaksperiodeId = vedtaksperiodeId
+                )
+            }
+
             // Selvbestemte arbeidsgiveropplysninger
-            if (tilstand in setOf(AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)) {
+            if (erAvsluttetUtenUtbetaling) {
                 return håndterSelvbestemtArbeidsgiveropplysninger(
                     arbeidsgiverperioder = arbeidsgiverperioder,
                     beregnetInntekt = beregnetInntekt,
@@ -454,19 +480,9 @@ internal class TestPerson(
                 )
             }
 
-            // Korrigerte arbeidsgiveropplysninger
-            return håndterKorrigerteArbeidsgiveropplysninger(
-                arbeidsgiverperioder = arbeidsgiverperioder,
-                beregnetInntekt = beregnetInntekt,
-                førsteFraværsdag = førsteFraværsdag,
-                refusjon = refusjon,
-                opphørAvNaturalytelser = opphørAvNaturalytelser,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                id = id,
-                mottatt = mottatt,
-                arbeidsforholdId = arbeidsforholdId,
-                vedtaksperiodeId = vedtaksperiodeId
-            )
+            if (tilstand == TilstandType.TIL_INFOTRYGD) error("Bruk håndterArbeidsgiveropplysningerForForkastetPeriode!!")
+
+            error("Uventet situasjon! Her er nok arbeidsgiveropplysningene sendt på feil periode. Tilstanden på perioden er ${tilstand.name}")
         }
 
         /** </Arbeidsgiveropplysninger> **/

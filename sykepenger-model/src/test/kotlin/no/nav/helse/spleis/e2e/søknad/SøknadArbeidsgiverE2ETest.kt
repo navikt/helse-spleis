@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -337,16 +339,17 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `hensyntar historikk fra infotrygd - får vite om det før IM`() {
+    fun `hensyntar historikk fra infotrygd`() {
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(
                 ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar)
             )
             håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar))
             håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
-            håndterInntektsmelding(
-                listOf(Periode(1.januar, 16.januar)),
-                førsteFraværsdag = 3.februar
+            håndterArbeidsgiveropplysningerForForkastetPeriode(1.vedtaksperiode,
+                Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
             )
             assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
         }
@@ -368,35 +371,6 @@ internal class SøknadArbeidsgiverE2ETest : AbstractDslTest() {
             assertVarsler(listOf(Varselkode.RV_IM_3), 1.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertEquals(1, observatør.inntektsmeldingHåndtert.size)
-
-        }
-    }
-
-    @Test
-    fun `hensyntar historikk fra infotrygd - får vite om det etter IM - flere perioder`() {
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(2.februar, 2.februar))
-            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
-                listOf(Periode(1.januar, 16.januar)),
-                førsteFraværsdag = 2.februar
-            )
-            håndterUtbetalingshistorikkEtterInfotrygdendring(
-                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar)
-            )
-            håndterSøknad(Sykdom(2.februar, 2.februar, 100.prosent))
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
-
-            nullstillTilstandsendringer()
-            håndterSykmelding(Sykmeldingsperiode(6.februar, 6.februar))
-            håndterInntektsmelding(
-                listOf(Periode(1.januar, 16.januar)),
-                førsteFraværsdag = 6.februar
-            )
-            håndterSøknad(Sykdom(6.februar, 6.februar, 100.prosent))
-
-            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
 

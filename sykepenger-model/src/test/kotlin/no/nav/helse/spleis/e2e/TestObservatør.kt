@@ -126,24 +126,46 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
         vedtaksperioder.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
         tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event.forrigeTilstand) }.add(event.gjeldendeTilstand)
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
-
-        if (event.forrigeTilstand == TilstandType.AVVENTER_INNTEKTSMELDING) {
-            trengerArbeidsgiveroppysninger.remove(event.vedtaksperiodeId)
-        }
     }
 
     internal fun nullstillTilstandsendringer() {
         tilstandsendringer.replaceAll { _, value -> mutableListOf(value.last()) }
     }
 
-    private val trengerArbeidsgiveroppysninger = mutableMapOf<UUID, Set<EventSubscription.ForespurtOpplysning>>()
+    private data class Forespørsel(
+        val opplysninger : Set<EventSubscription.ForespurtOpplysning>,
+        var tilstand: Tilstand = Tilstand.Åpen
+    ) {
+        sealed interface Tilstand {
+            data object Åpen : Tilstand
+            data object Besvart: Tilstand
+            data object TrengteIkkeOpplysninger: Tilstand
+            data object ForkastetVedtaksperiode: Tilstand
+        }
+    }
 
-    internal fun harForespurtArbeidsgiveropplysninger(vedtaksperiodeId: UUID) = trengerArbeidsgiveroppysninger.containsKey(vedtaksperiodeId)
+    private val arbeidsgiverForespørsler = mutableMapOf<UUID, Forespørsel>()
+    private fun endrearbeidsgiverForespørselTilstand(vedtaksperiodeId: UUID, nyTilstand: Forespørsel.Tilstand) {
+        val forespørsel = arbeidsgiverForespørsler[vedtaksperiodeId] ?: return
+        if (forespørsel.tilstand == nyTilstand) return
+        if (forespørsel.tilstand == Forespørsel.Tilstand.Åpen || nyTilstand == Forespørsel.Tilstand.ForkastetVedtaksperiode) {
+            forespørsel.tilstand = nyTilstand
+            return
+        }
+        error("Gir ikke mening å gå fra ${forespørsel.tilstand::class.simpleName} til ${nyTilstand::class.simpleName}")
+    }
+
+    internal fun forventerArbeidsgiveropplysninger(vedtaksperiodeId: UUID) = arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.Åpen
+    internal fun kanArbeidsgiveropplysningerKorrigeres(vedtaksperiodeId: UUID) = arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.Besvart
+    internal fun forventerArbeidsgiveropplysningerForkastetVedtaksperiode(vedtaksperiodeId: UUID) = arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.ForkastetVedtaksperiode
+
     internal fun forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg oppgitt: Arbeidsgiveropplysning) {
-        val forespurt = trengerArbeidsgiveroppysninger[vedtaksperiodeId] ?: error("Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId")
+        val forespørsel = arbeidsgiverForespørsler[vedtaksperiodeId] ?: error("Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId")
         if (oppgitt.isEmpty()) return
         val relevante = oppgitt.filter { it is Arbeidsgiveropplysning.OppgittInntekt || it is Arbeidsgiveropplysning.OppgittArbeidgiverperiode || it is Arbeidsgiveropplysning.OppgittRefusjon }
 
+        check(forespørsel.tilstand == Forespørsel.Tilstand.Åpen) { "Godtar ikke svar på forspørsel som har tilstand ${forespørsel.tilstand::class.simpleName}" }
+        val forespurt = forespørsel.opplysninger
         val forespurteOpplysninger = forespurt.map { it.somArbeidsgiveropplysning }.toSet()
         val oppgittOpplysninger = relevante.map { it::class }.toSet()
 
@@ -163,12 +185,12 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
 
     override fun trengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
         trengerArbeidsgiveropplysningerVedtaksperioder.add(event)
-        trengerArbeidsgiveroppysninger[event.opplysninger.vedtaksperiodeId] = event.opplysninger.forespurteOpplysninger
+        arbeidsgiverForespørsler[event.opplysninger.vedtaksperiodeId] = Forespørsel(event.opplysninger.forespurteOpplysninger)
     }
 
     override fun trengerIkkeArbeidsgiveropplysninger(event: EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent) {
         trengerIkkeArbeidsgiveropplysningerVedtaksperioder.add(event)
-        trengerArbeidsgiveroppysninger.remove(event.vedtaksperiodeId)
+        endrearbeidsgiverForespørselTilstand(event.vedtaksperiodeId, Forespørsel.Tilstand.TrengteIkkeOpplysninger)
     }
 
     override fun annullering(event: EventSubscription.UtbetalingAnnullertEvent) {
@@ -177,6 +199,11 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
 
     override fun vedtaksperiodeForkastet(event: EventSubscription.VedtaksperiodeForkastetEvent) {
         forkastedeEventer[event.vedtaksperiodeId] = event
+        if (event.vedtaksperiodeId !in arbeidsgiverForespørsler) {
+            // Dette er en såkalt "begrenset forespørsel" som sendes når vi har en forkastet periode på direkten. Da spør vi alltid om alt.
+            arbeidsgiverForespørsler[event.vedtaksperiodeId] = Forespørsel(setOf(EventSubscription.Inntekt, EventSubscription.Refusjon, EventSubscription.Arbeidsgiverperiode))
+        }
+        endrearbeidsgiverForespørselTilstand(event.vedtaksperiodeId, Forespørsel.Tilstand.ForkastetVedtaksperiode)
     }
 
     override fun overstyringIgangsatt(
@@ -199,7 +226,7 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
 
     override fun inntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent) {
         inntektsmeldingHåndtert.add(event.meldingsreferanseId to event.vedtaksperiodeId)
-        trengerArbeidsgiveroppysninger.remove(event.vedtaksperiodeId)
+        endrearbeidsgiverForespørselTilstand(event.vedtaksperiodeId, Forespørsel.Tilstand.Besvart)
     }
 
     override fun skatteinntekterLagtTilGrunn(event: EventSubscription.SkatteinntekterLagtTilGrunnEvent) {

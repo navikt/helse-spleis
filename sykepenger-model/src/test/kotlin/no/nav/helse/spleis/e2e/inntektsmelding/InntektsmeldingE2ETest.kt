@@ -583,10 +583,10 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             assertSisteTilstand(vedtaksperiodeIdFebruar, TIL_INFOTRYGD)
             nullstillTilstandsendringer()
 
-            val im = håndterInntektsmelding(
-                listOf(1.januar til 16.januar),
-                refusjon = Refusjon(1.daglig, null),
-                førsteFraværsdag = 10.februar
+            val im = håndterArbeidsgiveropplysningerForForkastetPeriode(2.vedtaksperiode,
+                Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
+                Arbeidsgiveropplysning.OppgittRefusjon(1.daglig, emptyList())
             )
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
@@ -767,7 +767,11 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true)
             assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { event -> event.opplysninger.arbeidstaker.organisasjonsnummer == a2 }.size)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysningerForForkastetPeriode(1.vedtaksperiode,
+                Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
+            )
         }
         a1 { assertSisteTilstand(1.vedtaksperiode, AVSLUTTET) }
     }
