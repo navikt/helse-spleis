@@ -1,6 +1,7 @@
 package no.nav.helse.opptjening.infra.kafka
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
@@ -16,16 +17,20 @@ import no.nav.helse.opptjening.domain.Arbeidsforhold
 class GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
     rapidsConnection: RapidsConnection,
     private val opptjeningService: OpptjeningService
-): River.PacketListener {
+) : River.PacketListener {
     private val behovKey = "ArbeidsforholdV2"
 
     init {
         River(rapidsConnection).apply {
-            validate { it.requireKey("@event_name") }
-            validate { it.requireKey("fødselsnummer") }
-            validate { it.requireKey("skjæringstidspunkt") }
-            validate { it.requireKey("behovId") }
-            validate { it.requireKey("løsninger") }
+            precondition {
+                it.requireValue("@event_name", "behov")
+                it.requireAllOrAny("@behov", listOf(behovKey))
+                it.requireValue("@final", true)
+                it.requireKey("fødselsnummer")
+                it.requireKey("skjæringstidspunkt")
+                it.requireKey("opprinneligBehov")
+                it.requireKey("@løsning")
+            }
 
             validate {
                 it.requireArray("@løsning.$behovKey") {
@@ -41,20 +46,31 @@ class GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
     override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
         val arbeidsforhold = packet.mapArbeidsforhold()
 
-        //val behov = opptjeningsbehovRepository.finnUbesvart(behovId) ?: return null
+        val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
+        val fødselsnummer = packet["fødselsnummer"].asText()
+        val resultat = opptjeningService.behandleGrunnlagForAutomatiskArbeidstakerOpptjeningsvurdering(
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsforhold = arbeidsforhold,
+        )
+        when(resultat){
+            OpptjeningService.BehandleGrunnlagResultat.AlleredeVurdert -> {
+                // No-op. finn ut av lognivå
+            }
+            is OpptjeningService.BehandleGrunnlagResultat.NyVurderingForetatt -> {
+                val opprinneligBehov = packet["opprinneligBehov"] as ObjectNode
+                val løsning = opprinneligBehov.putObject("@løsning")
+                løsning.putObject("Opptjeningsvurdering")
+                    .put("id", resultat.vurderingId.toString())
+                context.publish(opprinneligBehov.toString())
+            }
 
-/*
-        opptjeningService.behandleGrunnlagForAutomatiskArbeidstakerOpptjeningsvurdering(
-            arbeidsforhold,
-            packet["@behovId"].asUUID(),
-        ) ?: return
-*/
-        //behov.kvitterUt(vurdering.id)
-        //opptjeningsbehovRepository.lagre(behov)
+            OpptjeningService.BehandleGrunnlagResultat.IngenVurderingFunnet -> {
+                // No op med warning logging om vi ikke logger i servicen
+            }
+        }
 
-        // TODO: send kommando.fødselsnummer, kommando.skjæringstidspunkt, kommando.vurderingId på river
     }
-
 
     private fun JsonMessage.mapArbeidsforhold() =
         mapArbeidsforhold(this["@løsning.$behovKey"])

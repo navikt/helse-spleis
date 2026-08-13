@@ -50,21 +50,29 @@ class OpptjeningService(
         arbeidsforhold: List<Arbeidsforhold>,
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
-    ): UUID {
-/*
-        val vurdering = Opptjening.AutomatiskVurdering.nyAutomatiskVurdering(
-            fødselsnummer = fødselsnummer,
-            skjæringstidspunkt = skjæringstidspunkt,
-            versjonAvKildekode = "", // TODO: hent versjon av kildekode
-            grunnlagForAutomatiskVurdering = OpptjeningsgrunnlagForAutomatiskVurdering.ForArbeidstaker(arbeidsforhold = arbeidsforhold),
-        )
+    ): BehandleGrunnlagResultat {
+
+        val eksisterendeVilkårsvurdering = vilkårsvurderingRepository.finnNyesteVilkårsvurdering<Opptjening.AutomatiskVurdering>(fødselsnummer, skjæringstidspunkt)
+
+        if (eksisterendeVilkårsvurdering == null) {
+            // TODO log feil her
+            return BehandleGrunnlagResultat.IngenVurderingFunnet
+        }
 
 
-        vilkårsvurderingRepository.lagre(vurdering)
+        if (eksisterendeVilkårsvurdering.erKomplett) {
+            return BehandleGrunnlagResultat.AlleredeVurdert
+        }
 
-        return vurdering.id
-        */
- TODO()
+        eksisterendeVilkårsvurdering.fullfør(grunnlagForAutomatiskVurdering = OpptjeningsgrunnlagForAutomatiskVurdering.ForArbeidstaker(arbeidsforhold = arbeidsforhold))
+        vilkårsvurderingRepository.lagre(eksisterendeVilkårsvurdering)
+        return BehandleGrunnlagResultat.NyVurderingForetatt(fødselsnummer, skjæringstidspunkt, eksisterendeVilkårsvurdering.id)
+    }
+
+    sealed class BehandleGrunnlagResultat {
+        data class NyVurderingForetatt(val fødselsnummer: String, val skjæringstidspunkt: LocalDate, val vurderingId: UUID) : BehandleGrunnlagResultat()
+        object AlleredeVurdert : BehandleGrunnlagResultat()
+        object IngenVurderingFunnet : BehandleGrunnlagResultat()
     }
 
     fun finnOpptjeningsvurderingResultat(opptjeningsvurderingId: UUID): Opptjening {
