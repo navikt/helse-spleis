@@ -10,14 +10,16 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.opptjening.application.OpptjeningService
 import no.nav.helse.opptjening.application.VurderOpptjeningResultat
+import no.nav.helse.opptjening.bootstrap.sikkerLogg
 import no.nav.helse.opptjening.domain.Arbeidssituasjon
-import org.slf4j.LoggerFactory
 
 internal class OpptjeningsvurderingRiver(rapidsConnection: RapidsConnection, private val opptjeningService: OpptjeningService) : River.PacketListener {
+    private val behovKey = "Opptjeningsvurdering"
+
     init {
 
         River(rapidsConnection).apply {
-            precondition { it.requireAllOrAny("@behov", listOf("Opptjeningsvurdering")) }
+            precondition { it.requireAllOrAny("@behov", listOf(behovKey)) }
             validate { it.forbid("@løsning") }
             validate { it.requireKey("@id") }
             validate { it.requireKey("fødselsnummer") }
@@ -27,11 +29,10 @@ internal class OpptjeningsvurderingRiver(rapidsConnection: RapidsConnection, pri
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
+        sikkerLogg.info("Mottatt behov for $behovKey for fødselsnummer ${packet["fødselsnummer"].asText()} med skjæringstidspunkt ${packet["skjæringstidspunkt"].asLocalDate()}")
         val fødselsnummer = packet["fødselsnummer"].asText()
         val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
         val arbeidssituasjon = Arbeidssituasjon.valueOf(packet["arbeidssituasjon"].asText())
-
-
 
         val vurderOpptjeningResultat = opptjeningService.vurderOpptjening(
             fødselsnummer = fødselsnummer,
@@ -47,6 +48,7 @@ internal class OpptjeningsvurderingRiver(rapidsConnection: RapidsConnection, pri
                             "id" to vurderOpptjeningResultat.vurderingId.toString()
                         ),
                     )
+                sikkerLogg.info("Har vurdering for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. VurderingId: ${vurderOpptjeningResultat.vurderingId}. Løsning:\n\t${packet.toJson()}")
                 context.publish(packet.toJson())
             }
 
@@ -60,6 +62,7 @@ internal class OpptjeningsvurderingRiver(rapidsConnection: RapidsConnection, pri
                         "opprinneligBehov" to jacksonObjectMapper().readTree(packet.toJson()) //TODO vi må være sikker på json eller string her?
                     )
                 )
+                sikkerLogg.info("Trenger arbeidsforhold for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. Publiserer nytt behov:\n\t${utgåendeBehov.toJson()}")
                 context.publish(utgåendeBehov.toJson())
             }
         }

@@ -11,6 +11,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.opptjening.application.OpptjeningService
+import no.nav.helse.opptjening.bootstrap.sikkerLogg
 import no.nav.helse.opptjening.domain.Arbeidsforhold
 
 internal class GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
@@ -47,6 +48,7 @@ internal class GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
 
         val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
         val fødselsnummer = packet["fødselsnummer"].asText()
+        sikkerLogg.info("Mottatt løsning på behov for $behovKey for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. Antall arbeidsforhold: ${arbeidsforhold.size}")
         val resultat = opptjeningService.behandleGrunnlagForAutomatiskArbeidstakerOpptjeningsvurdering(
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -54,17 +56,22 @@ internal class GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
         )
         when(resultat){
             OpptjeningService.BehandleGrunnlagResultat.AlleredeVurdert -> {
+                sikkerLogg.warn("Allerede vurdert for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. Ingen ny vurdering foretatt.")
                 // No-op. finn ut av lognivå
             }
             is OpptjeningService.BehandleGrunnlagResultat.NyVurderingForetatt -> {
+                sikkerLogg.info("Ny vurdering foretatt for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. VurderingId: ${resultat.vurderingId}")
                 val opprinneligBehov = packet["opprinneligBehov"] as ObjectNode
                 val løsning = opprinneligBehov.putObject("@løsning")
                 løsning.putObject("Opptjeningsvurdering")
                     .put("id", resultat.vurderingId.toString())
-                context.publish(opprinneligBehov.toString())
+                val løsningString = opprinneligBehov.toString()
+                sikkerLogg.info("Publiserer løsning for på behov for opptjeningsvurdering for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. VurderingId: ${resultat.vurderingId}. Løsning:\n\t${løsningString}")
+                context.publish(løsningString)
             }
 
             OpptjeningService.BehandleGrunnlagResultat.IngenVurderingFunnet -> {
+                sikkerLogg.warn("Ingen vurdering funnet for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt.")
                 // No op med warning logging om vi ikke logger i servicen
             }
         }
