@@ -29,9 +29,16 @@ class OpptjeningService(
             }
         }
 
-
         return when (arbeidssituasjon) {
-            Arbeidssituasjon.Arbeidstaker -> TrengerArbeidsforhold(fødselsnummer)
+            Arbeidssituasjon.Arbeidstaker -> {
+                val vurdering = Opptjening.AutomatiskVurdering.nyAutomatiskVurdering(
+                    fødselsnummer = fødselsnummer,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    versjonAvKildekode = "",
+                )
+                vilkårsvurderingRepository.lagre(vurdering)
+                TrengerArbeidsforhold(fødselsnummer)
+            }
 
             Arbeidssituasjon.SelvstendigNæringsdrivende -> {
                 val vurdering = Opptjening.AutomatiskVurdering.nyAutomatiskVurdering(

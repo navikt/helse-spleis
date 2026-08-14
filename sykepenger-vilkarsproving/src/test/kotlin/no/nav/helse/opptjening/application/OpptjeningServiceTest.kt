@@ -37,13 +37,18 @@ internal class OpptjeningServiceTest {
     // vurderOpptjening
     // ---------------------------------------------------------------------
 
-    // For arbeidstakere kan vi ikke vurdere noe før vi har hentet arbeidsforhold fra aareg
+    // For arbeidstakere kan vi ikke vurdere noe før vi har hentet arbeidsforhold fra aareg,
+    // men vi oppretter en pending vurdering slik at grunnlagriveren kan finne den igjen
     @Test
     fun `arbeidstaker uten eksisterende vurdering trenger arbeidsforhold`() {
         val resultat = service.vurderOpptjening(FØDSELSNUMMER, 1.februar, Arbeidssituasjon.Arbeidstaker)
 
         assertEquals(TrengerArbeidsforhold(FØDSELSNUMMER), resultat)
-        assertEquals(0, repository.antallLagringer)
+        assertEquals(1, repository.antallLagringer) // pending vurdering lagres
+        val lagret = repository.alleVurderinger.single() as AutomatiskVurdering
+        assertEquals(FØDSELSNUMMER, lagret.fødselsnummer)
+        assertEquals(1.februar, lagret.skjæringstidspunkt)
+        assertFalse(lagret.erKomplett)
     }
 
     // Selvstendig næringsdrivende har alltid oppfylt opptjening, så vurderingen kan
@@ -117,6 +122,26 @@ internal class OpptjeningServiceTest {
         val resultat = service.vurderOpptjening(FØDSELSNUMMER, 1.februar, Arbeidssituasjon.Arbeidstaker)
 
         assertEquals(TrengerArbeidsforhold(FØDSELSNUMMER), resultat)
+    }
+
+    // vurderOpptjening(Arbeidstaker) oppretter en pending vurdering som
+    // behandleGrunnlag... kan fullføre når arbeidsforholdene kommer tilbake.
+    // Uten denne koblingen ville arbeidsforholdløsningen aldri treffe noe,
+    // og arbeidstakerflyt ville vært brutt.
+    @Test
+    fun `pending vurdering fra vurderOpptjening kan fullføres av behandleGrunnlag`() {
+        service.vurderOpptjening(FØDSELSNUMMER, 1.februar, Arbeidssituasjon.Arbeidstaker)
+
+        val resultat = service.behandleGrunnlagForAutomatiskArbeidstakerOpptjeningsvurdering(
+            arbeidsforhold = listOf(arbeidsforhold(1.januar til 31.januar)),
+            fødselsnummer = FØDSELSNUMMER,
+            skjæringstidspunkt = 1.februar
+        )
+
+        val nyVurdering = assertInstanceOf(BehandleGrunnlagResultat.NyVurderingForetatt::class.java, resultat)
+        val lagret = repository.finn<AutomatiskVurdering>(nyVurdering.vurderingId)!!
+        assertTrue(lagret.erKomplett)
+        assertEquals(OPPTJENING_MINST_4_UKER, lagret.kodeverkkode)
     }
 
     // ---------------------------------------------------------------------
@@ -273,7 +298,7 @@ internal class OpptjeningServiceTest {
                 versjonAvKildekode = ""
             )
 
-        fun komplettVurdering(skjæringstidspunkt: LocalDate, fødselsnummer: String = FØDSELSNUMMER): Opptjening.AutomatiskVurdering =
+        fun komplettVurdering(skjæringstidspunkt: LocalDate, fødselsnummer: String = FØDSELSNUMMER): AutomatiskVurdering =
             ufullstendigVurdering(skjæringstidspunkt, fødselsnummer)
                 .also { it.fullfør(ForArbeidstaker(listOf(arbeidsforhold(1.januar til 31.januar)))) }
     }
