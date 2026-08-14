@@ -25,10 +25,12 @@ internal class OpptjeningsvurderingRiverTest {
     // sender ut et nytt behov i stedet for en løsning
     @Test
     fun `arbeidstaker gir behov om arbeidsforhold`() {
-        rapid.sendTestMessage(opptjeningsvurderingBehov(arbeidssituasjon = "Arbeidstaker"))
+        rapid.sendTestMessage(opptjeningsvurderingBehov(arbeidssituasjon = "Arbeidstaker"), "123")
 
         assertEquals(1, rapid.inspektør.size)
         val utgående = rapid.inspektør.message(0)
+        val partisjonsnøkkelForUtgåendeMelding = rapid.inspektør.key(0)
+        assertEquals("123", partisjonsnøkkelForUtgåendeMelding)
         assertEquals("behov", utgående.path("@event_name").asText())
         assertEquals(listOf("ArbeidsforholdV2"), utgående.path("@behov").map { it.asText() })
         assertEquals(FØDSELSNUMMER, utgående.path("fødselsnummer").asText())

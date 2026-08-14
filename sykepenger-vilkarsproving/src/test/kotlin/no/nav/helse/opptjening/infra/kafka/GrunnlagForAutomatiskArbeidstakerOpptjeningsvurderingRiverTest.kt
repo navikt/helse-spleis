@@ -32,13 +32,15 @@ internal class GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiverTest {
     fun `løsning fullfører vurderingen og besvarer opprinnelig behov`() {
         val påbegynt = påbegyntVurdering()
 
-        rapid.sendTestMessage(arbeidsforholdløsning(arbeidsforhold(ansattSiden = "2018-01-01", ansattTil = "2018-01-31")))
+        rapid.sendTestMessage(arbeidsforholdløsning(arbeidsforhold(ansattSiden = "2018-01-01", ansattTil = "2018-01-31")), "123")
 
         assertTrue(påbegynt.erKomplett)
         assertEquals(OPPTJENING_MINST_4_UKER, påbegynt.kodeverkkode)
 
         assertEquals(1, rapid.inspektør.size)
         val svar = rapid.inspektør.message(0)
+        val partisjonsnøkkel = rapid.inspektør.key(0)
+        assertEquals("123", partisjonsnøkkel)
         assertEquals(OPPRINNELIG_BEHOV_ID, svar.path("@id").asText())
         assertEquals(listOf("Opptjeningsvurdering"), svar.path("@behov").map { it.asText() })
         assertEquals(påbegynt.id.toString(), svar.path("@løsning").path("Opptjeningsvurdering").path("id").asText())
