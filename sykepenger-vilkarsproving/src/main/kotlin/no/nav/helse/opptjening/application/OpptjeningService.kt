@@ -1,93 +1,86 @@
 package no.nav.helse.opptjening.application
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.opptjening.application.VurderOpptjeningResultat.HarVurdering
 import no.nav.helse.opptjening.application.VurderOpptjeningResultat.TrengerArbeidsforhold
 import no.nav.helse.opptjening.bootstrap.sikkerLogg
 import no.nav.helse.opptjening.domain.Arbeidsforhold
 import no.nav.helse.opptjening.domain.Arbeidssituasjon
-import no.nav.helse.opptjening.domain.Opptjening
-import no.nav.helse.opptjening.domain.Opptjening.AutomatiskVurdering.OpptjeningsgrunnlagForAutomatiskVurdering
+import no.nav.helse.opptjening.domain.Opptjeningsgrunnlag
+import no.nav.helse.opptjening.domain.Opptjeningsprøving
+import no.nav.helse.opptjening.domain.Opptjeningsvurdering
+import no.nav.helse.opptjening.domain.VurderingId
+import no.nav.helse.opptjening.infra.db.InMemoryVilkårsprøvingRepository
 
+/**
+ * Orkestrerer prøvingen: slår opp om vi allerede har et svar, starter prøvinger, og tar imot
+ * grunnlag etter hvert som det kommer inn. Selve reglene ligger i domenet.
+ */
 internal class OpptjeningService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val vilkårsprøvingRepository: VilkårsprøvingRepository = InMemoryVilkårsprøvingRepository()
 ) {
 
     fun vurderOpptjening(fødselsnummer: String, skjæringstidspunkt: LocalDate, arbeidssituasjon: Arbeidssituasjon): VurderOpptjeningResultat {
-
-        val eksisterendeVilkårsvurdering = vilkårsvurderingRepository.finnNyesteVilkårsvurdering<Opptjening>(fødselsnummer, skjæringstidspunkt)
-        eksisterendeVilkårsvurdering?.let {
-
-            return if (it.erKomplett) {
-
-                // TODO: I fremtiden bør vi sjekke at logikken på eksisterende vurdering var gjort basert på samme arbeidssituasjon.
-                //  Om vi i fremtiden kan endre situasjonen på et skjæringstidspunkt
-                sikkerLogg.info("Har allerede vurdering for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. VurderingId: ${it.id}.")
-                HarVurdering(fødselsnummer, skjæringstidspunkt, it.id)
-            } else {
-                // Nytt behov nedover. Mulig jeg ble påminnet av spleis.
-                TrengerArbeidsforhold(fødselsnummer, skjæringstidspunkt)
-            }
+        // TODO: I fremtiden bør vi sjekke at eksisterende vurdering ble gjort på samme arbeidssituasjon,
+        //  dersom situasjonen på et skjæringstidspunkt kan endre seg.
+        vilkårsvurderingRepository.gjeldende(fødselsnummer, skjæringstidspunkt)?.let { vurdering ->
+            sikkerLogg.info("Har allerede vurdering for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. VurderingId: ${vurdering.id}.")
+            return HarVurdering(fødselsnummer, skjæringstidspunkt, vurdering.id)
         }
 
-        return when (arbeidssituasjon) {
-            Arbeidssituasjon.Arbeidstaker -> {
-                val vurdering = Opptjening.AutomatiskVurdering.nyAutomatiskVurdering(
-                    fødselsnummer = fødselsnummer,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    versjonAvKildekode = "",
-                )
-                vilkårsvurderingRepository.lagre(vurdering)
-                TrengerArbeidsforhold(fødselsnummer)
-            }
-
-            Arbeidssituasjon.SelvstendigNæringsdrivende -> {
-                val vurdering = Opptjening.AutomatiskVurdering.nyAutomatiskVurdering(
-                    fødselsnummer = fødselsnummer,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    versjonAvKildekode = "",
-                )
-                vurdering.fullfør(grunnlagForAutomatiskVurdering = OpptjeningsgrunnlagForAutomatiskVurdering.ForSelvstendigNæringsdrivende)
-                vilkårsvurderingRepository.lagre(vurdering)
-                sikkerLogg.info("Foretar automatisk vurdering for selvstendig næringsdrivende for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. VurderingId: ${vurdering.id}.")
-                HarVurdering(fødselsnummer, skjæringstidspunkt, vurdering.id)
-            }
+        vilkårsprøvingRepository.finnSiste(fødselsnummer, skjæringstidspunkt)?.takeUnless { it.erAvsluttet }?.let { pågående ->
+            sikkerLogg.info("Prøving ${pågående.id} pågår allerede for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. Etterspør grunnlaget på nytt.")
+            return TrengerArbeidsforhold(fødselsnummer, skjæringstidspunkt)
         }
+
+        val (prøving, vurdering) = Opptjeningsprøving.start(
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidssituasjon = arbeidssituasjon
+        )
+        vilkårsprøvingRepository.opprett(prøving)
+
+        if (vurdering == null) {
+            sikkerLogg.info("Startet prøving ${prøving.id} for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. Venter på ${prøving.uteståendeBehov}.")
+            return TrengerArbeidsforhold(fødselsnummer, skjæringstidspunkt)
+        }
+
+        vilkårsvurderingRepository.lagre(vurdering)
+        sikkerLogg.info("Prøving ${prøving.id} fullført uten innhenting for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. VurderingId: ${vurdering.id}.")
+        return HarVurdering(fødselsnummer, skjæringstidspunkt, vurdering.id)
     }
 
     fun behandleGrunnlagForAutomatiskArbeidstakerOpptjeningsvurdering(
         arbeidsforhold: List<Arbeidsforhold>,
         fødselsnummer: String,
-        skjæringstidspunkt: LocalDate,
+        skjæringstidspunkt: LocalDate
     ): BehandleGrunnlagResultat {
+        val prøving = vilkårsprøvingRepository.finnSiste(fødselsnummer, skjæringstidspunkt)
 
-        val eksisterendeVilkårsvurdering = vilkårsvurderingRepository.finnNyesteVilkårsvurdering<Opptjening.AutomatiskVurdering>(fødselsnummer, skjæringstidspunkt)
-
-        if (eksisterendeVilkårsvurdering == null) {
-            sikkerLogg.error("Mottatt løsning på behov for ArbeidsforholdV2 for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt, men fant ingen eksisterende vilkårsvurdering.")
-            return BehandleGrunnlagResultat.IngenVurderingFunnet
+        if (prøving == null) {
+            sikkerLogg.error("Mottatt løsning på behov for ArbeidsforholdV2 for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt, men fant ingen prøving.")
+            return BehandleGrunnlagResultat.IngenPrøvingFunnet
         }
 
-        if (eksisterendeVilkårsvurdering.erKomplett) {
-            sikkerLogg.info("Mottatt løsning på behov for ArbeidsforholdV2 for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt, men eksisterende vilkårsvurdering er allerede komplett.")
+        if (prøving.erAvsluttet) {
+            sikkerLogg.info("Mottatt løsning på behov for ArbeidsforholdV2 for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt, men prøving ${prøving.id} er allerede avsluttet.")
             return BehandleGrunnlagResultat.AlleredeVurdert
         }
 
-        eksisterendeVilkårsvurdering.fullfør(grunnlagForAutomatiskVurdering = OpptjeningsgrunnlagForAutomatiskVurdering.ForArbeidstaker(arbeidsforhold = arbeidsforhold))
-        vilkårsvurderingRepository.lagre(eksisterendeVilkårsvurdering)
-        sikkerLogg.info("Foretar automatisk vurdering for arbeidstaker for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. VurderingId: ${eksisterendeVilkårsvurdering.id}.")
-        return BehandleGrunnlagResultat.NyVurderingForetatt(fødselsnummer, skjæringstidspunkt, eksisterendeVilkårsvurdering.id)
+        val vurdering = prøving.motta(Opptjeningsgrunnlag.Arbeidstaker(arbeidsforhold))
+        vilkårsvurderingRepository.lagre(vurdering)
+        vilkårsprøvingRepository.oppdater(prøving)
+        sikkerLogg.info("Prøving ${prøving.id} fullført for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. VurderingId: ${vurdering.id}.")
+        return BehandleGrunnlagResultat.NyVurderingForetatt(fødselsnummer, skjæringstidspunkt, vurdering.id)
     }
 
     sealed class BehandleGrunnlagResultat {
-        data class NyVurderingForetatt(val fødselsnummer: String, val skjæringstidspunkt: LocalDate, val vurderingId: UUID) : BehandleGrunnlagResultat()
-        object AlleredeVurdert : BehandleGrunnlagResultat()
-        object IngenVurderingFunnet : BehandleGrunnlagResultat()
+        data class NyVurderingForetatt(val fødselsnummer: String, val skjæringstidspunkt: LocalDate, val vurderingId: VurderingId) : BehandleGrunnlagResultat()
+        data object AlleredeVurdert : BehandleGrunnlagResultat()
+        data object IngenPrøvingFunnet : BehandleGrunnlagResultat()
     }
 
-    fun finnOpptjeningsvurderingResultat(opptjeningsvurderingId: UUID): Opptjening {
-        return vilkårsvurderingRepository.finn(opptjeningsvurderingId)
-            ?: error("Fant ikke opptjeningsvurdering med id $opptjeningsvurderingId")
-    }
+    fun finnOpptjeningsvurdering(vurderingId: VurderingId): Opptjeningsvurdering =
+        vilkårsvurderingRepository.finn(vurderingId) ?: error("Fant ikke opptjeningsvurdering med id $vurderingId")
 }

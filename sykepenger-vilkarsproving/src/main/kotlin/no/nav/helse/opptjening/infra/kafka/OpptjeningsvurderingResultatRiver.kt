@@ -9,8 +9,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.opptjening.application.VilkårsvurderingRepository
 import no.nav.helse.opptjening.bootstrap.sikkerLogg
-import no.nav.helse.opptjening.domain.Opptjening
 import no.nav.helse.opptjening.domain.Utfall
+import no.nav.helse.opptjening.domain.VurderingId
 
 internal class OpptjeningsvurderingResultatRiver(rapidsConnection: RapidsConnection, private val vilkårsvurderingRepository: VilkårsvurderingRepository) : River.PacketListener {
     init {
@@ -27,12 +27,11 @@ internal class OpptjeningsvurderingResultatRiver(rapidsConnection: RapidsConnect
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
-        val opptjeningsvurderingId = packet["OpptjeningsvurderingResultat.opptjeningsvurderingId"].asUUID()
+        val opptjeningsvurderingId = VurderingId(packet["OpptjeningsvurderingResultat.opptjeningsvurderingId"].asUUID())
         sikkerLogg.info("Mottatt behov for OpptjeningsvurderingResultat for opptjeningsvurderingId $opptjeningsvurderingId")
-        val vurdering = vilkårsvurderingRepository.finn<Opptjening>(opptjeningsvurderingId) ?: error("Finner ikke opptjening")
-        val kodeverkkode = vurdering.kodeverkkode ?: error("Det skal ikke være mulig å spørre om en vurdering der kodeverkkode ikke er satt")
+        val vurdering = vilkårsvurderingRepository.finn(opptjeningsvurderingId) ?: error("Finner ikke opptjeningsvurdering med id $opptjeningsvurderingId")
 
-        val opptjeningOk = when (kodeverkkode.utfall) {
+        val opptjeningOk = when (vurdering.utfall) {
             Utfall.Oppfylt -> true
             Utfall.IkkeOppfylt -> false
         }

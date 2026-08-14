@@ -1,11 +1,17 @@
 package no.nav.helse.opptjening.application
 
 import java.time.LocalDate
-import java.util.UUID
-import no.nav.helse.opptjening.domain.Vilkårsvurdering
+import no.nav.helse.opptjening.domain.Opptjeningsvurdering
+import no.nav.helse.opptjening.domain.VurderingId
 
+/**
+ * Lager for ferdige vurderinger. Vurderinger skrives kun én gang og oppdateres aldri; en ny prøving
+ * gir en ny vurdering, slik at historikken består.
+ */
 internal interface VilkårsvurderingRepository {
-    fun lagre(vilkårsvurdering: Vilkårsvurdering)
-    fun <T: Vilkårsvurdering> finnNyesteVilkårsvurdering(fødselsnummer: String, skjæringstidspunkt: LocalDate): T?
-    fun <T: Vilkårsvurdering> finn(opptjeningsvurderingId: UUID): T?
+    fun lagre(vurdering: Opptjeningsvurdering)
+
+    fun gjeldende(fødselsnummer: String, skjæringstidspunkt: LocalDate): Opptjeningsvurdering?
+
+    fun finn(vurderingId: VurderingId): Opptjeningsvurdering?
 }

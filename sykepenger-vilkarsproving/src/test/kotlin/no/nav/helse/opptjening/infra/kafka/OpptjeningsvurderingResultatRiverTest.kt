@@ -5,8 +5,11 @@ import java.util.UUID
 import java.util.stream.Stream
 import no.nav.helse.februar
 import no.nav.helse.opptjening.application.InMemoryVilkårsvurderingRepository
+import java.time.Instant
 import no.nav.helse.opptjening.domain.Kodeverkkode
-import no.nav.helse.opptjening.domain.Opptjening
+import no.nav.helse.opptjening.domain.Opptjeningsgrunnlag
+import no.nav.helse.opptjening.domain.Opptjeningsvurdering
+import no.nav.helse.opptjening.domain.PrøvingId
 import no.nav.helse.opptjening.domain.Utfall
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,7 +31,7 @@ internal class OpptjeningsvurderingResultatRiverTest {
     fun `oppfylt vurdering gir ok = true`() {
         val vurdering = manuellVurdering(kodeverkkode = Kodeverkkode.OPPTJENING_MINST_4_UKER)
 
-        rapid.sendTestMessage(opptjeningsvurderingResultatBehov(vurdering.id))
+        rapid.sendTestMessage(opptjeningsvurderingResultatBehov(vurdering.id.value))
 
         assertEquals(1, rapid.inspektør.size)
         val løsning = rapid.inspektør.message(0)
@@ -40,7 +43,7 @@ internal class OpptjeningsvurderingResultatRiverTest {
     fun `ikke-oppfylt vurdering gir ok = false`() {
         val vurdering = manuellVurdering(kodeverkkode = Kodeverkkode.IKKE_OPPTJENING_ARBEID_ELLER_YTELSE)
 
-        rapid.sendTestMessage(opptjeningsvurderingResultatBehov(vurdering.id))
+        rapid.sendTestMessage(opptjeningsvurderingResultatBehov(vurdering.id.value))
 
         assertEquals(1, rapid.inspektør.size)
         val løsning = rapid.inspektør.message(0)
@@ -54,7 +57,7 @@ internal class OpptjeningsvurderingResultatRiverTest {
         rapid.reset()
         val vurdering = manuellVurdering(kodeverkkode = kodeverkkode)
 
-        rapid.sendTestMessage(opptjeningsvurderingResultatBehov(vurdering.id))
+        rapid.sendTestMessage(opptjeningsvurderingResultatBehov(vurdering.id.value))
 
         val løsning = rapid.inspektør.message(0)
         assertTrue(løsning.path("@løsning").path("OpptjeningsvurderingResultat").path("ok").asBoolean()) {
@@ -69,7 +72,7 @@ internal class OpptjeningsvurderingResultatRiverTest {
         rapid.reset()
         val vurdering = manuellVurdering(kodeverkkode = kodeverkkode)
 
-        rapid.sendTestMessage(opptjeningsvurderingResultatBehov(vurdering.id))
+        rapid.sendTestMessage(opptjeningsvurderingResultatBehov(vurdering.id.value))
 
         val løsning = rapid.inspektør.message(0)
         assertFalse(løsning.path("@løsning").path("OpptjeningsvurderingResultat").path("ok").asBoolean()) {
@@ -132,14 +135,17 @@ internal class OpptjeningsvurderingResultatRiverTest {
         assertEquals(0, rapid.inspektør.size)
     }
 
-    private fun manuellVurdering(kodeverkkode: Kodeverkkode): Opptjening.ManuellVurdering {
-        return Opptjening.ManuellVurdering(
+    // Manuell vurdering er samme resultattype som automatisk – bare med en annen kilde
+    private fun manuellVurdering(kodeverkkode: Kodeverkkode): Opptjeningsvurdering {
+        return Opptjeningsvurdering.manuell(
+            prøvingId = PrøvingId.ny(),
             fødselsnummer = FØDSELSNUMMER,
             skjæringstidspunkt = 1.februar,
+            grunnlag = Opptjeningsgrunnlag.Arbeidstaker(emptyList()),
+            kodeverkkode = kodeverkkode,
             saksbehandlerIdent = "Z999999",
             fritekstbegrunnelse = "",
-            kodeverkkode = kodeverkkode,
-            id = UUID.randomUUID(),
+            vurdertTidspunkt = Instant.parse("2018-02-01T09:00:00Z")
         ).also { repository.lagre(it) }
     }
 

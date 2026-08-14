@@ -1,28 +1,22 @@
 package no.nav.helse.opptjening.application
 
 import java.time.LocalDate
-import java.util.UUID
-import no.nav.helse.opptjening.domain.Vilkårsvurdering
+import no.nav.helse.opptjening.domain.Opptjeningsvurdering
+import no.nav.helse.opptjening.domain.VurderingId
 
 internal class InMemoryVilkårsvurderingRepository : VilkårsvurderingRepository {
-    private val vurderinger = mutableListOf<Vilkårsvurdering>()
+    private val vurderinger = mutableListOf<Opptjeningsvurdering>()
 
-    internal var antallLagringer = 0
-        private set
+    internal val alleVurderinger: List<Opptjeningsvurdering> get() = vurderinger.toList()
+    internal val antallLagringer get() = vurderinger.size
 
-    internal val alleVurderinger: List<Vilkårsvurdering> get() = vurderinger.toList()
-
-    override fun lagre(vilkårsvurdering: Vilkårsvurdering) {
-        antallLagringer += 1
-        vurderinger.removeIf { it.id == vilkårsvurdering.id }
-        vurderinger.add(vilkårsvurdering)
+    override fun lagre(vurdering: Opptjeningsvurdering) {
+        check(vurderinger.none { it.id == vurdering.id }) { "Vurdering ${vurdering.id} er allerede lagret. Vurderinger er immutable." }
+        vurderinger.add(vurdering)
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Vilkårsvurdering> finnNyesteVilkårsvurdering(fødselsnummer: String, skjæringstidspunkt: LocalDate): T? =
-        vurderinger.lastOrNull { it.fødselsnummer == fødselsnummer && it.skjæringstidspunkt == skjæringstidspunkt } as T?
+    override fun gjeldende(fødselsnummer: String, skjæringstidspunkt: LocalDate) =
+        vurderinger.lastOrNull { it.fødselsnummer == fødselsnummer && it.skjæringstidspunkt == skjæringstidspunkt }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Vilkårsvurdering> finn(opptjeningsvurderingId: UUID): T? =
-        vurderinger.firstOrNull { it.id == opptjeningsvurderingId } as T?
+    override fun finn(vurderingId: VurderingId) = vurderinger.firstOrNull { it.id == vurderingId }
 }

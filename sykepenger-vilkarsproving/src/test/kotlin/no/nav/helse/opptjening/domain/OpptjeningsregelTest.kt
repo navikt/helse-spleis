@@ -1,7 +1,6 @@
 package no.nav.helse.opptjening.domain
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -14,59 +13,50 @@ import no.nav.helse.mai
 import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.oktober
-import no.nav.helse.tirsdag
-import no.nav.helse.torsdag
-import no.nav.helse.søndag
 import no.nav.helse.opptjening.domain.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import no.nav.helse.opptjening.domain.Kodeverkkode.IKKE_OPPTJENING_ARBEID_ELLER_YTELSE
 import no.nav.helse.opptjening.domain.Kodeverkkode.OPPTJENING_MINST_4_UKER
-import no.nav.helse.opptjening.domain.Opptjening.AutomatiskVurdering
-import no.nav.helse.opptjening.domain.Opptjening.AutomatiskVurdering.OpptjeningsgrunnlagForAutomatiskVurdering
-import no.nav.helse.opptjening.domain.Opptjening.AutomatiskVurdering.OpptjeningsgrunnlagForAutomatiskVurdering.ForArbeidstaker
-import no.nav.helse.opptjening.domain.Opptjening.AutomatiskVurdering.OpptjeningsgrunnlagForAutomatiskVurdering.ForSelvstendigNæringsdrivende
+import no.nav.helse.søndag
+import no.nav.helse.tirsdag
+import no.nav.helse.torsdag
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
 
-internal class OpptjeningAutomatiskVurderingTest {
+/**
+ * Regelen er en ren funksjon fra grunnlag til kodeverkkode, og testes uten prøving, repository eller klokke.
+ */
+internal class OpptjeningsregelTest {
 
     // 4.januar til 31.januar er nøyaktig 28 dager fram til dagen før skjæringstidspunktet
     @Test
     fun `nøyaktig 28 opptjeningsdager er oppfylt`() {
-        val kodeverkkode = vurderArbeidstaker(1.februar, arbeidsforhold(4.januar til 31.januar))
-        assertEquals(OPPTJENING_MINST_4_UKER, kodeverkkode)
+        assertEquals(OPPTJENING_MINST_4_UKER, vurderArbeidstaker(1.februar, arbeidsforhold(4.januar til 31.januar)))
     }
 
     @Test
     fun `27 opptjeningsdager er ikke oppfylt`() {
-        val kodeverkkode = vurderArbeidstaker(1.februar, arbeidsforhold(5.januar til 31.januar))
-        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, kodeverkkode)
+        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, vurderArbeidstaker(1.februar, arbeidsforhold(5.januar til 31.januar)))
     }
 
     @Test
     fun `flere enn 28 opptjeningsdager er oppfylt`() {
-        val kodeverkkode = vurderArbeidstaker(1.februar, arbeidsforhold(1.januar til 31.januar))
-        assertEquals(OPPTJENING_MINST_4_UKER, kodeverkkode)
+        assertEquals(OPPTJENING_MINST_4_UKER, vurderArbeidstaker(1.februar, arbeidsforhold(1.januar til 31.januar)))
     }
 
     @Test
     fun `uten arbeidsforhold er opptjening ikke oppfylt`() {
-        val kodeverkkode = vurderArbeidstaker(1.februar)
-        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, kodeverkkode)
+        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, vurderArbeidstaker(1.februar))
     }
 
     // Arbeidsforholdet må være løpende dagen før skjæringstidspunktet for å telle
     @Test
     fun `arbeidsforhold avsluttet før dagen før skjæringstidspunktet teller ikke`() {
-        val kodeverkkode = vurderArbeidstaker(1.februar, arbeidsforhold(1.januar til 30.januar))
-        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, kodeverkkode)
+        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, vurderArbeidstaker(1.februar, arbeidsforhold(1.januar til 30.januar)))
     }
 
     @Test
     fun `arbeidsforhold som starter på skjæringstidspunktet teller ikke`() {
-        val kodeverkkode = vurderArbeidstaker(1.februar, arbeidsforhold(1.februar til 28.februar))
-        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, kodeverkkode)
+        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, vurderArbeidstaker(1.februar, arbeidsforhold(1.februar til 28.februar)))
     }
 
     // Løpende arbeidsforhold har ansettelseperiode til LocalDate.MAX,
@@ -99,8 +89,7 @@ internal class OpptjeningAutomatiskVurderingTest {
         val gammelJobb = arbeidsforhold(1.januar til sisteDagFørJobbskifte, orgnummer = "111111111")
         val nyJobb = arbeidsforhold(førsteDagEtterJobbskifte til 31.januar, orgnummer = "222222222")
 
-        val kodeverkkode = vurderArbeidstaker(1.februar, gammelJobb, nyJobb)
-        assertEquals(OPPTJENING_MINST_4_UKER, kodeverkkode)
+        assertEquals(OPPTJENING_MINST_4_UKER, vurderArbeidstaker(1.februar, gammelJobb, nyJobb))
     }
 
     // Bare den sammenhengende perioden fram til skjæringstidspunktet teller;
@@ -110,8 +99,7 @@ internal class OpptjeningAutomatiskVurderingTest {
         val gammelJobb = arbeidsforhold(1.januar til 31.januar, orgnummer = "111111111")
         val nyJobb = arbeidsforhold(10.februar til 28.februar, orgnummer = "222222222")
 
-        val kodeverkkode = vurderArbeidstaker(1.mars, gammelJobb, nyJobb)
-        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, kodeverkkode)
+        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, vurderArbeidstaker(1.mars, gammelJobb, nyJobb))
     }
 
     // To samtidige arbeidsforhold gir ikke dobbelt opptjening
@@ -121,52 +109,12 @@ internal class OpptjeningAutomatiskVurderingTest {
         val annenJobb = arbeidsforhold(20.januar til 31.januar, orgnummer = "222222222")
 
         // 17 + 12 dager ville vært nok hvis dagene ble summert, men periodene overlapper
-        val kodeverkkode = vurderArbeidstaker(1.februar, enJobb, annenJobb)
-        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, kodeverkkode)
+        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, vurderArbeidstaker(1.februar, enJobb, annenJobb))
     }
 
     @Test
     fun `selvstendig næringsdrivende har alltid oppfylt opptjening`() {
-        val kodeverkkode = nyAutomatiskVurdering(1.februar, ForSelvstendigNæringsdrivende).kodeverkkode
-        assertEquals(OPPTJENING_MINST_4_UKER, kodeverkkode)
-    }
-
-    @Test
-    fun `nyAutomatiskVurdering beholder opplysningene den ble opprettet med`() {
-        val grunnlag = ForArbeidstaker(listOf(arbeidsforhold(1.januar til 31.januar)))
-
-        val vurdering = AutomatiskVurdering.nyAutomatiskVurdering(
-            fødselsnummer = FØDSELSNUMMER,
-            skjæringstidspunkt = 1.februar,
-            versjonAvKildekode = VERSJON_AV_KILDEKODE,
-        ).also { it.fullfør(grunnlag) }
-
-        assertEquals(FØDSELSNUMMER, vurdering.fødselsnummer)
-        assertEquals(1.februar, vurdering.skjæringstidspunkt)
-        assertEquals(VERSJON_AV_KILDEKODE, vurdering.versjonAvKildekode)
-        assertSame(grunnlag, vurdering.grunnlagForAutomatiskVurdering)
-    }
-
-    // nyAutomatiskVurdering utleder kodeverkkoden selv, mens fraLagring gjenbruker
-    // den lagrede koden uten å vurdere på nytt
-    @Test
-    fun `nyAutomatiskVurdering utleder kodeverkkode, fraLagring gjenbruker den lagrede`() {
-        val grunnlag = ForArbeidstaker(listOf(arbeidsforhold(1.januar til 31.januar)))
-
-        val nyVurdering = nyAutomatiskVurdering(1.februar, grunnlag)
-        assertEquals(OPPTJENING_MINST_4_UKER, nyVurdering.kodeverkkode)
-
-        val lagretVurdering = AutomatiskVurdering.fraLagring(
-            id = ID,
-            fødselsnummer = FØDSELSNUMMER,
-            skjæringstidspunkt = 1.februar,
-            versjonAvKildekode = VERSJON_AV_KILDEKODE,
-            grunnlagForAutomatiskVurdering = grunnlag,
-            kodeverkkode = IKKE_OPPTJENING_ARBEID_ELLER_YTELSE,
-            erKomplett = true
-        )
-        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, lagretVurdering.kodeverkkode)
-        assertNotEquals(nyVurdering.kodeverkkode, lagretVurdering.kodeverkkode)
+        assertEquals(OPPTJENING_MINST_4_UKER, Opptjeningsregel.vurder(1.februar, Opptjeningsgrunnlag.SelvstendigNæringsdrivende))
     }
 
     // ---------------------------------------------------------------------
@@ -177,8 +125,7 @@ internal class OpptjeningAutomatiskVurderingTest {
     @Test
     fun `én dags opptjening er ikke oppfylt`() {
         val løpende = Arbeidsforhold(orgnummer = ORGNUMMER, ansattFom = 1.januar, ansattTom = null, type = ORDINÆRT)
-        val kodeverkkode = vurderArbeidstaker(2.januar, løpende)
-        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, kodeverkkode)
+        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, vurderArbeidstaker(2.januar, løpende))
     }
 
     // Fra `to tilstøtende arbeidsforhold` – to perioder hos samme arbeidsgiver
@@ -188,8 +135,7 @@ internal class OpptjeningAutomatiskVurderingTest {
         val første = arbeidsforhold(1.januar til 10.januar)
         val andre = Arbeidsforhold(orgnummer = ORGNUMMER, ansattFom = 11.januar, ansattTom = null, type = ORDINÆRT)
 
-        val kodeverkkode = vurderArbeidstaker(29.januar, første, andre)
-        assertEquals(OPPTJENING_MINST_4_UKER, kodeverkkode)
+        assertEquals(OPPTJENING_MINST_4_UKER, vurderArbeidstaker(29.januar, første, andre))
     }
 
     // Fra `Opptjening kobler sammen gap selvom rekkefølgen ikke er kronologisk`
@@ -199,8 +145,7 @@ internal class OpptjeningAutomatiskVurderingTest {
         val sist = Arbeidsforhold(orgnummer = ORGNUMMER, ansattFom = 15.januar, ansattTom = null, type = ORDINÆRT)
         val imellom = arbeidsforhold(11.januar til 14.januar)
 
-        val kodeverkkode = vurderArbeidstaker(29.januar, først, sist, imellom)
-        assertEquals(OPPTJENING_MINST_4_UKER, kodeverkkode)
+        assertEquals(OPPTJENING_MINST_4_UKER, vurderArbeidstaker(29.januar, først, sist, imellom))
     }
 
     // Fra `slutter på lørdag, starter på mandag` – lørdag regnes som rett før påfølgende mandag
@@ -217,8 +162,7 @@ internal class OpptjeningAutomatiskVurderingTest {
             type = ORDINÆRT
         )
 
-        val kodeverkkode = vurderArbeidstaker(2.mai(2022), gammelJobb, nyJobb)
-        assertEquals(OPPTJENING_MINST_4_UKER, kodeverkkode)
+        assertEquals(OPPTJENING_MINST_4_UKER, vurderArbeidstaker(2.mai(2022), gammelJobb, nyJobb))
     }
 
     // Fra `slutter på fredag, starter på mandag` – fredag regnes som rett før påfølgende mandag,
@@ -236,8 +180,7 @@ internal class OpptjeningAutomatiskVurderingTest {
             type = ORDINÆRT
         )
 
-        val kodeverkkode = vurderArbeidstaker(tirsdag den 3.mai(2022), gammelJobb, nyJobb)
-        assertEquals(OPPTJENING_MINST_4_UKER, kodeverkkode)
+        assertEquals(OPPTJENING_MINST_4_UKER, vurderArbeidstaker(tirsdag den 3.mai(2022), gammelJobb, nyJobb))
     }
 
     // Fra `slutter på torsdag, starter på mandag` – torsdag er ikke rett før mandag,
@@ -255,8 +198,7 @@ internal class OpptjeningAutomatiskVurderingTest {
             type = ORDINÆRT
         )
 
-        val kodeverkkode = vurderArbeidstaker(tirsdag den 3.mai(2022), gammelJobb, nyJobb)
-        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, kodeverkkode)
+        assertEquals(IKKE_OPPTJENING_ARBEID_ELLER_YTELSE, vurderArbeidstaker(tirsdag den 3.mai(2022), gammelJobb, nyJobb))
     }
 
     // Fra subsumsjonstestene for § 8-2 ledd 1 – et arbeidsforhold som fortsatt løper
@@ -273,24 +215,12 @@ internal class OpptjeningAutomatiskVurderingTest {
     }
 
     private companion object {
-        const val FØDSELSNUMMER = "12029240045"
-        const val VERSJON_AV_KILDEKODE = "en-versjon-av-kildekode"
         const val ORGNUMMER = "987654321"
-        val ID = UUID.randomUUID()
 
         fun arbeidsforhold(ansettelseperiode: Periode, orgnummer: String = ORGNUMMER) =
             Arbeidsforhold(orgnummer = orgnummer, ansettelseperiode = ansettelseperiode, type = ORDINÆRT)
 
-        fun nyAutomatiskVurdering(
-            skjæringstidspunkt: LocalDate,
-            grunnlag: OpptjeningsgrunnlagForAutomatiskVurdering
-        ) = AutomatiskVurdering.nyAutomatiskVurdering(
-            fødselsnummer = FØDSELSNUMMER,
-            skjæringstidspunkt = skjæringstidspunkt,
-            versjonAvKildekode = VERSJON_AV_KILDEKODE,
-        ).also { it.fullfør(grunnlag) }
-
         fun vurderArbeidstaker(skjæringstidspunkt: LocalDate, vararg arbeidsforhold: Arbeidsforhold) =
-            nyAutomatiskVurdering(skjæringstidspunkt, ForArbeidstaker(arbeidsforhold.toList())).kodeverkkode
+            Opptjeningsregel.vurder(skjæringstidspunkt, Opptjeningsgrunnlag.Arbeidstaker(arbeidsforhold.toList()))
     }
 }

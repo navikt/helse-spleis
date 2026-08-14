@@ -70,8 +70,8 @@ internal class GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
                 context.publish(løsningString)
             }
 
-            OpptjeningService.BehandleGrunnlagResultat.IngenVurderingFunnet -> {
-                sikkerLogg.warn("Ingen vurdering funnet for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt.")
+            OpptjeningService.BehandleGrunnlagResultat.IngenPrøvingFunnet -> {
+                sikkerLogg.warn("Ingen prøving funnet for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt.")
                 // No op med warning logging om vi ikke logger i servicen
             }
         }

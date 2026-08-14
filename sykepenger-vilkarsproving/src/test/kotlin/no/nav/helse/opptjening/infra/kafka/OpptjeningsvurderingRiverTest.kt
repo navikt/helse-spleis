@@ -1,24 +1,35 @@
 package no.nav.helse.opptjening.infra.kafka
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import com.fasterxml.jackson.databind.node.ObjectNode
 import java.util.UUID
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.februar
+import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.opptjening.application.InMemoryVilkårsprøvingRepository
 import no.nav.helse.opptjening.application.InMemoryVilkårsvurderingRepository
 import no.nav.helse.opptjening.application.OpptjeningService
+import no.nav.helse.opptjening.domain.Arbeidsforhold
+import no.nav.helse.opptjening.domain.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
+import no.nav.helse.opptjening.domain.Arbeidssituasjon
+import no.nav.helse.opptjening.domain.Grunnlagsbehov
 import no.nav.helse.opptjening.domain.Kodeverkkode.OPPTJENING_MINST_4_UKER
-import no.nav.helse.opptjening.domain.Opptjening.AutomatiskVurdering
+import no.nav.helse.opptjening.domain.Opptjeningsgrunnlag
+import no.nav.helse.opptjening.domain.Opptjeningsprøving
+import no.nav.helse.opptjening.domain.VurderingId
 import org.intellij.lang.annotations.Language
-import com.fasterxml.jackson.databind.node.ObjectNode
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OpptjeningsvurderingRiverTest {
 
-    private val repository = InMemoryVilkårsvurderingRepository()
+    private val vurderinger = InMemoryVilkårsvurderingRepository()
+    private val prøvinger = InMemoryVilkårsprøvingRepository()
     private val rapid = TestRapid().apply {
-        OpptjeningsvurderingRiver(this, OpptjeningService(repository))
+        OpptjeningsvurderingRiver(this, OpptjeningService(vurderinger, prøvinger))
     }
 
     // For arbeidstakere må vi hente arbeidsforhold før vi kan vurdere, så riveren
@@ -38,6 +49,17 @@ internal class OpptjeningsvurderingRiverTest {
         assertTrue(utgående.hasNonNull("opprinneligBehov"))
     }
 
+    // Prøvingen er prosessen som venter på grunnlaget; ingen vurdering finnes ennå
+    @Test
+    fun `arbeidstaker starter en prøving uten å produsere en vurdering`() {
+        rapid.sendTestMessage(opptjeningsvurderingBehov(arbeidssituasjon = "Arbeidstaker"))
+
+        val prøving = prøvinger.alleProvinger.single()
+        assertFalse(prøving.erAvsluttet)
+        assertEquals(Grunnlagsbehov.Arbeidsforhold, prøving.uteståendeBehov)
+        assertEquals(0, vurderinger.antallLagringer)
+    }
+
     // Selvstendig næringsdrivende kan vurderes med en gang, og løsningen legges på
     // det innkommende behovet
     @Test
@@ -46,26 +68,24 @@ internal class OpptjeningsvurderingRiverTest {
 
         assertEquals(1, rapid.inspektør.size)
         val løsning = rapid.inspektør.message(0)
-        val vurderingId = UUID.fromString(løsning.path("@løsning").path("Opptjeningsvurdering").path("id").asText())
+        val vurderingId = VurderingId(UUID.fromString(løsning.path("@løsning").path("Opptjeningsvurdering").path("id").asText()))
 
-        val vurdering = repository.finn<AutomatiskVurdering>(vurderingId)!!
-        assertTrue(vurdering.erKomplett)
+        val vurdering = vurderinger.finn(vurderingId)!!
         assertEquals(OPPTJENING_MINST_4_UKER, vurdering.kodeverkkode)
+        assertTrue(prøvinger.alleProvinger.single().erAvsluttet)
     }
 
-    // Har vi allerede en komplett vurdering svarer vi med den eksisterende id-en
+    // Har vi allerede en vurdering svarer vi med den eksisterende id-en
     // i stedet for å be om arbeidsforhold på nytt
     @Test
     fun `eksisterende vurdering svares ut direkte`() {
-        val eksisterende = AutomatiskVurdering.nyAutomatiskVurdering(FØDSELSNUMMER, 1.februar, "")
-            .also { it.fullfør(AutomatiskVurdering.OpptjeningsgrunnlagForAutomatiskVurdering.ForSelvstendigNæringsdrivende) }
-        repository.lagre(eksisterende)
+        val eksisterende = fullførtPrøving()
 
         rapid.sendTestMessage(opptjeningsvurderingBehov(arbeidssituasjon = "Arbeidstaker"))
 
         assertEquals(1, rapid.inspektør.size)
         val løsning = rapid.inspektør.message(0)
-        assertEquals(eksisterende.id.toString(), løsning.path("@løsning").path("Opptjeningsvurdering").path("id").asText())
+        assertEquals(eksisterende.toString(), løsning.path("@løsning").path("Opptjeningsvurdering").path("id").asText())
     }
 
     @Test
@@ -142,8 +162,18 @@ internal class OpptjeningsvurderingRiverTest {
         assertEquals(0, rapid.inspektør.size)
     }
 
+    private fun fullførtPrøving(): VurderingId {
+        val prøving = Opptjeningsprøving.start(FØDSELSNUMMER, 1.februar, Arbeidssituasjon.Arbeidstaker).prøving
+        val arbeidsforhold = Arbeidsforhold(orgnummer = ORGNUMMER, ansettelseperiode = 1.januar til 31.januar, type = ORDINÆRT)
+        val vurdering = prøving.motta(Opptjeningsgrunnlag.Arbeidstaker(listOf(arbeidsforhold)))
+        prøvinger.opprett(prøving)
+        vurderinger.lagre(vurdering)
+        return vurdering.id
+    }
+
     private companion object {
         const val FØDSELSNUMMER = "12029240045"
+        const val ORGNUMMER = "987654321"
 
         @Language("JSON")
         fun opptjeningsvurderingBehov(arbeidssituasjon: String) = """

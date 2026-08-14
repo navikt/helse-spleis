@@ -2,6 +2,7 @@ package no.nav.helse.opptjening.bootstrap
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.opptjening.application.OpptjeningService
+import no.nav.helse.opptjening.infra.db.InMemoryVilkårsprøvingRepository
 import no.nav.helse.opptjening.infra.db.InMemoryVilkårsvurderingRepository
 import no.nav.helse.opptjening.infra.kafka.GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver
 import no.nav.helse.opptjening.infra.kafka.OpptjeningsvurderingResultatRiver
@@ -16,15 +17,17 @@ class VilkårsprøvingModule(
     rapidsConnection: RapidsConnection
 ) {
     private val vilkårsvurderingRepository = InMemoryVilkårsvurderingRepository()
+    private val vilkårsprøvingRepository = InMemoryVilkårsprøvingRepository()
+    private val opptjeningService = OpptjeningService(vilkårsvurderingRepository, vilkårsprøvingRepository)
 
     init {
         GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
             rapidsConnection = rapidsConnection,
-            opptjeningService = OpptjeningService(vilkårsvurderingRepository)
+            opptjeningService = opptjeningService
         )
         OpptjeningsvurderingRiver(
             rapidsConnection = rapidsConnection,
-            opptjeningService = OpptjeningService(vilkårsvurderingRepository)
+            opptjeningService = opptjeningService
         )
         OpptjeningsvurderingResultatRiver(
             rapidsConnection = rapidsConnection,
