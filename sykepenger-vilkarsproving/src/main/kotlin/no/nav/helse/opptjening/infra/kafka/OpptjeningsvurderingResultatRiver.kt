@@ -11,13 +11,14 @@ import no.nav.helse.opptjening.bootstrap.sikkerLogg
 import no.nav.helse.opptjening.domain.Opptjening
 import no.nav.helse.opptjening.domain.Utfall
 
-internal class OpptjeningsvurderingResultatRiver(rapidsConnection: RapidsConnection, private val vilkårsvurderingRepository: VilkårsvurderingRepository): River.PacketListener {
+internal class OpptjeningsvurderingResultatRiver(rapidsConnection: RapidsConnection, private val vilkårsvurderingRepository: VilkårsvurderingRepository) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
             precondition {
                 it.requireValue("@event_name", "behov")
                 it.requireAllOrAny("@behov", listOf("OpptjeningsvurderingResultat"))
                 it.requireKey("opptjeningsvurderingId")
+                it.forbid("@løsning")
             }
         }.register(this)
     }
