@@ -1,10 +1,10 @@
 package no.nav.helse.opptjening.domain
 
-enum class Utfall {
+internal enum class Utfall {
     Oppfylt, IkkeOppfylt
 }
 
-enum class Kodeverkkode(val utfall: Utfall) {
+internal enum class Kodeverkkode(val utfall: Utfall) {
     OPPTJENING_MINST_4_UKER(Utfall.Oppfylt),
     OPPTJENING_ANNEN_YTELSE(Utfall.Oppfylt),
     OPPTJENING_YRKESAKTIV_FOER_FORELDREPENGER(Utfall.Oppfylt),

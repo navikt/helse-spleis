@@ -13,7 +13,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.opptjening.application.OpptjeningService
 import no.nav.helse.opptjening.domain.Arbeidsforhold
 
-class GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
+internal class GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
     rapidsConnection: RapidsConnection,
     private val opptjeningService: OpptjeningService
 ) : River.PacketListener {

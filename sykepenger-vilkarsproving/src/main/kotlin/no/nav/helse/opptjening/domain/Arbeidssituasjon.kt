@@ -1,5 +1,5 @@
 package no.nav.helse.opptjening.domain
 
-enum class Arbeidssituasjon {
+internal enum class Arbeidssituasjon {
     Arbeidstaker, SelvstendigNæringsdrivende
 }

@@ -3,7 +3,7 @@ package no.nav.helse.opptjening.domain
 import java.time.LocalDate
 import java.util.UUID
 
-sealed interface Vilkårsvurdering {
+internal sealed interface Vilkårsvurdering {
     val id: UUID
     val fødselsnummer: String
     val skjæringstidspunkt: LocalDate

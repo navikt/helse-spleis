@@ -11,8 +11,9 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.opptjening.application.OpptjeningService
 import no.nav.helse.opptjening.application.VurderOpptjeningResultat
 import no.nav.helse.opptjening.domain.Arbeidssituasjon
+import org.slf4j.LoggerFactory
 
-class OpptjeningsvurderingRiver(rapidsConnection: RapidsConnection, private val opptjeningService: OpptjeningService) : River.PacketListener {
+internal class OpptjeningsvurderingRiver(rapidsConnection: RapidsConnection, private val opptjeningService: OpptjeningService) : River.PacketListener {
     init {
 
         River(rapidsConnection).apply {
@@ -29,6 +30,8 @@ class OpptjeningsvurderingRiver(rapidsConnection: RapidsConnection, private val 
         val fødselsnummer = packet["fødselsnummer"].asText()
         val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
         val arbeidssituasjon = Arbeidssituasjon.valueOf(packet["arbeidssituasjon"].asText())
+
+
 
         val vurderOpptjeningResultat = opptjeningService.vurderOpptjening(
             fødselsnummer = fødselsnummer,

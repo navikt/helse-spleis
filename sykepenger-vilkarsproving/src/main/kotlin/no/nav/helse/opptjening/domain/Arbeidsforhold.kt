@@ -4,7 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 
-data class Arbeidsforhold(
+internal data class Arbeidsforhold(
     val orgnummer: String,
     val ansettelseperiode: Periode,
     val type: Arbeidsforholdtype

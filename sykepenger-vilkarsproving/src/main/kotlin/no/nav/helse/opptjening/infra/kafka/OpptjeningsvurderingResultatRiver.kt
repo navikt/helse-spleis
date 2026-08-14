@@ -10,7 +10,7 @@ import no.nav.helse.opptjening.application.VilkårsvurderingRepository
 import no.nav.helse.opptjening.domain.Opptjening
 import no.nav.helse.opptjening.domain.Utfall
 
-class OpptjeningsvurderingResultatRiver(rapidsConnection: RapidsConnection, private val vilkårsvurderingRepository: VilkårsvurderingRepository): River.PacketListener {
+internal class OpptjeningsvurderingResultatRiver(rapidsConnection: RapidsConnection, private val vilkårsvurderingRepository: VilkårsvurderingRepository): River.PacketListener {
     init {
         River(rapidsConnection).apply {
             precondition {

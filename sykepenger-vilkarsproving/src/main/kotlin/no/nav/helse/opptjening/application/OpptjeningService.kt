@@ -9,7 +9,7 @@ import no.nav.helse.opptjening.domain.Arbeidssituasjon
 import no.nav.helse.opptjening.domain.Opptjening
 import no.nav.helse.opptjening.domain.Opptjening.AutomatiskVurdering.OpptjeningsgrunnlagForAutomatiskVurdering
 
-class OpptjeningService(
+internal class OpptjeningService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 ) {
 

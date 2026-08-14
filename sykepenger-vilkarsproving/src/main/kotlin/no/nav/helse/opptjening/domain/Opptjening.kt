@@ -6,7 +6,7 @@ import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.til
 
-sealed class Opptjening : Vilkårsvurdering {
+internal sealed class Opptjening : Vilkårsvurdering {
 
     class ManuellVurdering(
         override val fødselsnummer: String,
