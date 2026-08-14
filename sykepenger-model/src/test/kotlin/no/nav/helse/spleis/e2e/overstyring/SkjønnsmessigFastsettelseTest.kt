@@ -181,8 +181,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(a1, 19000.0.månedlig),
             OverstyrtArbeidsgiveropplysning(a2, 21000.0.månedlig)
-        )
-        )
+        ))
 
         a1 {
             håndterYtelser(1.vedtaksperiode)
@@ -201,7 +200,12 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         (a1 og a2).forlengVedtak(februar)
 
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig, refusjon = Refusjon(20000.månedlig, opphørsdato = 31.januar))
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beregnetInntekt = 20000.månedlig,
+                refusjon = Refusjon(20000.månedlig, opphørsdato = 31.januar),
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, 20_000.månedlig, forventetFastsattÅrsinntekt = 19_000.månedlig)

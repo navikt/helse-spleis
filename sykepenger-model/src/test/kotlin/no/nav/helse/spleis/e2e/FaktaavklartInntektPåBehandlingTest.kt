@@ -74,7 +74,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             håndterUtbetalt()
 
             // Så kommer det en korrigert IM
-            val im3 = håndterInntektsmelding(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT * 1.15)
+            val im3 = håndterInntektsmelding(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT * 1.15, vedtaksperiodeId = 1.vedtaksperiode)
             assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
             // Før beregning har vi rett inntekt på behandlingene
             assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
@@ -191,9 +191,9 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             forlengVedtak(21.januar til 31.januar)
             forlengVedtak(februar)
             forlengVedtak(mars)
-            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT * 1.20)
-            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 21.januar, beregnetInntekt = INNTEKT * 1.10)
-            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT * 1.15)
+            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT * 1.20, vedtaksperiodeId = 1.vedtaksperiode)
+            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 21.januar, beregnetInntekt = INNTEKT * 1.10, vedtaksperiodeId = 1.vedtaksperiode)
+            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT * 1.15, vedtaksperiodeId = 1.vedtaksperiode)
 
             assertEquals(INNTEKT * 1.05, faktaavvklartArbeidstakerBeløp(1.vedtaksperiode))
             assertEquals(INNTEKT * 1.10, faktaavvklartArbeidstakerBeløp(2.vedtaksperiode))

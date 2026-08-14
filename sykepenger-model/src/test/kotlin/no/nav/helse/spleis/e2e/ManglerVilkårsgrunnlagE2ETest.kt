@@ -213,8 +213,9 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             nullstillTilstandsendringer()
             håndterInntektsmelding(
-                listOf(1.februar til 16.februar),
-                førsteFraværsdag = 1.februar
+                arbeidsgiverperioder = listOf(1.februar til 16.februar),
+                førsteFraværsdag = 1.februar,
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             assertVarsler(listOf(Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -241,8 +242,9 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             nullstillTilstandsendringer()
             håndterInntektsmelding(
-                listOf(1.februar til 16.februar),
-                førsteFraværsdag = 1.februar
+                arbeidsgiverperioder = listOf(1.februar til 16.februar),
+                førsteFraværsdag = 1.februar,
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             assertVarsler(listOf(Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))

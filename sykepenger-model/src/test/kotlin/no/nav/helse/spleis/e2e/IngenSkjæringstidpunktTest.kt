@@ -93,8 +93,9 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             // Forlengelse med arbeid og ferie
             håndterSøknad(Sykdom(6.januar, 4.februar, 100.prosent), Arbeid(6.januar, 4.februar))
             håndterSøknad(Sykdom(5.februar, 24.februar, 100.prosent), Ferie(5.februar, 11.februar))
-            håndterInntektsmelding(
-                listOf(5.februar til 20.februar)
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                arbeidsgiverperioder = listOf(5.februar til 20.februar),
+                vedtaksperiodeId = 3.vedtaksperiode
             )
 
             håndterYtelser(2.vedtaksperiode)
@@ -116,12 +117,11 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
 
             // Inntektsmelding som flytter arbeidsgiverperioden en uke frem
             // Utbetaling revurderes og skal trekke penger tilbake for 21.-23.februar
-            håndterInntektsmelding(
-                listOf(12.februar til 27.februar)
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                arbeidsgiverperioder = listOf(12.februar til 27.februar),
+                vedtaksperiodeId = 3.vedtaksperiode
             )
             håndterVilkårsgrunnlag(3.vedtaksperiode)
-            assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
-            assertVarsel(RV_IM_24, 3.vedtaksperiode.filter())
             assertEquals(12.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
 
             håndterYtelser(3.vedtaksperiode)
@@ -142,7 +142,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             assertEquals(-4293, utbetalingenSomTrekkerPenger.nettobeløp)
 
             assertVarsel(Varselkode.RV_UT_23, 3.vedtaksperiode.filter())
-            assertVarsel(Varselkode.RV_IV_7, 3.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 3.vedtaksperiode.filter())
 
             // Det kommer en forlengelse som skal lage en ny utbetaling som hekter seg på forrige utbetaling
             nullstillTilstandsendringer()

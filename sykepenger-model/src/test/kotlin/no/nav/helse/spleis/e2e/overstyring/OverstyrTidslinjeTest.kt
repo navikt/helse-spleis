@@ -104,7 +104,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSøknad(Sykdom(27.februar, 12.mars, 100.prosent))
             håndterSøknad(Sykdom(13.mars, 31.mars, 100.prosent))
             håndterInntektsmelding(
-                listOf(6.mars til 21.mars),
+                arbeidsgiverperioder = listOf(6.mars til 21.mars),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
             håndterVilkårsgrunnlag(3.vedtaksperiode)
@@ -112,7 +112,8 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSimulering(3.vedtaksperiode)
             nullstillTilstandsendringer()
             håndterInntektsmelding(
-                listOf(2.februar til 17.februar)
+                arbeidsgiverperioder = listOf(2.februar til 17.februar),
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)

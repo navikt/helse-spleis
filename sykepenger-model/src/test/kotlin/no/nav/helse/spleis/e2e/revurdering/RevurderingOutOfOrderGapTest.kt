@@ -1147,7 +1147,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             nyPeriode(februar)
             val februarId = 2.vedtaksperiode
 
-            håndterInntektsmelding(listOf(1.februar til 16.februar))
             håndterVilkårsgrunnlag(februarId)
             håndterYtelser(februarId)
             håndterSimulering(februarId)
@@ -1165,7 +1164,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
 
             assertSisteTilstand(januarId, AVVENTER_VILKÅRSPRØVING)
 
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(januarId)
             håndterYtelser(januarId)
             håndterSimulering(januarId)

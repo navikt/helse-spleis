@@ -427,9 +427,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars).let {
-                MeldingsreferanseId(it)
-            }
+            val inntektsmeldingId = MeldingsreferanseId(håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars, vedtaksperiodeId = 1.vedtaksperiode))
             assertTrue(inntektsmeldingId.id in observatør.inntektsmeldingIkkeHåndtert)
             assertFalse(inntektsmeldingId.id in observatør.inntektsmeldingHåndtert.map { it.first })
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->

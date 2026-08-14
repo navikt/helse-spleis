@@ -422,7 +422,8 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 refusjon = Refusjon(
                     beløp = INNTEKT / 2,
                     opphørsdato = null
-                )
+                ),
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT / 2)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT / 2)
@@ -447,10 +448,8 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterInntektsmelding(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.januar,
-                refusjon = Refusjon(
-                    beløp = INNTEKT / 2,
-                    opphørsdato = 30.april
-                )
+                refusjon = Refusjon(beløp = INNTEKT / 2, opphørsdato = 30.april),
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT / 2)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT / 2)
@@ -515,7 +514,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Refusjon(INGEN, null))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Refusjon(INGEN, null), vedtaksperiodeId = 1.vedtaksperiode)
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INGEN)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT)
 

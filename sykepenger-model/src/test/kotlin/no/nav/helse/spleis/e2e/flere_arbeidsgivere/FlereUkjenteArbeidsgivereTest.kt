@@ -54,8 +54,9 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
 
         val im1 = a1 {
             val id = håndterInntektsmelding(
-                listOf(1.januar til 16.januar),
-                beregnetInntekt = inntektA1
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beregnetInntekt = inntektA1,
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)

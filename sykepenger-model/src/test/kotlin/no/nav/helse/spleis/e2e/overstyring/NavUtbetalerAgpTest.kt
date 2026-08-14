@@ -570,7 +570,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
         a1 {
             håndterSøknad(1.januar til 10.januar)
 
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 arbeidsgiverperioder = emptyList(),
                 førsteFraværsdag = 1.januar,
                 beregnetInntekt = 9000.månedlig,
@@ -581,22 +581,19 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            assertForventetFeil(
-                "Vet ikke helt hva som er riktig her. Skulle vi ha gått til AUU siden det ikke er AGP, fortsatt vært i AvIM, eller ha antatt at AGP går til 16 og gå videre? <- Svar: Ja slik gjøres for LPS/Altinn, men HAG-opplysninger blir som ønsket",
-                { assertEquals(listOf(1.januar til 1.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode)) },
-                { assertEquals(listOf(1.januar til 10.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode)) }
-            )
+            assertEquals(listOf(1.januar til 10.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
 
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 arbeidsgiverperioder = emptyList(),
                 førsteFraværsdag = 1.januar,
                 beregnetInntekt = INNTEKT,
                 refusjon = Refusjon(INNTEKT, null),
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+                vedtaksperiodeId = 1.vedtaksperiode
             )
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            assertVarsler(listOf(RV_IM_8, Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IM_8, Varselkode.RV_IM_4, Varselkode.RV_AO_3), 1.vedtaksperiode.filter())
         }
     }
 

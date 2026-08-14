@@ -136,9 +136,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             nyttVedtak(januar)
             forlengVedtak(februar)
             forlengVedtak(mars)
-            håndterInntektsmelding(
-                listOf(1.mars til 16.mars)
-            )
+            håndterInntektsmelding(listOf(1.mars til 16.mars), vedtaksperiodeId = 1.vedtaksperiode)
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
@@ -157,7 +155,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             nyttVedtak(10.januar til 31.januar)
             forlengVedtak(februar)
             forlengVedtak(mars)
-            håndterInntektsmelding(listOf(1.februar til 16.februar))
+            håndterInntektsmelding(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode)
 
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
             assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
@@ -195,7 +193,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterYtelser(vpMars)
             håndterSimulering(vpMars)
             håndterUtbetalingsgodkjenning(vpMars)
-            håndterInntektsmelding(listOf(1.februar til 16.februar))
+            håndterInntektsmelding(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode)
 
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
             assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
@@ -250,9 +248,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             nyttVedtak(10.januar til 30.januar)
             forlengVedtak(31.januar til 31.januar)
             forlengVedtak(februar)
-            håndterInntektsmelding(
-                listOf(1.februar til 16.februar)
-            )
+            håndterInntektsmelding(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode)
 
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
             assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
@@ -429,7 +425,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, listOf(10.januar til 25.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 10.januar, listOf(10.januar til 25.januar))
 
-            håndterInntektsmelding(listOf(1.februar til 16.februar))
+            håndterInntektsmelding(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode)
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, emptyList<Nothing>())
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.februar, listOf(1.februar til 16.februar))
@@ -449,9 +445,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             nyPeriode(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
-            håndterInntektsmelding(
-                listOf(1.februar til 16.februar)
-            )
+            håndterInntektsmelding(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode)
             assertVarsler(listOf(RV_IM_24), 2.vedtaksperiode.filter())
 
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())

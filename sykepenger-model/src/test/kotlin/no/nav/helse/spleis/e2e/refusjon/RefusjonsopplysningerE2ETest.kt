@@ -105,6 +105,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterInntektsmelding(
                 id = inntektsmeldingId,
                 arbeidsgiverperioder = arbeidsgiverperiode,
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)

@@ -52,7 +52,7 @@ internal class RevurderingFerieTest : AbstractDslTest() {
             nyttVedtak(5.februar til 28.februar)
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(1.mars, 31.mars))
-            håndterInntektsmelding(listOf(5.mars til 20.mars))
+            håndterInntektsmelding(listOf(5.mars til 20.mars), vedtaksperiodeId = 1.vedtaksperiode)
 
             assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
 

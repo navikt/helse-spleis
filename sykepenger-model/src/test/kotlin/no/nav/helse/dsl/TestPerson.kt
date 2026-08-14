@@ -49,7 +49,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -412,12 +412,10 @@ internal class TestPerson(
             arbeidsforholdId: String? = null,
             vedtaksperiodeId: UUID = sisteVedtaksperiode
         ): UUID {
-            val forventerArbeidsgiveropplysninger = observatør.forventerArbeidsgiveropplysninger(vedtaksperiodeId)
-            val kanArbeidsgiveropplysningerKorrigeres = observatør.kanArbeidsgiveropplysningerKorrigeres(vedtaksperiodeId)
             val tilstand = observatør.tilstandsendringer.getValue(vedtaksperiodeId).last()
-            val erAvsluttetUtenUtbetaling = tilstand in setOf(AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
 
-            if (Toggle.KnertInntektsmelding.disabled) {
+            fun håndterGammelInntektsmelding(): UUID? {
+                if (Toggle.KnertInntektsmelding.enabled) return null
                 arbeidsgiverHendelsefabrikk.lagInntektsmelding(
                     arbeidsgiverperioder,
                     beregnetInntekt,
@@ -433,8 +431,8 @@ internal class TestPerson(
             }
 
             // Forespurte arbeidsgiveropplysninger
-            if (forventerArbeidsgiveropplysninger) {
-                return håndterArbeidsgiveropplysninger(
+            if (observatør.forventerArbeidsgiveropplysninger(vedtaksperiodeId)) {
+                return håndterGammelInntektsmelding() ?: håndterArbeidsgiveropplysninger(
                     arbeidsgiverperioder = arbeidsgiverperioder,
                     beregnetInntekt = beregnetInntekt,
                     førsteFraværsdag = førsteFraværsdag,
@@ -449,8 +447,8 @@ internal class TestPerson(
             }
 
             // Korrigerte arbeidsgiveropplysninger
-            if (kanArbeidsgiveropplysningerKorrigeres) {
-                return håndterKorrigerteArbeidsgiveropplysninger(
+            if (observatør.kanArbeidsgiveropplysningerKorrigeres(vedtaksperiodeId)) {
+                return håndterGammelInntektsmelding() ?: håndterKorrigerteArbeidsgiveropplysninger(
                     arbeidsgiverperioder = arbeidsgiverperioder,
                     beregnetInntekt = beregnetInntekt,
                     førsteFraværsdag = førsteFraværsdag,
@@ -465,8 +463,8 @@ internal class TestPerson(
             }
 
             // Selvbestemte arbeidsgiveropplysninger
-            if (erAvsluttetUtenUtbetaling) {
-                return håndterSelvbestemtArbeidsgiveropplysninger(
+            if (tilstand in setOf(AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)) {
+                return håndterGammelInntektsmelding() ?: håndterSelvbestemtArbeidsgiveropplysninger(
                     arbeidsgiverperioder = arbeidsgiverperioder,
                     beregnetInntekt = beregnetInntekt,
                     førsteFraværsdag = førsteFraværsdag,
@@ -480,7 +478,7 @@ internal class TestPerson(
                 )
             }
 
-            if (tilstand == TilstandType.TIL_INFOTRYGD) error("Bruk håndterArbeidsgiveropplysningerForForkastetPeriode!!")
+            if (tilstand == TIL_INFOTRYGD) error("Bruk håndterArbeidsgiveropplysningerForForkastetPeriode!!")
 
             error("Uventet situasjon! Her er nok arbeidsgiveropplysningene sendt på feil periode. Tilstanden på perioden er ${tilstand.name}")
         }

@@ -122,7 +122,8 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             håndterInntektsmelding(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.mars,
-                refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null)
+                refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null),
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
             val vilkårsgrunnlagId2 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inspektør.vilkårsgrunnlagId
@@ -144,9 +145,10 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             nullstillTilstandsendringer()
             håndterInntektsmelding(
-                listOf(1.januar til 16.januar),
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.mars,
-                refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null)
+                refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null),
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING)
             val vilkårsgrunnlagId2 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inspektør.vilkårsgrunnlagId

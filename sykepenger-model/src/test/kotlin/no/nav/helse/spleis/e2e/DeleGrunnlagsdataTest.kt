@@ -120,7 +120,8 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterInntektsmelding(
                 listOf(Periode(18.januar, 1.februar)),
-                førsteFraværsdag = 4.mars
+                førsteFraværsdag = 4.mars,
+                vedtaksperiodeId = 1.vedtaksperiode
             )
 
             assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
