@@ -1,5 +1,6 @@
 package no.nav.helse.opptjening.infra.kafka
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
@@ -19,12 +20,15 @@ internal class OpptjeningsvurderingRiver(rapidsConnection: RapidsConnection, pri
     init {
 
         River(rapidsConnection).apply {
-            precondition { it.requireAllOrAny("@behov", listOf(behovKey)) }
-            validate { it.forbid("@løsning") }
-            validate { it.requireKey("@id") }
-            validate { it.requireKey("fødselsnummer") }
-            validate { it.requireKey("skjæringstidspunkt") }
-            validate { it.requireKey("arbeidssituasjon") } //TODO strengere validering
+            precondition {
+                it.requireAllOrAny("@behov", listOf(behovKey))
+                it.forbid("@løsning")
+            }
+            validate {
+                it.requireKey("fødselsnummer")
+                it.require("skjæringstidspunkt", JsonNode::asLocalDate)
+                it.requireKey("arbeidssituasjon") //TODO strengere validering
+            }
         }.register(this)
     }
 

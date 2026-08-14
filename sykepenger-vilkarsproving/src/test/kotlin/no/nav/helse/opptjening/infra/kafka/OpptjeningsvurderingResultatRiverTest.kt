@@ -85,7 +85,8 @@ internal class OpptjeningsvurderingResultatRiverTest {
         {
           "@event_name": "behov",
           "@id": "${UUID.randomUUID()}",
-          "@behov": ["OpptjeningsvurderingResultat"]
+          "@behov": ["OpptjeningsvurderingResultat"],
+          "OpptjeningsvurderingResultat": {}
         }
         """
         rapid.sendTestMessage(melding)
@@ -102,7 +103,9 @@ internal class OpptjeningsvurderingResultatRiverTest {
           "@event_name": "behov",
           "@id": "${UUID.randomUUID()}",
           "@behov": ["EtHeltAnnetBehov"],
-          "opptjeningsvurderingId": "${UUID.randomUUID()}"
+          "OpptjeningsvurderingResultat": {
+            "opptjeningsvurderingId": "${UUID.randomUUID()}"
+          }
         }
         """
         rapid.sendTestMessage(melding)
@@ -119,7 +122,9 @@ internal class OpptjeningsvurderingResultatRiverTest {
           "@event_name": "løsning",
           "@id": "${UUID.randomUUID()}",
           "@behov": ["OpptjeningsvurderingResultat"],
-          "opptjeningsvurderingId": "${UUID.randomUUID()}"
+          "OpptjeningsvurderingResultat": {
+            "opptjeningsvurderingId": "${UUID.randomUUID()}"
+          }
         }
         """
         rapid.sendTestMessage(melding)
@@ -155,7 +160,9 @@ internal class OpptjeningsvurderingResultatRiverTest {
           "@event_name": "behov",
           "@id": "${UUID.randomUUID()}",
           "@behov": ["OpptjeningsvurderingResultat"],
-          "opptjeningsvurderingId": "$opptjeningsvurderingId"
+          "OpptjeningsvurderingResultat": {
+            "opptjeningsvurderingId": "$opptjeningsvurderingId"
+          }
         }
         """
     }

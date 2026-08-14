@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.opptjening.application.VilkårsvurderingRepository
@@ -17,14 +18,16 @@ internal class OpptjeningsvurderingResultatRiver(rapidsConnection: RapidsConnect
             precondition {
                 it.requireValue("@event_name", "behov")
                 it.requireAllOrAny("@behov", listOf("OpptjeningsvurderingResultat"))
-                it.requireKey("opptjeningsvurderingId")
                 it.forbid("@løsning")
+            }
+            validate {
+                it.requireKey("OpptjeningsvurderingResultat.opptjeningsvurderingId")
             }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
-        val opptjeningsvurderingId = packet["opptjeningsvurderingId"].asUUID()
+        val opptjeningsvurderingId = packet["OpptjeningsvurderingResultat.opptjeningsvurderingId"].asUUID()
         sikkerLogg.info("Mottatt behov for OpptjeningsvurderingResultat for opptjeningsvurderingId $opptjeningsvurderingId")
         val vurdering = vilkårsvurderingRepository.finn<Opptjening>(opptjeningsvurderingId) ?: error("Finner ikke opptjening")
         val kodeverkkode = vurdering.kodeverkkode ?: error("Det skal ikke være mulig å spørre om en vurdering der kodeverkkode ikke er satt")
@@ -42,5 +45,9 @@ internal class OpptjeningsvurderingResultatRiver(rapidsConnection: RapidsConnect
             )
         sikkerLogg.info("Publiserer løsning for OpptjeningsvurderingResultat for opptjeningsvurderingId $opptjeningsvurderingId. Løsning:\n\t${packet.toJson()}")
         context.publish(packet.toJson())
+    }
+
+    override fun onError(problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
+        sikkerLogg.error("Forkastet behov for OpptjeningsvurderingResultat:\n$problems")
     }
 }

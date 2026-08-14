@@ -273,7 +273,9 @@ internal class OpptjeningE2ETest {
           "@event_name": "behov",
           "@id": "${UUID.randomUUID()}",
           "@behov": ["OpptjeningsvurderingResultat"],
-          "opptjeningsvurderingId": "$opptjeningsvurderingId"
+          "OpptjeningsvurderingResultat": {
+            "opptjeningsvurderingId": "$opptjeningsvurderingId"
+          }
         }
         """
     }

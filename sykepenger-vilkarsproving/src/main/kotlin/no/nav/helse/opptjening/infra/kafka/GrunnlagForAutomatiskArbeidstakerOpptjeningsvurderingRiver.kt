@@ -27,12 +27,12 @@ internal class GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
                 it.requireAllOrAny("@behov", listOf(behovKey))
                 it.requireValue("@final", true)
                 it.requireKey("fødselsnummer")
-                it.requireKey("skjæringstidspunkt")
                 it.requireKey("opprinneligBehov")
                 it.requireKey("@løsning")
             }
 
             validate {
+                it.require("skjæringstidspunkt", JsonNode::asLocalDate)
                 it.requireArray("@løsning.$behovKey") {
                     requireKey("orgnummer")
                     requireAny("type", listOf("FORENKLET_OPPGJØRSORDNING", "FRILANSER", "MARITIMT", "ORDINÆRT"))
