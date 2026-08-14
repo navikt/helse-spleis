@@ -11,4 +11,8 @@ internal enum class Kodeverkkode(val vilkår: Vilkår, val utfall: Utfall) {
 
     IKKE_OPPTJENING_AAP_FOER_FORELDREPENGER(Vilkår.Opptjening, Utfall.IkkeOppfylt),
     IKKE_OPPTJENING_ARBEID_ELLER_YTELSE(Vilkår.Opptjening, Utfall.IkkeOppfylt),
+
+    MEDLEM_I_FOLKETRYGDEN(Vilkår.Medlemskap, Utfall.Oppfylt),
+
+    IKKE_MEDLEM_I_FOLKETRYGDEN(Vilkår.Medlemskap, Utfall.IkkeOppfylt)
 }

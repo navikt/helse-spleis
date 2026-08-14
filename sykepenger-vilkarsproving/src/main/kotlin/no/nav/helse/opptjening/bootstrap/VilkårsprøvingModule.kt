@@ -1,10 +1,14 @@
 package no.nav.helse.opptjening.bootstrap
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import no.nav.helse.opptjening.application.MedlemskapService
 import no.nav.helse.opptjening.application.OpptjeningService
 import no.nav.helse.opptjening.infra.db.InMemoryVilkårsprøvingRepository
 import no.nav.helse.opptjening.infra.db.InMemoryVilkårsvurderingRepository
 import no.nav.helse.opptjening.infra.kafka.GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver
+import no.nav.helse.opptjening.infra.kafka.GrunnlagForMedlemskapsvurderingRiver
+import no.nav.helse.opptjening.infra.kafka.MedlemskapsvurderingResultatRiver
+import no.nav.helse.opptjening.infra.kafka.MedlemskapsvurderingRiver
 import no.nav.helse.opptjening.infra.kafka.OpptjeningsvurderingResultatRiver
 import no.nav.helse.opptjening.infra.kafka.OpptjeningsvurderingRiver
 import no.nav.helse.opptjening.infra.kafka.OverstyrOpptjeningRiver
@@ -20,6 +24,7 @@ class VilkårsprøvingModule(
     private val vilkårsvurderingRepository = InMemoryVilkårsvurderingRepository()
     private val vilkårsprøvingRepository = InMemoryVilkårsprøvingRepository()
     private val opptjeningService = OpptjeningService(vilkårsvurderingRepository, vilkårsprøvingRepository)
+    private val medlemskapService = MedlemskapService(vilkårsvurderingRepository, vilkårsprøvingRepository)
 
     init {
         GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(
@@ -37,6 +42,19 @@ class VilkårsprøvingModule(
         OverstyrOpptjeningRiver(
             rapidsConnection = rapidsConnection,
             opptjeningService = opptjeningService
+        )
+
+        GrunnlagForMedlemskapsvurderingRiver(
+            rapidsConnection = rapidsConnection,
+            medlemskapService = medlemskapService
+        )
+        MedlemskapsvurderingRiver(
+            rapidsConnection = rapidsConnection,
+            medlemskapService = medlemskapService
+        )
+        MedlemskapsvurderingResultatRiver(
+            rapidsConnection = rapidsConnection,
+            vilkårsvurderingRepository = vilkårsvurderingRepository
         )
     }
 }

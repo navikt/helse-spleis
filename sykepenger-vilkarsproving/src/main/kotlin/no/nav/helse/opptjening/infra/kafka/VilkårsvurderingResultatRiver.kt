@@ -59,5 +59,16 @@ internal class OpptjeningsvurderingResultatRiver(
     vilkårsvurderingRepository = vilkårsvurderingRepository,
     vilkår = Vilkår.Opptjening,
     behovnavn = "OpptjeningsvurderingResultat",
-    idFelt = "opptjeningsvurderingId"
+    idFelt = "OpptjeningsvurderingResultat.opptjeningsvurderingId"
+)
+
+internal class MedlemskapsvurderingResultatRiver(
+    rapidsConnection: RapidsConnection,
+    vilkårsvurderingRepository: VilkårsvurderingRepository
+) : VilkårsvurderingResultatRiver(
+    rapidsConnection = rapidsConnection,
+    vilkårsvurderingRepository = vilkårsvurderingRepository,
+    vilkår = Vilkår.Medlemskap,
+    behovnavn = "MedlemskapsvurderingResultat",
+    idFelt = "MedlemskapsvurderingResultat.medlemskapsvurderingId"
 )
