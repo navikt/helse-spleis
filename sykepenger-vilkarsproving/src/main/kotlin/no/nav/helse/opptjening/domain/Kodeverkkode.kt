@@ -1,7 +1,7 @@
 package no.nav.helse.opptjening.domain
 
 enum class Utfall {
-    Oppfylt, IkkeOppfylt, IkkeVurdert, Unntak
+    Oppfylt, IkkeOppfylt
 }
 
 enum class Kodeverkkode(val utfall: Utfall) {

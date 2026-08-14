@@ -10,7 +10,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
-import java.util.UUID
 import no.nav.helse.opptjening.application.OpptjeningService
 import no.nav.helse.opptjening.domain.Arbeidsforhold
 
