@@ -5,20 +5,16 @@ import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.til
 
-/**
- * Selve vilkårsregelen: en ren, total funksjon fra grunnlag til utfall.
- *
- * All I/O og asynkroni hører hjemme i [Opptjeningsprøving] og applikasjonslaget. Her finnes bare regelen,
- * slik at den kan testes isolert og kjøres om igjen på et historisk grunnlag.
- */
-internal object Opptjeningsregel {
-    const val VERSJON = "1"
+internal object Opptjeningsregel : Vilkårsregel {
+    override val vilkår = Vilkår.Opptjening
+    override val versjon = "1"
 
     private const val ANTALL_OPPTJENINGSDAGER_SOM_KREVES = 28
 
-    fun vurder(skjæringstidspunkt: LocalDate, grunnlag: Opptjeningsgrunnlag): Kodeverkkode = when (grunnlag) {
+    override fun vurder(skjæringstidspunkt: LocalDate, grunnlag: Vilkårsgrunnlag): Kodeverkkode = when (grunnlag) {
         is Opptjeningsgrunnlag.Arbeidstaker -> vurderArbeidstaker(skjæringstidspunkt, grunnlag.arbeidsforhold)
         Opptjeningsgrunnlag.SelvstendigNæringsdrivende -> Kodeverkkode.OPPTJENING_MINST_4_UKER
+        else -> error("Opptjeningsregelen kan ikke vurdere grunnlag for ${grunnlag.vilkår}")
     }
 
     private fun vurderArbeidstaker(skjæringstidspunkt: LocalDate, arbeidsforhold: List<Arbeidsforhold>): Kodeverkkode {

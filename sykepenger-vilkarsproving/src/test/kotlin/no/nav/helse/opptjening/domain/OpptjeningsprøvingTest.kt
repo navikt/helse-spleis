@@ -6,7 +6,6 @@ import no.nav.helse.januar
 import no.nav.helse.opptjening.domain.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -33,7 +32,7 @@ internal class OpptjeningsprøvingTest {
         assertNotNull(vurdering)
         assertTrue(prøving.erAvsluttet)
         assertNull(prøving.uteståendeBehov)
-        assertEquals(Opptjeningsprøving.Tilstand.Fullført(vurdering!!.id), prøving.tilstand)
+        assertEquals(Vilkårsprøving.Tilstand.Fullført(vurdering!!.id), prøving.tilstand)
         assertEquals(Opptjeningsgrunnlag.SelvstendigNæringsdrivende, vurdering.grunnlag)
     }
 
@@ -49,7 +48,7 @@ internal class OpptjeningsprøvingTest {
         assertEquals(FØDSELSNUMMER, vurdering.fødselsnummer)
         assertEquals(1.februar, vurdering.skjæringstidspunkt)
         assertEquals(arbeidsforhold, (vurdering.grunnlag as Opptjeningsgrunnlag.Arbeidstaker).arbeidsforhold)
-        assertEquals(Kilde.Automatisk(Opptjeningsregel.VERSJON), vurdering.kilde)
+        assertEquals(Kilde.Automatisk(Opptjeningsregel.versjon), vurdering.kilde)
         assertEquals(Kodeverkkode.OPPTJENING_MINST_4_UKER, vurdering.kodeverkkode)
         assertEquals(Utfall.Oppfylt, vurdering.utfall)
     }
@@ -62,7 +61,7 @@ internal class OpptjeningsprøvingTest {
         val vurdering = prøving.motta(Opptjeningsgrunnlag.Arbeidstaker(listOf(arbeidsforhold())))
 
         assertTrue(prøving.erAvsluttet)
-        assertEquals(Opptjeningsprøving.Tilstand.Fullført(vurdering.id), prøving.tilstand)
+        assertEquals(Vilkårsprøving.Tilstand.Fullført(vurdering.id), prøving.tilstand)
     }
 
     // En fullført prøving er endelig; duplikate svar skal ikke kunne overskrive resultatet

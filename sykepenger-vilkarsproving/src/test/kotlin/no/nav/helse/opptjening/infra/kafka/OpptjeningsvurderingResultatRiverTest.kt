@@ -1,16 +1,17 @@
 package no.nav.helse.opptjening.infra.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import java.time.Instant
 import java.util.UUID
 import java.util.stream.Stream
 import no.nav.helse.februar
 import no.nav.helse.opptjening.application.InMemoryVilkårsvurderingRepository
-import java.time.Instant
 import no.nav.helse.opptjening.domain.Kodeverkkode
 import no.nav.helse.opptjening.domain.Opptjeningsgrunnlag
-import no.nav.helse.opptjening.domain.Opptjeningsvurdering
 import no.nav.helse.opptjening.domain.PrøvingId
 import no.nav.helse.opptjening.domain.Utfall
+import no.nav.helse.opptjening.domain.Vilkår
+import no.nav.helse.opptjening.domain.Vilkårsvurdering
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -136,8 +137,8 @@ internal class OpptjeningsvurderingResultatRiverTest {
     }
 
     // Manuell vurdering er samme resultattype som automatisk – bare med en annen kilde
-    private fun manuellVurdering(kodeverkkode: Kodeverkkode): Opptjeningsvurdering {
-        return Opptjeningsvurdering.manuell(
+    private fun manuellVurdering(kodeverkkode: Kodeverkkode): Vilkårsvurdering {
+        return Vilkårsvurdering.manuell(
             prøvingId = PrøvingId.ny(),
             fødselsnummer = FØDSELSNUMMER,
             skjæringstidspunkt = 1.februar,
@@ -154,11 +155,11 @@ internal class OpptjeningsvurderingResultatRiverTest {
 
         @JvmStatic
         fun oppfylteKodeverkkoder(): Stream<Kodeverkkode> =
-            Kodeverkkode.entries.filter { it.utfall == Utfall.Oppfylt }.stream()
+            Kodeverkkode.entries.filter { it.vilkår == Vilkår.Opptjening && it.utfall == Utfall.Oppfylt }.stream()
 
         @JvmStatic
         fun ikkeOppfylteKodeverkkoder(): Stream<Kodeverkkode> =
-            Kodeverkkode.entries.filter { it.utfall == Utfall.IkkeOppfylt }.stream()
+            Kodeverkkode.entries.filter { it.vilkår == Vilkår.Opptjening && it.utfall == Utfall.IkkeOppfylt }.stream()
 
         @Language("JSON")
         fun opptjeningsvurderingResultatBehov(opptjeningsvurderingId: UUID) = """

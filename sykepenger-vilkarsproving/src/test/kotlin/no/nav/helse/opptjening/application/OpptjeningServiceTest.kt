@@ -17,6 +17,8 @@ import no.nav.helse.opptjening.domain.Kodeverkkode.IKKE_OPPTJENING_ARBEID_ELLER_
 import no.nav.helse.opptjening.domain.Kodeverkkode.OPPTJENING_MINST_4_UKER
 import no.nav.helse.opptjening.domain.Opptjeningsgrunnlag
 import no.nav.helse.opptjening.domain.Opptjeningsprøving
+import no.nav.helse.opptjening.domain.Vilkår
+import no.nav.helse.opptjening.domain.Vilkårsprøving
 import no.nav.helse.opptjening.domain.VurderingId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -62,7 +64,7 @@ internal class OpptjeningServiceTest {
         assertEquals(FØDSELSNUMMER, harVurdering.fødselsnummer)
         assertEquals(1.februar, harVurdering.skjæringstidspunkt)
 
-        val vurdering = vurderinger.finn(harVurdering.vurderingId)!!
+        val vurdering = vurderinger.finn(Vilkår.Opptjening, harVurdering.vurderingId)!!
         assertEquals(OPPTJENING_MINST_4_UKER, vurdering.kodeverkkode)
         assertEquals(Opptjeningsgrunnlag.SelvstendigNæringsdrivende, vurdering.grunnlag)
         assertTrue(prøvinger.alleProvinger.single().erAvsluttet)
@@ -166,9 +168,9 @@ internal class OpptjeningServiceTest {
 
         val nyVurdering = assertInstanceOf(BehandleGrunnlagResultat.NyVurderingForetatt::class.java, resultat)
         val prøving = prøvinger.alleProvinger.single()
-        assertEquals(Opptjeningsprøving.Tilstand.Fullført(nyVurdering.vurderingId), prøving.tilstand)
+        assertEquals(Vilkårsprøving.Tilstand.Fullført(nyVurdering.vurderingId), prøving.tilstand)
 
-        val vurdering = vurderinger.finn(nyVurdering.vurderingId)!!
+        val vurdering = vurderinger.finn(Vilkår.Opptjening, nyVurdering.vurderingId)!!
         assertEquals(prøving.id, vurdering.prøvingId)
         assertEquals(OPPTJENING_MINST_4_UKER, vurdering.kodeverkkode)
         assertEquals(arbeidsforhold, (vurdering.grunnlag as Opptjeningsgrunnlag.Arbeidstaker).arbeidsforhold)
@@ -257,7 +259,7 @@ internal class OpptjeningServiceTest {
         val ukjentId = VurderingId.ny()
 
         val feil = assertThrows<IllegalStateException> { service.finnOpptjeningsvurdering(ukjentId) }
-        assertEquals("Fant ikke opptjeningsvurdering med id $ukjentId", feil.message)
+        assertEquals("Fant ikke vurdering av Opptjening med id $ukjentId", feil.message)
     }
 
     private fun fullførtPrøving(skjæringstidspunkt: LocalDate, fødselsnummer: String = FØDSELSNUMMER): VurderingId {

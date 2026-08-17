@@ -1,8 +1,8 @@
 package no.nav.helse.opptjening.infra.kafka
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import java.util.UUID
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -16,6 +16,7 @@ import no.nav.helse.opptjening.domain.Grunnlagsbehov
 import no.nav.helse.opptjening.domain.Kodeverkkode.OPPTJENING_MINST_4_UKER
 import no.nav.helse.opptjening.domain.Opptjeningsgrunnlag
 import no.nav.helse.opptjening.domain.Opptjeningsprøving
+import no.nav.helse.opptjening.domain.Vilkår
 import no.nav.helse.opptjening.domain.VurderingId
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -70,7 +71,7 @@ internal class OpptjeningsvurderingRiverTest {
         val løsning = rapid.inspektør.message(0)
         val vurderingId = VurderingId(UUID.fromString(løsning.path("@løsning").path("Opptjeningsvurdering").path("id").asText()))
 
-        val vurdering = vurderinger.finn(vurderingId)!!
+        val vurdering = vurderinger.finn(Vilkår.Opptjening, vurderingId)!!
         assertEquals(OPPTJENING_MINST_4_UKER, vurdering.kodeverkkode)
         assertTrue(prøvinger.alleProvinger.single().erAvsluttet)
     }
