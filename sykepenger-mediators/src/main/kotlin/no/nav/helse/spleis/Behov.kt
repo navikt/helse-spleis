@@ -29,6 +29,9 @@ data class Behov(
         data object InntekterForSykepengegrunnlag: Behovstype { override val utgåendeNavn = "InntekterForSykepengegrunnlag" }
         data object InntekterForOpptjeningsvurdering: Behovstype { override val utgåendeNavn = "InntekterForOpptjeningsvurdering" }
         data object InntekterForBeregning: Behovstype { override val utgåendeNavn = "InntekterForBeregning" }
+        data object GraderteAndreYtelserForBeregning : Behovstype {
+            override val utgåendeNavn = "GraderteAndreYtelserForBeregning"
+        }
 
         data object Dagpenger: Behovstype { override val utgåendeNavn = "DagpengerV2" }
         data object Arbeidsavklaringspenger: Behovstype { override val utgåendeNavn = "ArbeidsavklaringspengerV2" }

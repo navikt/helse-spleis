@@ -2,6 +2,7 @@ package no.nav.helse.spleis.utboks
 
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.person.EventBus
@@ -671,6 +672,14 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 "fom" to event.beregningsperiode.start,
                 "tom" to event.beregningsperiode.endInclusive
             )),
+            if (Toggle.GraderteAndreYtelser.enabled) {
+                Behov(
+                    Behov.Behovstype.GraderteAndreYtelserForBeregning, mapOf(
+                    "fom" to event.beregningsperiode.start,
+                    "tom" to event.beregningsperiode.endInclusive
+                )
+                )
+            } else null,
             event.forsikringsvurderingId?.let { forsikringsvurderingId ->
                 Behov(Behov.Behovstype.ForsikringsvurderingResultat, mapOf(
                     "forsikringsvurderingId" to forsikringsvurderingId,

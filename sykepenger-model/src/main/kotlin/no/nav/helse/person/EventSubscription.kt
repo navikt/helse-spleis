@@ -10,8 +10,6 @@ import no.nav.helse.feriepenger.Feriepengeoppdrag
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
@@ -690,6 +688,7 @@ interface EventSubscription {
         val periodeForArbeidsavklaringspenger: Periode,
         val periodeForDagpenger: Periode,
         val beregningsperiode: Periode,
+        val graderteAndreYtelserPeriode: Periode,
         val forsikringsvurderingId: UUID?,
     ): Event
 

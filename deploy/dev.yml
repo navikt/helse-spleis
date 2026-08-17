@@ -69,6 +69,8 @@ spec:
       value: "true"
     - name: SELVSTENDIG_FORSIKRING
       value: "true"
+    - name: GRADERTE_ANDRE_YTELSER
+      value: "true"
     - name: VILKARSPROVING_MODULE
       value: "true"
     - name: JAVA_TOOL_OPTIONS
