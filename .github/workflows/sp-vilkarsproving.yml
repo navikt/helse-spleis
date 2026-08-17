@@ -1,0 +1,64 @@
+name: main - sp-vilkarsproving - Bygg, test og deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      # Generelt oppsett - alt unntatt dokumentasjon / urelatert oppsett
+      - '**'
+      - '!**.md'
+      - '!CODEOWNERS'
+      - '!LICENSE'
+      - '!docs/**'
+      - '!.nais/**'
+      - '!.github/workflows/standard-dependabot-auto-merge.yml'
+      - '!.github/workflows/standard-dependency-submission.yml'
+      # Ressursene som deployes av denne workflowen
+      - 'sykepenger-vilkarsproving/.nais/sp-vilkarsproving.yaml'
+      # Spesielt for denne tjenesten ellers
+  schedule:
+    - cron: '0 4 * * 3'
+      timezone: 'Europe/Oslo'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read # for sarif
+  contents: read
+  security-events: write # push sarif to github security
+  id-token: write # for nais login
+
+jobs:
+  bygg-og-test:
+    name: Bygg og test
+    uses: navikt/helse-sas-github-workflows/.github/workflows/bygg-og-test-med-gradle.yml@2f6844aa5e6852c64522681b3edb09c99445ad59 # v1.0.1
+    permissions:
+      contents: read
+
+  bygg-image:
+    name: Bygg image
+    needs: bygg-og-test
+    uses: navikt/helse-sas-github-workflows/.github/workflows/bygg-modul-image-med-jib.yml@2f6844aa5e6852c64522681b3edb09c99445ad59 # v1.0.1
+    with:
+      modul: sp-vilkarsproving
+    permissions:
+      actions: read # for sarif upload on private repos
+      contents: read
+      id-token: write # for nais login
+      security-events: write # push sarif to github security
+
+  deploy-dev:
+    name: Deploy til dev
+    needs: bygg-image
+    uses: navikt/helse-sas-github-workflows/.github/workflows/deploy.yml@2f6844aa5e6852c64522681b3edb09c99445ad59 # v1.0.1
+    with:
+      CLUSTER: dev-gcp
+      RESOURCE: sykepenger-vilkarsproving/.nais/sp-vilkarsproving.yaml
+      WORKLOAD_IMAGE: ${{ needs.bygg-image.outputs.image_ref }}
+    permissions:
+      contents: read
+      id-token: write # for nais login
