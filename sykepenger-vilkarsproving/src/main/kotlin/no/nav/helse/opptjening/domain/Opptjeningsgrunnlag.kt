@@ -11,4 +11,12 @@ internal sealed interface Opptjeningsgrunnlag : Vilkårsgrunnlag {
     data object SelvstendigNæringsdrivende : Opptjeningsgrunnlag {
         override val besvarer = null
     }
+
+    /**
+     * Brukes ved manuell saksbehandlerovertsyring. Det foreligger ingen faktabasert grunnlag —
+     * saksbehandleren har selv tatt stilling til vilkåret og dokumentert begrunnelsen i fritekst.
+     */
+    data object ManuellOverstyring : Opptjeningsgrunnlag {
+        override val besvarer = null
+    }
 }

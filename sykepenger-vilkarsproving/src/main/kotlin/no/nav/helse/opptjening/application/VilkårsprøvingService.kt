@@ -2,6 +2,7 @@ package no.nav.helse.opptjening.application
 
 import java.time.LocalDate
 import no.nav.helse.opptjening.bootstrap.sikkerLogg
+import no.nav.helse.opptjening.domain.Kodeverkkode
 import no.nav.helse.opptjening.domain.Vilkår
 import no.nav.helse.opptjening.domain.Vilkårsgrunnlag
 import no.nav.helse.opptjening.domain.Vilkårsprøving
@@ -88,4 +89,36 @@ internal class VilkårsprøvingService(
 
     fun finnVurdering(vilkår: Vilkår, vurderingId: VurderingId): Vilkårsvurdering =
         vilkårsvurderingRepository.finn(vilkår, vurderingId) ?: error("Fant ikke vurdering av $vilkår med id $vurderingId")
+
+    /**
+     * Lagrer en manuell saksbehandleroverstyring som ny gjeldende vurdering.
+     * Tidligere vurderinger beholdes i historikken; den nyeste er alltid gjeldende.
+     */
+    fun overstyr(
+        vilkår: Vilkår,
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+        grunnlag: Vilkårsgrunnlag,
+        kodeverkkode: Kodeverkkode,
+        saksbehandlerIdent: String,
+        fritekstbegrunnelse: String,
+    ): Vilkårsvurdering {
+        val (prøving, vurdering) = Vilkårsprøving.manuellOverstyring(
+            vilkår = vilkår,
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            grunnlag = grunnlag,
+            kodeverkkode = kodeverkkode,
+            saksbehandlerIdent = saksbehandlerIdent,
+            fritekstbegrunnelse = fritekstbegrunnelse
+        )
+        vilkårsprøvingRepository.opprett(prøving)
+        val fullførtVurdering = requireNotNull(vurdering) { "manuellOverstyring skal alltid produsere en vurdering" }
+        vilkårsvurderingRepository.lagre(fullførtVurdering)
+        sikkerLogg.info(
+            "Manuell overstyring av $vilkår for fødselsnummer $fødselsnummer med skjæringstidspunkt $skjæringstidspunkt. " +
+            "VurderingId: ${fullførtVurdering.id}. Saksbehandler: $saksbehandlerIdent."
+        )
+        return fullførtVurdering
+    }
 }

@@ -175,6 +175,7 @@ internal class OpptjeningServiceTest {
         assertEquals(OPPTJENING_MINST_4_UKER, vurdering.kodeverkkode)
         assertEquals(arbeidsforhold, (vurdering.grunnlag as Opptjeningsgrunnlag.Arbeidstaker).arbeidsforhold)
     }
+
     // Kodeverkkoden utledes av arbeidsforholdene: for kort opptjening gir avslagskode
     @Test
     fun `grunnlag med for kort opptjening gir ikke oppfylt`() {

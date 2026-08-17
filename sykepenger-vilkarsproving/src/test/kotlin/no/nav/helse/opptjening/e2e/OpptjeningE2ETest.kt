@@ -7,6 +7,7 @@ import no.nav.helse.opptjening.application.OpptjeningService
 import no.nav.helse.opptjening.infra.kafka.GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver
 import no.nav.helse.opptjening.infra.kafka.OpptjeningsvurderingResultatRiver
 import no.nav.helse.opptjening.infra.kafka.OpptjeningsvurderingRiver
+import no.nav.helse.opptjening.infra.kafka.OverstyrOpptjeningRiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -33,6 +34,7 @@ internal class OpptjeningE2ETest {
         OpptjeningsvurderingRiver(this, opptjeningService)
         GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver(this, opptjeningService)
         OpptjeningsvurderingResultatRiver(this, repository)
+        OverstyrOpptjeningRiver(this, opptjeningService)
     }
 
     // === Arbeidstaker-flyt ===
@@ -214,6 +216,63 @@ internal class OpptjeningE2ETest {
         assertEquals(vurderingId1, vurderingId2) { "Eksisterende vurdering skal gjenbrukes" }
     }
 
+    // === Manuell saksbehandleroverstyring ===
+
+    /**
+     * Flyt for manuell overstyring av § 8-2 (opptjeningskravet):
+     *   1. OverstyrOpptjeningRiver mottar saksbehandler_opptjeningsoverstyring → publiserer opptjeningsvurdering_manuelt_overstyrt
+     *   2. OpptjeningsvurderingResultatRiver henter resultatet → ok=true
+     */
+    @Test
+    fun `saksbehandler kan overstyre avslag på § 8-2 til innvilgelse`() {
+        // Steg 1: saksbehandlersystem sender overstyring
+        rapid.sendTestMessage(overstyring(), FØDSELSNUMMER)
+        assertEquals(1, rapid.inspektør.size)
+
+        val overstyrtMelding = rapid.inspektør.message(0)
+        assertEquals("opptjeningsvurdering_manuelt_overstyrt", overstyrtMelding.path("@event_name").asText())
+        assertTrue(overstyrtMelding.path("ok").asBoolean())
+        val vurderingId = UUID.fromString(overstyrtMelding.path("opptjeningsvurderingId").asText())
+
+        // Steg 2: spleis henter resultatet
+        rapid.sendTestMessage(opptjeningsvurderingResultatBehov(vurderingId), FØDSELSNUMMER)
+        assertEquals(2, rapid.inspektør.size)
+        assertTrue(rapid.inspektør.message(1).path("@løsning").path("OpptjeningsvurderingResultat").path("ok").asBoolean())
+    }
+
+    @Test
+    fun `manuell overstyring erstatter tidligere maskinell avslag som gjeldende vurdering`() {
+        val behovId = UUID.randomUUID()
+
+        // Maskinen gir avslag (for kort opptjening)
+        rapid.sendTestMessage(opptjeningsvurderingBehov(behovId, "Arbeidstaker"), FØDSELSNUMMER)
+        rapid.sendTestMessage(
+            arbeidsforholdløsning(behovId = behovId, arbeidsforhold(ansattSiden = "2018-01-05", ansattTil = "2018-01-31")),
+            FØDSELSNUMMER
+        )
+        val maskinVurderingId = UUID.fromString(
+            rapid.inspektør.message(1).path("@løsning").path("Opptjeningsvurdering").path("id").asText()
+        )
+        rapid.sendTestMessage(opptjeningsvurderingResultatBehov(maskinVurderingId), FØDSELSNUMMER)
+        assertFalse(rapid.inspektør.message(2).path("@løsning").path("OpptjeningsvurderingResultat").path("ok").asBoolean())
+
+        // Saksbehandler overstyrer til innvilgelse
+        rapid.sendTestMessage(overstyring(), FØDSELSNUMMER)
+        val manuellVurderingId = UUID.fromString(
+            rapid.inspektør.message(3).path("opptjeningsvurderingId").asText()
+        )
+
+        // Den manuelle vurderingen er nå gjeldende — spleis sender nytt behov og får ok=true
+        rapid.sendTestMessage(opptjeningsvurderingBehov(UUID.randomUUID(), "Arbeidstaker"), FØDSELSNUMMER)
+        val nyVurderingId = UUID.fromString(
+            rapid.inspektør.message(4).path("@løsning").path("Opptjeningsvurdering").path("id").asText()
+        )
+        assertEquals(manuellVurderingId, nyVurderingId) { "Manuell vurdering skal være gjeldende" }
+
+        rapid.sendTestMessage(opptjeningsvurderingResultatBehov(manuellVurderingId), FØDSELSNUMMER)
+        assertTrue(rapid.inspektør.message(5).path("@løsning").path("OpptjeningsvurderingResultat").path("ok").asBoolean())
+    }
+
     private companion object {
         const val FØDSELSNUMMER = "12029240045"
         const val ORGNUMMER = "987654321"
@@ -276,6 +335,22 @@ internal class OpptjeningE2ETest {
           "OpptjeningsvurderingResultat": {
             "opptjeningsvurderingId": "$opptjeningsvurderingId"
           }
+        }
+        """
+
+        @Language("JSON")
+        fun overstyring(
+            skjæringstidspunkt: String = "2018-02-01",
+            saksbehandlerIdent: String = "A123456",
+            begrunnelse: String = "Søker har dokumentert opptjening via annen kilde"
+        ) = """
+        {
+          "@event_name": "saksbehandler_opptjeningsoverstyring",
+          "@id": "${UUID.randomUUID()}",
+          "fødselsnummer": "$FØDSELSNUMMER",
+          "skjæringstidspunkt": "$skjæringstidspunkt",
+          "saksbehandlerIdent": "$saksbehandlerIdent",
+          "begrunnelse": "$begrunnelse"
         }
         """
     }

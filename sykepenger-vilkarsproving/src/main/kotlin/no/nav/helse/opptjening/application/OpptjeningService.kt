@@ -7,6 +7,7 @@ import no.nav.helse.opptjening.application.VurderOpptjeningResultat.HarVurdering
 import no.nav.helse.opptjening.application.VurderOpptjeningResultat.TrengerArbeidsforhold
 import no.nav.helse.opptjening.domain.Arbeidsforhold
 import no.nav.helse.opptjening.domain.Arbeidssituasjon
+import no.nav.helse.opptjening.domain.Kodeverkkode.OPPTJENING_MINST_4_UKER
 import no.nav.helse.opptjening.domain.Opptjeningsgrunnlag
 import no.nav.helse.opptjening.domain.Opptjeningsprøving
 import no.nav.helse.opptjening.domain.Vilkår
@@ -61,4 +62,28 @@ internal class OpptjeningService(
 
     fun finnOpptjeningsvurdering(vurderingId: VurderingId): Vilkårsvurdering =
         vilkårsprøving.finnVurdering(Vilkår.Opptjening, vurderingId)
+
+    /**
+     * Oppretter en manuell saksbehandleroverstyring av § 8-2 (opptjeningskravet) fra avslag til innvilgelse.
+     * Det foreligger ikke noe faktabasert grunnlag; saksbehandlerens begrunnelse er dokumentert i [begrunnelse].
+     *
+     * Den nye vurderingen blir gjeldende og vil returneres ved neste spørring mot [finnOpptjeningsvurdering].
+     */
+    fun overstyrOpptjening(
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+        saksbehandlerIdent: String,
+        begrunnelse: String,
+    ): VurderingId {
+        val vurdering = vilkårsprøving.overstyr(
+            vilkår = Vilkår.Opptjening,
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            grunnlag = Opptjeningsgrunnlag.ManuellOverstyring,
+            kodeverkkode = OPPTJENING_MINST_4_UKER,
+            saksbehandlerIdent = saksbehandlerIdent,
+            fritekstbegrunnelse = begrunnelse
+        )
+        return vurdering.id
+    }
 }

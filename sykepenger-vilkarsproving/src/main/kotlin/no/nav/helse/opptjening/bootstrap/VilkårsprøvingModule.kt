@@ -7,6 +7,7 @@ import no.nav.helse.opptjening.infra.db.InMemoryVilkårsvurderingRepository
 import no.nav.helse.opptjening.infra.kafka.GrunnlagForAutomatiskArbeidstakerOpptjeningsvurderingRiver
 import no.nav.helse.opptjening.infra.kafka.OpptjeningsvurderingResultatRiver
 import no.nav.helse.opptjening.infra.kafka.OpptjeningsvurderingRiver
+import no.nav.helse.opptjening.infra.kafka.OverstyrOpptjeningRiver
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -32,6 +33,10 @@ class VilkårsprøvingModule(
         OpptjeningsvurderingResultatRiver(
             rapidsConnection = rapidsConnection,
             vilkårsvurderingRepository = vilkårsvurderingRepository
+        )
+        OverstyrOpptjeningRiver(
+            rapidsConnection = rapidsConnection,
+            opptjeningService = opptjeningService
         )
     }
 }

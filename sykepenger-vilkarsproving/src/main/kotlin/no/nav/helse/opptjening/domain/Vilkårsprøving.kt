@@ -107,5 +107,40 @@ internal class Vilkårsprøving private constructor(
             startet: Instant,
             tilstand: Tilstand
         ) = Vilkårsprøving(id, vilkår, fødselsnummer, skjæringstidspunkt, startet, tilstand)
+
+        /**
+         * Starter en manuell saksbehandlerovertsyring: oppretter en prøving som er fullført umiddelbart,
+         * uten innhenting av grunnlag. Saksbehandlerens begrunnelse bæres av vurderingen.
+         */
+        fun manuellOverstyring(
+            vilkår: Vilkår,
+            fødselsnummer: String,
+            skjæringstidspunkt: LocalDate,
+            grunnlag: Vilkårsgrunnlag,
+            kodeverkkode: Kodeverkkode,
+            saksbehandlerIdent: String,
+            fritekstbegrunnelse: String,
+        ): Påbegynt {
+            val prøving = Vilkårsprøving(
+                id = PrøvingId.ny(),
+                vilkår = vilkår,
+                fødselsnummer = fødselsnummer,
+                skjæringstidspunkt = skjæringstidspunkt,
+                startet = Instant.now(),
+                tilstand = Tilstand.Startet
+            )
+            val vurdering = Vilkårsvurdering.manuell(
+                prøvingId = prøving.id,
+                fødselsnummer = fødselsnummer,
+                skjæringstidspunkt = skjæringstidspunkt,
+                grunnlag = grunnlag,
+                kodeverkkode = kodeverkkode,
+                saksbehandlerIdent = saksbehandlerIdent,
+                fritekstbegrunnelse = fritekstbegrunnelse,
+                vurdertTidspunkt = Instant.now()
+            )
+            prøving.tilstand = Tilstand.Fullført(vurdering.id)
+            return Påbegynt(prøving, vurdering)
+        }
     }
 }
