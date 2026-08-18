@@ -20,14 +20,15 @@ internal class PostgresUtboksDao(private val dataSource: DataSource): UtboksDao 
 
         @Language("PostgreSQL")
         val sql = """
-            INSERT INTO utboks (id, forarsaket_av, key, json, mottaker, opprettet)
+            INSERT INTO utboks (id, forarsaket_av, key, json, mottaker, opprettet, behold_etter_sending)
             SELECT * FROM unnest(
                 :id::uuid[],
                 :forarsaket_av::uuid[],
                 :key::text[],
                 :json::jsonb[],
                 :mottaker::text[],
-                :opprettet::timestamptz[]
+                :opprettet::timestamptz[],
+                :behold_etter_sending::boolean[]
             );
         """
 
@@ -38,6 +39,7 @@ internal class PostgresUtboksDao(private val dataSource: DataSource): UtboksDao 
             withParameter("json", meldinger.map { it.utgåendeMelding.json.toString() })
             withParameter("mottaker", meldinger.map { it.utgåendeMelding.mottaker.name })
             withParameter("opprettet") { setArray(it, connection.createArrayOf("timestamptz", meldinger.map { melding -> melding.utgåendeMelding.opprettet }.toTypedArray())) }
+            withParameter("behold_etter_sending") { setArray(it, connection.createArrayOf("boolean", meldinger.map { melding -> melding is Utboksmelding.BeholdEtterSending }.toTypedArray())) }
         }.use { it.execute() }
     }
 
@@ -60,7 +62,8 @@ internal class PostgresUtboksDao(private val dataSource: DataSource): UtboksDao 
             )
             INSERT INTO sendt (id, lopenummer, forarsaket_av, key, json, mottaker, opprettet, sendt)
             SELECT id, lopenummer, forarsaket_av, key, json, mottaker, opprettet, :sendt
-            FROM deleted;
+            FROM deleted
+            WHERE behold_etter_sending = true;
         """
 
         dataSource.connection {

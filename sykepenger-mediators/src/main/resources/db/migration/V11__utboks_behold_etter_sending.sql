@@ -1,0 +1,1 @@
+ALTER TABLE utboks ADD COLUMN behold_etter_sending BOOLEAN NOT NULL DEFAULT true;

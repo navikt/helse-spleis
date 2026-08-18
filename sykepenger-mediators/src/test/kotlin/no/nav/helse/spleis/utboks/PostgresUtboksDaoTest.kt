@@ -37,7 +37,7 @@ internal class PostgresUtboksDaoTest {
         val meldingerTilSykmeldt = listOf(nyMelding(), nyMelding(), nyMelding())
         val meldingUtenKey =  nyMelding(key = null)
         val meldinger = meldingerTilSykmeldt + meldingUtenKey
-        lagre(meldinger)
+        lagreMeldingerSomSkalBeholdesEtterSending(meldinger)
         assertEquals(meldinger, usendte(personidentifikator))
         assertEquals(listOf(meldingUtenKey), håndterOgFåTilbakeUsendte(personidentifikator, sendOgFåTilbakeSendtOk = { meldingerTilSykmeldt }))
         assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger())
@@ -54,7 +54,7 @@ internal class PostgresUtboksDaoTest {
         val melding1 = nyMelding(personidentifikator1)
         val melding2 = nyMelding(personidentifikator2)
         val melding3 = nyMelding(personidentifikator3)
-        lagre(listOf(melding1, melding2, melding3))
+        lagreMeldingerSomSkalBeholdesEtterSending(listOf(melding1, melding2, melding3))
         assertEquals(setOf(personidentifikator1, personidentifikator2, personidentifikator3), dao.personerMedUsendteMeldinger())
         assertEquals(listOf(melding1), usendte(personidentifikator1))
         assertEquals(listOf(melding2), usendte(personidentifikator2))
@@ -68,14 +68,41 @@ internal class PostgresUtboksDaoTest {
         assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger())
     }
 
+    @Test
+    fun `meldigner som skal beholdes og forkastes om hverandre`() {
+        val melding1 = nyMelding(eventName = "melding1")
+        val melding2 = nyMelding(eventName = "melding2")
+        val melding3 = nyMelding(eventName = "melding3")
+        val melding4 = nyMelding(eventName = "melding4")
 
-    private fun lagre(meldinger: List<UtgåendeMelding>, forårsaketAv: UUID = UUID.randomUUID()) {
+        lagre(listOf(
+            Utboksmelding.BeholdEtterSending(melding1),
+            Utboksmelding.ForkastEtterSending(melding2),
+            Utboksmelding.BeholdEtterSending(melding3),
+            Utboksmelding.ForkastEtterSending(melding4)
+        ))
+
+        assertEquals(listOf(melding2, melding3), håndterOgFåTilbakeUsendte (
+            sendOgFåTilbakeSendtOk = { listOf(melding1, melding4) },
+            skalVæreLagretISendt = { listOf(melding1) }
+        ))
+
+        assertEquals(emptyList<UtgåendeMelding>(), håndterOgFåTilbakeUsendte (
+            sendOgFåTilbakeSendtOk = { listOf(melding2, melding3) },
+            skalVæreLagretISendt = { listOf(melding3) }
+        ))
+    }
+
+    private fun lagre(meldinger: List<Utboksmelding>, forårsaketAv: UUID = UUID.randomUUID()) {
         dataSource.ds.connection {
             transaction {
-                dao.lagre(this, meldinger.map { Utboksmelding.BeholdEtterSending(it) }, forårsaketAv)
+                dao.lagre(this, meldinger, forårsaketAv)
             }
         }
     }
+
+    private fun lagreMeldingerSomSkalBeholdesEtterSending(meldinger: List<UtgåendeMelding>, forårsaketAv: UUID = UUID.randomUUID()) =
+        lagre(meldinger.map { Utboksmelding.BeholdEtterSending(it) }, forårsaketAv)
 
     private fun håndterOgFåTilbakeUsendte(
         person: Personidentifikator = personidentifikator,
@@ -140,7 +167,7 @@ internal class PostgresUtboksDaoTest {
 
     private companion object {
         private val personidentifikator = Personidentifikator("12345678910")
-        private fun nyMelding(key: Personidentifikator? = personidentifikator, mottaker: UtgåendeMelding.Mottaker = UtgåendeMelding.Mottaker.RAPID) = UtgåendeMelding(key?.toString(), """{"@id": "${nyUuidv7()}", "@even_name": "test", "@opprettetUTC":"${Instant.now()}"}""", mottaker)
+        private fun nyMelding(key: Personidentifikator? = personidentifikator, mottaker: UtgåendeMelding.Mottaker = UtgåendeMelding.Mottaker.RAPID, eventName: String = "test") = UtgåendeMelding(key?.toString(), """{"@id": "${nyUuidv7()}", "@event_name": "$eventName", "@opprettetUTC":"${Instant.now()}"}""", mottaker)
         private fun List<UtgåendeMelding>.somKvittering(sendingsTidspunkt: Instant = Instant.now(), feilet: List<UtgåendeMelding> = emptyList()) = Kvittering(
             sendt = sendingsTidspunkt,
             ok = this,
