@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test
 
 import no.nav.helse.spleis.utboks.UtgåendeMeldingTest.Companion.nyUuidv7
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class PostgresUtboksDaoTest {
 
@@ -40,9 +39,9 @@ internal class PostgresUtboksDaoTest {
         val meldinger = meldingerTilSykmeldt + meldingUtenKey
         lagre(meldinger)
         assertEquals(meldinger, usendte(personidentifikator))
-        assertEquals(listOf(meldingUtenKey), håndterOgFåTilbakeUsendte(personidentifikator) { meldingerTilSykmeldt })
+        assertEquals(listOf(meldingUtenKey), håndterOgFåTilbakeUsendte(personidentifikator, sendOgFåTilbakeSendtOk = { meldingerTilSykmeldt }))
         assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger())
-        assertEquals(emptyList<UtgåendeMelding>(), håndterOgFåTilbakeUsendte(personidentifikator) { listOf(meldingUtenKey) })
+        assertEquals(emptyList<UtgåendeMelding>(), håndterOgFåTilbakeUsendte(personidentifikator, sendOgFåTilbakeSendtOk = { listOf(meldingUtenKey) }))
     }
 
 
@@ -61,11 +60,11 @@ internal class PostgresUtboksDaoTest {
         assertEquals(listOf(melding2), usendte(personidentifikator2))
         assertEquals(listOf(melding3), usendte(personidentifikator3))
 
-        håndterOgFåTilbakeUsendte(personidentifikator2) { listOf(melding2) }
+        håndterOgFåTilbakeUsendte(personidentifikator2, sendOgFåTilbakeSendtOk = { listOf(melding2 )})
         assertEquals(setOf(personidentifikator1, personidentifikator3), dao.personerMedUsendteMeldinger())
 
-        håndterOgFåTilbakeUsendte(personidentifikator1) { listOf(melding1) }
-        håndterOgFåTilbakeUsendte(personidentifikator3) { listOf(melding3) }
+        håndterOgFåTilbakeUsendte(personidentifikator1, sendOgFåTilbakeSendtOk = { listOf(melding1) })
+        håndterOgFåTilbakeUsendte(personidentifikator3, sendOgFåTilbakeSendtOk = { listOf(melding3) })
         assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger())
     }
 
@@ -73,21 +72,29 @@ internal class PostgresUtboksDaoTest {
     private fun lagre(meldinger: List<UtgåendeMelding>, forårsaketAv: UUID = UUID.randomUUID()) {
         dataSource.ds.connection {
             transaction {
-                dao.lagre(this, meldinger, forårsaketAv)
+                dao.lagre(this, meldinger.map { Utboksmelding.BeholdEtterSending(it) }, forårsaketAv)
             }
         }
     }
 
     private fun håndterOgFåTilbakeUsendte(
         person: Personidentifikator = personidentifikator,
-        sendOgFåTilbakeSendtOk: (meldinger: List<UtgåendeMelding>) -> List<UtgåendeMelding> = { meldinger -> meldinger }
+        sendOgFåTilbakeSendtOk: (meldinger: List<UtgåendeMelding>) -> List<UtgåendeMelding> = { meldinger -> meldinger }, // Default går sending av alle meldinger bra
+        skalVæreLagretISendt: (sendtOk: List<UtgåendeMelding>) -> List<UtgåendeMelding> = { sendtOk -> sendtOk } // Default skal alle meldinger lagres i send-tabellen
     ): List<UtgåendeMelding> {
         lateinit var sendtOk: List<UtgåendeMelding>
+        lateinit var sendingFeilet: List<UtgåendeMelding>
         dao.usendte(person) { funnedeMeldinger ->
             sendtOk = sendOgFåTilbakeSendtOk(funnedeMeldinger)
-            sendtOk.somKvittering()
+            sendingFeilet = funnedeMeldinger - sendtOk.toSet()
+            sendtOk.somKvittering(feilet = sendingFeilet)
         }
-        sjekkAtDisseErSendt(sendtOk)
+        val skalVæreLagretISendt = skalVæreLagretISendt(sendtOk)
+        sjekkAtErLagretISendt(skalVæreLagretISendt)
+        sjekkAtIkkeErLagretISendt(sendtOk - skalVæreLagretISendt.toSet())
+
+        sjekkAtErLagretIUtboks(sendingFeilet)
+        sjekkAtIkkeErLagretIUtboks(sendtOk)
         return usendte(person)
     }
 
@@ -102,20 +109,42 @@ internal class PostgresUtboksDaoTest {
         return usendteMeldinger
     }
 
-    private fun sjekkAtDisseErSendt(burdeVæreSendt: List<UtgåendeMelding>) {
-        val erSendt = dataSource.ds.connection {
-            prepareStatement("SELECT * from sendt").mapNotNull { row -> row.somUtgåendeMelding() }
-        }
-        assertTrue(erSendt.containsAll(burdeVæreSendt))
+
+    private fun erLagretISendt(utvalg: List<UtgåendeMelding>) = dataSource.ds.connection {
+        prepareStatement("SELECT * from sendt").mapNotNull { row -> row.somUtgåendeMelding() }.intersect(utvalg.toSet())
+    }
+
+    private fun erLagretIUtboks(utvalg: List<UtgåendeMelding>) = dataSource.ds.connection {
+        prepareStatement("SELECT * from utboks").mapNotNull { row -> row.somUtgåendeMelding() }.intersect(utvalg.toSet())
+    }
+
+    private fun sjekkAtErLagretISendt(burdeVæreLagret: List<UtgåendeMelding>) {
+        val erLagret = erLagretISendt(burdeVæreLagret)
+        assertEquals(burdeVæreLagret.toSet(), erLagret) { "Ikke alle meldinger som var forventet lagret i sendt-tabellen var i sendt-tabellen! Forventet ${burdeVæreLagret.size} men var bare ${erLagret.size}" }
+    }
+
+    private fun sjekkAtIkkeErLagretISendt(burdeIkkeVæreLagret: List<UtgåendeMelding>) {
+        val erLagret = erLagretISendt(burdeIkkeVæreLagret)
+        assertEquals(emptySet<UtgåendeMelding>(), erLagret) { "Ingenting burde vært i sendt-tabellen, men her var det ${erLagret.size} stykk!" }
+    }
+
+    private fun sjekkAtErLagretIUtboks(burdeVæreLagret: List<UtgåendeMelding>) {
+        val erLagret = erLagretIUtboks(burdeVæreLagret)
+        assertEquals(burdeVæreLagret.toSet(), erLagret) { "Ikke alle meldinger som var forventet lagret i utboks-tabellen var i sendt-tabellen! Forventet ${burdeVæreLagret.size} men var bare ${erLagret.size}" }
+    }
+
+    private fun sjekkAtIkkeErLagretIUtboks(burdeIkkeVæreLagret: List<UtgåendeMelding>) {
+        val erLagret = erLagretIUtboks(burdeIkkeVæreLagret)
+        assertEquals(emptySet<UtgåendeMelding>(), erLagret) { "Ingen av disse burde være lagret utboks-tabellen, men her var det ${erLagret.size} stykk!" }
     }
 
     private companion object {
         private val personidentifikator = Personidentifikator("12345678910")
         private fun nyMelding(key: Personidentifikator? = personidentifikator, mottaker: UtgåendeMelding.Mottaker = UtgåendeMelding.Mottaker.RAPID) = UtgåendeMelding(key?.toString(), """{"@id": "${nyUuidv7()}", "@even_name": "test", "@opprettetUTC":"${Instant.now()}"}""", mottaker)
-        private fun List<UtgåendeMelding>.somKvittering(sendingsTidspunkt: Instant = Instant.now()) = Kvittering(
+        private fun List<UtgåendeMelding>.somKvittering(sendingsTidspunkt: Instant = Instant.now(), feilet: List<UtgåendeMelding> = emptyList()) = Kvittering(
             sendt = sendingsTidspunkt,
             ok = this,
-            feilet = emptyList()
+            feilet = feilet
         )
         private val ikkeKvitterUtNoenMeldinger get() = emptyList<UtgåendeMelding>().somKvittering()
     }

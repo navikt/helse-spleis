@@ -4,12 +4,12 @@ import java.sql.Connection
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 
-interface UtboksDao {
+internal interface UtboksDao {
 
     /**
      * Lagrer ned alle meldingene i samme database-transaksjon som personen lagres ned med.
      */
-    fun lagre(connection: Connection, meldinger: List<UtgåendeMelding>, forårsaketAv: UUID)
+    fun lagre(connection: Connection, meldinger: List<Utboksmelding>, forårsaketAv: UUID)
 
     /**
      * Henter alle usendte meldinger som er for den spesifikke personidentifikatoren,

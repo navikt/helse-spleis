@@ -4,11 +4,11 @@ import java.sql.Connection
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 
-class InMemoryUtboksDao: UtboksDao {
+internal class InMemoryUtboksDao: UtboksDao {
     private val usendte = mutableListOf<UtgåendeMelding>()
 
-    override fun lagre(connection: Connection, meldinger: List<UtgåendeMelding>, forårsaketAv: UUID) {
-        usendte.addAll(meldinger)
+    override fun lagre(connection: Connection, meldinger: List<Utboksmelding>, forårsaketAv: UUID) {
+        usendte.addAll(meldinger.map { it.utgåendeMelding })
     }
 
     override fun usendte(personidentifikator: Personidentifikator, send: (meldinger: List<UtgåendeMelding>) -> Kvittering) {

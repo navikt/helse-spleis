@@ -32,7 +32,7 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
         }
         tilstand = Tilstand.Lukket
         val tidsbruk = measureTimeMillis {
-            utboksDao.lagre(connection, utgåendeMeldinger, innkommendeMelding.meldingsporing.id.id)
+            utboksDao.lagre(connection, utgåendeMeldinger.map { Utboksmelding.BeholdEtterSending(it) }, innkommendeMelding.meldingsporing.id.id)
         }
         sikkerLogg.info("Brukte ${tidsbruk}ms å lagre ${utgåendeMeldinger.size} meldinger i utboksen.")
     }

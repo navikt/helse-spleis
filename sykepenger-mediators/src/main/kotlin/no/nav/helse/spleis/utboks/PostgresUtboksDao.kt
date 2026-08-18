@@ -15,7 +15,7 @@ import org.intellij.lang.annotations.Language
 
 internal class PostgresUtboksDao(private val dataSource: DataSource): UtboksDao {
 
-    override fun lagre(connection: Connection, meldinger: List<UtgåendeMelding>, forårsaketAv: UUID) {
+    override fun lagre(connection: Connection, meldinger: List<Utboksmelding>, forårsaketAv: UUID) {
         check(!connection.autoCommit) { "lagre må kalles innenfor transaksjonen som lagrer person" }
 
         @Language("PostgreSQL")
@@ -32,12 +32,12 @@ internal class PostgresUtboksDao(private val dataSource: DataSource): UtboksDao 
         """
 
         connection.prepareStatementWithNamedParameters(sql) {
-            withParameter("id", meldinger.map { it.id })
+            withParameter("id", meldinger.map { it.utgåendeMelding.id })
             withParameter("forarsaket_av", List(meldinger.size) { forårsaketAv })
-            withParameter("key", meldinger.map { it.key })
-            withParameter("json", meldinger.map { it.json.toString() })
-            withParameter("mottaker", meldinger.map { it.mottaker.name })
-            withParameter("opprettet") { setArray(it, connection.createArrayOf("timestamptz", meldinger.map { melding -> melding.opprettet }.toTypedArray())) }
+            withParameter("key", meldinger.map { it.utgåendeMelding.key })
+            withParameter("json", meldinger.map { it.utgåendeMelding.json.toString() })
+            withParameter("mottaker", meldinger.map { it.utgåendeMelding.mottaker.name })
+            withParameter("opprettet") { setArray(it, connection.createArrayOf("timestamptz", meldinger.map { melding -> melding.utgåendeMelding.opprettet }.toTypedArray())) }
         }.use { it.execute() }
     }
 
