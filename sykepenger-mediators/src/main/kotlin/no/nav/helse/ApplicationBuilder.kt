@@ -7,7 +7,6 @@ import io.micrometer.core.instrument.Clock
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.prometheus.metrics.model.registry.PrometheusRegistry
-import no.nav.helse.opptjening.bootstrap.VilkårsprøvingModule
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
@@ -53,9 +52,6 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
         )
         MonitoreringRiver(rapidsConnection, RegelmessigAvstemming { personDao.manglerAvstemming() })
         UtboksRetryRiver(rapidsConnection, utboksDao)
-        if (Toggle.VilkarsprovingModule.enabled) {
-            VilkårsprøvingModule(rapidsConnection)
-        }
     }
 
     fun start() = rapidsConnection.start()
