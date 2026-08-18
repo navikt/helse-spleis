@@ -6,6 +6,7 @@ import no.nav.helse.Personidentifikator
 
 internal class InMemoryUtboksDao: UtboksDao {
     private val usendte = mutableListOf<UtgåendeMelding>()
+    internal fun usendte() = usendte.toList()
 
     override fun lagre(connection: Connection, meldinger: List<Utboksmelding>, forårsaketAv: UUID) {
         usendte.addAll(meldinger.map { it.utgåendeMelding })

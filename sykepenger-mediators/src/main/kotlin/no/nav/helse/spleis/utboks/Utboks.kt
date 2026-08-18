@@ -22,7 +22,8 @@ internal class Utboks(
         tilstand.nyMelding(utgåendeMelding, this)
     }
 
-    fun lagre(connection: Connection) {
+    private fun leggTilMeldingOmMeldingHåndtert() {
+        if (utgåendeMeldinger.any { it.eventName == "melding_om_melding_ikke_håndtert_fordi_person_ikke_funnet" }) return
         nyMelding {
             UtgåendeMelding.nyRapidmelding(
                 personidentifikator = personidentifikator,
@@ -33,6 +34,10 @@ internal class Utboks(
                 )
             )
         }
+    }
+
+    fun lagre(connection: Connection) {
+        leggTilMeldingOmMeldingHåndtert()
         tilstand = Tilstand.Lukket
         val tidsbruk = measureTimeMillis {
             utboksDao.lagre(connection, utgåendeMeldinger.map { Utboksmelding.BeholdEtterSending(it) }, innkommendeMelding.meldingsreferanseId.id)
