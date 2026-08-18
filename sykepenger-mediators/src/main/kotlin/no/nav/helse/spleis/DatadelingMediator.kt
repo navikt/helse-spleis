@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.utboks.Utboksmelding
 import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.slf4j.LoggerFactory
 
@@ -36,13 +37,13 @@ internal class DatadelingMediator(
                 }
             }
         }
-        context.leggIUtboks { personidentifikator ->
+        context.leggIUtboks { personidentifikator -> Utboksmelding.ForkastEtterSending(
             UtgåendeMelding.nyRapidmelding(
                 eventName = "aktivitetslogg_ny_aktivitet",
                 personidentifikator = personidentifikator,
                 innhold = mapOf("aktiviteter" to aktivitetMap)
             )
-        }
+        )}
     }
 
     private fun aktivitetMap(nivå: String, aktivitet: Aktivitet) =

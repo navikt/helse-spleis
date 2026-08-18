@@ -6,6 +6,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.spleis.SubsumsjonMediator.SubsumsjonEvent.Companion.paragrafVersjonFormaterer
+import no.nav.helse.spleis.utboks.Utboksmelding
 import no.nav.helse.spleis.utboks.UtgåendeMelding
 
 internal class SubsumsjonMediator(
@@ -36,9 +37,9 @@ internal class SubsumsjonMediator(
     fun leggIUtboks(context: BehandlingContext) {
         if (subsumsjoner.isEmpty()) return
         subsumsjoner.forEach { subsumsjon ->
-            context.leggIUtboks {
+            context.leggIUtboks { Utboksmelding.ForkastEtterSending(
                 subsumsjonMelding(subsumsjon)
-            }
+            )}
         }
     }
 

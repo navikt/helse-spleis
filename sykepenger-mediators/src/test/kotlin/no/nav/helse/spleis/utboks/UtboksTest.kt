@@ -18,11 +18,13 @@ internal class UtboksTest {
     fun `melding_om_melding_håndtert bør ikke komme sammen med melding_om_melding_ikke_håndtert_fordi_person_ikke_funnet`() {
         val dao = InMemoryUtboksDao()
         val utboks = utboks(innkommendeMelding(), dao)
-        utboks.nyMelding { personidentifikator -> UtgåendeMelding.nyRapidmelding(
-            personidentifikator = personidentifikator,
-            eventName = "melding_om_melding_ikke_håndtert_fordi_person_ikke_funnet",
-            innhold = emptyMap()
-        ) }
+        utboks.nyMelding { personidentifikator -> Utboksmelding.BeholdEtterSending(
+            UtgåendeMelding.nyRapidmelding(
+                personidentifikator = personidentifikator,
+                eventName = "melding_om_melding_ikke_håndtert_fordi_person_ikke_funnet",
+                innhold = emptyMap()
+            )
+        )}
         utboks.lagre()
         assertEquals(listOf("melding_om_melding_ikke_håndtert_fordi_person_ikke_funnet"), dao.usendteEvents())
     }
@@ -31,11 +33,13 @@ internal class UtboksTest {
     fun `melding_om_melding_håndtert skal alltid komme for meldinger som ikke er melding_om_melding_ikke_håndtert_fordi_person_ikke_funnet`() {
         val dao = InMemoryUtboksDao()
         val utboks = utboks(innkommendeMelding(), dao)
-        utboks.nyMelding { personidentifikator -> UtgåendeMelding.nyRapidmelding(
-            personidentifikator = personidentifikator,
-            eventName = "utgående_test_event",
-            innhold = emptyMap()
-        ) }
+        utboks.nyMelding { personidentifikator -> Utboksmelding.BeholdEtterSending(
+            UtgåendeMelding.nyRapidmelding(
+                personidentifikator = personidentifikator,
+                eventName = "utgående_test_event",
+                innhold = emptyMap()
+            )
+        )}
         utboks.lagre()
         assertEquals(listOf("utgående_test_event", "melding_om_melding_håndtert"), dao.usendteEvents())
     }
@@ -45,11 +49,13 @@ internal class UtboksTest {
         val dao = InMemoryUtboksDao()
         val innkommendeMeldingId: UUID = UUID.randomUUID()
         val utboks = utboks(innkommendeMelding(meldingsreferanseId = innkommendeMeldingId), dao)
-        utboks.nyMelding { personidentifikator -> UtgåendeMelding.nyRapidmelding(
-            personidentifikator = personidentifikator,
-            eventName = "utgående_test_event",
-            innhold = emptyMap()
-        ) }
+        utboks.nyMelding { personidentifikator -> Utboksmelding.BeholdEtterSending(
+            UtgåendeMelding.nyRapidmelding(
+                personidentifikator = personidentifikator,
+                eventName = "utgående_test_event",
+                innhold = emptyMap()
+            )
+        )}
         utboks.lagre()
         assertEquals(listOf("utgående_test_event", "melding_om_melding_håndtert"), dao.usendteEvents())
         dao.usendte().forEach { utgåendeMelding ->
@@ -72,11 +78,13 @@ internal class UtboksTest {
         val dao = InMemoryUtboksDao()
         val innkommendeMeldingId: UUID = UUID.randomUUID()
         val utboks = utboks(innkommendeMelding(meldingsreferanseId = innkommendeMeldingId, navn = "behov", behov = listOf("Behov1", "Behov2")), dao)
-        utboks.nyMelding { personidentifikator -> UtgåendeMelding.nyRapidmelding(
-            personidentifikator = personidentifikator,
-            eventName = "utgående_test_event",
-            innhold = emptyMap()
-        ) }
+        utboks.nyMelding { personidentifikator -> Utboksmelding.ForkastEtterSending(
+            UtgåendeMelding.nyRapidmelding(
+                personidentifikator = personidentifikator,
+                eventName = "utgående_test_event",
+                innhold = emptyMap()
+            )
+        )}
         utboks.lagre()
         assertEquals(listOf("utgående_test_event", "melding_om_melding_håndtert"), dao.usendteEvents())
         dao.usendte().forEach { utgåendeMelding ->
@@ -100,10 +108,12 @@ internal class UtboksTest {
         val utboks = utboks(innkommendeMelding(), dao)
         utboks.lagre()
         val error = assertThrows<IllegalStateException> {
-            utboks.nyMelding { personidentifikator -> UtgåendeMelding.nyRapidmelding(
-                personidentifikator = personidentifikator,
-                eventName = "utgående_test_event",
-                innhold = emptyMap()
+            utboks.nyMelding { personidentifikator -> Utboksmelding.BeholdEtterSending(
+                UtgåendeMelding.nyRapidmelding(
+                    personidentifikator = personidentifikator,
+                    eventName = "utgående_test_event",
+                    innhold = emptyMap()
+                )
             )}
         }
         assertEquals("Utboksen er lukket, kan ikke legge til melding", error.message)
@@ -114,10 +124,12 @@ internal class UtboksTest {
         val dao = InMemoryUtboksDao()
         val utboks = utboks(innkommendeMelding(), dao)
         val error = assertThrows<IllegalArgumentException> {
-            utboks.nyMelding { _ -> UtgåendeMelding.nyRapidmelding(
-                personidentifikator = Personidentifikator("22222222222"),
-                eventName = "utgående_test_event",
-                innhold = emptyMap()
+            utboks.nyMelding { _ -> Utboksmelding.BeholdEtterSending(
+                UtgåendeMelding.nyRapidmelding(
+                    personidentifikator = Personidentifikator("22222222222"),
+                    eventName = "utgående_test_event",
+                    innhold = emptyMap()
+                )
             )}
         }
         assertEquals("Kan ikke sende ut meldinger for andre i denne utboksen!", error.message)

@@ -92,6 +92,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
 import no.nav.helse.spleis.utboks.EventBusOversetter
+import no.nav.helse.spleis.utboks.Utboksmelding
 import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.slf4j.LoggerFactory
 
@@ -424,7 +425,9 @@ internal class HendelseMediator(
         person(personidentifikator, message, context, emptySet(), Regelverkslogg.EmptyLog, null) { person ->
             val dto = person.dto()
             val avstemmer = Avstemmer(dto)
-            context.leggIUtboks { personidentifikator -> avstemmer.tilUtgåendeMelding(personidentifikator)}
+            context.leggIUtboks { personidentifikator -> Utboksmelding.BeholdEtterSending(
+                avstemmer.tilUtgåendeMelding(personidentifikator)
+            )}
         }
     }
 
@@ -476,10 +479,12 @@ internal class HendelseMediator(
             if (støtterIdentbytte) {
                 person.håndterIdentOpphørt(eventBus, identOpphørt, aktivitetslogg, nyPersonidentifikator)
             }
-            context.leggIUtboks { personidentifikator -> UtgåendeMelding.nyRapidmelding(
-                personidentifikator = personidentifikator,
-                eventName = "slackmelding",
-                innhold = mapOf("melding" to "Det er en person som har byttet ident.")
+            context.leggIUtboks { personidentifikator -> Utboksmelding.ForkastEtterSending(
+                UtgåendeMelding.nyRapidmelding(
+                    personidentifikator = personidentifikator,
+                    eventName = "slackmelding",
+                    innhold = mapOf("melding" to "Det er en person som har byttet ident.")
+                )
             )}
         }
     }
@@ -608,12 +613,14 @@ internal class HendelseMediator(
 
     private fun personHverkenFunnetEllerOpprettet(context: BehandlingContext, message: HendelseMessage) {
         sikkerLogg.info("fant ikke person ${message.meldingsporing.fødselsnummer}, oppretter heller ingen ny person.")
-        context.leggIUtboks { personidentifikator -> UtgåendeMelding.nyRapidmelding(
-            eventName = "melding_om_melding_ikke_håndtert_fordi_person_ikke_funnet",
-            personidentifikator = personidentifikator,
-            innhold = mapOf(
-                "originalt_event_name" to "${message.navn}",
-                "original_id" to "${message.meldingsporing.id.id}"
+        context.leggIUtboks { personidentifikator -> Utboksmelding.BeholdEtterSending(
+            UtgåendeMelding.nyRapidmelding(
+                eventName = "melding_om_melding_ikke_håndtert_fordi_person_ikke_funnet",
+                personidentifikator = personidentifikator,
+                innhold = mapOf(
+                    "originalt_event_name" to "${message.navn}",
+                    "original_id" to "${message.meldingsporing.id.id}"
+                )
             )
         )}
     }
@@ -644,8 +651,8 @@ internal class HendelseMediator(
         subsumsjonMediator: SubsumsjonMediator
     ) {
         EventBusOversetter(eventBus, message)
-            .utgåendeMeldinger()
-            .map { utgåendeMelding -> context.leggIUtboks { utgåendeMelding } }
+            .utboksmeldinger()
+            .map { utboksmelding -> context.leggIUtboks { utboksmelding } }
 
         datadelingMediator.leggIUtboks(context)
         subsumsjonMediator.leggIUtboks(context)

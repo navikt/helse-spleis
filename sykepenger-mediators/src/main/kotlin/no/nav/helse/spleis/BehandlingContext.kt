@@ -6,7 +6,7 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.utboks.InnkommendeMelding
 import no.nav.helse.spleis.utboks.Utboks
 import no.nav.helse.spleis.utboks.UtboksDao
-import no.nav.helse.spleis.utboks.UtgåendeMelding
+import no.nav.helse.spleis.utboks.Utboksmelding
 import no.nav.helse.spleis.utboks.Utsender
 
 internal class BehandlingContext(
@@ -27,5 +27,5 @@ internal class BehandlingContext(
     )
     fun sendMeldingerIUtboks() = utboks.send()
     fun lagreMeldingerIUtboks(connection: Connection) = utboks.lagre(connection)
-    fun leggIUtboks(block: (personidentifikator: Personidentifikator) -> UtgåendeMelding) = utboks.nyMelding(block)
+    fun leggIUtboks(block: (personidentifikator: Personidentifikator) -> Utboksmelding) = utboks.nyMelding(block)
 }
