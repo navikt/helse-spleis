@@ -20,7 +20,7 @@ internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivit
     internal val navn = packet["@event_name"].asText()
     internal val opprettet = packet["@opprettet"].asLocalDateTime()
     internal val behov = when (navn == "behov") {
-        true -> packet["@behov"].filterNot { it.isMissingOrNull() }
+        true -> packet["@behov"].filterNot { it.isMissingOrNull() }.map { it.asText() }
         false -> null
     }
 

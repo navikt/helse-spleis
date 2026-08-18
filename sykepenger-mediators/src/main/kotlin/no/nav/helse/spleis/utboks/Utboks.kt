@@ -5,11 +5,14 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import java.sql.Connection
 import kotlin.system.measureTimeMillis
 import no.nav.helse.Personidentifikator
-import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
-internal class Utboks(private val utsender: Utsender, private val innkommendeMelding: HendelseMessage, private val utboksDao: UtboksDao) {
-    private val personidentifikator = Personidentifikator(innkommendeMelding.meldingsporing.fødselsnummer)
+internal class Utboks(
+    private val utsender: Utsender,
+    private val innkommendeMelding: InnkommendeMelding,
+    private val utboksDao: UtboksDao
+) {
+    private val personidentifikator = innkommendeMelding.personidentifikator
     private val utgåendeMeldinger = mutableListOf<UtgåendeMelding>()
     private var tilstand: Tilstand = Tilstand.Åpen
 
@@ -25,14 +28,14 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
                 personidentifikator = personidentifikator,
                 eventName = "melding_om_melding_håndtert",
                 innhold = mapOf(
-                    "originalt_event_name" to "${innkommendeMelding.navn}",
-                    "original_id" to "${innkommendeMelding.meldingsporing.id.id}"
+                    "originalt_event_name" to innkommendeMelding.navn,
+                    "original_id" to "${innkommendeMelding.meldingsreferanseId.id}"
                 )
             )
         }
         tilstand = Tilstand.Lukket
         val tidsbruk = measureTimeMillis {
-            utboksDao.lagre(connection, utgåendeMeldinger.map { Utboksmelding.BeholdEtterSending(it) }, innkommendeMelding.meldingsporing.id.id)
+            utboksDao.lagre(connection, utgåendeMeldinger.map { Utboksmelding.BeholdEtterSending(it) }, innkommendeMelding.meldingsreferanseId.id)
         }
         sikkerLogg.info("Brukte ${tidsbruk}ms å lagre ${utgåendeMeldinger.size} meldinger i utboksen.")
     }
@@ -40,7 +43,7 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
     fun send() {
         val tidsbruk = measureTimeMillis {
             utboksDao.usendte(personidentifikator) { usendteMeldinger ->
-                sikkerLogg.info("som følge av ${innkommendeMelding.navn} id=${innkommendeMelding.meldingsporing.id} sendes ${usendteMeldinger.size} meldinger for fnr=${personidentifikator}")
+                sikkerLogg.info("som følge av ${innkommendeMelding.navn} id=${innkommendeMelding.meldingsreferanseId.id} sendes ${usendteMeldinger.size} meldinger for fnr=${personidentifikator}")
                 utsender.send(usendteMeldinger).also { kvittering ->
                     kvittering.ok.loggSending()
                     // Logger meldinger som ble sendt nå men som ikke ble produsert nå
@@ -76,12 +79,12 @@ internal class Utboks(private val utsender: Utsender, private val innkommendeMel
                 utboks.utgåendeMeldinger.add(melding.copy(
                     json = melding.json.apply {
                         putObject("@forårsaket_av").apply {
-                            put("id", utboks.innkommendeMelding.meldingsporing.id.id.toString())
+                            put("id", utboks.innkommendeMelding.meldingsreferanseId.id.toString())
                             put("opprettet", utboks.innkommendeMelding.opprettet.toString())
                             put("event_name", utboks.innkommendeMelding.navn)
                             utboks.innkommendeMelding.behov?.let { behov ->
                                 putArray("behov").apply {
-                                    addAll(behov)
+                                    behov.forEach(::add)
                                 }
                             }
                         }
