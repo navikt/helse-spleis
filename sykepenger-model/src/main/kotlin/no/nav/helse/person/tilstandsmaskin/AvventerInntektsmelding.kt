@@ -45,7 +45,11 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
             return Revurderingseventyr.inntektsmeldingSomAldriKom(påminnelse, vedtaksperiode.periode)
         }
 
-        trengerInntektsmeldingReplay(vedtaksperiode, eventBus)
+        when (påminnelse.når(Påminnelse.Predikat.Flagg("trengerReplay"))) {
+            true -> trengerInntektsmeldingReplay(vedtaksperiode, eventBus)
+            false -> sendTrengerArbeidsgiveropplysninger(vedtaksperiode, eventBus)
+        }
+
         return null
     }
 
