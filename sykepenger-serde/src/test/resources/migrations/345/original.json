@@ -1,0 +1,647 @@
+{
+  "fødselsnummer": "12029240045",
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "id": "471b6f9f-c23e-4329-843f-723cf2f1925c",
+      "opprettet": [
+        2026,
+        8,
+        19,
+        12,
+        59,
+        17,
+        350711000
+      ],
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": [
+            2018,
+            1,
+            1
+          ],
+          "type": "Vilkårsprøving",
+          "inntektsgrunnlag": {
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "dce3ddaf-4cd1-487f-941b-244c764e082b",
+                  "dato": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "hendelseId": "81cb0471-3286-4f6d-980f-d00c10c9d37e",
+                  "beløp": 20000.0,
+                  "tidsstempel": [
+                    2026,
+                    8,
+                    19,
+                    12,
+                    59,
+                    17,
+                    222206000
+                  ],
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              },
+              {
+                "orgnummer": "a2",
+                "inntektsopplysning": {
+                  "id": "7300b70b-41f9-4f0b-ad2d-f22dec2b0faa",
+                  "dato": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "hendelseId": "d21e9d40-1ef1-4d9f-bb51-a99a29f99ef7",
+                  "beløp": 20000.0,
+                  "tidsstempel": [
+                    2026,
+                    8,
+                    19,
+                    12,
+                    59,
+                    17,
+                    230120000
+                  ],
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              }
+            ],
+            "selvstendigInntektsopplysninger": null,
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false
+          },
+          "opptjening": {
+            "opptjeningFom": [
+              1970,
+              1,
+              1
+            ],
+            "opptjeningTom": [
+              2017,
+              12,
+              31
+            ],
+            "arbeidsforhold": [
+              {
+                "orgnummer": "a1",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": [
+                      1970,
+                      1,
+                      1
+                    ],
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              },
+              {
+                "orgnummer": "a2",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": [
+                      1970,
+                      1,
+                      1
+                    ],
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              }
+            ]
+          },
+          "medlemskapstatus": "JA",
+          "meldingsreferanseId": "c810cf9a-453e-4b70-ad96-a4f18d2b7900",
+          "vilkårsgrunnlagId": "eb1ffaf2-aebb-48c1-8c4c-418b5d03473d",
+          "forsikringsvurderingId": null
+        },
+        {
+          "skjæringstidspunkt": [
+            2018,
+            3,
+            1
+          ],
+          "type": "Vilkårsprøving",
+          "inntektsgrunnlag": {
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "7cc64582-e0cf-4e0d-845a-7ef2d2a86dc3",
+                  "dato": [
+                    2018,
+                    3,
+                    1
+                  ],
+                  "hendelseId": "fdce92ce-3b86-4b21-a8a3-6b17590ba8b9",
+                  "beløp": 33000.0,
+                  "tidsstempel": [
+                    2026,
+                    8,
+                    19,
+                    12,
+                    59,
+                    17,
+                    345371000
+                  ],
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              },
+              {
+                "orgnummer": "a2",
+                "inntektsopplysning": {
+                  "id": "e3068cca-04fd-41ac-8607-431d300c8fbc",
+                  "dato": [
+                    2018,
+                    3,
+                    1
+                  ],
+                  "hendelseId": "be531d34-7463-4c68-aae5-b8c20e389038",
+                  "beløp": 20000.0,
+                  "tidsstempel": [
+                    2026,
+                    8,
+                    19,
+                    12,
+                    59,
+                    17,
+                    321909000
+                  ],
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              }
+            ],
+            "selvstendigInntektsopplysninger": null,
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false
+          },
+          "opptjening": {
+            "opptjeningFom": [
+              1970,
+              1,
+              1
+            ],
+            "opptjeningTom": [
+              2018,
+              2,
+              28
+            ],
+            "arbeidsforhold": [
+              {
+                "orgnummer": "a1",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": [
+                      1970,
+                      1,
+                      1
+                    ],
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              },
+              {
+                "orgnummer": "a2",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": [
+                      1970,
+                      1,
+                      1
+                    ],
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              }
+            ]
+          },
+          "medlemskapstatus": "JA",
+          "meldingsreferanseId": "cb1a9ced-a88d-4eed-b397-d4d2ac5f098b",
+          "vilkårsgrunnlagId": "f49ee207-2a56-49e4-a854-77cf6e7845fa",
+          "forsikringsvurderingId": null
+        }
+      ]
+    },
+    {
+      "id": "068bc9c2-b944-40d5-9e5b-f46725b9c797",
+      "opprettet": [
+        2026,
+        8,
+        19,
+        12,
+        59,
+        17,
+        325247000
+      ],
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": [
+            2018,
+            1,
+            1
+          ],
+          "type": "Vilkårsprøving",
+          "inntektsgrunnlag": {
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "dce3ddaf-4cd1-487f-941b-244c764e082b",
+                  "dato": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "hendelseId": "81cb0471-3286-4f6d-980f-d00c10c9d37e",
+                  "beløp": 20000.0,
+                  "tidsstempel": [
+                    2026,
+                    8,
+                    19,
+                    12,
+                    59,
+                    17,
+                    222206000
+                  ],
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              },
+              {
+                "orgnummer": "a2",
+                "inntektsopplysning": {
+                  "id": "7300b70b-41f9-4f0b-ad2d-f22dec2b0faa",
+                  "dato": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "hendelseId": "d21e9d40-1ef1-4d9f-bb51-a99a29f99ef7",
+                  "beløp": 20000.0,
+                  "tidsstempel": [
+                    2026,
+                    8,
+                    19,
+                    12,
+                    59,
+                    17,
+                    230120000
+                  ],
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              }
+            ],
+            "selvstendigInntektsopplysninger": null,
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false
+          },
+          "opptjening": {
+            "opptjeningFom": [
+              1970,
+              1,
+              1
+            ],
+            "opptjeningTom": [
+              2017,
+              12,
+              31
+            ],
+            "arbeidsforhold": [
+              {
+                "orgnummer": "a1",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": [
+                      1970,
+                      1,
+                      1
+                    ],
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              },
+              {
+                "orgnummer": "a2",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": [
+                      1970,
+                      1,
+                      1
+                    ],
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              }
+            ]
+          },
+          "medlemskapstatus": "JA",
+          "meldingsreferanseId": "c810cf9a-453e-4b70-ad96-a4f18d2b7900",
+          "vilkårsgrunnlagId": "eb1ffaf2-aebb-48c1-8c4c-418b5d03473d",
+          "forsikringsvurderingId": null
+        },
+        {
+          "skjæringstidspunkt": [
+            2018,
+            3,
+            1
+          ],
+          "type": "Vilkårsprøving",
+          "inntektsgrunnlag": {
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "7022c023-c078-4157-a990-bb7be5a2b545",
+                  "dato": [
+                    2018,
+                    3,
+                    1
+                  ],
+                  "hendelseId": "95b15ad9-30d3-4dcf-ad32-61d3523bc819",
+                  "beløp": 20000.0,
+                  "tidsstempel": [
+                    2026,
+                    8,
+                    19,
+                    12,
+                    59,
+                    17,
+                    319401000
+                  ],
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              },
+              {
+                "orgnummer": "a2",
+                "inntektsopplysning": {
+                  "id": "e3068cca-04fd-41ac-8607-431d300c8fbc",
+                  "dato": [
+                    2018,
+                    3,
+                    1
+                  ],
+                  "hendelseId": "be531d34-7463-4c68-aae5-b8c20e389038",
+                  "beløp": 20000.0,
+                  "tidsstempel": [
+                    2026,
+                    8,
+                    19,
+                    12,
+                    59,
+                    17,
+                    321909000
+                  ],
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              }
+            ],
+            "selvstendigInntektsopplysninger": null,
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false
+          },
+          "opptjening": {
+            "opptjeningFom": [
+              1970,
+              1,
+              1
+            ],
+            "opptjeningTom": [
+              2018,
+              2,
+              28
+            ],
+            "arbeidsforhold": [
+              {
+                "orgnummer": "a1",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": [
+                      1970,
+                      1,
+                      1
+                    ],
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              },
+              {
+                "orgnummer": "a2",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": [
+                      1970,
+                      1,
+                      1
+                    ],
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              }
+            ]
+          },
+          "medlemskapstatus": "JA",
+          "meldingsreferanseId": "cb1a9ced-a88d-4eed-b397-d4d2ac5f098b",
+          "vilkårsgrunnlagId": "780b6e5a-9042-4f31-a9f9-99f45f6bddea",
+          "forsikringsvurderingId": null
+        }
+      ]
+    },
+    {
+      "id": "ccb8a0e6-6757-4d54-adac-9d8ccd0e472f",
+      "opprettet": [
+        2026,
+        8,
+        19,
+        12,
+        59,
+        17,
+        245953000
+      ],
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": [
+            2018,
+            1,
+            1
+          ],
+          "type": "Vilkårsprøving",
+          "inntektsgrunnlag": {
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "a1",
+                "inntektsopplysning": {
+                  "id": "dce3ddaf-4cd1-487f-941b-244c764e082b",
+                  "dato": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "hendelseId": "81cb0471-3286-4f6d-980f-d00c10c9d37e",
+                  "beløp": 20000.0,
+                  "tidsstempel": [
+                    2026,
+                    8,
+                    19,
+                    12,
+                    59,
+                    17,
+                    222206000
+                  ],
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              },
+              {
+                "orgnummer": "a2",
+                "inntektsopplysning": {
+                  "id": "7300b70b-41f9-4f0b-ad2d-f22dec2b0faa",
+                  "dato": [
+                    2018,
+                    1,
+                    1
+                  ],
+                  "hendelseId": "d21e9d40-1ef1-4d9f-bb51-a99a29f99ef7",
+                  "beløp": 20000.0,
+                  "tidsstempel": [
+                    2026,
+                    8,
+                    19,
+                    12,
+                    59,
+                    17,
+                    230120000
+                  ],
+                  "kilde": "INNTEKTSMELDING",
+                  "type": "ARBEIDSTAKER",
+                  "pensjonsgivendeInntekter": null,
+                  "anvendtÅrligGrunnbeløp": null,
+                  "skatteopplysninger": null
+                },
+                "korrigertInntekt": null,
+                "skjønnsmessigFastsatt": null
+              }
+            ],
+            "selvstendigInntektsopplysninger": null,
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false
+          },
+          "opptjening": {
+            "opptjeningFom": [
+              1970,
+              1,
+              1
+            ],
+            "opptjeningTom": [
+              2017,
+              12,
+              31
+            ],
+            "arbeidsforhold": [
+              {
+                "orgnummer": "a1",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": [
+                      1970,
+                      1,
+                      1
+                    ],
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              },
+              {
+                "orgnummer": "a2",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": [
+                      1970,
+                      1,
+                      1
+                    ],
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              }
+            ]
+          },
+          "medlemskapstatus": "JA",
+          "meldingsreferanseId": "c810cf9a-453e-4b70-ad96-a4f18d2b7900",
+          "vilkårsgrunnlagId": "eb1ffaf2-aebb-48c1-8c4c-418b5d03473d",
+          "forsikringsvurderingId": null
+        }
+      ]
+    }
+  ]
+}
