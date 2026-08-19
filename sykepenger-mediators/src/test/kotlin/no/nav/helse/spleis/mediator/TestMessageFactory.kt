@@ -973,7 +973,8 @@ internal class TestMessageFactory(
             "Institusjonsopphold",
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
-            "DagpengerV2"
+            "DagpengerV2",
+            "GraderteAndreYtelserForBeregning"
         )
 
         if (forsikringsvurderingResultat != null) {

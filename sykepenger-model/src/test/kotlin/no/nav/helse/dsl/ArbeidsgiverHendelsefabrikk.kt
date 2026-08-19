@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.temporal.Temporal
 import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
-import no.nav.helse.hendelser.AndreYtelser
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
@@ -18,6 +17,7 @@ import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.GradertPeriode
+import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -302,7 +302,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         arbeidsavklaringspengerV2: List<Periode> = emptyList(),
         dagpengerV2: List<Periode> = emptyList(),
         inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
-        andreYtelser: List<AndreYtelser.PeriodeMedAnnenYtelse> = emptyList(),
+        graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
         forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
@@ -331,7 +331,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspengerV2),
             dagpenger = Dagpenger(dagpengerV2),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
-            andreYtelser = AndreYtelser(andreYtelser),
+            graderteAndreYtelser = graderteAndreYtelser,
             forsikringsvurderingResultat = forsikringsvurderingResultat,
         )
     }

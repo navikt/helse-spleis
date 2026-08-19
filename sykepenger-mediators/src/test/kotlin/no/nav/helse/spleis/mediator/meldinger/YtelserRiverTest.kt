@@ -72,7 +72,8 @@ private val json = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "DagpengerV2"
+        "DagpengerV2",
+        "GraderteAndreYtelserForBeregning"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -222,7 +223,8 @@ private val ukjentPeriode = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "DagpengerV2"
+        "DagpengerV2",
+        "GraderteAndreYtelserForBeregning"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -319,7 +321,8 @@ private val ugyldigPeriode = """
         "Institusjonsopphold",
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
-        "DagpengerV2"
+        "DagpengerV2",
+        "GraderteAndreYtelserForBeregning"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",

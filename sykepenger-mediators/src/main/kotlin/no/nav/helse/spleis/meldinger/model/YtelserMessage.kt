@@ -11,6 +11,8 @@ import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.GradertPeriode
+import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
+import no.nav.helse.hendelser.GraderteAndreYtelserType
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
@@ -65,6 +67,20 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
                 it.path("faktiskSluttdato").asOptionalLocalDate()
             )
         })
+
+    internal val graderteAndreYtelser =
+        packet.mapFraArrayEllerObjectMedArray("@løsning", Behovstype.GraderteAndreYtelserForBeregning.utgåendeNavn) { gradertAndreYtelse ->
+            GraderteAndreYtelserForBeregning(
+                graderteAndreYtelserForBeregningPeriodeList = gradertAndreYtelse.path("graderteAndreYtelserPerioder").map { graderteAndreYtelserPeriode ->
+                    GraderteAndreYtelserForBeregning.GraderteAndreYtelserForBeregningPeriode(
+                        fom = graderteAndreYtelserPeriode.path("fom").asLocalDate(),
+                        tom = graderteAndreYtelserPeriode.path("tom").asLocalDate(),
+                        grad = graderteAndreYtelserPeriode.path("grad").asInt()
+                    )
+                },
+                graderteAndreYtelserType = GraderteAndreYtelserType.valueOf(gradertAndreYtelse.path("graderteAndreYtelserType").asText())
+            )
+        }
 
     internal val inntekterForBeregning = InntekterForBeregning(packet["@løsning.${Behovstype.InntekterForBeregning.utgåendeNavn}.inntekter"].map {
         InntekterForBeregning.Inntektsperiode(
@@ -138,6 +154,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             arbeidsavklaringspenger = arbeidsavklaringspengerV2,
             dagpenger = dagpengerV2,
             inntekterForBeregning = inntekterForBeregning,
+            graderteAndreYtelser = graderteAndreYtelser,
             forsikringsvurderingResultat = forsikringsvurderingResultat,
         )
 

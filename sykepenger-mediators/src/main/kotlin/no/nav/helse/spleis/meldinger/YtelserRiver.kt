@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import no.nav.helse.Toggle
 import no.nav.helse.spleis.Behov.Behovstype.Arbeidsavklaringspenger
 import no.nav.helse.spleis.Behov.Behovstype.Dagpenger
 import no.nav.helse.spleis.Behov.Behovstype.Foreldrepenger
 import no.nav.helse.spleis.Behov.Behovstype.ForsikringsvurderingResultat
+import no.nav.helse.spleis.Behov.Behovstype.GraderteAndreYtelserForBeregning
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForBeregning
 import no.nav.helse.spleis.Behov.Behovstype.Institusjonsopphold
 import no.nav.helse.spleis.Behov.Behovstype.Omsorgspenger
@@ -21,16 +23,20 @@ internal class YtelserRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
-    override val behov = listOf(
-        Foreldrepenger,
-        Pleiepenger,
-        Omsorgspenger,
-        Opplæringspenger,
-        Institusjonsopphold,
-        Arbeidsavklaringspenger,
-        InntekterForBeregning,
-        Dagpenger
-    )
+
+    override val behov = buildList {
+        addAll(listOf(
+            Foreldrepenger,
+            Pleiepenger,
+            Omsorgspenger,
+            Opplæringspenger,
+            Institusjonsopphold,
+            Arbeidsavklaringspenger,
+            InntekterForBeregning,
+            Dagpenger,
+        ))
+        if (Toggle.GraderteAndreYtelser.enabled) add(GraderteAndreYtelserForBeregning)
+    }
 
     override val riverName = "Ytelser"
 
@@ -55,6 +61,13 @@ internal class YtelserRiver(
         }
         message.requireArrayEllerObjectMedArray("@løsning.${Opplæringspenger.utgåendeNavn}", "perioder") {
             validerGradertPeriode()
+        }
+
+        if (Toggle.GraderteAndreYtelser.enabled) {
+            message.interestedInArray("@løsning.${GraderteAndreYtelserForBeregning.utgåendeNavn}.perioder") {
+                validerGradertPeriode()
+                requireKey("graderteAndreYtelseType")
+            }
         }
 
         // Dagpenger & AAP

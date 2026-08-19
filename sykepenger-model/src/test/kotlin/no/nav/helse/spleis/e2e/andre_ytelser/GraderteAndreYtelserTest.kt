@@ -5,7 +5,9 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.hendelser.AndreYtelser.PeriodeMedAnnenYtelse
+import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
+import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning.GraderteAndreYtelserForBeregningPeriode
+import no.nav.helse.hendelser.GraderteAndreYtelserType
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -20,7 +22,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class GraderteAndreYtelserTest: AbstractDslTest() {
+internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
     @Test
     fun `pleiepenger sykt barn`() {
@@ -32,10 +34,18 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
             håndterInntektsendringer(20.januar)
-            håndterYtelser(1.vedtaksperiode, andreYtelser = listOf(PeriodeMedAnnenYtelse("PLEIEPENGERSYKTBARN", 20.januar til 30.januar, 30.prosent)))
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser = listOf(
+                    GraderteAndreYtelserForBeregning(
+                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
+                        graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
+                    )
+                )
+            )
 
             // Jeg er bare et regnestykke for å vise hvorfor det blir 1400,-
-            assertEquals(1400.0, (2000 - (520_000 * 0.3) /260))
+            assertEquals(1400.0, (2000 - (520_000 * 0.3) / 260))
 
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 19.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1400, 2000, subset = 20.januar til 30.januar)
@@ -54,7 +64,18 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
             håndterInntektsendringer(20.januar)
-            håndterYtelser(1.vedtaksperiode, andreYtelser = listOf(PeriodeMedAnnenYtelse("PLEIEPENGERSYKTBARN", 20.januar til 30.januar, 30.prosent)))
+
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser = listOf(
+                    GraderteAndreYtelserForBeregning(
+                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
+                        graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
+
+                    )
+                )
+            )
+
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 19.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1400, 2000, subset = 20.januar til 30.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 31.januar til 31.januar)
@@ -66,10 +87,19 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
                 assertSykepengegrunnlag(533_000.årlig)
             }
 
-            håndterYtelser(1.vedtaksperiode, andreYtelser = listOf(PeriodeMedAnnenYtelse("PLEIEPENGERSYKTBARN", 20.januar til 30.januar, 30.prosent)))
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser = listOf(
+                    GraderteAndreYtelserForBeregning(
+                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
+                        graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
+
+                    )
+                )
+            )
 
             // Jeg er bare et regnestykke for å vise hvorfor det blir 1435,-
-            assertEquals(1435.0, (2050 - (533_000 * 0.3) /260))
+            assertEquals(1435.0, (2050 - (533_000 * 0.3) / 260))
             assertUtbetalingsbeløp(1.vedtaksperiode, 2050, 2050, subset = 17.januar til 19.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1435, 2050, subset = 20.januar til 30.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 2050, 2050, subset = 31.januar til 31.januar)
@@ -88,13 +118,21 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
             håndterInntektsendringer(20.januar)
-            håndterYtelser(1.vedtaksperiode,
+
+            håndterYtelser(
+                1.vedtaksperiode,
                 inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar til 30.januar, 250.daglig)),
-                andreYtelser = listOf(PeriodeMedAnnenYtelse("FORELDREPENGER", 1.januar til 29.januar, 50.prosent),)
+                graderteAndreYtelser = listOf(
+                    GraderteAndreYtelserForBeregning(
+                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.januar, 29.januar, 50)),
+                        graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER
+
+                    ),
+                )
             )
 
             // Jeg er bare et regnestykke for å vise hvorfor det blir 750,-
-            assertEquals(750.0, (2000 - (520_000 * 0.5) /260) - 250)
+            assertEquals(750.0, (2000 - (520_000 * 0.5) / 260) - 250)
 
             // Jeg er bare et regnestykke for å vise hvorfor det blir 1750,-
             assertEquals(1750, (2000 - 250))
@@ -116,9 +154,16 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
             håndterInntektsendringer(20.januar)
-            håndterYtelser(1.vedtaksperiode, andreYtelser = listOf(
-                PeriodeMedAnnenYtelse("FORELDREPENGER", januar, 81.prosent),
-            ))
+
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser = listOf(
+                    GraderteAndreYtelserForBeregning(
+                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.januar, 31.januar, 81)),
+                        graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER
+                    )
+                )
+            )
 
             // 2000 * 0.19 = 380
             assertUtbetalingsbeløp(1.vedtaksperiode, 380, 2000, subset = 17.januar til 31.januar)
@@ -140,9 +185,15 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 1502, 7692, subset = 17.juni(2025) til 30.juni(2025))
 
             håndterInntektsendringer(1.juni(2025))
-            håndterYtelser(1.vedtaksperiode, andreYtelser = listOf(
-                PeriodeMedAnnenYtelse("FORELDREPENGER", 1.juni(2025) til 30.juni(2025), 50.prosent),
-            ))
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser = listOf(
+                    GraderteAndreYtelserForBeregning(
+                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.juni(2025), 30.juni(2025), 50)),
+                        graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER
+                    )
+                )
+            )
 
             // Her er det "plass" til 50% foreldrepenger uten at det går utover sykepengene
             assertUtbetalingsbeløp(1.vedtaksperiode, 1502, 7692, subset = 17.juni(2025) til 30.juni(2025))
@@ -155,12 +206,30 @@ internal class GraderteAndreYtelserTest: AbstractDslTest() {
             nyttVedtak(januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
             håndterInntektsendringer(1.januar)
-            håndterYtelser(1.vedtaksperiode, andreYtelser = listOf(
-                PeriodeMedAnnenYtelse("FORELDREPENGER", 1.januar til 28.januar, 20.prosent),
-                PeriodeMedAnnenYtelse("PLEIEPENGER_SYKT_BARN", 17.januar til 22.januar, 20.prosent),
-                PeriodeMedAnnenYtelse("OMSORGSPENGER", 22.januar.somPeriode(), 15.prosent),
-                PeriodeMedAnnenYtelse("PLEIEPENGER_NÆRSTÅENDE", 22.januar til 30.januar, 20.prosent),
-            ))
+
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser = listOf(
+                    GraderteAndreYtelserForBeregning(
+                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.januar, 28.januar, 20)),
+                        graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER
+                    ), GraderteAndreYtelserForBeregning(
+                    graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(17.januar, 22.januar, 20)),
+                    graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER
+
+                ), GraderteAndreYtelserForBeregning(
+                    graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(22.januar, 22.januar, 15)),
+                    graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
+
+                ), GraderteAndreYtelserForBeregning(
+                    graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(22.januar, 30.januar, 20)),
+                    graderteAndreYtelserType = GraderteAndreYtelserType.OPPLARINGSPENGER
+
+                )
+
+                )
+            )
+
             assertUtbetalingsbeløp(1.vedtaksperiode, 858, 1431, subset = 17.januar til 21.januar) // 1431 * 0,60 =  858
             assertUtbetalingsbeløp(1.vedtaksperiode, 358, 1431, subset = 22.januar.somPeriode())  // 1431 * 0,25 =  358
             assertUtbetalingsbeløp(1.vedtaksperiode, 858, 1431, subset = 23.januar til 28.januar) // 1431 * 0,60 =  858

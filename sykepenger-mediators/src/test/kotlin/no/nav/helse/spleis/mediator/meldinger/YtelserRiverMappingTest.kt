@@ -103,7 +103,8 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
             "DagpengerV2",
-            "ForsikringsvurderingResultat"
+            "ForsikringsvurderingResultat",
+            "GraderteAndreYtelserForBeregning"
           ],
           "fødselsnummer": "20014812238",
           "yrkesaktivitetstype": "SELVSTENDIG",
@@ -220,7 +221,8 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
             "DagpengerV2",
-            "ForsikringsvurderingResultat"
+            "ForsikringsvurderingResultat",
+            "GraderteAndreYtelserForBeregning"
           ],
           "fødselsnummer": "20014812238",
           "yrkesaktivitetstype": "SELVSTENDIG",

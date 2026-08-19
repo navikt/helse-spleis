@@ -13,6 +13,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.AnnenInntektskilde
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet
 import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 class Ytelser(
     meldingsreferanseId: MeldingsreferanseId,
@@ -28,7 +29,7 @@ class Ytelser(
     private val dagpenger: Dagpenger,
     private val inntekterForBeregning: InntekterForBeregning,
     val forsikringsvurderingResultat: ForsikringsvurderingResultat?,
-    private val andreYtelser: AndreYtelser = AndreYtelser(emptyList())
+    private val graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList()
 ) : Hendelse {
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
@@ -87,8 +88,8 @@ class Ytelser(
             }
     }
 
-    internal fun andreYtelser() = andreYtelser.perioder.fold(AndreYtelserTidslinje()) { sammenslått , periode ->
-        sammenslått + AndreYtelserTidslinje(periode.periode to periode.prosent)
+    internal fun andreYtelser() = graderteAndreYtelser.flatMap { graderteAndreYtelserForBeregning -> graderteAndreYtelserForBeregning.graderteAndreYtelserForBeregningPeriodeList }.fold(AndreYtelserTidslinje()) { sammenslått, graderteAndreYtelserForBeregningPeriode ->
+        sammenslått + AndreYtelserTidslinje(graderteAndreYtelserForBeregningPeriode.tilPeriode() to graderteAndreYtelserForBeregningPeriode.grad.prosent)
     }
 }
 
