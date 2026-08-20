@@ -1,17 +1,11 @@
 package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.signed_jwt_issuer_test.Issuer
-import com.github.navikt.tbd_libs.sql_dsl.connection
-import com.github.navikt.tbd_libs.sql_dsl.long
-import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
-import com.github.navikt.tbd_libs.sql_dsl.single
-import com.github.navikt.tbd_libs.sql_dsl.transaction
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.ktor.http.HttpStatusCode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.sql.DataSource
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
@@ -25,52 +19,39 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.serde.tilPersonData
-import no.nav.helse.serde.tilSerialisertPerson
-import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 
-internal class RestApiTest {
-    private companion object {
+internal class RestApiTest : AbstractApiTest() {
+    companion object {
         private const val UNG_PERSON_FNR = "12029240045"
-        private val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
+        @JvmStatic private val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         private const val ORGNUMMER = "987654321"
-        private val MELDINGSREFERANSE = UUID.randomUUID()
-
-        private val appservere = Applikasjonsservere()
-
-        @AfterAll
-        @JvmStatic
-        fun teardown() {
-            appservere.ryddOpp()
-        }
+        @JvmStatic private val MELDINGSREFERANSE = UUID.randomUUID()
     }
 
     @Test
-    fun sporingapi() = blackboxTestApplication {
+    fun sporingapi() = blackboxTestApplication(::opprettTestdata) {
         "/api/vedtaksperioder".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR))
     }
 
     @Test
-    fun `hent personJson med fnr`() = blackboxTestApplication {
+    fun `hent personJson med fnr`() = blackboxTestApplication(::opprettTestdata) {
         "/api/person-json".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to UNG_PERSON_FNR))
     }
 
     @Test
-    fun `finner ikke melding`() = blackboxTestApplication {
+    fun `finner ikke melding`() = blackboxTestApplication(::opprettTestdata) {
         "/api/hendelse-json/${UUID.randomUUID()}".httpGet(HttpStatusCode.NotFound)
     }
 
     @Test
-    fun `finner melding`() = blackboxTestApplication {
+    fun `finner melding`() = blackboxTestApplication(::opprettTestdata) {
         "/api/hendelse-json/${MELDINGSREFERANSE}".httpGet(HttpStatusCode.OK)
     }
 
     @Test
-    fun `request med manglende eller feil access token`() = blackboxTestApplication {
+    fun `request med manglende eller feil access token`() = blackboxTestApplication(::opprettTestdata) {
         val query = """
             {
                 person(fnr: \"${UNG_PERSON_FNR}\") { } 
@@ -89,9 +70,6 @@ internal class RestApiTest {
         post(body, HttpStatusCode.OK, accessToken = issuer.accessToken())
     }
 
-    private fun blackboxTestApplication(testblokk: suspend Applikasjonsservere.BlackboxTestContext.() -> Unit) {
-        appservere.kjørTest(::opprettTestdata, testblokk)
-    }
 
     private fun opprettTestdata(testDataSource: TestDataSource) {
         val eventBus = EventBus()
@@ -124,53 +102,7 @@ internal class RestApiTest {
         person.håndterSykmelding(eventBus, sykmelding, Aktivitetslogg())
         person.håndterInntektsmelding(eventBus, inntektsmelding, Aktivitetslogg())
         testDataSource.ds.lagrePerson(UNG_PERSON_FNR, person)
-        testDataSource.ds.lagreHendelse(MELDINGSREFERANSE)
+        testDataSource.ds.lagreHendelse(meldingsReferanse = MELDINGSREFERANSE, fødselsnummer = UNG_PERSON_FNR)
     }
 
-    private fun DataSource.lagrePerson(fødselsnummer: String, person: Person) {
-        val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
-        connection {
-            transaction {
-                @Language("PostgreSQL")
-                val opprettPerson = "INSERT INTO person(skjema_versjon, fnr, data) VALUES(:skjemaVersjon, :fnr, :data) RETURNING id"
-                val personId = prepareStatementWithNamedParameters(opprettPerson) {
-                    withParameter("fnr", fødselsnummer.toLong())
-                    withParameter("skjemaVersjon", serialisertPerson.skjemaVersjon)
-                    withParameter("data", serialisertPerson.json)
-                }.use {
-                    it.executeQuery().use { rs ->
-                        rs.single { it.long(1) }
-                    }
-                }
-
-                @Language("PostgreSQL")
-                val opprettPersonAlias = "INSERT INTO person_alias (fnr, person_id) VALUES (:fnr, :personId)"
-                prepareStatementWithNamedParameters(opprettPersonAlias) {
-                    withParameter("fnr", fødselsnummer.toLong())
-                    withParameter("personId", personId)
-                }.use {
-                    it.execute()
-                }
-            }
-
-        }
-    }
-
-    private fun DataSource.lagreHendelse(
-        meldingsReferanse: UUID,
-        meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
-        fødselsnummer: String = UNG_PERSON_FNR,
-        data: String = """{ "@opprettet": "${LocalDateTime.now()}" }"""
-    ) {
-        @Language("PostgreSQL")
-        val sql = "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (:fnr, :meldingId, :meldingType, cast(:data as json))"
-        connection {
-            prepareStatementWithNamedParameters(sql) {
-                withParameter("fnr", fødselsnummer.toLong())
-                withParameter("meldingId", meldingsReferanse)
-                withParameter("meldingType", meldingstype.name)
-                withParameter("data", data)
-            }.use { it.execute() }
-        }
-    }
 }
