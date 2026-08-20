@@ -77,8 +77,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
     internal fun lagSøknad(
         vararg perioder: Søknad.Søknadsperiode,
         andreInntektskilder: Boolean = false,
-        sendtTilNAVEllerArbeidsgiver: LocalDateTime,
-        sykmeldingSkrevet: LocalDateTime,
+        sendtTilNAVEllerArbeidsgiver: LocalDateTime = LocalDateTime.now(),
+        sykmeldingSkrevet: LocalDateTime = LocalDateTime.now().minusMonths(1),
         ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false,
         id: UUID = UUID.randomUUID(),
         merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
