@@ -13,12 +13,14 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiodeOrNull
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.toEtterlevelseMap
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.aktiver
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.arbeidsforholdForJurist
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.deaktiver
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.inngårIOpptjening
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
+import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiodeOrNull
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.startdatoFor
 
 private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
@@ -102,16 +104,21 @@ internal class ArbeidstakerOpptjening private constructor(
 
             companion object {
 
-                internal fun Collection<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate): Periode {
+                internal fun Collection<Arbeidsforhold>.opptjeningsperiodeOrNull(skjæringstidspunkt: LocalDate): Periode? {
                     val grunnlag = this
                         .mapNotNull { it.periode(skjæringstidspunkt) }
                         .sortedByDescending { it.endInclusive }
                     val dagenFør = skjæringstidspunkt.forrigeDag.somPeriode()
-                    if (grunnlag.firstOrNull()?.erRettFør(skjæringstidspunkt) != true) return dagenFør
+                    if (grunnlag.firstOrNull()?.erRettFør(skjæringstidspunkt) != true) return null
                     return grunnlag.fold(dagenFør) { resultat, periode ->
                         if (!resultat.overlapperMed(periode) && !periode.erRettFør(resultat)) resultat
                         else resultat + periode
                     }
+                }
+
+                internal fun Collection<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate): Periode {
+                    val dagenFør = skjæringstidspunkt.forrigeDag.somPeriode()
+                    return opptjeningsperiodeOrNull(skjæringstidspunkt) ?: dagenFør
                 }
 
                 internal fun Collection<Arbeidsforhold>.ansattVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = any { it.gjelder(skjæringstidspunkt) }
@@ -152,6 +159,9 @@ internal class ArbeidstakerOpptjening private constructor(
 
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.opptjeningsperiode(skjæringstidspunkt: LocalDate) =
                 flatMap { it.ansattPerioder }.opptjeningsperiode(skjæringstidspunkt)
+
+            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.opptjeningsperiodeOrNull(skjæringstidspunkt: LocalDate) =
+                flatMap { it.ansattPerioder }.opptjeningsperiodeOrNull(skjæringstidspunkt)
 
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.inngårIOpptjening(opptjeningsperiode: Periode) =
                 mapNotNull { it.inngårIOpptjening(opptjeningsperiode) }
@@ -194,6 +204,7 @@ internal class ArbeidstakerOpptjening private constructor(
     fun dto(): OpptjeningUtDto = OpptjeningUtDto(
         arbeidsforhold = this.arbeidsforhold.map { it.dto() },
         opptjeningsperiode = this.opptjeningsperiode.dto(),
+        reellOpptjeningsperiode = this.arbeidsforhold.opptjeningsperiodeOrNull(skjæringstidspunkt)?.dto(),
         opptjeningsdager = opptjeningsdager,
         erOppfylt = erOppfylt()
     )

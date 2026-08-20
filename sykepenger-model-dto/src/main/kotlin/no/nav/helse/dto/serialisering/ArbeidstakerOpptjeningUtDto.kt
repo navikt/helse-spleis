@@ -6,6 +6,7 @@ import no.nav.helse.dto.PeriodeDto
 data class OpptjeningUtDto(
     val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagDto>,
     val opptjeningsperiode: PeriodeDto,
+    val reellOpptjeningsperiode: PeriodeDto?,
     val opptjeningsdager: Int,
     val erOppfylt: Boolean
 )
