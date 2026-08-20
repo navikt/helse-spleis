@@ -28,6 +28,7 @@ data class SpleisVilkårsgrunnlag(
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?,
     val forsikringsvurderingId: UUID?,
+    val opptjeningsvurderingId: UUID,
 ) : Vilkårsgrunnlag
 
 data class InfotrygdVilkårsgrunnlag(

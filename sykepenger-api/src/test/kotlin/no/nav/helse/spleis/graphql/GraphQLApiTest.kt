@@ -769,7 +769,8 @@ internal class GraphQLApiTest : AbstractObservableTest() {
           "oppfyllerKravOmOpptjening": true,
           "opptjeningFra": "2017-01-01",
           "skjonnsmessigFastsattAarlig": null,
-          "forsikringsvurderingId": null
+          "forsikringsvurderingId": null,
+          "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000000"
         }
       ], 
       "versjon": 54

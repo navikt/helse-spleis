@@ -70,6 +70,7 @@ internal class ISpleisGrunnlag(
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?,
     val forsikringsvurderingId: UUID?,
+    val opptjeningsvurderingId: UUID,
 ) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id) {
 
     override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag {
@@ -88,6 +89,7 @@ internal class ISpleisGrunnlag(
             oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
             oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
             forsikringsvurderingId = forsikringsvurderingId,
+            opptjeningsvurderingId = opptjeningsvurderingId,
         )
     }
 }
@@ -229,6 +231,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
             id = grunnlagsdata.vilkårsgrunnlagId,
             forsikringsvurderingId = grunnlagsdata.forsikringsvurderingId,
+            opptjeningsvurderingId = grunnlagsdata.opptjeningsvurderingId,
         )
     }
 
