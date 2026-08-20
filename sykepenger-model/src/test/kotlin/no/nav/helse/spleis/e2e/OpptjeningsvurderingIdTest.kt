@@ -2,10 +2,12 @@ package no.nav.helse.spleis.e2e
 
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.januar
 import no.nav.helse.mars
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,6 +16,21 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OpptjeningsvurderingIdTest : AbstractDslTest() {
+
+    @Test
+    fun `Overstyring av arbeidsforhold skal medføre ny opptjeningsvurderingId`() {
+        a1 {
+            nyttVedtak(januar)
+            val opptjeningsvurderingIdFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.opptjeningsvurderingId
+            håndterOverstyrArbeidsforhold(1.januar, OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a1, deaktivert = true, "test"))
+            val opptjeningsvurderingIdEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.opptjeningsvurderingId
+            assertForventetFeil(
+                forklaring = "Lager ikke ny ID ved overstyring av arbeidsforhold",
+                ønsket = { assertNotEquals(opptjeningsvurderingIdFør, opptjeningsvurderingIdEtter) },
+                nå = { assertEquals(opptjeningsvurderingIdFør, opptjeningsvurderingIdEtter) }
+            )
+        }
+    }
 
     @Test
     fun `deterministisk opptjeningsvurderingId migreres inn i V345-migreringen, mens det legges random id på nye vilkårsgrunnlag`() {
