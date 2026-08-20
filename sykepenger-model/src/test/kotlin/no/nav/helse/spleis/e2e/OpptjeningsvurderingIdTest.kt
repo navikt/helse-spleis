@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
@@ -24,11 +23,7 @@ internal class OpptjeningsvurderingIdTest : AbstractDslTest() {
             val opptjeningsvurderingIdFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.opptjeningsvurderingId
             håndterOverstyrArbeidsforhold(1.januar, OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a1, deaktivert = true, "test"))
             val opptjeningsvurderingIdEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.opptjeningsvurderingId
-            assertForventetFeil(
-                forklaring = "Lager ikke ny ID ved overstyring av arbeidsforhold",
-                ønsket = { assertNotEquals(opptjeningsvurderingIdFør, opptjeningsvurderingIdEtter) },
-                nå = { assertEquals(opptjeningsvurderingIdFør, opptjeningsvurderingIdEtter) }
-            )
+            assertNotEquals(opptjeningsvurderingIdFør, opptjeningsvurderingIdEtter)
         }
     }
 

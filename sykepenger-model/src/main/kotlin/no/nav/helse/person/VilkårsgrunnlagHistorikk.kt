@@ -134,7 +134,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             inntektsgrunnlag: Inntektsgrunnlag,
             opptjening: ArbeidstakerOpptjening?,
             subsumsjonslogg: Subsumsjonslogg,
-            nyttSkjæringstidspunkt: LocalDate? = null
+            nyttSkjæringstidspunkt: LocalDate? = null,
+            nyOpptjeningsvurderingId: UUID? = null
         ): Grunnlagsdata
 
         abstract fun overstyrArbeidsforhold(
@@ -266,6 +267,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             opptjening = hendelse.overstyr(opptjening!!).also {
                 subsumsjonslogg.logg(it.subsumsjon)
             },
+            nyOpptjeningsvurderingId = UUID.randomUUID(),
             subsumsjonslogg = subsumsjonslogg,
         )
 
@@ -274,6 +276,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             opptjening: ArbeidstakerOpptjening?,
             subsumsjonslogg: Subsumsjonslogg,
             nyttSkjæringstidspunkt: LocalDate?,
+            nyOpptjeningsvurderingId: UUID?
         ): Grunnlagsdata {
             return Grunnlagsdata(
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
@@ -283,7 +286,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 forsikringsvurderingId = forsikringsvurderingId,
-                opptjeningsvurderingId = opptjeningsvurderingId,
+                opptjeningsvurderingId = nyOpptjeningsvurderingId ?: opptjeningsvurderingId,
             )
         }
 
@@ -347,14 +350,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             inntektsgrunnlag: Inntektsgrunnlag,
             opptjening: ArbeidstakerOpptjening?,
             subsumsjonslogg: Subsumsjonslogg,
-            nyttSkjæringstidspunkt: LocalDate?
+            nyttSkjæringstidspunkt: LocalDate?,
+            nyOpptjeningsvurderingId: UUID?
         ): Grunnlagsdata {
-            error("What?")
-            /*return InfotrygdVilkårsgrunnlag(
-                skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
-                inntektsgrunnlag = inntektsgrunnlag,
-                vilkårsgrunnlagId = UUID.randomUUID()
-            )*/
+            error("Kan ikke kopiere Infotrygd vilkårsgrunnlag")
         }
 
         override fun vilkårsgrunnlagtype() = "Infotrygd"
