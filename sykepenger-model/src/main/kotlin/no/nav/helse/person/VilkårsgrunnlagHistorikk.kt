@@ -217,14 +217,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             }
         }
 
-        internal fun dto(): VilkårsgrunnlagUtDto =
-            dto(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag.dto())
-
-        protected abstract fun dto(
-            vilkårsgrunnlagId: UUID,
-            skjæringstidspunkt: LocalDate,
-            sykepengegrunnlag: InntektsgrunnlagUtDto,
-        ): VilkårsgrunnlagUtDto
+        internal abstract fun dto(): VilkårsgrunnlagUtDto
     }
 
     internal class Grunnlagsdata(
@@ -294,14 +287,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         }
 
-        override fun dto(
-            vilkårsgrunnlagId: UUID,
-            skjæringstidspunkt: LocalDate,
-            sykepengegrunnlag: InntektsgrunnlagUtDto
-        ) = VilkårsgrunnlagUtDto.Spleis(
+        override fun dto() = VilkårsgrunnlagUtDto.Spleis(
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             skjæringstidspunkt = skjæringstidspunkt,
-            inntektsgrunnlag = sykepengegrunnlag,
+            inntektsgrunnlag = inntektsgrunnlag.dto(),
             opptjening = this.opptjening?.dto(),
             medlemskapstatus = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapsvurderingDto.Ja
@@ -370,11 +359,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun vilkårsgrunnlagtype() = "Infotrygd"
 
-        override fun dto(
-            vilkårsgrunnlagId: UUID,
-            skjæringstidspunkt: LocalDate,
-            sykepengegrunnlag: InntektsgrunnlagUtDto
-        ) = VilkårsgrunnlagUtDto.Infotrygd(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, opptjeningsvurderingId = opptjeningsvurderingId)
+        override fun dto() = VilkårsgrunnlagUtDto.Infotrygd(
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            inntektsgrunnlag = inntektsgrunnlag.dto(),
+            opptjeningsvurderingId = opptjeningsvurderingId
+        )
 
         internal companion object {
             fun gjenopprett(dto: VilkårsgrunnlagInnDto.Infotrygd): InfotrygdVilkårsgrunnlag {
