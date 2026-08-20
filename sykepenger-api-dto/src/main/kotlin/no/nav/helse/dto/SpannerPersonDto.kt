@@ -109,6 +109,7 @@ data class SpannerPersonDto(
         val meldingsreferanseId: UUID?,
         val vilkårsgrunnlagId: UUID,
         val forsikringsvurderingId: UUID?,
+        val opptjeningsvurderingId: UUID,
     ) {
         enum class MedlemskapstatusDto { JA, VET_IKKE, NEI, UAVKLART_MED_BRUKERSPØRSMÅL }
         enum class GrunnlagsdataType { Infotrygd, Vilkårsprøving }
@@ -1755,7 +1756,8 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = VilkårsgrunnlagElementData(
         else -> null
     },
     vilkårsgrunnlagId = this.vilkårsgrunnlagId,
-    forsikringsvurderingId = (this as? VilkårsgrunnlagUtDto.Spleis)?.forsikringsvurderingId
+    forsikringsvurderingId = (this as? VilkårsgrunnlagUtDto.Spleis)?.forsikringsvurderingId,
+    opptjeningsvurderingId = this.opptjeningsvurderingId,
 )
 
 private fun OpptjeningUtDto.tilPersonData() =
