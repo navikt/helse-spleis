@@ -1589,6 +1589,15 @@ internal class TestMessageFactory(
     )
     )
 
+    internal fun lagGraderteAndreYtelserEndringer(
+        graderteAndreYtelserEndringerFom: LocalDate = LocalDate.now().minusDays(1)
+    ) = nyHendelse(
+        "graderte_andre_ytelser_endringer", mutableMapOf(
+        "fødselsnummer" to fødselsnummer,
+        "graderteAndreYtelserEndringerFom" to graderteAndreYtelserEndringerFom
+    )
+    )
+
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(navn, hendelse).let { it.id to it.toJson() }
 

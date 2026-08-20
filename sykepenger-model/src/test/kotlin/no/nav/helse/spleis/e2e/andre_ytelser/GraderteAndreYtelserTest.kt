@@ -33,7 +33,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 assertSykepengegrunnlag(520_000.årlig)
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
-            håndterInntektsendringer(20.januar)
+            håndterGraderteAndreYtelserEndringer(20.januar)
             håndterYtelser(
                 1.vedtaksperiode,
                 graderteAndreYtelser = listOf(
@@ -63,7 +63,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 assertSykepengegrunnlag(520_000.årlig)
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
-            håndterInntektsendringer(20.januar)
+            håndterGraderteAndreYtelserEndringer(20.januar)
 
             håndterYtelser(
                 1.vedtaksperiode,
@@ -117,7 +117,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 assertSykepengegrunnlag(520_000.årlig)
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
-            håndterInntektsendringer(20.januar)
+            håndterGraderteAndreYtelserEndringer(20.januar)
 
             håndterYtelser(
                 1.vedtaksperiode,
@@ -153,7 +153,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 assertSykepengegrunnlag(520_000.årlig)
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
-            håndterInntektsendringer(20.januar)
+            håndterGraderteAndreYtelserEndringer(20.januar)
 
             håndterYtelser(
                 1.vedtaksperiode,
@@ -184,7 +184,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             }
             assertUtbetalingsbeløp(1.vedtaksperiode, 1502, 7692, subset = 17.juni(2025) til 30.juni(2025))
 
-            håndterInntektsendringer(1.juni(2025))
+            håndterGraderteAndreYtelserEndringer(1.juni(2025))
             håndterYtelser(
                 1.vedtaksperiode,
                 graderteAndreYtelser = listOf(
@@ -205,7 +205,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
-            håndterInntektsendringer(1.januar)
+            håndterGraderteAndreYtelserEndringer(1.januar)
 
             håndterYtelser(
                 1.vedtaksperiode,

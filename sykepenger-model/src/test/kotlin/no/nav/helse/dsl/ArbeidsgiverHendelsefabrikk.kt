@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.GradertPeriode
+import no.nav.helse.hendelser.GraderteAndreYtelserEndringer
 import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
@@ -510,4 +511,5 @@ internal class ArbeidsgiverHendelsefabrikk(
         )
 
     internal fun lagInntektsendringer(inntektsendringerFom: LocalDate) = Inntektsendringer(MeldingsreferanseId(UUID.randomUUID()), inntektsendringerFom)
+    internal fun lagGraderteAndreYtelserEndringer(graderteAndreYtelserEndringerFom: LocalDate) = GraderteAndreYtelserEndringer(MeldingsreferanseId(UUID.randomUUID()), graderteAndreYtelserEndringerFom)
 }

@@ -82,6 +82,7 @@ private val HendelseMessage.kontekstnavn
         is IdentOpphørtMessage -> "IdentOpphørt"
         is InfotrygdendringMessage -> "Infotrygdendring"
         is InntektsendringerMessage -> "Inntektsendringer"
+        is GraderteAndreYtelserEndringerMessage -> "GraderteAndreYtelserEndringer"
         is InntektsmeldingMessage -> "Inntektsmelding"
         is NavNoInntektsmeldingMessage -> "NavNoInntektsmelding"
         is InntektsopplysningerFraLagretInntektsmeldingMessage -> "InntektsopplysningerFraLagretInntektsmelding"

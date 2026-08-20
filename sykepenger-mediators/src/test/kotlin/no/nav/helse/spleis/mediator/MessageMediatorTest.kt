@@ -221,6 +221,12 @@ internal class MessageMediatorTest {
         assertTrue(hendelseMediator.lestForkastSykmeldingsperioderMessage)
     }
 
+    @Test
+    fun `graderte andre ytelser endringer`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagGraderteAndreYtelserEndringer())
+        assertTrue(hendelseMediator.lestGraderteAndreYtelserEndringerMessage)
+    }
+
     @BeforeEach
     internal fun reset() {
         testRapid.reset()
