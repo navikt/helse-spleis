@@ -464,30 +464,6 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `To perioder med gap, den siste venter på at den første skal bli ferdig - dersom den første blir forkastet skal den siste perioden forkastes`() {
-        a1 {
-            håndterSykmelding(januar)
-            håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai))
-
-            håndterSøknad(januar)
-            håndterSøknad(mai)
-
-            håndterArbeidsgiveropplysninger(
-                listOf(1.mai til 16.mai),
-                vedtaksperiodeId = 2.vedtaksperiode
-            )
-            håndterPåminnelse(
-                1.vedtaksperiode,
-                tilstand = AVVENTER_INNTEKTSMELDING,
-                tilstandsendringstidspunkt = 5.februar.atStartOfDay()
-            )
-
-            assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-        }
-    }
-
-    @Test
     fun `Kort periode med en tidligere kort periode som har lagret inntekt for første fraværsdag`() {
         a1 {
             /* skal ikke gå videre til AVVENTER_HISTORIKK siden perioden ikke går forbi AGP */

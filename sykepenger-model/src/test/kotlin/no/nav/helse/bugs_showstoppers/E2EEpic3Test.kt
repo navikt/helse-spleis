@@ -167,31 +167,6 @@ internal class E2EEpic3Test : AbstractDslTest() {
     }
 
     @Test
-    fun `Første periode får søknad, men ikke inntektsmelding og må nå makstid før de neste kan fortsette behandling`() {
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.november(2017), 30.november(2017)))
-            håndterSykmelding(Sykmeldingsperiode(3.januar, 3.januar))
-            håndterSykmelding(Sykmeldingsperiode(5.januar, 22.januar))
-            håndterSøknad(Sykdom(1.november(2017), 30.november(2017), 100.prosent))
-            håndterSøknad(Sykdom(3.januar, 3.januar, 100.prosent))
-            håndterSøknad(Sykdom(5.januar, 22.januar, 100.prosent))
-            håndterArbeidsgiveropplysninger(
-                listOf(
-                    3.januar til 3.januar,
-                    5.januar til 19.januar
-                ),
-                vedtaksperiodeId = 3.vedtaksperiode
-            )
-
-            assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, LocalDateTime.now().minusDays(181))
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-        }
-    }
-
-    @Test
     fun `Ikke samsvar mellom sykmeldinger og inntektsmelding - første periode får hverken søknad eller inntektsmelding og må nå makstid før de neste kan fortsette behandling`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar))

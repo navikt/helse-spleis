@@ -283,7 +283,7 @@ enum class Varselkode(
     RV_RV_7("En tilhørende periode er annullert."),
 
     // VT: Vedtaksperiodetilstand
-    RV_VT_1("Gir opp fordi tilstanden er nådd makstid"),
+    RV_VT_1("Gir opp fordi tilstanden er nådd makstid", avviklet = true),
     RV_VT_2("Forventet ikke vilkårsgrunnlag", avviklet = true),
     RV_VT_3("Forventet ikke utbetalingsgodkjenning", avviklet = true),
     RV_VT_4("Forventet ikke simulering", avviklet = true),

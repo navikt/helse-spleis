@@ -8,7 +8,7 @@ object HendelseProbe {
     fun onPåminnelse(påminnelse: Påminnelse) {
         Counter.builder("paminnet_totals")
             .description("Antall ganger vi har mottatt en påminnelse")
-            .tag("tilstand", påminnelse.tilstand().toString())
+            .tag("tilstand", påminnelse.tilstand.toString())
             .register(meterRegistry)
             .increment()
         tell("Påminnelse")

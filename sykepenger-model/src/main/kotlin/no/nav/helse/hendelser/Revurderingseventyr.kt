@@ -53,6 +53,7 @@ class Revurderingseventyr private constructor(
         fun inntektFraInntektsmelding(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(InntektFraInntektsmelding, periode.start, periode, hendelse)
         fun inntektsopplysningerFraLagretInntektsmelding(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(InntektsopplysningerFraLagretInntektsmelding, periode.start, periode, hendelse)
         fun harFlereArbeidsforhold(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(HarFlereArbeidsforhold, periode.start, periode, hendelse)
+        fun søknaderSomAldriKom(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(RevurderingÅrsak.SøknaderSomAldriKom, periode.start, periode, hendelse)
 
         fun tidligsteEventyr(a: Revurderingseventyr?, b: Revurderingseventyr?) = when {
             b == null || (a != null && a.periodeForEndring.start <= b.periodeForEndring.start) -> a
@@ -150,6 +151,10 @@ class Revurderingseventyr private constructor(
 
         data object InntektsmeldingSomAldriKom : RevurderingÅrsak {
             override fun navn(): String = "INNTEKTSMELDING_SOM_ALDRI_KOM"
+        }
+
+        data object SøknaderSomAldriKom : RevurderingÅrsak {
+            override fun navn(): String = "SØKNADER_SOM_ALDRI_KOM"
         }
 
         data object InntektFraInntektsmelding : RevurderingÅrsak {

@@ -184,7 +184,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            val venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(180)
+            val venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(90)
             val forventetVedtaksperiode1 = EventSubscription.VedtaksperiodeVenterEvent(
                 yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                 vedtaksperiodeId = 1.vedtaksperiode,
@@ -264,7 +264,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                 skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                 hendelser = setOf(søknadId, inntektsmeldingId),
                 ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
-                venterTil = LocalDateTime.MAX,
+                venterTil = inspektør(1.vedtaksperiode).oppdatert.plusMonths(3),
                 venterPå = EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
@@ -292,7 +292,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                 skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                 hendelser = setOf(søknadId),
                 ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
-                venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(180),
+                venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(90),
                 venterPå = EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
                     skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
@@ -327,7 +327,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-            val januarVenterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(180)
+            val januarVenterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(90)
             val januarVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
             assertEquals(1.vedtaksperiode, januarVenter.venterPå.vedtaksperiodeId)
             assertEquals(januarVenterTil, januarVenter.venterTil)

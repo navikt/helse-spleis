@@ -465,7 +465,6 @@ internal class ArbeidsgiverHendelsefabrikk(
             antallGangerPåminnet = 0,
             tilstand = tilstand,
             tilstandsendringstidspunkt = tilstandsendringstidspunkt,
-            nå = nåtidspunkt,
             påminnelsestidspunkt = nåtidspunkt,
             nestePåminnelsestidspunkt = nåtidspunkt,
             opprettet = nåtidspunkt,

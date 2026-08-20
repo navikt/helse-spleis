@@ -1,12 +1,12 @@
 package no.nav.helse.person.tilstandsmaskin
 
-import java.time.LocalDateTime
 import java.time.Period
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somArbeidstakerOrThrow
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
@@ -20,8 +20,13 @@ import no.nav.helse.yearMonth
 
 internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_INNTEKTSMELDING
-    override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-        tilstandsendringstidspunkt.plusDays(180)
+
+    override fun timeout() = Timeout.Etter(Period.ofDays(90), Flagg("ønskerInntektFraAOrdningen")) { vedtaksperiode, eventBus, påminnelse, aktivitetslogg ->
+        if (vedtaksperiode.refusjonstidslinje.isEmpty() && vedtaksperiode.vilkårsgrunnlag != null) aktivitetslogg.varsel(Varselkode.RV_IV_10) // Burde dette være et eget varsel? Har jo bare brukt 0kr i refusjon 🤔
+        vedtaksperiode.nullKronerRefusjonOmViManglerRefusjonsopplysninger(eventBus, påminnelse.metadata, aktivitetslogg)
+        vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
+        Revurderingseventyr.inntektsmeldingSomAldriKom(påminnelse, vedtaksperiode.periode)
+    }
 
     override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
         check(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) { "Forventer kun arbeidstakere her" }
@@ -35,28 +40,16 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     }
 
     override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, påminnelse)) {
+        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)) {
             aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
             return null
         }
-
-        if (vurderOmInntektsmeldingAldriKommer(påminnelse)) {
-            gåVidereMedInntekterFraAOrdningen(vedtaksperiode, aktivitetslogg, påminnelse, eventBus)
-            return Revurderingseventyr.inntektsmeldingSomAldriKom(påminnelse, vedtaksperiode.periode)
-        }
-
-        when (påminnelse.når(Påminnelse.Predikat.Flagg("trengerReplay"))) {
+        when (påminnelse.når(Flagg("trengerReplay"))) {
             true -> trengerInntektsmeldingReplay(vedtaksperiode, eventBus)
             false -> sendTrengerArbeidsgiveropplysninger(vedtaksperiode, eventBus)
         }
 
         return null
-    }
-
-    private fun vurderOmInntektsmeldingAldriKommer(påminnelse: Påminnelse): Boolean {
-        if (påminnelse.når(Påminnelse.Predikat.Flagg("ønskerInntektFraAOrdningen"))) return true
-        val ventetMinst3Måneder = påminnelse.når(Påminnelse.Predikat.VentetMinst(Period.ofDays(90)))
-        return ventetMinst3Måneder
     }
 
     override fun gjenopptaBehandling(
@@ -65,7 +58,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, hendelse)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
     private fun Vedtaksperiode.infotrygdutbetalingPåvirkerArbeidsgiverperioden() = person.infotrygdhistorikk.betaltePerioder(yrkesaktivitet.organisasjonsnummer).any {
@@ -73,7 +66,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     }
 
     override fun replayUtført(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, hendelse)) return
+        if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)) return
 
         if (vedtaksperiode.kanForkastes() && vedtaksperiode.infotrygdutbetalingPåvirkerArbeidsgiverperioden()) {
             aktivitetslogg.info("Forkaster periode fordi infotrygdutbetaling påvirker arbeidsgiverperioden")
@@ -89,16 +82,10 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg
     ) {
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg, hendelse)
+        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
-    private fun gåVidereMedInntekterFraAOrdningen(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse, eventBus: EventBus) {
-        if (vedtaksperiode.refusjonstidslinje.isEmpty() && vedtaksperiode.vilkårsgrunnlag != null) aktivitetslogg.varsel(Varselkode.RV_IV_10) // Burde dette være et eget varsel? Har jo bare brukt 0kr i refusjon 🤔
-        vedtaksperiode.nullKronerRefusjonOmViManglerRefusjonsopplysninger(eventBus, hendelse.metadata, aktivitetslogg)
-        vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
-    }
-
-    private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg, hendelse: Hendelse): Boolean {
+    private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg): Boolean {
         vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(eventBus, null, aktivitetslogg)
         vedtaksperiode.lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg)
 

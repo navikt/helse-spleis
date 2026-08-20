@@ -1,7 +1,6 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
-import java.time.Period
 import java.util.*
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -17,7 +16,6 @@ class Påminnelse(
     val påminnelsestidspunkt: LocalDateTime,
     val nestePåminnelsestidspunkt: LocalDateTime,
     private val flagg: Set<String>,
-    private val nå: LocalDateTime = LocalDateTime.now(),
     opprettet: LocalDateTime
 ) : Hendelse {
     override val metadata = HendelseMetadata(
@@ -27,16 +25,6 @@ class Påminnelse(
         registrert = LocalDateTime.now(),
         automatiskBehandling = true
     )
-
-    fun antallGangerPåminnet() = antallGangerPåminnet
-    fun tilstand() = tilstand
-    fun tilstandsendringstidspunkt() = tilstandsendringstidspunkt
-    fun påminnelsestidspunkt() = påminnelsestidspunkt
-    fun nestePåminnelsestidspunkt() = nestePåminnelsestidspunkt
-
-    internal fun nåddMakstid(beregnetMakstid: (LocalDateTime) -> LocalDateTime): Boolean {
-        return nå >= beregnetMakstid(tilstandsendringstidspunkt)
-    }
 
     internal fun erRelevant(vedtaksperiodeId: UUID) = vedtaksperiodeId.toString() == this.vedtaksperiodeId
 
@@ -55,9 +43,7 @@ class Påminnelse(
         fun evaluer(påminnelse: Påminnelse): Boolean
         data class Flagg(private val flagg: String): Predikat {
             override fun evaluer(påminnelse: Påminnelse) = flagg in påminnelse.flagg
-        }
-        data class VentetMinst(private val varighet: Period): Predikat {
-            override fun evaluer(påminnelse: Påminnelse) = påminnelse.tilstandsendringstidspunkt.plus(varighet) <= påminnelse.nå
+            override fun toString() = flagg
         }
     }
 }

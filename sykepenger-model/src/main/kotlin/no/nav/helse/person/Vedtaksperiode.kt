@@ -3047,7 +3047,7 @@ internal class Vedtaksperiode private constructor(
             gjeldendeTilstand = tilstand.type,
             forrigeTilstand = previousState.type,
             hendelser = eksterneIderSet,
-            makstid = makstid(),
+            makstid = timeoutTidspunkt(),
             fom = periode.start,
             tom = periode.endInclusive,
             skjæringstidspunkt = skjæringstidspunkt
@@ -3075,13 +3075,16 @@ internal class Vedtaksperiode private constructor(
             påminnelsestidspunkt = påminnelse.påminnelsestidspunkt,
             nestePåminnelsestidspunkt = påminnelse.nestePåminnelsestidspunkt
         )
-        val beregnetMakstid = { tilstandsendringstidspunkt: LocalDateTime -> makstid(tilstandsendringstidspunkt) }
-        if (påminnelse.nåddMakstid(beregnetMakstid)) {
-            håndterMakstid(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)
-            return null
-        }
+
+        val timeout = vedtaksperiode.tilstand.timeout().håndter(
+            vedtaksperiode = vedtaksperiode,
+            eventBus = eventBus,
+            påminnelse = påminnelse,
+            aktivitetslogg = aktivitetslogg
+        )
 
         val overstyring = when {
+            timeout != null -> timeout
             påminnelse.når(Flagg("nullstillEgenmeldingsdager")) -> nullstillEgenmeldingsdagerIArbeidsgiverperiode(eventBus, påminnelse, aktivitetslogg, null).tidligsteEventyr()
             påminnelse.når(Flagg("ønskerReberegning"), Flagg("knertVilkårsgrunnlag")) -> {
                 vedtaksperiode.person.fjernVilkårsgrunnlagPå(vedtaksperiode.skjæringstidspunkt, aktivitetslogg)
@@ -3283,11 +3286,10 @@ internal class Vedtaksperiode private constructor(
         skjæringstidspunkt = skjæringstidspunkt,
         hendelseIder = eksterneIderSet,
         ventetSiden = oppdatert,
-        venterTil = makstid()
+        venterTil = timeoutTidspunkt()
     )
 
-    private fun makstid(tilstandsendringstidspunkt: LocalDateTime = oppdatert) =
-        tilstand.makstid(this, tilstandsendringstidspunkt)
+    private fun timeoutTidspunkt() = tilstand.timeout().tidspunkt(oppdatert)
 
     fun slutterEtter(dato: LocalDate) = periode.slutterEtter(dato)
 

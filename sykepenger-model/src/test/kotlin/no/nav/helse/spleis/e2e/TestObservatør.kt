@@ -52,7 +52,7 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
         perioder.map { it.inspektør.id }.toMutableSet()
     }?.toMutableMap() ?: mutableMapOf()
 
-    private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
+    val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
 
     private val forkastedeEventer = mutableMapOf<UUID, EventSubscription.VedtaksperiodeForkastetEvent>()
     val annulleringer = mutableListOf<EventSubscription.UtbetalingAnnullertEvent>()
