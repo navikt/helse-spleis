@@ -107,6 +107,7 @@ class Vilkårsgrunnlag(
             meldingsreferanseId = metadata.meldingsreferanseId,
             vilkårsgrunnlagId = UUID.randomUUID(),
             forsikringsvurderingId = forsikringsvurderingId,
+            opptjeningsvurderingId = UUID.randomUUID(),
         )
         return aktivitetslogg
     }

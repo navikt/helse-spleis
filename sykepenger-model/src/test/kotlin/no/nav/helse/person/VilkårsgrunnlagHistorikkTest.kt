@@ -65,6 +65,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 forsikringsvurderingId = null,
+                opptjeningsvurderingId = UUID.randomUUID(),
             )
         }
         val grunnlag1Januar = grunnlagMedSkjæringstidspunkt(1.januar)
@@ -94,6 +95,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 forsikringsvurderingId = null,
+                opptjeningsvurderingId = UUID.randomUUID(),
             )
         )
 

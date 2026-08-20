@@ -111,7 +111,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         val vilkårsgrunnlagId: UUID,
         val skjæringstidspunkt: LocalDate,
         val inntektsgrunnlag: Inntektsgrunnlag,
-        val opptjening: ArbeidstakerOpptjening?
+        val opptjening: ArbeidstakerOpptjening?,
+        val opptjeningsvurderingId: UUID,
     ) : Aktivitetskontekst {
         internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) = true
 
@@ -222,7 +223,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         protected abstract fun dto(
             vilkårsgrunnlagId: UUID,
             skjæringstidspunkt: LocalDate,
-            sykepengegrunnlag: InntektsgrunnlagUtDto
+            sykepengegrunnlag: InntektsgrunnlagUtDto,
         ): VilkårsgrunnlagUtDto
     }
 
@@ -234,7 +235,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         val meldingsreferanseId: MeldingsreferanseId?,
         vilkårsgrunnlagId: UUID,
         val forsikringsvurderingId: UUID?,
-    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjening) {
+        opptjeningsvurderingId: UUID,
+    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjening, opptjeningsvurderingId = opptjeningsvurderingId) {
 
         override fun view() = GrunnlagsdataView(
             vilkårsgrunnlagId = vilkårsgrunnlagId,
@@ -288,6 +290,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 forsikringsvurderingId = forsikringsvurderingId,
+                opptjeningsvurderingId = opptjeningsvurderingId,
             )
         }
 
@@ -308,6 +311,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             },
             meldingsreferanseId = meldingsreferanseId?.dto(),
             forsikringsvurderingId = forsikringsvurderingId,
+            opptjeningsvurderingId = opptjeningsvurderingId,
         )
 
         internal companion object {
@@ -325,6 +329,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                     },
                     meldingsreferanseId = dto.meldingsreferanseId?.let { MeldingsreferanseId.gjenopprett(it) },
                     forsikringsvurderingId = dto.forsikringsvurderingId,
+                    opptjeningsvurderingId = dto.opptjeningsvurderingId,
                 )
             }
         }
@@ -333,8 +338,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal class InfotrygdVilkårsgrunnlag(
         skjæringstidspunkt: LocalDate,
         inntektsgrunnlag: Inntektsgrunnlag,
-        vilkårsgrunnlagId: UUID = UUID.randomUUID()
-    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, null) {
+        vilkårsgrunnlagId: UUID ,
+        opptjeningsvurderingId: UUID,
+    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, null, opptjeningsvurderingId = opptjeningsvurderingId) {
 
         override fun view() = InfotrygdView(
             vilkårsgrunnlagId = vilkårsgrunnlagId,
@@ -368,14 +374,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vilkårsgrunnlagId: UUID,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: InntektsgrunnlagUtDto
-        ) = VilkårsgrunnlagUtDto.Infotrygd(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag)
+        ) = VilkårsgrunnlagUtDto.Infotrygd(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, opptjeningsvurderingId = opptjeningsvurderingId)
 
         internal companion object {
             fun gjenopprett(dto: VilkårsgrunnlagInnDto.Infotrygd): InfotrygdVilkårsgrunnlag {
                 return InfotrygdVilkårsgrunnlag(
                     skjæringstidspunkt = dto.skjæringstidspunkt,
                     inntektsgrunnlag = Inntektsgrunnlag.gjenopprett(dto.skjæringstidspunkt, dto.inntektsgrunnlag),
-                    vilkårsgrunnlagId = dto.vilkårsgrunnlagId
+                    vilkårsgrunnlagId = dto.vilkårsgrunnlagId,
+                    opptjeningsvurderingId = dto.opptjeningsvurderingId,
                 )
             }
         }

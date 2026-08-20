@@ -214,12 +214,14 @@ data class PersonData(
         val meldingsreferanseId: UUID?,
         val vilkårsgrunnlagId: UUID,
         val forsikringsvurderingId: UUID?,
+        val opptjeningsvurderingId: UUID,
     ) {
         fun tilDto() = when (type) {
             GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagInnDto.Infotrygd(
                 vilkårsgrunnlagId = this.vilkårsgrunnlagId,
                 skjæringstidspunkt = this.skjæringstidspunkt,
-                inntektsgrunnlag = inntektsgrunnlag.tilInfotrygdDto()
+                inntektsgrunnlag = inntektsgrunnlag.tilInfotrygdDto(),
+                opptjeningsvurderingId = opptjeningsvurderingId,
             )
 
             GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagInnDto.Spleis(
@@ -230,6 +232,7 @@ data class PersonData(
                 medlemskapstatus = this.medlemskapstatus!!.tilDto(),
                 meldingsreferanseId = this.meldingsreferanseId?.let { MeldingsreferanseDto(it) },
                 forsikringsvurderingId = this.forsikringsvurderingId,
+                opptjeningsvurderingId = this.opptjeningsvurderingId,
             )
         }
 
