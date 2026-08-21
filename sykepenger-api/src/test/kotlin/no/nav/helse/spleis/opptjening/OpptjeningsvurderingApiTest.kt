@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.ktor.http.HttpStatusCode
 import java.time.LocalDate
+import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import kotlin.test.assertEquals
+import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.Personidentifikator
 import no.nav.helse.april
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.gjenopprettFraJSON
@@ -17,16 +20,21 @@ import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.PensjonsgivendeInntekt
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.AbstractApiTest
 import no.nav.helse.spleis.objectMapper
 import no.nav.helse.spleis.testhelpers.PersonHendelsefabrikk
 import no.nav.helse.spleis.testhelpers.YrkesaktivitetHendelsefabrikk
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -41,7 +49,7 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
     }
 
     @Test
-    fun `hent opptjeningsvurderinger for person som finnes`() = blackboxTestApplication(::opprettVåreTestdata) {
+    fun `hent opptjeningsvurderinger for person som finnes`() = blackboxTestApplication(::opprettArbeidstakerTestdata) {
         "/api/opptjeningsvurderinger".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to FNR)) {
             val actual = assertOgNullifiserSpleisOpptjeningsvurderingIder(this)
             @Language("JSON")
@@ -50,11 +58,13 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
               "opptjeningsvurderinger": [
                 {
                   "opptjeningsvurderingId": "b89e2ae5-59e3-388e-98cd-42a8e7350773",
+                  "type": "ARBEIDSTAKER",
                   "skjæringstidspunkt": "2018-01-01",
                   "kilde": "INFOTRYGD"
                 },
                 {
                   "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000000",
+                  "type": "ARBEIDSTAKER",
                   "skjæringstidspunkt": "2018-04-01",
                   "kilde": "SPLEIS",
                   "oppfylt": false,
@@ -64,6 +74,7 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
                 },
                 {
                   "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000000",
+                  "type": "ARBEIDSTAKER",
                   "skjæringstidspunkt": "2018-04-01",
                   "kilde": "SPLEIS",
                   "arbeidsforhold": [
@@ -104,6 +115,27 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
         }
     }
 
+    @Test
+    fun `hent opptjeningsvurderinger for selvstendig som finnes`() = blackboxTestApplication(::opprettSelvstendigTestdata) {
+        "/api/opptjeningsvurderinger".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to FNR)) {
+            val actual = assertOgNullifiserSpleisOpptjeningsvurderingIder(this)
+            @Language("JSON")
+            val expected = """
+            {
+              "opptjeningsvurderinger": [
+                {
+                  "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000000",
+                  "skjæringstidspunkt": "2018-04-01",
+                  "kilde": "SPLEIS",
+                  "type": "SELVSTENDIG"
+                }
+              ]
+            }
+            """
+            JSONAssert.assertEquals(expected, actual, true)
+        }
+    }
+
     private fun assertOgNullifiserSpleisOpptjeningsvurderingIder(response: String): String{
         val spleisOpptjeningsvurderingIder = mutableListOf<UUID>()
         return objectMapper.readTree(response).apply {
@@ -119,7 +151,7 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
         }.toString()
     }
 
-    private fun opprettVåreTestdata(testDataSource: TestDataSource) {
+    private fun opprettArbeidstakerTestdata(testDataSource: TestDataSource) {
         val eventBus = EventBus()
         val fom = 1.april
         val tom = 30.april
@@ -178,4 +210,60 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
 
         testDataSource.ds.lagrePerson(FNR, person)
     }
+
+
+    private fun opprettSelvstendigTestdata(testDataSource: TestDataSource) {
+        val eventBus = EventBus()
+        val aktivitetslogg = Aktivitetslogg()
+        val fom = 1.april
+        val tom = 30.april
+
+        val person = Person(Personidentifikator(FNR), 1.januar(1990).alder, EmptyLog)
+
+        val fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Selvstendig)
+
+        val søknad = fabrikk.lagSøknad(Søknad.Søknadsperiode.Sykdom(fom = fom, tom = tom, sykmeldingsgrad = 100.prosent),
+            arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
+            pensjonsgivendeInntekter = listOf(
+                PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
+            ),
+            fraværFørSykmelding = false)
+        person.håndterSøknad(eventBus, søknad, aktivitetslogg)
+
+        val vedtaksperiodeId = eventBus.events.filterIsInstance<EventSubscription.VedtaksperiodeOpprettet>().single().vedtaksperiodeId
+
+        person.håndterUtbetalingshistorikk(eventBus, fabrikk.lagUtbetalingshistorikk(vedtaksperiodeId), aktivitetslogg)
+
+        val arbeidsgiverinntekt = ArbeidsgiverInntekt(
+            arbeidsgiver = ORGNUMMER,
+            inntekter = listOf(YearMonth.of(2018, 1), YearMonth.of(2018, 2), YearMonth.of(2018, 3)).map {
+                ArbeidsgiverInntekt.MånedligInntekt(
+                    yearMonth = it, inntekt = 31000.månedlig, type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, fordel = "a", beskrivelse = "b"
+                )
+            },
+        )
+
+        val vilkårsgrunnlag = fabrikk.lagVilkårsgrunnlag(
+            vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = 1.april,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = ORGNUMMER,
+                    ansettelseperiode = 1.april(2017) til LocalDate.MAX,
+                    type = Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(emptyList()),
+            inntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(emptyList()),
+            forsikringsvurderingId = null,
+        )
+        person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag, aktivitetslogg)
+
+        testDataSource.ds.lagrePerson(FNR, person)
+    }
+
+
 }
