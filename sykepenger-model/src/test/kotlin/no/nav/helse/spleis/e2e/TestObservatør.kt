@@ -44,6 +44,7 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
     val analytiskDatapakkeEventer = mutableListOf<EventSubscription.AnalytiskDatapakkeEvent>()
     val selvstendigIngenDagerIgjenEventer = mutableListOf<EventSubscription.SelvstendigIngenDagerIgjenEvent>()
     val trengerInformasjonTilVilkårsprøvingEventer = mutableListOf<EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent>()
+    val trengerInformasjonTilBeregningEventer = mutableListOf<EventSubscription.TrengerInformasjonTilBeregningEvent>()
 
     val vedtaksperiodeUtbetalinger = mutableMapOf<String, MutableMap<UUID, List<UUID>>>()
 
@@ -259,6 +260,10 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
             .compute(event.vedtaksperiodeId) { _, eksisterende ->
                 (eksisterende ?: emptyList()).plusElement(event.utbetalingId)
             }
+    }
+
+    override fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) {
+        trengerInformasjonTilBeregningEventer.add(event)
     }
 
     fun vedtaksperiodeUtbetalinger(vedtaksperiodeId: UUID, orgnummer: String): List<UUID> {

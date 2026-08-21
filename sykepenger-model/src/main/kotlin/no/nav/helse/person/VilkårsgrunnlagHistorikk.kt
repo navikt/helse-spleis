@@ -14,12 +14,14 @@ import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1 - selvstendig næringsdrivende`
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
+import no.nav.helse.hendelser.Vurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -176,6 +178,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 }
             }
         }
+        
+        internal fun håndterEndretVurdering(hendelse: EndretVurderingPåSkjæringstidspunkt, aktivitetslogg: IAktivitetslogg): Grunnlagsdata? {
+            if (this !is Grunnlagsdata) return null.also { aktivitetslogg.info("Kan ikke endre på Infotrygdvilkårsgrunnlag") }
+            return when (val endretVurdering = hendelse.endretVurdering) {
+                is Vurdering.Forsikringsvurdering -> medEndretForsikringsvurdering(endretVurdering, aktivitetslogg)
+                is Vurdering.Opptjeningsvurdering -> medEndretOpptjeningsvurdering(endretVurdering, aktivitetslogg)
+            }
+        }
 
         protected abstract fun vilkårsgrunnlagtype(): String
 
@@ -260,14 +270,25 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         )
 
         internal fun medNyttInntektsgrunnlag(nyttInntektsgrunnlag: Inntektsgrunnlag) = kopierMed(nyttInntektsgrunnlag = nyttInntektsgrunnlag)
+        
+        internal fun medEndretForsikringsvurdering(forsikringsvurdering: Vurdering.Forsikringsvurdering, aktivitetslogg: IAktivitetslogg): Grunnlagsdata? {
+            if (forsikringsvurderingId == forsikringsvurdering.id) return null.also { aktivitetslogg.info("Forsikringsvurderingen er allerede lagt til grunn") }
+            return kopierMed(nyForsikringsvurderingId = forsikringsvurdering.id)
+        }
+        
+        internal fun medEndretOpptjeningsvurdering(opptjeningsvurdering: Vurdering.Opptjeningsvurdering, aktivitetslogg: IAktivitetslogg): Grunnlagsdata? {
+            if (opptjeningsvurderingId == opptjeningsvurdering.id) return null.also { aktivitetslogg.info("Opptjeningsvurderingen er allerede lagt til grunn") }
+            return kopierMed(nyOpptjeningsvurderingId = opptjeningsvurdering.id)
+        }
 
         private fun kopierMed(
             nyttInntektsgrunnlag: Inntektsgrunnlag? = null,
             nyOpptjening: ArbeidstakerOpptjening? = null,
             nyttSkjæringstidspunkt: LocalDate? = null,
-            nyOpptjeningsvurderingId: UUID? = null
+            nyOpptjeningsvurderingId: UUID? = null,
+            nyForsikringsvurderingId: UUID? = null
         ): Grunnlagsdata {
-            require(listOfNotNull(nyttInntektsgrunnlag, nyOpptjening, nyttSkjæringstidspunkt, nyOpptjeningsvurderingId).isNotEmpty()) {
+            require(listOfNotNull(nyttInntektsgrunnlag, nyOpptjening, nyttSkjæringstidspunkt, nyOpptjeningsvurderingId, nyForsikringsvurderingId).isNotEmpty()) {
                 "Må endre minst et felt for at det skal gi mening å lage et nytt grunnlag!"
             }
             return Grunnlagsdata(
@@ -277,7 +298,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 medlemskapstatus = medlemskapstatus,
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID(),
-                forsikringsvurderingId = forsikringsvurderingId,
+                forsikringsvurderingId = nyForsikringsvurderingId ?: forsikringsvurderingId,
                 opptjeningsvurderingId = nyOpptjeningsvurderingId ?: opptjeningsvurderingId,
             )
         }

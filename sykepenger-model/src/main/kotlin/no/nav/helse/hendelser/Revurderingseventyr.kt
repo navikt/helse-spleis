@@ -54,6 +54,8 @@ class Revurderingseventyr private constructor(
         fun inntektsopplysningerFraLagretInntektsmelding(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(InntektsopplysningerFraLagretInntektsmelding, periode.start, periode, hendelse)
         fun harFlereArbeidsforhold(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(HarFlereArbeidsforhold, periode.start, periode, hendelse)
         fun søknaderSomAldriKom(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(RevurderingÅrsak.SøknaderSomAldriKom, periode.start, periode, hendelse)
+        fun endretForsikringsvurdering(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(RevurderingÅrsak.EndretForsikringsvurdering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
+        fun endretOpptjeningsvurdering(hendelse: Hendelse,skjæringstidspunkt: LocalDate) = Revurderingseventyr(RevurderingÅrsak.EndretOpptjenigsvurdering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
 
         fun tidligsteEventyr(a: Revurderingseventyr?, b: Revurderingseventyr?) = when {
             b == null || (a != null && a.periodeForEndring.start <= b.periodeForEndring.start) -> a
@@ -83,11 +85,6 @@ class Revurderingseventyr private constructor(
         hvorfor.emitOverstyringIgangsattEvent(eventBus, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring, hendelse.metadata.meldingsreferanseId)
     }
 
-    internal fun loggDersomKorrigerendeSøknad(aktivitetslogg: IAktivitetslogg, loggMelding: String) {
-        if (hvorfor == KorrigertSøknad) {
-            aktivitetslogg.info(loggMelding)
-        }
-    }
 
     private sealed interface RevurderingÅrsak {
 
@@ -167,6 +164,14 @@ class Revurderingseventyr private constructor(
 
         data object HarFlereArbeidsforhold : RevurderingÅrsak {
             override fun navn(): String = "HAR_FLERE_ARBEIDSFORHOLD"
+        }
+
+        data object EndretForsikringsvurdering : RevurderingÅrsak {
+            override fun navn(): String = "ENDRET_FORSIKRINGSVURDERING"
+        }
+
+        data object EndretOpptjenigsvurdering : RevurderingÅrsak {
+            override fun navn(): String = "ENDRET_OPPTJENINGSVURDERING"
         }
 
         data object Reberegning : RevurderingÅrsak {

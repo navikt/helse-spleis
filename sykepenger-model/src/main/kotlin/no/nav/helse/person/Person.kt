@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopptaBehandling
@@ -318,6 +319,15 @@ class Person private constructor(
         håndterGjenoppta(eventBus, graderteAndreYtelserEndret, aktivitetsloggMedPersonkontekst)
     }
 
+    fun håndterEndretVurderingPåSkjæringstidspunkt(eventBus: EventBus, endretVurderingPåSkjæringstidspunkt: EndretVurderingPåSkjæringstidspunkt, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler endret vurdering på skjæringstidspunkt")
+        val grunnlag = vilkårsgrunnlagFor(endretVurderingPåSkjæringstidspunkt.skjæringstidspunkt) ?: return aktivitetsloggMedPersonkontekst.info("Fant ikke vilkårsgrunnlag på ${endretVurderingPåSkjæringstidspunkt.skjæringstidspunkt}")
+        val nyttGrunnlag = grunnlag.håndterEndretVurdering(endretVurderingPåSkjæringstidspunkt, aktivitetsloggMedPersonkontekst) ?: return
+        lagreVilkårsgrunnlag(nyttGrunnlag)
+        igangsettOverstyring(eventBus, endretVurderingPåSkjæringstidspunkt.revurderingseventyr(), aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(eventBus, endretVurderingPåSkjæringstidspunkt, aktivitetsloggMedPersonkontekst)
+    }
+
     fun håndterUtbetalingshistorikkEtterInfotrygdendring(eventBus: EventBus, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
         håndterHistorikkFraInfotrygd(eventBus, utbetalingshistorikkEtterInfotrygdendring, aktivitetsloggMedPersonkontekst, utbetalingshistorikkEtterInfotrygdendring.element)
@@ -325,8 +335,7 @@ class Person private constructor(
 
     fun håndterUtbetalingshistorikk(eventBus: EventBus, utbetalingshistorikk: Utbetalingshistorikk, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
-        finnYrkesaktivitet(utbetalingshistorikk.behandlingsporing)
-            .håndterHistorikkFraInfotrygd(eventBus, utbetalingshistorikk, aktivitetsloggMedPersonkontekst)
+        finnYrkesaktivitet(utbetalingshistorikk.behandlingsporing).håndterHistorikkFraInfotrygd(eventBus, utbetalingshistorikk, aktivitetsloggMedPersonkontekst)
         håndterHistorikkFraInfotrygd(eventBus, utbetalingshistorikk, aktivitetsloggMedPersonkontekst, utbetalingshistorikk.element)
     }
 

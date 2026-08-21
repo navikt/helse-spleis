@@ -37,6 +37,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.hendelser.Vurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
@@ -727,8 +728,8 @@ internal class TestPerson(
             )
         }
 
-        internal fun håndterVilkårsgrunnlagSelvstendig(vedtaksperiodeId: UUID = 1.vedtaksperiode, skatteInntekter: List<Pair<String, Inntekt>> = emptyList()) {
-            håndterVilkårsgrunnlag(vedtaksperiodeId, skatteinntekter = skatteInntekter)
+        internal fun håndterVilkårsgrunnlagSelvstendig(vedtaksperiodeId: UUID = 1.vedtaksperiode, skatteInntekter: List<Pair<String, Inntekt>> = emptyList(), forsikringsvurderingId: UUID = UUID.randomUUID()) {
+            håndterVilkårsgrunnlag(vedtaksperiodeId, skatteinntekter = skatteInntekter, forsikringsvurderingId = forsikringsvurderingId)
         }
 
         /**
@@ -964,6 +965,11 @@ internal class TestPerson(
         internal fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) {
             personHendelsefabrikk.lagOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold)
                 .håndter(Person::håndterOverstyrArbeidsforhold)
+        }
+
+        internal fun håndterEndretVuderingPåSkjæringstidspunkt(skjæringstidspunkt: LocalDate, endretVurdering: Vurdering) {
+            personHendelsefabrikk.lagEndretVuderingPåSkjæringstidspunkt(skjæringstidspunkt, endretVurdering)
+                .håndter(Person::håndterEndretVurderingPåSkjæringstidspunkt)
         }
 
         internal fun håndterMinimumSykdomsgradVurdert(

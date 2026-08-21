@@ -9,6 +9,7 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.medSkjønnsmes
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -17,6 +18,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.Vurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.mai
 import no.nav.helse.person.beløp.Beløpstidslinje
@@ -37,6 +39,13 @@ internal class PersonHendelsefabrikk {
             skjæringstidspunkt = skjæringstidspunkt,
             overstyrteArbeidsforhold = overstyrteArbeidsforhold.toList(),
             opprettet = LocalDateTime.now()
+        )
+
+    internal fun lagEndretVuderingPåSkjæringstidspunkt(skjæringstidspunkt: LocalDate, endretVurdering: Vurdering) =
+        EndretVurderingPåSkjæringstidspunkt(
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+            skjæringstidspunkt = skjæringstidspunkt,
+            endretVurdering = endretVurdering
         )
 
     internal fun lagPåminnelse() =
