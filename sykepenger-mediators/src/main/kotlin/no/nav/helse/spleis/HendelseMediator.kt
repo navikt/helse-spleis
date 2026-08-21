@@ -10,7 +10,7 @@ import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopptaBehandling
-import no.nav.helse.hendelser.GraderteAndreYtelserEndringer
+import no.nav.helse.hendelser.GraderteAndreYtelserEndret
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
@@ -52,7 +52,7 @@ import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
-import no.nav.helse.spleis.meldinger.model.GraderteAndreYtelserEndringerMessage
+import no.nav.helse.spleis.meldinger.model.GraderteAndreYtelserEndretMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
@@ -514,13 +514,13 @@ internal class HendelseMediator(
     }
 
     override fun behandle(
-        message: GraderteAndreYtelserEndringerMessage,
-        graderteAndreYtelserEndringer: GraderteAndreYtelserEndringer,
+        message: GraderteAndreYtelserEndretMessage,
+        graderteAndreYtelserEndret: GraderteAndreYtelserEndret,
         context: BehandlingContext
     ) {
         hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
-            HendelseProbe.onGraderteAndreYtelserEndringer()
-            person.håndterGraderteAndreYtelserEndringer(eventBus, graderteAndreYtelserEndringer, aktivitetslogg)
+            HendelseProbe.onGraderteAndreYtelserEndret()
+            person.håndterGraderteAndreYtelserEndret(eventBus, graderteAndreYtelserEndret, aktivitetslogg)
         }
     }
 
@@ -811,7 +811,7 @@ internal interface IHendelseMediator {
     fun behandle(message: GrunnbeløpsreguleringMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: BehandlingContext)
     fun behandle(message: InfotrygdendringMessage, infotrygdEndring: Infotrygdendring, context: BehandlingContext)
     fun behandle(message: InntektsendringerMessage, inntektsendringer: Inntektsendringer, context: BehandlingContext)
-    fun behandle(message: GraderteAndreYtelserEndringerMessage, graderteAndreYtelserEndringer: GraderteAndreYtelserEndringer, context: BehandlingContext)
+    fun behandle(message: GraderteAndreYtelserEndretMessage, graderteAndreYtelserEndret: GraderteAndreYtelserEndret, context: BehandlingContext)
     fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: BehandlingContext)
     fun behandle(
         nyPersonidentifikator: Personidentifikator,

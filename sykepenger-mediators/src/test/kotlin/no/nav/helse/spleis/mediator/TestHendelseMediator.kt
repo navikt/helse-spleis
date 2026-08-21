@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopptaBehandling
-import no.nav.helse.hendelser.GraderteAndreYtelserEndringer
+import no.nav.helse.hendelser.GraderteAndreYtelserEndret
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
@@ -48,7 +48,7 @@ import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
-import no.nav.helse.spleis.meldinger.model.GraderteAndreYtelserEndringerMessage
+import no.nav.helse.spleis.meldinger.model.GraderteAndreYtelserEndretMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
@@ -129,7 +129,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     val lestInntektsendringer get() = lestInntektsendringerVerdi.get()
     val utbetalingshistorikkEtterInfotrygdendringMessage get() = utbetalingshistorikkEtterInfotrygdendringMessageVerdi.get()
     val lestForkastSykmeldingsperioderMessage get() = lestForkastSykmeldingsperioderMessageVerdi.get()
-    val lestGraderteAndreYtelserEndringerMessage get() = lestGraderteAndreYtelserEndringerVerdi.get()
+    val lestGraderteAndreYtelserEndretMessage get() = lestGraderteAndreYtelserEndretVerdi.get()
 
     private val lestNySøknadVerdi = ThreadLocal.withInitial { false }
     private val lestNySøknadFrilansVerdi = ThreadLocal.withInitial { false }
@@ -169,7 +169,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     private val lestGrunnbeløpsreguleringVerdi = ThreadLocal.withInitial { false }
     private val lestInfotrygdendringVerdi = ThreadLocal.withInitial { false }
     private val lestInntektsendringerVerdi = ThreadLocal.withInitial { false }
-    private val lestGraderteAndreYtelserEndringerVerdi = ThreadLocal.withInitial { false }
+    private val lestGraderteAndreYtelserEndretVerdi = ThreadLocal.withInitial { false }
     private val utbetalingshistorikkEtterInfotrygdendringMessageVerdi = ThreadLocal.withInitial { false }
     private val lestForkastSykmeldingsperioderMessageVerdi = ThreadLocal.withInitial { false }
 
@@ -466,8 +466,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestInntektsendringerVerdi.set(true)
     }
 
-    override fun behandle(message: GraderteAndreYtelserEndringerMessage, graderteAndreYtelserEndringer: GraderteAndreYtelserEndringer, context: BehandlingContext) {
-        lestGraderteAndreYtelserEndringerVerdi.set(true)
+    override fun behandle(message: GraderteAndreYtelserEndretMessage, graderteAndreYtelserEndret: GraderteAndreYtelserEndret, context: BehandlingContext) {
+        lestGraderteAndreYtelserEndretVerdi.set(true)
     }
 
     override fun behandle(

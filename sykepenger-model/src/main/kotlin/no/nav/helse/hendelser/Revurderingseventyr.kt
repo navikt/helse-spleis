@@ -42,7 +42,7 @@ class Revurderingseventyr private constructor(
         fun arbeidsgiverperiode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Arbeidsgiverperiode, skjæringstidspunkt, periodeForEndring, hendelse)
         fun infotrygdendring(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(RevurderingÅrsak.Infotrygdendring, skjæringstidspunkt, periodeForEndring, hendelse)
         fun inntektsendringer(hendelse: Hendelse, inntektsendringFom: LocalDate) = Revurderingseventyr(RevurderingÅrsak.Inntektsendringer, inntektsendringFom, inntektsendringFom.somPeriode(), hendelse)
-        fun graderteAndreYtelserEndringer(hendelse: Hendelse, graderteAndreYtelserEndringFom: LocalDate) = Revurderingseventyr(RevurderingÅrsak.GraderteAndreYtelserEndringer, graderteAndreYtelserEndringFom, graderteAndreYtelserEndringFom.somPeriode(), hendelse)
+        fun graderteAndreYtelserEndret(hendelse: Hendelse, graderteAndreYtelserEndringFom: LocalDate) = Revurderingseventyr(RevurderingÅrsak.GraderteAndreYtelserEndret, graderteAndreYtelserEndringFom, graderteAndreYtelserEndringFom.somPeriode(), hendelse)
         fun korrigertInntektsmeldingInntektsopplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmeldingInntektsopplysninger, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
         fun refusjonsopplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periode: Periode) = Revurderingseventyr(RevurderingÅrsak.Refusjonsopplysninger, skjæringstidspunkt, periode, hendelse)
         fun inntekt(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(RevurderingÅrsak.Inntekt, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
@@ -117,8 +117,8 @@ class Revurderingseventyr private constructor(
             override fun navn() = "INNTEKTSENDRINGER"
         }
 
-        data object GraderteAndreYtelserEndringer : RevurderingÅrsak {
-            override fun navn() = "GRADERTE_ANDRE_YTELSER_ENDRINGER"
+        data object GraderteAndreYtelserEndret : RevurderingÅrsak {
+            override fun navn() = "GRADERTE_ANDRE_YTELSER_ENDRET"
         }
 
         data object Sykdomstidslinje : RevurderingÅrsak {

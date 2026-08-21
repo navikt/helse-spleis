@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.hendelser.Avsender.SYSTEM
 
-class GraderteAndreYtelserEndringer(meldingsreferanseId: MeldingsreferanseId, val graderteAndreYtelserEndringFom: LocalDate) : Hendelse {
+class GraderteAndreYtelserEndret(meldingsreferanseId: MeldingsreferanseId, val graderteAndreYtelserEndretFom: LocalDate) : Hendelse {
     override val behandlingsporing = Behandlingsporing.IngenYrkesaktivitet
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(

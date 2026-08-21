@@ -1589,12 +1589,12 @@ internal class TestMessageFactory(
     )
     )
 
-    internal fun lagGraderteAndreYtelserEndringer(
-        graderteAndreYtelserEndringerFom: LocalDate = LocalDate.now().minusDays(1)
+    internal fun lagGraderteAndreYtelserEndret(
+        graderteAndreYtelserEndretFom: LocalDate = LocalDate.now().minusDays(1)
     ) = nyHendelse(
-        "graderte_andre_ytelser_endringer", mutableMapOf(
+        "graderte_andre_ytelser_endret", mutableMapOf(
         "fødselsnummer" to fødselsnummer,
-        "graderteAndreYtelserEndringerFom" to graderteAndreYtelserEndringerFom
+        "graderteAndreYtelserEndretFom" to graderteAndreYtelserEndretFom
     )
     )
 

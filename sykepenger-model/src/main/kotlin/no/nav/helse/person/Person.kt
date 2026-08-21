@@ -20,7 +20,7 @@ import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopptaBehandling
-import no.nav.helse.hendelser.GraderteAndreYtelserEndringer
+import no.nav.helse.hendelser.GraderteAndreYtelserEndret
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.IdentOpphørt
@@ -312,10 +312,10 @@ class Person private constructor(
         håndterGjenoppta(eventBus, inntektsendringer, aktivitetsloggMedPersonkontekst)
     }
 
-    fun håndterGraderteAndreYtelserEndringer(eventBus: EventBus, graderteAndreYtelserEndringer: GraderteAndreYtelserEndringer, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler graderte andre ytelser endringer")
-        igangsettOverstyring(eventBus, Revurderingseventyr.graderteAndreYtelserEndringer(graderteAndreYtelserEndringer, graderteAndreYtelserEndringer.graderteAndreYtelserEndringFom), aktivitetsloggMedPersonkontekst)
-        håndterGjenoppta(eventBus, graderteAndreYtelserEndringer, aktivitetsloggMedPersonkontekst)
+    fun håndterGraderteAndreYtelserEndret(eventBus: EventBus, graderteAndreYtelserEndret: GraderteAndreYtelserEndret, aktivitetslogg: IAktivitetslogg) {
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler graderte andre ytelser endret")
+        igangsettOverstyring(eventBus, Revurderingseventyr.graderteAndreYtelserEndret(graderteAndreYtelserEndret, graderteAndreYtelserEndret.graderteAndreYtelserEndretFom), aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(eventBus, graderteAndreYtelserEndret, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndterUtbetalingshistorikkEtterInfotrygdendring(eventBus: EventBus, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, aktivitetslogg: IAktivitetslogg) {

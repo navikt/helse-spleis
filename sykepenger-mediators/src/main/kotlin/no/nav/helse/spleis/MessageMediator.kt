@@ -26,7 +26,7 @@ import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
 import no.nav.helse.spleis.meldinger.FeriepengeutbetalingerRiver
 import no.nav.helse.spleis.meldinger.ForkastSykmeldingsperioderRiver
 import no.nav.helse.spleis.meldinger.GjenopptaBehandlingerRiver
-import no.nav.helse.spleis.meldinger.GraderteAndreYtelserEndringerRiver
+import no.nav.helse.spleis.meldinger.GraderteAndreYtelserEndretRiver
 import no.nav.helse.spleis.meldinger.GrunnbeløpsreguleringRiver
 import no.nav.helse.spleis.meldinger.IdentOpphørtRiver
 import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
@@ -73,7 +73,7 @@ import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
-import no.nav.helse.spleis.meldinger.model.GraderteAndreYtelserEndringerMessage
+import no.nav.helse.spleis.meldinger.model.GraderteAndreYtelserEndretMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
@@ -171,7 +171,7 @@ internal class MessageMediator(
             OverstyrArbeidsgiveropplysningerRiver(it, this)
             InfotrygdendringerRiver(it, this)
             InntektsendringerRiver(it, this)
-            GraderteAndreYtelserEndringerRiver(it, this)
+            GraderteAndreYtelserEndretRiver(it, this)
             UtbetalingshistorikkEtterInfotrygdendringRiver(it, this)
             DødsmeldingerRiver(it, this)
             ForkastSykmeldingsperioderRiver(it, this)
@@ -262,7 +262,7 @@ internal class MessageMediator(
         is PåminnelseMessage,
         is SkjønnsmessigFastsettelseMessage,
         is InntektsendringerMessage,
-        is GraderteAndreYtelserEndringerMessage,
+        is GraderteAndreYtelserEndretMessage,
         is GjenopptaBehandlingMessage,
         is InntektsopplysningerFraLagretInntektsmeldingMessage -> false
 

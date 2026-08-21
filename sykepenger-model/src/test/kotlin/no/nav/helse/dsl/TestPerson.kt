@@ -865,8 +865,8 @@ internal class TestPerson(
             arbeidsgiverHendelsefabrikk.lagInntektsendringer(inntektsendringFom).håndter(Person::håndterInntektsendringer)
         }
 
-        internal fun håndterGraderteAndreYtelserEndringer(graderteAndreYtelserEndringerFom: LocalDate) {
-            arbeidsgiverHendelsefabrikk.lagGraderteAndreYtelserEndringer(graderteAndreYtelserEndringerFom).håndter(Person::håndterGraderteAndreYtelserEndringer)
+        internal fun håndterGraderteAndreYtelserEndret(graderteAndreYtelserEndretFom: LocalDate) {
+            arbeidsgiverHendelsefabrikk.lagGraderteAndreYtelserEndret(graderteAndreYtelserEndretFom).håndter(Person::håndterGraderteAndreYtelserEndret)
         }
 
         internal fun håndterSimulering(

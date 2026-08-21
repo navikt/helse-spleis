@@ -222,9 +222,9 @@ internal class MessageMediatorTest {
     }
 
     @Test
-    fun `graderte andre ytelser endringer`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagGraderteAndreYtelserEndringer())
-        assertTrue(hendelseMediator.lestGraderteAndreYtelserEndringerMessage)
+    fun `graderte andre ytelser endret`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagGraderteAndreYtelserEndret())
+        assertTrue(hendelseMediator.lestGraderteAndreYtelserEndretMessage)
     }
 
     @BeforeEach
