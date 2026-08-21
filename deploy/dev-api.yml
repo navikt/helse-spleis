@@ -54,6 +54,7 @@ spec:
         - application: spesialist
         - application: spanner
         - application: sporing
+        - application: sp-vilkarsproving
     outbound:
       rules:
         - application: logging
