@@ -1594,7 +1594,7 @@ internal class TestMessageFactory(
     ) = nyHendelse(
         "graderte_andre_ytelser_endret", mutableMapOf(
         "fødselsnummer" to fødselsnummer,
-        "graderteAndreYtelserEndretFom" to graderteAndreYtelserEndretFom
+        "fom" to graderteAndreYtelserEndretFom
     )
     )
 

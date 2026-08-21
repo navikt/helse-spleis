@@ -21,7 +21,7 @@ internal class GraderteAndreYtelserEndretRiver(
     }
 
     override fun precondition(packet: JsonMessage) {
-        packet.require("graderteAndreYtelserEndretFom", JsonNode::asLocalDate)
+        packet.require("fom", JsonNode::asLocalDate)
     }
 
     override fun createMessage(packet: JsonMessage) = GraderteAndreYtelserEndretMessage(

@@ -9,7 +9,7 @@ import no.nav.helse.spleis.Meldingsporing
 
 internal class GraderteAndreYtelserEndretMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
 
-    private val graderteAndreYtelserEndretFom = packet["graderteAndreYtelserEndretFom"].asLocalDate()
+    private val graderteAndreYtelserEndretFom = packet["fom"].asLocalDate()
 
     override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
         mediator.behandle(
