@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
 
 internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
+    //@OpenInSpanner
     @Test
     fun `pleiepenger sykt barn`() {
         a1 {
@@ -50,6 +51,8 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 19.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1400, 2000, subset = 20.januar til 30.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 31.januar til 31.januar)
+            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         }
     }
@@ -169,6 +172,9 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 380, 2000, subset = 17.januar til 31.januar)
 
             assertEquals(0, inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
+
+            assertEquals(19.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
 
             assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23)
         }

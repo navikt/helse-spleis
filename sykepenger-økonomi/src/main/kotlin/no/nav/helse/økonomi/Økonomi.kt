@@ -85,22 +85,22 @@ data class Økonomi(
             val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, sykepengegrunnlagBegrenset6G * utbetalingsgrad)
 
             return økonomiList
-                .fordelRefusjon(totalArbeidsgiverFør6GBegrensning, inntektstapSomSkalDekkesAvNAV)
-                .fordelBruker(totalArbeidsgiverFør6GBegrensning, total, inntektstapSomSkalDekkesAvNAV)
+                .fordelRefusjon(totalArbeidsgiverFør6GBegrensning, inntektstapSomSkalDekkesAvNAV, utbetalingsgrad)
+                .fordelBruker(totalArbeidsgiverFør6GBegrensning, total, inntektstapSomSkalDekkesAvNAV, utbetalingsgrad)
                 .sjekkRestbeløp(inntektstapSomSkalDekkesAvNAV)
         }
-        
-        private fun List<Økonomi>.fordelRefusjon(totalArbeidsgiverFør6GBegrensning: Inntekt, inntektstapSomSkalDekkesAvNAV: Inntekt): List<Økonomi> {
+
+        private fun List<Økonomi>.fordelRefusjon(totalArbeidsgiverFør6GBegrensning: Inntekt, inntektstapSomSkalDekkesAvNAV: Inntekt, utbetalingsgrad: Prosentdel): List<Økonomi> {
             return reduserBeløpTilTotal(
                 økonomiList = this,
                 total = totalArbeidsgiverFør6GBegrensning,
                 grense = inntektstapSomSkalDekkesAvNAV,
-                setter = { økonomi, inntekt -> økonomi.copy(reservertArbeidsgiverbeløp = inntekt) },
+                setter = { økonomi, inntekt -> økonomi.copy(reservertArbeidsgiverbeløp = inntekt, utbetalingsgrad = utbetalingsgrad) },
                 getter = { it.reservertArbeidsgiverbeløp!! }
             )
         }
-        
-        private fun List<Økonomi>.fordelBruker(totalArbeidsgiverFør6GBegrensning: Inntekt, total: Inntekt, inntektstapSomSkalDekkesAvNAV: Inntekt): List<Økonomi> {
+
+        private fun List<Økonomi>.fordelBruker(totalArbeidsgiverFør6GBegrensning: Inntekt, total: Inntekt, inntektstapSomSkalDekkesAvNAV: Inntekt, utbetalingsgrad: Prosentdel): List<Økonomi> {
             val ratio = reduksjon(inntektstapSomSkalDekkesAvNAV, totalArbeidsgiverFør6GBegrensning)
             val totalArbeidsgiverEtter6GBegrensning = totalArbeidsgiverFør6GBegrensning * ratio
 
@@ -108,7 +108,7 @@ data class Økonomi(
                 økonomiList = this,
                 total = total - totalArbeidsgiverEtter6GBegrensning,
                 grense = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverEtter6GBegrensning,
-                setter = { økonomi, inntekt -> økonomi.copy(reservertPersonbeløp = inntekt) },
+                setter = { økonomi, inntekt -> økonomi.copy(reservertPersonbeløp = inntekt, utbetalingsgrad = utbetalingsgrad) },
                 getter = { it.reservertPersonbeløp!! }
             )
         }

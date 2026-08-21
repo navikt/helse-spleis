@@ -16,8 +16,8 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.inspectors.inspektør
+import no.nav.helse.økonomi.Økonomi
 
 val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
 
@@ -161,6 +161,8 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     fun arbeidsgiverbeløp(dag: LocalDate) = økonomi.getValue(dag).inspektør.arbeidsgiverbeløp
     fun personbeløp(dag: LocalDate) = økonomi.getValue(dag).inspektør.personbeløp
     fun dekningsgrad(dag: LocalDate) = økonomi.getValue(dag).dekningsgrad
+    fun utbetalingsgrad(dag: LocalDate) = økonomi.getValue(dag).utbetalingsgrad
+    fun totalSykdomsgrad(dag: LocalDate) = økonomi.getValue(dag).totalSykdomsgrad
 
     fun totalUtbetaling() = totalUtbetaling
 
