@@ -109,7 +109,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         val vilkårsgrunnlagId: UUID,
         val skjæringstidspunkt: LocalDate,
         val inntektsgrunnlag: Inntektsgrunnlag,
-        val opptjening: ArbeidstakerOpptjening?,
         val opptjeningsvurderingId: UUID,
     ) : Aktivitetskontekst {
         internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) = true
@@ -216,13 +215,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal class Grunnlagsdata(
         skjæringstidspunkt: LocalDate,
         inntektsgrunnlag: Inntektsgrunnlag,
-        opptjening: ArbeidstakerOpptjening?,
+        val opptjening: ArbeidstakerOpptjening?,
         val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         val meldingsreferanseId: MeldingsreferanseId?,
         vilkårsgrunnlagId: UUID,
         val forsikringsvurderingId: UUID?,
         opptjeningsvurderingId: UUID,
-    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjening, opptjeningsvurderingId = opptjeningsvurderingId) {
+    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjeningsvurderingId) {
 
         override fun view() = GrunnlagsdataView(
             vilkårsgrunnlagId = vilkårsgrunnlagId,
@@ -325,7 +324,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         inntektsgrunnlag: Inntektsgrunnlag,
         vilkårsgrunnlagId: UUID ,
         opptjeningsvurderingId: UUID,
-    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, null, opptjeningsvurderingId = opptjeningsvurderingId) {
+    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjeningsvurderingId) {
 
         override fun view() = InfotrygdView(
             vilkårsgrunnlagId = vilkårsgrunnlagId,
