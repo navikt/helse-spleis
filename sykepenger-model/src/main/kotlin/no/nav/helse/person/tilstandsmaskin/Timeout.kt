@@ -37,7 +37,7 @@ internal sealed interface Timeout {
             }
 
             if (påminnelse.når(tvingFremTimeoutoppførselFlagg)) {
-                aktivitetslogg.info("Gir opp å vente i tilstand ${vedtaksperiode.tilstand::class.simpleName} etter $dagerVentet dager ettersom flagget '$tvingFremTimeoutoppførselFlagg' var satt i påminnelsen. (T for tiltanden er ${periode.days} dager.)")
+                aktivitetslogg.info("Gir opp å vente i tilstand ${vedtaksperiode.tilstand::class.simpleName} etter $dagerVentet dager ettersom flagget '$tvingFremTimeoutoppførselFlagg' var satt i påminnelsen. (Timeout for tiltanden er ${periode.days} dager.)")
                 return vedTimeout(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)
             }
             return null
