@@ -2300,7 +2300,7 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
         val grunnlag = vilkårsgrunnlag ?: return null
-        val (nyttGrunnlag, endredeArbeidsgivere) = grunnlag.håndterKorrigerteInntekter(overstyrArbeidsgiveropplysninger, subsumsjonslogg) ?: return null
+        val (nyttGrunnlag, endredeArbeidsgivere) = grunnlag.håndterKorrigerteInntekter(overstyrArbeidsgiveropplysninger) ?: return null
         person.lagreVilkårsgrunnlag(nyttGrunnlag)
 
         endredeArbeidsgivere.forEach { endretArbeidsgiver ->
@@ -2320,7 +2320,7 @@ internal class Vedtaksperiode private constructor(
         // i praksis double-dispatch, kotlin-style
         val (nyttGrunnlag, revurderingseventyr) = when (overstyrInntektsgrunnlag) {
             is Grunnbeløpsregulering -> {
-                val nyttGrunnlag = grunnlag.grunnbeløpsregulering(subsumsjonslogg)
+                val nyttGrunnlag = grunnlag.grunnbeløpsregulering()
                 if (nyttGrunnlag == null) {
                     aktivitetsloggMedVedtaksperiodekontekst.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt er allerede korrekt.")
                 } else {
@@ -2335,7 +2335,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             is SkjønnsmessigFastsettelse -> {
-                val nyttGrunnlag = grunnlag.skjønnsmessigFastsettelse(overstyrInntektsgrunnlag, subsumsjonslogg)
+                val nyttGrunnlag = grunnlag.skjønnsmessigFastsettelse(overstyrInntektsgrunnlag)
                 nyttGrunnlag to Revurderingseventyr.skjønnsmessigFastsettelse(overstyrInntektsgrunnlag, skjæringstidspunkt, skjæringstidspunkt)
             }
 

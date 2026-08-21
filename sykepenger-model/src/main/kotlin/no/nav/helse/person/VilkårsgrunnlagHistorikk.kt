@@ -7,13 +7,11 @@ import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnslagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
-import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1 - selvstendig næringsdrivende`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -130,50 +128,44 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         )
 
-        protected abstract fun kopierMed(
-            inntektsgrunnlag: Inntektsgrunnlag,
-            opptjening: ArbeidstakerOpptjening?,
-            subsumsjonslogg: Subsumsjonslogg,
-            nyttSkjæringstidspunkt: LocalDate? = null,
-            nyOpptjeningsvurderingId: UUID? = null
-        ): Grunnlagsdata
-
-        abstract fun overstyrArbeidsforhold(
+        internal fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
             subsumsjonslogg: Subsumsjonslogg
-        ): VilkårsgrunnlagElement
-
-        internal fun grunnbeløpsregulering(
-            subsumsjonslogg: Subsumsjonslogg
-        ): VilkårsgrunnlagElement? {
-            val nyttSykepengegrunnlag = inntektsgrunnlag.grunnbeløpsregulering() ?: return null
-            return kopierMed(nyttSykepengegrunnlag, opptjening, subsumsjonslogg)
+        ): Grunnlagsdata? {
+            if (this !is Grunnlagsdata) return null
+            return medOverstyrArbeidsforhold(hendelse, subsumsjonslogg)
         }
 
-        internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement? {
-            if (this is InfotrygdVilkårsgrunnlag) return null
+        internal fun grunnbeløpsregulering(): Grunnlagsdata? {
+            val nyttInntektsgrunnlag = inntektsgrunnlag.grunnbeløpsregulering() ?: return null
+            if (this !is Grunnlagsdata) return null
+            return medNyttInntektsgrunnlag(nyttInntektsgrunnlag)
+        }
+
+        internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse): Grunnlagsdata? {
+            if (this !is Grunnlagsdata) return null
             val nyttInntektsgrunnlag = inntektsgrunnlag.skjønnsmessigFastsettelse(hendelse)
-            return kopierMed(nyttInntektsgrunnlag, opptjening, subsumsjonslogg)
+            return medNyttInntektsgrunnlag(nyttInntektsgrunnlag)
         }
 
         internal fun håndterArbeidstakerFaktaavklartInntekt(
             organisasjonsnummer: String,
             førsteFraværsdag: LocalDate,
             arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
-        ) = when (val utfall = inntektsgrunnlag.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, førsteFraværsdag, arbeidstakerFaktaavklartInntekt)) {
-            Inntektsgrunnlag.Utfall.Uendret -> null
-            is Inntektsgrunnlag.Utfall.Endret -> kopierMed(utfall.nyttInntektsgrunnlag, opptjening, EmptyLog)
+        ): Grunnlagsdata? {
+            if (this !is Grunnlagsdata) return null
+            return when (val utfall = inntektsgrunnlag.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, førsteFraværsdag, arbeidstakerFaktaavklartInntekt)) {
+                Inntektsgrunnlag.Utfall.Uendret -> null
+                is Inntektsgrunnlag.Utfall.Endret -> medNyttInntektsgrunnlag(utfall.nyttInntektsgrunnlag)
+            }
         }
 
-        internal fun håndterKorrigerteInntekter(
-            hendelse: OverstyrArbeidsgiveropplysninger,
-            subsumsjonslogg: Subsumsjonslogg
-        ): Pair<Grunnlagsdata, List<EndretArbeidsgiver>>? {
-            if (this is InfotrygdVilkårsgrunnlag) return null
+        internal fun håndterKorrigerteInntekter(hendelse: OverstyrArbeidsgiveropplysninger): Pair<Grunnlagsdata, List<EndretArbeidsgiver>>? {
+            if (this !is Grunnlagsdata) return null
             return when (val utfall = inntektsgrunnlag.håndterKorrigerteInntekter(hendelse)) {
                 Inntektsgrunnlag.Utfall.Uendret -> null
                 is Inntektsgrunnlag.Utfall.Endret -> {
-                    val nyttGrunnlag = kopierMed(utfall.nyttInntektsgrunnlag, opptjening, subsumsjonslogg)
+                    val nyttGrunnlag = medNyttInntektsgrunnlag(utfall.nyttInntektsgrunnlag)
                     val arbeidstakerOpptjening = nyttGrunnlag.opptjening as ArbeidstakerOpptjening
                     val endredeArbeidsgivere = utfall.arbeidsgivereMedEndretBeløp.map { orgnr ->
                         EndretArbeidsgiver(
@@ -262,26 +254,27 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun vilkårsgrunnlagtype() = "Spleis"
 
-        override fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg) = kopierMed(
-            inntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
-            opptjening = hendelse.overstyr(opptjening!!).also {
-                subsumsjonslogg.logg(it.subsumsjon)
-            },
-            nyOpptjeningsvurderingId = UUID.randomUUID(),
-            subsumsjonslogg = subsumsjonslogg,
+        internal fun medOverstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg) = kopierMed(
+            nyttInntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
+            nyOpptjening = hendelse.overstyr(opptjening!!).also { subsumsjonslogg.logg(it.subsumsjon) },
+            nyOpptjeningsvurderingId = UUID.randomUUID()
         )
 
-        override fun kopierMed(
-            inntektsgrunnlag: Inntektsgrunnlag,
-            opptjening: ArbeidstakerOpptjening?,
-            subsumsjonslogg: Subsumsjonslogg,
-            nyttSkjæringstidspunkt: LocalDate?,
-            nyOpptjeningsvurderingId: UUID?
+        internal fun medNyttInntektsgrunnlag(nyttInntektsgrunnlag: Inntektsgrunnlag) = kopierMed(nyttInntektsgrunnlag = nyttInntektsgrunnlag)
+
+        private fun kopierMed(
+            nyttInntektsgrunnlag: Inntektsgrunnlag? = null,
+            nyOpptjening: ArbeidstakerOpptjening? = null,
+            nyttSkjæringstidspunkt: LocalDate? = null,
+            nyOpptjeningsvurderingId: UUID? = null
         ): Grunnlagsdata {
+            require(listOfNotNull(nyttInntektsgrunnlag, nyOpptjening, nyttSkjæringstidspunkt, nyOpptjeningsvurderingId).isNotEmpty()) {
+                "Må endre minst et felt for at det skal gi mening å lage et nytt grunnlag!"
+            }
             return Grunnlagsdata(
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
-                inntektsgrunnlag = inntektsgrunnlag,
-                opptjening = opptjening ?: this.opptjening,
+                inntektsgrunnlag = nyttInntektsgrunnlag ?: inntektsgrunnlag,
+                opptjening = nyOpptjening ?: opptjening,
                 medlemskapstatus = medlemskapstatus,
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID(),
@@ -339,22 +332,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             inntektsgrunnlag = inntektsgrunnlag.view(),
             skjæringstidspunkt = skjæringstidspunkt
         )
-
-        override fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg) = kopierMed(
-            inntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
-            opptjening = null,
-            subsumsjonslogg = subsumsjonslogg
-        )
-
-        override fun kopierMed(
-            inntektsgrunnlag: Inntektsgrunnlag,
-            opptjening: ArbeidstakerOpptjening?,
-            subsumsjonslogg: Subsumsjonslogg,
-            nyttSkjæringstidspunkt: LocalDate?,
-            nyOpptjeningsvurderingId: UUID?
-        ): Grunnlagsdata {
-            error("Kan ikke kopiere Infotrygd vilkårsgrunnlag")
-        }
 
         override fun vilkårsgrunnlagtype() = "Infotrygd"
 
