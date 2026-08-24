@@ -5,10 +5,17 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.april
 import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest
@@ -275,6 +282,55 @@ internal class MessageMediatorTest {
             manuellVurdering = true
         )
         assertEquals(forventet, hendelseMediator.lestEndretVurderingPåSkjæringstidspunkt)
+    }
+
+    @Test
+    fun `avbrutt fisker søknad`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttFiskerSøknad(1.januar,  31.januar))
+        val forventet = TestHendelseMediator.AvbruttSøknadData(1.januar, 31.januar, Behandlingsporing.Yrkesaktivitet.Selvstendig)
+        assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
+    }
+
+    @Test
+    fun `avbrutt frilanser søknad`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttFrilanserSøknad(1.februar,  28.februar))
+        val forventet = TestHendelseMediator.AvbruttSøknadData(1.februar, 28.februar, Behandlingsporing.Yrkesaktivitet.Frilans)
+        assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
+    }
+
+    @Test
+    fun `avbrutt jordbruker søknad`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttJordbrukerSøknad(1.mars,  31.mars))
+        val forventet = TestHendelseMediator.AvbruttSøknadData(1.mars, 31.mars, Behandlingsporing.Yrkesaktivitet.Selvstendig)
+        assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
+    }
+
+    @Test
+    fun `avbrutt selvstendig søknad`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttSelvstendigSøknad(1.april,  30.april))
+        val forventet = TestHendelseMediator.AvbruttSøknadData(1.april, 30.april, Behandlingsporing.Yrkesaktivitet.Selvstendig)
+        assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
+    }
+
+    @Test
+    fun `avbrutt arbeidstaker søknad`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttArbeidstakerSøknad(1.mai,  31.mai, "testOrgNr"))
+        val forventet = TestHendelseMediator.AvbruttSøknadData(1.mai, 31.mai, Behandlingsporing.Yrkesaktivitet.Arbeidstaker("testOrgNr"))
+        assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
+    }
+
+    @Test
+    fun `avbrutt arbeidsledig søknad uten tidligere arbeidsgiver`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttArbeidsledigSøknad(1.juni,  30.juni, null))
+        val forventet = TestHendelseMediator.AvbruttSøknadData(1.juni, 30.juni, Behandlingsporing.Yrkesaktivitet.Arbeidsledig)
+        assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
+    }
+
+    @Test
+    fun `avbrutt arbeidsledig søknad med tidligere arbeidsgiver`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttArbeidsledigSøknad(1.juli,  31.juli, "tidligereOrgNr"))
+        val forventet = TestHendelseMediator.AvbruttSøknadData(1.juli, 31.juli, Behandlingsporing.Yrkesaktivitet.Arbeidstaker("tidligereOrgNr"))
+        assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
     }
 
     @BeforeEach

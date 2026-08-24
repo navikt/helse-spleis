@@ -1661,4 +1661,46 @@ internal class TestMessageFactory(
         )
     )
     )
+
+    fun lagAvbruttFiskerSøknad(fom: LocalDate, tom: LocalDate) = nyHendelse("avbrutt_fisker_søknad", mapOf(
+        "fnr" to fødselsnummer,
+        "fom" to fom.toString(),
+        "tom" to tom.toString()
+    ))
+
+    fun lagAvbruttFrilanserSøknad(fom: LocalDate, tom: LocalDate) = nyHendelse("avbrutt_frilanser_søknad", mapOf(
+        "fnr" to fødselsnummer,
+        "fom" to fom.toString(),
+        "tom" to tom.toString()
+    ))
+
+    fun lagAvbruttJordbrukerSøknad(fom: LocalDate, tom: LocalDate) = nyHendelse("avbrutt_jordbruker_søknad", mapOf(
+        "fnr" to fødselsnummer,
+        "fom" to fom.toString(),
+        "tom" to tom.toString()
+    ))
+
+    fun lagAvbruttSelvstendigSøknad(fom: LocalDate, tom: LocalDate) = nyHendelse("avbrutt_selvstendig_søknad", mapOf(
+        "fnr" to fødselsnummer,
+        "fom" to fom.toString(),
+        "tom" to tom.toString()
+    ))
+
+    fun lagAvbruttArbeidstakerSøknad(fom: LocalDate, tom: LocalDate, organisasjonsnummer: String) = nyHendelse("avbrutt_søknad", mapOf(
+        "fnr" to fødselsnummer,
+        "fom" to fom.toString(),
+        "tom" to tom.toString(),
+        "arbeidsgiver" to mapOf(
+            "orgnummer" to organisasjonsnummer
+        )
+    ))
+
+    fun lagAvbruttArbeidsledigSøknad(fom: LocalDate, tom: LocalDate, tidligereArbeidsgiverOrgnummer : String?) = nyHendelse("avbrutt_arbeidsledig_søknad", mapOf(
+        "fnr" to fødselsnummer,
+        "fom" to fom.toString(),
+        "tom" to tom.toString()
+    ).let { when (tidligereArbeidsgiverOrgnummer) {
+        null -> it
+        else -> it + mapOf("tidligereArbeidsgiverOrgnummer" to tidligereArbeidsgiverOrgnummer)
+    } })
 }

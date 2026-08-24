@@ -11,7 +11,7 @@ import no.nav.helse.spleis.Meldingsporing
 
 internal class AvbruttSøknadMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, val behandlingsporing: Behandlingsporing.Yrkesaktivitet) : HendelseMessage(packet) {
 
-    private val periode = packet["fom"].asLocalDate() til packet["tom"].asLocalDate()
+    internal val periode = packet["fom"].asLocalDate() til packet["tom"].asLocalDate()
 
     private val avbruttSøknad
         get() = AvbruttSøknad(
