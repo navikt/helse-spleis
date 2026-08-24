@@ -1599,7 +1599,7 @@ internal class TestMessageFactory(
     )
 
     internal fun lagEndretForsikringsvurdering(skjæringstidspunkt: LocalDate, forsikringsvurderingId: UUID) = nyHendelse(
-        "endret_forsikringsvurdering", mutableMapOf(
+        "endret_forsikringsvurdering", mapOf(
             "fødselsnummer" to fødselsnummer,
             "skjæringstidspunkt" to skjæringstidspunkt.toString(),
             "forsikringsvurderingId" to forsikringsvurderingId.toString()
@@ -1607,11 +1607,18 @@ internal class TestMessageFactory(
     )
 
     internal fun lagEndretOpptjeningsvurdering(skjæringstidspunkt: LocalDate, opptjeningsvurderingId: UUID, manuellVurdering: Boolean) = nyHendelse(
-        "endret_opptjeningsvurdering", mutableMapOf(
+        "endret_opptjeningsvurdering", mapOf(
             "fødselsnummer" to fødselsnummer,
             "skjæringstidspunkt" to skjæringstidspunkt.toString(),
             "opptjeningsvurderingId" to opptjeningsvurderingId.toString(),
             "manuellVurdering" to manuellVurdering
+        )
+    )
+
+    internal fun lagInntektsendringer(fom: LocalDate) = nyHendelse(
+            "inntektsendringer", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "inntektsendringFom" to fom.toString()
         )
     )
 

@@ -117,8 +117,8 @@ internal class TestHendelseMediator : IHendelseMediator {
     val lestAvstemming get() = lestAvstemmingVerdi.get()
     val lestMigrate get() = lestMigrateVerdi.get()
     val lestForkastSykmeldingsperioder get() = lestForkastSykmeldingsperioderMessageVerdi.get()
-    val lestGraderteAndreYtelserEndret get() = lestGraderteAndreYtelserEndretVerdi.get()
     val lestEndretVurderingPåSkjæringstidspunkt get() = lestEndretVurderingPåSkjæringstidspunktVerdi.get()
+    val lestEndretGrunnlagForBeregning get() = lestEndretGrunnlagForBeregningVerdi.get()
 
     private val lestNySøknadVerdi = ThreadLocal.withInitial { false }
     private val lestSendtSøknadArbeidsgiverVerdi = ThreadLocal.withInitial { false }
@@ -141,8 +141,8 @@ internal class TestHendelseMediator : IHendelseMediator {
     private val lestAvstemmingVerdi = ThreadLocal.withInitial { false }
     private val lestMigrateVerdi = ThreadLocal.withInitial { false }
     private val lestForkastSykmeldingsperioderMessageVerdi = ThreadLocal.withInitial { false }
-    private val lestGraderteAndreYtelserEndretVerdi = ThreadLocal.withInitial { false }
     private val lestEndretVurderingPåSkjæringstidspunktVerdi: ThreadLocal<EndretVurderingPåSkjæringstidspunktData?> = ThreadLocal.withInitial { null }
+    private val lestEndretGrunnlagForBeregningVerdi: ThreadLocal<EndretGrunnlagForBeregningData?> = ThreadLocal.withInitial { null }
 
     fun reset() {
         lestNySøknadVerdi.remove()
@@ -166,8 +166,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestMigrateVerdi.remove()
         lestAnmodningOmForkastingVerdi.remove()
         lestForkastSykmeldingsperioderMessageVerdi.remove()
-        lestGraderteAndreYtelserEndretVerdi.remove()
         lestEndretVurderingPåSkjæringstidspunktVerdi.remove()
+        lestEndretGrunnlagForBeregningVerdi.remove()
     }
 
     override fun behandle(message: HendelseMessage, context: BehandlingContext) {
@@ -296,10 +296,18 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: InfotrygdendringMessage, infotrygdEndring: Infotrygdendring, context: BehandlingContext) {}
 
-    override fun behandle(message: InntektsendringerMessage, inntektsendringer: Inntektsendringer, context: BehandlingContext) {}
+    override fun behandle(message: InntektsendringerMessage, inntektsendringer: Inntektsendringer, context: BehandlingContext) {
+        lestEndretGrunnlagForBeregningVerdi.set(EndretGrunnlagForBeregningData(
+            type = "Inntektsendringer",
+            fom = inntektsendringer.inntektsendringFom
+        ))
+    }
 
     override fun behandle(message: GraderteAndreYtelserEndretMessage, graderteAndreYtelserEndret: GraderteAndreYtelserEndret, context: BehandlingContext) {
-        lestGraderteAndreYtelserEndretVerdi.set(true)
+        lestEndretGrunnlagForBeregningVerdi.set(EndretGrunnlagForBeregningData(
+            type = "GraderteAndreYtelser",
+            fom = graderteAndreYtelserEndret.graderteAndreYtelserEndretFom
+        ))
     }
 
     override fun behandle(message: UtbetalingshistorikkEtterInfotrygdendringMessage, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, context: BehandlingContext) {}
@@ -313,7 +321,6 @@ internal class TestHendelseMediator : IHendelseMediator {
     override fun behandle(message: SkjønnsmessigFastsettelseMessage, skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse, context: BehandlingContext) {}
 
     override fun behandle(message: MinimumSykdomsgradVurdertMessage, minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding, context: BehandlingContext) {}
-
 
     data class EndretVurderingPåSkjæringstidspunktData(
         val skjæringstidspunkt: LocalDate,
@@ -330,4 +337,9 @@ internal class TestHendelseMediator : IHendelseMediator {
             manuellVurdering = message.avsender == Avsender.SAKSBEHANDLER
         ))
     }
+
+    data class EndretGrunnlagForBeregningData(
+        val type: String,
+        val fom: LocalDate
+    )
 }

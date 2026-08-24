@@ -224,8 +224,22 @@ internal class MessageMediatorTest {
 
     @Test
     fun `graderte andre ytelser endret`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagGraderteAndreYtelserEndret())
-        assertTrue(hendelseMediator.lestGraderteAndreYtelserEndret)
+        testRapid.sendTestMessage(meldingsfabrikk.lagGraderteAndreYtelserEndret(5.januar))
+        val forventet = TestHendelseMediator.EndretGrunnlagForBeregningData(
+            type = "GraderteAndreYtelser",
+            fom = 5.januar,
+        )
+        assertEquals(forventet, hendelseMediator.lestEndretGrunnlagForBeregning)
+    }
+
+    @Test
+    fun inntektsendringer() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagInntektsendringer(7.januar))
+        val forventet = TestHendelseMediator.EndretGrunnlagForBeregningData(
+            type = "Inntektsendringer",
+            fom = 7.januar,
+        )
+        assertEquals(forventet, hendelseMediator.lestEndretGrunnlagForBeregning)
     }
 
     @Test
