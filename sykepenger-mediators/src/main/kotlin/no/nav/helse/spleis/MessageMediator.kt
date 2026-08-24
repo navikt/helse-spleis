@@ -16,11 +16,6 @@ import no.nav.helse.serde.migration.JsonMigrationException
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.AnmodningOmForkastingRiver
 import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
-import no.nav.helse.spleis.meldinger.AvbruttArbeidsledigSøknadRiver
-import no.nav.helse.spleis.meldinger.AvbruttFiskerSøknadRiver
-import no.nav.helse.spleis.meldinger.AvbruttFrilansSøknadRiver
-import no.nav.helse.spleis.meldinger.AvbruttJordbrukerSøknadRiver
-import no.nav.helse.spleis.meldinger.AvbruttSelvstendigSøknadRiver
 import no.nav.helse.spleis.meldinger.AvbruttSøknadRiver
 import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
 import no.nav.helse.spleis.meldinger.EndretGrunnlagForBeregningRiver
@@ -174,11 +169,6 @@ internal class MessageMediator(
             DødsmeldingerRiver(it, this)
             ForkastSykmeldingsperioderRiver(it, this)
             AvbruttSøknadRiver(it, this)
-            AvbruttArbeidsledigSøknadRiver(it, this)
-            AvbruttSelvstendigSøknadRiver(it, this)
-            AvbruttJordbrukerSøknadRiver(it, this)
-            AvbruttFiskerSøknadRiver(it, this)
-            AvbruttFrilansSøknadRiver(it, this)
             AnmodningOmForkastingRiver(it, this)
             IdentOpphørtRiver(it, this)
             SkjønnsmessigFastsettelseRiver(it, this)
