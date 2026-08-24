@@ -13,7 +13,7 @@ internal class OverstyrArbeidsgiveropplysningerRiver(
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
 
-    override val eventName = "overstyr_inntekt_og_refusjon"
+    override val eventNames = setOf("overstyr_inntekt_og_refusjon")
 
     override val riverName = "Overstyr inntekt og refusjon"
 

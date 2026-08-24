@@ -12,7 +12,7 @@ internal class OverstyrArbeidsforholdRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "overstyr_arbeidsforhold"
+    override val eventNames = setOf("overstyr_arbeidsforhold")
 
     override val riverName = "Overstyr arbeidsforhold"
 

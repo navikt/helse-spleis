@@ -11,7 +11,7 @@ internal class IdentOpphørtRiver(
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
 
-    override val eventName = "ident_opphørt"
+    override val eventNames = setOf("ident_opphørt")
     override val riverName = "Ident opphørt"
 
 

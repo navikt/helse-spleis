@@ -13,7 +13,7 @@ internal class InntektsmeldingerReplayRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "inntektsmeldinger_replay"
+    override val eventNames = setOf("inntektsmeldinger_replay")
     override val riverName = "Inntektsmeldinger Replay"
 
     override fun validate(message: JsonMessage) {

@@ -10,7 +10,7 @@ internal abstract class BehovRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "behov"
+    override val eventNames = setOf("behov")
     protected abstract val behov: List<Behov.Behovstype>
 
     init {

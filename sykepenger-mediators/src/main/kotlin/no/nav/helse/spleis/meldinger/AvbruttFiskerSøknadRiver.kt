@@ -14,7 +14,7 @@ internal class AvbruttFiskerSøknadRiver(
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
 
-    override val eventName = "avbrutt_fisker_søknad"
+    override val eventNames = setOf("avbrutt_fisker_søknad")
     override val riverName = "Avbrutt fisker søknad"
 
     override fun validate(message: JsonMessage) {

@@ -15,7 +15,7 @@ internal class SendtArbeidsledigSøknaderRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : SøknadRiver(rapidsConnection, messageMediator) {
-    override val eventName = "sendt_søknad_arbeidsledig"
+    override val eventNames = setOf("sendt_søknad_arbeidsledig")
     override val riverName = "Sendt søknad Arbeidsledig"
 
     override fun validate(message: JsonMessage) {

@@ -13,7 +13,7 @@ internal class SendtNavSøknaderRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : SøknadRiver(rapidsConnection, messageMediator) {
-    override val eventName = "sendt_søknad_nav"
+    override val eventNames = setOf("sendt_søknad_nav")
     override val riverName = "Sendt søknad Nav"
 
     override fun validate(message: JsonMessage) {

@@ -11,7 +11,7 @@ internal class PersonAvstemmingRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "person_avstemming"
+    override val eventNames = setOf("person_avstemming")
     override val riverName = "Person Avstemming"
 
     override fun validate(message: JsonMessage) {

@@ -12,7 +12,7 @@ internal class MinimumSykdomsgradVurdertRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "minimum_sykdomsgrad_vurdert"
+    override val eventNames = setOf("minimum_sykdomsgrad_vurdert")
     override val riverName = "minimum_sykdomsgrad_vurdert"
 
     override fun validate(message: JsonMessage) {

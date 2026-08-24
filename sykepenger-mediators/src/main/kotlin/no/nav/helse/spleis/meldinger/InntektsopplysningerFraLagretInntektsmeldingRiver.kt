@@ -10,7 +10,7 @@ internal class InntektsopplysningerFraLagretInntektsmeldingRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "inntektsopplysninger_fra_lagret_inntektsmelding"
+    override val eventNames = setOf("inntektsopplysninger_fra_lagret_inntektsmelding")
 
     override val riverName = "InntektsopplysningerFraLagretInntektsmelding"
 

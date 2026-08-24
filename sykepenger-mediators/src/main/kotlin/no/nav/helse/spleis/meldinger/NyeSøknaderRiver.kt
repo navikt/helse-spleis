@@ -10,7 +10,7 @@ internal class NyeSøknaderRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : SøknadRiver(rapidsConnection, messageMediator) {
-    override val eventName = "ny_søknad"
+    override val eventNames = setOf("ny_søknad")
     override val riverName = "Ny søknad"
 
     override fun validate(message: JsonMessage) {

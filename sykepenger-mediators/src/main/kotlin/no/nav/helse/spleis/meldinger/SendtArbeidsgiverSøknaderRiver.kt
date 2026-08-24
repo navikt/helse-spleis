@@ -13,7 +13,7 @@ internal class SendtArbeidsgiverSøknaderRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : SøknadRiver(rapidsConnection, messageMediator) {
-    override val eventName = "sendt_søknad_arbeidsgiver"
+    override val eventNames = setOf("sendt_søknad_arbeidsgiver")
     override val riverName = "Sendt søknad arbeidsgiver"
 
     override fun validate(message: JsonMessage) {

@@ -13,7 +13,7 @@ internal class ForkastSykmeldingsperioderRiver(
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
 
-    override val eventName = "forkast_sykmeldingsperioder"
+    override val eventNames = setOf("forkast_sykmeldingsperioder")
     override val riverName = "forkast_sykmeldingsperioder"
 
     override fun validate(message: JsonMessage) {

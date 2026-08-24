@@ -12,7 +12,7 @@ internal class InfotrygdendringerRiver(
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
 
-    override val eventName = "infotrygdendring"
+    override val eventNames = setOf("infotrygdendring")
     override val riverName = "Infotrygdendring"
 
 

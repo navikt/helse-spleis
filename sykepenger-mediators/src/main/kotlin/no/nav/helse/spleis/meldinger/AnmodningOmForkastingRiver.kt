@@ -11,7 +11,7 @@ internal open class AnmodningOmForkastingRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "anmodning_om_forkasting"
+    override val eventNames = setOf("anmodning_om_forkasting")
     override val riverName = "anmodningOmForkasting"
 
     override fun validate(message: JsonMessage) {

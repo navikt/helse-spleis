@@ -10,7 +10,7 @@ internal class PersonPåminnelserRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "person_påminnelse"
+    override val eventNames = setOf("person_påminnelse")
     override val riverName = "Person påminnelse"
 
     override fun validate(message: JsonMessage) {

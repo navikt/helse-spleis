@@ -13,7 +13,7 @@ internal class DødsmeldingerRiver(
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
 
-    override val eventName = "dødsmelding"
+    override val eventNames = setOf("dødsmelding")
     override val riverName = "Dødsmelding"
 
     override fun validate(message: JsonMessage) {

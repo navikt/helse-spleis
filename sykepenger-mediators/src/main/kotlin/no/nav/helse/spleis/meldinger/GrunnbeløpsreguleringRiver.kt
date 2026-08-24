@@ -10,7 +10,7 @@ internal class GrunnbeløpsreguleringRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "grunnbeløpsregulering"
+    override val eventNames = setOf("grunnbeløpsregulering")
 
     override val riverName = "Grunnbeløpsregulering"
 

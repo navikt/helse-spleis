@@ -8,7 +8,7 @@ import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 
 internal class MigrateRiver(rapidsConnection: RapidsConnection, messageMediator: IMessageMediator) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "json_migrate"
+    override val eventNames = setOf("json_migrate")
     override val riverName = "JSON Migrate"
 
     override fun validate(message: JsonMessage) {

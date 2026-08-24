@@ -13,7 +13,7 @@ internal class NyeArbeidsledigSøknaderRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : SøknadRiver(rapidsConnection, messageMediator) {
-    override val eventName = "ny_søknad_arbeidsledig"
+    override val eventNames = setOf("ny_søknad_arbeidsledig")
     override val riverName = "Ny arbeidsledig søknad"
 
     override fun validate(message: JsonMessage) {

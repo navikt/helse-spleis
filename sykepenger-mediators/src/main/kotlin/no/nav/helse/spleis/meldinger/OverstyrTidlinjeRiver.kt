@@ -11,7 +11,7 @@ internal class OverstyrTidlinjeRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "overstyr_tidslinje"
+    override val eventNames = setOf("overstyr_tidslinje")
     override val riverName = "Overstyr tidslinje"
 
     override fun validate(message: JsonMessage) {

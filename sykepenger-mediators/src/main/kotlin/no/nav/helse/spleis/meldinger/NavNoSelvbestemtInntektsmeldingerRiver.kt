@@ -10,7 +10,7 @@ internal class NavNoSelvbestemtInntektsmeldingerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "selvbestemte_arbeidsgiveropplysninger"
+    override val eventNames = setOf("selvbestemte_arbeidsgiveropplysninger")
     override val riverName = "Selvbestemte arbeidsgiveropplysninger"
 
     override fun validate(message: JsonMessage) {

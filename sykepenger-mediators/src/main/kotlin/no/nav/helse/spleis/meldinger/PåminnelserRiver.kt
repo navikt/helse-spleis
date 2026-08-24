@@ -14,7 +14,7 @@ internal class PåminnelserRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "påminnelse"
+    override val eventNames = setOf("påminnelse")
     override val riverName = "Påminnelse"
 
     init {

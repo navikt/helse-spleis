@@ -15,7 +15,7 @@ internal class AvbruttArbeidsledigSøknadRiver(
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
 
-    override val eventName = "avbrutt_arbeidsledig_søknad"
+    override val eventNames = setOf("avbrutt_arbeidsledig_søknad")
     override val riverName = "Avbrutt arbeidsledig søknad"
 
     override fun validate(message: JsonMessage) {

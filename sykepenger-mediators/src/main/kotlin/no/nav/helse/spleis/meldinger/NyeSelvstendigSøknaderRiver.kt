@@ -10,7 +10,7 @@ internal class NyeSelvstendigSøknaderRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : SøknadRiver(rapidsConnection, messageMediator) {
-    override val eventName = "ny_søknad_selvstendig"
+    override val eventNames = setOf("ny_søknad_selvstendig")
     override val riverName = "Ny selvstendig søknad"
 
     override fun precondition(packet: JsonMessage) {

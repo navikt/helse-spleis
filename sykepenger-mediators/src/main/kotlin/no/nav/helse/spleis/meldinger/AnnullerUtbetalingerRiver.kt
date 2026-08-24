@@ -10,7 +10,7 @@ internal class AnnullerUtbetalingerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "annullering"
+    override val eventNames = setOf("annullering")
     override val riverName = "annullering"
 
     override fun validate(message: JsonMessage) {

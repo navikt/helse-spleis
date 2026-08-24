@@ -13,7 +13,7 @@ internal class LpsOgAltinnInntektsmeldingerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "inntektsmelding"
+    override val eventNames = setOf("inntektsmelding")
     override val riverName = "Lps- og Altinn-inntektsmeldinger"
 
     override fun validate(message: JsonMessage) {

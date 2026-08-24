@@ -10,7 +10,7 @@ internal class GjenopptaBehandlingerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "gjenoppta_behandling"
+    override val eventNames = setOf("gjenoppta_behandling")
     override val riverName = "Gjenoppta behandling"
 
     override fun validate(message: JsonMessage) {

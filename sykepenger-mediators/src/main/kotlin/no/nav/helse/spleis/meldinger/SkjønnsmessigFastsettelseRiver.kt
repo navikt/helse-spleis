@@ -13,7 +13,7 @@ internal class SkjønnsmessigFastsettelseRiver(
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
 
-    override val eventName = "skjønnsmessig_fastsettelse"
+    override val eventNames = setOf("skjønnsmessig_fastsettelse")
 
     override val riverName = "Skjønnsmessig fastsettelse"
 

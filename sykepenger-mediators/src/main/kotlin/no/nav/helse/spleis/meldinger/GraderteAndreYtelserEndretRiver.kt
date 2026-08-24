@@ -13,7 +13,7 @@ internal class GraderteAndreYtelserEndretRiver(
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
 
-    override val eventName = "graderte_andre_ytelser_endret"
+    override val eventNames = setOf("graderte_andre_ytelser_endret")
     override val riverName = "GraderteAndreYtelserEndret"
 
     override fun validate(message: JsonMessage) {

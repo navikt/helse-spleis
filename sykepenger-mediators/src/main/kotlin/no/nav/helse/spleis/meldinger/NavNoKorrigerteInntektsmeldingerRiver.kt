@@ -10,7 +10,7 @@ internal class NavNoKorrigerteInntektsmeldingerRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    override val eventName = "korrigerte_arbeidsgiveropplysninger"
+    override val eventNames = setOf("korrigerte_arbeidsgiveropplysninger")
     override val riverName = "Korrigerte Arbeidsgiveropplysninger"
 
     override fun validate(message: JsonMessage) {

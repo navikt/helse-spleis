@@ -13,7 +13,7 @@ internal class InntektsendringerRiver(
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
 
-    override val eventName = "inntektsendringer"
+    override val eventNames = setOf("inntektsendringer")
     override val riverName = "Inntektsendringer"
 
     override fun validate(message: JsonMessage) {
