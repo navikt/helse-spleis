@@ -58,6 +58,7 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
@@ -197,6 +198,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is UtbetalingshistorikkMessage,
         is InfotrygdendringMessage,
         is GraderteAndreYtelserEndretMessage,
+        is EndretVurderingPåSkjæringstidspunktMessage,
         is InntektsendringerMessage -> null // Disse trenger vi ikke å lagre
     }
 

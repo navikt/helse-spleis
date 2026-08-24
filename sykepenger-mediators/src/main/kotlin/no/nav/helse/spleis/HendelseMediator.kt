@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopptaBehandling
@@ -49,6 +50,7 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
@@ -580,6 +582,12 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(message: EndretVurderingPåSkjæringstidspunktMessage, endretVurderingPåSkjæringstidspunkt: EndretVurderingPåSkjæringstidspunkt, context: BehandlingContext) {
+        hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
+            person.håndterEndretVurderingPåSkjæringstidspunkt(eventBus, endretVurderingPåSkjæringstidspunkt, aktivitetslogg)
+        }
+    }
+
     private fun opprettPersonOgHåndter(
         personopplysninger: Personopplysninger,
         message: HendelseMessage,
@@ -826,4 +834,5 @@ internal interface IHendelseMediator {
     fun behandle(message: AvbruttSøknadMessage, avbruttSøknad: AvbruttSøknad, context: BehandlingContext)
     fun behandle(message: SkjønnsmessigFastsettelseMessage, skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse, context: BehandlingContext)
     fun behandle(message: MinimumSykdomsgradVurdertMessage, minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding, context: BehandlingContext)
+    fun behandle(message: EndretVurderingPåSkjæringstidspunktMessage, endretVurderingPåSkjæringstidspunkt: EndretVurderingPåSkjæringstidspunkt, context: BehandlingContext)
 }

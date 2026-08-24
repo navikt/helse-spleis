@@ -23,6 +23,7 @@ import no.nav.helse.spleis.meldinger.AvbruttJordbrukerSøknadRiver
 import no.nav.helse.spleis.meldinger.AvbruttSelvstendigSøknadRiver
 import no.nav.helse.spleis.meldinger.AvbruttSøknadRiver
 import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
+import no.nav.helse.spleis.meldinger.EndretVurderingPåSkjæringstidspunktRiver
 import no.nav.helse.spleis.meldinger.FeriepengeutbetalingerRiver
 import no.nav.helse.spleis.meldinger.ForkastSykmeldingsperioderRiver
 import no.nav.helse.spleis.meldinger.GjenopptaBehandlingerRiver
@@ -70,6 +71,7 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
@@ -185,6 +187,7 @@ internal class MessageMediator(
             IdentOpphørtRiver(it, this)
             SkjønnsmessigFastsettelseRiver(it, this)
             MinimumSykdomsgradVurdertRiver(it, this)
+            EndretVurderingPåSkjæringstidspunktRiver(it, this)
         }
     }
 
@@ -264,6 +267,7 @@ internal class MessageMediator(
         is InntektsendringerMessage,
         is GraderteAndreYtelserEndretMessage,
         is GjenopptaBehandlingMessage,
+        is EndretVurderingPåSkjæringstidspunktMessage,
         is InntektsopplysningerFraLagretInntektsmeldingMessage -> false
 
         // meldinger som må replayes/sendes på nytt ved feil får

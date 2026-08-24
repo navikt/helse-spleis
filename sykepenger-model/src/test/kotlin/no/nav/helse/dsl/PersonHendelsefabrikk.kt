@@ -7,6 +7,7 @@ import java.util.UUID
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.medSaksbehandlerinntekt
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.medSkjønnsmessigFastsattInntekt
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidslinjer
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
@@ -45,7 +46,8 @@ internal class PersonHendelsefabrikk {
         EndretVurderingPåSkjæringstidspunkt(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             skjæringstidspunkt = skjæringstidspunkt,
-            endretVurdering = endretVurdering
+            endretVurdering = endretVurdering,
+            avsender = Avsender.SYSTEM
         )
 
     internal fun lagPåminnelse() =

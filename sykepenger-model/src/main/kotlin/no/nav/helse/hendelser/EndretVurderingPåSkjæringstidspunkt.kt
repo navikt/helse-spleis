@@ -14,7 +14,7 @@ class EndretVurderingPåSkjæringstidspunkt(
     private val meldingsreferanseId: MeldingsreferanseId,
     internal val skjæringstidspunkt: LocalDate,
     internal val endretVurdering: Vurdering,
-    private val avsender: Avsender = SYSTEM
+    private val avsender: Avsender
 ): Hendelse {
     override val behandlingsporing = Behandlingsporing.IngenYrkesaktivitet
 

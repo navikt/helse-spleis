@@ -320,7 +320,7 @@ class Person private constructor(
     }
 
     fun håndterEndretVurderingPåSkjæringstidspunkt(eventBus: EventBus, endretVurderingPåSkjæringstidspunkt: EndretVurderingPåSkjæringstidspunkt, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler endret vurdering på skjæringstidspunkt")
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler endret ${endretVurderingPåSkjæringstidspunkt.endretVurdering::class.simpleName} på skjæringstidspunkt")
         val grunnlag = vilkårsgrunnlagFor(endretVurderingPåSkjæringstidspunkt.skjæringstidspunkt) ?: return aktivitetsloggMedPersonkontekst.info("Fant ikke vilkårsgrunnlag på ${endretVurderingPåSkjæringstidspunkt.skjæringstidspunkt}")
         val nyttGrunnlag = grunnlag.håndterEndretVurdering(endretVurderingPåSkjæringstidspunkt, aktivitetsloggMedPersonkontekst) ?: return
         lagreVilkårsgrunnlag(nyttGrunnlag)

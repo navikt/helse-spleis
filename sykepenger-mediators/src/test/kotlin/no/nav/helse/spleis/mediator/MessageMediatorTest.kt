@@ -17,6 +17,7 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.utboks.InMemoryUtboksDao
 import no.nav.helse.spleis.utboks.TestUtsender
 import no.nav.inntektsmeldingkontrakt.Periode
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -218,13 +219,48 @@ internal class MessageMediatorTest {
     @Test
     fun `forkast sykmeldingsperioder`() {
         testRapid.sendTestMessage(meldingsfabrikk.lagForkastSykmeldingsperioder())
-        assertTrue(hendelseMediator.lestForkastSykmeldingsperioderMessage)
+        assertTrue(hendelseMediator.lestForkastSykmeldingsperioder)
     }
 
     @Test
     fun `graderte andre ytelser endret`() {
         testRapid.sendTestMessage(meldingsfabrikk.lagGraderteAndreYtelserEndret())
-        assertTrue(hendelseMediator.lestGraderteAndreYtelserEndretMessage)
+        assertTrue(hendelseMediator.lestGraderteAndreYtelserEndret)
+    }
+
+    @Test
+    fun `endret forsikringsvurdering`() {
+        val forsikringsvurderingId = UUID.randomUUID()
+
+        testRapid.sendTestMessage(meldingsfabrikk.lagEndretForsikringsvurdering(
+            skjæringstidspunkt = 1.januar,
+            forsikringsvurderingId = forsikringsvurderingId,
+        ))
+        val forventet = TestHendelseMediator.EndretVurderingPåSkjæringstidspunktData(
+            skjæringstidspunkt = 1.januar,
+            vurderingId = forsikringsvurderingId,
+            type = "Forsikringsvurdering",
+            manuellVurdering = false
+        )
+        assertEquals(forventet, hendelseMediator.lestEndretVurderingPåSkjæringstidspunkt)
+    }
+
+    @Test
+    fun `endret opptjeningsvurdering`() {
+        val opptjeningsvurderingId = UUID.randomUUID()
+
+        testRapid.sendTestMessage(meldingsfabrikk.lagEndretOpptjeningsvurdering(
+            skjæringstidspunkt = 2.januar,
+            opptjeningsvurderingId = opptjeningsvurderingId,
+            manuellVurdering = true
+        ))
+        val forventet = TestHendelseMediator.EndretVurderingPåSkjæringstidspunktData(
+            skjæringstidspunkt = 2.januar,
+            vurderingId = opptjeningsvurderingId,
+            type = "Opptjeningsvurdering",
+            manuellVurdering = true
+        )
+        assertEquals(forventet, hendelseMediator.lestEndretVurderingPåSkjæringstidspunkt)
     }
 
     @BeforeEach

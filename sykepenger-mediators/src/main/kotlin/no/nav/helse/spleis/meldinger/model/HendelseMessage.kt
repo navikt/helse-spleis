@@ -98,6 +98,7 @@ private val HendelseMessage.kontekstnavn
         is PåminnelseMessage -> "Påminnelse"
         is SkjønnsmessigFastsettelseMessage -> "SkjønnsmessigFastsettelse"
         is GjenopptaBehandlingMessage -> "GjenopptaBehandling"
+        is EndretVurderingPåSkjæringstidspunktMessage -> "EndretVurderingPåSkjæringstidspunkt"
 
         is NyArbeidsledigSøknadMessage,
         is NyArbeidsledigTidligereArbeidstakerSøknadMessage,

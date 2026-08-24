@@ -1598,6 +1598,23 @@ internal class TestMessageFactory(
     )
     )
 
+    internal fun lagEndretForsikringsvurdering(skjæringstidspunkt: LocalDate, forsikringsvurderingId: UUID) = nyHendelse(
+        "endret_forsikringsvurdering", mutableMapOf(
+            "fødselsnummer" to fødselsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt.toString(),
+            "forsikringsvurderingId" to forsikringsvurderingId.toString()
+        )
+    )
+
+    internal fun lagEndretOpptjeningsvurdering(skjæringstidspunkt: LocalDate, opptjeningsvurderingId: UUID, manuellVurdering: Boolean) = nyHendelse(
+        "endret_opptjeningsvurdering", mutableMapOf(
+            "fødselsnummer" to fødselsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt.toString(),
+            "opptjeningsvurderingId" to opptjeningsvurderingId.toString(),
+            "manuellVurdering" to manuellVurdering
+        )
+    )
+
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(navn, hendelse).let { it.id to it.toJson() }
 

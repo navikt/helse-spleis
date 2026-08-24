@@ -1,11 +1,15 @@
 package no.nav.helse.spleis.mediator
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopptaBehandling
@@ -45,6 +49,7 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
@@ -111,8 +116,9 @@ internal class TestHendelseMediator : IHendelseMediator {
     val lestAnnullerUtbetaling get() = lestAnnullerUtbetalingVerdi.get()
     val lestAvstemming get() = lestAvstemmingVerdi.get()
     val lestMigrate get() = lestMigrateVerdi.get()
-    val lestForkastSykmeldingsperioderMessage get() = lestForkastSykmeldingsperioderMessageVerdi.get()
-    val lestGraderteAndreYtelserEndretMessage get() = lestGraderteAndreYtelserEndretVerdi.get()
+    val lestForkastSykmeldingsperioder get() = lestForkastSykmeldingsperioderMessageVerdi.get()
+    val lestGraderteAndreYtelserEndret get() = lestGraderteAndreYtelserEndretVerdi.get()
+    val lestEndretVurderingPåSkjæringstidspunkt get() = lestEndretVurderingPåSkjæringstidspunktVerdi.get()
 
     private val lestNySøknadVerdi = ThreadLocal.withInitial { false }
     private val lestSendtSøknadArbeidsgiverVerdi = ThreadLocal.withInitial { false }
@@ -136,6 +142,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     private val lestMigrateVerdi = ThreadLocal.withInitial { false }
     private val lestForkastSykmeldingsperioderMessageVerdi = ThreadLocal.withInitial { false }
     private val lestGraderteAndreYtelserEndretVerdi = ThreadLocal.withInitial { false }
+    private val lestEndretVurderingPåSkjæringstidspunktVerdi: ThreadLocal<EndretVurderingPåSkjæringstidspunktData?> = ThreadLocal.withInitial { null }
 
     fun reset() {
         lestNySøknadVerdi.remove()
@@ -160,6 +167,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestAnmodningOmForkastingVerdi.remove()
         lestForkastSykmeldingsperioderMessageVerdi.remove()
         lestGraderteAndreYtelserEndretVerdi.remove()
+        lestEndretVurderingPåSkjæringstidspunktVerdi.remove()
     }
 
     override fun behandle(message: HendelseMessage, context: BehandlingContext) {
@@ -305,4 +313,21 @@ internal class TestHendelseMediator : IHendelseMediator {
     override fun behandle(message: SkjønnsmessigFastsettelseMessage, skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse, context: BehandlingContext) {}
 
     override fun behandle(message: MinimumSykdomsgradVurdertMessage, minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding, context: BehandlingContext) {}
+
+
+    data class EndretVurderingPåSkjæringstidspunktData(
+        val skjæringstidspunkt: LocalDate,
+        val vurderingId: UUID,
+        val type: String,
+        val manuellVurdering: Boolean
+    )
+
+    override fun behandle(message: EndretVurderingPåSkjæringstidspunktMessage, endretVurderingPåSkjæringstidspunkt: EndretVurderingPåSkjæringstidspunkt, context: BehandlingContext) {
+        lestEndretVurderingPåSkjæringstidspunktVerdi.set(EndretVurderingPåSkjæringstidspunktData(
+            skjæringstidspunkt = message.skjæringstidspunkt,
+            vurderingId = message.vurdering.id,
+            type = message.vurdering::class.simpleName!!,
+            manuellVurdering = message.avsender == Avsender.SAKSBEHANDLER
+        ))
+    }
 }
