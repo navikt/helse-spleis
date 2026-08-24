@@ -10,7 +10,9 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.refusjonstidsl
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.EndretGrunnlagForBeregning
 import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
+import no.nav.helse.hendelser.Grunnlag
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -40,14 +42,6 @@ internal class PersonHendelsefabrikk {
             skjæringstidspunkt = skjæringstidspunkt,
             overstyrteArbeidsforhold = overstyrteArbeidsforhold.toList(),
             opprettet = LocalDateTime.now()
-        )
-
-    internal fun lagEndretVuderingPåSkjæringstidspunkt(skjæringstidspunkt: LocalDate, endretVurdering: Vurdering) =
-        EndretVurderingPåSkjæringstidspunkt(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            skjæringstidspunkt = skjæringstidspunkt,
-            endretVurdering = endretVurdering,
-            avsender = Avsender.SYSTEM
         )
 
     internal fun lagPåminnelse() =
@@ -117,6 +111,34 @@ internal class PersonHendelsefabrikk {
         perioderMedMinimumSykdomsgradVurdertOK,
         perioderMedMinimumSykdomsgradVurdertIkkeOK,
         MeldingsreferanseId(UUID.randomUUID())
+    )
+
+    internal fun lagInntektsendringer(inntektsendringerFom: LocalDate) = EndretGrunnlagForBeregning(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        fom = inntektsendringerFom,
+        endretGrunnlag = Grunnlag.Inntektsendringer,
+        avsender = Avsender.SYSTEM
+    )
+
+    internal fun lagGraderteAndreYtelserEndret(graderteAndreYtelserEndretFom: LocalDate) = EndretGrunnlagForBeregning(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        fom = graderteAndreYtelserEndretFom,
+        endretGrunnlag = Grunnlag.GraderteAndreYtelser,
+        avsender = Avsender.SYSTEM
+    )
+
+    internal fun lagEndretOpptjeningsvurdering(skjæringstidspunkt: LocalDate, opptjeningsvurderingId: UUID) = EndretVurderingPåSkjæringstidspunkt(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        skjæringstidspunkt = skjæringstidspunkt,
+        endretVurdering = Vurdering.Opptjeningsvurdering(opptjeningsvurderingId),
+        avsender = Avsender.SYSTEM
+    )
+
+    internal fun lagEndretForsikrsingsvurdering(skjæringstidspunkt: LocalDate, forsikringsvurderingId: UUID) = EndretVurderingPåSkjæringstidspunkt(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        skjæringstidspunkt = skjæringstidspunkt,
+        endretVurdering = Vurdering.Forsikringsvurdering(forsikringsvurderingId),
+        avsender = Avsender.SYSTEM
     )
 }
 

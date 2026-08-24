@@ -863,11 +863,11 @@ internal class TestPerson(
         }
 
         internal fun håndterInntektsendringer(inntektsendringFom: LocalDate) {
-            arbeidsgiverHendelsefabrikk.lagInntektsendringer(inntektsendringFom).håndter(Person::håndterInntektsendringer)
+            personHendelsefabrikk.lagInntektsendringer(inntektsendringFom).håndter(Person::håndterEndretGrunnlagForBeregning)
         }
 
         internal fun håndterGraderteAndreYtelserEndret(graderteAndreYtelserEndretFom: LocalDate) {
-            arbeidsgiverHendelsefabrikk.lagGraderteAndreYtelserEndret(graderteAndreYtelserEndretFom).håndter(Person::håndterGraderteAndreYtelserEndret)
+            personHendelsefabrikk.lagGraderteAndreYtelserEndret(graderteAndreYtelserEndretFom).håndter(Person::håndterEndretGrunnlagForBeregning)
         }
 
         internal fun håndterSimulering(
@@ -967,8 +967,13 @@ internal class TestPerson(
                 .håndter(Person::håndterOverstyrArbeidsforhold)
         }
 
-        internal fun håndterEndretVuderingPåSkjæringstidspunkt(skjæringstidspunkt: LocalDate, endretVurdering: Vurdering) {
-            personHendelsefabrikk.lagEndretVuderingPåSkjæringstidspunkt(skjæringstidspunkt, endretVurdering)
+        internal fun håndterEndretOpptjeningsvurdering(skjæringstidspunkt: LocalDate, opptjeningsvurderingId: UUID) {
+            personHendelsefabrikk.lagEndretOpptjeningsvurdering(skjæringstidspunkt, opptjeningsvurderingId)
+                .håndter(Person::håndterEndretVurderingPåSkjæringstidspunkt)
+        }
+
+        internal fun håndterEndretForsikringsvurdering(skjæringstidspunkt: LocalDate, forsikringsvurderingId: UUID) {
+            personHendelsefabrikk.lagEndretForsikrsingsvurdering(skjæringstidspunkt, forsikringsvurderingId)
                 .håndter(Person::håndterEndretVurderingPåSkjæringstidspunkt)
         }
 
@@ -996,8 +1001,16 @@ internal class TestPerson(
             hendelseId: UUID = UUID.randomUUID(),
             organisasjonsnummer: String = orgnummer,
         ) =
-            arbeidsgiverHendelsefabrikk.lagOverstyrInntekt(hendelseId, skjæringstidspunkt, inntekt, organisasjonsnummer)
-                .håndter(Person::håndterOverstyrArbeidsgiveropplysninger)
+            personHendelsefabrikk.lagOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(
+                    orgnummer = organisasjonsnummer,
+                    inntekt = inntekt,
+                    refusjonsopplysninger = emptyList()
+                )),
+                meldingsreferanseId = hendelseId,
+                tidsstempel = LocalDateTime.now(),
+            ).håndter(Person::håndterOverstyrArbeidsgiveropplysninger)
 
         internal fun håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt: LocalDate,

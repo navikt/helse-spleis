@@ -81,8 +81,6 @@ private val HendelseMessage.kontekstnavn
         is GrunnbeløpsreguleringMessage -> "Grunnbeløpsregulering"
         is IdentOpphørtMessage -> "IdentOpphørt"
         is InfotrygdendringMessage -> "Infotrygdendring"
-        is InntektsendringerMessage -> "Inntektsendringer"
-        is GraderteAndreYtelserEndretMessage -> "GraderteAndreYtelserEndret"
         is InntektsmeldingMessage -> "Inntektsmelding"
         is NavNoInntektsmeldingMessage -> "NavNoInntektsmelding"
         is InntektsopplysningerFraLagretInntektsmeldingMessage -> "InntektsopplysningerFraLagretInntektsmelding"
@@ -99,6 +97,7 @@ private val HendelseMessage.kontekstnavn
         is SkjønnsmessigFastsettelseMessage -> "SkjønnsmessigFastsettelse"
         is GjenopptaBehandlingMessage -> "GjenopptaBehandling"
         is EndretVurderingPåSkjæringstidspunktMessage -> "EndretVurderingPåSkjæringstidspunkt"
+        is EndretGrunnlagForBeregningMessage -> "EndretGrunnlagForBeregning"
 
         is NyArbeidsledigSøknadMessage,
         is NyArbeidsledigTidligereArbeidstakerSøknadMessage,

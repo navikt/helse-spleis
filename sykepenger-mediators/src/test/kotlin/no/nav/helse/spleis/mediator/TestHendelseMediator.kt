@@ -9,15 +9,14 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.EndretGrunnlagForBeregning
 import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopptaBehandling
-import no.nav.helse.hendelser.GraderteAndreYtelserEndret
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
-import no.nav.helse.hendelser.Inntektsendringer
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
@@ -49,16 +48,15 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.EndretGrunnlagForBeregningMessage
 import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
-import no.nav.helse.spleis.meldinger.model.GraderteAndreYtelserEndretMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.InntektsendringerMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
@@ -296,20 +294,6 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: InfotrygdendringMessage, infotrygdEndring: Infotrygdendring, context: BehandlingContext) {}
 
-    override fun behandle(message: InntektsendringerMessage, inntektsendringer: Inntektsendringer, context: BehandlingContext) {
-        lestEndretGrunnlagForBeregningVerdi.set(EndretGrunnlagForBeregningData(
-            type = "Inntektsendringer",
-            fom = inntektsendringer.inntektsendringFom
-        ))
-    }
-
-    override fun behandle(message: GraderteAndreYtelserEndretMessage, graderteAndreYtelserEndret: GraderteAndreYtelserEndret, context: BehandlingContext) {
-        lestEndretGrunnlagForBeregningVerdi.set(EndretGrunnlagForBeregningData(
-            type = "GraderteAndreYtelser",
-            fom = graderteAndreYtelserEndret.graderteAndreYtelserEndretFom
-        ))
-    }
-
     override fun behandle(message: UtbetalingshistorikkEtterInfotrygdendringMessage, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, context: BehandlingContext) {}
 
     override fun behandle(message: ForkastSykmeldingsperioderMessage, forkastSykmeldingsperioder: ForkastSykmeldingsperioder, context: BehandlingContext) {
@@ -342,4 +326,11 @@ internal class TestHendelseMediator : IHendelseMediator {
         val type: String,
         val fom: LocalDate
     )
+
+    override fun behandle(message: EndretGrunnlagForBeregningMessage, endretGrunnlagForBeregning: EndretGrunnlagForBeregning, context: BehandlingContext) {
+        lestEndretGrunnlagForBeregningVerdi.set(EndretGrunnlagForBeregningData(
+            type = message.endretGrunnlag::class.simpleName!!,
+            fom = message.fom
+        ))
+    }
 }

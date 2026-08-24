@@ -17,14 +17,12 @@ import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.GraderteAndreYtelserEndret
 import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
-import no.nav.helse.hendelser.Inntektsendringer
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.fraInnteksmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
@@ -500,15 +498,4 @@ internal class ArbeidsgiverHendelsefabrikk(
             dager = overstyringsdager,
             opprettet = LocalDateTime.now()
         )
-
-    internal fun lagOverstyrInntekt(hendelseId: UUID, skjæringstidspunkt: LocalDate, inntekt: Inntekt, orgnummer: String, tidsstempel: LocalDateTime = LocalDateTime.now()) =
-        PersonHendelsefabrikk().lagOverstyrArbeidsgiveropplysninger(
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, emptyList())),
-            meldingsreferanseId = hendelseId,
-            tidsstempel = tidsstempel
-        )
-
-    internal fun lagInntektsendringer(inntektsendringerFom: LocalDate) = Inntektsendringer(MeldingsreferanseId(UUID.randomUUID()), inntektsendringerFom)
-    internal fun lagGraderteAndreYtelserEndret(graderteAndreYtelserEndretFom: LocalDate) = GraderteAndreYtelserEndret(MeldingsreferanseId(UUID.randomUUID()), graderteAndreYtelserEndretFom)
 }

@@ -23,15 +23,14 @@ import no.nav.helse.spleis.meldinger.AvbruttJordbrukerSøknadRiver
 import no.nav.helse.spleis.meldinger.AvbruttSelvstendigSøknadRiver
 import no.nav.helse.spleis.meldinger.AvbruttSøknadRiver
 import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
+import no.nav.helse.spleis.meldinger.EndretGrunnlagForBeregningRiver
 import no.nav.helse.spleis.meldinger.EndretVurderingPåSkjæringstidspunktRiver
 import no.nav.helse.spleis.meldinger.FeriepengeutbetalingerRiver
 import no.nav.helse.spleis.meldinger.ForkastSykmeldingsperioderRiver
 import no.nav.helse.spleis.meldinger.GjenopptaBehandlingerRiver
-import no.nav.helse.spleis.meldinger.GraderteAndreYtelserEndretRiver
 import no.nav.helse.spleis.meldinger.GrunnbeløpsreguleringRiver
 import no.nav.helse.spleis.meldinger.IdentOpphørtRiver
 import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
-import no.nav.helse.spleis.meldinger.InntektsendringerRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
 import no.nav.helse.spleis.meldinger.InntektsopplysningerFraLagretInntektsmeldingRiver
 import no.nav.helse.spleis.meldinger.LpsOgAltinnInntektsmeldingerRiver
@@ -71,16 +70,15 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.EndretGrunnlagForBeregningMessage
 import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
-import no.nav.helse.spleis.meldinger.model.GraderteAndreYtelserEndretMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.InntektsendringerMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
@@ -172,8 +170,6 @@ internal class MessageMediator(
             OverstyrArbeidsforholdRiver(it, this)
             OverstyrArbeidsgiveropplysningerRiver(it, this)
             InfotrygdendringerRiver(it, this)
-            InntektsendringerRiver(it, this)
-            GraderteAndreYtelserEndretRiver(it, this)
             UtbetalingshistorikkEtterInfotrygdendringRiver(it, this)
             DødsmeldingerRiver(it, this)
             ForkastSykmeldingsperioderRiver(it, this)
@@ -188,6 +184,7 @@ internal class MessageMediator(
             SkjønnsmessigFastsettelseRiver(it, this)
             MinimumSykdomsgradVurdertRiver(it, this)
             EndretVurderingPåSkjæringstidspunktRiver(it, this)
+            EndretGrunnlagForBeregningRiver(it, this)
         }
     }
 
@@ -264,10 +261,9 @@ internal class MessageMediator(
         is PersonPåminnelseMessage,
         is PåminnelseMessage,
         is SkjønnsmessigFastsettelseMessage,
-        is InntektsendringerMessage,
-        is GraderteAndreYtelserEndretMessage,
         is GjenopptaBehandlingMessage,
         is EndretVurderingPåSkjæringstidspunktMessage,
+        is EndretGrunnlagForBeregningMessage,
         is InntektsopplysningerFraLagretInntektsmeldingMessage -> false
 
         // meldinger som må replayes/sendes på nytt ved feil får

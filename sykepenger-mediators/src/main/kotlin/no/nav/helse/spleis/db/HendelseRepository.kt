@@ -58,16 +58,15 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.EndretGrunnlagForBeregningMessage
 import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
-import no.nav.helse.spleis.meldinger.model.GraderteAndreYtelserEndretMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.InntektsendringerMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
@@ -197,9 +196,8 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is GjenopptaBehandlingMessage,
         is UtbetalingshistorikkMessage,
         is InfotrygdendringMessage,
-        is GraderteAndreYtelserEndretMessage,
         is EndretVurderingPåSkjæringstidspunktMessage,
-        is InntektsendringerMessage -> null // Disse trenger vi ikke å lagre
+        is EndretGrunnlagForBeregningMessage  -> null // Disse trenger vi ikke å lagre
     }
 
     internal fun hentAlleHendelser(personidentifikator: Personidentifikator): Map<UUID, Hendelse> {

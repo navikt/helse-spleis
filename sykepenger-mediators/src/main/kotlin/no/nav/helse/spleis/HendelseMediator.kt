@@ -7,15 +7,14 @@ import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.EndretGrunnlagForBeregning
 import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
 import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopptaBehandling
-import no.nav.helse.hendelser.GraderteAndreYtelserEndret
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
-import no.nav.helse.hendelser.Inntektsendringer
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
@@ -50,16 +49,15 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.EndretGrunnlagForBeregningMessage
 import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
-import no.nav.helse.spleis.meldinger.model.GraderteAndreYtelserEndretMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.InntektsendringerMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
@@ -505,29 +503,6 @@ internal class HendelseMediator(
     }
 
     override fun behandle(
-        message: InntektsendringerMessage,
-        inntektsendringer: Inntektsendringer,
-        context: BehandlingContext
-    ) {
-        hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
-            HendelseProbe.onInntektsendringer()
-            person.håndterInntektsendringer(eventBus, inntektsendringer, aktivitetslogg)
-        }
-    }
-
-    override fun behandle(
-        message: GraderteAndreYtelserEndretMessage,
-        graderteAndreYtelserEndret: GraderteAndreYtelserEndret,
-        context: BehandlingContext
-    ) {
-        hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
-            HendelseProbe.onGraderteAndreYtelserEndret()
-            person.håndterGraderteAndreYtelserEndret(eventBus, graderteAndreYtelserEndret, aktivitetslogg)
-        }
-    }
-
-
-    override fun behandle(
         message: UtbetalingshistorikkEtterInfotrygdendringMessage,
         utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring,
         context: BehandlingContext
@@ -585,6 +560,12 @@ internal class HendelseMediator(
     override fun behandle(message: EndretVurderingPåSkjæringstidspunktMessage, endretVurderingPåSkjæringstidspunkt: EndretVurderingPåSkjæringstidspunkt, context: BehandlingContext) {
         hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
             person.håndterEndretVurderingPåSkjæringstidspunkt(eventBus, endretVurderingPåSkjæringstidspunkt, aktivitetslogg)
+        }
+    }
+
+    override fun behandle(message: EndretGrunnlagForBeregningMessage, endretGrunnlagForBeregning: EndretGrunnlagForBeregning, context: BehandlingContext) {
+        hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
+            person.håndterEndretGrunnlagForBeregning(eventBus, endretGrunnlagForBeregning, aktivitetslogg)
         }
     }
 
@@ -818,8 +799,6 @@ internal interface IHendelseMediator {
     fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: BehandlingContext)
     fun behandle(message: GrunnbeløpsreguleringMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: BehandlingContext)
     fun behandle(message: InfotrygdendringMessage, infotrygdEndring: Infotrygdendring, context: BehandlingContext)
-    fun behandle(message: InntektsendringerMessage, inntektsendringer: Inntektsendringer, context: BehandlingContext)
-    fun behandle(message: GraderteAndreYtelserEndretMessage, graderteAndreYtelserEndret: GraderteAndreYtelserEndret, context: BehandlingContext)
     fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: BehandlingContext)
     fun behandle(
         nyPersonidentifikator: Personidentifikator,
@@ -835,4 +814,5 @@ internal interface IHendelseMediator {
     fun behandle(message: SkjønnsmessigFastsettelseMessage, skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse, context: BehandlingContext)
     fun behandle(message: MinimumSykdomsgradVurdertMessage, minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding, context: BehandlingContext)
     fun behandle(message: EndretVurderingPåSkjæringstidspunktMessage, endretVurderingPåSkjæringstidspunkt: EndretVurderingPåSkjæringstidspunkt, context: BehandlingContext)
+    fun behandle(message: EndretGrunnlagForBeregningMessage, endretGrunnlagForBeregning: EndretGrunnlagForBeregning, context: BehandlingContext)
 }
