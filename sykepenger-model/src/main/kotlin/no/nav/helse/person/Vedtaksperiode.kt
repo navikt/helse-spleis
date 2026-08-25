@@ -47,8 +47,6 @@ import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
 import no.nav.helse.hendelser.DagerFraInntektsmelding
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.KOLLEKTIV
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
@@ -1787,7 +1785,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             Selvstendig -> {
-                if (forsikringsvurderingResultat?.harForsikring == true && forsikringsvurderingResultat.forsikringskategori == NAVKJØPT) {
+                if (forsikringsvurderingResultat?.harForsikring == true && forsikringsvurderingResultat.harIndividuellForsikring) {
                     if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
                     else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_6)
                 }
@@ -3802,13 +3800,12 @@ private fun subsummerForsikringsvurdering(
 ) {
     if (forsikringsvurderingResultat?.harForsikring != true) return
 
-    val forsikringskategori = forsikringsvurderingResultat.forsikringskategori
-        ?: error("Forsikringskategori kan ikke være null når harForsikring er true")
     val forsikringsvurderingId = forsikringsvurderingResultat.forsikringsvurderingId.toString()
 
-    when (forsikringskategori) {
-        KOLLEKTIV -> subsumsjonslogg.logg(`§ 8-36 ledd 4`(forsikringsvurderingId))
-        NAVKJØPT -> subsummerNavkjøptForsikring(
+    if (!forsikringsvurderingResultat.harIndividuellForsikring) {
+        subsumsjonslogg.logg(`§ 8-36 ledd 4`(forsikringsvurderingId))
+    } else {
+        subsummerIndividuellForsikring(
             subsumsjonslogg,
             forsikringsvurderingResultat.dekning,
             forsikringsvurderingId,
@@ -3817,7 +3814,7 @@ private fun subsummerForsikringsvurdering(
     }
 }
 
-private fun subsummerNavkjøptForsikring(
+private fun subsummerIndividuellForsikring(
     subsumsjonslogg: Subsumsjonslogg,
     dekning: ForsikringsvurderingResultat.Dekning?,
     forsikringsvurderingId: String,

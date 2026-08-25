@@ -19,7 +19,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
@@ -120,21 +119,25 @@ internal class SelvstendigTest : AbstractDslTest() {
             }
             val spgFakta = godkjenningsbehov.event.sykepengegrunnlagsfakta as EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel
 
-            assertEquals(listOf(
-                PensjonsgivendeInntekt(årstall = Year.of(2014), beløp = 300000.0),
-                PensjonsgivendeInntekt(årstall = Year.of(2015), beløp=300000.0),
-                PensjonsgivendeInntekt(årstall = Year.of(2016), beløp=300000.0)
-            ), spgFakta.pensjonsgivendeInntekter)
+            assertEquals(
+                listOf(
+                    PensjonsgivendeInntekt(årstall = Year.of(2014), beløp = 300000.0),
+                    PensjonsgivendeInntekt(årstall = Year.of(2015), beløp = 300000.0),
+                    PensjonsgivendeInntekt(årstall = Year.of(2016), beløp = 300000.0)
+                ), spgFakta.pensjonsgivendeInntekter
+            )
 
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertTilstand(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET)
 
-            håndterForlengelsessøknadSelvstendig(periode = februar, pensjonsgivendeInntekter = listOf(
+            håndterForlengelsessøknadSelvstendig(
+                periode = februar, pensjonsgivendeInntekter = listOf(
                 Søknad.PensjonsgivendeInntekt(Year.of(2015), 300000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
                 Søknad.PensjonsgivendeInntekt(Year.of(2016), 300000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
                 Søknad.PensjonsgivendeInntekt(Year.of(2017), 600000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
-            ))
+            )
+            )
             håndterYtelserSelvstendig(2.vedtaksperiode)
 
             val godkjenningsbehov2 = enesteGodkjenningsbehovSomFølgeAv({ 2.vedtaksperiode }) {
@@ -142,11 +145,13 @@ internal class SelvstendigTest : AbstractDslTest() {
             }
             val spgFakta2 = godkjenningsbehov2.event.sykepengegrunnlagsfakta as EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel
 
-            assertEquals(listOf(
-                PensjonsgivendeInntekt(årstall = Year.of(2014), beløp = 300000.0),
-                PensjonsgivendeInntekt(årstall = Year.of(2015), beløp=300000.0),
-                PensjonsgivendeInntekt(årstall = Year.of(2016), beløp=300000.0)
-            ), spgFakta2.pensjonsgivendeInntekter)
+            assertEquals(
+                listOf(
+                    PensjonsgivendeInntekt(årstall = Year.of(2014), beløp = 300000.0),
+                    PensjonsgivendeInntekt(årstall = Year.of(2015), beløp = 300000.0),
+                    PensjonsgivendeInntekt(årstall = Year.of(2016), beløp = 300000.0)
+                ), spgFakta2.pensjonsgivendeInntekter
+            )
         }
     }
 
@@ -240,7 +245,6 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
-
 
     @Test
     fun `Kaster ut overlappenden vedtaksperiode på tvers av yrkesaktivitetstype`() {
@@ -626,8 +630,6 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
         }
     }
-
-
 
     @ParameterizedTest
     @CsvSource(
@@ -1112,7 +1114,8 @@ internal class SelvstendigTest : AbstractDslTest() {
         }
         a1 {
             håndterSøknad(1.januar til 16.januar)
-            håndterArbeidsgiveropplysningerForForkastetPeriode(1.vedtaksperiode,
+            håndterArbeidsgiveropplysningerForForkastetPeriode(
+                1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
                 Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
@@ -1182,7 +1185,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )
@@ -1210,7 +1213,6 @@ internal class SelvstendigTest : AbstractDslTest() {
         }
     }
 
-
     @Test
     fun `gir varsel om ubetalt forsikring når toggle er på`() = Toggle.SelvstendigForsikring.enable {
         selvstendig {
@@ -1224,7 +1226,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = false,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = true,
                 )
             )
@@ -1252,7 +1254,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = 7.januar,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )
@@ -1298,7 +1300,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )
@@ -1336,7 +1338,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )
@@ -1373,7 +1375,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )
@@ -1388,7 +1390,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )
@@ -1414,7 +1416,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )
@@ -1429,7 +1431,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )
@@ -1455,7 +1457,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )
@@ -1485,7 +1487,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     harForsikring = false,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = true,
                 )
             )

@@ -31,8 +31,6 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.KOLLEKTIV
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -939,7 +937,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-36 ledd 1 bokstav a - Navkjøpt forsikring med 80 prosent dekningsgrad`() {
+    fun `§ 8-36 ledd 1 bokstav a - Individuell forsikring med 80 prosent dekningsgrad`() {
         Toggle.SelvstendigForsikring.enable {
             selvstendig {
                 håndterFørstegangssøknadSelvstendig(januar)
@@ -952,7 +950,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                         harForsikring = true,
                         dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = false),
                         opphørsdato = null,
-                        forsikringskategori = NAVKJØPT,
+                        harIndividuellForsikring = true,
                         villeHattForsikringOmDenVarBetalt = false,
                     )
                 )
@@ -972,7 +970,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-36 ledd 1 bokstav b - Navkjøpt forsikring med 100 prosent dekningsgrad uten ventetid`() {
+    fun `§ 8-36 ledd 1 bokstav b - Individuell forsikring med 100 prosent dekningsgrad uten ventetid`() {
         Toggle.SelvstendigForsikring.enable {
             selvstendig {
                 håndterFørstegangssøknadSelvstendig(januar)
@@ -985,7 +983,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                         harForsikring = true,
                         dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                         opphørsdato = null,
-                        forsikringskategori = NAVKJØPT,
+                        harIndividuellForsikring = true,
                         villeHattForsikringOmDenVarBetalt = false,
                     )
                 )
@@ -1005,7 +1003,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-36 ledd 1 bokstav c - Navkjøpt forsikring med 100 prosent dekningsgrad i ventetid`() {
+    fun `§ 8-36 ledd 1 bokstav c - Individuell forsikring med 100 prosent dekningsgrad i ventetid`() {
         Toggle.SelvstendigForsikring.enable {
             selvstendig {
                 håndterFørstegangssøknadSelvstendig(januar)
@@ -1018,7 +1016,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                         harForsikring = true,
                         dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                         opphørsdato = null,
-                        forsikringskategori = NAVKJØPT,
+                        harIndividuellForsikring = true,
                         villeHattForsikringOmDenVarBetalt = false,
                     )
                 )
@@ -1038,7 +1036,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§ 8-36 ledd 1 bokstav c og ledd 4 - Jordbruker med navkjøpt forsikring i ventetid`() {
+    fun `§ 8-36 ledd 1 bokstav c og ledd 4 - Jordbruker med individuell forsikring i ventetid`() {
         Toggle.SelvstendigForsikring.enable {
             Toggle.Jordbruker.enable {
                 selvstendig {
@@ -1052,7 +1050,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             harForsikring = true,
                             dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                             opphørsdato = null,
-                            forsikringskategori = NAVKJØPT,
+                            harIndividuellForsikring = true,
                             villeHattForsikringOmDenVarBetalt = false,
                         )
                     )
@@ -1097,7 +1095,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             harForsikring = true,
                             dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                             opphørsdato = null,
-                            forsikringskategori = KOLLEKTIV,
+                            harIndividuellForsikring = false,
                             villeHattForsikringOmDenVarBetalt = false,
                         )
                     )

@@ -102,13 +102,13 @@ internal class YtelserRiver(
             message.requireKey(
                 "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.forsikringsvurderingId",
                 "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.harForsikring",
-                "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.villeHattForsikringOmDenVarBetalt"
+                "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.villeHattForsikringOmDenVarBetalt",
+                "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.harIndividuellForsikring"
             )
             message.interestedIn("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning") {
                 message.requireKey("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning.grad", "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning.iVentetid")
             }
             message.interestedIn("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.opphørsdato")
-            message.interestedIn("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.forsikringskategori")
         }
     }
 

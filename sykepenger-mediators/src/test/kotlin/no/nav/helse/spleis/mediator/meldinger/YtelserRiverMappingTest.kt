@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.Institusjonsopphold
@@ -85,7 +84,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             harForsikring = true,
             dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
             opphørsdato = null,
-            forsikringskategori = NAVKJØPT,
+            harIndividuellForsikring = true,
             villeHattForsikringOmDenVarBetalt = false,
         )
 
@@ -196,7 +195,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
                 "iVentetid": true
               },
               "opphørsdato": null,
-              "forsikringskategori": "NAVKJØPT"
+              "harIndividuellForsikring": true
             }
           },
           "@final": true,
@@ -322,7 +321,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
                 "iVentetid": true
               },
               "opphørsdato": null,
-              "forsikringskategori": "NAVKJØPT"
+              "harIndividuellForsikring": true
             }
           },
           "@final": true,

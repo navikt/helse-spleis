@@ -1085,7 +1085,7 @@ internal class TestMessageFactory(
                         )
                     },
                     "opphørsdato" to forsikringsvurdering.opphørsdato,
-                    "forsikringskategori" to forsikringsvurdering.forsikringskategori
+                    "harIndividuellForsikring" to forsikringsvurdering.harIndividuellForsikring
                 )
             }
         )

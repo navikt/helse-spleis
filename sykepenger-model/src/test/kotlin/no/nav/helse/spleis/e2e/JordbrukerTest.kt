@@ -5,8 +5,6 @@ import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.KOLLEKTIV
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -44,7 +42,7 @@ internal class JordbrukerTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
-                    forsikringskategori = KOLLEKTIV,
+                    harIndividuellForsikring = false,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )
@@ -88,7 +86,7 @@ internal class JordbrukerTest : AbstractDslTest() {
                         harForsikring = true,
                         dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                         opphørsdato = null,
-                        forsikringskategori = NAVKJØPT,
+                        harIndividuellForsikring = true,
                         villeHattForsikringOmDenVarBetalt = false,
                     )
                 )

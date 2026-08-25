@@ -9,14 +9,10 @@ data class ForsikringsvurderingResultat(
     val villeHattForsikringOmDenVarBetalt: Boolean,
     val dekning: Dekning?,
     val opphørsdato: LocalDate?,
-    val forsikringskategori: Forsikringskategori?,
+    val harIndividuellForsikring: Boolean,
 ) {
     data class Dekning(
         val grad: Int,
         val iVentetid: Boolean,
     )
-    enum class Forsikringskategori {
-        KOLLEKTIV,
-        NAVKJØPT
-    }
 }

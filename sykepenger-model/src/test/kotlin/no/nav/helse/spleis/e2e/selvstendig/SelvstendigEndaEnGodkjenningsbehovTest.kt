@@ -7,8 +7,6 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.KOLLEKTIV
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.januar
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
@@ -114,7 +112,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )
@@ -209,7 +207,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
-                    forsikringskategori = NAVKJØPT,
+                    harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )
@@ -304,7 +302,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
-                    forsikringskategori = KOLLEKTIV,
+                    harIndividuellForsikring = false,
                     villeHattForsikringOmDenVarBetalt = false,
                 )
             )

@@ -9,7 +9,6 @@ import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -37,7 +36,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT,
+                harIndividuellForsikring = true,
                 villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
@@ -70,7 +69,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
-                forsikringskategori = null,
+                harIndividuellForsikring = false,
                 villeHattForsikringOmDenVarBetalt = false,
             )
         )
@@ -99,7 +98,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             harForsikring = false,
             dekning = null,
             opphørsdato = null,
-            forsikringskategori = null,
+            harIndividuellForsikring = false,
             villeHattForsikringOmDenVarBetalt = false,
         )
         sendYtelser(
@@ -137,7 +136,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
-                forsikringskategori = null,
+                harIndividuellForsikring = false,
                 villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
@@ -163,7 +162,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
-                forsikringskategori = null,
+                harIndividuellForsikring = false,
                 villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
@@ -174,7 +173,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
 
         assertEquals(1, testRapid.inspektør.meldinger("selvstendig_ingen_dager_igjen").size)
     }
-
 
     @Test
     fun `Sender event SelvstendigIngenDagerIgjenEvent når bruker blir 70 år i løpet av perioden`() {
@@ -305,7 +303,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT,
+                harIndividuellForsikring = true,
                 villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
@@ -335,7 +333,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT,
+                harIndividuellForsikring = true,
                 villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
@@ -354,7 +352,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT,
+                harIndividuellForsikring = true,
                 villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
@@ -377,7 +375,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             harForsikring = false,
             dekning = null,
             opphørsdato = null,
-            forsikringskategori = null,
+            harIndividuellForsikring = false,
             villeHattForsikringOmDenVarBetalt = false,
         )
         sendYtelser(
@@ -418,7 +416,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT,
+                harIndividuellForsikring = true,
                 villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
@@ -437,7 +435,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT,
+                harIndividuellForsikring = true,
                 villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
@@ -463,7 +461,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT,
+                harIndividuellForsikring = true,
                 villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"

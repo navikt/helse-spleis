@@ -5,8 +5,6 @@ import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.KOLLEKTIV
-import no.nav.helse.hendelser.ForsikringsvurderingResultat.Forsikringskategori.NAVKJØPT
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import org.junit.jupiter.api.Test
@@ -26,7 +24,7 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT,
+                harIndividuellForsikring = true,
                 villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
@@ -56,7 +54,7 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                 opphørsdato = null,
-                forsikringskategori = KOLLEKTIV,
+                harIndividuellForsikring = false,
                 villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
@@ -86,7 +84,7 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
                 harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                 opphørsdato = null,
-                forsikringskategori = NAVKJØPT,
+                harIndividuellForsikring = true,
                 villeHattForsikringOmDenVarBetalt = false,
             ),
             orgnummer = "SELVSTENDIG"
