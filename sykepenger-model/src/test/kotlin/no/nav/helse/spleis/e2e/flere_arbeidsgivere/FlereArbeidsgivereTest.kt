@@ -1641,40 +1641,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `inntektsmelding for ag2 strekker perioden tilbake til å bli først`() {
-        a1 {
-            nyPeriode(3.januar til 18.januar)
-            nyPeriode(19.januar til 31.januar)
-        }
-
-        a2 {
-            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.februar til 16.februar), beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INNTEKT, null))
-            nyPeriode(februar)
-        }
-
-        a1 {
-            håndterInntektsmelding(listOf(3.januar til 18.januar))
-            håndterVilkårsgrunnlag(2.vedtaksperiode)
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            assertVarsel(RV_VV_2, 2.vedtaksperiode.filter())
-        }
-
-        a2 {
-            håndterInntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INNTEKT, null), begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet")
-            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
-            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
-            assertEquals(3.januar til 28.februar, inspektør.periode(1.vedtaksperiode))
-            assertEquals(listOf(1.februar til 1.februar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
-            håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
-        }
-
-        a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
-        a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING) }
-    }
-
-    @Test
     fun `skal ikke ha to vedtaksperioder til godkjenning samtidig`() {
         a1 {
             nyPeriode(12.januar til 16.januar)

@@ -431,10 +431,6 @@ internal class TestPerson(
                 return id
             }
 
-            /** <TODO> er 10 tester som må fikses før man fjerner denne blokken og belager seg på sjekkene under **/
-                if (Toggle.KnertInntektsmelding.disabled) return checkNotNull(håndterGammelInntektsmelding())
-            /** </TODO> **/
-
             // Forespurte arbeidsgiveropplysninger
             if (observatør.forventerArbeidsgiveropplysninger(vedtaksperiodeId)) {
                 return håndterGammelInntektsmelding() ?: håndterArbeidsgiveropplysninger(

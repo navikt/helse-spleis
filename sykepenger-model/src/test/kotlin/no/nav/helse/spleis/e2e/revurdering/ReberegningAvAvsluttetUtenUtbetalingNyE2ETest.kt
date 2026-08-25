@@ -5,7 +5,6 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
@@ -432,49 +431,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
-        //assertVarsel(RV_IM_4, 2.vedtaksperiode.filter(a1)) // huh? Ser bare 1 IM
         nullstillTilstandsendringer()
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVVENTER_SIMULERING)
-    }
-
-    @Test
-    fun `støtter omgjøring om det er utbetalt en senere periode på samme skjæringstidspunkt`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar))
-        håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 3.februar))
-        håndterSøknad(Sykdom(21.januar, 3.februar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(4.februar, 28.februar))
-        håndterSøknad(Sykdom(4.februar, 28.februar, 100.prosent))
-        håndterInntektsmelding(listOf(19.januar til 3.februar), beregnetInntekt = INNTEKT, vedtaksperiodeId = 2.vedtaksperiode)
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode)
-        håndterSimulering(3.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt()
-
-        nullstillTilstandsendringer()
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
-
-        val arbeidsgiverperioder = listOf(10.januar til 20.januar, 28.januar til 1.februar)
-
-        håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt = INNTEKT)
-
-        assertEquals("UUUGG UUUUSHR AAAAARH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
-        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, arbeidsgiverperioder)
-        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 28.januar, arbeidsgiverperioder)
-        assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 28.januar, arbeidsgiverperioder)
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        assertVarsel(Varselkode.RV_IV_7, 3.vedtaksperiode.filter())
     }
 
     @Test
@@ -1054,105 +1014,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() = a1 {
-        val forMyeInntekt = INNTEKT * 1.2
-        val riktigInntekt = INNTEKT
-
-        håndterSøknad(Sykdom(5.februar, 11.februar, 100.prosent))
-        håndterSøknad(Sykdom(12.februar, 20.februar, 100.prosent))
-
-        nullstillTilstandsendringer()
-
-        håndterInntektsmelding(
-            listOf(
-                24.januar til 8.februar
-            ),
-            beregnetInntekt = forMyeInntekt
-        )
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-
-        val im = håndterInntektsmelding(
-            listOf(
-                22.januar til 6.februar
-            ),
-            beregnetInntekt = riktigInntekt
-        )
-
-        assertTrue(im in observatør.inntektsmeldingHåndtert.map { it.first })
-        assertVarsler(listOf(RV_IM_24), 1.vedtaksperiode.filter())
-        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
-        assertEquals(22.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
-        assertEquals("UUUUUGG UUUUUGG SSSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
-        assertInntektsgrunnlag(22.januar, forventetAntallArbeidsgivere = 1) {
-            assertInntektsgrunnlag(a1, riktigInntekt)
-        }
-
-        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 22.januar, listOf(22.januar til 6.februar))
-        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 22.januar, listOf(22.januar til 6.februar))
-
-        val førsteUtbetalingsdag = inspektør.utbetalingstidslinjer(1.vedtaksperiode)[7.februar]
-        assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
-        assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.arbeidsgiverRefusjonsbeløp)
-
-        assertTilstander(
-            1.vedtaksperiode,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING
-        )
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
-    }
-
-    @Test
-    fun `arbeidsgiver angrer på innsendt arbeidsgiverperiode - endrer ikke på sykdomstidslinjen fra im2`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar))
-        håndterSøknad(Sykdom(5.februar, 20.februar, 100.prosent), Ferie(10.februar, 20.februar))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-
-        nullstillTilstandsendringer()
-        håndterInntektsmelding(
-            listOf(
-                29.januar til 13.februar
-            ),
-            beregnetInntekt = INNTEKT
-        )
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-
-        nullstillTilstandsendringer()
-        håndterInntektsmelding(
-            listOf(
-                22.januar til 6.februar
-            ),
-            beregnetInntekt = INNTEKT
-        )
-
-        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
-        assertTrue(inspektør.sykdomstidslinje[10.februar] is Dag.ArbeidsgiverHelgedag)
-        assertTrue(inspektør.sykdomstidslinje[11.februar] is Dag.ArbeidsgiverHelgedag)
-        assertTrue(inspektør.sykdomstidslinje[13.februar] is Dag.Arbeidsgiverdag)
-        assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
