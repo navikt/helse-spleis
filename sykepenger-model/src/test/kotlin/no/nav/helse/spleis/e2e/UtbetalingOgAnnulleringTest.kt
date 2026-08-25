@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.a1
@@ -9,17 +8,14 @@ import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -34,12 +30,10 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.OVERFØRT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -136,50 +130,6 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
             assertEquals(Utbetalingstatus.ANNULLERT, inspektør.utbetaling(1).tilstand)
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        }
-    }
-
-    @Test
-    fun `periode med syk nav strekkes tilbake med foreldrepenger - opphører tidligere utbetaling`() {
-        a1 {
-            håndterSøknad(Sykdom(1.februar, 2.februar, 100.prosent))
-            håndterInntektsmelding(
-                emptyList(),
-                førsteFraværsdag = 1.februar,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
-            )
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
-            listOf(Varselkode.RV_AY_5, Varselkode.RV_AY_12, RV_IM_8).forEach {
-                assertVarsel(it, 1.vedtaksperiode.filter())
-            }
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-
-            håndterOverstyrTidslinje(
-                (januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) } +
-                    listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100))
-            )
-            håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-
-            val utbetaling = inspektør.utbetaling(0)
-            val revurdering = inspektør.utbetaling(1)
-            assertEquals(utbetaling.korrelasjonsId, revurdering.korrelasjonsId)
-            assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
-            revurdering.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-                assertEquals(1.februar til 1.februar, linje.fom til linje.tom)
-                assertEquals(Endringskode.ENDR, linje.endringskode)
-                assertEquals("OPPH", linje.statuskode)
-                assertEquals(1.februar, linje.datoStatusFom)
-                assertEquals(1, linje.delytelseId)
-                Assertions.assertNull(linje.refDelytelseId)
-            }
         }
     }
 

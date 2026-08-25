@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
@@ -447,13 +446,13 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             nyPeriode(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
-            håndterInntektsmelding(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode)
-            if (Toggle.KnertInntektsmelding.disabled) {
-                assertVarsler(listOf(RV_IM_24), 2.vedtaksperiode.filter())
-            }
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode)
 
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         }
     }

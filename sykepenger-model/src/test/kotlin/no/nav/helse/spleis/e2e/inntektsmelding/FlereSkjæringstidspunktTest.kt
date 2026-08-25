@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.den
 import no.nav.helse.dsl.AbstractDslTest
@@ -100,7 +99,7 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
         a1 {
             håndterSøknad(5.august til 20.august)
             håndterSøknad(21.august til 20.september)
-            håndterInntektsmelding(listOf(5.august til 20.august))
+            håndterArbeidsgiveropplysninger(listOf(5.august til 20.august))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -111,13 +110,9 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
             }
             nullstillTilstandsendringer()
 
-            håndterInntektsmelding(listOf(27.august til 27.august, 4.september til 18.september))
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
-            } else {
-                assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IV_11), 2.vedtaksperiode.filter())
-            }
-            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(27.august til 27.august, 4.september til 18.september))
+            assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
+            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
     }
 

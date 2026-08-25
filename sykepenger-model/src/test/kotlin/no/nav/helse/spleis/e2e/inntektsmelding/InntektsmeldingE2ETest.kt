@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime.MIN
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -215,16 +214,14 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 1.januar til 2.januar,
                 7.januar til 20.januar
             )
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 beregnetInntekt = INNTEKT,
-                førsteFraværsdag = 7.januar
+                vedtaksperiodeId = 1.vedtaksperiode
             )
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsler(listOf(RV_IV_10), 2.vedtaksperiode.filter())
-            } else {
-                assertVarsler(listOf(RV_IV_10, RV_IM_4), 2.vedtaksperiode.filter())
-            }
+            assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IV_10, 2.vedtaksperiode.filter())
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
@@ -252,16 +249,13 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 1.januar til 2.januar,
                 7.januar til 20.januar
             )
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 arbeidsgiverperioder = arbeidsgiverperioder,
-                beregnetInntekt = INNTEKT,
-                førsteFraværsdag = 7.januar
+                beregnetInntekt = INNTEKT
             )
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsler(listOf(RV_IV_10), 1.vedtaksperiode.filter())
-            } else {
-                assertVarsler(listOf(RV_IV_10, RV_IM_4,  RV_IM_24), 1.vedtaksperiode.filter())
-            }
+            assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
+            assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 7.januar, arbeidsgiverperioder)
@@ -534,30 +528,6 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
 
             assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, 10_000.månedlig, im3.arbeidsgiver), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje)
-        }
-    }
-
-    @Test
-    fun `Padder vedtaksperiode unødvendig med arbeidsdager ved out-of-order-søknader og begrunnelse for reduksjon er oppgitt når det ikke er ny arbeidsgiverperiode`() {
-        a1 {
-            nyPeriode(5.februar til 28.februar)
-            nyPeriode(januar)
-            håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar)
-            )
-            håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 5.februar,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
-            )
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsler(listOf(RV_IM_4, RV_IM_8), 2.vedtaksperiode.filter())
-            } else {
-                assertVarsler(listOf(RV_IM_25, RV_IM_24), 2.vedtaksperiode.filter())
-            }
-            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-            assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
-            assertEquals(5.februar til 28.februar, inspektør.periode(1.vedtaksperiode))
         }
     }
 

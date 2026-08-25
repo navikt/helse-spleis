@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -212,14 +211,10 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             nullstillTilstandsendringer()
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.februar til 16.februar),
-                førsteFraværsdag = 1.februar,
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-            if (Toggle.KnertInntektsmelding.disabled) {
-                assertVarsler(listOf(Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
-            }
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
@@ -227,7 +222,9 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
 
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
 
         }
@@ -243,23 +240,19 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             nullstillTilstandsendringer()
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.februar til 16.februar),
-                førsteFraværsdag = 1.februar,
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-            if (Toggle.KnertInntektsmelding.disabled) {
-                assertVarsler(listOf(Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
-            }
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
             håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
 
-            assertVarsel(Varselkode.RV_UT_23, 2.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING)
         }
     }
 }

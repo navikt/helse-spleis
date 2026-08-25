@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -24,7 +23,7 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription.VedtaksperiodeVenterEvent
-import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
@@ -206,15 +205,15 @@ internal class InfotrygdTest : AbstractDslTest() {
 
             håndterSøknad(4.juni til 6.juni)
             assertSisteTilstand(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            håndterInntektsmelding(emptyList(), førsteFraværsdag = 4.juni, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 4.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), førsteFraværsdag = 4.juni, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            assertVarsel(RV_AO_3, 4.vedtaksperiode.filter())
+            assertVarsel(RV_IM_8, 4.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(4.vedtaksperiode)
             håndterYtelser(4.vedtaksperiode)
             håndterSimulering(4.vedtaksperiode)
             håndterOverstyrTidslinje((4.juni til 6.juni).map { ManuellOverskrivingDag(it, Dagtype.Pleiepengerdag) })
             assertSkjæringstidspunktOgVenteperiode(4.vedtaksperiode, 4.juni, emptyList())
             assertSisteTilstand(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertVarsler(listOf(RV_IM_8), 4.vedtaksperiode.filter())
         }
     }
 
