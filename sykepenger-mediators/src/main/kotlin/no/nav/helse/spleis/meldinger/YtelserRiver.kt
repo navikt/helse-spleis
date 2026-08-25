@@ -103,6 +103,7 @@ internal class YtelserRiver(
                 "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.forsikringsvurderingId",
                 "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.harForsikring",
                 "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.villeHattForsikringOmDenVarBetalt",
+                "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.harForsikringSomIkkePasserMedSøknadstype",
                 "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.harIndividuellForsikring"
             )
             message.interestedIn("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning") {

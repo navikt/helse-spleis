@@ -37,6 +37,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
                 opphørsdato = null,
                 harIndividuellForsikring = true,
                 villeHattForsikringOmDenVarBetalt = false,
+                harForsikringSomIkkePasserMedSøknadstype = false,
             )
         )
         assertEquals(31, inspektør.size)
@@ -98,6 +99,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
                 opphørsdato = opphørsdato,
                 harIndividuellForsikring = true,
                 villeHattForsikringOmDenVarBetalt = false,
+                harForsikringSomIkkePasserMedSøknadstype = false,
             )
         )
         assertEquals(30, utbetalingstidslinje.size)
@@ -127,6 +129,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
             opphørsdato = null,
             harIndividuellForsikring = true,
             villeHattForsikringOmDenVarBetalt = false,
+            harForsikringSomIkkePasserMedSøknadstype = false,
         ),
         avslagstidslinje: Avslagstidslinje = Avslagstidslinje()
     ) {

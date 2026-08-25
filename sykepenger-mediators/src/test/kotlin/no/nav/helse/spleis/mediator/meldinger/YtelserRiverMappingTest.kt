@@ -86,6 +86,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             opphørsdato = null,
             harIndividuellForsikring = true,
             villeHattForsikringOmDenVarBetalt = false,
+            harForsikringSomIkkePasserMedSøknadstype = false,
         )
 
 
@@ -190,6 +191,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
               "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
               "harForsikring": true,
               "villeHattForsikringOmDenVarBetalt": false,
+              "harForsikringSomIkkePasserMedSøknadstype": false,
               "dekning": {
                 "grad": 80,
                 "iVentetid": true
@@ -316,6 +318,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
               "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
               "harForsikring": true,
               "villeHattForsikringOmDenVarBetalt": false,
+              "harForsikringSomIkkePasserMedSøknadstype": false,
               "dekning": {
                 "grad": 80,
                 "iVentetid": true

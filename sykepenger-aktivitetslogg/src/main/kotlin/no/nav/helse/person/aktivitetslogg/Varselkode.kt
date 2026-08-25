@@ -301,6 +301,7 @@ enum class Varselkode(
     RV_AN_5("Personen har blitt behandlet på en tidligere ident"),
     RV_AN_6("Bruker har forsikring som selvstendig næringsdrivende"),
     RV_AN_7("Bruker har en helt ubetalt forsikring"),
+    RV_AN_8("Bruker har en forsikring som ikke passer med søknadstypen"),
 
     // YS: Yrkesskade
     RV_YS_1("Yrkesskade oppgitt i søknaden")

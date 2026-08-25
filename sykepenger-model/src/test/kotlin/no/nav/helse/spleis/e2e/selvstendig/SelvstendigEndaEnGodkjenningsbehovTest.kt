@@ -114,6 +114,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     opphørsdato = null,
                     harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
+                    harForsikringSomIkkePasserMedSøknadstype = false,
                 )
             )
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
@@ -209,6 +210,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     opphørsdato = null,
                     harIndividuellForsikring = true,
                     villeHattForsikringOmDenVarBetalt = false,
+                    harForsikringSomIkkePasserMedSøknadstype = false,
                 )
             )
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
@@ -304,6 +306,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     opphørsdato = null,
                     harIndividuellForsikring = false,
                     villeHattForsikringOmDenVarBetalt = false,
+                    harForsikringSomIkkePasserMedSøknadstype = false,
                 )
             )
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {

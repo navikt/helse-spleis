@@ -221,6 +221,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
                 opphørsdato = null,
                 harIndividuellForsikring = false,
                 villeHattForsikringOmDenVarBetalt = false,
+                harForsikringSomIkkePasserMedSøknadstype = false,
             ),
             orgnummer = "SELVSTENDIG"
         )

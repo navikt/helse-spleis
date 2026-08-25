@@ -952,6 +952,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                         opphørsdato = null,
                         harIndividuellForsikring = true,
                         villeHattForsikringOmDenVarBetalt = false,
+                        harForsikringSomIkkePasserMedSøknadstype = false,
                     )
                 )
 
@@ -985,6 +986,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                         opphørsdato = null,
                         harIndividuellForsikring = true,
                         villeHattForsikringOmDenVarBetalt = false,
+                        harForsikringSomIkkePasserMedSøknadstype = false,
                     )
                 )
 
@@ -1018,6 +1020,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                         opphørsdato = null,
                         harIndividuellForsikring = true,
                         villeHattForsikringOmDenVarBetalt = false,
+                        harForsikringSomIkkePasserMedSøknadstype = false,
                     )
                 )
 
@@ -1052,6 +1055,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             opphørsdato = null,
                             harIndividuellForsikring = true,
                             villeHattForsikringOmDenVarBetalt = false,
+                            harForsikringSomIkkePasserMedSøknadstype = false,
                         )
                     )
 
@@ -1097,6 +1101,7 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                             opphørsdato = null,
                             harIndividuellForsikring = false,
                             villeHattForsikringOmDenVarBetalt = false,
+                            harForsikringSomIkkePasserMedSøknadstype = false,
                         )
                     )
 

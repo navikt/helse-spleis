@@ -44,6 +44,7 @@ internal class JordbrukerTest : AbstractDslTest() {
                     opphørsdato = null,
                     harIndividuellForsikring = false,
                     villeHattForsikringOmDenVarBetalt = false,
+                    harForsikringSomIkkePasserMedSøknadstype = false,
                 )
             )
             håndterSimulering(1.vedtaksperiode)
@@ -88,6 +89,7 @@ internal class JordbrukerTest : AbstractDslTest() {
                         opphørsdato = null,
                         harIndividuellForsikring = true,
                         villeHattForsikringOmDenVarBetalt = false,
+                        harForsikringSomIkkePasserMedSøknadstype = false,
                     )
                 )
                 håndterSimulering(1.vedtaksperiode)
