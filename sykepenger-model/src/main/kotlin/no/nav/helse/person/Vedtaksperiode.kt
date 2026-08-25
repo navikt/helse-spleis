@@ -1799,6 +1799,10 @@ internal class Vedtaksperiode private constructor(
                     if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_8)
                     else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_8)
                 }
+
+                if (forsikringsvurderingResultat?.opphørsdato != null && forsikringsvurderingResultat.opphørsdato in periode) {
+                    aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_9)
+                }
             }
         }
         if (!harOpptjening) aktivitetslogg.varsel(RV_OV_1)

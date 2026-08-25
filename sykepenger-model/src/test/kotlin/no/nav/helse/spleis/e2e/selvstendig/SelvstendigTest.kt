@@ -1271,7 +1271,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `foreslår utbetaling på 80 prosent dekning i ventetid frem til forsikringens opphørsdato ved denne type forsikring`() = Toggle.SelvstendigForsikring.enable {
+    fun `Kaster ut periode når forsikringen opphører inni perioden`() = Toggle.SelvstendigForsikring.enable {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -1289,31 +1289,45 @@ internal class SelvstendigTest : AbstractDslTest() {
                 )
             )
 
-            val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
-            utbetalingstidslinje.subset(1.januar til 16.januar).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class, 100) }
+            assertVarsel(Varselkode.RV_AN_6, 1.vedtaksperiode.filter())
+            assertFunksjonellFeil(Varselkode.RV_AN_9, 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                SELVSTENDIG_START,
+                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
+                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
+                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
+                SELVSTENDIG_AVVENTER_HISTORIKK,
+                TIL_INFOTRYGD,
+                varselkode = Varselkode.RV_AN_9
+            )
+        }
+    }
 
-            inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
-                assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
-                assertEquals(2, utbetalinginspektør.personOppdrag.size)
-                utbetalinginspektør.personOppdrag.first().inspektør.also { linje ->
-                    assertEquals(1.januar til 7.januar, linje.periode)
-                    assertEquals(1417, linje.beløp)
-                    assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
-                }
-                utbetalinginspektør.personOppdrag.last().inspektør.also { linje ->
-                    assertEquals(17.januar til 31.januar, linje.periode)
-                    assertEquals(1417, linje.beløp)
-                    assertEquals(Klassekode.SelvstendigNæringsdrivendeOppgavepliktig, linje.klassekode)
-                }
-            }
+    @Test
+    fun `godtar forsikring som opphører etter perioden`() = Toggle.SelvstendigForsikring.enable {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    harForsikring = true,
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
+                    opphørsdato = 1.februar,
+                    harIndividuellForsikring = true,
+                    villeHattForsikringOmDenVarBetalt = false,
+                    harForsikringSomIkkePasserMedSøknadstype = false,
+                )
+            )
+
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
 
-            // Sjekk at forsikringen (dager nav overtar) er lagret på behandlingsendringen
-            assertEquals(listOf(1.januar til 7.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
             assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
-
         }
     }
 
