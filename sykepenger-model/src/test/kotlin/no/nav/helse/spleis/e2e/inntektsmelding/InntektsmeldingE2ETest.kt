@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime.MIN
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -219,7 +220,11 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 beregnetInntekt = INNTEKT,
                 førsteFraværsdag = 7.januar
             )
-            assertVarsler(listOf(RV_IV_10, RV_IM_4), 2.vedtaksperiode.filter())
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsler(listOf(RV_IV_10), 2.vedtaksperiode.filter())
+            } else {
+                assertVarsler(listOf(RV_IV_10, RV_IM_4), 2.vedtaksperiode.filter())
+            }
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
@@ -252,7 +257,11 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 beregnetInntekt = INNTEKT,
                 førsteFraværsdag = 7.januar
             )
-            assertVarsler(listOf(RV_IV_10, RV_IM_4,  RV_IM_24), 1.vedtaksperiode.filter())
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsler(listOf(RV_IV_10), 1.vedtaksperiode.filter())
+            } else {
+                assertVarsler(listOf(RV_IV_10, RV_IM_4,  RV_IM_24), 1.vedtaksperiode.filter())
+            }
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 7.januar, arbeidsgiverperioder)
@@ -541,7 +550,11 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 førsteFraværsdag = 5.februar,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
             )
-            assertVarsler(listOf(RV_IM_25, RV_IM_24), 2.vedtaksperiode.filter())
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsler(listOf(RV_IM_4, RV_IM_8), 2.vedtaksperiode.filter())
+            } else {
+                assertVarsler(listOf(RV_IM_25, RV_IM_24), 2.vedtaksperiode.filter())
+            }
             assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
             assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
             assertEquals(5.februar til 28.februar, inspektør.periode(1.vedtaksperiode))

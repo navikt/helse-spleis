@@ -476,13 +476,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             nyPeriode(februar)
         }
         a1 {
-            håndterInntektsmelding(listOf(7.januar til 22.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(listOf(7.januar til 22.januar), vedtaksperiodeId = 1.vedtaksperiode)
         }
         a2 {
-            håndterInntektsmelding(listOf(7.januar til 22.januar), førsteFraværsdag = 1.februar)
+            håndterArbeidsgiveropplysninger(listOf(7.januar til 22.januar), førsteFraværsdag = 1.februar)
             // denne inntektsmeldingen lagrer refusjonsopplysninger uten første fraværsdag. Uten denne IMen så er testen useless
-            håndterInntektsmelding(listOf(7.januar til 22.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
-            assertVarsler(listOf(Varselkode.RV_IM_24, Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(7.januar til 22.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
+            assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
         }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)

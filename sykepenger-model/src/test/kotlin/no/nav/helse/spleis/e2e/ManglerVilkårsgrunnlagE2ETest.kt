@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -216,7 +217,9 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
                 førsteFraværsdag = 1.februar,
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-            assertVarsler(listOf(Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
+            if (Toggle.KnertInntektsmelding.disabled) {
+                assertVarsler(listOf(Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
+            }
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
@@ -245,7 +248,9 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
                 førsteFraværsdag = 1.februar,
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-            assertVarsler(listOf(Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
+            if (Toggle.KnertInntektsmelding.disabled) {
+                assertVarsler(listOf(Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
+            }
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 

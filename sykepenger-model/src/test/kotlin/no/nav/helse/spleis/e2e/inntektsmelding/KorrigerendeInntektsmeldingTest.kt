@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
@@ -212,11 +213,11 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             nyttVedtak(februar, arbeidsgiverperiode = emptyList())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar)
             )
 
-            assertVarsler(listOf(RV_IM_3), 2.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IM_4, RV_IM_24), 2.vedtaksperiode.filter())
             assertEquals("SSSHH SSSSSHH SSSSSHH S??SSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -447,7 +448,9 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterInntektsmelding(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode)
-            assertVarsler(listOf(RV_IM_24), 2.vedtaksperiode.filter())
+            if (Toggle.KnertInntektsmelding.disabled) {
+                assertVarsler(listOf(RV_IM_24), 2.vedtaksperiode.filter())
+            }
 
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)

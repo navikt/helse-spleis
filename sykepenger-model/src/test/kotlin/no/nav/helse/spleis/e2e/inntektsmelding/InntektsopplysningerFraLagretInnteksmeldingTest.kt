@@ -101,8 +101,7 @@ internal class InntektsopplysningerFraLagretInnteksmeldingTest: AbstractDslTest(
 
         a2 {
             håndterSøknad(1.januar til 9.februar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertVarsler(1.vedtaksperiode, Varselkode.RV_IM_4) //Hvorfor får vi varsel når dette er første inntektsmelding på a2????
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
 
         a1 {
