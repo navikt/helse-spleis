@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
@@ -97,6 +98,9 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
                 it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
             })
             assertEquals(1431.daglig, utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp)
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            }
         }
     }
 

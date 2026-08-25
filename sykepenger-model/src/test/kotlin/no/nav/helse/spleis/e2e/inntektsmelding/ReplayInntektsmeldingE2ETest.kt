@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
@@ -57,6 +58,9 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
             assertTrue(im1 to 1.vedtaksperiode in observatør.inntektsmeldingHåndtert)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -569,6 +570,9 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertFalse(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
             assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            }
         }
     }
 

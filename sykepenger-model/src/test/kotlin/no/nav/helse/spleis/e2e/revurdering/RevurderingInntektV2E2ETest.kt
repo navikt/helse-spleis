@@ -568,6 +568,9 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
 
             assertEquals(15741, inspektør.utbetaling(1).personOppdrag.nettoBeløp())
             assertEquals(-15741, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            }
         }
     }
 
@@ -594,6 +597,9 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
 
             assertEquals(3047, inspektør.utbetaling(1).personOppdrag.nettoBeløp())
             assertEquals(-3047, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            }
         }
     }
 

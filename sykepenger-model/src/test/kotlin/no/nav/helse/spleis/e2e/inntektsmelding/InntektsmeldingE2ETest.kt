@@ -47,6 +47,7 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.EventSubscription
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
@@ -957,6 +958,9 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+            }
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -1207,6 +1211,9 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING
             )
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            }
         }
     }
 
@@ -1684,6 +1691,12 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
 
             assertVarsler(listOf(RV_IM_24), 4.vedtaksperiode.filter())
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+                assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
+                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+                assertVarsel(Varselkode.RV_IM_24, 3.vedtaksperiode.filter())
+            }
         }
     }
 
@@ -2678,6 +2691,9 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, 30000.månedlig)
             }
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            }
         }
     }
 
@@ -2704,6 +2720,9 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
 
             assertInntektsgrunnlag(1.mars, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, 30000.månedlig)
+            }
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
             }
         }
     }

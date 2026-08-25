@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -10,6 +11,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
@@ -79,6 +81,9 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
             assertTrue(inntektsmelding1Id in inspektør.hendelseIder(2.vedtaksperiode))
             assertTrue(inntektsmelding1Id in inspektør.hendelseIder(3.vedtaksperiode))
             assertTrue(inntektsmelding2Id in inspektør.hendelseIder(4.vedtaksperiode))
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+            }
         }
     }
 

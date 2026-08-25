@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
@@ -65,6 +66,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
             håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
             håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = INNTEKT * 1.1, førsteFraværsdag = 1.februar)
             håndterInntektsmelding(emptyList(), beregnetInntekt = INNTEKT * 1.2, førsteFraværsdag = 25.januar)
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            }
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -1289,6 +1293,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a2 {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+            }
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)

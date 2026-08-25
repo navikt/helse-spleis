@@ -422,6 +422,9 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+            }
         }
     }
 

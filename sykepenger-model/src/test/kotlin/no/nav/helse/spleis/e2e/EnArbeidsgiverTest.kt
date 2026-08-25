@@ -581,6 +581,9 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
             håndterSøknad(20.februar til 28.februar)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            }
         }
     }
 

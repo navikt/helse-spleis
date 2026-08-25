@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.Year
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -22,6 +23,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
@@ -385,6 +387,9 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 assertNotNull(faktaavklartInntekt)
                 assertEquals(INNTEKT, faktaavklartInntekt.beløp)
                 assertEquals(korrigertInntektsmeldingId, faktaavklartInntekt.hendelseId)
+            }
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             }
         }
     }

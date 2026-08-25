@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -681,6 +682,9 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 utbetalingstype = "REVURDERING",
                 utbetalingsdager = standardUtbetalingsdager(0, 1431),
             )
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            }
         }
     }
 

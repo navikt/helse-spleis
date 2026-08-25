@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -111,6 +112,9 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
+            if (Toggle.KnertInntektsmelding.enabled) {
+                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            }
         }
     }
 
