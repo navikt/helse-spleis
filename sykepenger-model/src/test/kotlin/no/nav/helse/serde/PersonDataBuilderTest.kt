@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.Year
 import java.util.UUID
 import no.nav.helse.EnableFeriepenger
-import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -90,12 +89,12 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
     fun `serialisering av person`() {
         a1 {
             håndterSøknad(Sykdom(5.januar, 17.januar, 100.prosent))
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(
                 beløp = INNTEKT / 2,
                 opphørsdato = 31.januar
             ))
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
@@ -130,14 +129,14 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         }
         a3 {
             håndterSøknad(Sykdom(1.juni, 16.juni, 100.prosent))
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(1.juni til 16.juni),
                 beregnetInntekt = INNTEKT,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
                 refusjon = Inntektsmelding.Refusjon(INGEN, null)
             )
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -379,7 +378,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         val forsikringsvurderingId = UUID.randomUUID()
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),

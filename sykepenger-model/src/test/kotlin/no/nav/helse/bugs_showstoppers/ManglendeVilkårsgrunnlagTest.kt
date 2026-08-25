@@ -83,7 +83,7 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractDslTest() {
             // så regnes lørdag + søndag som del av arbeidsgiverperioden også.
             // Dermed ble perioden 6. januar - 2. februar regnet som tilstøtende til 1.-5. januar, selv om
             // de to har forskjellige skjæringstidspunkt.
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(
                     1.januar til 5.januar,
                     8.januar til 8.januar,

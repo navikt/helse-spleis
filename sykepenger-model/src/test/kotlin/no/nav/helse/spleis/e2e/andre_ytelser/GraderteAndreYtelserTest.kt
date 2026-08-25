@@ -84,7 +84,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 31.januar til 31.januar)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
 
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 533_000.årlig)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 533_000.årlig)
             assertInntektsgrunnlag(1.januar, 1) {
                 assertInntektsgrunnlag(a1, 533_000.årlig)
                 assertSykepengegrunnlag(533_000.årlig)

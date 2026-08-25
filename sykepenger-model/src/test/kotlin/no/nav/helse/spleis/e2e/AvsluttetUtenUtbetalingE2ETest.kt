@@ -156,7 +156,7 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
             nullstillTilstandsendringer()
             // 6. og 7. januar blir FriskHelg og medfører brudd i arbeidsgiverperioden
             // og dermed ble også skjæringstidspunktet forskjøvet til 8. januar
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(
                     1.januar til 3.januar, //3
                     4.januar til 5.januar, // 2

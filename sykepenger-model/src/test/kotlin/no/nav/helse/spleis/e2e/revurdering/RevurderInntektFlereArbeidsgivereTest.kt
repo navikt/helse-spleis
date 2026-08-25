@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.TestPerson
@@ -112,7 +111,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         a2 { assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
 
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 33000.månedlig)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 33000.månedlig)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterOverstyrInntekt(1.januar, 33000.månedlig)
             håndterYtelser(1.vedtaksperiode)
@@ -135,7 +134,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
     fun `Å flytte penger fra arbeidsgiveroppdrag til personoppdrag skal ikke logge at arbeidsgiveren har fått trukket penger`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 15000.månedlig)
         a2 {
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 15000.månedlig,
                 refusjon = Refusjon(7500.månedlig, opphørsdato = null)
@@ -151,9 +150,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 
@@ -184,7 +181,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         (a1 og a2) { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
 
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 16500.månedlig)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 16500.månedlig)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterOverstyrInntekt(1.januar, 16500.månedlig)
             håndterYtelser(1.vedtaksperiode)
@@ -252,7 +249,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(januar)
         }
-        (a1 og a2) { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        (a1 og a2) { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
@@ -365,8 +362,8 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(januar)
         }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
@@ -390,7 +387,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         (a1 og a2).nyeVedtak(januar)
         nullstillTilstandsendringer()
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 23000.månedlig)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 23000.månedlig)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterOverstyrInntekt(1.januar, 22000.månedlig)
             håndterOverstyrInntekt(1.januar, 23000.månedlig)
@@ -419,7 +416,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         (a1 og a2).nyeVedtak(januar)
         nullstillTilstandsendringer()
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 23000.månedlig)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 23000.månedlig)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterOverstyrInntekt(1.januar, 22000.månedlig)
             håndterYtelser(1.vedtaksperiode)
@@ -450,7 +447,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         (a1 og a2).nyeVedtak(januar)
         nullstillTilstandsendringer()
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 23000.månedlig)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 23000.månedlig)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterOverstyrInntekt(1.januar, 22000.månedlig)
             håndterYtelser(1.vedtaksperiode)
@@ -514,7 +511,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),

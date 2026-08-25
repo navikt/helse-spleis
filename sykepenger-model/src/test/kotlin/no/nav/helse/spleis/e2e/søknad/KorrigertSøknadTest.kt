@@ -126,7 +126,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
     fun `korrigert søknad i avventer simulering - forkaster utbetalingen`() {
         a1 {
             val id = nyPeriode(3.januar til 26.januar, 100.prosent)
-            håndterInntektsmelding(listOf(3.januar til 18.januar))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar))
             håndterVilkårsgrunnlag(id)
             håndterYtelser(id)
         }
@@ -363,7 +363,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
 
             håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar))
             val søknadId = håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar)
             )
             håndterVilkårsgrunnlag(3.vedtaksperiode)

@@ -34,7 +34,7 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
     fun `endre arbeidsgiverperiode til å starte tidligere`() {
         a1 {
             håndterSøknad(Sykdom(20.januar, 15.februar, 100.prosent))
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(
                     17.januar til 31.januar,
                     2.februar til 2.februar
@@ -84,7 +84,7 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
 
             håndterSøknad(Sykdom(1.april, 14.april, 100.prosent))
             håndterSøknad(Sykdom(15.april, 30.april, 100.prosent))
-            håndterInntektsmelding(listOf(1.april til 16.april))
+            håndterArbeidsgiveropplysninger(listOf(1.april til 16.april))
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)

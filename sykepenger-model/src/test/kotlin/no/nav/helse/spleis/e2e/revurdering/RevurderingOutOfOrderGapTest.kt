@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -70,7 +69,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
     fun `Arbeidsgiver med kort gap mellom sykefravær blir forsøkt sklitaklet av annen arbeidsgiver som tetter gapet og flytter skjæringstidspunktet`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
 
@@ -235,10 +234,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
     fun `out-of-order søknad medfører revurdering -- AvventerVilkårsprøving`() {
         a1 {
             nyPeriode(1.mars til 10.mars)
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(20.februar til 7.mars)
             )
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
             nyPeriode(1.januar til 18.januar)
@@ -434,7 +433,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             nyPeriode(1.januar til 16.januar)
 
             nyPeriode(29.januar til 15.februar)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 29.januar
             )
@@ -1126,7 +1125,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING) }
 
         a2 {
-            håndterInntektsmelding(listOf(10.februar til 25.februar))
+            håndterArbeidsgiveropplysninger(listOf(10.februar til 25.februar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -1241,7 +1240,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             assertSisteTilstand(februarId, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(januarId, AVVENTER_INNTEKTSMELDING)
 
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(januarId)
             håndterYtelser(januarId)
             håndterSimulering(januarId)

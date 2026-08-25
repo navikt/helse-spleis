@@ -102,7 +102,7 @@ internal class ForeldetSøknadE2ETest : AbstractDslTest() {
                 Ferie(1.februar, 16.februar),
                 sendtTilNAVEllerArbeidsgiver = 1.mai
             )
-            håndterInntektsmelding(listOf(16.januar til 31.januar))
+            håndterArbeidsgiveropplysninger(listOf(16.januar til 31.januar))
             assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
             assertEquals(Dag.ForeldetSykedag::class, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode)[31.januar]::class)
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -135,7 +135,7 @@ internal class ForeldetSøknadE2ETest : AbstractDslTest() {
 
             // foreldet søknad :(
             håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 24.januar
             )

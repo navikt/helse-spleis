@@ -34,7 +34,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
         a2 {
             håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar))
             håndterSøknad(6.februar til 28.februar)
-            håndterInntektsmelding(listOf(21.januar til 21.januar, 6.februar til 20.februar))
+            håndterArbeidsgiveropplysninger(listOf(21.januar til 21.januar, 6.februar til 20.februar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
@@ -48,7 +48,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
 
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT, a2 to (-500).månedlig),
@@ -84,7 +84,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
     fun `nytt og eneste arbeidsforhold på skjæringstidspunkt`() {
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
             )

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -106,15 +105,13 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
     fun `revurdering uten endring som siden annulleres skal sende melding om annullert`() {
         a1 {
             nyttVedtak(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 

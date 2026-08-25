@@ -27,7 +27,7 @@ internal class DødsmeldingE2E : AbstractDslTest() {
         håndterDødsmelding(18.januar)
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.also {
@@ -44,7 +44,7 @@ internal class DødsmeldingE2E : AbstractDslTest() {
         håndterDødsmelding(1.februar)
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             assertEquals(0, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.avvistDagTeller)
@@ -56,7 +56,7 @@ internal class DødsmeldingE2E : AbstractDslTest() {
         håndterDødsmelding(31.desember(2017))
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.also {

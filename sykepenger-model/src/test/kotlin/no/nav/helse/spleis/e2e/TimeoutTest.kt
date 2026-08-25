@@ -137,7 +137,7 @@ internal class TimeoutTest : AbstractDslTest() {
             håndterSøknad(januar)
         }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
@@ -163,7 +163,7 @@ internal class TimeoutTest : AbstractDslTest() {
         a2 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
             assertTimeoutTidspunkt(1.vedtaksperiode) { venterTil, gikkInnITilstand ->
                 assertEquals(gikkInnITilstand.plusMonths(3), venterTil)
@@ -176,7 +176,7 @@ internal class TimeoutTest : AbstractDslTest() {
         a1 {
             tilGodkjenning(januar)
             håndterSøknad(mars)
-            håndterInntektsmelding(listOf(1.mars til 16.mars))
+            håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertTimeoutTidspunkt(2.vedtaksperiode) { venterTil, _ ->
@@ -195,7 +195,7 @@ internal class TimeoutTest : AbstractDslTest() {
             håndterSøknad(mars)
         }
         a1 {
-            håndterInntektsmelding(listOf(1.mars til 16.mars))
+            håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
@@ -227,12 +227,12 @@ internal class TimeoutTest : AbstractDslTest() {
             håndterSøknad(mars)
         }
         a1 {
-            håndterInntektsmelding(listOf(1.mars til 16.mars))
+            håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
-            håndterInntektsmelding(listOf(1.mars til 16.mars))
+            håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertTimeoutTidspunkt(1.vedtaksperiode) { venterTil, _ ->
                 assertEquals(LocalDateTime.MAX, venterTil)

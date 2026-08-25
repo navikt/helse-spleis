@@ -168,7 +168,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 31000.månedlig
             )
@@ -370,7 +370,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
                 beregnetInntekt = INNTEKT
             )
@@ -932,7 +932,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         }
         // IM for tidligere ghost a2 sparker igang revurdering på a1
         a2 {
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(16.mars til 31.mars),
                 førsteFraværsdag = 16.mars,
                 refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList())

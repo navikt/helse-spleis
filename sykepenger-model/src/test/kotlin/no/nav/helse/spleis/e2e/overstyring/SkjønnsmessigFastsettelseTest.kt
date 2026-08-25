@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.util.*
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
@@ -201,7 +200,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         (a1 og a2).forlengVedtak(februar)
 
         a1 {
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 beregnetInntekt = 20000.månedlig,
                 refusjon = Refusjon(20000.månedlig, opphørsdato = 31.januar),
@@ -212,9 +211,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a1, 20_000.månedlig, forventetFastsattÅrsinntekt = 19_000.månedlig)
                 assertInntektsgrunnlag(a2, 20_000.månedlig, forventetFastsattÅrsinntekt = 21_000.månedlig)
             }
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 
@@ -334,15 +331,13 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = inntekt)))
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             nullstillTilstandsendringer()
-            håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), inntekt)
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 
@@ -374,7 +369,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         }
 
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
 
@@ -396,7 +391,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         )
         a1 {
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 3)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), INNTEKT * 3)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
@@ -409,7 +404,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
     fun `skjønnsmessig fastsatt - men så skulle det være etter hovedregel`() {
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
 
@@ -433,7 +428,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             nyPeriode(mars, a1)
-            håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT * 2)
+            håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT * 2)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(
@@ -456,7 +451,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         a1 {
             // Normal behandling med Inntektsmelding
             håndterSøknad(januar)
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektsmeldingInntekt, refusjon = Refusjon(inntektsmeldingInntekt, null, emptyList()))
+            val inntektsmeldingId = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = inntektsmeldingInntekt, refusjon = Refusjon(inntektsmeldingInntekt, null, emptyList()))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -496,7 +491,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         a1 {
             // Normal behandling med Inntektsmelding
             håndterSøknad(januar)
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektsmeldingInntekt, refusjon = Refusjon(inntektsmeldingInntekt, null, emptyList()))
+            val inntektsmeldingId = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = inntektsmeldingInntekt, refusjon = Refusjon(inntektsmeldingInntekt, null, emptyList()))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dsl.INNTEKT
@@ -49,7 +48,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
     fun `sender med inntektskilder i sykepengegrunnlaget i godkjenningsbehovet`() {
         a1 { nyPeriode(januar) }
         a2 { nyPeriode(januar) }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
         a2 { håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(), nåtidspunkt = 10.februar(2025).atStartOfDay()) }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -238,7 +237,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
         a1 {
             nyPeriode(2.januar til 17.januar)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
@@ -246,7 +245,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             }
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertTrue(godkjenningsbehov.event.kanAvvises)
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 
@@ -411,7 +410,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
         }
         a2 {
-            håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)

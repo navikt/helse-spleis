@@ -125,7 +125,7 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
             assertEquals(17.september til 19.september, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
             assertEquals("SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
 
-            håndterInntektsmelding(listOf(20.august til 4.september), førsteFraværsdag = 17.september)
+            håndterArbeidsgiveropplysninger(listOf(20.august til 4.september), førsteFraværsdag = 17.september)
 
             assertEquals(4.september til 19.september, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
             assertEquals("U????? ??????? SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())

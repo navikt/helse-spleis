@@ -84,11 +84,11 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
 
         a2 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 60.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = a2Inntekt)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = a2Inntekt)
         }
 
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = a1Inntekt)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = a1Inntekt)
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekter = listOf(a1 to a1Inntekt, a2 to a2Inntekt))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

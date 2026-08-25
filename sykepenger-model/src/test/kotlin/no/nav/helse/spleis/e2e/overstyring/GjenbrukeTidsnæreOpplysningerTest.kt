@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.reflect.KClass
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
@@ -250,7 +249,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(3.januar, 5.januar, 100.prosent))
             håndterSøknad(Sykdom(6.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(3.januar til 18.januar))
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 18.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -342,13 +341,12 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent), Arbeid(1.januar, 9.januar))
             håndterSøknad(Sykdom(15.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(15.januar til 29.januar))
+            håndterArbeidsgiveropplysninger(listOf(15.januar til 29.januar))
             assertEquals(listOf(15.januar til 30.januar), inspektør.venteperiode(2.vedtaksperiode))
-            if (Toggle.KnertInntektsmelding.disabled) assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
         }
         a2 {
             håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(10.januar til 25.januar))
+            håndterArbeidsgiveropplysninger(listOf(10.januar til 25.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -397,7 +395,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     fun `vedtaksperiode flytter skjæringstidspunktet frem`() {
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -433,7 +431,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     fun `vedtaksperiode flytter skjæringstidspunktet frem etter utbetalt`() {
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -475,7 +473,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     fun `flytter arbeidsgiverperioden frem 16 dager etter utbetalt`() {
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -528,7 +526,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     fun `flytter arbeidsgiverperioden frem 10 dager etter utbetalt`() {
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -581,7 +579,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             nyttVedtak(januar)
 
             håndterSøknad(mars)
-            håndterInntektsmelding(listOf(1.mars til 16.mars))
+            håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -941,7 +939,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
     fun `gjenbruker saksbehandlerinntekt som overstyrer annen saksbehandler`() {
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -1006,7 +1004,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             val skjønnsmessigFastsattInntekt = INNTEKT * 1.5
 
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntektIM)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntektIM)
             nullstillTilstandsendringer()
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
@@ -1057,7 +1055,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterSøknad(Sykdom(17.januar, 20.januar, 100.prosent))
             håndterSøknad(Sykdom(21.januar, 8.februar, 100.prosent))
             håndterSøknad(Sykdom(9.februar, 28.februar, 100.prosent))
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(
                     17.januar til 20.januar,
                     2.februar til 13.februar
@@ -1080,7 +1078,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         a1 {
             // Planke
             håndterSøknad(Sykdom(8.januar, 31.januar, 100.prosent))
-            val inntektsmeldingId = håndterInntektsmelding(listOf(8.januar til 23.januar), beregnetInntekt = INNTEKT)
+            val inntektsmeldingId = håndterArbeidsgiveropplysninger(listOf(8.januar til 23.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -1122,7 +1120,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         a1 {
             // Planke
             håndterSøknad(Sykdom(8.januar, 31.januar, 100.prosent))
-            val inntektsmeldingId = håndterInntektsmelding(listOf(8.januar til 23.januar), beregnetInntekt = INNTEKT)
+            val inntektsmeldingId = håndterArbeidsgiveropplysninger(listOf(8.januar til 23.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -1176,7 +1174,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(2.januar til 16.januar)
             håndterSøknad(17.januar til 31.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
         }

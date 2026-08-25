@@ -54,7 +54,7 @@ internal class VarselE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei)
 
             assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
@@ -137,7 +137,7 @@ internal class VarselE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(10.januar til 25.januar)
             håndterSøknad(26.januar til 31.januar)
-            håndterInntektsmelding(listOf(10.januar til 25.januar))
+            håndterArbeidsgiveropplysninger(listOf(10.januar til 25.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             nullstillTilstandsendringer()
             assertEquals(listOf(10.januar til 25.januar), inspektør.venteperiode(1.vedtaksperiode))

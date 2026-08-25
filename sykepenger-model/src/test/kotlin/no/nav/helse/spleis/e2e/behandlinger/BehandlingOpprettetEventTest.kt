@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.behandlinger
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.reflect.KClass
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -98,8 +97,8 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
     fun omgjøring() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-            håndterInntektsmelding(listOf(25.desember(2017) til 9.januar), beregnetInntekt = INNTEKT)
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(25.desember(2017) til 9.januar), beregnetInntekt = INNTEKT)
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer
             assertEquals(2, behandlingOpprettetEventer.size)
             val førsteEvent = behandlingOpprettetEventer.first()

@@ -86,7 +86,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
             assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
@@ -226,7 +226,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
             assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)

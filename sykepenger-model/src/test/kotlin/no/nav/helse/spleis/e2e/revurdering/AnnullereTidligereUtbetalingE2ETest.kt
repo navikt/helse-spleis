@@ -64,7 +64,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
-            håndterInntektsmelding(listOf(1.mars til 16.mars))
+            håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

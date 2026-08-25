@@ -1,7 +1,6 @@
 package no.nav.helse.bugs_showstoppers
 
 import java.time.LocalDateTime
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.INNTEKT
@@ -230,7 +229,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
             håndterSøknad(Sykdom(14.februar(2020), 14.februar(2020), 100.prosent))
             håndterSøknad(Sykdom(27.februar(2020), 28.februar(2020), 100.prosent))
 
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(
                     10.februar(2020) til 12.februar(2020),
                     27.februar(2020) til 10.mars(2020)
@@ -270,9 +269,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
                 27.februar(2020) til 28.februar(2020)
             ), inspektør.venteperiode(3.vedtaksperiode))
 
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsler(3.vedtaksperiode, RV_AO_3)
-            }
+            assertVarsler(3.vedtaksperiode, RV_AO_3)
         }
     }
 
@@ -337,7 +334,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020)))
             håndterSøknad(Sykdom(28.januar(2020), 10.februar(2020), 100.prosent))
             håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100.prosent))
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020)))
             )
 
@@ -404,7 +401,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar))
             håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(3.januar til 4.januar, 9.januar til 10.januar)
             )
             inspektør.also {
@@ -423,9 +420,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
                 AVSLUTTET_UTEN_UTBETALING
             )
 
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsler(1.vedtaksperiode, RV_AO_3)
-            }
+            assertVarsler(1.vedtaksperiode, RV_AO_3)
         }
     }
 
@@ -799,7 +794,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(12.juni(2020), 25.juni(2020)))
             håndterSøknad(Sykdom(12.juni(2020), 25.juni(2020), 100.prosent))
 
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(Periode(4.juni(2020), 19.juni(2020)))
             )
             håndterVilkårsgrunnlag(3.vedtaksperiode)
@@ -829,7 +824,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
 
             håndterSykmelding(Sykmeldingsperiode(9.juli, 31.juli))
             håndterSøknad(Sykdom(9.juli, 31.juli, 100.prosent))
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(Periode(1.juni, 16.juni)),
                 førsteFraværsdag = 9.juli
             )

@@ -631,7 +631,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractDslTest() {
         nyPeriode(1.februar til 18.februar, a2)
 
         a2 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
         a1 { håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag))) }
 

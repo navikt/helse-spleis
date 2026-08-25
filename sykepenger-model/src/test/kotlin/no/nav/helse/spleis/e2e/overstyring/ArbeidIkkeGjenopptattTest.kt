@@ -20,7 +20,7 @@ internal class ArbeidIkkeGjenopptattTest: AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(mars)
-            håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.mars)
+            håndterArbeidsgiveropplysninger(emptyList(), førsteFraværsdag = 1.mars)
             håndterOverstyrTidslinje(februar.map { ManuellOverskrivingDag(it, ArbeidIkkeGjenopptattDag) })
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -39,7 +39,7 @@ internal class ArbeidIkkeGjenopptattTest: AbstractDslTest() {
             nyttVedtak(10.februar til 28.februar, arbeidsgiverperiode = emptyList())
 
             håndterSøknad(april)
-            håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.april)
+            håndterArbeidsgiveropplysninger(emptyList(), førsteFraværsdag = 1.april)
             håndterOverstyrTidslinje(mars.map { ManuellOverskrivingDag(it, ArbeidIkkeGjenopptattDag) })
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)

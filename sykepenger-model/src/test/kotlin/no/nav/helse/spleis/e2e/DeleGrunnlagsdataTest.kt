@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -50,7 +49,7 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
                 arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-            val inntektsmelding2Id = håndterInntektsmelding(
+            val inntektsmelding2Id = håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
                 førsteFraværsdag = 5.april
             )
@@ -81,9 +80,7 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
             assertTrue(inntektsmelding1Id in inspektør.hendelseIder(2.vedtaksperiode))
             assertTrue(inntektsmelding1Id in inspektør.hendelseIder(3.vedtaksperiode))
             assertTrue(inntektsmelding2Id in inspektør.hendelseIder(4.vedtaksperiode))
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
         }
     }
 
@@ -154,7 +151,7 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             håndterSøknad(mars, søknadId = søknadId)
 
-            val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(20.februar, 7.mars)))
+            val inntektsmeldingId = håndterArbeidsgiveropplysninger(listOf(Periode(20.februar, 7.mars)))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
 

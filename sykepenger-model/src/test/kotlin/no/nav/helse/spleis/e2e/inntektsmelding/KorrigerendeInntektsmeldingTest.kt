@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.assertInntektsgrunnlag
@@ -84,7 +83,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
     fun `Korrigerende inntektsmelding med lik agp skal ikke ha varsel`() {
         a1 {
             nyttVedtak(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -98,9 +97,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
                 it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
             })
             assertEquals(1431.daglig, utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp)
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 

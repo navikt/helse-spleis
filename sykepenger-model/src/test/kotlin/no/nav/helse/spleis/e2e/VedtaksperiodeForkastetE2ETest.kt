@@ -51,7 +51,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractDslTest() {
             håndterSøknad(1.januar til 5.januar)
             håndterSøknad(6.januar til 15.januar)
             håndterSøknad(16.januar til 31.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)

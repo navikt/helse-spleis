@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.behandlinger
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
@@ -115,12 +114,12 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
     fun `bestridelse av sykdom - auu`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 emptyList(),
                 førsteFraværsdag = 1.januar,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "BetvilerArbeidsufoerhet"
             )
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val behandlinger = inspektørForkastet(1.vedtaksperiode).behandlinger
             val sisteBehandling = behandlinger.last()

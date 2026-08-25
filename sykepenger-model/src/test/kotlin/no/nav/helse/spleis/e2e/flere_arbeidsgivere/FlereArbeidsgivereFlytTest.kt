@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.TestPerson
@@ -63,10 +62,10 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
             håndterSøknad(Sykdom(13.januar, 26.januar, 100.prosent))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
         }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
         a2 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
         a1 {
             assertEquals(13.januar til 26.januar, inspektør.periode(3.vedtaksperiode))
@@ -88,8 +87,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
         a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -110,8 +109,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
             håndterSøknad(Sykdom(13.januar, 31.januar, 100.prosent))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
         a1 {
             assertEquals(13.januar til 31.januar, inspektør.periode(3.vedtaksperiode))
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -395,7 +394,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
         a2 {
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(2.januar til 17.januar),
                 førsteFraværsdag = 20.januar
             )
@@ -422,9 +421,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
         }
     }
 
@@ -619,12 +616,12 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive))
             håndterSøknad(Sykdom(periode1.start, periode1.endInclusive, 100.prosent))
-            håndterInntektsmelding(listOf(31.januar til 15.februar))
+            håndterArbeidsgiveropplysninger(listOf(31.januar til 15.februar))
         }
         a2 {
             håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive))
             håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent))
-            håndterInntektsmelding(listOf(1.februar til 16.februar))
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar))
             håndterSykmelding(Sykmeldingsperiode(periode3.start, periode3.endInclusive))
             håndterSøknad(Sykdom(periode3.start, periode3.endInclusive, 100.prosent))
         }
@@ -785,14 +782,14 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
     fun `får tidligere sykmelding og søknad for en annen arbeidsgiver`() {
         a1 {
             nyPeriode(februar, a1)
-            håndterInntektsmelding(listOf(1.februar til 16.februar), INNTEKT, 1.februar)
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), INNTEKT, 1.februar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
         }
         a2 {
             nyPeriode(januar, a2)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, 1.januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), INNTEKT, 1.januar)
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

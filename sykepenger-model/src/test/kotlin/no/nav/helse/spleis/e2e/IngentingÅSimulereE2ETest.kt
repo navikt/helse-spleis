@@ -74,7 +74,7 @@ internal class IngentingÅSimulereE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar))
             håndterSøknad(1.januar til 21.januar)
-            håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+            håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode, simuleringsresultat = null)

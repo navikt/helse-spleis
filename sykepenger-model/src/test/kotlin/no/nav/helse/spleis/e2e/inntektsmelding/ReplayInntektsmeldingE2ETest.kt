@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDateTime
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
@@ -42,7 +41,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertTrue(im1 in observatør.inntektsmeldingIkkeHåndtert)
 
-            val im2 = håndterInntektsmelding(listOf(1.januar til 16.januar), mottatt = im2Mottatt)
+            val im2 = håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), mottatt = im2Mottatt)
             assertEquals(januar, inspektør.periode(1.vedtaksperiode))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -58,9 +57,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
             assertTrue(im1 to 1.vedtaksperiode in observatør.inntektsmeldingHåndtert)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 
@@ -135,7 +132,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
     fun `replay av IM medfører ikke at allerede revurdert skjæringstidspunkt revurderes på nytt`() {
         a1 {
             nyttVedtak(mars)
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
                 beregnetInntekt = INNTEKT + 500.daglig
             )
@@ -160,7 +157,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
 
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar)
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)

@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -114,7 +113,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     fun `to helt like korrigerende inntektsmeldinger`() {
         a1 {
             nyttVedtak(januar)
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT * 1.1
             )
@@ -127,7 +126,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             observatør.inntektsmeldingIkkeHåndtert.clear()
             observatør.inntektsmeldingHåndtert.clear()
-            val korrigertInntektsmelding2 = håndterInntektsmelding(
+            val korrigertInntektsmelding2 = håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT * 1.1
             )
@@ -194,7 +193,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(17.januar, 31.januar), søknadId = søknadId)
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-            val id = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+            val id = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
 
             assertEquals(id to 1.vedtaksperiode, observatør.inntektsmeldingHåndtert.single())
             assertEquals(setOf(søknadId, id), inspektør.hendelseIder(1.vedtaksperiode))
@@ -307,7 +306,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             val søknadId4 = UUID.randomUUID()
             håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent), søknadId = søknadId4)
             val søknad4 = MeldingsreferanseId(søknadId4)
-            val im = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeId = 3.vedtaksperiode))
+            val im = MeldingsreferanseId(håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 3.vedtaksperiode))
 
             assertEquals(
                 setOf(
@@ -560,7 +559,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     fun `sender ut inntektsmelding ikke håndtert på im med funksjonelle feil ved revurdering av dager`() {
         a1 {
             nyttVedtak(januar)
-            val inntektsmeldingId = håndterInntektsmelding(
+            val inntektsmeldingId = håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 opphørAvNaturalytelser = listOf(Inntektsmelding.OpphørAvNaturalytelse(1000.månedlig, 1.januar, "BIL"))
             )
@@ -570,9 +569,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertFalse(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
             assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 
@@ -632,7 +629,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            val im2 = MeldingsreferanseId(håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1))
+            val im2 = MeldingsreferanseId(håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1))
 
             assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
 

@@ -90,7 +90,7 @@ internal class OutOfOrderSøknadTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
 
-            håndterInntektsmelding(listOf(1.februar til 16.februar))
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

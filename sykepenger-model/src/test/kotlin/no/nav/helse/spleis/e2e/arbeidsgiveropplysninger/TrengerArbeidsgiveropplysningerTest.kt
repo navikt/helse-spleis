@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.util.UUID
 import kotlin.reflect.KClass
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -223,7 +222,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSøknad(Sykdom(22.januar, 26.januar, 100.prosent))
             håndterSøknad(Sykdom(27.januar, 28.januar, 100.prosent))
             håndterSøknad(Sykdom(29.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeId = 4.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 4.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -308,7 +307,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Ferie(1.januar, 11.januar))
             håndterSøknad(Sykdom(16.januar, 29.januar, 100.prosent), Ferie(16.januar, 16.januar))
-            håndterInntektsmelding(listOf(12.januar til 27.januar))
+            håndterArbeidsgiveropplysninger(listOf(12.januar til 27.januar))
             assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
             assertEquals(2.vedtaksperiode, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().opplysninger.vedtaksperiodeId)
         }
@@ -1076,8 +1075,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         // enn å ha den janky koden.
         a1 {
             nyPeriode(1.januar til 16.januar, a1)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             nyPeriode(18.januar til 31.januar, a1)
         }
 
@@ -1105,8 +1104,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         val ag2Periode = sykefraværHosArbeidsgiver[a2]!!
         nyPeriode(ag1Periode.start til ag1Periode.endInclusive, a1)
         nyPeriode(ag2Periode.start til ag2Periode.endInclusive, a2)
-        a1 { håndterInntektsmelding(listOf(ag1Periode.start til ag1Periode.start.plusDays(15)), beregnetInntekt = INNTEKT) }
-        a2 { håndterInntektsmelding(listOf(ag2Periode.start til ag2Periode.start.plusDays(15)), beregnetInntekt = INNTEKT) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(ag1Periode.start til ag1Periode.start.plusDays(15)), beregnetInntekt = INNTEKT) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(ag2Periode.start til ag2Periode.start.plusDays(15)), beregnetInntekt = INNTEKT) }
         fraVilkårsprøvingTilGodkjent()
     }
 

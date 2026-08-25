@@ -51,7 +51,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(28.desember(2017), 15.januar))
             håndterSøknad(28.desember(2017) til 15.januar)
-            håndterInntektsmelding(listOf(28.desember(2017) til 12.januar))
+            håndterArbeidsgiveropplysninger(listOf(28.desember(2017) til 12.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
@@ -80,7 +80,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
         }
         assertHarArbeidsforhold(1.januar, a1)
@@ -92,7 +92,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsler(listOf(Varselkode.RV_VV_2), 1.vedtaksperiode.filter())
         }
@@ -105,7 +105,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
@@ -124,7 +124,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
@@ -143,7 +143,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
@@ -164,7 +164,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars))
             håndterSøknad(1.januar til 15.mars)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
 
         a1 {
@@ -196,7 +196,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 inntekterForOpptjeningsvurdering = listOf(a1 to INGEN)

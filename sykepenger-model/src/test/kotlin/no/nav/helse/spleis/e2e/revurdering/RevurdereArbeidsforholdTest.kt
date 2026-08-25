@@ -45,7 +45,7 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -77,7 +77,7 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -127,7 +127,7 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -185,7 +185,7 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -227,7 +227,7 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -307,8 +307,8 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(januar)
         }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
 
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, a3)
@@ -390,7 +390,7 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -441,8 +441,8 @@ internal class RevurderArbeidsforholdTest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(januar)
         }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = inntekt) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = inntekt) }
 
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, a3)

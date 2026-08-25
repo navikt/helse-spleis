@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.Year
 import kotlin.math.roundToInt
 import no.nav.helse.EnableFeriepenger
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -574,8 +573,8 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(6.juni(2020), 7.juni(2020)))
             håndterSøknad(6.juni(2020) til 7.juni(2020))
-            håndterInntektsmelding(listOf(6.juni(2020) til 7.juni(2020)))
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(6.juni(2020) til 7.juni(2020)))
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
         assertIngenFeriepengebehov {
             håndterUtbetalingshistorikkForFeriepenger(

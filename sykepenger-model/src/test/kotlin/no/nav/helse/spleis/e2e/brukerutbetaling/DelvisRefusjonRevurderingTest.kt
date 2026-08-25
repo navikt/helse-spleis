@@ -31,7 +31,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
 
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT / 2,
                 refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
@@ -163,7 +163,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractDslTest() {
             )
         }
         a1 {
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = a1Inntekt / 2,
                 refusjon = Inntektsmelding.Refusjon(a1Inntekt / 2, null, emptyList())

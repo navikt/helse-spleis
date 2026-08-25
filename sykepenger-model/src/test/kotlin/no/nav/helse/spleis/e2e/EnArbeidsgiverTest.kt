@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
@@ -471,16 +470,14 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(10.januar, 11.januar))
 
             håndterSøknad(1.januar til 2.januar)
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(1.januar til 2.januar, 10.januar til 23.januar)
             )
             assertEquals(listOf(1.januar til 2.januar), inspektør.venteperiode(1.vedtaksperiode))
             håndterSøknad(10.januar til 11.januar)
 
             assertTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 
@@ -574,16 +571,14 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(
                 utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 10.februar))
             )
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 20.februar
             )
             håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
             håndterSøknad(20.februar til 28.februar)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 

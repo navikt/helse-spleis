@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.refusjon
 
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -80,12 +79,10 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
             nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
-            håndterInntektsmelding(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null))
+            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null))
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 
@@ -95,7 +92,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            val inntektsmeldingId = håndterInntektsmelding(arbeidsgiverperiode)
+            val inntektsmeldingId = håndterArbeidsgiveropplysninger(arbeidsgiverperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -106,7 +103,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
 
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterSøknad(februar)
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 id = inntektsmeldingId,
                 arbeidsgiverperioder = arbeidsgiverperiode,
                 vedtaksperiodeId = 1.vedtaksperiode
@@ -114,9 +111,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 
@@ -131,7 +126,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 1.januar))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterInntektsmelding(listOf(), førsteFraværsdag = 1.januar)
+            håndterArbeidsgiveropplysninger(listOf(), førsteFraværsdag = 1.januar)
         }
         a2 {
             håndterYtelser(2.vedtaksperiode)
@@ -154,7 +149,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 1.januar))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterInntektsmelding(listOf(1.desember(2017) til 16.desember(2017)), førsteFraværsdag = 2.januar)
+            håndterArbeidsgiveropplysninger(listOf(1.desember(2017) til 16.desember(2017)), førsteFraværsdag = 2.januar)
 
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)

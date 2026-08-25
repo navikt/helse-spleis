@@ -124,7 +124,7 @@ internal class AnalytiskDatapakkeTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
 
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.5)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.5)
             håndterUtbetalt()
 
             håndterYtelser(1.vedtaksperiode)

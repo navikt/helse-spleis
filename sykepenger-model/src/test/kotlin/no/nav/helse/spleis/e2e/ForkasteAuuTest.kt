@@ -48,7 +48,7 @@ internal class ForkasteAuuTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
             håndterSøknad(Sykdom(17.februar, 28.februar, 100.prosent))
-            håndterInntektsmelding(listOf(1.februar til 16.februar))
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

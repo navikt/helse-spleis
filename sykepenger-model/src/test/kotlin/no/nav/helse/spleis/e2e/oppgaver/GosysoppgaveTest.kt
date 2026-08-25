@@ -82,7 +82,7 @@ internal class GosysoppgaveTest: AbstractDslTest() {
         }
         a2 {
             håndterSøknad(17.januar til 17.februar)
-            håndterInntektsmelding(listOf(17.januar til 1.februar))
+            håndterArbeidsgiveropplysninger(listOf(17.januar til 1.februar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT, a2 to INNTEKT),

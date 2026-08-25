@@ -196,7 +196,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a1, INNTEKT, nySaksbehandlerInntekt, forventetKorrigertInntekt = nySaksbehandlerInntekt)
             }
 
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = nyIMInntekt
             )
@@ -792,7 +792,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a2, INNTEKT, INNTEKT * 1.5, forventetKorrigertInntekt = INNTEKT * 1.5)
             }
 
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT
             )

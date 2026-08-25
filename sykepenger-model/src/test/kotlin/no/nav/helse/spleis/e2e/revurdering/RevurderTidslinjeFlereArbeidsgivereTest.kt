@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -46,7 +45,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar))
             håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig)
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -65,10 +64,10 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractDslTest() {
         }
 
         a1 {
-            håndterInntektsmelding(listOf(2.januar til 17.januar), beregnetInntekt = 20000.månedlig)
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(2.januar til 17.januar), beregnetInntekt = 20000.månedlig)
             assertIngenFunksjonelleFeil()
             assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
@@ -130,11 +129,11 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractDslTest() {
     fun `revurdere en AG når en annen AG er til godkjenning`() {
         a1 {
             nyPeriode(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
         a2 {
             nyPeriode(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)

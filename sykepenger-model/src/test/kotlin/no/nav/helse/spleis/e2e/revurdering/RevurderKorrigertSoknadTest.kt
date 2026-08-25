@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -382,8 +381,8 @@ internal class RevurderKorrigertSoknadTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar))
             håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
 
-            håndterInntektsmelding(listOf(31.januar til 15.februar), beregnetInntekt = INNTEKT)
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(31.januar til 15.februar), beregnetInntekt = INNTEKT)
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
 
             assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 

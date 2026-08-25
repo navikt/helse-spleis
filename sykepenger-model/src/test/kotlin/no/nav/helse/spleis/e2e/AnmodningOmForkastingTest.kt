@@ -60,7 +60,7 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
         }
         a2 {
             nyPeriode(mars)
-            håndterInntektsmelding(listOf(1.mars til 16.mars))
+            håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a1 {

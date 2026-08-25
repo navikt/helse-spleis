@@ -46,7 +46,7 @@ internal class FrilanserTest : AbstractDslTest() {
     fun `frilansarbeidsforhold med feriepenger siste tre måneder før skjæringstidspunktet`() {
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -62,7 +62,7 @@ internal class FrilanserTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
@@ -89,7 +89,7 @@ internal class FrilanserTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
             assertTilstander(
@@ -109,7 +109,7 @@ internal class FrilanserTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT, a2 to 1000.månedlig),
@@ -132,7 +132,7 @@ internal class FrilanserTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterSøknad(mars)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
                 førsteFraværsdag = 1.mars,
                 beregnetInntekt = 10000.månedlig
@@ -156,7 +156,7 @@ internal class FrilanserTest : AbstractDslTest() {
             val periode = januar
             håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
             håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

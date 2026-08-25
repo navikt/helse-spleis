@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
@@ -460,7 +459,7 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar))
             håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(Periode(1.januar, 16.januar))
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -497,8 +496,8 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
-            håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)))
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
 
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterSøknad(februar)
@@ -549,7 +548,7 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
     fun `revurdere inntekt slik at det blir brukerutbetaling`() {
         a1 {
             nyttVedtak(januar)
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(Periode(1.januar, 16.januar)),
                 refusjon = Refusjon(
                     INGEN,
@@ -568,9 +567,7 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
 
             assertEquals(15741, inspektør.utbetaling(1).personOppdrag.nettoBeløp())
             assertEquals(-15741, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 
@@ -578,7 +575,7 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
     fun `revurdere inntekt slik at det blir delvis refusjon`() {
         a1 {
             nyttVedtak(januar)
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(Periode(1.januar, 16.januar)),
                 refusjon = Refusjon(
                     25000.månedlig,
@@ -597,9 +594,7 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
 
             assertEquals(3047, inspektør.utbetaling(1).personOppdrag.nettoBeløp())
             assertEquals(-3047, inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 

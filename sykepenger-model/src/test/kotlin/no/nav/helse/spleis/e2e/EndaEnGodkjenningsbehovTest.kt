@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -667,7 +666,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     fun `trekker tilbake penger fra arbeidsgiver og flytter til bruker`() {
         a1 {
             nyttVedtak(januar)
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null)
             )
@@ -682,9 +681,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 utbetalingstype = "REVURDERING",
                 utbetalingsdager = standardUtbetalingsdager(0, 1431),
             )
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 

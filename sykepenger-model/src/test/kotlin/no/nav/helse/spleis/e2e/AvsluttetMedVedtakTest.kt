@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
@@ -79,7 +78,7 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(17.januar, 20.januar))
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertEquals(0, inspektør.antallUtbetalinger)
             assertEquals(0, observatør.utbetalingUtenUtbetalingEventer.size)
@@ -249,12 +248,12 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             håndterSøknad(1.januar til 16.januar, søknadId = søknadId)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            val inntektsmeldingId = håndterInntektsmelding(
+            val inntektsmeldingId = håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()),
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
             )
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
+            assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

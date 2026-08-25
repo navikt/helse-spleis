@@ -232,7 +232,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
     fun `overstyre ferie til sykdom`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterOverstyrTidslinje(
                 (17.januar til 31.januar).map { dagen -> ManuellOverskrivingDag(dagen, Sykedag, 100) }
             )
@@ -366,7 +366,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
         a1 {
             nyPeriode(1.januar til 9.januar, a1)
             nyPeriode(10.januar til 31.januar, a1)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -395,7 +395,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
         a1 {
             nyPeriode(1.januar til 9.januar, a1)
             nyPeriode(10.januar til 31.januar, a1)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

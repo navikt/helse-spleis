@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.util.UUID
 import kotlin.reflect.KClass
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -233,7 +232,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Refusjon(INGEN, null, emptyList())
             )
@@ -282,7 +281,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
     fun `Overstyrer sykedagNav tilbake til vanlig agp`() {
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Refusjon(INGEN, null, emptyList()),
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
@@ -322,11 +321,11 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
     fun `Overstyrer egenmeldingsdager til SykedagNav`() {
         a1 {
             håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Refusjon(INGEN, null, emptyList())
             )
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
+            assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -352,7 +351,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)

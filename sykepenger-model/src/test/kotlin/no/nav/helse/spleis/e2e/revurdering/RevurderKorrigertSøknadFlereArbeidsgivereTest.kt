@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -75,10 +74,10 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a2 {
             håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar))
-            håndterInntektsmelding(listOf(15.januar til 30.januar), beregnetInntekt = 20000.månedlig)
+            håndterArbeidsgiveropplysninger(listOf(15.januar til 30.januar), beregnetInntekt = 20000.månedlig)
         }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -124,10 +123,10 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a2 {
             håndterSykmelding(Sykmeldingsperiode(periodeAg2.start, periodeAg2.endInclusive))
             håndterSøknad(Sykdom(periodeAg2.start, periodeAg2.endInclusive, 100.prosent))
-            håndterInntektsmelding(listOf(periodeAg2.start til periodeAg2.start.plusDays(15)))
+            håndterArbeidsgiveropplysninger(listOf(periodeAg2.start til periodeAg2.start.plusDays(15)))
         }
         a1 {
-            håndterInntektsmelding(listOf(periodeAg1.start til periodeAg1.start.plusDays(15)))
+            håndterArbeidsgiveropplysninger(listOf(periodeAg1.start til periodeAg1.start.plusDays(15)))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -181,14 +180,14 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
         }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars))
             håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
             observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
-            håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(24.februar til 11.mars), beregnetInntekt = INNTEKT)
         }
         a2 {
-            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(25.januar til 9.februar), beregnetInntekt = INNTEKT)
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
@@ -476,14 +475,14 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
         }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars))
             håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
             observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
-            håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(24.februar til 11.mars), beregnetInntekt = INNTEKT)
         }
         a2 {
-            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(25.januar til 9.februar), beregnetInntekt = INNTEKT)
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
@@ -599,14 +598,14 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
         }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterSykmelding(Sykmeldingsperiode(10.februar, 10.mars))
             håndterSøknad(Sykdom(10.februar, 10.mars, 100.prosent))
             observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, 10.februar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, 10.februar)
         }
         a2 {
-            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(25.januar til 9.februar), beregnetInntekt = INNTEKT)
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
@@ -697,9 +696,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             (10..28).forEach {
                 assertEquals(100.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
             }
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
         }
     }
 

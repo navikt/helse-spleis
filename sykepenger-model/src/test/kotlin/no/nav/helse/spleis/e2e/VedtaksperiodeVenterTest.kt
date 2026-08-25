@@ -39,7 +39,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
     fun `Venteårsak når vi venter på å få gjennomført vilkårsprøving`() {
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             val sisteVedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last()
             assertEquals("VILKÅRSPRØVING", sisteVedtaksperiodeVenter.venterPå.venteårsak.hva)
@@ -76,7 +76,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
         val a1Vedtaksperiode2 = a1 { 2.vedtaksperiode }
         a2 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
             val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
             assertEquals(a1Vedtaksperiode2, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
@@ -91,7 +91,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -131,7 +131,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
         }
         val a2VedtaksperiodeId = a2 { 1.vedtaksperiode }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
             val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
             assertEquals(a2VedtaksperiodeId, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
@@ -168,7 +168,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                 )
             )
 
-            val inntektsmeldingIdMars = håndterInntektsmelding(listOf(1.mars til 16.mars))
+            val inntektsmeldingIdMars = håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars))
             assertVenterPå(
                 listOf(
                     1.vedtaksperiode to INFOTRYGDHISTORIKK,
@@ -246,7 +246,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                 )
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+            val inntektsmeldingId = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
             assertVenterPå(
                 listOf(
@@ -323,7 +323,7 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             håndterSøknad(mars)
-            håndterInntektsmelding(listOf(1.mars til 16.mars))
+            håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 

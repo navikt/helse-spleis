@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -94,10 +93,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             nyPeriode(januar)
         }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
         a2 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
         a2 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -213,7 +212,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertVenterPåSøknad(1.vedtaksperiode)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
             assertVenterPåSøknad(1.vedtaksperiode)
@@ -282,11 +281,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSøknad(1.januar til 20.januar) }
         a2 {
             håndterSøknad(1.januar til 31.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
 
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, a3)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 3) {
                 assertInntektsgrunnlag(a1, INNTEKT)
@@ -326,8 +325,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     fun `forbrukte og gjenstående sykedager blir riktig også om arbeidsgiver som ikke beregner utbetalinger strekker seg lengre enn den som beregner`() {
         a1 { håndterSøknad(1.januar til 20.januar) }
         a2 { håndterSøknad(januar) }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -365,8 +364,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
             nullstillTilstandsendringer()
             observatør.vedtaksperiodeVenter.clear()
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertEquals(0, observatør.vedtaksperiodeVenter.size)
@@ -385,9 +384,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             nyPeriode(2.januar til 20.januar)
             nyPeriode(21.januar til 31.januar)
         }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a3 { håndterInntektsmelding(listOf(2.januar til 17.januar), vedtaksperiodeId = 1.vedtaksperiode) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
+        a3 { håndterArbeidsgiveropplysninger(listOf(2.januar til 17.januar), vedtaksperiodeId = 1.vedtaksperiode) }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -429,9 +428,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             nyPeriode(2.januar til 18.januar)
             nyPeriode(19.januar til 31.januar)
         }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a3 { håndterInntektsmelding(listOf(2.januar til 17.januar), vedtaksperiodeId = 1.vedtaksperiode) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
+        a3 { håndterArbeidsgiveropplysninger(listOf(2.januar til 17.januar), vedtaksperiodeId = 1.vedtaksperiode) }
         a3 {
             håndterSøknad(Sykdom(2.januar, 18.januar, 100.prosent), Ferie(18.januar, 18.januar))
         }
@@ -590,7 +589,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             nyPeriode(1.januar til 16.januar)
             nyPeriode(20.januar til 31.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
@@ -622,7 +621,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             håndterSøknad(17.januar til 31.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -680,7 +679,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -696,7 +695,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         a2 {
             håndterSøknad(februar)
-            håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT, id = a2Inntektsmelding)
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT, id = a2Inntektsmelding)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -722,13 +721,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 {
             håndterSøknad(10.januar til 31.januar)
-            håndterInntektsmelding(listOf(1.januar til 1.januar, 8.januar til 22.januar), beregnetInntekt = a1Inntekt)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 1.januar, 8.januar til 22.januar), beregnetInntekt = a1Inntekt)
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 8.januar, listOf(1.januar til 1.januar, 8.januar til 22.januar))
         }
 
         a2 {
             håndterSøknad(10.januar til 31.januar)
-            håndterInntektsmelding(listOf(8.januar til 23.januar), beregnetInntekt = a2Inntekt, refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()))
+            håndterArbeidsgiveropplysninger(listOf(8.januar til 23.januar), beregnetInntekt = a2Inntekt, refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()))
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 8.januar, listOf(8.januar til 23.januar))
         }
 
@@ -794,7 +793,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             håndterSøknad(15.januar til 31.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
 
@@ -838,12 +837,12 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
 
         a1 {
-            håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)))
+            håndterArbeidsgiveropplysninger(listOf(1.januar(2021) til 16.januar(2021)))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)))
+            håndterArbeidsgiveropplysninger(listOf(1.januar(2021) til 16.januar(2021)))
         }
 
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING) }
@@ -915,7 +914,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(januar)
         }
         a1 {
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT
             )
@@ -923,7 +922,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class)
         }
         a2 {
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT
             )
@@ -995,12 +994,12 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
 
         a1 {
-            håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)))
+            håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar(2021) til 3.januar(2021), 6.januar(2021) til 18.januar(2021)),
                 beregnetInntekt = 1000.månedlig
             )
@@ -1034,14 +1033,14 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
         a1 {
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(31.desember(2020) til 15.januar(2021))
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar(2021) til 3.januar(2021), 6.januar(2021) til 18.januar(2021)),
                 beregnetInntekt = 1000.månedlig
             )
@@ -1077,14 +1076,14 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
         a1 {
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(31.desember(2020) til 15.januar(2021))
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar(2021) til 3.januar(2021), 6.januar(2021) til 18.januar(2021)),
                 beregnetInntekt = 1000.månedlig
             )
@@ -1108,7 +1107,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         nyPeriode(periode, a1, a2)
         nyPeriode(forlengelseperiode, a1, a2)
         a1 {
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
 
                 )
@@ -1116,7 +1115,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
 
                 )
@@ -1148,10 +1147,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         val periode = januar
         nyPeriode(periode, a1, a2)
         a1 {
-            håndterInntektsmelding(listOf(Periode(periode.start, periode.start.plusDays(15))))
+            håndterArbeidsgiveropplysninger(listOf(Periode(periode.start, periode.start.plusDays(15))))
         }
         a2 {
-            håndterInntektsmelding(listOf(Periode(periode.start, periode.start.plusDays(15))))
+            håndterArbeidsgiveropplysninger(listOf(Periode(periode.start, periode.start.plusDays(15))))
         }
         a1 {
             håndterVilkårsgrunnlag(
@@ -1191,8 +1190,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(periode)
         }
         a2 { håndterSøknad(periode) }
-        a1 { håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021))) }
-        a2 { håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021))) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar(2021) til 16.januar(2021))) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar(2021) til 16.januar(2021))) }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -1213,14 +1212,14 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     fun `to AG - to perioder på hver - siste periode på første AG til godkjenning, siste periode på andre AG avventer første AG`() {
         nyPeriode(januar, a1, a2)
         a1 {
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
                 beregnetInntekt = 20000.månedlig,
 
                 )
         }
         a2 {
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
                 beregnetInntekt = 20000.månedlig,
 
@@ -1331,11 +1330,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { håndterSykmelding(januar) }
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
         a2 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
         a1 {
             assertTilstander(
@@ -1365,8 +1364,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { håndterSykmelding(17.januar til 16.februar) }
         a1 { håndterSøknad(Sykdom(1.januar, 31.januar, 20.prosent)) }
         a2 { håndterSøknad(Sykdom(17.januar, 16.februar, 20.prosent)) }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a2 { håndterInntektsmelding(listOf(17.januar til 1.februar)) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(17.januar til 1.februar)) }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
@@ -1435,7 +1434,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(4.januar til 18.januar)
             håndterSykmelding(19.januar til 22.januar)
             håndterSøknad(19.januar til 22.januar)
-            håndterInntektsmelding(listOf(4.januar til 19.januar))
+            håndterArbeidsgiveropplysninger(listOf(4.januar til 19.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
@@ -1463,8 +1462,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSøknad(januar) }
         a2 { håndterSøknad(januar) }
 
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
 
         a1 { assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING) }
         a2 { assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
@@ -1524,10 +1523,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             nyPeriode(mai)
-            håndterInntektsmelding(listOf(1.mai til 16.mai))
+            håndterArbeidsgiveropplysninger(listOf(1.mai til 16.mai))
         }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -1680,8 +1679,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             nyPeriode(12.januar til 16.januar)
             håndterSøknad(17.januar til 21.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
@@ -1692,8 +1691,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 {
             nyPeriode(30.januar til 31.januar)
             //Overlappende vedtaksperiode men med senere skjæringstidspunkt enn a1
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 30.januar)
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 30.januar)
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
         a1 {
             håndterYtelser(2.vedtaksperiode)

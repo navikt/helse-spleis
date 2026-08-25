@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.Year
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -99,7 +98,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterSøknad(februar)
             nullstillTilstandsendringer()
-            val im = håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            val im = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Arbeidsdag)))
             assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
@@ -328,7 +327,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             assertNull(inspektør.faktaavklartInntekt(1.vedtaksperiode))
-            val hendelseIdIM = håndterInntektsmelding(listOf(1.januar til 16.januar))
+            val hendelseIdIM = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
 
             val faktaavklartInntekt = inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView
             assertNotNull(faktaavklartInntekt)
@@ -341,7 +340,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
     fun `bruker ny faktaavklart inntekt fra korrigerende inntektsmelding`() {
         a1 {
             håndterSøknad(januar)
-            val hendelseIdIM = håndterInntektsmelding(listOf(1.januar til 16.januar))
+            val hendelseIdIM = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -354,7 +353,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
             }
 
-            val hendelseIdKorrigerendeIM = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
+            val hendelseIdKorrigerendeIM = håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
             (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView).also { faktaavklartInntekt ->
                 assertNotNull(faktaavklartInntekt)
                 assertEquals(INNTEKT * 1.1, faktaavklartInntekt.beløp)
@@ -369,7 +368,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
     fun `korrigerende inntektsmelding med samme inntekt som original inntektsmelding`() {
         a1 {
             håndterSøknad(januar)
-            val hendelseIdIM = håndterInntektsmelding(listOf(1.januar til 16.januar))
+            val hendelseIdIM = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -382,15 +381,13 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
             }
 
-            val korrigertInntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+            val korrigertInntektsmeldingId = håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeistakerFaktaavklartInntektView).also { faktaavklartInntekt ->
                 assertNotNull(faktaavklartInntekt)
                 assertEquals(INNTEKT, faktaavklartInntekt.beløp)
                 assertEquals(korrigertInntektsmeldingId, faktaavklartInntekt.hendelseId)
             }
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 

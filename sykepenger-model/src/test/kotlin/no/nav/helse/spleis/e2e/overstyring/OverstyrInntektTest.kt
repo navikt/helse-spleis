@@ -41,7 +41,7 @@ internal class OverstyrInntektTest : AbstractDslTest() {
             val overstyrtInntekt = 32000.månedlig
             tilGodkjenning(fom til 31.januar(2021), 100.prosent)
 
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(fom til fom.plusDays(15)),
                 beregnetInntekt = overstyrtInntekt,
                 refusjon = Refusjon(overstyrtInntekt, null, emptyList())

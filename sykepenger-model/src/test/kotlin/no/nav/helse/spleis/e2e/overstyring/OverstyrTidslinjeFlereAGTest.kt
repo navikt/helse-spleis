@@ -22,11 +22,11 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractDslTest() {
     fun `kan ikke overstyre én AG hvis en annen AG har blitt godkjent`() {
         a1 {
             nyPeriode(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
         a2 {
             nyPeriode(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)

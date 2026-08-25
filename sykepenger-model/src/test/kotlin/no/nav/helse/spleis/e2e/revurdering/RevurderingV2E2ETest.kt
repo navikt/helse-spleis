@@ -470,7 +470,7 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             nyPeriode(mars, a1)
-            håndterInntektsmelding(emptyList(), INNTEKT, 1.mars)
+            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT, 1.mars)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -641,7 +641,7 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
     fun `periode til utbetaling blir overstyrt`() {
         a1 {
             nyPeriode(januar, a1)
-            håndterInntektsmelding(emptyList(), INNTEKT, 1.januar)
+            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT, 1.januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -683,7 +683,7 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
             nyPeriode(mars, a1)
-            håndterInntektsmelding(emptyList(), INNTEKT, 1.mars)
+            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT, 1.mars)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
@@ -707,7 +707,7 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
             nyPeriode(mars, a1)
-            håndterInntektsmelding(emptyList(), INNTEKT, 1.mars)
+            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT, 1.mars)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

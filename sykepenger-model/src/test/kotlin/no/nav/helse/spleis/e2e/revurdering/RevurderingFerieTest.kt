@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.forlengVedtak
@@ -30,8 +29,8 @@ internal class RevurderingFerieTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(5.februar, 28.februar))
-            håndterInntektsmelding(listOf(5.februar til 20.februar))
-            if (Toggle.KnertInntektsmelding.enabled) assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(5.februar til 20.februar))
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)

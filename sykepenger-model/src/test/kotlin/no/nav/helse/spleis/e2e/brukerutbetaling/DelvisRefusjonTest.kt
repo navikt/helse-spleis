@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -641,7 +640,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-            val im2 = håndterInntektsmelding(
+            val im2 = håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT + 100.månedlig,
                 refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
@@ -665,9 +664,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a1, INNTEKT + 100.månedlig)
             }
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT / 2, im2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 
@@ -777,16 +774,14 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
 
-            håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar)
+            håndterKorrigerteArbeidsgiveropplysninger(emptyList(), førsteFraværsdag = 1.januar)
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            if (Toggle.KnertInntektsmelding.enabled) {
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 

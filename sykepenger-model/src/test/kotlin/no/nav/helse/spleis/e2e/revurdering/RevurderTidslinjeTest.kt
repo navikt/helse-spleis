@@ -1116,7 +1116,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
         a1 {
             nyttVedtak(1.januar til 20.januar)
             håndterSøknad(Sykdom(25.januar, 25.januar, 100.prosent))
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 25.januar
             )

@@ -34,7 +34,7 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
         a1 {
             håndterSøknad(3.januar til 23.januar, egenmeldinger = listOf(1.januar til 3.januar))
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), forventetEgenmeldinger = listOf(1.januar til 3.januar))
-            håndterInntektsmelding(arbeidsgiverperioder = listOf(3.januar til 18.januar))
+            håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(3.januar til 18.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -70,7 +70,7 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
 
             assertSkjæringstidspunktOgVenteperiode(4.vedtaksperiode, 25.mai, listOf(1.mai til 2.mai, 5.mai til 9.mai, 15.mai til 19.mai, 24.mai til 27.mai), listOf(24.mai til 24.mai))
 
-            håndterInntektsmelding(arbeidsgiverperioder = listOf(15.mai til 19.mai, 25.mai til 29.mai))
+            håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(15.mai til 19.mai, 25.mai til 29.mai))
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), listOf(1.januar til 2.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 5.mai, listOf(5.mai til 9.mai, 15.mai til 19.mai, 25.mai til 29.mai))
@@ -88,7 +88,7 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 9.januar), listOf(1.januar til 2.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 15.januar, listOf(1.januar til 9.januar, 14.januar til 20.januar), listOf(14.januar til 14.januar))
 
-            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 15.januar)
+            håndterArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 15.januar)
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 9.januar, 15.januar til 23.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 15.januar, listOf(3.januar til 9.januar, 15.januar til 23.januar))

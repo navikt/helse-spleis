@@ -27,7 +27,7 @@ internal class ForkastSykmeldingsperioderTest : AbstractDslTest() {
 
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
             val sisteVedtaksperiodeventer = observatør.vedtaksperiodeVenter.last()
             assertEquals(1.vedtaksperiode, sisteVedtaksperiodeventer.vedtaksperiodeId)
@@ -57,7 +57,7 @@ internal class ForkastSykmeldingsperioderTest : AbstractDslTest() {
 
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterUtbetalingshistorikkEtterInfotrygdendring(
                 utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar))
             )
