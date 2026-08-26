@@ -43,6 +43,7 @@ internal class EndretGrunnlagForBeregningMessage(
     sealed interface Grunnlagsformat {
         val eventName: String
         val fomPath: String
+        fun precondition(packet: JsonMessage) {}
 
         data object GraderteAndreYtelser: Grunnlagsformat {
             override val eventName = "graderte_andre_ytelser_endret"
@@ -51,6 +52,9 @@ internal class EndretGrunnlagForBeregningMessage(
         data object Inntektsendringer: Grunnlagsformat {
             override val eventName = "inntektsendringer"
             override val fomPath = "inntektsendringFom"
+            override fun precondition(packet: JsonMessage) {
+                packet.requireKey(fomPath)
+            }
         }
     }
 }

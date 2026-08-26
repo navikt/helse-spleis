@@ -30,6 +30,11 @@ internal class EndretGrunnlagForBeregningRiver(
         message.require(message.grunnlagsformat.fomPath, JsonNode::asLocalDate)
     }
 
+    override fun precondition(packet: JsonMessage) {
+        packet.requireKey("@event_name")
+        packet.grunnlagsformatOrNull?.precondition(packet)
+    }
+
     override fun createMessage(packet: JsonMessage) = EndretGrunnlagForBeregningMessage(
         packet = packet,
         meldingsporing = Meldingsporing(
@@ -39,7 +44,9 @@ internal class EndretGrunnlagForBeregningRiver(
         grunnlagsformat = packet.grunnlagsformat
     )
 
-    private val JsonMessage.grunnlagsformat get() = grunnlag.singleOrNull {
+    private val JsonMessage.grunnlagsformatOrNull get() = grunnlag.singleOrNull {
         it.eventName == get("@event_name").asText()
-    } ?: error("Ukjent grunnlag for eventName ${get("@event_name").asText()}")
+    }
+
+    private val JsonMessage.grunnlagsformat get() = grunnlagsformatOrNull?: error("Ukjent grunnlag for eventName ${get("@event_name").asText()}")
 }
