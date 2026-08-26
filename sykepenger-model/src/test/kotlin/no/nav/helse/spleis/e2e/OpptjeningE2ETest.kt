@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import java.lang.Boolean.parseBoolean
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
@@ -28,21 +29,23 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.ManglerOpptjening
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 internal class OpptjeningE2ETest : AbstractDslTest() {
 
@@ -137,6 +140,60 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         assertHarArbeidsforhold(1.januar, a1)
         assertHarArbeidsforhold(1.januar, a2)
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["true", "false", "null"])
+    fun `manglende opptjening overstyres av opptjeningsvurderingResultatOk hvis angitt`(opptjeningsvurderingResultatOkString: String) {
+        val opptjeningsvurderingResultatOk : Boolean? = opptjeningsvurderingResultatOkString.let {
+            if (it == "null") null else parseBoolean(it)
+        }
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = emptyList<Arbeidsforhold>(), skatteinntekter = emptyList())
+            håndterYtelser(1.vedtaksperiode, opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk)
+            
+            assertErIkkeOppfylt() // I den lagrede modellen ligger det ikke-oppfylt, men det kan overstyres av opptjeningsvurderingResultatOk
+            
+            assertVarsel(RV_OV_3, 1.vedtaksperiode.filter())
+            assertVarsel(RV_VV_1, 1.vedtaksperiode.filter()) // Rart ikke-reelt case dette. Egentlig ikke opptjening men opptjeningsvurderingResultatOk sier OK
+
+            if (opptjeningsvurderingResultatOk in listOf(false, null)) {
+                assertVarsel(RV_OV_1, 1.vedtaksperiode.filter())
+            }
+
+            val dagbeløp = if (opptjeningsvurderingResultatOk in listOf(false, null)) 0 else 1431
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, dagbeløp, 1431, 0,  subset = 17.januar til 31.januar)
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["true", "false", "null"])
+    fun `faktisk opptjening overstyres av opptjeningsvurderingResultatOk hvis angitt`(opptjeningsvurderingResultatOkString: String) {
+        val opptjeningsvurderingResultatOk : Boolean? = opptjeningsvurderingResultatOkString.let {
+            if (it == "null") null else parseBoolean(it)
+        }
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Arbeidsforhold(
+                orgnummer = a1, ansettelseperiode = 1.november(2017) til 31.desember(2017), type = Arbeidsforhold.Arbeidsforholdtype.FORENKLET_OPPGJØRSORDNING
+            )), skatteinntekter = emptyList())
+            håndterYtelser(1.vedtaksperiode, opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk)
+
+            assertVarsel(RV_OV_3, 1.vedtaksperiode.filter())
+
+            if (opptjeningsvurderingResultatOk == false) {
+                assertVarsel(RV_OV_1, 1.vedtaksperiode.filter())
+            }
+
+            val dagbeløp = if (opptjeningsvurderingResultatOk in listOf(true, null)) 1431 else 0
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, dagbeløp, 1431, 0,  subset = 17.januar til 31.januar)
+        }
+    }
+
 
     @Test
     fun `opptjening er ikke oppfylt siden det ikke er nok opptjeningsdager`() {

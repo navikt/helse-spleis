@@ -35,6 +35,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
 
@@ -134,6 +136,39 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertOpplæringspengerdetaljer(behov)
         assertPleiepengerdetaljer(behov)
         assertInntekterForBeregning(behov)
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun ytelserTogglingOpptjeningsResultatBehov(toggleOpptjeningResultat: Boolean) = Toggle.OpptjeningsResultatBehov.let { if (toggleOpptjeningResultat) it::enable else it::disable }() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
+        val utbetalinghistorikkbehov = testRapid.inspektør.meldinger("behov").last()
+        assertVedtaksperiodeBehov(utbetalinghistorikkbehov, Sykepengehistorikk)
+        assertSykepengehistorikkdetaljer(utbetalinghistorikkbehov)
+        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
+        val forventedeTyper = listOf(
+            Arbeidsavklaringspenger,
+            Dagpenger,
+            Foreldrepenger,
+            Institusjonsopphold,
+            Omsorgspenger,
+            Opplæringspenger,
+            Pleiepenger,
+            InntekterForBeregning
+        ).let {
+            if (toggleOpptjeningResultat) {
+                it + Behov.Behovstype.OpptjeningsvurderingResultat
+            } else {
+                it
+            }
+        }.toTypedArray()
+
+        assertVedtaksperiodeBehov(behov, *forventedeTyper)
     }
 
     @Test

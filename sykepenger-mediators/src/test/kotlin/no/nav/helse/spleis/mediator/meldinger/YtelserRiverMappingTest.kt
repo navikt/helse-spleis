@@ -48,7 +48,13 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
         sendJson(json).assertForventetInnhold(forsikring = null)
     }
 
-    private fun YtelserMessage.assertForventetInnhold(forsikring: ForsikringsvurderingResultat? = forventetForsikring) {
+    @Test
+    fun `Mapping ved løsninger uten løsning på opptjeningsvurderingresultat`() {
+        val json = fjernLøsninger(medObject, "OpptjeningsvurderingResultat")
+        sendJson(json).assertForventetInnhold(forventetOpptjeningsvurderingResultatOk = null)
+    }
+
+    private fun YtelserMessage.assertForventetInnhold(forsikring: ForsikringsvurderingResultat? = forventetForsikring, forventetOpptjeningsvurderingResultatOk: Boolean? = true) {
         assertEquals(forventetPleiepenger, this.pleiepenger)
         assertEquals(forventetForeldrepenger, this.foreldrepenger)
         assertEquals(forventetSvangerskapspenger, this.svangerskapspenger)
@@ -59,6 +65,7 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
         assertEquals(forventetArbeidsavklaringspenger, this.arbeidsavklaringspengerV2)
         assertEquals(forventetDagpenger, this.dagpengerV2)
         assertEquals(forsikring, this.forsikringsvurderingResultat)
+        assertEquals(forventetOpptjeningsvurderingResultatOk, this.opptjeningsvurderingResultatOk)
     }
 
     private fun fjernLøsninger(json: String, vararg fjern: String): String {
@@ -198,6 +205,9 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
               },
               "opphørsdato": null,
               "harIndividuellForsikring": true
+            },
+            "OpptjeningsvurderingResultat": {
+              "ok": true
             }
           },
           "@final": true,
@@ -325,6 +335,9 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
               },
               "opphørsdato": null,
               "harIndividuellForsikring": true
+            },
+            "OpptjeningsvurderingResultat": {
+              "ok": true
             }
           },
           "@final": true,

@@ -121,6 +121,9 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             )
         }
 
+    internal val opptjeningsvurderingResultatOk : Boolean? = packet["@løsning.${Behovstype.OpptjeningsvurderingResultat.utgåendeNavn}.ok"].
+        takeUnless { it.isMissingOrNull() }?.asBoolean()
+
     internal val dagpengerV2 = Dagpenger(
         packet["@løsning.${Behovstype.Dagpenger.utgåendeNavn}.meldekortperioder"]
             .map {
@@ -151,6 +154,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             inntekterForBeregning = inntekterForBeregning,
             graderteAndreYtelser = graderteAndreYtelser,
             forsikringsvurderingResultat = forsikringsvurderingResultat,
+            opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
         )
 
     override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {

@@ -310,6 +310,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             dagpenger = Dagpenger(dagpengerV2),
             forsikringsvurderingResultat = forsikringsvurderingResultat,
+            opptjeningsvurderingResultatOk = null,
         )
     }
 

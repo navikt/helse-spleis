@@ -219,6 +219,7 @@ internal abstract class AbstractObservableTest {
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             dagpenger = Dagpenger(dagpenger),
             forsikringsvurderingResultat = forsikringsvurderingResultat,
+            opptjeningsvurderingResultatOk = null,
         )
     }
 

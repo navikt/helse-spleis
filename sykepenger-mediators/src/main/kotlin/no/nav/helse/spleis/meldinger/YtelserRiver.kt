@@ -5,6 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.Toggle
+import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.Behov.Behovstype.Arbeidsavklaringspenger
 import no.nav.helse.spleis.Behov.Behovstype.Dagpenger
 import no.nav.helse.spleis.Behov.Behovstype.Foreldrepenger
@@ -69,6 +70,8 @@ internal class YtelserRiver(
                 requireKey("graderteAndreYtelseType")
             }
         }
+
+        message.interestedIn("@løsning.${Behov.Behovstype.OpptjeningsvurderingResultat.utgåendeNavn}.ok")
 
         // Dagpenger & AAP
         message.requireArray("@løsning.${Dagpenger.utgåendeNavn}.meldekortperioder") {

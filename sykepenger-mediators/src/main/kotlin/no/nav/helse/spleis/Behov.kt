@@ -32,7 +32,7 @@ data class Behov(
         data object GraderteAndreYtelserForBeregning : Behovstype {
             override val utgåendeNavn = "GraderteAndreYtelserForBeregning"
         }
-
+        data object OpptjeningsvurderingResultat : Behovstype { override val utgåendeNavn = "OpptjeningsvurderingResultat" }
         data object Dagpenger: Behovstype { override val utgåendeNavn = "DagpengerV2" }
         data object Arbeidsavklaringspenger: Behovstype { override val utgåendeNavn = "ArbeidsavklaringspengerV2" }
         data object Medlemskap: Behovstype { override val utgåendeNavn = "Medlemskap" }

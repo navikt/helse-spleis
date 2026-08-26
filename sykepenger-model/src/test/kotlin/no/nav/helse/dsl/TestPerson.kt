@@ -851,10 +851,11 @@ internal class TestPerson(
             arbeidsavklaringspengerV2: List<Periode> = emptyList(),
             dagpenger: List<Periode> = emptyList(),
             inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
-            graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList()
+            graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
+            opptjeningsvurderingResultatOk: Boolean? = null,
         ) {
             behovshåndterer.bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId)
-            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, graderteAndreYtelser, null)
+            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, graderteAndreYtelser, null, opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk)
                 .håndter(Person::håndterYtelser)
         }
 

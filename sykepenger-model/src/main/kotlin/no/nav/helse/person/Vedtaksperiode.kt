@@ -1614,7 +1614,7 @@ internal class Vedtaksperiode private constructor(
             forsikringsvurderingResultat = forsikringsvurderingResultat
         )
         // steg 3: beregn alle utbetalingstidslinjer (avslå dager, beregne maksdato og utbetalingsbeløp)
-        val harOpptjening = harOpptjening(grunnlagsdata)
+        val harOpptjening = ytelser.opptjeningsvurderingResultatOk ?: harOpptjening(grunnlagsdata)
         val sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag
         val beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag
         val medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus
@@ -2998,6 +2998,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun trengerYtelser(aktivitetslogg: IAktivitetslogg, eventBus: EventBus) {
         val søkevinduFamilieytelser = periode.familieYtelserPeriode
+        val grunnlag = vilkårsgrunnlag ?: error("forventer vilkårsgrunnlag når vi beregner")
         val (beregningsperiode, _) = perioderSomMåHensyntasVedBeregning()
 
         val event = EventSubscription.TrengerInformasjonTilBeregningEvent(
@@ -3013,7 +3014,8 @@ internal class Vedtaksperiode private constructor(
             periodeForDagpenger = periode.start.minusMonths(2) til periode.endInclusive,
             beregningsperiode = beregningsperiode,
             graderteAndreYtelserPeriode = beregningsperiode,
-            forsikringsvurderingId = (vilkårsgrunnlag as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.forsikringsvurderingId,
+            forsikringsvurderingId = (grunnlag as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.forsikringsvurderingId,
+            opptjeningsvurderingId = grunnlag.opptjeningsvurderingId,
         )
         aktivitetslogg.info("Sender ut event om at vi trenger informasjon til beregning")
         eventBus.trengerInformasjonTilBeregning(event)
