@@ -10,7 +10,6 @@ import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_1
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
 import no.nav.helse.etterlevelse.Ledd.LEDD_3
-import no.nav.helse.etterlevelse.Ledd.LEDD_4
 import no.nav.helse.etterlevelse.Ledd.LEDD_5
 import no.nav.helse.etterlevelse.Paragraf.KJENNELSE_2006_4023
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_22_13
@@ -29,7 +28,6 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_29
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_34
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_35
-import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_36
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_48
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
@@ -869,50 +867,6 @@ fun `§ 8-35 ledd 2`(pensjonsgivendeInntekter: List<PensjonsgivendeInntektSubsum
     output = mapOf(
         "sykepengegrunnlag" to sykepengegrunnlag
     )
-)
-
-/**
- * En selvstendig næringsdrivende kan mot særskilt premie tegne forsikring som kan omfatte
- *
- *      a. sykepenger med 80 prosent av sykepengegrunnlaget fra første sykedag
- *      b. sykepenger med 100 prosent av sykepengegrunnlaget fra 17. sykedag, eller
- *      c. sykepenger med 100 prosent av sykepengegrunnlaget fra første sykedag.
- *
- * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§8-36)
- *
- * @param bokstav hvilken bokstav av leddet som skal subsumeres. Avhenger av hvilken forsikringsdekning som brukes
- * @param forsikringsvuderingId Id for forsikringsvurderingen som er gjort for den selvstendig næringsdrivende. Kan brukes for å hente ut hvilken dekning som er valgt
- */
-
-fun `§ 8-36 ledd 1`(bokstav: Bokstav, forsikringsvuderingId: String) = Subsumsjon.enkelSubsumsjon(
-    utfall = VILKAR_BEREGNET,
-    lovverk = "folketrygdloven",
-    versjon = LocalDate.of(2019, 6, 21),
-    paragraf = PARAGRAF_8_36,
-    ledd = LEDD_1,
-    bokstav = bokstav,
-    input = mapOf(
-        "forsikringsvuderingId" to forsikringsvuderingId
-    ),
-    output = emptyMap()
-)
-
-/**
- * Spesielle yrkesgrupper kan tegne kollektiv forsikring etter denne paragrafen.
- *
- * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§8-36)
- */
-
-fun `§ 8-36 ledd 4`(forsikringsvuderingId: String) = Subsumsjon.enkelSubsumsjon(
-    utfall = VILKAR_BEREGNET,
-    lovverk = "folketrygdloven",
-    versjon = LocalDate.of(2019, 6, 21),
-    paragraf = PARAGRAF_8_36,
-    ledd = LEDD_4,
-    input = mapOf(
-        "forsikringsvuderingId" to forsikringsvuderingId
-    ),
-    output = emptyMap()
 )
 
 /**
