@@ -107,9 +107,6 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
         ?.let { løsningJson ->
             ForsikringsvurderingResultat(
                 forsikringsvurderingId = UUID.fromString(løsningJson["forsikringsvurderingId"].asText()),
-                harForsikring = løsningJson["harForsikring"].asBoolean(),
-                villeHattForsikringOmDenVarBetalt = løsningJson["villeHattForsikringOmDenVarBetalt"].asBoolean(),
-                harForsikringSomIkkePasserMedSøknadstype = løsningJson["harForsikringSomIkkePasserMedSøknadstype"].asBoolean(),
                 dekning = løsningJson["dekning"]?.takeUnless { it.isMissingOrNull() }?.let { dekningJson ->
                     ForsikringsvurderingResultat.Dekning(
                         grad = dekningJson["grad"].asInt(),
@@ -118,6 +115,8 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
                 },
                 opphørsdato = løsningJson["opphørsdato"]?.takeUnless { it.isNull }?.asLocalDate(),
                 harIndividuellForsikring = løsningJson["harIndividuellForsikring"].asBoolean(),
+                villeHattForsikringOmDenVarBetalt = løsningJson["villeHattForsikringOmDenVarBetalt"].asBoolean(),
+                harForsikringSomIkkePasserMedSøknadstype = løsningJson["harForsikringSomIkkePasserMedSøknadstype"].asBoolean(),
             )
         }
 

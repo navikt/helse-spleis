@@ -88,7 +88,6 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
         private val forventetDagpenger = Dagpenger(listOf(1.februar til 28.februar))
         private val forventetForsikring = ForsikringsvurderingResultat(
             forsikringsvurderingId = UUID.fromString("abebbf72-2bef-473d-aabb-c5314bcc5ea3"),
-            harForsikring = true,
             dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
             opphørsdato = null,
             harIndividuellForsikring = true,
@@ -196,7 +195,6 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             },
             "ForsikringsvurderingResultat": {
               "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
-              "harForsikring": true,
               "villeHattForsikringOmDenVarBetalt": false,
               "harForsikringSomIkkePasserMedSøknadstype": false,
               "dekning": {
@@ -326,7 +324,6 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             },
             "ForsikringsvurderingResultat": {
               "forsikringsvurderingId": "abebbf72-2bef-473d-aabb-c5314bcc5ea3",
-              "harForsikring": true,
               "villeHattForsikringOmDenVarBetalt": false,
               "harForsikringSomIkkePasserMedSøknadstype": false,
               "dekning": {

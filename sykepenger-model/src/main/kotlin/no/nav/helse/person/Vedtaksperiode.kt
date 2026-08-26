@@ -1782,7 +1782,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             Selvstendig -> {
-                if (forsikringsvurderingResultat?.harForsikring == true && forsikringsvurderingResultat.harIndividuellForsikring) {
+                if (forsikringsvurderingResultat?.harIndividuellForsikring == true) {
                     if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
                     else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_6)
                 }

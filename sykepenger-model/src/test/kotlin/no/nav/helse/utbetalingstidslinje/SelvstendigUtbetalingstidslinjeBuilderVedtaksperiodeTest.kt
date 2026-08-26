@@ -32,7 +32,6 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
             tidslinje = 16.M + 15.S,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = UUID.randomUUID(),
-                harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
                 harIndividuellForsikring = true,
@@ -94,7 +93,6 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
             tidslinje = 16.M + 14.S,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = UUID.randomUUID(),
-                harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = dekningsgradIForsikring, iVentetid = true),
                 opphørsdato = opphørsdato,
                 harIndividuellForsikring = true,
@@ -124,10 +122,9 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
         tidslinje: Sykdomstidslinje,
         forsikringsvurderingResultat: ForsikringsvurderingResultat = ForsikringsvurderingResultat(
             forsikringsvurderingId = UUID.randomUUID(),
-            harForsikring = false,
             dekning = null,
             opphørsdato = null,
-            harIndividuellForsikring = true,
+            harIndividuellForsikring = false,
             villeHattForsikringOmDenVarBetalt = false,
             harForsikringSomIkkePasserMedSøknadstype = false,
         ),

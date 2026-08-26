@@ -109,7 +109,6 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = forsikringsvurderingId,
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                     harIndividuellForsikring = true,
@@ -205,7 +204,6 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = forsikringsvurderingId,
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
                     harIndividuellForsikring = true,
@@ -301,7 +299,6 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = forsikringsvurderingId,
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
                     harIndividuellForsikring = false,

@@ -99,10 +99,9 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
         val forsikringsvurderingResultat = ForsikringsvurderingResultat(
             forsikringsvurderingId = forsikringsvurderingId,
-            harForsikring = false,
             dekning = null,
             opphørsdato = null,
-                harIndividuellForsikring = false,
+            harIndividuellForsikring = false,
             villeHattForsikringOmDenVarBetalt = false,
             harForsikringSomIkkePasserMedSøknadstype = false,
         )
@@ -160,7 +159,6 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
                 harIndividuellForsikring = false,
@@ -187,7 +185,6 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
                 harIndividuellForsikring = false,
@@ -231,7 +228,6 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
                 harIndividuellForsikring = false,
@@ -267,7 +263,6 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
                 harIndividuellForsikring = false,
@@ -354,7 +349,6 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
                 harIndividuellForsikring = false,
@@ -390,7 +384,6 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
                 harIndividuellForsikring = false,
@@ -430,7 +423,6 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
                 harIndividuellForsikring = false,
@@ -464,7 +456,6 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
                 harIndividuellForsikring = false,

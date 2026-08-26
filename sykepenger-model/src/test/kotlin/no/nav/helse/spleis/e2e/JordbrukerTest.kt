@@ -39,7 +39,6 @@ internal class JordbrukerTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
                     harIndividuellForsikring = false,
@@ -84,7 +83,6 @@ internal class JordbrukerTest : AbstractDslTest() {
                     1.vedtaksperiode,
                     forsikringsvurderingResultat = ForsikringsvurderingResultat(
                         forsikringsvurderingId = UUID.randomUUID(),
-                        harForsikring = true,
                         dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                         opphørsdato = null,
                         harIndividuellForsikring = true,

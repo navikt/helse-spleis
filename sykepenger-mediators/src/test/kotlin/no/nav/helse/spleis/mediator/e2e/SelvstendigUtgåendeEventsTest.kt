@@ -33,7 +33,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
                 harIndividuellForsikring = true,
@@ -67,7 +66,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             orgnummer = "SELVSTENDIG",
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
                 harIndividuellForsikring = false,
@@ -97,7 +95,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
         val forsikringsvurderingResultat = ForsikringsvurderingResultat(
             forsikringsvurderingId = forsikringsvurderingId,
-            harForsikring = false,
             dekning = null,
             opphørsdato = null,
             harIndividuellForsikring = false,
@@ -136,7 +133,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
                 harIndividuellForsikring = false,
@@ -163,7 +159,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
                 harIndividuellForsikring = false,
@@ -305,7 +300,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
                 harIndividuellForsikring = true,
@@ -336,7 +330,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
                 harIndividuellForsikring = true,
@@ -356,7 +349,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 1,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = UUID.randomUUID(),
-                harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
                 harIndividuellForsikring = true,
@@ -380,7 +372,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
         val forsikringsvurderingResultat = ForsikringsvurderingResultat(
             forsikringsvurderingId = forsikringsvurderingId,
-            harForsikring = false,
             dekning = null,
             opphørsdato = null,
             harIndividuellForsikring = false,
@@ -422,7 +413,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
                 harIndividuellForsikring = true,
@@ -442,7 +432,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 1,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = UUID.randomUUID(),
-                harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
                 harIndividuellForsikring = true,
@@ -469,7 +458,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                 opphørsdato = null,
                 harIndividuellForsikring = true,

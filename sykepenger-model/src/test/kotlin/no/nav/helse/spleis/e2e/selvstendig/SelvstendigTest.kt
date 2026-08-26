@@ -1182,7 +1182,6 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = null,
                     harIndividuellForsikring = true,
@@ -1224,10 +1223,9 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = false,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = null,
-                    harIndividuellForsikring = true,
+                    harIndividuellForsikring = false,
                     villeHattForsikringOmDenVarBetalt = true,
                     harForsikringSomIkkePasserMedSøknadstype = false,
                 )
@@ -1253,10 +1251,9 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = false,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = null,
-                    harIndividuellForsikring = true,
+                    harIndividuellForsikring = false,
                     villeHattForsikringOmDenVarBetalt = false,
                     harForsikringSomIkkePasserMedSøknadstype = true,
                 )
@@ -1280,7 +1277,6 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = 7.januar,
                     harIndividuellForsikring = true,
@@ -1314,7 +1310,6 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
                     opphørsdato = 1.februar,
                     harIndividuellForsikring = true,
@@ -1341,7 +1336,6 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                     opphørsdato = null,
                     harIndividuellForsikring = true,
@@ -1380,7 +1374,6 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                     harIndividuellForsikring = true,
@@ -1418,7 +1411,6 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                     harIndividuellForsikring = true,
@@ -1434,7 +1426,6 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                     harIndividuellForsikring = true,
@@ -1461,7 +1452,6 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                     harIndividuellForsikring = true,
@@ -1477,7 +1467,6 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                     harIndividuellForsikring = true,
@@ -1504,7 +1493,6 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = true,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
                     harIndividuellForsikring = true,
@@ -1535,10 +1523,9 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = false,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    harIndividuellForsikring = true,
+                    harIndividuellForsikring = false,
                     villeHattForsikringOmDenVarBetalt = true,
                     harForsikringSomIkkePasserMedSøknadstype = false,
                 )
@@ -1566,10 +1553,9 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forsikringsvurderingResultat = ForsikringsvurderingResultat(
                     forsikringsvurderingId = UUID.randomUUID(),
-                    harForsikring = false,
                     dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                     opphørsdato = null,
-                    harIndividuellForsikring = true,
+                    harIndividuellForsikring = false,
                     villeHattForsikringOmDenVarBetalt = false,
                     harForsikringSomIkkePasserMedSøknadstype = true,
                 )

@@ -21,7 +21,6 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                 opphørsdato = null,
                 harIndividuellForsikring = true,
@@ -52,7 +51,6 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
                 opphørsdato = null,
                 harIndividuellForsikring = false,
@@ -83,7 +81,6 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = true,
                 dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
                 opphørsdato = null,
                 harIndividuellForsikring = true,

@@ -200,7 +200,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             forsikringsvurderingResultat = ForsikringsvurderingResultat(
                 forsikringsvurderingId = forsikringsvurderingId,
-                harForsikring = false,
                 dekning = null,
                 opphørsdato = null,
                 harIndividuellForsikring = false,
