@@ -12,6 +12,7 @@ interface GraphQLVilkarsgrunnlag {
     val sykepengegrunnlag: Double
     val inntekter: List<GraphQLArbeidsgiverinntekt>
     val arbeidsgiverrefusjoner: List<GraphQLArbeidsgiverrefusjon>
+    val opptjeningsvurderingId: UUID
 }
 
 data class GraphQLSpleisVilkarsgrunnlag(
@@ -30,7 +31,7 @@ data class GraphQLSpleisVilkarsgrunnlag(
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?,
     val forsikringsvurderingId: UUID?,
-    val opptjeningsvurderingId: UUID,
+    override val opptjeningsvurderingId: UUID,
 ) : GraphQLVilkarsgrunnlag {
     val skjonnsmessigFastsattAarlig: Double? = inntekter.filter { it.deaktivert != true }.mapNotNull { it.skjonnsmessigFastsatt }.takeIf(List<*>::isNotEmpty)?.sumOf { it.belop }
 }
@@ -41,7 +42,8 @@ data class GraphQLInfotrygdVilkarsgrunnlag(
     override val omregnetArsinntekt: Double,
     override val sykepengegrunnlag: Double,
     override val arbeidsgiverrefusjoner: List<GraphQLArbeidsgiverrefusjon>,
-    override val inntekter: List<GraphQLArbeidsgiverinntekt>
+    override val inntekter: List<GraphQLArbeidsgiverinntekt>,
+    override val opptjeningsvurderingId: UUID
 ) : GraphQLVilkarsgrunnlag
 
 data class GraphQLVilkarsgrunnlaghistorikk(

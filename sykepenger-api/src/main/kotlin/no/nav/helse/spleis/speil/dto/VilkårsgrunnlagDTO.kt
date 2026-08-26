@@ -11,6 +11,7 @@ interface Vilkårsgrunnlag {
     val sykepengegrunnlag: Double
     val inntekter: List<Arbeidsgiverinntekt>
     val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
+    val opptjeningsvurderingId: UUID
 }
 
 data class SpleisVilkårsgrunnlag(
@@ -28,7 +29,7 @@ data class SpleisVilkårsgrunnlag(
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?,
     val forsikringsvurderingId: UUID?,
-    val opptjeningsvurderingId: UUID,
+    override val opptjeningsvurderingId: UUID,
 ) : Vilkårsgrunnlag
 
 data class InfotrygdVilkårsgrunnlag(
@@ -36,7 +37,8 @@ data class InfotrygdVilkårsgrunnlag(
     override val beregningsgrunnlag: Double,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>,
-    override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
+    override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
+    override val opptjeningsvurderingId: UUID
 ) : Vilkårsgrunnlag
 
 data class Arbeidsgiverinntekt(

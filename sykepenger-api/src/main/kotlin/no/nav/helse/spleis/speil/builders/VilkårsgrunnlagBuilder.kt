@@ -30,7 +30,8 @@ internal abstract class IVilkårsgrunnlag(
     val beregningsgrunnlag: Double,
     val sykepengegrunnlag: Double,
     val inntekter: List<IArbeidsgiverinntekt>,
-    val id: UUID
+    val id: UUID,
+    val opptjeningsvurderingId: UUID
 ) {
     abstract fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag
     fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) = inntekter.none { it.arbeidsgiver == organisasjonsnummer }
@@ -70,8 +71,8 @@ internal class ISpleisGrunnlag(
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?,
     val forsikringsvurderingId: UUID?,
-    val opptjeningsvurderingId: UUID,
-) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id) {
+    opptjeningsvurderingId: UUID,
+) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id, opptjeningsvurderingId) {
 
     override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag {
         return SpleisVilkårsgrunnlag(
@@ -116,8 +117,9 @@ internal class IInfotrygdGrunnlag(
     beregningsgrunnlag: Double,
     inntekter: List<IArbeidsgiverinntekt>,
     sykepengegrunnlag: Double,
-    id: UUID
-) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id) {
+    id: UUID,
+    opptjeningsvurderingId: UUID
+) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id, opptjeningsvurderingId) {
 
     override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag {
         return InfotrygdVilkårsgrunnlag(
@@ -125,7 +127,8 @@ internal class IInfotrygdGrunnlag(
             beregningsgrunnlag = beregningsgrunnlag,
             sykepengegrunnlag = sykepengegrunnlag,
             inntekter = inntekter.map { it.toDTO() },
-            arbeidsgiverrefusjoner = refusjonsopplysningerFraBehandlinger.map { it.toDTO() }
+            arbeidsgiverrefusjoner = refusjonsopplysningerFraBehandlinger.map { it.toDTO() },
+            opptjeningsvurderingId = opptjeningsvurderingId
         )
     }
 
@@ -299,7 +302,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             beregningsgrunnlag = infotrygdVilkårsgrunnlag.inntektsgrunnlag.beregningsgrunnlag.årlig.beløp,
             inntekter = inntekter(infotrygdVilkårsgrunnlag.inntektsgrunnlag),
             sykepengegrunnlag = infotrygdVilkårsgrunnlag.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp,
-            id = infotrygdVilkårsgrunnlag.vilkårsgrunnlagId
+            id = infotrygdVilkårsgrunnlag.vilkårsgrunnlagId,
+            opptjeningsvurderingId = infotrygdVilkårsgrunnlag.opptjeningsvurderingId
         )
     }
 }
