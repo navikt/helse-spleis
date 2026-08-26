@@ -452,7 +452,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
     @Test
     fun `Validering feiler hvis beregnet feriepengebeløp for IT ikke finnes i lista over utbetalte feriepenger`() {
         standardOppsett2020()
-        fangLoggmeldinger("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") {
+        fangLoggmeldinger("Spleis-beregnet feriepengebeløp til arbeidsgiver fra Infotrygd samsvarer ikke med utbetalt beløp") {
             håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020),
                 utbetalinger = listOf(Arbeidsgiverutbetalingsperiode(a1, 1.januar(2020), 31.januar(2020), 1431, 31.januar(2020))),
@@ -469,7 +469,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
     @Test
     fun `Validerer ikke utbetalte feriepenger hvis beregnet feriepengebeløp for IT er 0`() {
         standardOppsett2020()
-        fangLoggmeldinger("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") {
+        fangLoggmeldinger("Spleis-beregnet feriepengebeløp til arbeidsgiver fra Infotrygd samsvarer ikke med utbetalt beløp") {
             håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020),
                 feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 4000, 1.mai(2021), 31.mai(2021))),
@@ -824,7 +824,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
     @Test
     fun `Feriepengeutbetaling til person`() {
         standardOppsettLangPeriode2020()
-        fangLoggmeldinger("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") {
+        fangLoggmeldinger("Differanse mellom det Infotrygd har utbetalt og det spleis har beregnet at Infotrygd skulle betale") {
             val behovene = fangAlleFeriepengebehovene {
                 håndterUtbetalingshistorikkForFeriepenger(
                     opptjeningsår = Year.of(2020),
@@ -852,7 +852,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
     @Test
     fun `Personutbetaling 48 dager i IT, spleis skal ikke betale noe`() {
         standardOppsettLangPeriode2020()
-        fangLoggmeldinger("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") {
+        fangLoggmeldinger("Differanse mellom det Infotrygd har utbetalt og det spleis har beregnet at Infotrygd skulle betale") {
             assertIngenFeriepengebehov {
                 håndterUtbetalingshistorikkForFeriepenger(
                     opptjeningsår = Year.of(2020),
@@ -867,7 +867,7 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
     @Test
     fun `Feriepengeutbetaling til orgnummer 0`() {
         standardOppsettLangPeriode2020()
-        fangLoggmeldinger("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") {
+        fangLoggmeldinger("Differanse mellom det Infotrygd har utbetalt og det spleis har beregnet at Infotrygd skulle betale") {
             val behovene = fangAlleFeriepengebehovene {
                 håndterUtbetalingshistorikkForFeriepenger(
                     opptjeningsår = Year.of(2020),
