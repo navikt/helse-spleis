@@ -23,6 +23,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Ventetidsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.betal
 import no.nav.helse.økonomi.Økonomi
 
@@ -65,9 +66,9 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             }
         }
 
-        fun totalSykdomsgrad(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
-            return beregnDagForDag(tidslinjer) { _ , økonomiList ->
-                Økonomi.totalSykdomsgrad(økonomiList)
+        fun totalSykdomsgrad(tidslinjer: List<Utbetalingstidslinje>, andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }): List<Utbetalingstidslinje> {
+            return beregnDagForDag(tidslinjer) { dato, økonomiList ->
+                Økonomi.totalSykdomsgrad(økonomiList, andreYtelser(dato))
             }
         }
 

@@ -11,6 +11,7 @@ import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -128,7 +129,7 @@ internal class SykdomsgradfilterTest {
             )
         }
 
-        val resultat = input.sykdomsgradsberegning(emptySet())
+        val resultat = input.sykdomsgradsberegning(emptySet()) { _ -> 0.prosent }
             .map { it.samletVedtaksperiodetidslinje }
         inspektør = resultat.inspektør(0)
         return resultat

@@ -69,9 +69,9 @@ internal fun List<Arbeidsgiverberegning>.avvisMedlemskap(erMedlemAvFolketrygden:
     return this.avvis(listOf(LocalDate.MIN til LocalDate.MAX), Begrunnelse.ManglerMedlemskap)
 }
 
-internal fun List<Arbeidsgiverberegning>.sykdomsgradsberegning(perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>): List<Arbeidsgiverberegning> {
+internal fun List<Arbeidsgiverberegning>.sykdomsgradsberegning(perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>, andreYtelser: (dato: LocalDate) -> Prosentdel): List<Arbeidsgiverberegning> {
     fun List<Arbeidsgiverberegning>.totalSykdomsgradsberegning(): List<Arbeidsgiverberegning> {
-        return Utbetalingstidslinje.totalSykdomsgrad(this.map { it.samletTidslinje })
+        return Utbetalingstidslinje.totalSykdomsgrad(this.map { it.samletTidslinje }, andreYtelser)
             .zip(this) { beregnetTidslinje, arbeidsgiver ->
                 arbeidsgiver.copy(
                     vedtaksperioder = arbeidsgiver.vedtaksperioder.map { vedtaksperiodeberegning ->

@@ -15,7 +15,9 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -51,9 +53,9 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 19.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1400, 2000, subset = 20.januar til 30.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 31.januar til 31.januar)
-            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
-            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
         }
     }
 
@@ -112,6 +114,129 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
     }
 
     @Test
+    fun `annen ytelse for person med to arbeidsforhold, men under 6G til sammen`() {
+        val inntektPerArbeidsgiver = 260_000.årlig
+        val gradertePleiepenger = listOf(
+            GraderteAndreYtelserForBeregning(
+                graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
+                graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
+            )
+        )
+
+        listOf(a1, a2).nyeVedtak(januar, inntekt = inntektPerArbeidsgiver)
+
+        a1 {
+            assertInntektsgrunnlag(1.januar, 2) {
+                assertInntektsgrunnlag(a1, inntektPerArbeidsgiver)
+                assertInntektsgrunnlag(a2, inntektPerArbeidsgiver)
+                assertSykepengegrunnlag(520_000.årlig)
+            }
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 17.januar til 31.januar)
+        }
+        a2 {
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 17.januar til 31.januar)
+        }
+
+        a1 {
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(1.vedtaksperiode, graderteAndreYtelser = gradertePleiepenger)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+
+            assertEquals(700.0, (1000 - (260_000 * 0.3) / 260))
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 17.januar til 19.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 700, 1000, subset = 20.januar til 30.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 31.januar til 31.januar)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            assertEquals(100, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.grad(22.januar))
+            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode, graderteAndreYtelser = gradertePleiepenger)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 17.januar til 19.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 700, 1000, subset = 20.januar til 30.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 31.januar til 31.januar)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+            assertEquals(100, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.grad(22.januar))
+            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+        }
+    }
+
+    @Test
+    fun `annen ytelse for person med to arbeidsforhold, og 6G-begrenset til sammen`() {
+        val inntektA1 = 400_000.årlig
+        val inntektA2 = 600_000.årlig
+        val gradertePleiepenger = listOf(
+            GraderteAndreYtelserForBeregning(
+                graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
+                graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
+            )
+        )
+
+        a1 {
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = inntektA1)
+        }
+        a2 {
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = inntektA2)
+        }
+
+        a1 {
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                skatteinntekter = listOf(a1 to inntektA1, a2 to inntektA2)
+            )
+            assertInntektsgrunnlag(1.januar, 2) {
+                assertInntektsgrunnlag(a1, inntektA1)
+                assertInntektsgrunnlag(a2, inntektA2)
+                assertSykepengegrunnlag(561_804.årlig)
+            }
+        }
+
+        a1 {
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(1.vedtaksperiode, graderteAndreYtelser = gradertePleiepenger)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 864, 1538, subset = 17.januar til 19.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 605, 1538, subset = 20.januar til 30.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 864, 1538, subset = 31.januar til 31.januar)
+            assertEquals(100, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.grad(22.januar))
+            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode, graderteAndreYtelser = gradertePleiepenger)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1296, 2308, subset = 17.januar til 19.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 908, 2308, subset = 20.januar til 30.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1296, 2308, subset = 31.januar til 31.januar)
+            assertEquals(100, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.grad(22.januar))
+            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+        }
+    }
+
+    @Test
     fun `foreldrepenger og tilkommen inntekt`() {
         a1 {
             nyttVedtak(januar, beregnetInntekt = 520_000.årlig)
@@ -145,7 +270,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 31.januar til 31.januar) // ingen
 
             assertEquals(37.5.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
-            assertEquals(87.5.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar)) // begge
+            assertEquals(37.5.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar)) // begge
 
             assertEquals(87.5.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(30.januar))
             assertEquals(87.5.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(30.januar)) // tilkommen
@@ -158,7 +283,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `så mye foreldrepenger at du havner under 20 prosent avslås ikke på totalgrad, men utbetalingen reduseres`() {
+    fun `så mye foreldrepenger at du havner under 20 prosent avslår vi på total grad`() {
         a1 {
             nyttVedtak(januar, beregnetInntekt = 520_000.årlig)
             assertInntektsgrunnlag(1.januar, 1) {
@@ -178,15 +303,15 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 )
             )
 
-            // 2000 * 0.19 = 380
-            assertUtbetalingsbeløp(1.vedtaksperiode, 380, 2000, subset = 17.januar til 31.januar)
+            // Alt er avvist, under 20 prosent
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 2000, subset = 17.januar til 31.januar)
 
-            assertEquals(0, inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
+            assertEquals(11, inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
 
-            assertEquals(19.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
-            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertEquals(0.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+            assertEquals(19.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
 
-            assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23)
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23, Varselkode.RV_VV_4)
         }
     }
 

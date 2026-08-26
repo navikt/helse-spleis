@@ -50,21 +50,29 @@ data class Økonomi(
             return totalgrad
         }
 
-        fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
-            val totalgrad = totalGrad(økonomiList, Økonomi::sykdomsgrad)
-            return økonomiList.map { økonomi: Økonomi ->
-                økonomi.copy(totalSykdomsgrad = totalgrad)
+        fun totalSykdomsgrad(økonomiList: List<Økonomi>, andreYtelser: Prosentdel = 0.prosent): List<Økonomi> {
+            val totalSykdomsgrad = totalGradMedAndreYtelser(økonomiList, Økonomi::sykdomsgrad, andreYtelser)
+            return økonomiList.map { økonomi ->
+                økonomi.copy(totalSykdomsgrad = totalSykdomsgrad)
             }
         }
 
         fun List<Økonomi>.erUnderGrensen() = none { !it.totalSykdomsgrad.erUnderGrensen() }
 
-        internal fun totalUtbetalingsgrad(økonomiList: List<Økonomi>, andreYtelser: Prosentdel): Prosentdel {
-            val utbetalingsgrad = totalGrad(økonomiList, Økonomi::utbetalingsgrad)
-            if (andreYtelser == NullProsent) return utbetalingsgrad
-            val utbetalingsgradUtenInntektjustering = totalGrad(økonomiList, Økonomi::utbetalingsgrad, INGEN)
-            val romForAndreYtelser = HundreProsent - utbetalingsgradUtenInntektjustering
-            return utbetalingsgrad - (andreYtelser - romForAndreYtelser)
+        internal fun totalUtbetalingsgrad(økonomiList: List<Økonomi>, andreYtelser: Prosentdel) =
+            totalGradMedAndreYtelser(økonomiList, Økonomi::utbetalingsgrad, andreYtelser)
+
+        private fun totalGradMedAndreYtelser(
+            økonomiList: List<Økonomi>,
+            gradStrategi: (Økonomi) -> Prosentdel,
+            andreYtelser: Prosentdel
+        ): Prosentdel {
+            val grad = totalGrad(økonomiList, gradStrategi)
+            if (andreYtelser == NullProsent) return grad
+
+            val gradUtenInntektjustering = totalGrad(økonomiList, gradStrategi, INGEN)
+            val romForAndreYtelser = HundreProsent - gradUtenInntektjustering
+            return grad - (andreYtelser - romForAndreYtelser)
         }
 
         fun betal(sykepengegrunnlagBegrenset6G: Inntekt, økonomiList: List<Økonomi>, andreYtelser: Prosentdel): List<Økonomi> {

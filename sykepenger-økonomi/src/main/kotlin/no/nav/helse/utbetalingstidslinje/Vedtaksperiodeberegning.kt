@@ -39,7 +39,7 @@ fun filtrerUtbetalingstidslinjer(
     )
 
     val beregnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver
-        .sykdomsgradsberegning(perioderMedMinimumSykdomsgradVurdertOK)
+        .sykdomsgradsberegning(perioderMedMinimumSykdomsgradVurdertOK, andreYtelser)
         .avvisMinsteinntekt(
             sekstisyvårsdagen = sekstisyvårsdagen,
             erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
