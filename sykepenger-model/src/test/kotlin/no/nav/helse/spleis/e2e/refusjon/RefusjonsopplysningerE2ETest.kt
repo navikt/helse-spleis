@@ -56,17 +56,17 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `lager nytt innslag i vilkårsgrunnlaghistorikken med oppdaterte refusjonsopplysninger ved ny inntektsmelding`() {
+    fun `AI fjerner gammel IM - lager nytt innslag i vilkårsgrunnlaghistorikken med oppdaterte refusjonsopplysninger ved ny inntektsmelding`() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
             nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            håndterInntektsmelding(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 22.januar, refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null), beregnetInntekt = INNTEKT * 1.1)
+            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 22.januar, refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null), beregnetInntekt = INNTEKT * 1.1)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertBeløpstidslinje(
-                ARBEIDSGIVER.beløpstidslinje(1.januar til 21.januar, INNTEKT) + ARBEIDSGIVER.beløpstidslinje(22.januar til 31.januar, INGEN),
+                ARBEIDSGIVER.beløpstidslinje(januar, INGEN),
                 inspektør.refusjon(1.vedtaksperiode),
                 ignoreMeldingsreferanseId = true
             )

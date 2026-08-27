@@ -9,6 +9,8 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Test
@@ -17,7 +19,7 @@ import org.junit.jupiter.api.assertNull
 internal class InntektsmeldingMedRefusjonsopplForPerioderViEnnåIkkeHarMottatTest : AbstractDslTest() {
 
     @Test
-    fun `håndterer korrigerte refusjonsopplysinger frem i tid som sier at det er refusjon allikevel`() {
+    fun `AI fjerner gammel IM - håndterer korrigerte refusjonsopplysinger frem i tid som sier at det er refusjon allikevel`() {
         a1 {
             nyttVedtak(
                 periode = januar,
@@ -28,15 +30,16 @@ internal class InntektsmeldingMedRefusjonsopplForPerioderViEnnåIkkeHarMottatTes
             )
             val fremtidigeRefusjonsopplysninger = inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar)
             assertBeløpstidslinje(fremtidigeRefusjonsopplysninger, 1.februar.somPeriode(), INGEN)
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(
                     beløp = INNTEKT,
                     opphørsdato = null,
                 )
             )
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             val reviderteOpplysninger = inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer[1.januar]
-            assertNull(reviderteOpplysninger)
+            assertBeløpstidslinje(reviderteOpplysninger!!, 1.februar.somPeriode(), INNTEKT)
         }
     }
 }

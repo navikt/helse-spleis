@@ -47,7 +47,7 @@ internal class TestPersonTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
-            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -83,7 +83,7 @@ internal class TestPersonTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
-            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -116,7 +116,7 @@ internal class TestPersonTest : AbstractDslTest() {
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
         }
         a1 {
-            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), INNTEKT)
             assertTilstander(
                 1.vedtaksperiode,
                 START,
@@ -126,7 +126,7 @@ internal class TestPersonTest : AbstractDslTest() {
             )
         }
         a2 {
-            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), INNTEKT)
             assertTilstander(
                 1.vedtaksperiode,
                 START,
@@ -144,7 +144,7 @@ internal class TestPersonTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
-            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(Periode(3.januar, 18.januar)), INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

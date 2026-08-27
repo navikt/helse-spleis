@@ -70,15 +70,18 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
     }
 
     @Test
-    fun `arbeid ikke gjenopptatt`() {
+    fun `AI fjerner gammel IM - arbeid ikke gjenopptatt`() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(mars)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.mars,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
+                vedtaksperiodeId = 2.vedtaksperiode
             )
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertVarsler(listOf(RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)

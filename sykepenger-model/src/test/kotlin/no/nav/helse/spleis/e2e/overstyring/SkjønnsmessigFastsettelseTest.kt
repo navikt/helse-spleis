@@ -77,10 +77,10 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
     }
 
     @Test
-    fun `blir syk fra ghost etter skjønnsfastsettelse - skal ikke medføre ny skjønnsfastsettelse`() {
+    fun `AI fjerner gammel IM - blir syk fra ghost etter skjønnsfastsettelse - skal ikke medføre ny skjønnsfastsettelse`() {
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -99,8 +99,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)
@@ -125,11 +124,11 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
     }
 
     @Test
-    fun `overskriver ikke skjønnsmessig fastsettelse om inntekt fra im utgjør mindre enn 1kr forskjell på årlig`() {
+    fun `AI fjerner gammel IM - overskriver ikke skjønnsmessig fastsettelse om inntekt fra im utgjør mindre enn 1kr forskjell på årlig`() {
         val inntektVedNyIM = 372000.5.årlig
         a1 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -148,8 +147,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektVedNyIM)
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = inntektVedNyIM)
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)

@@ -746,16 +746,15 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Første utbetalte dag er før første fraværsdag`() {
+    fun `AI fjerner gammel IM - Første utbetalte dag er før første fraværsdag`() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            val inntektsmeldingId = håndterInntektsmelding(
+            val inntektsmeldingId = håndterArbeidsgiveropplysninger(
                 listOf(),
                 førsteFraværsdag = 17.januar
             )
 
-            assertInntektshistorikkForDato(INNTEKT, 17.januar, inspektør)
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)

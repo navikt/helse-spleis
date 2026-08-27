@@ -402,16 +402,19 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Sender med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga AIG-dager`() {
+    fun `AI fjerner gammel IM - Sender med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga AIG-dager`() {
         a1 {
             nyttVedtak(juni)
             håndterSøknad(august)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.juni til 16.juni),
                 førsteFraværsdag = 1.august,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
+                vedtaksperiodeId = 2.vedtaksperiode
             )
             assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -686,10 +689,10 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     }
 
     @Test
-    fun `trekker tilbake penger fra person og flytter til arbeidsgiver`() {
+    fun `AI fjerner gammel IM - trekker tilbake penger fra person og flytter til arbeidsgiver`() {
         a1 {
             nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null)
             )
@@ -697,7 +700,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             val godkjenningsbehov =  enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode }) {
                 håndterSimulering(1.vedtaksperiode)
             }
-            assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_UT_23, Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
             assertGodkjenningsbehov(actualBehov = godkjenningsbehov, tags = setOf("Førstegangsbehandling", "Innvilget", "Revurdering", "Arbeidsgiverutbetaling", "NegativPersonutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"), kanAvvises = false, utbetalingstype = "REVURDERING")
         }
     }

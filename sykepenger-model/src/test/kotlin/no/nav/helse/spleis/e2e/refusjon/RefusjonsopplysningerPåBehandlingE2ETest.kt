@@ -61,6 +61,7 @@ import no.nav.helse.tirsdag
 import no.nav.helse.torsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -206,17 +207,15 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `En situasjon med gjenbruk hvor refusjonsopplysningene på vilkårsgrunnlaget blir feil, men vil løse seg med refusjonsopplysniger på behandlingene`() {
+    fun `AI fjerner gammel IM - En situasjon med gjenbruk hvor refusjonsopplysningene på vilkårsgrunnlaget blir feil, men vil løse seg med refusjonsopplysniger på behandlingene`() {
         a1 {
             nyttVedtak(2.januar til 31.januar)
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(2.januar til 31.januar, INNTEKT), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
 
-            håndterInntektsmelding(listOf(2.januar til 5.januar, 8.januar til 12.januar, 15.januar til 19.januar, 22.januar til 23.januar))
-            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(2.januar til 5.januar, 8.januar til 12.januar, 15.januar til 19.januar, 22.januar til 23.januar))
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            håndterSimulering(1.vedtaksperiode)
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(2.januar til 31.januar, INNTEKT), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
 
             håndterOverstyrArbeidsgiveropplysninger(
@@ -231,19 +230,18 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                     )
                 )
             )
-            assertBeløpstidslinje(SAKSBEHANDLER.beløpstidslinje(2.januar til 25.januar, INGEN) + ARBEIDSGIVER.beløpstidslinje(26.januar til 31.januar, INNTEKT), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(2.januar til 31.januar, INNTEKT), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
 
-            assertEquals(listOf(2.januar til 5.januar, 8.januar til 12.januar, 15.januar til 19.januar, 22.januar til 23.januar), inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
             håndterOverstyrTidslinje((2.januar til 23.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
             assertEquals(listOf(2.januar til 17.januar), inspektør.venteperiode(1.vedtaksperiode))
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_IV_7, 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_IM_24), 1.vedtaksperiode.filter())
 
             håndterYtelser(1.vedtaksperiode)
-            assertBeløpstidslinje(SAKSBEHANDLER.beløpstidslinje(2.januar til 25.januar, INGEN) + ARBEIDSGIVER.beløpstidslinje(26.januar til 31.januar, INNTEKT), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(2.januar til 31.januar, INNTEKT), inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, ignoreMeldingsreferanseId = true)
         }
     }
 
@@ -466,14 +464,17 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `periode som er strukket kant i kant med annen med AIG`() {
+    fun `AI fjerner gammel IM - periode som er strukket kant i kant med annen med AIG`() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(mars)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             håndterOverstyrTidslinje(februar.map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT * 1.1)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT * 1.1)
+            // korrigerende AGP setter i gang en revurdering av januar som må kjøres ferdig først
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -483,9 +484,10 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INNTEKT * 1.1)
 
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Refusjon(INGEN, null))
-            assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INGEN)
-            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INNTEKT * 1.1)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Refusjon(INGEN, null))
+            assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
+            assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT)
+            assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INGEN)
         }
     }
 
@@ -690,20 +692,20 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `uendret refusjonsopplysninger i Avsluttet - arbeidsgiverperiode utført tidligere`() {
+    fun `AI fjerner gammel IM - uendret refusjonsopplysninger i Avsluttet - arbeidsgiverperiode utført tidligere`() {
         a1 {
             val tidsstempelEldst = LocalDateTime.now().minusDays(10)
             val eldstId = nyttVedtak(januar, tidsstempelEldst)
             val kildeEldst = Kilde(eldstId, ARBEIDSGIVER, tidsstempelEldst)
 
             val tidsstempelGammel = LocalDateTime.now().minusDays(1)
-            val gammelId = nyttVedtak(10.februar til 28.februar, tidsstempelGammel, vedtaksperiode = 2, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            val gammelId = nyttVedtak(10.februar til 28.februar, tidsstempelGammel, vedtaksperiode = 2, blokkerendeRevurdering = 1, arbeidsgiverperiode = listOf(1.januar til 16.januar))
             val kildeGammel = Kilde(gammelId, ARBEIDSGIVER, tidsstempelGammel)
 
             nullstillTilstandsendringer()
 
             inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.also { inspektør ->
-                assertEquals(1, inspektør.behandlinger.size)
+                assertEquals(2, inspektør.behandlinger.size)
                 inspektør.behandlinger[0].also {
                     val forventetTidslinje = Beløpstidslinje.fra(januar, INNTEKT, kildeEldst)
                     assertEquals(forventetTidslinje, it.endringer.last().refusjonstidslinje)
@@ -817,7 +819,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `korrigerte refusjonsopplysninger i AvventerRevurdering`() {
+    fun `AI fjerner gammel IM - korrigerte refusjonsopplysninger i AvventerRevurdering`() {
         a1 {
             nyttVedtak(januar, tidsstempel = LocalDateTime.now())
 
@@ -826,13 +828,13 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             val kildeGammel = Kilde(imGammel, ARBEIDSGIVER, tidsstempelGammel)
 
             // Trigger en revurdering
-            håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, mottatt = LocalDateTime.now())
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), INNTEKT, mottatt = LocalDateTime.now())
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             nullstillTilstandsendringer()
 
             val tidsstempelNy = LocalDateTime.now()
-            val imNy = MeldingsreferanseId(håndterInntektsmelding(listOf(1.mars til 16.mars), INNTEKT, refusjon = Refusjon(500.daglig, 27.mars), mottatt = tidsstempelNy))
+            val imNy = MeldingsreferanseId(håndterKorrigerteArbeidsgiveropplysninger(listOf(1.mars til 16.mars), INNTEKT, refusjon = Refusjon(500.daglig, 27.mars), mottatt = tidsstempelNy))
             val kildeNy = Kilde(imNy, ARBEIDSGIVER, tidsstempelNy)
 
             val inspektør = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør
@@ -846,7 +848,9 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 val forventetTidslinje = Beløpstidslinje.fra(1.mars til 27.mars, 500.daglig, kildeNy) + Beløpstidslinje.fra(28.mars til 31.mars, INGEN, kildeNy)
                 assertEquals(forventetTidslinje, it.endringer.last().refusjonstidslinje)
             }
-            assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
         }
     }
 
@@ -1196,17 +1200,17 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `Korrigerene IM som overstyrer deler av refusjonshistorikken fjerner ikke refusjonshistorikk den ikke vet noe om`() {
+    fun `AI fjerner gammel IM - Korrigerene IM som overstyrer deler av refusjonshistorikken fjerner ikke refusjonshistorikk den ikke vet noe om`() {
         a1 {
             nyttVedtak(januar)
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 20.januar,
                 refusjon = Refusjon(INNTEKT / 2, null),
                 beregnetInntekt = INNTEKT * 1.1
             )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            assertEquals(INNTEKT, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[19.januar].beløp)
+            assertEquals(15500.månedlig, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[19.januar].beløp)
             assertEquals(INNTEKT / 2, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje[20.januar].beløp)
         }
     }
@@ -1215,18 +1219,24 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         periode: Periode,
         tidsstempel: LocalDateTime,
         vedtaksperiode: Int = 1,
+        blokkerendeRevurdering: Int? = null,
         arbeidsgiverperiode: List<Periode> = listOf(periode.start til periode.start.plusDays(15)),
         opphørAvRefusjon: LocalDate? = null,
         endringerIRefusjon: List<Refusjon.EndringIRefusjon> = emptyList()
     ): MeldingsreferanseId {
         håndterSøknad(periode)
-        val im = håndterInntektsmelding(
+        val im = håndterArbeidsgiveropplysninger(
             arbeidsgiverperiode,
             INNTEKT,
             førsteFraværsdag = periode.start,
             mottatt = tidsstempel,
             refusjon = Refusjon(INNTEKT, opphørsdato = opphørAvRefusjon, endringerIRefusjon = endringerIRefusjon)
         )
+        blokkerendeRevurdering?.also {
+            // korrigerende AGP setter i gang en revurdering av en tidligere periode som må kjøres ferdig først
+            håndterYtelser(it.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(it.vedtaksperiode)
+        }
         håndterVilkårsgrunnlag(vedtaksperiode.vedtaksperiode)
         håndterYtelser(vedtaksperiode.vedtaksperiode)
         håndterSimulering(vedtaksperiode.vedtaksperiode)

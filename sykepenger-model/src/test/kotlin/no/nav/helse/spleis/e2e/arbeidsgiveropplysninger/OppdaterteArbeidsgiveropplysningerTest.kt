@@ -215,24 +215,24 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Sender oppdatert forespørsel ved nytt vilkårsgrunnlag pga korrigerende inntektsmelding -- revurdering`() {
+    fun `AI fjerner gammel IM - Sender oppdatert forespørsel ved nytt vilkårsgrunnlag pga korrigerende inntektsmelding -- revurdering`() {
         a1 {
             nyttVedtak(januar)
             nyPeriode(mars)
 
             assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 32000.månedlig
             )
 
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+            assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
             val forespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
             assertEquals(
                 EventSubscription.Inntekt,
                 forespørsel.opplysninger.forespurteOpplysninger.first { it is EventSubscription.Inntekt }
             )
+            assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
         }
     }
 

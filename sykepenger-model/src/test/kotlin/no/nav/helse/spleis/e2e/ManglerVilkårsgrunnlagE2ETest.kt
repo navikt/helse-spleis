@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test
 internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
 
     @Test
-    fun `Inntektsmelding opplyser om endret arbeidsgiverperiode - AUU periode inneholder utbetalingsdag`() {
+    fun `AI fjerner gammel IM - Inntektsmelding opplyser om endret arbeidsgiverperiode - AUU periode inneholder utbetalingsdag`() {
         a1 {
             nyPeriode(2.januar til 17.januar, a1)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -44,7 +44,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
 
             nyPeriode(22.januar til 31.januar, a1)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 førsteFraværsdag = 22.januar
             )
@@ -52,9 +52,10 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
 
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 1.januar
+                førsteFraværsdag = 1.januar,
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)

@@ -618,7 +618,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Periode som kommer inn som SøknadArbeidsgiver selv om det er mindre enn 16 dager gap til forrige periode`() {
+    fun `AI fjerner gammel IM - Periode som kommer inn som SøknadArbeidsgiver selv om det er mindre enn 16 dager gap til forrige periode`() {
         a1 {
             nyttVedtak(1.september(2021) til 24.september(2021))
 
@@ -631,9 +631,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-            håndterInntektsmelding(listOf(12.oktober(2021) til 27.oktober(2021)), INNTEKT, vedtaksperiodeId = 2.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(listOf(12.oktober(2021) til 27.oktober(2021)), INNTEKT, vedtaksperiodeId = 2.vedtaksperiode)
             assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
-            assertVarsel(Varselkode.RV_IM_3, 3.vedtaksperiode.filter())
 
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)

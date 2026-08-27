@@ -146,7 +146,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Periode som starter før en annen, men med senere skjæringstidspunkt - da må de behandles i rett rekkefølge`() {
+    fun `AI fjerner gammel IM - Periode som starter før en annen, men med senere skjæringstidspunkt - da må de behandles i rett rekkefølge`() {
         a1 { nyttVedtak(januar) } // Ignorer denne, den må bare på plass til å lage rett rekkefølge på ting
         a2 {
             håndterSøknad(16.januar(2025) til 24.januar(2025))
@@ -156,13 +156,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterSøknad(17.februar(2025) til 24.februar(2025))
             assertEquals(17.februar(2025) til 24.februar(2025), inspektør.periode(2.vedtaksperiode))
-            håndterInntektsmelding(listOf(16.januar(2025) til 31.januar(2025)), førsteFraværsdag = 17.februar(2025))
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(16.januar(2025) til 31.januar(2025)), førsteFraværsdag = 17.februar(2025))
             // Blir strukket en måned i snuten
             assertEquals(16.januar(2025) til 24.februar(2025), inspektør.periode(2.vedtaksperiode))
         }
         a2 {
-            håndterInntektsmelding(listOf(16.januar(2025) til 31.januar(2025)))
-            håndterInntektsmelding(listOf(16.januar(2025) til 31.januar(2025)), førsteFraværsdag = 17.februar(2025))
+            håndterArbeidsgiveropplysninger(listOf(16.januar(2025) til 31.januar(2025)))
+            håndterArbeidsgiveropplysninger(listOf(16.januar(2025) til 31.januar(2025)), førsteFraværsdag = 17.februar(2025), vedtaksperiodeId = 2.vedtaksperiode)
             assertEquals(16.januar(2025), inspektør.skjæringstidspunkt(2.vedtaksperiode))
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             håndterYtelser(2.vedtaksperiode)
@@ -179,6 +179,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(listOf(17.februar(2025), 16.januar(2025)), inspektør.skjæringstidspunkter(2.vedtaksperiode))
+            assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
         }
         a2 {
             assertEquals(17.februar(2025), inspektør.skjæringstidspunkt(3.vedtaksperiode))
@@ -241,7 +242,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `en gjenskapning fra virkeligheten med foreldrepenger, ferie og en spenstig IM blant annet`() {
+    fun `AI fjerner gammel IM - en gjenskapning fra virkeligheten med foreldrepenger, ferie og en spenstig IM blant annet`() {
         (a1 og a2).nyeVedtak(januar)
         (a1 og a2).forlengVedtak(februar)
         a1 { håndterOverstyrTidslinje((1..28).map { ManuellOverskrivingDag(it.februar, Dagtype.Foreldrepengerdag) }) }
@@ -266,13 +267,14 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 14.mars))
-            håndterInntektsmelding(emptyList(), førsteFraværsdag = 15.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "fox")
+            håndterArbeidsgiveropplysninger(emptyList(), førsteFraværsdag = 15.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
             assertEquals(15.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
             assertEquals(listOf(15.mars, 1.januar), inspektør.skjæringstidspunkter(3.vedtaksperiode))
+            assertVarsel(Varselkode.RV_IM_8, 3.vedtaksperiode.filter())
         }
         a1 {
             håndterSøknad(april)
-            assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         }
     }
 
@@ -530,7 +532,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `mangler refusjonsopplysninger etter at skjæringstidspunktet flyttes - da gjenbruker vi tidsnære opplysninger`() {
+    fun `AI fjerner gammel IM - mangler refusjonsopplysninger etter at skjæringstidspunktet flyttes - da gjenbruker vi tidsnære opplysninger`() {
         a1 {
             nyPeriode(3.januar til onsdag den 17.januar)
         }
@@ -543,7 +545,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 Sykdom(mandag den 22.januar, 23.januar, 100.prosent),
                 egenmeldinger = listOf(fredag den 19.januar til fredag den 19.januar)
             )
-            håndterInntektsmelding(listOf(3.januar til 17.januar, 19.januar.somPeriode()), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(3.januar til 17.januar, 19.januar.somPeriode()), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -558,7 +560,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 {
             nyPeriode(24.januar til 31.januar)
             nullstillTilstandsendringer()
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(
                     8.januar til onsdag den 17.januar,
                     // nå blir helgen 20. januar - 21.januar tolket som frisk,
@@ -573,8 +575,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-            assertTilstander(3.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(3.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, AVVENTER_BLOKKERENDE_PERIODE)
 
         }
         a2 {
@@ -1334,7 +1336,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
         }
         a1 {
             assertTilstander(
@@ -1374,17 +1376,17 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Sykmelding og søknad kommer for to perioder før inntektsmelding kommer - skal fortsatt vilkårsprøve kun én gang`() {
+    fun `AI fjerner gammel IM - Sykmelding og søknad kommer for to perioder før inntektsmelding kommer - skal fortsatt vilkårsprøve kun én gang`() {
         nyPeriode(1.januar til 18.januar, a1, a2)
         a1 { håndterSykmelding(20.januar til 31.januar) }
         a2 { håndterSykmelding(22.januar til 31.januar) }
         a1 { håndterSøknad(20.januar til 31.januar) }
         a2 { håndterSøknad(22.januar til 31.januar) }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, vedtaksperiodeId = 1.vedtaksperiode) }
         // Sender med en annen inntekt enn i forrige IM for å kunne asserte på at det er denne vi bruker
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, førsteFraværsdag = 22.januar) }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, førsteFraværsdag = 22.januar, vedtaksperiodeId = 1.vedtaksperiode) }
+        a1 { håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode) }
+        a2 { håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig, vedtaksperiodeId = 1.vedtaksperiode) }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
@@ -1399,14 +1401,16 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalt()
         }
         a1 {
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(20.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-            assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
         a2 {
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(20.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-            assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
     }
 
@@ -1553,7 +1557,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `inntektsmelding skal kun treffe sammenhengende vedtaksperioder, ikke alle med samme skjæringstidspunkt`() {
+    fun `AI fjerner gammel IM - inntektsmelding skal kun treffe sammenhengende vedtaksperioder, ikke alle med samme skjæringstidspunkt`() {
         // Vedtaksperiode for AG 1 skal bare koble sammen to vedtaksperioder for AG 2 så de får samme skjæringstidspunkt
         a1 { håndterSykmelding(januar) }
         a2 {
@@ -1564,13 +1568,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 { håndterSøknad(januar) }
         a2 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class)
         }
         a1 { assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
         a2 {
-            assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
-            assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
     }
 
@@ -1596,11 +1600,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `andre inntektskilder på a2 etter vilkårsprøving på a1 - kun warning på a2`() {
+    fun `AI fjerner gammel IM - andre inntektskilder på a2 etter vilkårsprøving på a1 - kun warning på a2`() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -1620,9 +1624,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertIngenFunksjonelleFeil()
             assertVarsel(Varselkode.RV_SØ_10, 1.vedtaksperiode.filter())
-            håndterInntektsmelding(listOf(15.januar til 30.januar))
+            håndterArbeidsgiveropplysninger(listOf(15.januar til 30.januar))
             assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)

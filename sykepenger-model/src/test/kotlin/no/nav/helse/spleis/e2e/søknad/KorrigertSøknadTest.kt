@@ -76,14 +76,20 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Gjenbruker inntekt når korrigerende søknad flytter skjæringstidspunkt - fått IM for originalt skjæringstidspunkt`() {
+    fun `AI fjerner gammel IM - Gjenbruker inntekt når korrigerende søknad flytter skjæringstidspunkt - fått IM for originalt skjæringstidspunkt`() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
             forlengVedtak(mars)
 
             håndterSøknad(10.april til 30.april)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.april)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 10.april, vedtaksperiodeId = 4.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterYtelser(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
             håndterVilkårsgrunnlag(4.vedtaksperiode)
             håndterYtelser(4.vedtaksperiode)
             håndterSimulering(4.vedtaksperiode)

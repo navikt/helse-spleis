@@ -71,7 +71,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `En annen vedtaksperiode håndterer innteksmelding, så forespørsel bli aldri kvittert ut`()  {
+    fun `AI fjerner gammel IM - En annen vedtaksperiode håndterer innteksmelding, så forespørsel bli aldri kvittert ut`()  {
         a1 {
             håndterSøknad(1.januar til 16.januar)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -82,11 +82,11 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertEtterspurt(2.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
 
             // Arbeidsgiver svarer ikke på forespørselen, men sender en "gammel" inntektsmelding & opplyser om begrunnelseForReduksjonEllerIkkeUtbetalt
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "En eller annen kul verdi")
+            val inntektsmeldingId = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
             // Da er det periode nummer 1 som håndterer denne inntektsmeldingen
-            assertEquals(inntektsmeldingId to 1.vedtaksperiode, observatør.inntektsmeldingHåndtert.single())
+            assertEquals(inntektsmeldingId to 2.vedtaksperiode, observatør.inntektsmeldingHåndtert.single())
 
-            assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IM_8), 2.vedtaksperiode.filter())
         }
     }
 
@@ -987,17 +987,18 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Skal ikke sende ut forespørsler dersom vi er innenfor arbeidsgiverperioden`() {
+    fun `AI fjerner gammel IM - Skal ikke sende ut forespørsler dersom vi er innenfor arbeidsgiverperioden`() {
         nyPeriode(1.januar til 2.januar, a1)
         nyPeriode(3.januar til 6.januar, a1)
 
         a1 {
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 emptyList(),
                 førsteFraværsdag = 1.januar,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
             )
-            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
+            assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
         }
         assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         assertEquals(0, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)

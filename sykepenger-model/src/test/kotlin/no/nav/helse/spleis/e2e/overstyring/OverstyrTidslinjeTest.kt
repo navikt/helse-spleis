@@ -98,41 +98,38 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
     }
 
     @Test
-    fun `overstyring av tidslinje i avventer inntektsmelding`() {
+    fun `AI fjerner gammel IM - overstyring av tidslinje i avventer inntektsmelding`() {
         a1 {
             håndterSøknad(Sykdom(3.februar, 26.februar, 100.prosent))
             håndterSøknad(Sykdom(27.februar, 12.mars, 100.prosent))
             håndterSøknad(Sykdom(13.mars, 31.mars, 100.prosent))
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(6.mars til 21.mars),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-            håndterVilkårsgrunnlag(3.vedtaksperiode)
-            håndterYtelser(3.vedtaksperiode)
-            håndterSimulering(3.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
             nullstillTilstandsendringer()
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(2.februar til 17.februar),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
             nullstillTilstandsendringer()
 
-            assertEquals("UGG UUUUUGG UUUUUGR AAAAARR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+            assertEquals("HH SSSSSHH SSSSSHH SSSSSHH SAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
             håndterOverstyrTidslinje((20.februar til 24.februar).map { ManuellOverskrivingDag(it, Sykedag, 100) })
-            assertEquals("UGG UUUUUGG UUUUUGR ASSSSHR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+            assertEquals("HH SSSSSHH SSSSSHH SSSSSHH SAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
             håndterOverstyrTidslinje((18.februar til 19.februar).map { ManuellOverskrivingDag(it, Sykedag, 100) })
-            assertEquals("UGG UUUUUGG UUUUUGH SSSSSHR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+            assertEquals("HH SSSSSHH SSSSSHH SSSSSHH SAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
-            assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_3, Varselkode.RV_IM_24, Varselkode.RV_AO_3), 1.vedtaksperiode.filter())
         }
     }
 
@@ -197,7 +194,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
     }
 
     @Test
-    fun `arbeidsgiver endrer arbeidsgiverperioden tilbake - må overstyre tidslinje for å fikse`() {
+    fun `AI fjerner gammel IM - arbeidsgiver endrer arbeidsgiverperioden tilbake - må overstyre tidslinje for å fikse`() {
         a1 {
             håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
             nyttVedtak(11.februar til 28.februar, arbeidsgiverperiode = listOf(1.februar til 4.februar, 7.februar til 18.februar))
@@ -206,11 +203,10 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             nullstillTilstandsendringer()
 
             observatør.vedtaksperiodeVenter.clear()
-            håndterInntektsmelding(listOf(16.januar til 31.januar))
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(16.januar til 31.januar))
 
-            assertEquals(listOf(7.februar, 16.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
-            assertVarsel(Varselkode.RV_IV_11, 1.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            assertEquals(listOf(7.februar, 1.februar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
 
             håndterOverstyrTidslinje(
                 listOf(
@@ -220,11 +216,12 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
 
             assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[5.februar]::class)
             assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[6.februar]::class)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
         }
     }
 
@@ -258,17 +255,19 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
     }
 
     @Test
-    fun `ferie uten sykmelding mellom to perioder`() {
+    fun `AI fjerner gammel IM - ferie uten sykmelding mellom to perioder`() {
         a1 {
             nyttVedtak(juni)
 
             håndterSøknad(Sykdom(1.august, 31.august, 100.prosent))
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.juni til 16.juni),
                 førsteFraværsdag = 1.august,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
             )
             assertVarsler(listOf(RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -279,7 +278,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
 
-            assertEquals(listOf(1.august.somPeriode()), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
             assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHJ JJJJJJJ JJJJJJJ JJJJJJJ JJJJJJJ JJSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
 
             assertEquals(1.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -289,13 +288,13 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             val augustutbetalingFør = inspektør.utbetaling(1)
             val augustutbetalingEtter = inspektør.utbetaling(2)
 
-            assertNotEquals(juniutbetaling.korrelasjonsId, augustutbetalingFør.korrelasjonsId)
+            assertEquals(juniutbetaling.korrelasjonsId, augustutbetalingFør.korrelasjonsId)
             assertNotEquals(juniutbetaling.korrelasjonsId, augustutbetalingEtter.korrelasjonsId)
 
             augustutbetalingEtter.arbeidsgiverOppdrag.also { oppdrag ->
                 assertEquals(1, oppdrag.size)
                 oppdrag[0].also { linje ->
-                    assertEquals(august, linje.fom til linje.tom)
+                    assertEquals(17.august til 31.august, linje.fom til linje.tom)
                 }
             }
         }

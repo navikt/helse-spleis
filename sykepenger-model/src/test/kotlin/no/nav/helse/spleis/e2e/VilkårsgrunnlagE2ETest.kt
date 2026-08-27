@@ -111,7 +111,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
 
     @Disabled("Som best jeg klarte gjenskaper dette hendelsesforløp i prod, men det blir en annen tilstand i spannerish enn prod-caset?")
     @Test
-    fun `Rare ting skjer med korte perioder, out of order søknader, og inntektsmeldinger fra feil arbeidsgiver`() {
+    fun `AI fjerner gammel IM - Rare ting skjer med korte perioder, out of order søknader, og inntektsmeldinger fra feil arbeidsgiver`() {
         val sfo = a2
         val skole = a1
         sfo {
@@ -126,7 +126,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
         sfo {
             håndterSøknad(5.januar(2026) til 20.januar(2026))
             håndterSøknad(21.januar(2026) til 5.februar(2026))
-            håndterInntektsmelding(listOf(29.september(2025) til 14.oktober(2025)))
+            håndterArbeidsgiveropplysninger(listOf(29.september(2025) til 14.oktober(2025)))
         }
         skole {
             /*
@@ -134,7 +134,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             men skole og sfo er underenhet av samme hovedenhet, så egentlig så skal de jo dele AGP, men
             vi har vel ikke støtte for sånt?
              */
-            håndterInntektsmelding(listOf(29.september(2025) til 14.oktober(2025)))
+            håndterArbeidsgiveropplysninger(listOf(29.september(2025) til 14.oktober(2025)))
             håndterSøknad(6.februar(2026) til 25.februar(2026))
         }
         sfo {

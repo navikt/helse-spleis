@@ -47,16 +47,16 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
     }
 
     @Test
-    fun `inntektsmelding strekkes tilbake til å dekke arbeidsgiverperiode om det er helg mellom`() {
+    fun `AI fjerner gammel IM - inntektsmelding strekkes tilbake til å dekke arbeidsgiverperiode om det er helg mellom`() {
         a1 {
             håndterSøknad(mandag den 22.januar til 15.februar)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 førsteFraværsdag = 22.januar,
                 arbeidsgiverperioder = listOf(torsdag den 4.januar til fredag den 19.januar),
                 beregnetInntekt = INNTEKT
             )
-            assertEquals(22.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertEquals(listOf(22.januar, 4.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
+            assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(listOf(4.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
             assertEquals(4.januar til 15.februar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         }
@@ -81,16 +81,19 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Egenmeldingsdager fra sykmelding møter begrunnelseForReduksjonEllerIkkeUtbetalt`() {
+    fun `AI fjerner gammel IM - Egenmeldingsdager fra sykmelding møter begrunnelseForReduksjonEllerIkkeUtbetalt`() {
         a1 {
             håndterSøknad(Sykdom(9.mars, 14.mars, 100.prosent), egenmeldinger = listOf(2.mars til 3.mars))
-            håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.mars, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(2.januar til 17.januar), førsteFraværsdag = 2.mars, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
 
             observatør.vedtaksperiodeVenter.last().let {
-                assertEquals("SHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
-                assertEquals("INNTEKTSMELDING", it.venterPå.venteårsak.hva)
+                assertEquals("UUUUGG UUUUUGG UUU???? ??????? ??????? ??????? ??????? ??????? ??????? ????SHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+                assertEquals("VILKÅRSPRØVING", it.venterPå.venteårsak.hva)
                 assertNull(it.venterPå.venteårsak.hvorfor)
             }
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
         }
     }
 

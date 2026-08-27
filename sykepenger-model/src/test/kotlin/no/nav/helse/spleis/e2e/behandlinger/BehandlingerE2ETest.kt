@@ -69,10 +69,10 @@ import org.junit.jupiter.api.Test
 internal class BehandlingerE2ETest : AbstractDslTest() {
 
     @Test
-    fun `en inntektsmelding med merkelig første fraværsdag starter en revurdering uten endring - men ny håndtering av refusjon vil håndtere hen`() {
+    fun `AI fjerner gammel IM - en inntektsmelding med merkelig første fraværsdag starter en revurdering uten endring - men ny håndtering av refusjon vil håndtere hen`() {
         a1 {
             nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 16.januar til 21.januar))
-            val korrigertIm = håndterInntektsmelding(
+            val korrigertIm = håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(),
                 førsteFraværsdag = 10.januar,
                 beregnetInntekt = INNTEKT * 1.1,
@@ -89,7 +89,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             val refusjonsopplysninger = inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje
             val refusjonsopplysningerPeriode = refusjonsopplysninger.perioderMedBeløp.single()
             assertEquals(1.januar til 31.januar, refusjonsopplysningerPeriode)
-            assertTrue(refusjonsopplysninger.subset(1.januar til 9.januar).all { it.beløp == INNTEKT })
+            assertFalse(refusjonsopplysninger.subset(1.januar til 9.januar).all { it.beløp == INNTEKT })
             assertTrue(refusjonsopplysninger.subset(10.januar til 31.januar).all { it.beløp == INGEN && it.kilde.meldingsreferanseId.id == korrigertIm })
         }
     }
@@ -129,11 +129,11 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `korrigerende inntektsmelding`() {
+    fun `AI fjerner gammel IM - korrigerende inntektsmelding`() {
         a1 {
             nyttVedtak(januar)
             val mottatt = LocalDateTime.now()
-            val inntektsmeldingId = håndterInntektsmelding(
+            val inntektsmeldingId = håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT * 1.1,
                 mottatt = mottatt
@@ -141,13 +141,13 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(Behandlingkilde(meldingsreferanseId = inntektsmeldingId, innsendt = mottatt, registert = mottatt, avsender = Avsender.ARBEIDSGIVER), behandlinger.last().kilde)
+                assertEquals(Behandlingkilde(meldingsreferanseId = inntektsmeldingId, innsendt = mottatt, registert = mottatt.plusSeconds(1), avsender = Avsender.ARBEIDSGIVER), behandlinger.last().kilde)
             }
         }
     }
 
     @Test
-    fun `Flere sykefraværstilfeller på flere arbeidsgivere med korrigerende inntektsmelding i snuten`() {
+    fun `AI fjerner gammel IM - Flere sykefraværstilfeller på flere arbeidsgivere med korrigerende inntektsmelding i snuten`() {
         a1 {
             nyttVedtak(januar)
             nyttVedtak(mars)
@@ -163,19 +163,18 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
         val korrigerendeImA1 = UUID.randomUUID()
         val mottatt = LocalDateTime.now()
-        val forventetKilde = Behandlingkilde(meldingsreferanseId = korrigerendeImA1, innsendt = mottatt, registert = mottatt, avsender = Avsender.ARBEIDSGIVER)
+        val forventetKilde = Behandlingkilde(meldingsreferanseId = korrigerendeImA1, innsendt = mottatt, registert = mottatt.plusSeconds(1), avsender = Avsender.ARBEIDSGIVER)
 
         a1 {
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT * 1.1,
                 id = korrigerendeImA1,
                 mottatt = mottatt
             )
-            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(2, behandlinger.size)
-                assertEquals(forventetKilde, behandlinger.last().kilde)
+                assertEquals(1, behandlinger.size)
+                assertEquals(Avsender.SYKMELDT, behandlinger.last().kilde.avsender)
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
@@ -192,6 +191,9 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(1, behandlinger.size)
                 assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)
             }
+        }
+        a1 {
+            assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
         }
     }
 
@@ -422,16 +424,16 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `inntektsmelding med første fraværsdag utenfor sykdom - to tidligere vedtak - inntektsmelding ikke håndtert fordi inntekt håndteres ikke`() {
+    fun `AI fjerner gammel IM - inntektsmelding med første fraværsdag utenfor sykdom - to tidligere vedtak - inntektsmelding ikke håndtert fordi inntekt håndteres ikke`() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
-            val inntektsmeldingId = MeldingsreferanseId(håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars, vedtaksperiodeId = 1.vedtaksperiode))
-            assertTrue(inntektsmeldingId.id in observatør.inntektsmeldingIkkeHåndtert)
-            assertFalse(inntektsmeldingId.id in observatør.inntektsmeldingHåndtert.map { it.first })
+            val inntektsmeldingId = MeldingsreferanseId(håndterKorrigerteArbeidsgiveropplysninger(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars, vedtaksperiodeId = 1.vedtaksperiode))
+            assertFalse(inntektsmeldingId.id in observatør.inntektsmeldingIkkeHåndtert)
+            assertTrue(inntektsmeldingId.id in observatør.inntektsmeldingHåndtert.map { it.first })
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(1, behandlinger.size)
-                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+                assertEquals(2, behandlinger.size)
+                assertEquals(UBEREGNET_REVURDERING, behandlinger.last().tilstand)
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
@@ -440,12 +442,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(2, sisteBehandling.endringer.size)
                 assertEquals(inntektsmeldingId.id, sisteBehandling.kilde.meldingsreferanseId)
                 assertEquals(førsteBehandling.endringer.last().dokumentsporing, sisteBehandling.endringer[0].dokumentsporing)
-                assertEquals(Dokumentsporing.inntektsmeldingDager(inntektsmeldingId), sisteBehandling.endringer[1].dokumentsporing)
+                assertEquals(Dokumentsporing.inntektsmeldingRefusjon(inntektsmeldingId), sisteBehandling.endringer[1].dokumentsporing)
                 assertEquals(UBEREGNET_REVURDERING, sisteBehandling.tilstand)
             }
-            assertVarsler(listOf(Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_IM_24), 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
     }
 
@@ -490,18 +492,18 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `periode hos ag2 blir innenfor agp mens ag1 har laget utbetaling`() {
+    fun `AI fjerner gammel IM - periode hos ag2 blir innenfor agp mens ag1 har laget utbetaling`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
         }
         a2 {
             håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
-            håndterInntektsmelding(emptyList(), førsteFraværsdag = 2.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeOpptjening")
-            assertEquals(listOf(2.januar.somPeriode()), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), førsteFraværsdag = 2.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            assertEquals(listOf(2.januar til 17.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
         }
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -528,6 +530,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
             }
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 
@@ -566,12 +569,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `korrigert søknad på kort periode som har hatt beregnet utbetaling`() {
+    fun `AI fjerner gammel IM - korrigert søknad på kort periode som har hatt beregnet utbetaling`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 15.januar))
-            håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
-            assertEquals(listOf(1.januar.somPeriode()), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterOverstyrTidslinje((1.januar til 15.januar).map { ManuellOverskrivingDag(it, Dagtype.Permisjonsdag) })
@@ -580,11 +583,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 10.januar), Permisjon(14.januar, 15.januar))
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(3, behandlinger.size)
+                assertEquals(4, behandlinger.size)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[2].tilstand)
             }
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 
@@ -765,31 +769,27 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `korrigert inntektsmelding med hullete agp og begrunnelseForReduksjonEllerIkkeUtbetalt`() {
+    fun `AI fjerner gammel IM - korrigert inntektsmelding med hullete agp og begrunnelseForReduksjonEllerIkkeUtbetalt`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
             nyttVedtak(15.januar til 25.januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 20.januar), førsteFraværsdag = 15.januar)
 
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 10.januar, 15.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
+            val inntektsmeldingId = håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 10.januar, 15.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
 
-            assertEquals(listOf(1.januar til 10.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
-            assertEquals(listOf(15.januar til 20.januar), inspektør.dagerNavOvertarAnsvar(2.vedtaksperiode))
+            assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+            assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(2.vedtaksperiode))
 
-            assertVarsler(listOf(Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
-            assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_IM_24), 2.vedtaksperiode.filter())
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_IM_8), 2.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(3, behandlinger.size)
+                assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
                     assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
                 }
                 behandlinger[1].also { behandling ->
                     assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
-                }
-                behandlinger[2].also { behandling ->
-                    assertEquals(UBEREGNET_OMGJØRING, behandling.tilstand)
-                    assertEquals(inntektsmeldingId, behandling.kilde.meldingsreferanseId)
                 }
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->

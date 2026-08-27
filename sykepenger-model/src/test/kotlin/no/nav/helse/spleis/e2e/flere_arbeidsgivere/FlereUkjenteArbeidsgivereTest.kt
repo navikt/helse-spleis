@@ -44,7 +44,7 @@ import org.junit.jupiter.api.Test
 internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
 
     @Test
-    fun `to arbeidsgivere - ny overlappende førstegangsbehandlingen hos ag2`() {
+    fun `AI fjerner gammel IM - to arbeidsgivere - ny overlappende førstegangsbehandlingen hos ag2`() {
         val inntektA1 = INNTEKT + 500.daglig
         val inntektA2 = INNTEKT
 
@@ -53,7 +53,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
         a1 { forlengVedtak(mars) }
 
         val im1 = a1 {
-            val id = håndterInntektsmelding(
+            val id = håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 beregnetInntekt = inntektA1,
                 vedtaksperiodeId = 1.vedtaksperiode
@@ -70,7 +70,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
         val søknad = UUID.randomUUID()
         val im2 = a2 {
             håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), søknadId = søknad)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
                 beregnetInntekt = inntektA2
             )
@@ -89,9 +89,9 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
         overstyringerIgangsatt[6].also { event ->
             assertEquals(
                 EventSubscription.OverstyringIgangsatt(
-                    årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
+                    årsak = "REFUSJONSOPPLYSNINGER",
                     skjæringstidspunkt = 1.januar,
-                    periodeForEndring = 1.januar til 1.januar,
+                    periodeForEndring = 1.januar til 31.januar,
                     berørtePerioder = listOf(
                         VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 1.vedtaksperiode(a1), 1.januar til 31.januar, 1.januar, REVURDERING),
                         VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 2.vedtaksperiode(a1), februar, 1.januar, REVURDERING),
@@ -121,8 +121,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
         overstyringerIgangsatt[8].also { event ->
             assertEquals(
                 EventSubscription.OverstyringIgangsatt(
-                    årsak = "INNTEKT_FRA_INNTEKTSMELDING",
-                    skjæringstidspunkt = 1.mars,
+                    årsak = "ARBEIDSGIVERPERIODE",
+                    skjæringstidspunkt = 1.januar,
                     periodeForEndring = 1.mars til 20.mars,
                     berørtePerioder = listOf(
                         VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode(a1), 1.mars til 31.mars, 1.januar, REVURDERING),

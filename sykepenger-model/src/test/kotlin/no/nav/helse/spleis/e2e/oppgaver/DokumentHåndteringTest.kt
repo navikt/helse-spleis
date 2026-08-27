@@ -32,6 +32,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PER
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -145,17 +146,17 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Inntektsmelding før søknad med kort gap`() {
+    fun `AI fjerner gammel IM - Inntektsmelding før søknad med kort gap`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
-            val id = håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 20.januar
             )
-            val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
-            assertEquals(id, inntektsmeldingFørSøknadEvent.inntektsmeldingId)
+            assertEquals(emptyList<Any>(), observatør.inntektsmeldingFørSøknad)
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 
@@ -175,14 +176,14 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Inntektsmelding før forlengelse-søknad`() {
+    fun `AI fjerner gammel IM - Inntektsmelding før forlengelse-søknad`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
-            val id = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
-            val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
-            assertEquals(id, inntektsmeldingFørSøknadEvent.inntektsmeldingId)
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+            assertEquals(emptyList<Any>(), observatør.inntektsmeldingFørSøknad)
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 
@@ -202,19 +203,19 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Inntektsmelding ikke håndtert - lang periode mellom auu og sykmelding`() {
+    fun `AI fjerner gammel IM - Inntektsmelding ikke håndtert - lang periode mellom auu og sykmelding`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-            val id = håndterInntektsmelding(listOf(1.januar til 16.januar))
-            val inntektsmelding = observatør.inntektsmeldingIkkeHåndtert.single()
-            assertEquals(id, inntektsmelding)
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 
     @Test
-    fun `Inntektsmelding bare håndtert inntekt`() {
+    fun `AI fjerner gammel IM - Inntektsmelding bare håndtert inntekt`() {
         a1 {
             håndterSøknad(januar)
             val im1 = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
@@ -233,17 +234,16 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), søknadId = søknadId)
             val søknad = MeldingsreferanseId(søknadId)
             val im = MeldingsreferanseId(
-                håndterInntektsmelding(
+                håndterArbeidsgiveropplysninger(
                     listOf(1.januar til 16.januar),
                     førsteFraværsdag = 10.februar
                 )
             )
             assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
-            assertEquals(hendelserHåndtertFør, inspektør.hendelser(1.vedtaksperiode))
+            assertEquals(hendelserHåndtertFør + Dokumentsporing.inntektsmeldingDager(im), inspektør.hendelser(1.vedtaksperiode))
             assertEquals(
                 setOf(
                     Dokumentsporing.søknad(søknad),
-                    Dokumentsporing.inntektsmeldingDager(im),
                     Dokumentsporing.inntektsmeldingRefusjon(im),
                     Dokumentsporing.inntektsmeldingInntekt(im)
                 ), inspektør.hendelser(2.vedtaksperiode)
@@ -254,14 +254,15 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     }
 
     @Test
-    fun `lps-Inntektsmelding noen dager håndtert`() {
+    fun `AI fjerner gammel IM - lps-Inntektsmelding noen dager håndtert`() {
         a1 {
             val søknadId = UUID.randomUUID()
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), søknadId = søknadId)
-            val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertEquals(listOf(im), observatør.inntektsmeldingIkkeHåndtert)
+            val im = håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
             assertEquals(listOf(søknadId to 1.vedtaksperiode), observatør.søknadHåndtert)
-            assertEquals(emptyList<Any>(), observatør.inntektsmeldingHåndtert)
+            assertEquals(listOf(im to 1.vedtaksperiode), observatør.inntektsmeldingHåndtert)
         }
     }
 
@@ -278,16 +279,17 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Inntektsmelding noen dager håndtert - IM før søknad`() {
+    fun `AI fjerner gammel IM - Inntektsmelding noen dager håndtert - IM før søknad`() {
         a1 {
             val søknadId = UUID.randomUUID()
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), søknadId = søknadId)
             håndterSykmelding(Sykmeldingsperiode(11.januar, 20.januar))
-            val im = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+            val im = håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
-            assertEquals(listOf(im), observatør.inntektsmeldingFørSøknad.map { it.inntektsmeldingId })
+            assertEquals(emptyList<UUID>(), observatør.inntektsmeldingFørSøknad.map { it.inntektsmeldingId })
             assertEquals(listOf(søknadId to 1.vedtaksperiode), observatør.søknadHåndtert)
-            assertEquals(emptyList<Any>(), observatør.inntektsmeldingHåndtert)
+            assertEquals(listOf(im to 1.vedtaksperiode), observatør.inntektsmeldingHåndtert)
         }
     }
 
@@ -374,19 +376,19 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     }
 
     @Test
-    fun `har periode rett før men det er en AUU`() {
+    fun `AI fjerner gammel IM - har periode rett før men det er en AUU`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
             val søknad2Id = UUID.randomUUID()
             håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), søknadId = søknad2Id)
-            val im = håndterInntektsmelding(
+            val im = håndterArbeidsgiveropplysninger(
                 listOf(10.januar til 25.januar),
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
             )
             assertFunksjonellFeil(RV_IM_8, AktivitetsloggFilter.Alle)
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
             val vp2 = 2.vedtaksperiode
             assertEquals(
@@ -394,14 +396,14 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                     vedtaksperiodeId = vp2,
                     gjeldendeTilstand = AVVENTER_INNTEKTSMELDING,
-                    hendelser = setOf(søknad2Id),
+                    hendelser = setOf(søknad2Id, im),
                     fom = 17.januar,
                     tom = 31.januar,
                     sykmeldingsperioder = emptyList(),
                     speilrelatert = false
                 ), observatør.forkastet(vp2)
             )
-            assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
+            assertFalse(im in observatør.inntektsmeldingIkkeHåndtert)
         }
     }
 
@@ -590,17 +592,17 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
     }
 
     @Test
-    fun `inntektsmelding med første fraværsdag utenfor sykdom - ingen tidligere vedtak - inntektsmelding ikke håndtert fordi inntekt håndteres ikke`() {
+    fun `AI fjerner gammel IM - inntektsmelding med første fraværsdag utenfor sykdom - ingen tidligere vedtak - inntektsmelding ikke håndtert fordi inntekt håndteres ikke`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-            val im = håndterInntektsmelding(
+            val im = håndterArbeidsgiveropplysninger(
                 listOf(Periode(3.januar, 18.januar)),
                 førsteFraværsdag = 27.januar
             )
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-            assertFalse(im in observatør.inntektsmeldingHåndtert.map(Pair<UUID, *>::first))
-            assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTrue(im in observatør.inntektsmeldingHåndtert.map(Pair<UUID, *>::first))
+            assertFalse(im in observatør.inntektsmeldingIkkeHåndtert)
         }
     }
 

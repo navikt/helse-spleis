@@ -41,7 +41,7 @@ import org.junit.jupiter.api.assertNull
 internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
 
     @Test
-    fun `Velger RIKTIG inntekt når en AUU først har fått lagret faktaavkalrt inntekt på behandlignen sin`() {
+    fun `AI fjerner gammel IM - Velger RIKTIG inntekt når en AUU først har fått lagret faktaavkalrt inntekt på behandlignen sin`() {
         a1 {
             håndterSøknad(1.januar til 20.januar)
             val im1 = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.05)
@@ -75,15 +75,16 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             håndterUtbetalt()
 
             // Så kommer det en korrigert IM
-            val im3 = håndterInntektsmelding(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT * 1.15, vedtaksperiodeId = 1.vedtaksperiode)
+            val im3 = håndterKorrigerteArbeidsgiveropplysninger(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT * 1.15, vedtaksperiodeId = 1.vedtaksperiode)
+            assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
             assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
             // Før beregning har vi rett inntekt på behandlingene
-            assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
-            assertEquals(im3, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
+            assertEquals(im3, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
+            assertEquals(im2, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
 
             // Etter beregning har vi IKKE rotet det til IGJEN
             håndterYtelser(2.vedtaksperiode)
-            assertEquals(im1, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
+            assertEquals(im3, inspektør.faktaavklartInntekt(1.vedtaksperiode)?.hendelseId)
             assertEquals(im3, inspektør.faktaavklartInntekt(2.vedtaksperiode)?.hendelseId)
             assertInntektsgrunnlag(5.januar, 1) {
                 assertInntektsgrunnlag(a1, INNTEKT * 1.15, forventetKildeId = im3)
@@ -186,23 +187,23 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Flere korrigerende inntektsmeldinger, også flytter skjæringstidspunktet på seg`() {
+    fun `AI fjerner gammel IM - Flere korrigerende inntektsmeldinger, også flytter skjæringstidspunktet på seg`() {
         a1 {
             nyttVedtak(2.januar til 20.januar, beregnetInntekt = INNTEKT * 1.05)
             forlengVedtak(21.januar til 31.januar)
             forlengVedtak(februar)
             forlengVedtak(mars)
-            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT * 1.20, vedtaksperiodeId = 1.vedtaksperiode)
-            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 21.januar, beregnetInntekt = INNTEKT * 1.10, vedtaksperiodeId = 1.vedtaksperiode)
-            håndterInntektsmelding(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT * 1.15, vedtaksperiodeId = 1.vedtaksperiode)
+            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT * 1.20, vedtaksperiodeId = 1.vedtaksperiode)
+            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 21.januar, beregnetInntekt = INNTEKT * 1.10, vedtaksperiodeId = 1.vedtaksperiode)
+            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT * 1.15, vedtaksperiodeId = 1.vedtaksperiode)
 
-            assertEquals(INNTEKT * 1.05, faktaavvklartArbeidstakerBeløp(1.vedtaksperiode))
-            assertEquals(INNTEKT * 1.10, faktaavvklartArbeidstakerBeløp(2.vedtaksperiode))
-            assertEquals(INNTEKT * 1.15, faktaavvklartArbeidstakerBeløp(3.vedtaksperiode))
-            assertEquals(INNTEKT * 1.20, faktaavvklartArbeidstakerBeløp(4.vedtaksperiode))
+            assertEquals(INNTEKT * 1.15, faktaavvklartArbeidstakerBeløp(1.vedtaksperiode))
+            assertEquals(INNTEKT * 1.05, faktaavvklartArbeidstakerBeløp(2.vedtaksperiode))
+            assertEquals(INNTEKT * 1.05, faktaavvklartArbeidstakerBeløp(3.vedtaksperiode))
+            assertEquals(INNTEKT * 1.05, faktaavvklartArbeidstakerBeløp(4.vedtaksperiode))
 
             assertInntektsgrunnlag(2.januar, forventetAntallArbeidsgivere = 1) {
-                assertInntektsgrunnlag(a1, INNTEKT * 1.05)
+                assertInntektsgrunnlag(a1, INNTEKT * 1.15)
             }
 
             assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -210,10 +211,10 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertVarsler(1.vedtaksperiode, RV_IV_7)
+            assertVarsler(1.vedtaksperiode, RV_IM_4, RV_IM_4, RV_IM_4, RV_IM_4, RV_IM_4, RV_IM_4, RV_IV_7)
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
-                assertInntektsgrunnlag(a1, INNTEKT * 1.05)
+                assertInntektsgrunnlag(a1, INNTEKT * 1.15)
             }
 
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -223,7 +224,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
 
             assertInntektsgrunnlag(31.desember(2017), forventetAntallArbeidsgivere = 1) {
-                assertInntektsgrunnlag(a1, INNTEKT * 1.05, forventetkilde = Arbeidstakerkilde.Arbeidsgiver)
+                assertInntektsgrunnlag(a1, INNTEKT * 1.15, forventetkilde = Arbeidstakerkilde.Arbeidsgiver)
             }
         }
     }

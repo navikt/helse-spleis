@@ -67,7 +67,7 @@ import org.junit.jupiter.api.fail
 internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
 
     @Test
-    fun `Stuckiness med helg involvert - da gjenbruker vi tidsnære opplysninger`() {
+    fun `AI fjerner gammel IM - Stuckiness med helg involvert - da gjenbruker vi tidsnære opplysninger`() {
         a1 { håndterSykmelding(januar) }
         a2 {
             håndterSykmelding(1.januar til fredag(19.januar))
@@ -78,9 +78,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             håndterSøknad(1.januar til fredag(19.januar))
             håndterSøknad(mandag(22.januar) til 31.januar)
         }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
         a2 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -119,9 +119,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
          */
         a1 {
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
-            håndterInntektsmelding(listOf(mandag(22.januar) til 6.februar))
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(mandag(22.januar) til 6.februar), vedtaksperiodeId = 1.vedtaksperiode)
             assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
-            assertEquals("AAAAARR AAAAARR AAAAARR SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
         }
         a2 {
             assertEquals("SSSSSHH SSSSSHH SSSSS?? SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
@@ -134,19 +134,16 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
             assertEquals(1.januar, inspektør.førsteFraværsdag(1.vedtaksperiode))
 
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-            assertEquals(22.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(1.januar, inspektør.førsteFraværsdag(2.vedtaksperiode))
         }
 
         a1 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
-            håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
 
         a2 {

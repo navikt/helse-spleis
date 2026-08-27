@@ -963,12 +963,12 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `§8-12 ledd 2 - Bruker har ikke vært arbeidsfør i 26 uker`() {
+    fun `AI fjerner gammel IM - §8-12 ledd 2 - Bruker har ikke vært arbeidsfør i 26 uker`() {
         a1 {
             {
 
                 håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 30.desember(2018)))
-                håndterInntektsmelding(
+                håndterArbeidsgiveropplysninger(
                     listOf(Periode(1.januar(2018), 16.januar(2018)))
                 )
                 håndterSøknad(
@@ -986,7 +986,7 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
                     Sykdom(1.januar(2019), 31.januar(2019), 100.prosent),
                     sendtTilNAVEllerArbeidsgiver = 31.januar(2019)
                 )
-                håndterInntektsmelding(
+                håndterArbeidsgiveropplysninger(
                     listOf(Periode(1.januar(2018), 16.januar(2018))),
                     førsteFraværsdag = 1.januar(2019)
                 )

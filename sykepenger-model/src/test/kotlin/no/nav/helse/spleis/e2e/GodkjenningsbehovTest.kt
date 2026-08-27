@@ -23,6 +23,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -108,7 +109,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
     }
 
     @Test
-    fun `sender med feil vilkårsgrunnlagId i påminnet godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden`() {
+    fun `AI fjerner gammel IM - sender med feil vilkårsgrunnlagId i påminnet godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden`() {
         a1 {
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
                 tilGodkjenning(januar)
@@ -118,22 +119,23 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             nyPeriode(februar)
             nyPeriode(mars)
             nullstillTilstandsendringer()
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.mars,
                 refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
             val vilkårsgrunnlagId2 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inspektør.vilkårsgrunnlagId
             assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagId2)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertEquals(vilkårsgrunnlagId1, godkjenningsbehov.event.vilkårsgrunnlagId)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 
     @Test
-    fun `sender med feil vilkårsgrunnlagId i første godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden mens den står i avventer simulering`() {
+    fun `AI fjerner gammel IM - sender med feil vilkårsgrunnlagId i første godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden mens den står i avventer simulering`() {
         a1 {
             nyPeriode(januar)
             nyPeriode(februar)
@@ -143,29 +145,30 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             val vilkårsgrunnlagId1 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inspektør.vilkårsgrunnlagId
             håndterYtelser(1.vedtaksperiode)
             nullstillTilstandsendringer()
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 førsteFraværsdag = 1.mars,
                 refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-            assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
             val vilkårsgrunnlagId2 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inspektør.vilkårsgrunnlagId
             assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagId2)
+            håndterYtelser(1.vedtaksperiode)
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
                 håndterSimulering(1.vedtaksperiode)
             }
-            assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
             assertEquals(vilkårsgrunnlagId1, godkjenningsbehov.event.vilkårsgrunnlagId)
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 
     @Test
-    fun `godkjenningsbehov som ikke kan avvises automatisk blir avvist av saksbehandler`() {
+    fun `AI fjerner gammel IM - godkjenningsbehov som ikke kan avvises automatisk blir avvist av saksbehandler`() {
         a1 {
             nyPeriode(1.januar til 16.januar)
             nyPeriode(17.januar til 31.januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -177,9 +180,10 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-            håndterInntektsmelding(
+            håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -217,6 +221,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
             assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 
@@ -249,13 +254,13 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
     }
 
     @Test
-    fun `omgjøring som _ikke_ kan avvises`() {
+    fun `AI fjerner gammel IM - omgjøring som _ikke_ kan avvises`() {
         a1 {
             nyPeriode(2.januar til 17.januar)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
             nyPeriode(18.januar til 31.januar)
-            håndterInntektsmelding(listOf(2.januar til 17.januar))
+            håndterArbeidsgiveropplysninger(listOf(2.januar til 17.januar))
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             val godkjenningsbehov1 = enesteGodkjenningsbehovSomFølgeAv({2.vedtaksperiode}) {
@@ -271,7 +276,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             val godkjenningsbehov2 = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
@@ -289,6 +294,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
 
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             assertFalse(godkjenningsbehov3.event.kanAvvises)
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 

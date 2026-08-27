@@ -109,7 +109,7 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
     }
 
     @Test
-    fun `inntektsmelding bryter ikke opp forlengelse`() {
+    fun `AI fjerner gammel IM - inntektsmelding bryter ikke opp forlengelse`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterSøknad(februar)
@@ -120,20 +120,22 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterSøknad(mars)
             nullstillTilstandsendringer()
-            håndterInntektsmelding(
+            håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(Periode(18.januar, 1.februar)),
                 førsteFraværsdag = 4.mars,
                 vedtaksperiodeId = 1.vedtaksperiode
             )
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
 
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             håndterYtelser(2.vedtaksperiode)
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
             assertSame(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
             assertEquals(18.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))

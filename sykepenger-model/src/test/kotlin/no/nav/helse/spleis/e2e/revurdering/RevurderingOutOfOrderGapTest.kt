@@ -189,16 +189,19 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
     }
 
     @Test
-    fun `hører til samme arbeidsgiverperiode som forrige - har en fremtidig utbetaling`() {
+    fun `AI fjerner gammel IM - hører til samme arbeidsgiverperiode som forrige - har en fremtidig utbetaling`() {
         a1 {
             nyttVedtak(januar)
             nyttVedtak(april)
 
             nyPeriode(10.februar til 28.februar)
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                førsteFraværsdag = 10.februar
+                førsteFraværsdag = 10.februar,
+                vedtaksperiodeId = 3.vedtaksperiode
             )
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
@@ -223,9 +226,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
 
             inspektør.utbetaling(2).also { inspektør ->
                 assertEquals(1, inspektør.arbeidsgiverOppdrag.size)
-                assertEquals(NY, inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
-                assertEquals(10.februar, inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
-                assertEquals(28.februar, inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
+                assertEquals(UEND, inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
+                assertEquals(17.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
+                assertEquals(31.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
             }
         }
     }
@@ -903,7 +906,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
     }
 
     @Test
-    fun `kort periode, lang periode kommer out of order og fører til utbetaling på kort periode som nå trenger IM`() {
+    fun `AI fjerner gammel IM - kort periode, lang periode kommer out of order og fører til utbetaling på kort periode som nå trenger IM`() {
         a1 {
             håndterSykmelding(1.mars til 16.mars)
             håndterSøknad(1.mars til 16.mars)
@@ -922,9 +925,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
-                førsteFraværsdag = 1.mars
+                førsteFraværsdag = 1.mars,
+                vedtaksperiodeId = 1.vedtaksperiode
             )
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -1041,7 +1045,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Out of order gjør at AUU revurderes fordi de ikke lenger er innen AGP - ber om inntektsmelding`() {
+    fun `AI fjerner gammel IM - Out of order gjør at AUU revurderes fordi de ikke lenger er innen AGP - ber om inntektsmelding`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars))
             håndterSøknad(1.mars til 10.mars)
@@ -1056,9 +1060,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-            håndterInntektsmelding(
+            håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
-                førsteFraværsdag = 1.mars
+                førsteFraværsdag = 1.mars,
+                vedtaksperiodeId = 1.vedtaksperiode
             )
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)

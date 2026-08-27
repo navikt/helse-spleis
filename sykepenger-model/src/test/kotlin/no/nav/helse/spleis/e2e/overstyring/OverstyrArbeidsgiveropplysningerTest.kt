@@ -806,11 +806,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Legge til refusjonsopplysninger tilbake i tid`() {
+    fun `AI fjerner gammel IM - Legge til refusjonsopplysninger tilbake i tid`() {
         val im1 = UUID.randomUUID()
         a1 {
             val vedtaksperiode = nyPeriode(januar)
-            håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT, id = im1)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), INNTEKT, id = im1)
             håndterVilkårsgrunnlag(vedtaksperiode)
             håndterYtelser(vedtaksperiode)
             håndterSimulering(vedtaksperiode)
@@ -818,11 +818,14 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             nyPeriode(5.februar til 28.februar)
-            val im2 = håndterInntektsmelding(
+            val im2 = håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT,
                 førsteFraværsdag = 7.februar
             )
+            // korrigerende AGP setter i gang en revurdering av januar som må kjøres ferdig først
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

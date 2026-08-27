@@ -14,6 +14,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
@@ -46,14 +47,17 @@ internal class RevurderingFerieTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Forlengelse med bare ferie, så kommer en tidligere periode med sykdom - ferie skal revurderes`() {
+    fun `AI fjerner gammel IM - Forlengelse med bare ferie, så kommer en tidligere periode med sykdom - ferie skal revurderes`() {
         a1 {
             nyttVedtak(5.februar til 28.februar)
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(1.mars, 31.mars))
-            håndterInntektsmelding(listOf(5.mars til 20.mars), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(5.mars til 20.mars), vedtaksperiodeId = 1.vedtaksperiode)
+            assertVarsler(listOf(RV_IM_4, RV_IM_24), 1.vedtaksperiode.filter())
 
-            assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+            // korrigerende AGP setter i gang en revurdering av februar som må kjøres ferdig først
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
