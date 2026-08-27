@@ -10,7 +10,6 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Arbeidstakerkilde
 import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
@@ -22,7 +21,6 @@ import no.nav.helse.fredag
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Dagtype.Feriedag
-import no.nav.helse.hendelser.Dagtype.Permisjonsdag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
@@ -471,16 +469,16 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
             val korrigertId = håndterKorrigerteArbeidsgiveropplysninger(
-                2.vedtaksperiode,
+                1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT * 2),
                 Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT * 2, emptyList()),
             )
 
-            assertTrue(korrigertId to 2.vedtaksperiode in observatør.inntektsmeldingHåndtert)
+            assertTrue(korrigertId to 1.vedtaksperiode in observatør.inntektsmeldingHåndtert)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-            assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
+            assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
 

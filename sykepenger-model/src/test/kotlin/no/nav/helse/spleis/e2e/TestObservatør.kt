@@ -156,9 +156,13 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
         error("Gir ikke mening å gå fra ${forespørsel.tilstand::class.simpleName} til ${nyTilstand::class.simpleName}")
     }
 
-    internal fun forventerArbeidsgiveropplysninger(vedtaksperiodeId: UUID) = arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.Åpen
-    internal fun kanArbeidsgiveropplysningerKorrigeres(vedtaksperiodeId: UUID) = arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.Besvart
-    internal fun forventerArbeidsgiveropplysningerForkastetVedtaksperiode(vedtaksperiodeId: UUID) = arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.ForkastetVedtaksperiode
+    internal fun forsikreArbeidsgiveropplysningerForkastetVedtaksperiode(vedtaksperiodeId: UUID) {
+        check(arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.ForkastetVedtaksperiode) { "Kan bare brukes ved svar på forespørsler på forkastede vedtaksperioder!" }
+    }
+
+    internal fun forsikreKanKorrigereArbeidsgiveropplysninger(vedtaksperiodeId: UUID) {
+        check(arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.Besvart) { "Kan ikke korrigere arbeidsgiveropplysninger." }
+    }
 
     internal fun forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg oppgitt: Arbeidsgiveropplysning) {
         val forespørsel = arbeidsgiverForespørsler[vedtaksperiodeId] ?: error("Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId")

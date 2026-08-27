@@ -1249,7 +1249,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         nullstillTilstandsendringer()
         val im = a1 {
             håndterKorrigerteArbeidsgiveropplysninger(
-                1.vedtaksperiode,
+                2.vedtaksperiode,
                 *fraInntektsmelding(
                     beregnetInntekt = INNTEKT,
                     refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
@@ -1260,7 +1260,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
                 ).toTypedArray()
             )
         }
-        assertVarsler(listOf(RV_IM_4, RV_IM_24, RV_IM_8), 1.vedtaksperiode.filter())
+        assertVarsler(listOf(RV_IM_4, RV_IM_24, RV_IM_8), 2.vedtaksperiode.filter())
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertInntektshistorikkForDato(INNTEKT, 2.januar, inspektør)
 

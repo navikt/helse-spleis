@@ -44,7 +44,6 @@ class Toggle private constructor(enabled: Boolean) {
         val SelvstendigForsikring = fraEnv("SELVSTENDIG_FORSIKRING", false)
         val GraderteAndreYtelser = fraEnv("GRADERTE_ANDRE_YTELSER", false)
         val OpptjeningsResultatBehov = fraEnv("OPPTJENINGSRESULTATBEHOV", false)
-        val KnertInntektsmelding = Toggle(false)
 
         fun fraEnv(navn: String, defaultValue: Boolean) = Toggle(System.getenv(navn)?.lowercase()?.toBooleanStrictOrNull() ?: defaultValue)
         fun Iterable<Toggle>.enable(block: () -> Unit) {

@@ -8,7 +8,6 @@ import java.time.temporal.Temporal
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -37,7 +36,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.Vurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
@@ -48,9 +46,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -373,7 +368,7 @@ internal class TestPerson(
                 innsendt = innsendt,
                 opplysninger = opplysninger
             )
-            check(observatør.forventerArbeidsgiveropplysningerForkastetVedtaksperiode(vedtaksperiodeId)) { "Kan bare brukes ved svar på forespørsler på forkastede vedtaksperioder!" }
+            observatør.forsikreArbeidsgiveropplysningerForkastetVedtaksperiode(vedtaksperiodeId)
             hendelse.håndter(Person::håndterArbeidsgiveropplysninger)
             return hendelse.metadata.meldingsreferanseId.id
         }
@@ -385,6 +380,7 @@ internal class TestPerson(
                 innsendt = innsendt,
                 opplysninger = opplysninger
             )
+            observatør.forsikreKanKorrigereArbeidsgiveropplysninger(vedtaksperiodeId)
             hendelse.håndter(Person::håndterKorrigerteArbeidsgiveropplysninger)
             return hendelse.metadata.meldingsreferanseId.id
         }
@@ -398,90 +394,6 @@ internal class TestPerson(
             )
             hendelse.håndter(Person::håndterSelvbestemtArbeidsgiveropplysninger)
             return hendelse.metadata.meldingsreferanseId.id
-        }
-
-        @Deprecated("Bruk håndterArbeidsgiveropplysninger, håndterKorrigerteArbeidsgiveropplysninger eller håndterSelvbestemtArbeidsgiveropplysninger i stedet")
-        internal fun håndterInntektsmelding(
-            arbeidsgiverperioder: List<Periode>,
-            beregnetInntekt: Inntekt = INNTEKT,
-            førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
-            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-            opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-            begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-            id: UUID = UUID.randomUUID(),
-            mottatt: LocalDateTime = LocalDateTime.now(),
-            arbeidsforholdId: String? = null,
-            vedtaksperiodeId: UUID = sisteVedtaksperiode
-        ): UUID {
-            val tilstand = observatør.tilstandsendringer.getValue(vedtaksperiodeId).last()
-
-            fun håndterGammelInntektsmelding(): UUID? {
-                if (Toggle.KnertInntektsmelding.enabled) return null
-                arbeidsgiverHendelsefabrikk.lagInntektsmelding(
-                    arbeidsgiverperioder,
-                    beregnetInntekt,
-                    førsteFraværsdag,
-                    refusjon,
-                    opphørAvNaturalytelser,
-                    begrunnelseForReduksjonEllerIkkeUtbetalt,
-                    id,
-                    mottatt = mottatt,
-                    arbeidsforholdId = arbeidsforholdId
-                ).håndter(Person::håndterInntektsmelding)
-                return id
-            }
-
-            // Forespurte arbeidsgiveropplysninger
-            if (observatør.forventerArbeidsgiveropplysninger(vedtaksperiodeId)) {
-                return håndterGammelInntektsmelding() ?: håndterArbeidsgiveropplysninger(
-                    arbeidsgiverperioder = arbeidsgiverperioder,
-                    beregnetInntekt = beregnetInntekt,
-                    førsteFraværsdag = førsteFraværsdag,
-                    refusjon = refusjon,
-                    opphørAvNaturalytelser = opphørAvNaturalytelser,
-                    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                    id = id,
-                    mottatt = mottatt,
-                    arbeidsforholdId = arbeidsforholdId,
-                    vedtaksperiodeId = vedtaksperiodeId
-                )
-            }
-
-            // Korrigerte arbeidsgiveropplysninger
-            if (observatør.kanArbeidsgiveropplysningerKorrigeres(vedtaksperiodeId)) {
-                return håndterGammelInntektsmelding() ?: håndterKorrigerteArbeidsgiveropplysninger(
-                    arbeidsgiverperioder = arbeidsgiverperioder,
-                    beregnetInntekt = beregnetInntekt,
-                    førsteFraværsdag = førsteFraværsdag,
-                    refusjon = refusjon,
-                    opphørAvNaturalytelser = opphørAvNaturalytelser,
-                    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                    id = id,
-                    mottatt = mottatt,
-                    arbeidsforholdId = arbeidsforholdId,
-                    vedtaksperiodeId = vedtaksperiodeId
-                )
-            }
-
-            // Selvbestemte arbeidsgiveropplysninger
-            if (tilstand in setOf(AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)) {
-                return håndterGammelInntektsmelding() ?: håndterSelvbestemtArbeidsgiveropplysninger(
-                    arbeidsgiverperioder = arbeidsgiverperioder,
-                    beregnetInntekt = beregnetInntekt,
-                    førsteFraværsdag = førsteFraværsdag,
-                    refusjon = refusjon,
-                    opphørAvNaturalytelser = opphørAvNaturalytelser,
-                    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                    id = id,
-                    mottatt = mottatt,
-                    arbeidsforholdId = arbeidsforholdId,
-                    vedtaksperiodeId = vedtaksperiodeId
-                )
-            }
-
-            if (tilstand == TIL_INFOTRYGD) error("Bruk håndterArbeidsgiveropplysningerForForkastetPeriode!!")
-
-            error("Uventet situasjon! Her er nok arbeidsgiveropplysningene sendt på feil periode. Tilstanden på perioden er ${tilstand.name}")
         }
 
         /** </Arbeidsgiveropplysninger> **/
