@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -14,6 +15,9 @@ internal class EndretGrunnlagForBeregningRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : HendelseRiver(rapidsConnection, messageMediator) {
+    private companion object {
+        private val objectMapper = jacksonObjectMapper()
+    }
 
     private val grunnlag = setOf(
         GraderteAndreYtelser,
@@ -44,9 +48,19 @@ internal class EndretGrunnlagForBeregningRiver(
         grunnlagsformat = packet.grunnlagsformat
     )
 
-    private val JsonMessage.grunnlagsformatOrNull get() = grunnlag.singleOrNull {
-        it.eventName == get("@event_name").asText()
-    }
+    private val JsonMessage.eventNameOrNull
+        get() =
+            objectMapper.readTree(toJson())
+                .takeIf { it.has("@event_name") }
+                ?.path("@event_name")
+                ?.asText()
 
-    private val JsonMessage.grunnlagsformat get() = grunnlagsformatOrNull?: error("Ukjent grunnlag for eventName ${get("@event_name").asText()}")
+    private val JsonMessage.grunnlagsformatOrNull
+        get() = eventNameOrNull?.let { eventName ->
+            grunnlag.singleOrNull { it.eventName == eventName }
+        }
+
+    private val JsonMessage.grunnlagsformat
+        get() =
+            grunnlagsformatOrNull ?: error("Ukjent grunnlag for eventName ${eventNameOrNull ?: "mangler @event_name"}")
 }

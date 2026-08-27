@@ -24,8 +24,10 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.utboks.InMemoryUtboksDao
 import no.nav.helse.spleis.utboks.TestUtsender
 import no.nav.inntektsmeldingkontrakt.Periode
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -236,6 +238,20 @@ internal class MessageMediatorTest {
             fom = 7.januar,
         )
         assertEquals(forventet, hendelseMediator.lestEndretGrunnlagForBeregning)
+    }
+
+    @Test
+    fun `melding uten event name krasjer ikke i EndretGrunnlagForBeregningRiver`() {
+        assertDoesNotThrow {
+            testRapid.sendTestMessage(meldingsfabrikk.lagEndretGrunnlagForBeregningUtenEventName())
+        }
+        assertNull(hendelseMediator.lestEndretGrunnlagForBeregning)
+    }
+
+    @Test
+    fun `melding med annet event name ignoreres i precondition i EndretGrunnlagForBeregningRiver`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagEndretGrunnlagForBeregningMedUkjentEventName())
+        assertNull(hendelseMediator.lestEndretGrunnlagForBeregning)
     }
 
     @Test

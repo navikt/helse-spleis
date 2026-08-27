@@ -1605,6 +1605,28 @@ internal class TestMessageFactory(
         )
     )
 
+    internal fun lagEndretGrunnlagForBeregningUtenEventName(
+        fom: LocalDate = LocalDate.now().minusDays(1)
+    ) = nyHendelse(
+        "graderte_andre_ytelser_endret", mapOf(
+        "fødselsnummer" to fødselsnummer,
+        "fom" to fom.toString()
+    )
+    ).let { (id, json) ->
+        id to objectMapper.readTree(json).also {
+            (it as ObjectNode).remove("@event_name")
+        }.toString()
+    }
+
+    internal fun lagEndretGrunnlagForBeregningMedUkjentEventName(
+        fom: LocalDate = LocalDate.now().minusDays(1)
+    ) = nyHendelse(
+        "ukjent_endret_grunnlag", mapOf(
+        "fødselsnummer" to fødselsnummer,
+        "fom" to fom.toString()
+    )
+    )
+
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(navn, hendelse).let { it.id to it.toJson() }
 
