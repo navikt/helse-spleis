@@ -44,14 +44,14 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     @Test
     fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden`() {
         a1 {
-            nyttVedtak(førsteFraværsdag = 17.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar), periode = januar)
+            nyttVedtak(arbeidsgiverperiode = listOf(1.januar til 16.januar), periode = januar)
         }
     }
 
     @Test
     fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden over helg`() {
         a1 {
-            nyttVedtak(førsteFraværsdag = 22.januar, arbeidsgiverperiode = listOf(4.januar til 19.januar), periode = 4.januar til 31.januar)
+            nyttVedtak(arbeidsgiverperiode = listOf(4.januar til 19.januar), periode = 4.januar til 31.januar)
         }
     }
 
@@ -59,10 +59,10 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     fun `AI fjerner gammel IM - lager nytt innslag i vilkårsgrunnlaghistorikken med oppdaterte refusjonsopplysninger ved ny inntektsmelding`() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
-            nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
+            nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 22.januar, refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null), beregnetInntekt = INNTEKT * 1.1)
+            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = arbeidsgiverperiode, refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null), beregnetInntekt = INNTEKT * 1.1)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertBeløpstidslinje(
@@ -77,9 +77,9 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     fun `Duplikat innhold i ny inntektsmelding`() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
-            nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
+            nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
-            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null))
+            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = arbeidsgiverperiode, refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null))
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
@@ -126,7 +126,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 1.januar))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterArbeidsgiveropplysninger(listOf(), førsteFraværsdag = 1.januar)
+            håndterArbeidsgiveropplysninger(listOf())
         }
         a2 {
             håndterYtelser(2.vedtaksperiode)
@@ -149,7 +149,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 1.januar))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterArbeidsgiveropplysninger(listOf(1.desember(2017) til 16.desember(2017)), førsteFraværsdag = 2.januar)
+            håndterArbeidsgiveropplysninger(listOf(1.desember(2017) til 16.desember(2017)))
 
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)

@@ -156,13 +156,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             håndterSøknad(17.februar(2025) til 24.februar(2025))
             assertEquals(17.februar(2025) til 24.februar(2025), inspektør.periode(2.vedtaksperiode))
-            håndterSelvbestemtArbeidsgiveropplysninger(listOf(16.januar(2025) til 31.januar(2025)), førsteFraværsdag = 17.februar(2025))
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(16.januar(2025) til 31.januar(2025)))
             // Blir strukket en måned i snuten
             assertEquals(16.januar(2025) til 24.februar(2025), inspektør.periode(2.vedtaksperiode))
         }
         a2 {
             håndterArbeidsgiveropplysninger(listOf(16.januar(2025) til 31.januar(2025)))
-            håndterArbeidsgiveropplysninger(listOf(16.januar(2025) til 31.januar(2025)), førsteFraværsdag = 17.februar(2025), vedtaksperiodeId = 2.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(listOf(16.januar(2025) til 31.januar(2025)), vedtaksperiodeId = 2.vedtaksperiode)
             assertEquals(16.januar(2025), inspektør.skjæringstidspunkt(2.vedtaksperiode))
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             håndterYtelser(2.vedtaksperiode)
@@ -267,7 +267,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 14.mars))
-            håndterArbeidsgiveropplysninger(emptyList(), førsteFraværsdag = 15.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
+            håndterArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
             assertEquals(15.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
             assertEquals(listOf(15.mars, 1.januar), inspektør.skjæringstidspunkter(3.vedtaksperiode))
             assertVarsel(Varselkode.RV_IM_8, 3.vedtaksperiode.filter())
@@ -481,7 +481,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(7.januar til 22.januar), vedtaksperiodeId = 1.vedtaksperiode)
         }
         a2 {
-            håndterArbeidsgiveropplysninger(listOf(7.januar til 22.januar), førsteFraværsdag = 1.februar)
+            håndterArbeidsgiveropplysninger(listOf(7.januar til 22.januar))
             // denne inntektsmeldingen lagrer refusjonsopplysninger uten første fraværsdag. Uten denne IMen så er testen useless
             håndterKorrigerteArbeidsgiveropplysninger(listOf(7.januar til 22.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
             assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
@@ -591,7 +591,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             nyPeriode(1.januar til 16.januar)
             nyPeriode(20.januar til 31.januar)
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
@@ -697,7 +697,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         a2 {
             håndterSøknad(februar)
-            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT, id = a2Inntektsmelding)
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), beregnetInntekt = INNTEKT, id = a2Inntektsmelding)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1382,9 +1382,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { håndterSykmelding(22.januar til 31.januar) }
         a1 { håndterSøknad(20.januar til 31.januar) }
         a2 { håndterSøknad(22.januar til 31.januar) }
-        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, vedtaksperiodeId = 1.vedtaksperiode) }
+        a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode) }
         // Sender med en annen inntekt enn i forrige IM for å kunne asserte på at det er denne vi bruker
-        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, førsteFraværsdag = 22.januar, vedtaksperiodeId = 1.vedtaksperiode) }
+        a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, vedtaksperiodeId = 1.vedtaksperiode) }
         a1 { håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode) }
         a2 { håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig, vedtaksperiodeId = 1.vedtaksperiode) }
         a1 {
@@ -1660,7 +1660,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 {
             nyPeriode(30.januar til 31.januar)
             //Overlappende vedtaksperiode men med senere skjæringstidspunkt enn a1
-            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 30.januar)
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
         a1 {

@@ -63,8 +63,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a1 { håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent)) }
         a2 {
             håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
-            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), beregnetInntekt = INNTEKT * 1.1, førsteFraværsdag = 1.februar)
-            håndterKorrigerteArbeidsgiveropplysninger(emptyList(), beregnetInntekt = INNTEKT * 1.2, førsteFraværsdag = 25.januar)
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), beregnetInntekt = INNTEKT * 1.1)
+            håndterKorrigerteArbeidsgiveropplysninger(emptyList(), beregnetInntekt = INNTEKT * 1.2)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
         a1 {
@@ -255,14 +255,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a2 { håndterSøknad(Sykdom(5.mars, 31.mars, 100.prosent)) }
         a1 {
             håndterArbeidsgiveropplysninger(
-                listOf(28.februar til 15.mars),
-                førsteFraværsdag = 28.februar
+                listOf(28.februar til 15.mars)
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(5.mars til 20.mars),
-                førsteFraværsdag = 5.mars,
                 beregnetInntekt = INNTEKT
             )
         }
@@ -330,14 +328,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a2 { håndterSøknad(Sykdom(5.mars, 31.mars, 100.prosent)) }
         a1 {
             håndterArbeidsgiveropplysninger(
-                listOf(28.februar til 15.mars),
-                førsteFraværsdag = 28.februar
+                listOf(28.februar til 15.mars)
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(5.mars til 20.mars),
-                førsteFraværsdag = 5.mars,
                 beregnetInntekt = INNTEKT
             )
         }
@@ -370,14 +366,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(28.februar til 15.mars),
-                førsteFraværsdag = 28.februar,
                 beregnetInntekt = 10000.månedlig
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(5.mars til 20.mars),
-                førsteFraværsdag = 5.mars,
                 beregnetInntekt = 20000.månedlig
             )
         }
@@ -417,14 +411,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(28.februar til 15.mars),
-                førsteFraværsdag = 28.februar,
                 beregnetInntekt = 30000.månedlig
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(5.mars til 20.mars),
-                førsteFraværsdag = 5.mars,
                 beregnetInntekt = 40000.månedlig
             )
         }
@@ -466,14 +458,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(28.februar til 15.mars),
-                førsteFraværsdag = 28.februar,
                 beregnetInntekt = 30000.månedlig
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(5.mars til 20.mars),
-                førsteFraværsdag = 5.mars,
                 beregnetInntekt = 40000.månedlig
             )
         }
@@ -620,14 +610,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(28.februar til 15.mars),
-                førsteFraværsdag = 28.februar,
                 beregnetInntekt = 30000.månedlig
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(5.mars til 20.mars),
-                førsteFraværsdag = 5.mars,
                 beregnetInntekt = 40000.månedlig
             )
         }
@@ -1031,14 +1019,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                førsteFraværsdag = 1.mars,
                 beregnetInntekt = 10000.månedlig
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(4.mars til 19.mars),
-                førsteFraværsdag = 4.mars,
                 beregnetInntekt = 19000.månedlig
             )
         }
@@ -1088,14 +1074,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(28.februar til 15.mars),
-                førsteFraværsdag = 28.februar,
                 beregnetInntekt = 30000.månedlig
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(20.mars til 4.april),
-                førsteFraværsdag = 20.mars,
                 beregnetInntekt = 40000.månedlig
             )
         }
@@ -1135,14 +1119,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(28.februar til 15.mars),
-                førsteFraværsdag = 28.februar,
                 beregnetInntekt = 30000.månedlig
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(20.mars til 4.april),
-                førsteFraværsdag = 20.mars,
                 beregnetInntekt = 40000.månedlig
             )
         }
@@ -1268,8 +1250,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
             håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
-                førsteFraværsdag = 21.januar
+                listOf(1.januar til 16.januar)
             )
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1279,7 +1260,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
             håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                førsteFraværsdag = 22.januar,
                 beregnetInntekt = 32000.månedlig
             )
         }

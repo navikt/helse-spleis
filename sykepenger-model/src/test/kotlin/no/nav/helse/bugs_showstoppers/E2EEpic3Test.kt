@@ -32,7 +32,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
@@ -825,8 +824,7 @@ internal class E2EEpic3Test : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(9.juli, 31.juli))
             håndterSøknad(Sykdom(9.juli, 31.juli, 100.prosent))
             håndterArbeidsgiveropplysninger(
-                listOf(Periode(1.juni, 16.juni)),
-                førsteFraværsdag = 9.juli
+                listOf(Periode(1.juni, 16.juni))
             )
 
             inspektør.also {

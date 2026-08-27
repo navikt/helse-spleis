@@ -109,7 +109,7 @@ internal class FrilanserTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT, a2 to 1000.månedlig),
@@ -134,7 +134,6 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterSøknad(mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                førsteFraværsdag = 1.mars,
                 beregnetInntekt = 10000.månedlig
             )
             håndterVilkårsgrunnlag(
@@ -156,7 +155,7 @@ internal class FrilanserTest : AbstractDslTest() {
             val periode = januar
             håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
             håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

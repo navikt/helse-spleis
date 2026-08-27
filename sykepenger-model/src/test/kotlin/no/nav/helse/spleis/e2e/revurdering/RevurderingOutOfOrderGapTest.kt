@@ -197,7 +197,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             nyPeriode(10.februar til 28.februar)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                førsteFraværsdag = 10.februar,
                 vedtaksperiodeId = 3.vedtaksperiode
             )
             håndterYtelser(1.vedtaksperiode)
@@ -437,8 +436,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
 
             nyPeriode(29.januar til 15.februar)
             håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
-                førsteFraværsdag = 29.januar
+                listOf(1.januar til 16.januar)
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -927,7 +925,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
-                førsteFraværsdag = 1.mars,
                 vedtaksperiodeId = 1.vedtaksperiode
             )
 
@@ -1062,7 +1059,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
-                førsteFraværsdag = 1.mars,
                 vedtaksperiodeId = 1.vedtaksperiode
             )
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)

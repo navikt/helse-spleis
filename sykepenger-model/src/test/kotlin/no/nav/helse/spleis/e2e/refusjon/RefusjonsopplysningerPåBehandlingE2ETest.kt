@@ -416,7 +416,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
             håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 1.januar,
                 refusjon = Refusjon(
                     beløp = INNTEKT / 2,
                     opphørsdato = null
@@ -446,7 +445,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
             håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 1.januar,
                 refusjon = Refusjon(beløp = INNTEKT / 2, opphørsdato = 30.april),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
@@ -471,7 +469,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             håndterOverstyrTidslinje(februar.map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT * 1.1)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
             // korrigerende AGP setter i gang en revurdering av januar som må kjøres ferdig først
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -484,7 +482,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INNTEKT * 1.1)
 
-            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Refusjon(INGEN, null))
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), refusjon = Refusjon(INGEN, null))
             assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INNTEKT)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 1.februar til 31.mars, INGEN)
@@ -518,7 +516,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Refusjon(INGEN, null), vedtaksperiodeId = 1.vedtaksperiode)
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), refusjon = Refusjon(INGEN, null), vedtaksperiodeId = 1.vedtaksperiode)
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, INGEN)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, februar, INNTEKT)
 
@@ -1205,7 +1203,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                førsteFraværsdag = 20.januar,
                 refusjon = Refusjon(INNTEKT / 2, null),
                 beregnetInntekt = INNTEKT * 1.1
             )
@@ -1228,7 +1225,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
         val im = håndterArbeidsgiveropplysninger(
             arbeidsgiverperiode,
             INNTEKT,
-            førsteFraværsdag = periode.start,
             mottatt = tidsstempel,
             refusjon = Refusjon(INNTEKT, opphørsdato = opphørAvRefusjon, endringerIRefusjon = endringerIRefusjon)
         )

@@ -400,7 +400,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
 
         håndterArbeidsgiveropplysninger(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 31.januar,
             beregnetInntekt = INNTEKT
         )
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
@@ -614,8 +613,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         håndterArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
         håndterKorrigerteArbeidsgiveropplysninger(
             listOf(10.januar til 25.januar),
-            beregnetInntekt = INNTEKT,
-            førsteFraværsdag = 30.januar
+            beregnetInntekt = INNTEKT
         )
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
@@ -638,8 +636,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         nullstillTilstandsendringer()
         håndterArbeidsgiveropplysninger(
             listOf(10.januar til 25.januar),
-            beregnetInntekt = INNTEKT,
-            førsteFraværsdag = 30.januar
+            beregnetInntekt = INNTEKT
         )
         håndterKorrigerteArbeidsgiveropplysninger(
             listOf(10.januar til 25.januar),

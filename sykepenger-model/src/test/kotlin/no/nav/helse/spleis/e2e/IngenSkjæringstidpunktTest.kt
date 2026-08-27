@@ -19,7 +19,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -200,7 +199,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
             håndterSykmelding(Sykmeldingsperiode(24.februar, 12.mars))
             håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterSøknad(Sykdom(24.februar, 12.mars, 100.prosent))
 
             assertEquals(januar, inspektør.periode(1.vedtaksperiode))

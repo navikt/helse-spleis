@@ -121,7 +121,6 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                førsteFraværsdag = 1.mars,
                 refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
@@ -147,7 +146,6 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 1.mars,
                 refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null),
                 vedtaksperiodeId = 1.vedtaksperiode
             )
@@ -415,7 +413,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
         }
         a2 {
-            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar))
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)

@@ -408,7 +408,6 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterSøknad(august)
             håndterArbeidsgiveropplysninger(
                 listOf(1.juni til 16.juni),
-                førsteFraværsdag = 1.august,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
                 vedtaksperiodeId = 2.vedtaksperiode
             )

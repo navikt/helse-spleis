@@ -9,7 +9,6 @@ import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.erHelg
 import no.nav.helse.februar
@@ -820,8 +819,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             nyPeriode(5.februar til 28.februar)
             val im2 = håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT,
-                førsteFraværsdag = 7.februar
+                beregnetInntekt = INNTEKT
             )
             // korrigerende AGP setter i gang en revurdering av januar som må kjøres ferdig først
             håndterYtelser(1.vedtaksperiode)

@@ -994,7 +994,6 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSelvbestemtArbeidsgiveropplysninger(
                 emptyList(),
-                førsteFraværsdag = 1.januar,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
             )
             assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())

@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -34,7 +33,7 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
     fun `kan forkaste auu når force-flagget er satt`() {
         a1 {
             håndterSøknad(1.januar til 16.januar)
-            nyttVedtak(17.januar til 31.januar, førsteFraværsdag = 1.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            nyttVedtak(17.januar til 31.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
             håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
             assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING)

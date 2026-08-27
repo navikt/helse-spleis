@@ -12,7 +12,6 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
@@ -987,8 +986,7 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
                     sendtTilNAVEllerArbeidsgiver = 31.januar(2019)
                 )
                 håndterArbeidsgiveropplysninger(
-                    listOf(Periode(1.januar(2018), 16.januar(2018))),
-                    førsteFraværsdag = 1.januar(2019)
+                    listOf(Periode(1.januar(2018), 16.januar(2018)))
                 )
                 håndterVilkårsgrunnlag(2.vedtaksperiode)
                 håndterYtelser(2.vedtaksperiode)
@@ -2272,8 +2270,7 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
             håndterSøknad(2.februar til 28.februar)
             håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
-                førsteFraværsdag = 2.februar
+                listOf(1.januar til 16.januar)
             )
 
             håndterYtelser(1.vedtaksperiode)
@@ -2404,8 +2401,7 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
             håndterSøknad(2.februar til 28.februar)
             håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
-                førsteFraværsdag = 2.februar
+                listOf(1.januar til 16.januar)
             )
 
             håndterYtelser(1.vedtaksperiode)

@@ -51,7 +51,6 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
         a1 {
             håndterSøknad(mandag den 22.januar til 15.februar)
             håndterArbeidsgiveropplysninger(
-                førsteFraværsdag = 22.januar,
                 arbeidsgiverperioder = listOf(torsdag den 4.januar til fredag den 19.januar),
                 beregnetInntekt = INNTEKT
             )
@@ -84,7 +83,7 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
     fun `AI fjerner gammel IM - Egenmeldingsdager fra sykmelding møter begrunnelseForReduksjonEllerIkkeUtbetalt`() {
         a1 {
             håndterSøknad(Sykdom(9.mars, 14.mars, 100.prosent), egenmeldinger = listOf(2.mars til 3.mars))
-            håndterSelvbestemtArbeidsgiveropplysninger(listOf(2.januar til 17.januar), førsteFraværsdag = 2.mars, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(2.januar til 17.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
 
             observatør.vedtaksperiodeVenter.last().let {
                 assertEquals("UUUUGG UUUUUGG UUU???? ??????? ??????? ??????? ??????? ??????? ??????? ????SHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
@@ -128,7 +127,7 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
             assertEquals(17.september til 19.september, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
             assertEquals("SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
 
-            håndterArbeidsgiveropplysninger(listOf(20.august til 4.september), førsteFraværsdag = 17.september)
+            håndterArbeidsgiveropplysninger(listOf(20.august til 4.september))
 
             assertEquals(4.september til 19.september, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
             assertEquals("U????? ??????? SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())

@@ -88,7 +88,7 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 9.januar), listOf(1.januar til 2.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 15.januar, listOf(1.januar til 9.januar, 14.januar til 20.januar), listOf(14.januar til 14.januar))
 
-            håndterArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 15.januar)
+            håndterArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList())
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 9.januar, 15.januar til 23.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 15.januar, listOf(3.januar til 9.januar, 15.januar til 23.januar))

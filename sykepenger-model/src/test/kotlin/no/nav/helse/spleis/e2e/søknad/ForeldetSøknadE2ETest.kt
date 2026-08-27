@@ -136,8 +136,7 @@ internal class ForeldetSøknadE2ETest : AbstractDslTest() {
             // foreldet søknad :(
             håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
             håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
-                førsteFraværsdag = 24.januar
+                listOf(1.januar til 16.januar)
             )
 
             håndterYtelser(1.vedtaksperiode)

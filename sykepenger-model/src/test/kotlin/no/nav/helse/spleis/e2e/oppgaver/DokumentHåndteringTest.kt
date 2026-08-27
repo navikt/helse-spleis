@@ -152,8 +152,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
             håndterSelvbestemtArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
-                førsteFraværsdag = 20.januar
+                listOf(1.januar til 16.januar)
             )
             assertEquals(emptyList<Any>(), observatør.inntektsmeldingFørSøknad)
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
@@ -181,7 +180,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
-            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertEquals(emptyList<Any>(), observatør.inntektsmeldingFørSøknad)
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
@@ -194,7 +193,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(17.januar, 31.januar), søknadId = søknadId)
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-            val id = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+            val id = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
 
             assertEquals(id to 1.vedtaksperiode, observatør.inntektsmeldingHåndtert.single())
             assertEquals(setOf(søknadId, id), inspektør.hendelseIder(1.vedtaksperiode))
@@ -235,8 +234,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             val søknad = MeldingsreferanseId(søknadId)
             val im = MeldingsreferanseId(
                 håndterArbeidsgiveropplysninger(
-                    listOf(1.januar til 16.januar),
-                    førsteFraværsdag = 10.februar
+                    listOf(1.januar til 16.januar)
                 )
             )
             assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
@@ -284,7 +282,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), søknadId = søknadId)
             håndterSykmelding(Sykmeldingsperiode(11.januar, 20.januar))
-            val im = håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+            val im = håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
             assertEquals(emptyList<UUID>(), observatør.inntektsmeldingFørSøknad.map { it.inntektsmeldingId })
@@ -597,8 +595,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
             val im = håndterArbeidsgiveropplysninger(
-                listOf(Periode(3.januar, 18.januar)),
-                førsteFraværsdag = 27.januar
+                listOf(Periode(3.januar, 18.januar))
             )
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertTrue(im in observatør.inntektsmeldingHåndtert.map(Pair<UUID, *>::first))

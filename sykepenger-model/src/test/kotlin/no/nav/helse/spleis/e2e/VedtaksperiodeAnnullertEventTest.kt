@@ -76,7 +76,6 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
             håndterSøknad(mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                førsteFraværsdag = 1.mars,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
                 vedtaksperiodeId = 2.vedtaksperiode
             )

@@ -45,8 +45,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
 
             nyPeriode(22.januar til 31.januar, a1)
             håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 22.januar
+                arbeidsgiverperioder = listOf(1.januar til 16.januar)
             )
 
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -54,7 +53,6 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 1.januar,
                 vedtaksperiodeId = 1.vedtaksperiode
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -126,8 +124,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             håndterSøknad(31.januar til 5.februar)
             // perioden 4. til 9.januar er paddet arbeidsdager; perioden 23.januar til 30.januar er "implisitte arbeidsdager" (ukjentdager på sykdomtsidslinjen)
             håndterSelvbestemtArbeidsgiveropplysninger(
-                listOf(1.januar til 3.januar, 10.januar til 22.januar),
-                førsteFraværsdag = 31.januar
+                listOf(1.januar til 3.januar, 10.januar til 22.januar)
             )
             assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)

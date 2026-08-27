@@ -23,7 +23,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -262,7 +261,6 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.august, 31.august, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.juni til 16.juni),
-                førsteFraværsdag = 1.august,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
             )
             assertVarsler(listOf(RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())

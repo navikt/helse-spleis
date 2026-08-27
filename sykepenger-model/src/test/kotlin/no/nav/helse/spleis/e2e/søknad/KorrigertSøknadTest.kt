@@ -17,7 +17,6 @@ import no.nav.helse.november
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -83,7 +82,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
             forlengVedtak(mars)
 
             håndterSøknad(10.april til 30.april)
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 10.april, vedtaksperiodeId = 4.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 4.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)

@@ -50,8 +50,7 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode
             )
             val inntektsmelding2Id = håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-                førsteFraværsdag = 5.april
+                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar))
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -122,7 +121,6 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(Periode(18.januar, 1.februar)),
-                førsteFraværsdag = 4.mars,
                 vedtaksperiodeId = 1.vedtaksperiode
             )
 

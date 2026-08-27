@@ -103,7 +103,7 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
     fun `oppdaterer skjæringstidspunkt på senere vedtak ved overstyring av tidligere auu`() {
         a1 {
             håndterSøknad(1.januar til 16.januar)
-            nyttVedtak(17.januar til 31.januar, førsteFraværsdag = 1.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            nyttVedtak(17.januar til 31.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
 
             håndterOverstyrTidslinje(listOf(manuellArbeidsdag(1.januar)))
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))

@@ -116,7 +116,6 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSelvbestemtArbeidsgiveropplysninger(
                 emptyList(),
-                førsteFraværsdag = 1.januar,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "BetvilerArbeidsufoerhet"
             )
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())

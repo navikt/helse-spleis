@@ -602,7 +602,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSykmelding(Sykmeldingsperiode(10.februar, 10.mars))
             håndterSøknad(Sykdom(10.februar, 10.mars, 100.prosent))
             observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class)
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, 10.februar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         }
         a2 {
             håndterArbeidsgiveropplysninger(listOf(25.januar til 9.februar), beregnetInntekt = INNTEKT)

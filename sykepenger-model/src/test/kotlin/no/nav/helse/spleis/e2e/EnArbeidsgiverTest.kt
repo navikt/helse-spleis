@@ -18,7 +18,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
-import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -51,8 +50,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterSøknad(25.juni til 5.juli)
             håndterSøknad(31.juli til 18.august)
             håndterArbeidsgiveropplysninger(
-                listOf(25.juni til 5.juli, 8.juli til 12.juli),
-                førsteFraværsdag = 1.august
+                listOf(25.juni til 5.juli, 8.juli til 12.juli)
             )
 
             assertEquals(6.juli til 18.august, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
@@ -62,7 +60,6 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
 
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(25.juni til 5.juli, 8.juli til 12.juli),
-                førsteFraværsdag = 7.august,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
             )
 
@@ -572,8 +569,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
                 utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 10.februar))
             )
             håndterKorrigerteArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
-                førsteFraværsdag = 20.februar
+                listOf(1.januar til 16.januar)
             )
             håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
             håndterSøknad(20.februar til 28.februar)

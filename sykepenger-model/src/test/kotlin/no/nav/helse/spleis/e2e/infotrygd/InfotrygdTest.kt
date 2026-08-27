@@ -205,7 +205,7 @@ internal class InfotrygdTest : AbstractDslTest() {
 
             håndterSøknad(4.juni til 6.juni)
             assertSisteTilstand(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), førsteFraværsdag = 4.juni, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             assertVarsel(RV_AO_3, 4.vedtaksperiode.filter())
             assertVarsel(RV_IM_8, 4.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(4.vedtaksperiode)

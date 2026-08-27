@@ -395,8 +395,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
         }
         a2 {
             håndterArbeidsgiveropplysninger(
-                listOf(2.januar til 17.januar),
-                førsteFraværsdag = 20.januar
+                listOf(2.januar til 17.januar)
             )
         }
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING) }
@@ -782,14 +781,14 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
     fun `får tidligere sykmelding og søknad for en annen arbeidsgiver`() {
         a1 {
             nyPeriode(februar, a1)
-            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), INNTEKT, 1.februar)
+            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
         }
         a2 {
             nyPeriode(januar, a2)
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), INNTEKT, 1.januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), INNTEKT)
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

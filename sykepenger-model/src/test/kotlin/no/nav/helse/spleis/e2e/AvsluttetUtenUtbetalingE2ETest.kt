@@ -163,8 +163,7 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
                     // 6. og 7. januar er helg
                     8.januar til 12.januar,// 5
                     13.januar til 18.januar // 6
-                ),
-                førsteFraværsdag = 8.januar
+                )
             )
             assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)

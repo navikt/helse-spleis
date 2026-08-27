@@ -475,8 +475,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         }
         val korrigerendeInntektsmelding = a2 {
             håndterKorrigerteArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(1.februar til 16.februar),
-                førsteFraværsdag = 20.februar
+                arbeidsgiverperioder = listOf(1.februar til 16.februar)
             )
         }
         a1 {
@@ -515,7 +514,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(26.mars, 10.april, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                førsteFraværsdag = 26.mars,
                 refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
                 vedtaksperiodeId = 2.vedtaksperiode
             )
@@ -938,7 +936,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(16.mars til 31.mars),
-                førsteFraværsdag = 16.mars,
                 refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList())
             )
         }

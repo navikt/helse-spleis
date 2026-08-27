@@ -10,7 +10,6 @@ import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -470,7 +469,7 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             nyPeriode(mars, a1)
-            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT, 1.mars)
+            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -641,7 +640,7 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
     fun `periode til utbetaling blir overstyrt`() {
         a1 {
             nyPeriode(januar, a1)
-            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT, 1.januar)
+            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -683,7 +682,7 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
             nyPeriode(mars, a1)
-            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT, 1.mars)
+            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
@@ -707,7 +706,7 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
             nyPeriode(mars, a1)
-            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT, 1.mars)
+            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

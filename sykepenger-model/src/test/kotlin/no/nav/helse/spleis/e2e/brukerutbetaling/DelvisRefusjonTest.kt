@@ -751,8 +751,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterSøknad(januar)
             val inntektsmeldingId = håndterArbeidsgiveropplysninger(
-                listOf(),
-                førsteFraværsdag = 17.januar
+                listOf()
             )
 
 
@@ -773,7 +772,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
 
-            håndterKorrigerteArbeidsgiveropplysninger(emptyList(), førsteFraværsdag = 1.januar)
+            håndterKorrigerteArbeidsgiveropplysninger(emptyList())
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)

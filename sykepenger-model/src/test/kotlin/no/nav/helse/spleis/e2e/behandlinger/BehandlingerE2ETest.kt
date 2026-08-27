@@ -35,7 +35,6 @@ import no.nav.helse.person.BehandlingView.TilstandView
 import no.nav.helse.person.BehandlingView.TilstandView.ANNULLERT_PERIODE
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST
-import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_OMGJØRING
 import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_REVURDERING
 import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_FATTET
 import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_IVERKSATT
@@ -51,7 +50,6 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PER
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.START
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
@@ -74,7 +72,6 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 16.januar til 21.januar))
             val korrigertIm = håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(),
-                førsteFraværsdag = 10.januar,
                 beregnetInntekt = INNTEKT * 1.1,
                 refusjon = Inntektsmelding.Refusjon(INGEN, null)
             )
@@ -99,7 +96,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.mars, 16.mars, 100.prosent))
             nullstillTilstandsendringer()
-            val inntektsmeldingId = håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars)
+            val inntektsmeldingId = håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
@@ -428,7 +425,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
-            val inntektsmeldingId = MeldingsreferanseId(håndterKorrigerteArbeidsgiveropplysninger(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars, vedtaksperiodeId = 1.vedtaksperiode))
+            val inntektsmeldingId = MeldingsreferanseId(håndterKorrigerteArbeidsgiveropplysninger(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode))
             assertFalse(inntektsmeldingId.id in observatør.inntektsmeldingIkkeHåndtert)
             assertTrue(inntektsmeldingId.id in observatør.inntektsmeldingHåndtert.map { it.first })
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
@@ -498,7 +495,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
-            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), førsteFraværsdag = 2.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             assertEquals(listOf(2.januar til 17.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
         }
@@ -572,7 +569,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     fun `AI fjerner gammel IM - korrigert søknad på kort periode som har hatt beregnet utbetaling`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 15.januar))
-            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -772,7 +769,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     fun `AI fjerner gammel IM - korrigert inntektsmelding med hullete agp og begrunnelseForReduksjonEllerIkkeUtbetalt`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-            nyttVedtak(15.januar til 25.januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 20.januar), førsteFraværsdag = 15.januar)
+            nyttVedtak(15.januar til 25.januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 20.januar))
 
             val inntektsmeldingId = håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 10.januar, 15.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
 

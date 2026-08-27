@@ -295,7 +295,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
             håndterArbeidsgiveropplysninger(
-                førsteFraværsdag = 1.januar,
                 arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
                 beregnetInntekt = INNTEKT
             )
@@ -321,8 +320,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(4.januar til 19.januar),
-                beregnetInntekt = INNTEKT,
-                førsteFraværsdag = 24.januar
+                beregnetInntekt = INNTEKT
             )
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)

@@ -193,9 +193,12 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             forlengVedtak(21.januar til 31.januar)
             forlengVedtak(februar)
             forlengVedtak(mars)
-            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.mars, beregnetInntekt = INNTEKT * 1.20, vedtaksperiodeId = 1.vedtaksperiode)
-            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 21.januar, beregnetInntekt = INNTEKT * 1.10, vedtaksperiodeId = 1.vedtaksperiode)
-            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT * 1.15, vedtaksperiodeId = 1.vedtaksperiode)
+            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(),
+                beregnetInntekt = INNTEKT * 1.20, vedtaksperiodeId = 1.vedtaksperiode)
+            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(),
+                beregnetInntekt = INNTEKT * 1.10, vedtaksperiodeId = 1.vedtaksperiode)
+            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(),
+                beregnetInntekt = INNTEKT * 1.15, vedtaksperiodeId = 1.vedtaksperiode)
 
             assertEquals(INNTEKT * 1.15, faktaavvklartArbeidstakerBeløp(1.vedtaksperiode))
             assertEquals(INNTEKT * 1.05, faktaavvklartArbeidstakerBeløp(2.vedtaksperiode))

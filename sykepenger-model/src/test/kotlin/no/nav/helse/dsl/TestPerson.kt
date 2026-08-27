@@ -268,7 +268,6 @@ internal class TestPerson(
         internal fun håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder: List<Periode>,
             beregnetInntekt: Inntekt = INNTEKT,
-            førsteFraværsdag: LocalDate = LocalDate.MAX, // Tøsete parameter for å kune bytte fra håndterInntektsmelding bare med navnskifte
             refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
             opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
@@ -296,7 +295,6 @@ internal class TestPerson(
         internal fun håndterKorrigerteArbeidsgiveropplysninger(
             arbeidsgiverperioder: List<Periode>,
             beregnetInntekt: Inntekt = INNTEKT,
-            førsteFraværsdag: LocalDate = LocalDate.MAX, // Tøsete parameter for å kune bytte fra håndterInntektsmelding bare med navnskifte
             refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
             opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
@@ -324,7 +322,6 @@ internal class TestPerson(
         internal fun håndterSelvbestemtArbeidsgiveropplysninger(
             arbeidsgiverperioder: List<Periode>,
             beregnetInntekt: Inntekt = INNTEKT,
-            førsteFraværsdag: LocalDate = LocalDate.MAX, // Tøsete parameter for å kune bytte fra håndterInntektsmelding bare med navnskifte
             refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
             opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
@@ -1030,7 +1027,6 @@ internal fun standardSimuleringsresultat(orgnummer: String) = SimuleringResultat
 internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
     periode: Periode,
     grad: Prosentdel = 100.prosent,
-    førsteFraværsdag: LocalDate = periode.start,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode> = emptyList(),
@@ -1038,7 +1034,7 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
 ): UUID {
     val arbeidsgivere = listOf(this.orgnummer) + ghosts
     val vedtaksperiode = nyPeriode(periode, grad)
-    håndterArbeidsgiveropplysninger(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
+    håndterArbeidsgiveropplysninger(arbeidsgiverperiode, beregnetInntekt, refusjon)
     håndterVilkårsgrunnlagFlereArbeidsgivere(vedtaksperiode, *arbeidsgivere.toTypedArray())
     håndterYtelser(vedtaksperiode)
     håndterSimulering(vedtaksperiode)
@@ -1058,14 +1054,13 @@ internal fun TestPerson.TestArbeidsgiver.forlengelseTilGodkjenning(
 internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     periode: Periode,
     grad: Prosentdel = 100.prosent,
-    førsteFraværsdag: LocalDate = periode.start,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode> = emptyList(),
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     ghosts: List<String> = emptyList()
 ) {
-    val vedtaksperiode = tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, ghosts)
+    val vedtaksperiode = tilGodkjenning(periode, grad, beregnetInntekt, refusjon, arbeidsgiverperiode, ghosts)
     håndterUtbetalingsgodkjenning(vedtaksperiode)
     håndterUtbetalt(status)
 }
