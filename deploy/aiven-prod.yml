@@ -212,3 +212,6 @@ spec:
         - team: tbd
           application: sp-forsikring
           access: readwrite
+        - team: tbd
+          application: sp-vilkarsproving
+          access: readwrite
