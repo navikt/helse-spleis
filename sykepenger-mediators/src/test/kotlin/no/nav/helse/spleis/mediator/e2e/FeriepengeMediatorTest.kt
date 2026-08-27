@@ -26,9 +26,8 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(
-            listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
-            førsteFraværsdag = 1.juni(2020)
+        sendNavNoInntektsmelding(
+            listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020)))
         )
         sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelser(0)
@@ -87,9 +86,8 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(
-            listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
-            førsteFraværsdag = 1.juni(2020)
+        sendNavNoInntektsmelding(
+            listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020)))
         )
         sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelser(0)
@@ -162,9 +160,8 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(
-            listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
-            førsteFraværsdag = 1.juni(2020)
+        sendNavNoInntektsmelding(
+            listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020)))
         )
         sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelser(0)
@@ -237,9 +234,8 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(
-            listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
-            førsteFraværsdag = 1.juni(2020)
+        sendNavNoInntektsmelding(
+            listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020)))
         )
         sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelser(0)

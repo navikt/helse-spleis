@@ -18,7 +18,7 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
         assertAntallOgSisteÅrsak(0)
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         assertAntallOgSisteÅrsak(3, "INNTEKTSMELDING")
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         assertAntallOgSisteÅrsak(4, "VILKÅRSPRØVING")
         sendVilkårsgrunnlag(0)
         assertAntallOgSisteÅrsak(5, "BEREGNING")
@@ -33,22 +33,10 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `unngår å sende unødvendig vedtaksperiode venter når replay treffer`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
-        sendInntektsmelding(listOf(Periode(fom = 1.februar, tom = 16.februar)), førsteFraværsdag = 2.januar)
-        sendInntektsmelding(listOf(Periode(fom = 1.mars, tom = 16.mars)), førsteFraværsdag = 3.januar)
-        assertAntallOgSisteÅrsak(0)
-        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)))
-        assertAntallOgSisteÅrsak(3, "VILKÅRSPRØVING")
-        sendVilkårsgrunnlag(0)
-        assertAntallOgSisteÅrsak(4, "BEREGNING")
-    }
-
-    @Test
     fun `replay som bommer på person som allerede har Infotrygdhistorikk`() {
         nyttVedtakJanuar()
         val antallVedtaksperiodeVenter = vedtaksperiodeVenter.size
-        sendInntektsmelding(listOf(Periode(fom = 1.februar, tom = 16.februar)), førsteFraværsdag = 1.februar)
+        sendNavNoInntektsmelding(listOf(Periode(fom = 1.februar, tom = 16.februar)))
         assertAntallOgSisteÅrsak(antallVedtaksperiodeVenter)
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
         assertAntallOgSisteÅrsak(antallVedtaksperiodeVenter)
@@ -69,7 +57,7 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
     private fun nyttVedtakJanuar() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendNavNoInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)))
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, OK)

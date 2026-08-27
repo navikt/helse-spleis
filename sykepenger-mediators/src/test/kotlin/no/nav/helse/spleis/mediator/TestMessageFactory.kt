@@ -559,28 +559,6 @@ internal class TestMessageFactory(
         arsakTilInnsending = ArsakTilInnsending.valueOf(årsakTilInnsending)
     )
 
-    fun lagLpsInntektsmelding(
-        arbeidsgiverperiode: List<Periode>,
-        førsteFraværsdag: LocalDate,
-        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
-        beregnetInntekt: Double = inntekt,
-        opphørsdatoForRefusjon: LocalDate? = null,
-        orgnummer: String = organisasjonsnummer,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-    ) = nyHendelse(
-        "inntektsmelding", lagInntektsmelding(
-        arbeidsgiverperiode,
-        førsteFraværsdag,
-        opphørAvNaturalytelser,
-        beregnetInntekt,
-        orgnummer,
-        opphørsdatoForRefusjon,
-        begrunnelseForReduksjonEllerIkkeUtbetalt,
-        AvsenderSystem("LPS", "V1.0"),
-        null
-    ).toMapMedFelterFraSpedisjon(fødselsdato)
-    )
-
     fun lagNavNoInntektsmelding(
         arbeidsgiverperiode: List<Periode>,
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),

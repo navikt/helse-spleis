@@ -45,17 +45,6 @@ internal class MessageMediatorTest {
     }
 
     @Test
-    fun LPSinntektsmeldinger() {
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagLpsInntektsmelding(
-                listOf(Periode(LocalDate.now(), LocalDate.now())),
-                LocalDate.now()
-            )
-        )
-        assertTrue(hendelseMediator.lestInntektsmelding)
-    }
-
-    @Test
     fun `NavNo inntektsmeldinger`() {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagNavNoInntektsmelding(

@@ -46,7 +46,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
         assertVedtaksperiodeBehov(
             behov,
@@ -114,7 +114,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         val utbetalinghistorikkbehov = testRapid.inspektør.meldinger("behov").last()
         assertVedtaksperiodeBehov(utbetalinghistorikkbehov, Sykepengehistorikk)
         assertSykepengehistorikkdetaljer(utbetalinghistorikkbehov)
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
         val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
         assertVedtaksperiodeBehov(
@@ -148,7 +148,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         val utbetalinghistorikkbehov = testRapid.inspektør.meldinger("behov").last()
         assertVedtaksperiodeBehov(utbetalinghistorikkbehov, Sykepengehistorikk)
         assertSykepengehistorikkdetaljer(utbetalinghistorikkbehov)
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
         val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
         val forventedeTyper = listOf(
@@ -177,7 +177,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         val behov = testRapid.inspektør.etterspurteBehov(Simulering)
@@ -220,7 +220,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -235,7 +235,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -251,7 +251,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)

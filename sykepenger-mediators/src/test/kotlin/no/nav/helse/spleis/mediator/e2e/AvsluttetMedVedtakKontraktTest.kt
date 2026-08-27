@@ -25,9 +25,8 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         val søknadId = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        val (inntektsmeldingId, _) = sendInntektsmelding(
-            listOf(Periode(fom = 3.januar, tom = 18.januar)),
-            førsteFraværsdag = 3.januar
+        val (inntektsmeldingId, _) = sendNavNoInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar))
         )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -72,9 +71,8 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         val søknadId = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        val (inntektsmeldingId, _) = sendInntektsmelding(
+        val (inntektsmeldingId, _) = sendNavNoInntektsmelding(
             listOf(Periode(fom = 3.januar, tom = 18.januar)),
-            førsteFraværsdag = 3.januar,
             beregnetInntekt = 45000.00
         )
         sendVilkårsgrunnlag(0)
@@ -153,7 +151,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        val (innteksmeldingId, _) = sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        val (innteksmeldingId, _) = sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)

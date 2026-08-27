@@ -36,6 +36,7 @@ import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as Hendelseperiode
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -407,32 +408,43 @@ internal abstract class AbstractEndToEndMediatorTest {
         }
     }
 
-    protected fun sendInntektsmelding(
-        arbeidsgiverperiode: List<Periode>,
-        førsteFraværsdag: LocalDate,
-        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
-        beregnetInntekt: Double = INNTEKT,
-        opphørsdatoForRefusjon: LocalDate? = null,
-        orgnummer: String = ORGNUMMER,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
-    ): Pair<UUID, String> {
-        return meldingsfabrikk.lagLpsInntektsmelding(
-            arbeidsgiverperiode,
-            førsteFraværsdag,
-            opphørAvNaturalytelser,
-            beregnetInntekt,
-            opphørsdatoForRefusjon,
-            orgnummer,
-            begrunnelseForReduksjonEllerIkkeUtbetalt,
-        ).let { (id, message) ->
-            testRapid.sendTestMessage(message)
-            id.toUUID() to message
+    protected sealed interface VedtaksperiodeUtfisker {
+        fun vedtaksperiodeId(testRapid: TestRapid): UUID
+        data class Eksplisitt(private val vedtaksperiodeId: UUID): VedtaksperiodeUtfisker {
+            override fun vedtaksperiodeId(testRapid: TestRapid) = vedtaksperiodeId
+        }
+        data class SisteForArbeidsgiver(private val organisasjonsnummer: String) : VedtaksperiodeUtfisker {
+            override fun vedtaksperiodeId(testRapid: TestRapid) = testRapid.inspektør.sisteVedtaksperiodeIdFor(organisasjonsnummer)
+        }
+        data class IndexForArbeidsgiver(private val organisasjonsnummer: String, private val idx: Int) : VedtaksperiodeUtfisker {
+            override fun vedtaksperiodeId(testRapid: TestRapid) = testRapid.inspektør.vedtaksperiodeId(idx, organisasjonsnummer)
         }
     }
 
     protected fun sendNavNoInntektsmelding(
+        arbeidsgiverperiode: List<Periode>,
+        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
+        beregnetInntekt: Double = INNTEKT,
+        opphørsdatoForRefusjon: LocalDate? = null,
+        orgnummer: String = ORGNUMMER,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        vedtaksperiodeIndeksForOrganisasjonsnummer: Int? = null
+    ) = sendNavNoInntektsmelding(
+        arbeidsgiverperiode = arbeidsgiverperiode.map { it.fom til it.tom },
+        opphørAvNaturalytelser = opphørAvNaturalytelser,
+        beregnetInntekt = beregnetInntekt,
+        opphørsdatoForRefusjon = opphørsdatoForRefusjon,
+        orgnummer = orgnummer,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        vedtaksperiodeUtfisker = when (val idx = vedtaksperiodeIndeksForOrganisasjonsnummer) {
+            null -> VedtaksperiodeUtfisker.SisteForArbeidsgiver(orgnummer)
+            else -> VedtaksperiodeUtfisker.IndexForArbeidsgiver(orgnummer, idx)
+        }
+    )
+
+    protected fun sendNavNoInntektsmelding(
         arbeidsgiverperiode: List<no.nav.helse.hendelser.Periode>,
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeUtfisker: VedtaksperiodeUtfisker,
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
         beregnetInntekt: Double = INNTEKT,
         opphørsdatoForRefusjon: LocalDate? = null,
@@ -446,7 +458,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             opphørsdatoForRefusjon = opphørsdatoForRefusjon,
             orgnummer = orgnummer,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            vedtaksperiodeId = vedtaksperiodeId
+            vedtaksperiodeId = vedtaksperiodeUtfisker.vedtaksperiodeId(testRapid)
         ).let { (id, message) ->
             testRapid.sendTestMessage(message)
             id.toUUID() to message
@@ -455,14 +467,13 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun sendNavNoSelvbestemtInntektsmelding(
         arbeidsgiverperiode: List<no.nav.helse.hendelser.Periode>,
-        vedtaksperiodeIndeks: Int,
+        vedtaksperiodeUtfisker: VedtaksperiodeUtfisker = VedtaksperiodeUtfisker.SisteForArbeidsgiver(ORGNUMMER),
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
         beregnetInntekt: Double = INNTEKT,
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = ORGNUMMER,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ): Pair<UUID, String> {
-        val vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)
         return meldingsfabrikk.lagNavNoSelvbestemtInntektsmelding(
             arbeidsgiverperiode = arbeidsgiverperiode.map { Periode(it.start, it.endInclusive) },
             opphørAvNaturalytelser = opphørAvNaturalytelser,
@@ -470,7 +481,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             opphørsdatoForRefusjon = opphørsdatoForRefusjon,
             orgnummer = orgnummer,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            vedtaksperiodeId = vedtaksperiodeId
+            vedtaksperiodeId = vedtaksperiodeUtfisker.vedtaksperiodeId(testRapid)
         ).let { (id, message) ->
             testRapid.sendTestMessage(message)
             id.toUUID() to message
@@ -835,7 +846,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         val soknadperiode = SoknadsperiodeDTO(fom, tom, sykmeldingsgrad = 100)
         sendNySøknad(soknadperiode)
         sendSøknad(perioder = listOf(soknadperiode))
-        sendInntektsmelding(arbeidsgiverperiode = listOf(Periode(fom, fom.plusDays(15))), fom)
+        sendNavNoInntektsmelding(arbeidsgiverperiode = listOf(Periode(fom, fom.plusDays(15))))
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)

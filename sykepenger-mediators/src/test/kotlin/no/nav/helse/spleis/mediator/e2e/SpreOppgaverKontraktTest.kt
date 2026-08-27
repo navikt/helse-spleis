@@ -1,12 +1,10 @@
 package no.nav.helse.spleis.mediator.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import java.time.LocalDate
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -17,31 +15,13 @@ import org.junit.jupiter.api.Test
 internal class SpreOppgaverKontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `inntektmelding før søknad`() {
-        sendNySøknad(SoknadsperiodeDTO(1.januar, 31.januar, 100))
-        sendInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
-        val inntektsmeldingFørSøknad = testRapid.inspektør.siste("inntektsmelding_før_søknad")
-        assertTrue(inntektsmeldingFørSøknad is ObjectNode)
-        assertInntektsmeldingFørSøknad(inntektsmeldingFørSøknad)
-    }
-
-    @Test
-    fun `inntektmelding ikke håndtert`() {
-        sendNySøknad(SoknadsperiodeDTO(1.mars, 31.mars, 100))
-        sendInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar)
-        val melding = testRapid.inspektør.siste("inntektsmelding_ikke_håndtert")
-        assertInntektsmeldingIkkeHåndtert(melding)
-    }
-
-    @Test
     fun `Sender ut inntektsmeldingHåndtertEvent når en vedtaksperiode har håndtert en inntektsmelding`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         )
-        val (inntektsmeldingId, _) = sendInntektsmelding(
-            listOf(Periode(fom = 1.januar, tom = 16.januar)),
-            førsteFraværsdag = 1.januar
+        val (inntektsmeldingId, _) = sendNavNoInntektsmelding(
+            listOf(Periode(fom = 1.januar, tom = 16.januar))
         )
         val vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(0)
 

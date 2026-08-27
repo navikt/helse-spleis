@@ -100,6 +100,18 @@ internal class TestRapid(private val utstender: TestUtsender = TestUtsender()) :
                 }
             }
 
+        private val vedtaksperiodeIderPerOrganisasjonsnummer
+            get() = mutableMapOf<String, List<UUID>>().apply {
+                events("vedtaksperiode_endret") {
+                    if (it.path("yrkesaktivitetstype").asText() == "ARBEIDSTAKER") {
+                        this.compute(it.path("organisasjonsnummer").asText()) { _, eksisterende ->
+                            (eksisterende ?: emptyList()) + UUID.fromString(it.path("vedtaksperiodeId").asText())
+                        }
+                    }
+                }
+            }
+
+
         private val forkastedeVedtaksperiodeIder
             get() = mutableMapOf<UUID, String>().apply {
                 events("vedtaksperiode_forkastet") {
@@ -174,6 +186,9 @@ internal class TestRapid(private val utstender: TestUtsender = TestUtsender()) :
             .filter { name == it.path("@event_name").asText() }
 
         fun vedtaksperiodeId(indeks: Int) = vedtaksperiodeIder.elementAt(indeks)
+        fun vedtaksperiodeId(indeks: Int, organisasjonsummer: String) = vedtaksperiodeIderPerOrganisasjonsnummer.getValue(organisasjonsummer).elementAt(indeks)
+        fun sisteVedtaksperiodeIdFor(organisasjonsummer: String) = vedtaksperiodeIderPerOrganisasjonsnummer.getValue(organisasjonsummer).last()
+
         fun utbetalingtilstander(utbetalingIndeks: Int) =
             utbetalinger.elementAt(utbetalingIndeks).let { utbetalingId ->
                 utbetalingtilstander[utbetalingId]?.toList()

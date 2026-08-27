@@ -13,7 +13,6 @@ import no.nav.helse.mars
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.til
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -48,7 +47,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         )
         assertTilstand(0, "AVSLUTTET_UTEN_UTBETALING")
         sendNavNoSelvbestemtInntektsmelding(
-            vedtaksperiodeIndeks = 0,
             arbeidsgiverperiode = listOf(1.januar til 16.januar),
         )
         assertTilstand(0, "AVVENTER_VILKÅRSPRØVING")
@@ -83,9 +81,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             egenmeldingerFraSykmelding = listOf(1.januar)
         )
-        sendInntektsmelding(
-            listOf(Periode(1.januar, 16.januar)),
-            1.januar
+        sendNavNoInntektsmelding(
+            listOf(Periode(1.januar, 16.januar))
         )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -98,9 +95,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)),
             egenmeldingerFraSykmelding = emptyList()
         )
-        sendInntektsmelding(
-            listOf(Periode(1.mars, 16.mars)),
-            1.mars
+        sendNavNoInntektsmelding(
+            listOf(Periode(1.mars, 16.mars))
         )
         sendVilkårsgrunnlag(1)
         sendYtelser(1)
@@ -121,7 +117,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendNavNoInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)))
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -146,9 +142,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
     fun `Sender ikke med forrige refusjonsopplysninger i forespørsel`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(
+        sendNavNoInntektsmelding(
             arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar)),
-            1.januar,
             opphørsdatoForRefusjon = 1.april
         )
         sendVilkårsgrunnlag(0)
@@ -385,14 +380,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             orgnummer = a2
         )
 
-        sendInntektsmelding(
+        sendNavNoInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
-            1.januar,
             orgnummer = a1
         )
-        sendInntektsmelding(
+        sendNavNoInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
-            1.januar,
             orgnummer = a2
         )
         sendVilkårsgrunnlag(

@@ -14,9 +14,8 @@ internal class InntektsmeldingTest : AbstractEndToEndMediatorTest() {
     fun `Håndterer portalinntektsmelding uten inntektsdato`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(
-            arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 1.januar
+        sendNavNoInntektsmelding(
+            arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar))
         )
         sendVilkårsgrunnlag(vedtaksperiodeIndeks = 0)
     }
@@ -28,9 +27,8 @@ internal class InntektsmeldingTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknad(SoknadsperiodeDTO(fom = 11.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 31.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(
-            arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar)),
-            førsteFraværsdag = 1.januar
+        sendNavNoInntektsmelding(
+            arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar))
         )
 
         val inntektsmeldingHåndtertEvent = testRapid.inspektør.meldinger("inntektsmelding_håndtert").first()

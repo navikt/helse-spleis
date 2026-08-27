@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -27,7 +28,7 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 17.januar, sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendNavNoSelvbestemtInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeUtfisker = VedtaksperiodeUtfisker.IndexForArbeidsgiver(ORGNUMMER, 0))
         sendVilkårsgrunnlag(2)
         sendYtelser(2)
         sendSimulering(2, SimuleringMessage.Simuleringstatus.OK)
@@ -51,11 +52,11 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 23.januar, tom = 23.januar, sykmeldingsgrad = 100))
         )
-        sendInntektsmelding(
+        sendNavNoSelvbestemtInntektsmelding(
             listOf(
-                Periode(fom = 1.januar, tom = 6.januar),
-                Periode(fom = 11.januar, tom = 20.januar),
-            ), førsteFraværsdag = 11.januar
+                1.januar til 6.januar,
+                11.januar til 20.januar
+            )
         )
         sendVilkårsgrunnlag(1)
         sendYtelser(1)

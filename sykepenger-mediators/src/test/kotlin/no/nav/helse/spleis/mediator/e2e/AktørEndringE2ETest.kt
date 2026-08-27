@@ -8,7 +8,6 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-
 internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
     private companion object {
         private const val FNR1 = "12029240045"
@@ -22,7 +21,7 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
 
-        meldingsfabrikkFNR2.lagLpsInntektsmelding(listOf(Periode(3.januar, 18.januar)), 3.januar).also { (_, melding) ->
+        meldingsfabrikkFNR2.lagNavNoInntektsmelding(listOf(Periode(3.januar, 18.januar)), opphørsdatoForRefusjon = 3.januar, vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(0, ORGNUMMER)).also { (_, melding) ->
             // json.utgåendeBehov() gir et behov med gammelt FNR
             // utgåendeBehovsmeldingerFraEventBus[fraAktivitetslogg.identifikator] gir et behov med nytt FNR
             // tanken vår var vel at utgående meldinger skal bruke samme fnr som meldingen som trigget den utgående meldingen... som kanskje er lurt, kanskje ikke.

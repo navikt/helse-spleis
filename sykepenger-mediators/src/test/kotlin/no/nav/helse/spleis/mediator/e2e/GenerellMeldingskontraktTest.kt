@@ -72,27 +72,20 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        val (meldingId, _) = sendInntektsmelding(
-            listOf(Periode(fom = 3.januar, tom = 18.januar)),
-            førsteFraværsdag = 3.januar
+        val (meldingId, _) = sendNavNoInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar))
         )
         val behov = testRapid.inspektør.siste("behov")
-        assertBehov(behov, meldingId, "inntektsmelding")
+        assertBehov(behov, meldingId, "arbeidsgiveropplysninger")
     }
 
     @Test
     fun `replay inntektsmelding`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendInntektsmelding(
-            listOf(Periode(fom = 3.januar, tom = 18.januar)),
-            førsteFraværsdag = 3.januar
-        )
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        )
+        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
 
         val behov = testRapid.inspektør.siste("behov")
-        assertBehov(behov, null, "inntektsmeldinger_replay")
+        assertBehov(behov, null, "sendt_søknad_nav")
     }
 
     private fun assertVedtaksperiodeEndret(melding: JsonNode, originalMeldingId: UUID, originalMeldingtype: String) {
