@@ -32,7 +32,7 @@ internal class EndretGrunnlagForBeregningRiver(
 
     override fun precondition(packet: JsonMessage) {
         packet.requireKey("@event_name")
-        packet.grunnlagsformatOrNull?.precondition(packet)
+        packet.requireAny("@event_name", grunnlag.map { it.eventName })
     }
 
     override fun createMessage(packet: JsonMessage) = EndretGrunnlagForBeregningMessage(
