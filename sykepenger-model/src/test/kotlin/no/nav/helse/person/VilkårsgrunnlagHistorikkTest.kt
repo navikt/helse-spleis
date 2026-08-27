@@ -121,6 +121,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = null,
+            opptjeningsvurderingId = null,
         )
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
@@ -147,6 +148,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = null,
+            opptjeningsvurderingId = null,
         )
 
         vilkårsgrunnlag.valider(
@@ -170,6 +172,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = null,
+            opptjeningsvurderingId = null,
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -181,6 +184,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = null,
+            opptjeningsvurderingId = null,
         )
         vilkårsgrunnlag1.valider(
             Aktivitetslogg(),
@@ -219,6 +223,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = null,
+            opptjeningsvurderingId = null,
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -230,6 +235,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = null,
+            opptjeningsvurderingId = null,
         )
 
         vilkårsgrunnlag1.valider(
@@ -261,6 +267,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = null,
+            opptjeningsvurderingId = null,
         )
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
@@ -286,6 +293,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = null,
+            opptjeningsvurderingId = null,
         )
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),

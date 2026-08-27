@@ -20,6 +20,7 @@ import no.nav.helse.spleis.Behov.Behovstype.Forsikringsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForOpptjeningsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForSykepengegrunnlag
 import no.nav.helse.spleis.Behov.Behovstype.Medlemskap
+import no.nav.helse.spleis.Behov.Behovstype.Opptjeningsvurdering
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
@@ -39,6 +40,8 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
     internal val arbeidsforhold = packet.mapArbeidsforhold()
 
     internal val forsikringsvurderingId = packet["@løsning.${Forsikringsvurdering.utgåendeNavn}.forsikringsvurderingId"].takeUnless { it.isMissingOrNull() }?.asText()?.toUUID()
+
+    internal val opptjeningsvurderingId = packet["@løsning.${Opptjeningsvurdering.utgåendeNavn}.id"].takeUnless { it.isMissingOrNull() }?.asText()?.toUUID()
 
     internal val medlemskapstatus = when (packet["@løsning.${Medlemskap.utgåendeNavn}.resultat.svar"].asText()) {
         "JA" -> Medlemskapsvurdering.Medlemskapstatus.Ja
@@ -69,6 +72,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
             inntekterForOpptjeningsvurdering = no.nav.helse.hendelser.InntekterForOpptjeningsvurdering(inntekter = inntekterForOpptjeningsvurdering),
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = forsikringsvurderingId,
+            opptjeningsvurderingId = opptjeningsvurderingId,
         )
 
     override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {

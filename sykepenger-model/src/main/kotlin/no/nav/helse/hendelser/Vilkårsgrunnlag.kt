@@ -29,7 +29,8 @@ class Vilkårsgrunnlag(
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
     private val arbeidsforhold: List<Arbeidsforhold>,
-    val forsikringsvurderingId: UUID?
+    val forsikringsvurderingId: UUID?,
+    val opptjeningsvurderingId: UUID?,
 ) : Hendelse {
     override val metadata = LocalDateTime.now().let { nå ->
         HendelseMetadata(
@@ -107,7 +108,7 @@ class Vilkårsgrunnlag(
             meldingsreferanseId = metadata.meldingsreferanseId,
             vilkårsgrunnlagId = UUID.randomUUID(),
             forsikringsvurderingId = forsikringsvurderingId,
-            opptjeningsvurderingId = UUID.randomUUID(),
+            opptjeningsvurderingId = opptjeningsvurderingId ?: UUID.randomUUID(), // TODO: fjern random når vi alltid får
         )
         return aktivitetslogg
     }

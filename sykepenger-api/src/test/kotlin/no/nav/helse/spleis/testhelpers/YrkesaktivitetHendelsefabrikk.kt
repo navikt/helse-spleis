@@ -267,6 +267,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = forsikringsvurderingId,
+            opptjeningsvurderingId = null,
         )
     }
 

@@ -10,6 +10,7 @@ import no.nav.helse.spleis.Behov.Behovstype.Forsikringsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForOpptjeningsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForSykepengegrunnlag
 import no.nav.helse.spleis.Behov.Behovstype.Medlemskap
+import no.nav.helse.spleis.Behov.Behovstype.Opptjeningsvurdering
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
@@ -60,6 +61,7 @@ internal class VilkårsgrunnlagRiver(
         }
 
         message.interestedIn("@løsning.${Forsikringsvurdering.utgåendeNavn}.forsikringsvurderingId")
+        message.interestedIn("@løsning.${Opptjeningsvurdering.utgåendeNavn}.id") // TODO ?
     }
 
     override fun createMessage(packet: JsonMessage) = VilkårsgrunnlagMessage(

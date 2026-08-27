@@ -180,6 +180,7 @@ internal abstract class AbstractObservableTest {
         inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
         arbeidsforhold = arbeidsforhold,
         forsikringsvurderingId = null,
+        opptjeningsvurderingId = null,
     )
 
     protected fun ytelser(

@@ -276,6 +276,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
         inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
         forsikringsvurderingId: UUID? = null,
+        opptjeningsvurderingId: UUID? = null,
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -287,6 +288,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = forsikringsvurderingId,
+            opptjeningsvurderingId = opptjeningsvurderingId,
         )
     }
 

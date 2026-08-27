@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.lang.Boolean.parseBoolean
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -48,6 +49,17 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
 internal class OpptjeningE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `opptjeningsvurderingId fra sp-vilkarsproving blir lagt på`() {
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            val opptjeningsvurderingId = UUID.randomUUID()
+            håndterVilkårsgrunnlag(1.vedtaksperiode, opptjeningsvurderingId = opptjeningsvurderingId)
+            assertEquals(opptjeningsvurderingId, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.opptjeningsvurderingId)
+        }
+    }
 
     @Test
     fun `avslag på opptjening sier 1 dag opptjening når den burde si 0 dager`() {

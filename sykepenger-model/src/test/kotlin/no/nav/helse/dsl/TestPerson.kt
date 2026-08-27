@@ -568,25 +568,29 @@ internal class TestPerson(
         internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
-            skatteinntekt: Inntekt? = INNTEKT
+            skatteinntekt: Inntekt? = INNTEKT,
+            opptjeningsvurderingId: UUID? = null,
         ) = håndterVilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
-            skatteinntekt = skatteinntekt
+            skatteinntekt = skatteinntekt,
+            opptjeningsvurderingId = opptjeningsvurderingId
         )
 
         internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
             inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
-            skatteinntekt: Inntekt? = INNTEKT
+            skatteinntekt: Inntekt? = INNTEKT,
+            opptjeningsvurderingId: UUID? = null,
         ) = håndterVilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId,
             medlemskapstatus = medlemskapstatus,
             skatteinntekter = skatteinntekt?.let { listOf(this.orgnummer to it) } ?: emptyList(),
             arbeidsforhold = arbeidsgivere.map { Triple(it.key, LocalDate.EPOCH, null) },
-            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering
+            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
+            opptjeningsvurderingId = opptjeningsvurderingId,
         )
 
         /**
@@ -615,7 +619,8 @@ internal class TestPerson(
             arbeidsforhold: List<Triple<String, LocalDate, LocalDate?>> = skatteinntekter.map { (orgnr, _) -> Triple(orgnr, LocalDate.EPOCH, null) },
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
-            forsikringsvurderingId: UUID? = null
+            forsikringsvurderingId: UUID? = null,
+            opptjeningsvurderingId: UUID? = null,
         ) {
             val skjæringstidspunkt = inspektør.skjæringstidspunkt(vedtaksperiodeId)
             val opptjeningsinntekter = inntekterForOpptjeningsvurdering?.let {
@@ -630,7 +635,8 @@ internal class TestPerson(
                     Vilkårsgrunnlag.Arbeidsforhold(orgnr, fom, tom, type = Arbeidsforholdtype.ORDINÆRT)
                 },
                 skjæringstidspunkt = skjæringstidspunkt,
-                forsikringsvurderingId = forsikringsvurderingId
+                forsikringsvurderingId = forsikringsvurderingId,
+                opptjeningsvurderingId = opptjeningsvurderingId,
             )
         }
 
@@ -706,7 +712,8 @@ internal class TestPerson(
             arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
             inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = null,
             skjæringstidspunkt: LocalDate = inspektør.skjæringstidspunkt(vedtaksperiodeId),
-            forsikringsvurderingId: UUID? = null
+            forsikringsvurderingId: UUID? = null,
+            opptjeningsvurderingId: UUID? = null,
         ) {
             val inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering ?: run {
 
@@ -727,7 +734,8 @@ internal class TestPerson(
                 arbeidsforhold,
                 inntektsvurderingForSykepengegrunnlag,
                 inntekterForOpptjeningsvurdering,
-                forsikringsvurderingId
+                forsikringsvurderingId,
+                opptjeningsvurderingId = opptjeningsvurderingId,
             ).håndter(Person::håndterVilkårsgrunnlag)
         }
 
