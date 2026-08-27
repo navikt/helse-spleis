@@ -941,7 +941,8 @@ internal class TestMessageFactory(
         forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
         arbeidsavklaringspengerV2: Arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         orgnummer: String = organisasjonsnummer,
-        yrkesaktivitetstype: String = "ARBEIDSTAKER"
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
+        opptjeningsvurderingResultatOk: Boolean = true,
     ): Pair<String, String> {
         val behovliste = mutableListOf(
             "Foreldrepenger",
@@ -952,7 +953,8 @@ internal class TestMessageFactory(
             "ArbeidsavklaringspengerV2",
             "InntekterForBeregning",
             "DagpengerV2",
-            "GraderteAndreYtelserForBeregning"
+            "GraderteAndreYtelserForBeregning",
+            "OpptjeningsvurderingResultat",
         )
 
         if (forsikringsvurderingResultat != null) {
@@ -1035,6 +1037,9 @@ internal class TestMessageFactory(
                         )
 
                     }
+                ),
+                Behov.Behovstype.OpptjeningsvurderingResultat.utgåendeNavn to mapOf(
+                    "ok" to opptjeningsvurderingResultatOk
                 ),
                 Behov.Behovstype.Dagpenger.utgåendeNavn to mapOf(
                     "meldekortperioder" to dagpengerV2.perioder.map { data ->

@@ -282,6 +282,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         inntekterForBeregning: List<Inntektsperiode> = emptyList(),
         dagpengerV2: List<Periode> = emptyList(),
         forsikringsvurderingResultat: ForsikringsvurderingResultat?,
+        opptjeningsvurderingResultatOk: Boolean = true,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -310,7 +311,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             dagpenger = Dagpenger(dagpengerV2),
             forsikringsvurderingResultat = forsikringsvurderingResultat,
-            opptjeningsvurderingResultatOk = null,
+            opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
         )
     }
 

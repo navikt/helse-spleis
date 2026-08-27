@@ -42,6 +42,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Person
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -745,7 +746,7 @@ internal class TestPerson(
             graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList()
         ) {
             behovshåndterer.bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId)
-            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, graderteAndreYtelser, forsikringsvurderingResultat)
+            arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, graderteAndreYtelser, forsikringsvurderingResultat, opptjeningsvurderingResultatOk = true)
                 .håndter(Person::håndterYtelser)
         }
 
@@ -763,6 +764,13 @@ internal class TestPerson(
             graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
             opptjeningsvurderingResultatOk: Boolean? = null,
         ) {
+            val opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk ?: if (inspektør.orgnummer == "SELVSTENDIG") true else (inspektør.vilkårsgrunnlag(vedtaksperiodeId) ?: return).let {
+                when (it) {
+                    is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag -> true
+                    is VilkårsgrunnlagHistorikk.Grunnlagsdata -> it.opptjening!!.erOppfylt()
+                }
+            }
+
             behovshåndterer.bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, graderteAndreYtelser, null, opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk)
                 .håndter(Person::håndterYtelser)

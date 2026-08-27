@@ -680,13 +680,11 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 )
                 )
             } else null,
-            if (Toggle.OpptjeningsResultatBehov.enabled) {
-                Behov(
-                    Behov.Behovstype.OpptjeningsvurderingResultat, mapOf(
-                        "opptjeningsvurderingId" to event.opptjeningsvurderingId
-                    )
+            Behov(
+                Behov.Behovstype.OpptjeningsvurderingResultat, mapOf(
+                    "opptjeningsvurderingId" to event.opptjeningsvurderingId
                 )
-            } else null,
+            ),
             event.forsikringsvurderingId?.let { forsikringsvurderingId ->
                 Behov(Behov.Behovstype.ForsikringsvurderingResultat, mapOf(
                     "forsikringsvurderingId" to forsikringsvurderingId,

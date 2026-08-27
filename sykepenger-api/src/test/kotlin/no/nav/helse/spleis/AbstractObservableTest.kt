@@ -195,6 +195,7 @@ internal abstract class AbstractObservableTest {
         inntekterForBeregning: List<Inntektsperiode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
         forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
+        opptjeningsvurderingResultatOk: Boolean = true,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -219,7 +220,7 @@ internal abstract class AbstractObservableTest {
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             dagpenger = Dagpenger(dagpenger),
             forsikringsvurderingResultat = forsikringsvurderingResultat,
-            opptjeningsvurderingResultatOk = null,
+            opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
         )
     }
 

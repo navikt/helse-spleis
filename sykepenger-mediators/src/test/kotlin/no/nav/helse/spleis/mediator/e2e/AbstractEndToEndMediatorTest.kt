@@ -565,6 +565,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Dagpenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Institusjonsopphold))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.InntekterForBeregning))
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.OpptjeningsvurderingResultat))
         val behov = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Foreldrepenger)
         val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
         val behandlingId = behov.path("behandlingId").asText().toUUID()

@@ -48,12 +48,6 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
         sendJson(json).assertForventetInnhold(forsikring = null)
     }
 
-    @Test
-    fun `Mapping ved løsninger uten løsning på opptjeningsvurderingresultat`() {
-        val json = fjernLøsninger(medObject, "OpptjeningsvurderingResultat")
-        sendJson(json).assertForventetInnhold(forventetOpptjeningsvurderingResultatOk = null)
-    }
-
     private fun YtelserMessage.assertForventetInnhold(forsikring: ForsikringsvurderingResultat? = forventetForsikring, forventetOpptjeningsvurderingResultatOk: Boolean? = true) {
         assertEquals(forventetPleiepenger, this.pleiepenger)
         assertEquals(forventetForeldrepenger, this.foreldrepenger)
@@ -110,7 +104,8 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             "InntekterForBeregning",
             "DagpengerV2",
             "ForsikringsvurderingResultat",
-            "GraderteAndreYtelserForBeregning"
+            "GraderteAndreYtelserForBeregning",
+            "OpptjeningsvurderingResultat"
           ],
           "fødselsnummer": "20014812238",
           "yrkesaktivitetstype": "SELVSTENDIG",
@@ -231,7 +226,8 @@ internal class YtelserRiverMappingTest: RiverMappingTest<YtelserMessage>(
             "InntekterForBeregning",
             "DagpengerV2",
             "ForsikringsvurderingResultat",
-            "GraderteAndreYtelserForBeregning"
+            "GraderteAndreYtelserForBeregning",
+            "OpptjeningsvurderingResultat"
           ],
           "fødselsnummer": "20014812238",
           "yrkesaktivitetstype": "SELVSTENDIG",

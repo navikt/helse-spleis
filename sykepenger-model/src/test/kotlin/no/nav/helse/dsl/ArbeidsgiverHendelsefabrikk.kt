@@ -303,7 +303,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
         graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
         forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
-        opptjeningsvurderingResultatOk: Boolean? = null,
+        opptjeningsvurderingResultatOk: Boolean,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(

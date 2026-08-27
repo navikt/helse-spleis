@@ -1590,10 +1590,6 @@ internal class Vedtaksperiode private constructor(
         håndterYtelser(eventBus, ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk, nesteSimuleringtilstand, nesteGodkjenningtilstand)
     }
 
-    private fun harOpptjening(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Boolean {
-        return (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.opptjening?.harTilstrekkeligAntallOpptjeningsdager() ?: true
-    }
-
     private fun håndterYtelser(eventBus: EventBus, ytelser: Ytelser, aktivitetslogg: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk, nesteSimuleringtilstand: Vedtaksperiodetilstand, nesteGodkjenningtilstand: Vedtaksperiodetilstand) {
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
@@ -1611,7 +1607,7 @@ internal class Vedtaksperiode private constructor(
             forsikringsvurderingResultat = forsikringsvurderingResultat
         )
         // steg 3: beregn alle utbetalingstidslinjer (avslå dager, beregne maksdato og utbetalingsbeløp)
-        val harOpptjening = ytelser.opptjeningsvurderingResultatOk ?: harOpptjening(grunnlagsdata)
+        val harOpptjening = ytelser.opptjeningsvurderingResultatOk
         val sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag
         val beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag
         val medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus

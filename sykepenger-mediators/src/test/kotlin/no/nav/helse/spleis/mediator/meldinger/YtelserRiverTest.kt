@@ -73,7 +73,8 @@ private val json = """
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "DagpengerV2",
-        "GraderteAndreYtelserForBeregning"
+        "GraderteAndreYtelserForBeregning",
+        "OpptjeningsvurderingResultat"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -201,8 +202,10 @@ private val json = """
               "tom": "2019-04-12"
             }
           ]
+        },
+        "OpptjeningsvurderingResultat" : {
+          "ok" : true
         }
-
       },
       "@final": true,
       "@besvart": "2020-01-24T11:25:00"
@@ -224,7 +227,8 @@ private val ukjentPeriode = """
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "DagpengerV2",
-        "GraderteAndreYtelserForBeregning"
+        "GraderteAndreYtelserForBeregning",
+        "OpptjeningsvurderingResultat"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -292,6 +296,9 @@ private val ukjentPeriode = """
         },
         "DagpengerV2": {
           "meldekortperioder": []
+        },
+        "OpptjeningsvurderingResultat" : {
+          "ok": true
         }
       },
       "@final": true,
@@ -322,7 +329,8 @@ private val ugyldigPeriode = """
         "ArbeidsavklaringspengerV2",
         "InntekterForBeregning",
         "DagpengerV2",
-        "GraderteAndreYtelserForBeregning"
+        "GraderteAndreYtelserForBeregning",
+        "OpptjeningsvurderingResultat"
       ],
       "@id": "${UUID.randomUUID()}",
       "@opprettet": "2020-01-24T11:25:00",
@@ -390,6 +398,9 @@ private val ugyldigPeriode = """
         },
         "DagpengerV2": {
           "meldekortperioder": []
+        },
+        "OpptjeningsvurderingResultat": {
+          "ok": true
         }
       },
       "@final": true,

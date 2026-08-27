@@ -120,8 +120,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             )
         }
 
-    internal val opptjeningsvurderingResultatOk : Boolean? = packet["@løsning.${Behovstype.OpptjeningsvurderingResultat.utgåendeNavn}.ok"].
-        takeUnless { it.isMissingOrNull() }?.asBoolean()
+    internal val opptjeningsvurderingResultatOk : Boolean = packet["@løsning.${Behovstype.OpptjeningsvurderingResultat.utgåendeNavn}.ok"].asBoolean()
 
     internal val dagpengerV2 = Dagpenger(
         packet["@løsning.${Behovstype.Dagpenger.utgåendeNavn}.meldekortperioder"]

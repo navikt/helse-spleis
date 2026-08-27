@@ -24,6 +24,7 @@ import no.nav.helse.spleis.Behov.Behovstype.Institusjonsopphold
 import no.nav.helse.spleis.Behov.Behovstype.Medlemskap
 import no.nav.helse.spleis.Behov.Behovstype.Omsorgspenger
 import no.nav.helse.spleis.Behov.Behovstype.Opplæringspenger
+import no.nav.helse.spleis.Behov.Behovstype.OpptjeningsvurderingResultat
 import no.nav.helse.spleis.Behov.Behovstype.Pleiepenger
 import no.nav.helse.spleis.Behov.Behovstype.Simulering
 import no.nav.helse.spleis.Behov.Behovstype.Sykepengehistorikk
@@ -126,7 +127,8 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             Omsorgspenger,
             Opplæringspenger,
             Pleiepenger,
-            InntekterForBeregning
+            InntekterForBeregning,
+            OpptjeningsvurderingResultat
         )
         assertArbeidsavklaringspengerdetaljer(behov)
         assertDagpengerdetaljer(behov)
@@ -136,39 +138,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertOpplæringspengerdetaljer(behov)
         assertPleiepengerdetaljer(behov)
         assertInntekterForBeregning(behov)
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = [true, false])
-    fun ytelserTogglingOpptjeningsResultatBehov(toggleOpptjeningResultat: Boolean) = Toggle.OpptjeningsResultatBehov.let { if (toggleOpptjeningResultat) it::enable else it::disable }() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        )
-        val utbetalinghistorikkbehov = testRapid.inspektør.meldinger("behov").last()
-        assertVedtaksperiodeBehov(utbetalinghistorikkbehov, Sykepengehistorikk)
-        assertSykepengehistorikkdetaljer(utbetalinghistorikkbehov)
-        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
-        sendVilkårsgrunnlag(0)
-        val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
-        val forventedeTyper = listOf(
-            Arbeidsavklaringspenger,
-            Dagpenger,
-            Foreldrepenger,
-            Institusjonsopphold,
-            Omsorgspenger,
-            Opplæringspenger,
-            Pleiepenger,
-            InntekterForBeregning
-        ).let {
-            if (toggleOpptjeningResultat) {
-                it + Behov.Behovstype.OpptjeningsvurderingResultat
-            } else {
-                it
-            }
-        }.toTypedArray()
-
-        assertVedtaksperiodeBehov(behov, *forventedeTyper)
     }
 
     @Test

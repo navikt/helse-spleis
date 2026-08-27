@@ -29,7 +29,7 @@ class Ytelser(
     private val dagpenger: Dagpenger,
     private val inntekterForBeregning: InntekterForBeregning,
     val forsikringsvurderingResultat: ForsikringsvurderingResultat?,
-    val opptjeningsvurderingResultatOk: Boolean?,
+    val opptjeningsvurderingResultatOk: Boolean,
     private val graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList()
 ) : Hendelse {
     override val metadata = LocalDateTime.now().let { nå ->
