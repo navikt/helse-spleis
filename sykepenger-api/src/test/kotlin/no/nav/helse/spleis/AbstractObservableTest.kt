@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -121,30 +120,6 @@ internal abstract class AbstractObservableTest {
             perioder = emptyList()
         ),
         besvart = LocalDateTime.now()
-    )
-
-    protected fun inntektsmelding(
-        id: UUID = INNTEKTSMELDING_ID,
-        arbeidsgiverperioder: List<Periode> = listOf(Periode(FOM, FOM.plusDays(15))),
-        beregnetInntekt: Inntekt = INNTEKT,
-        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: LocalDate.of(2018, 1, 1),
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        orgnummer: String = ORGNUMMER,
-        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-        arbeidsforholdId: String? = null
-    ): Inntektsmelding = Inntektsmelding(
-        meldingsreferanseId = MeldingsreferanseId(id),
-        refusjon = refusjon,
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-            organisasjonsnummer = orgnummer
-        ),
-        beregnetInntekt = beregnetInntekt,
-        arbeidsgiverperioder = arbeidsgiverperioder,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-        opphørAvNaturalytelser = opphørAvNaturalytelser,
-        førsteFraværsdag = førsteFraværsdag,
-        mottatt = LocalDateTime.now(),
-        arbeidsforholdId = arbeidsforholdId
     )
 
     protected fun vilkårsgrunnlag(

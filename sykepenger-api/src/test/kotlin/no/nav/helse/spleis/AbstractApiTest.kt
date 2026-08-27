@@ -58,7 +58,7 @@ abstract class AbstractApiTest {
 
     internal fun DataSource.lagreHendelse(
         meldingsReferanse: UUID,
-        meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
+        meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.NAV_NO_INNTEKTSMELDING,
         fødselsnummer: String,
         data: String = """{ "@opprettet": "${LocalDateTime.now()}" }"""
     ) {

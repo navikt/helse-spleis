@@ -4,22 +4,21 @@ import com.github.navikt.tbd_libs.signed_jwt_issuer_test.Issuer
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.ktor.http.HttpStatusCode
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.EventBus
+import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.spleis.testhelpers.YrkesaktivitetHendelsefabrikk
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class RestApiTest : AbstractApiTest() {
@@ -73,34 +72,16 @@ internal class RestApiTest : AbstractApiTest() {
 
     private fun opprettTestdata(testDataSource: TestDataSource) {
         val eventBus = EventBus()
+        val aktivitetslogg = Aktivitetslogg()
         val fom = LocalDate.of(2018, 9, 10)
         val tom = fom.plusDays(16)
-        val sykeperioder = listOf(Sykmeldingsperiode(fom, tom))
-        val sykmelding = Sykmelding(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER),
-            sykeperioder = sykeperioder
-        )
-        val inntektsmelding = Inntektsmelding(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            refusjon = Inntektsmelding.Refusjon(
-                beløp = 12000.månedlig,
-                opphørsdato = null
-            ),
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                organisasjonsnummer = ORGNUMMER
-            ),
-            beregnetInntekt = 12000.månedlig,
-            arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 25))),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            opphørAvNaturalytelser = emptyList(),
-            førsteFraværsdag = LocalDate.of(2018, 9, 10),
-            mottatt = LocalDateTime.now(),
-            arbeidsforholdId = null
-        )
         val person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
-        person.håndterSykmelding(eventBus, sykmelding, Aktivitetslogg())
-        person.håndterInntektsmelding(eventBus, inntektsmelding, Aktivitetslogg())
+        val fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER))
+        val søknad = fabrikk.lagSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER)
+        person.håndterSøknad(eventBus, søknad, aktivitetslogg)
+        val vedtaksperiodeId = eventBus.events.filterIsInstance<EventSubscription.VedtaksperiodeOpprettet>().single().vedtaksperiodeId
+        val arbeidsgiveropplysninger = fabrikk.lagArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(fom til fom.plusDays(15)), vedtaksperiodeId = vedtaksperiodeId, beregnetInntekt = 31000.månedlig)
+        person.håndterArbeidsgiveropplysninger(eventBus, arbeidsgiveropplysninger, Aktivitetslogg())
         testDataSource.ds.lagrePerson(UNG_PERSON_FNR, person)
         testDataSource.ds.lagreHendelse(meldingsReferanse = MELDINGSREFERANSE, fødselsnummer = UNG_PERSON_FNR)
     }

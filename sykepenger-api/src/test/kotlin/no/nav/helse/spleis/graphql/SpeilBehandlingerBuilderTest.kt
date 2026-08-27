@@ -544,7 +544,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     fun `forkastet auu`() {
         val søknad = håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(11.januar, 20.januar, 100.prosent))
-        val im = håndterLpsInntektsmelding(1.januar)
+        val im = håndterArbeidsgiveropplysninger(1.januar, vedtaksperiode = 2)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
         generasjoner {
@@ -565,7 +565,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(17.januar, 22.januar, 100.prosent))
         håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
-        håndterLpsInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar, vedtaksperiode = 2)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
@@ -596,7 +596,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     fun `syk nav-dager i to korte perioder`() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Ferie(1.januar, 15.januar))
         håndterSøknad(Sykdom(16.januar, 20.januar, 100.prosent), Ferie(16.januar, 20.januar))
-        håndterLpsInntektsmelding(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        håndterSelvbestemteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", vedtaksperiode = 1)
         generasjoner {
             assertEquals(2, size)
             0.generasjon {
@@ -616,13 +616,13 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     fun `Manglende generasjon når det kommer IM som endrer AGP ved å endre dager i forkant av perioden`() {
         håndterSøknad(Sykdom(7.august, 20.august, 100.prosent))
         håndterSøknad(Sykdom(21.august, 1.september, 100.prosent))
-        håndterLpsInntektsmelding(arbeidsgiverperioder = listOf(24.juli til 25.juli, 7.august til 20.august))
+        håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(24.juli til 25.juli, 7.august til 20.august), vedtaksperiode = 2)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
         // 21 & 22.August utbetalingsdager
 
-        håndterLpsInntektsmelding(7.august)
+        håndterSelvbestemteArbeidsgiveropplysninger(listOf(7.august til 22.august), vedtaksperiode= 1)
         håndterYtelserTilUtbetalt()
         // 21 & 22.August agp -- denne blir ikke en generasjon
 
@@ -665,7 +665,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         val beregnetInntekt = halvG.beløp(1.januar)
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        håndterLpsInntektsmelding(listOf(1.januar til 16.januar), 1.januar, beregnetInntekt = beregnetInntekt - 1.daglig)
+        håndterKorrigerendeArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt - 1.daglig, vedtaksperiode = 1)
         håndterYtelserTilUtbetalt()
         håndterYtelserTilGodkjenning()
         generasjoner {
@@ -1071,7 +1071,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     fun `kort periode med forlengelse`() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
-        håndterLpsInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar, vedtaksperiode = 2)
         håndterVilkårsgrunnlagTilGodkjenning()
 
         generasjoner {
@@ -1093,7 +1093,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
 
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
-        håndterLpsInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar, vedtaksperiode = 2)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
@@ -1232,7 +1232,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     @Test
     fun `periode uten utbetaling - kun ferie`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
-        håndterLpsInntektsmelding(1.januar)
+        håndterArbeidsgiveropplysninger(1.januar, vedtaksperiode = 1)
         generasjoner {
             assertEquals(1, size)
             0.generasjon {
@@ -2051,7 +2051,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
         håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
-        håndterLpsInntektsmelding(10.januar)
+        håndterArbeidsgiveropplysninger(10.januar, vedtaksperiode = 3)
         håndterVilkårsgrunnlagTilGodkjenning()
 
         generasjoner {
@@ -2074,7 +2074,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     fun `avvist revurdering uten tidligere utbetaling kan forkastes`() {
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
-        håndterLpsInntektsmelding(10.januar)
+        håndterSelvbestemteArbeidsgiveropplysninger(listOf(10.januar til 25.januar), vedtaksperiode = 1)
         håndterVilkårsgrunnlagTilGodkjenning()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
 
@@ -2174,7 +2174,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(30.mars, 31.mars))
         håndterYtelserTilUtbetalt()
 
-        håndterLpsInntektsmelding(1.januar)
+        håndterSelvbestemteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiode = 1)
         håndterVilkårsgrunnlagTilUtbetalt()
 
         generasjoner {
@@ -2280,7 +2280,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         }
 
         håndterSøknad(16.januar til 31.januar, orgnummer = a1)
-        håndterLpsInntektsmelding(1.januar, orgnummer = a1)
+        håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1, vedtaksperiode = 3)
         håndterVilkårsgrunnlag()
         håndterYtelser()
         håndterSimulering()

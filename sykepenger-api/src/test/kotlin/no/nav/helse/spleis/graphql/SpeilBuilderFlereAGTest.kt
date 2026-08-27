@@ -104,7 +104,7 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         håndterSøknad(Sykdom(4.januar, 31.januar, 100.prosent), orgnummer = a2)
 
         håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
-        håndterArbeidsgiveropplysninger(listOf(4.januar til 19.januar), orgnummer = a2, beregnetInntekt = 5000.månedlig)
+        håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(4.januar til 19.januar), orgnummer = a2, beregnetInntekt = 5000.månedlig)
 
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
@@ -659,10 +659,10 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(13.mars, 31.mars, 100.prosent), orgnummer = a2)
 
-        håndterLpsInntektsmelding(listOf(1.januar til 16.januar), 1.januar, orgnummer = a1)
-        håndterLpsInntektsmelding(listOf(1.januar til 16.januar), 12.februar, orgnummer = a1)
-        håndterLpsInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), førsteFraværsdag = 17.januar, orgnummer = a2)
-        håndterLpsInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), førsteFraværsdag = 13.mars, orgnummer = a2)
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), orgnummer = a1, vedtaksperiode = 1)
+        håndterArbeidsgiveropplysninger(listOf(), orgnummer = a1, vedtaksperiode = 2)
+        håndterArbeidsgiveropplysninger(listOf(17.januar til 26.januar, 1.februar til 6.februar), orgnummer = a2, vedtaksperiode = 2)
+        håndterArbeidsgiveropplysninger(listOf(), orgnummer = a2, vedtaksperiode = 3)
 
         håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to INNTEKT))
         håndterYtelserTilGodkjenning()

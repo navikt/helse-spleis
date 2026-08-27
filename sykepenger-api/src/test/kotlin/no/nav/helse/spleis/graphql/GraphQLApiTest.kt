@@ -29,6 +29,8 @@ import javax.sql.DataSource
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
+import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Person
@@ -43,7 +45,9 @@ import no.nav.helse.spleis.databaseContainer
 import no.nav.helse.spleis.lagApplikasjonsmodul
 import no.nav.helse.spleis.objectMapper
 import no.nav.helse.spleis.testhelpers.TestObservatør
+import no.nav.helse.spleis.testhelpers.YrkesaktivitetHendelsefabrikk
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -862,7 +866,13 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             person.håndterSykmelding(eventBus, sykmelding(), Aktivitetslogg())
             person.håndterUtbetalingshistorikkEtterInfotrygdendring(eventBus, utbetalinghistorikk(), Aktivitetslogg())
             person.håndterSøknad(eventBus, søknad(), Aktivitetslogg())
-            person.håndterInntektsmelding(eventBus, inntektsmelding(), Aktivitetslogg())
+            val vedtaksperiodeId = eventBus.events.filterIsInstance<EventSubscription.VedtaksperiodeOpprettet>().single().vedtaksperiodeId
+            person.håndterArbeidsgiveropplysninger(eventBus, YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER)).lagArbeidsgiveropplysninger(
+                arbeidsgiverperioder = listOf(FOM til FOM.plusDays(15)),
+                vedtaksperiodeId = vedtaksperiodeId,
+                beregnetInntekt = 31000.månedlig,
+                id = INNTEKTSMELDING_ID
+            ), Aktivitetslogg())
             person.håndterYtelser(eventBus, ytelser(), Aktivitetslogg())
             person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag(), Aktivitetslogg())
             val ytelser = ytelser()
@@ -870,7 +880,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             val simuleringsutfisker = Simuleringsutfisker()
             eventBus.register(simuleringsutfisker)
             person.håndterYtelser(eventBus, ytelser, aktivitetslogg)
-            val vedtaksperiodeId = simuleringsutfisker.vedtaksperiodeId
             val behandlingId = simuleringsutfisker.behandlingId
             val utbetalingId = simuleringsutfisker.utbetalingId
             val fagsystemId = simuleringsutfisker.fagsystemId
@@ -938,7 +947,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         dataSource: DataSource,
         fødselsnummer: String,
         meldingsReferanse: UUID,
-        meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
+        meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.NAV_NO_INNTEKTSMELDING,
         data: String = "{}"
     ) {
         dataSource.connection {
@@ -958,7 +967,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             dataSource = dataSource,
             fødselsnummer = fødselsnummer,
             meldingsReferanse = meldingsReferanse,
-            meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
+            meldingstype = HendelseDao.Meldingstype.NAV_NO_INNTEKTSMELDING,
             data = """
                 {
                     "beregnetInntekt": "$beregnetInntekt",

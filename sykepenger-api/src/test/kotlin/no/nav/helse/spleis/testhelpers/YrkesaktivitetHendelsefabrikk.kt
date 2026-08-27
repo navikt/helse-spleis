@@ -22,7 +22,6 @@ import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.InntekterForBeregning.Inntektsperiode
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.fraInnteksmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
@@ -36,6 +35,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
@@ -59,7 +59,6 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
 
     private val sykmeldinger = mutableListOf<Sykmelding>()
     private val søknader = mutableListOf<Søknad>()
-    private val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
 
     internal fun lagSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
@@ -82,8 +81,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false,
         id: UUID = UUID.randomUUID(),
         merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
-        permittert: Boolean = false,
-        korrigerer: UUID? = null,
+        permittert: Boolean = false, korrigerer: UUID? = null,
         utenlandskSykmelding: Boolean = false,
         arbeidUtenforNorge: Boolean = false,
         sendTilGosys: Boolean = false,
@@ -130,35 +128,6 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         ).apply {
             søknader.add(this)
         }
-    }
-
-    internal fun lagInntektsmelding(
-        arbeidsgiverperioder: List<Periode>,
-        beregnetInntekt: Inntekt,
-        førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
-        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        id: UUID = UUID.randomUUID(),
-        mottatt: LocalDateTime = LocalDateTime.now(),
-        arbeidsforholdId: String? = null,
-    ): Inntektsmelding {
-        val inntektsmeldinggenerator = {
-            Inntektsmelding(
-                meldingsreferanseId = MeldingsreferanseId(id),
-                refusjon = refusjon,
-                behandlingsporing = behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
-                beregnetInntekt = beregnetInntekt,
-                arbeidsgiverperioder = arbeidsgiverperioder,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
-                opphørAvNaturalytelser = opphørAvNaturalytelser,
-                førsteFraværsdag = førsteFraværsdag,
-                mottatt = mottatt,
-                arbeidsforholdId = arbeidsforholdId
-            )
-        }
-        inntektsmeldinger[id] = inntektsmeldinggenerator
-        return inntektsmeldinggenerator()
     }
 
     internal fun lagArbeidsgiveropplysninger(
@@ -212,6 +181,33 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             harFlereArbeidsforhold = harFlereArbeidsforhold
         )
     )
+
+    internal fun lagSelvbestemteArbeidsgiveropplysninger(
+        arbeidsgiverperioder: List<Periode>?,
+        beregnetInntekt: Inntekt?,
+        vedtaksperiodeId: UUID,
+        refusjon: Inntektsmelding.Refusjon? = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        id: UUID = UUID.randomUUID(),
+        mottatt: LocalDateTime = LocalDateTime.now(),
+        harFlereArbeidsforhold: Boolean = false,
+    ) = SelvbestemteArbeidsgiveropplysninger(
+        meldingsreferanseId = MeldingsreferanseId(id),
+        innsendt = mottatt,
+        registrert = mottatt.plusSeconds(1),
+        behandlingsporing = behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
+        vedtaksperiodeId = vedtaksperiodeId,
+        opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            beregnetInntekt = beregnetInntekt,
+            opphørAvNaturalytelser = opphørAvNaturalytelser,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            refusjon = refusjon,
+            harFlereArbeidsforhold = harFlereArbeidsforhold
+        )
+    )
+
 
     internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) =
         InntektsmeldingerReplay(MeldingsreferanseId(UUID.randomUUID()), behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker, vedtaksperiodeId, emptyList())

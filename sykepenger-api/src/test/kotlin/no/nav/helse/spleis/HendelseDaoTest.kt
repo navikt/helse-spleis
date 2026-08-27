@@ -33,7 +33,7 @@ internal class HendelseDaoTest {
 
     private fun DataSource.lagreHendelse(
         meldingsReferanse: UUID,
-        meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
+        meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.NAV_NO_INNTEKTSMELDING,
         fødselsnummer: String = UNG_PERSON_FNR,
         data: String = """{ "@opprettet": "${LocalDateTime.now()}" }"""
     ) {

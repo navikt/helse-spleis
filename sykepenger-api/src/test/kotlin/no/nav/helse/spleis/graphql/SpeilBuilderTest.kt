@@ -289,7 +289,7 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
     @Test
     fun `nav skal ikke utbetale agp for kort periode likevel - perioden går så til AUU`() {
         håndterSøknad(1.januar til 16.januar)
-        håndterLpsInntektsmelding(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
+        håndterSelvbestemteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
         håndterVilkårsgrunnlag()
         håndterYtelserTilGodkjenning()
         val idOverstyring = UUID.randomUUID()
@@ -497,10 +497,10 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelserTilGodkjenning()
-        håndterLpsInntektsmelding(
-            listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.februar,
-            refusjon = Inntektsmelding.Refusjon(INGEN, null)
+        håndterKorrigerendeArbeidsgiveropplysninger(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            vedtaksperiode = 1,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.januar)
         )
         håndterYtelserTilGodkjent()
         håndterYtelserTilGodkjenning()
