@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":sykepenger-model"))
     implementation(project(":sykepenger-serde"))
     implementation(project(":sykepenger-api-graphql"))
+    implementation(project(":sykepenger-api-rest"))
     implementation(project(":sykepenger-api-dto"))
     implementation("com.github.navikt.tbd-libs:naisful-app:$tbdLibsVersion")
     implementation("com.github.navikt.tbd-libs:naisful-postgres:$tbdLibsVersion")

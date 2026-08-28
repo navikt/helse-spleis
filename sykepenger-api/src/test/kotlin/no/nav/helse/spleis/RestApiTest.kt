@@ -2,7 +2,11 @@ package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.signed_jwt_issuer_test.Issuer
 import com.github.navikt.tbd_libs.test_support.TestDataSource
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
@@ -19,6 +23,8 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.testhelpers.YrkesaktivitetHendelsefabrikk
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RestApiTest : AbstractApiTest() {
@@ -37,6 +43,20 @@ internal class RestApiTest : AbstractApiTest() {
     @Test
     fun `hent personJson med fnr`() = blackboxTestApplication(::opprettTestdata) {
         "/api/person-json".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to UNG_PERSON_FNR))
+    }
+
+    @Test
+    fun `personApi krever gyldig access token`() = blackboxTestApplication(::opprettTestdata) {
+        runBlocking {
+            client.post("/api/person") {
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("fødselsnummer" to UNG_PERSON_FNR))
+            }.also {
+                assertEquals(HttpStatusCode.Unauthorized, it.status)
+            }
+        }
+        // med gyldig token kommer vi forbi autentiseringen og helt fram til validering av requesten
+        "/api/person".httpPost(HttpStatusCode.BadRequest, mapOf("fødselsnummer" to "tullball"))
     }
 
     @Test
