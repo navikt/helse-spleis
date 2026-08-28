@@ -8,29 +8,29 @@ import java.util.UUID
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes(
-    JsonSubTypes.Type(value = SpleisVilkarsgrunnlag::class, name = "SpleisVilkarsgrunnlag"),
-    JsonSubTypes.Type(value = InfotrygdVilkarsgrunnlag::class, name = "InfotrygdVilkarsgrunnlag")
+    JsonSubTypes.Type(value = ApiSpleisVilkarsgrunnlag::class, name = "SpleisVilkarsgrunnlag"),
+    JsonSubTypes.Type(value = ApiInfotrygdVilkarsgrunnlag::class, name = "InfotrygdVilkarsgrunnlag")
 )
-sealed interface Vilkarsgrunnlag {
+sealed interface ApiVilkarsgrunnlag {
     val id: UUID
     val skjaeringstidspunkt: LocalDate
     val omregnetArsinntekt: Double
     val sykepengegrunnlag: Double
-    val inntekter: List<Arbeidsgiverinntekt>
-    val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
+    val inntekter: List<ApiArbeidsgiverinntekt>
+    val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjon>
     val opptjeningsvurderingId: UUID
 }
 
-data class SpleisVilkarsgrunnlag(
+data class ApiSpleisVilkarsgrunnlag(
     override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
     override val omregnetArsinntekt: Double,
     override val sykepengegrunnlag: Double,
-    override val inntekter: List<Arbeidsgiverinntekt>,
-    override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
+    override val inntekter: List<ApiArbeidsgiverinntekt>,
+    override val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjon>,
     val beregningsgrunnlag: Double,
     val grunnbelop: Int,
-    val sykepengegrunnlagsgrense: Sykepengegrunnlagsgrense,
+    val sykepengegrunnlagsgrense: ApiSykepengegrunnlagsgrense,
     val antallOpptjeningsdagerErMinst: Int,
     val opptjeningFra: LocalDate,
     val oppfyllerKravOmMinstelonn: Boolean,
@@ -38,7 +38,7 @@ data class SpleisVilkarsgrunnlag(
     val oppfyllerKravOmMedlemskap: Boolean?,
     val forsikringsvurderingId: UUID?,
     override val opptjeningsvurderingId: UUID
-) : Vilkarsgrunnlag {
+) : ApiVilkarsgrunnlag {
     val skjonnsmessigFastsattAarlig: Double? =
         inntekter
             .filter { it.deaktivert != true }
@@ -47,23 +47,23 @@ data class SpleisVilkarsgrunnlag(
             ?.sumOf { it.belop }
 }
 
-data class InfotrygdVilkarsgrunnlag(
+data class ApiInfotrygdVilkarsgrunnlag(
     override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
     override val omregnetArsinntekt: Double,
     override val sykepengegrunnlag: Double,
-    override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
-    override val inntekter: List<Arbeidsgiverinntekt>,
+    override val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjon>,
+    override val inntekter: List<ApiArbeidsgiverinntekt>,
     override val opptjeningsvurderingId: UUID
-) : Vilkarsgrunnlag
+) : ApiVilkarsgrunnlag
 
-data class Sykepengegrunnlagsgrense(
+data class ApiSykepengegrunnlagsgrense(
     val grunnbelop: Int,
     val grense: Int,
     val virkningstidspunkt: LocalDate
 )
 
-enum class Inntektskilde {
+enum class ApiInntektskilde {
     Saksbehandler,
     Inntektsmelding,
     Infotrygd,
@@ -71,39 +71,39 @@ enum class Inntektskilde {
     IkkeRapportert
 }
 
-data class InntekterFraAOrdningen(
+data class ApiInntekterFraAOrdningen(
     val maned: YearMonth,
     val sum: Double
 )
 
-data class SkjonnsmessigFastsatt(
+data class ApiSkjonnsmessigFastsatt(
     val belop: Double,
     val manedsbelop: Double
 )
 
-data class OmregnetArsinntekt(
-    val kilde: Inntektskilde,
+data class ApiOmregnetArsinntekt(
+    val kilde: ApiInntektskilde,
     val belop: Double,
     val manedsbelop: Double,
-    val inntekterFraAOrdningen: List<InntekterFraAOrdningen>?
+    val inntekterFraAOrdningen: List<ApiInntekterFraAOrdningen>?
 )
 
-data class Arbeidsgiverinntekt(
+data class ApiArbeidsgiverinntekt(
     val arbeidsgiver: String,
-    val omregnetArsinntekt: OmregnetArsinntekt,
+    val omregnetArsinntekt: ApiOmregnetArsinntekt,
     // TODO: speil bruker kun <beløp>, og verdien kunne altså vært forenklet til en <Double?>
-    val skjonnsmessigFastsatt: SkjonnsmessigFastsatt?,
+    val skjonnsmessigFastsatt: ApiSkjonnsmessigFastsatt?,
     val fom: LocalDate,
     val tom: LocalDate?,
     val deaktivert: Boolean? = null
 )
 
-data class Arbeidsgiverrefusjon(
+data class ApiArbeidsgiverrefusjon(
     val arbeidsgiver: String,
-    val refusjonsopplysninger: List<Refusjonselement>
+    val refusjonsopplysninger: List<ApiRefusjonselement>
 )
 
-data class Refusjonselement(
+data class ApiRefusjonselement(
     val fom: LocalDate,
     val tom: LocalDate?,
     val belop: Double,

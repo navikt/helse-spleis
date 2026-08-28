@@ -22,7 +22,7 @@ import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.hentPersonSnapshot
-import no.nav.helse.spleis.rest.dto.Person
+import no.nav.helse.spleis.rest.dto.ApiPerson
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("no.nav.helse.spleis.rest.PersonApi")
@@ -76,7 +76,7 @@ private fun hentPerson(
     ident: String,
     callId: String,
     meterRegistry: MeterRegistry
-): Person? {
+): ApiPerson? {
     val snapshot = hentPersonSnapshot(spekematClient, personDao, hendelseDao, ident, callId, meterRegistry) ?: return null
     val (_, aktørId) = retryBlocking { speedClient.hentFødselsnummerOgAktørId(ident, callId).getOrThrow() }
     return mapTilPerson(snapshot.person, ident, aktørId, snapshot.hendelser)

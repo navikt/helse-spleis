@@ -3,28 +3,28 @@ package no.nav.helse.spleis.rest.dto
 import java.time.LocalDate
 import java.util.UUID
 
-data class Person(
+data class ApiPerson(
     val aktorId: String,
     val fodselsnummer: String,
-    val arbeidsgivere: List<Arbeidsgiver>,
+    val arbeidsgivere: List<ApiArbeidsgiver>,
     val dodsdato: LocalDate?,
     val versjon: Int,
-    val vilkarsgrunnlag: List<Vilkarsgrunnlag>
+    val vilkarsgrunnlag: List<ApiVilkarsgrunnlag>
 )
 
-data class Arbeidsgiver(
+data class ApiArbeidsgiver(
     val organisasjonsnummer: String,
-    val generasjoner: List<Generasjon>,
-    val ghostPerioder: List<GhostPeriode>
+    val generasjoner: List<ApiGenerasjon>,
+    val ghostPerioder: List<ApiGhostPeriode>
 )
 
-data class Generasjon(
+data class ApiGenerasjon(
     val id: UUID,
-    val perioder: List<Tidslinjeperiode>,
+    val perioder: List<ApiTidslinjeperiode>,
     val kildeTilGenerasjon: UUID
 )
 
-data class GhostPeriode(
+data class ApiGhostPeriode(
     val id: UUID,
     val fom: LocalDate,
     val tom: LocalDate,

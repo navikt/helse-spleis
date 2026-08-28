@@ -2,7 +2,7 @@ package no.nav.helse.spleis.rest.dto
 
 import java.time.LocalDate
 
-data class Simuleringsdetaljer(
+data class ApiSimuleringsdetaljer(
     val faktiskFom: LocalDate,
     val faktiskTom: LocalDate,
     val konto: String,
@@ -18,21 +18,21 @@ data class Simuleringsdetaljer(
     val refunderesOrgNr: String
 )
 
-data class Simuleringsutbetaling(
+data class ApiSimuleringsutbetaling(
     val utbetalesTilId: String,
     val utbetalesTilNavn: String,
     val forfall: LocalDate,
     val feilkonto: Boolean,
-    val detaljer: List<Simuleringsdetaljer>
+    val detaljer: List<ApiSimuleringsdetaljer>
 )
 
-data class Simuleringsperiode(
+data class ApiSimuleringsperiode(
     val fom: LocalDate,
     val tom: LocalDate,
-    val utbetalinger: List<Simuleringsutbetaling>
+    val utbetalinger: List<ApiSimuleringsutbetaling>
 )
 
-data class Simulering(
+data class ApiSimulering(
     val totalbelop: Int,
-    val perioder: List<Simuleringsperiode>
+    val perioder: List<ApiSimuleringsperiode>
 )

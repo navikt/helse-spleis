@@ -6,18 +6,18 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-enum class Inntektstype {
+enum class ApiInntektstype {
     EnArbeidsgiver
 }
 
-enum class Periodetype {
+enum class ApiPeriodetype {
     Forstegangsbehandling,
     Forlengelse,
     OvergangFraIt,
     Infotrygdforlengelse
 }
 
-enum class Sykdomsdagtype {
+enum class ApiSykdomsdagtype {
     Arbeidsdag,
     Arbeidsgiverdag,
     MeldingTilNavDag,
@@ -40,7 +40,7 @@ enum class Sykdomsdagtype {
     AndreYtelserDagpenger
 }
 
-enum class UtbetalingsdagType {
+enum class ApiUtbetalingsdagType {
     ArbeidsgiverperiodeDag,
     NavDag,
     NavHelgDag,
@@ -53,7 +53,7 @@ enum class UtbetalingsdagType {
     Ventetidsdag
 }
 
-enum class Sykdomsdagkildetype {
+enum class ApiSykdomsdagkildetype {
     Inntektsmelding,
     Soknad,
     Sykmelding,
@@ -61,7 +61,7 @@ enum class Sykdomsdagkildetype {
     Ukjent
 }
 
-enum class Begrunnelse {
+enum class ApiBegrunnelse {
     SykepengedagerOppbrukt,
     SykepengedagerOppbruktOver67,
     MinimumInntekt,
@@ -77,7 +77,7 @@ enum class Begrunnelse {
     Over70
 }
 
-enum class Periodetilstand {
+enum class ApiPeriodetilstand {
     TilUtbetaling,
     TilAnnullering,
     AvventerAnnullering,
@@ -95,7 +95,7 @@ enum class Periodetilstand {
     TilGodkjenning
 }
 
-enum class Utbetalingstatus {
+enum class ApiUtbetalingstatus {
     Annullert,
     GodkjentUtenUtbetaling,
     IkkeGodkjent,
@@ -104,7 +104,7 @@ enum class Utbetalingstatus {
     Utbetalt
 }
 
-enum class Utbetalingtype {
+enum class ApiUtbetalingtype {
     UTBETALING,
     ETTERUTBETALING,
     ANNULLERING,
@@ -112,12 +112,12 @@ enum class Utbetalingtype {
     FERIEPENGER
 }
 
-data class Sykdomsdagkilde(
+data class ApiSykdomsdagkilde(
     val id: UUID,
-    val type: Sykdomsdagkildetype
+    val type: ApiSykdomsdagkildetype
 )
 
-data class Utbetalingsinfo(
+data class ApiUtbetalingsinfo(
     val inntekt: Int?,
     val utbetaling: Int?,
     val personbelop: Int?,
@@ -126,123 +126,123 @@ data class Utbetalingsinfo(
     val totalGrad: Double?
 )
 
-data class Vurdering(
+data class ApiVurdering(
     val godkjent: Boolean,
     val tidsstempel: LocalDateTime,
     val automatisk: Boolean,
     val ident: String
 )
 
-data class Utbetalingslinje(
+data class ApiUtbetalingslinje(
     val fom: LocalDate,
     val tom: LocalDate,
     val dagsats: Int,
     val grad: Int
 )
 
-data class Oppdrag(
+data class ApiOppdrag(
     val fagsystemId: String,
     val tidsstempel: LocalDateTime,
-    val simulering: Simulering?,
-    val utbetalingslinjer: List<Utbetalingslinje>
+    val simulering: ApiSimulering?,
+    val utbetalingslinjer: List<ApiUtbetalingslinje>
 )
 
-data class Utbetaling(
+data class ApiUtbetaling(
     val id: UUID,
-    val typeEnum: Utbetalingtype,
-    val statusEnum: Utbetalingstatus,
+    val typeEnum: ApiUtbetalingtype,
+    val statusEnum: ApiUtbetalingstatus,
     val arbeidsgiverNettoBelop: Int,
     val personNettoBelop: Int,
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
-    val arbeidsgiveroppdrag: Oppdrag?,
-    val personoppdrag: Oppdrag?,
-    val vurdering: Vurdering?
+    val arbeidsgiveroppdrag: ApiOppdrag?,
+    val personoppdrag: ApiOppdrag?,
+    val vurdering: ApiVurdering?
 )
 
-data class Dag(
+data class ApiDag(
     val dato: LocalDate,
-    val sykdomsdagtype: Sykdomsdagtype,
-    val utbetalingsdagtype: UtbetalingsdagType,
-    val kilde: Sykdomsdagkilde,
+    val sykdomsdagtype: ApiSykdomsdagtype,
+    val utbetalingsdagtype: ApiUtbetalingsdagType,
+    val kilde: ApiSykdomsdagkilde,
     val grad: Double?,
-    val utbetalingsinfo: Utbetalingsinfo?,
-    val begrunnelser: List<Begrunnelse>?
+    val utbetalingsinfo: ApiUtbetalingsinfo?,
+    val begrunnelser: List<ApiBegrunnelse>?
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes(
-    JsonSubTypes.Type(value = BeregnetPeriode::class, name = "BeregnetPeriode"),
-    JsonSubTypes.Type(value = UberegnetPeriode::class, name = "UberegnetPeriode")
+    JsonSubTypes.Type(value = ApiBeregnetPeriode::class, name = "BeregnetPeriode"),
+    JsonSubTypes.Type(value = ApiUberegnetPeriode::class, name = "UberegnetPeriode")
 )
-sealed interface Tidslinjeperiode {
+sealed interface ApiTidslinjeperiode {
     val behandlingId: UUID
     val kilde: UUID
     val fom: LocalDate
     val tom: LocalDate
-    val tidslinje: List<Dag>
-    val periodetype: Periodetype
-    val hendelser: List<Hendelse>
+    val tidslinje: List<ApiDag>
+    val periodetype: ApiPeriodetype
+    val hendelser: List<ApiHendelse>
 
     // 040423: dette feltet virker ikke å være i bruk i Speil, men spesialist nullsjekker det
-    val inntektstype: Inntektstype
+    val inntektstype: ApiInntektstype
     val erForkastet: Boolean
     val opprettet: LocalDateTime
     val vedtaksperiodeId: UUID
-    val periodetilstand: Periodetilstand
+    val periodetilstand: ApiPeriodetilstand
     val skjaeringstidspunkt: LocalDate
-    val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>
+    val pensjonsgivendeInntekter: List<ApiPensjonsgivendeInntekt>
 }
 
-data class UberegnetPeriode(
+data class ApiUberegnetPeriode(
     override val behandlingId: UUID,
     override val kilde: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
-    override val tidslinje: List<Dag>,
-    override val periodetype: Periodetype,
+    override val tidslinje: List<ApiDag>,
+    override val periodetype: ApiPeriodetype,
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
-    override val periodetilstand: Periodetilstand,
+    override val periodetilstand: ApiPeriodetilstand,
     override val skjaeringstidspunkt: LocalDate,
-    override val hendelser: List<Hendelse>,
-    override val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>
-) : Tidslinjeperiode {
-    override val inntektstype: Inntektstype get() = Inntektstype.EnArbeidsgiver
+    override val hendelser: List<ApiHendelse>,
+    override val pensjonsgivendeInntekter: List<ApiPensjonsgivendeInntekt>
+) : ApiTidslinjeperiode {
+    override val inntektstype: ApiInntektstype get() = ApiInntektstype.EnArbeidsgiver
 }
 
-data class BeregnetPeriode(
+data class ApiBeregnetPeriode(
     override val behandlingId: UUID,
     override val kilde: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
-    override val tidslinje: List<Dag>,
-    override val periodetype: Periodetype,
+    override val tidslinje: List<ApiDag>,
+    override val periodetype: ApiPeriodetype,
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
-    override val periodetilstand: Periodetilstand,
+    override val periodetilstand: ApiPeriodetilstand,
     override val skjaeringstidspunkt: LocalDate,
-    override val hendelser: List<Hendelse>,
-    override val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>,
+    override val hendelser: List<ApiHendelse>,
+    override val pensjonsgivendeInntekter: List<ApiPensjonsgivendeInntekt>,
     val beregningId: UUID,
     val gjenstaendeSykedager: Int?,
     val forbrukteSykedager: Int?,
     val maksdato: LocalDate,
-    val utbetaling: Utbetaling,
-    val periodevilkar: Periodevilkar,
+    val utbetaling: ApiUtbetaling,
+    val periodevilkar: ApiPeriodevilkar,
     val vilkarsgrunnlagId: UUID?,
-    val annulleringskandidater: List<Annulleringskandidat>
-) : Tidslinjeperiode {
-    override val inntektstype: Inntektstype get() = Inntektstype.EnArbeidsgiver
+    val annulleringskandidater: List<ApiAnnulleringskandidat>
+) : ApiTidslinjeperiode {
+    override val inntektstype: ApiInntektstype get() = ApiInntektstype.EnArbeidsgiver
 }
 
-data class Periodevilkar(
-    val sykepengedager: Sykepengedager,
-    val alder: Alder
+data class ApiPeriodevilkar(
+    val sykepengedager: ApiSykepengedager,
+    val alder: ApiAlder
 ) {
-    data class Sykepengedager(
+    data class ApiSykepengedager(
         val skjaeringstidspunkt: LocalDate,
         val maksdato: LocalDate,
         val forbrukteSykedager: Int?,
@@ -250,18 +250,18 @@ data class Periodevilkar(
         val oppfylt: Boolean
     )
 
-    data class Alder(
+    data class ApiAlder(
         val alderSisteSykedag: Int,
         val oppfylt: Boolean
     )
 }
 
-data class PensjonsgivendeInntekt(
+data class ApiPensjonsgivendeInntekt(
     val inntektsar: Int,
     val arligBelop: Double
 )
 
-data class Annulleringskandidat(
+data class ApiAnnulleringskandidat(
     val vedtaksperiodeId: UUID,
     val organisasjonsnummer: String,
     val fom: LocalDate,
