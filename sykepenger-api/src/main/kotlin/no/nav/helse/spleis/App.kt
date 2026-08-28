@@ -22,6 +22,7 @@ import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dao.SendtDao
 import no.nav.helse.spleis.graphql.Api.installGraphQLApi
 import no.nav.helse.spleis.opptjening.opptjeningApi
+import no.nav.helse.spleis.rest.personApi
 import org.slf4j.LoggerFactory
 
 internal val nyObjectmapper
@@ -92,5 +93,6 @@ internal fun Application.lagApplikasjonsmodul(
     spannerApi(hendelseDao, personDao, sendtDao)
     sporingApi(personDao)
     installGraphQLApi(speedClient, spekematClient, hendelseDao, personDao, meterRegistry)
+    personApi(speedClient, spekematClient, hendelseDao, personDao, meterRegistry)
     opptjeningApi(personDao)
 }
