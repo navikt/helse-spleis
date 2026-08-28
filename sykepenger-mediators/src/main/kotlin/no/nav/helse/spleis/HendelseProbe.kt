@@ -42,10 +42,6 @@ object HendelseProbe {
         tell("Simulering")
     }
 
-    fun onInntektsmelding() {
-        tell("Inntektsmelding")
-    }
-
     fun onNavNoInntektsmelding() {
         tell("NavNoInntektsmelding")
     }

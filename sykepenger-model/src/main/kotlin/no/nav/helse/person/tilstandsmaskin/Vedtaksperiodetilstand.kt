@@ -21,14 +21,6 @@ internal sealed interface Vedtaksperiodetilstand {
 
     fun replayUtført(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {}
 
-    fun inntektsmeldingFerdigbehandlet(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-    }
-
     fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         return null
     }

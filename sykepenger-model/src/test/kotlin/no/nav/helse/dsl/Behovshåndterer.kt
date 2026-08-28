@@ -131,8 +131,7 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 opphørAvNaturalytelser = opphørAvNaturalytelser,
                 førsteFraværsdag = førsteFraværsdag,
-                mottatt = metadata.innsendt,
-                arbeidsforholdId = arbeidsforholdId
+                mottatt = metadata.innsendt
             )
             private fun Inntektsmelding.somEksternKontrakt(): no.nav.inntektsmeldingkontrakt.Inntektsmelding {
                 val beregnetInntekt = faktaavklartInntekt.inntektsdata.beløp

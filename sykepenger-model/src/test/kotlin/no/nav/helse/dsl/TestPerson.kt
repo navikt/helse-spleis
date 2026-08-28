@@ -248,8 +248,7 @@ internal class TestPerson(
             opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
             id: UUID = UUID.randomUUID(),
-            mottatt: LocalDateTime = LocalDateTime.now(),
-            arbeidsforholdId: String? = null
+            mottatt: LocalDateTime = LocalDateTime.now()
         ): UUID {
             val inntektsmelding = arbeidsgiverHendelsefabrikk.lagInntektsmelding(
                 arbeidsgiverperioder,
@@ -260,7 +259,6 @@ internal class TestPerson(
                 begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id,
                 mottatt = mottatt,
-                arbeidsforholdId = arbeidsforholdId
             )
             behovshåndterer.gammelInntektsmelding(inntektsmelding)
             return id

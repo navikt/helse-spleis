@@ -18,7 +18,6 @@ import no.nav.helse.hendelser.GjenopptaBehandling
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -58,7 +57,6 @@ import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
@@ -98,7 +96,6 @@ internal class TestHendelseMediator : IHendelseMediator {
     val lestNySøknad get() = lestNySøknadVerdi.get()
     val lestSendtSøknadArbeidsgiver get() = lestSendtSøknadArbeidsgiverVerdi.get()
     val lestSendtSøknad get() = lestSendtSøknadVerdi.get()
-    val lestInntektsmelding get() = lestInntektsmeldingVerdi.get()
     val lestNavNoInntektsmelding get() = lestNavNoInntektsmeldingVerdi.get()
     val lestKorrigertNavNoInntektsmelding get() = lestKorrigertNavNoInntektsmeldingVerdi.get()
     val lestNavNoSelvbestemtInntektsmelding get() = lestNavNoSelvbestemtInntektsmeldingVerdi.get()
@@ -206,10 +203,6 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(personopplysninger: Personopplysninger, message: SendtSøknadNavMessage, søknad: Søknad, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {
         lestSendtSøknadVerdi.set(true)
-    }
-
-    override fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: BehandlingContext) {
-        lestInntektsmeldingVerdi.set(true)
     }
 
     override fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsmeldingMeldingsreferanseId: MeldingsreferanseId, context: BehandlingContext) {}

@@ -166,8 +166,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
-        mottatt: LocalDateTime = LocalDateTime.now(),
-        arbeidsforholdId: String? = null,
+        mottatt: LocalDateTime = LocalDateTime.now()
     ) = Inntektsmelding(
         meldingsreferanseId = MeldingsreferanseId(id),
         refusjon = refusjon,
@@ -177,8 +176,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
         opphørAvNaturalytelser = opphørAvNaturalytelser,
         førsteFraværsdag = førsteFraværsdag,
-        mottatt = mottatt,
-        arbeidsforholdId = arbeidsforholdId,
+        mottatt = mottatt
     )
 
     internal fun lagArbeidsgiveropplysninger(

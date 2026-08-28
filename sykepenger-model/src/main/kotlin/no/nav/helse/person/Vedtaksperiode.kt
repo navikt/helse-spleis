@@ -845,11 +845,6 @@ internal class Vedtaksperiode private constructor(
         tilstand.replayUtført(this, eventBus, replays, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
-    internal fun inntektsmeldingFerdigbehandlet(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
-        tilstand.inntektsmeldingFerdigbehandlet(this, eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
-    }
-
     private fun håndterArbeidsgiveropplysninger(eventBus: EventBus, eventyr: List<List<Revurderingseventyr>>, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
         eventBus.emitInntektsmeldingHåndtert(
             hendelse.metadata.meldingsreferanseId.id,

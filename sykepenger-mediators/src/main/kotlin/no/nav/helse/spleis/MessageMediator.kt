@@ -28,7 +28,6 @@ import no.nav.helse.spleis.meldinger.IdentOpphørtRiver
 import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
 import no.nav.helse.spleis.meldinger.InntektsopplysningerFraLagretInntektsmeldingRiver
-import no.nav.helse.spleis.meldinger.LpsOgAltinnInntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.MigrateRiver
 import no.nav.helse.spleis.meldinger.MinimumSykdomsgradVurdertRiver
 import no.nav.helse.spleis.meldinger.NavNoInntektsmeldingerRiver
@@ -74,7 +73,6 @@ import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
@@ -140,7 +138,6 @@ internal class MessageMediator(
             SendtFiskerSøknaderRiver(it, this)
             SendtAnnetSøknaderRiver(it, this)
             SendtArbeidsledigSøknaderRiver(it, this)
-            LpsOgAltinnInntektsmeldingerRiver(it, this)
             NavNoInntektsmeldingerRiver(it, this)
             NavNoKorrigerteInntektsmeldingerRiver(it, this)
             NavNoSelvbestemtInntektsmeldingerRiver(it, this)
@@ -263,7 +260,6 @@ internal class MessageMediator(
         is DødsmeldingMessage,
         is IdentOpphørtMessage,
         is InfotrygdendringMessage,
-        is InntektsmeldingMessage,
         is NavNoInntektsmeldingMessage,
         is NavNoKorrigertInntektsmeldingMessage,
         is NavNoSelvbestemtInntektsmeldingMessage,

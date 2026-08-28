@@ -26,7 +26,6 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
@@ -231,18 +230,6 @@ class Person private constructor(
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         arbeidsgiver.validerArbeidsgiverperiode(selvbestemteArbeidsgiveropplysninger, selvbestemteArbeidsgiveropplysninger.vedtaksperiodeId, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, selvbestemteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
-    }
-
-    fun håndterInntektsmelding(eventBus: EventBus, inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler inntektsmelding")
-        val arbeidsgiver = finnEllerOpprettYrkesaktivitet(inntektsmelding.behandlingsporing, aktivitetsloggMedPersonkontekst)
-
-        if (arbeidsgiver.utsettHåndtering(inntektsmelding, aktivitetsloggMedPersonkontekst)) return
-
-        val revurderingseventyr = arbeidsgiver.håndterInntektsmelding(eventBus, inntektsmelding, aktivitetsloggMedPersonkontekst)
-        arbeidsgiver.inntektsmeldingFerdigbehandlet(eventBus, inntektsmelding, aktivitetsloggMedPersonkontekst)
-        if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
-        håndterGjenoppta(eventBus, inntektsmelding, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndterInntektsopplysningerFraLagretInntektsmelding(eventBus: EventBus, inntektsopplysningerFraLagretInnteksmelding: InntektsopplysningerFraLagretInnteksmelding, aktivitetslogg: IAktivitetslogg) {

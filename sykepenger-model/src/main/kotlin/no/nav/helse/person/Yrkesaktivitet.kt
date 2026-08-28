@@ -95,7 +95,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.refusjon.Refusjonsservitør
-import no.nav.helse.person.tilstandsmaskin.AvventerInntektsmelding
 import no.nav.helse.person.view.ArbeidsgiverView
 import no.nav.helse.sykdomstidslinje.Dag.Companion.bareNyeDager
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
@@ -644,26 +643,6 @@ internal class Yrkesaktivitet private constructor(
         return tidligsteOverstyring
     }
 
-    internal fun utsettHåndtering(inntektsmelding: Inntektsmelding, aktivitetslogg: IAktivitetslogg): Boolean {
-        val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        // Utsetter aldri når arbeidsforholdId er null
-        if (inntektsmelding.arbeidsforholdId == null) return false
-
-        // Om vi ikke har noe periode som inneholder "inntektsdato" så er vi mest sannsynlig en IM før søknad,
-        // men kan også være en edge-case hvor håndtering av dager ville strukket perioden slik at den nå
-        // ville inneholdt inntektsdato. Her kan vi ikke være sikre på at det vil komme noe replay, så må bare håndtere IM om så er tilfelle
-        val periodeSomErTruffet = periodeSomInneholderInntektsdato(inntektsmelding) ?: return false
-
-        // Utsetter håndtering om en av periodene er i AvventerInnektsmelding. Da vet vi at replay vil komme
-        if (vedtaksperioderMedSammeFørsteFraværsdag(periodeSomErTruffet).any { it.tilstand is AvventerInntektsmelding }) {
-            aktivitetsloggMedArbeidsgiverkontekst.info("Behandler ikke inntektsmelding likevel, da den har satt arbeidsforholdId satt til noe annet enn null")
-            return true
-        }
-
-        // Mest sannsynlig en korrigerende inntektsmelding
-        return false
-    }
-
     private fun periodeSomInneholderInntektsdato(inntektsmelding: Inntektsmelding) =
         vedtaksperioder.firstOrNull { inntektsmelding.faktaavklartInntekt.inntektsdata.dato in it.periode }
 
@@ -698,12 +677,6 @@ internal class Yrkesaktivitet private constructor(
     internal fun refusjonstidslinje(vedtaksperiode: Vedtaksperiode): Beløpstidslinje {
         val startdatoPåSammenhengendeVedtaksperioder = startdatoPåSammenhengendeVedtaksperioder(vedtaksperiode)
         return ubrukteRefusjonsopplysninger.servér(startdatoPåSammenhengendeVedtaksperioder, vedtaksperiode.periode)
-    }
-
-    internal fun inntektsmeldingFerdigbehandlet(eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
-        val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
-        aktivitetsloggMedArbeidsgiverkontekst.info("Inntektsmelding ferdigbehandlet")
-        håndter { it.inntektsmeldingFerdigbehandlet(eventBus, hendelse, aktivitetsloggMedArbeidsgiverkontekst) }
     }
 
     internal fun håndterHistorikkFraInfotrygd(

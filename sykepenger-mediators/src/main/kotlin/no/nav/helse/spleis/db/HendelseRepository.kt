@@ -67,7 +67,6 @@ import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
@@ -165,7 +164,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is NavNoSelvbestemtInntektsmeldingMessage -> NAV_NO_SELVBESTEMT_INNTEKTSMELDING
         is NavNoKorrigertInntektsmeldingMessage -> NAV_NO_KORRIGERT_INNTEKTSMELDING
         is NavNoInntektsmeldingMessage -> NAV_NO_INNTEKTSMELDING
-        is InntektsmeldingMessage -> INNTEKTSMELDING
         is YtelserMessage -> YTELSER
         is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
         is SimuleringMessage -> SIMULERING

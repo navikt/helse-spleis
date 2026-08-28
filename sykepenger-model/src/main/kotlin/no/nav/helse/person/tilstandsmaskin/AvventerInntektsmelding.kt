@@ -76,15 +76,6 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         sendTrengerArbeidsgiveropplysninger(vedtaksperiode, eventBus)
     }
 
-    override fun inntektsmeldingFerdigbehandlet(
-        vedtaksperiode: Vedtaksperiode,
-        eventBus: EventBus,
-        hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg
-    ) {
-        vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)
-    }
-
     private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg): Boolean {
         vedtaksperiode.videreførEksisterendeRefusjonsopplysninger(eventBus, null, aktivitetslogg)
         vedtaksperiode.lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg)

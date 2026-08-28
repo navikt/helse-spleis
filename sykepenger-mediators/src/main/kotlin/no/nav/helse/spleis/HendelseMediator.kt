@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.GjenopptaBehandling
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -58,7 +57,6 @@ import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
@@ -279,13 +277,6 @@ internal class HendelseMediator(
         opprettPersonOgHåndter(personopplysninger, message, context, historiskeFolkeregisteridenter) { eventBus, person, aktivitetslogg ->
             HendelseProbe.onSøknadFrilans()
             person.håndterSøknad(eventBus, søknad, aktivitetslogg)
-        }
-    }
-
-    override fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: BehandlingContext) {
-        hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
-            HendelseProbe.onInntektsmelding()
-            person.håndterInntektsmelding(eventBus, inntektsmelding, aktivitetslogg)
         }
     }
 
@@ -773,7 +764,6 @@ internal interface IHendelseMediator {
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     )
 
-    fun behandle(message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: BehandlingContext)
     fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsmeldingMeldingsreferanseId: MeldingsreferanseId, context: BehandlingContext)
     fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, selvbestemteArbeidsgiveropplysninger: SelvbestemteArbeidsgiveropplysninger, context: BehandlingContext)
     fun behandle(message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: BehandlingContext)
