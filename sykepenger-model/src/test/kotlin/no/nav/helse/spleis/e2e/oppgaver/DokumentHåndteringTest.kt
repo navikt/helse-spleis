@@ -394,14 +394,14 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
                     vedtaksperiodeId = vp2,
                     gjeldendeTilstand = AVVENTER_INNTEKTSMELDING,
-                    hendelser = setOf(søknad2Id, im),
+                    hendelser = setOf(søknad2Id),
                     fom = 17.januar,
                     tom = 31.januar,
                     sykmeldingsperioder = emptyList(),
                     speilrelatert = false
                 ), observatør.forkastet(vp2)
             )
-            assertFalse(im in observatør.inntektsmeldingIkkeHåndtert)
+            assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
         }
     }
 

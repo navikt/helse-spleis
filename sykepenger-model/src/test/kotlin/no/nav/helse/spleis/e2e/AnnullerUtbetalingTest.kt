@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.Behovsoppsamler
@@ -25,13 +25,13 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.BehandlingView
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING_TIL_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -41,6 +41,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING_TIL_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
@@ -139,8 +140,8 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
-            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
@@ -154,11 +155,13 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 11.januar, listOf(11.januar til 26.januar))
 
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
 
-            håndterVilkårsgrunnlag(3.vedtaksperiode)
-            assertVarsel(RV_IV_7, 3.vedtaksperiode.filter())
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
+            assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+            assertVarsel(RV_IM_8, 3.vedtaksperiode.filter())
         }
     }
 
@@ -182,7 +185,8 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
@@ -201,7 +205,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertSisteTilstand(2.vedtaksperiode, TIL_ANNULLERING)
 
-            assertVarsler(2.vedtaksperiode, RV_IV_7)
+            assertVarsel(RV_IV_7, 2.vedtaksperiode.filter())
         }
     }
 
@@ -987,7 +991,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             håndterAnnullering(1.vedtaksperiode)
 
-            assertEquals(inspektør.vedtaksperioder(1.vedtaksperiode).tilstand, AVSLUTTET_UTEN_UTBETALING)
+            assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.vedtaksperioder(1.vedtaksperiode).tilstand)
             assertSisteTilstand(2.vedtaksperiode, TIL_ANNULLERING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
 
@@ -1020,7 +1024,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertEquals(listOf(2.vedtaksperiode, 3.vedtaksperiode), observatør.vedtaksperiodeAnnullertEventer.map { it.vedtaksperiodeId })
 
-            assertEquals(inspektør.vedtaksperioder(1.vedtaksperiode).tilstand, AVSLUTTET_UTEN_UTBETALING)
+            assertEquals(AVSLUTTET_UTEN_UTBETALING, inspektør.vedtaksperioder(1.vedtaksperiode).tilstand)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
         }

@@ -45,7 +45,15 @@ import no.nav.helse.oktober
 import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.*
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -313,7 +321,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
             håndterArbeidsgiveropplysninger(listOf(2.desember.somPeriode(), 4.desember til 18.desember), begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet")
-            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf(11.november til 11.november, 21.november til 5.desember), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).dagerNavOvertarAnsvar)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
@@ -324,7 +332,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_IM_3, 3.vedtaksperiode.filter())
-            assertVarsel(Varselkode.RV_IM_8, 3.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
         }
     }
 
@@ -2196,7 +2204,6 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre",
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-            assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre", 1.vedtaksperiode.filter())
             assertFunksjonellFeil(RV_IM_8, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }

@@ -31,15 +31,15 @@ sealed interface Arbeidsgiveropplysning {
         data class Refusjonsendring(val fom: LocalDate, val beløp: Inntekt)
     }
 
-    data class IkkeUtbetaltArbeidsgiverperiode(private val begrunnelse: Begrunnelse) : Arbeidsgiveropplysning {
+    data class IkkeUtbetaltArbeidsgiverperiode(internal val begrunnelse: Begrunnelse) : Arbeidsgiveropplysning {
         internal fun valider(aktivitetslogg: IAktivitetslogg) = begrunnelse.valider(aktivitetslogg)
     }
 
-    data class RedusertUtbetaltBeløpIArbeidsgiverperioden(private val begrunnelse: Begrunnelse) : Arbeidsgiveropplysning {
+    data class RedusertUtbetaltBeløpIArbeidsgiverperioden(internal val begrunnelse: Begrunnelse) : Arbeidsgiveropplysning {
         internal fun valider(aktivitetslogg: IAktivitetslogg) = begrunnelse.valider(aktivitetslogg)
     }
 
-    data class UtbetaltDelerAvArbeidsgiverperioden(private val begrunnelse: Begrunnelse, val utbetaltTilOgMed: LocalDate) : Arbeidsgiveropplysning {
+    data class UtbetaltDelerAvArbeidsgiverperioden(internal val begrunnelse: Begrunnelse, val utbetaltTilOgMed: LocalDate) : Arbeidsgiveropplysning {
         internal fun valider(aktivitetslogg: IAktivitetslogg) = begrunnelse.valider(aktivitetslogg)
     }
 
@@ -47,7 +47,7 @@ sealed interface Arbeidsgiveropplysning {
 
     data object IkkeNyArbeidsgiverperiode : Arbeidsgiveropplysning
 
-    enum class Begrunnelse(private val støttes: Boolean) {
+    enum class Begrunnelse(internal val støttes: Boolean) {
         LovligFravaer(støttes = true),
         ArbeidOpphoert(støttes = true),
         ManglerOpptjening(støttes = true),

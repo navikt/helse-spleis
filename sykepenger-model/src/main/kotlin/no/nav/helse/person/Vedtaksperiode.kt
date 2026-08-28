@@ -866,15 +866,21 @@ internal class Vedtaksperiode private constructor(
             return null
         }
 
+        val forkastingEventyr = forkastDersomViIkkeStøtterBegrunnelseForReduksjon(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
+        if (forkastingEventyr != null) return forkastingEventyr
+
+        val nullstillEgenmeldingsdagerIRevurderingseventyr = nullstillEgenmeldingsdagerIArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, inntektsmeldingDager(arbeidsgiveropplysninger.metadata.meldingsreferanseId))
+        val (arbeidsgiverperiodeRevurderingseventyr, arbeidsgiverperiode) = håndterOppgittArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst)
+
         val eventyr = listOf(
-            nullstillEgenmeldingsdagerIArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, inntektsmeldingDager(arbeidsgiveropplysninger.metadata.meldingsreferanseId)),
-            håndterOppgittArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst),
+            nullstillEgenmeldingsdagerIRevurderingseventyr,
+            arbeidsgiverperiodeRevurderingseventyr,
             håndterOppgittRefusjon(eventBus, arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst, ubrukteRefusjonsopplysninger),
             håndterOppgittInntekt(eventBus, arbeidsgiveropplysninger, inntektshistorikk, aktivitetsloggMedVedtaksperiodekontekst),
             håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
-            håndterIkkeUtbetaltArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
-            håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
-            håndterUtbetaltDelerAvArbeidsgiverperioden(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterIkkeUtbetaltArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, vedtaksperioder, arbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(eventBus, arbeidsgiveropplysninger, vedtaksperioder, arbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterUtbetaltDelerAvArbeidsgiverperioden(eventBus, arbeidsgiveropplysninger, vedtaksperioder, arbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst),
             håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
             håndterHarFlereArbeidsforhold(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
         )
@@ -886,15 +892,21 @@ internal class Vedtaksperiode private constructor(
         if (arbeidsgiveropplysninger.vedtaksperiodeId != id) return null
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
 
+        val forkastingEventyr = forkastDersomViIkkeStøtterBegrunnelseForReduksjon(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
+        if (forkastingEventyr != null) return forkastingEventyr
+
+        val nullstillEgenmeldingsdagerIArbeidsgiverperiodeEventyr = nullstillEgenmeldingsdagerIArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, inntektsmeldingDager(arbeidsgiveropplysninger.metadata.meldingsreferanseId))
+        val (arbeidsgiverperiodeRevurderingseventyr, arbeidsgiverperiode) = håndterOppgittArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst)
+
         val eventyr = listOf(
-            nullstillEgenmeldingsdagerIArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst, inntektsmeldingDager(arbeidsgiveropplysninger.metadata.meldingsreferanseId)),
-            håndterOppgittArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst),
+            nullstillEgenmeldingsdagerIArbeidsgiverperiodeEventyr,
+            arbeidsgiverperiodeRevurderingseventyr,
             håndterOppgittRefusjon(eventBus, arbeidsgiveropplysninger, vedtaksperioder, aktivitetsloggMedVedtaksperiodekontekst, ubrukteRefusjonsopplysninger),
             håndterOppgittInntekt(eventBus, arbeidsgiveropplysninger, inntektshistorikk, aktivitetsloggMedVedtaksperiodekontekst),
             håndterIkkeNyArbeidsgiverperiode(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
-            håndterIkkeUtbetaltArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
-            håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
-            håndterUtbetaltDelerAvArbeidsgiverperioden(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterIkkeUtbetaltArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, vedtaksperioder, arbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(eventBus, arbeidsgiveropplysninger, vedtaksperioder, arbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst),
+            håndterUtbetaltDelerAvArbeidsgiverperioden(eventBus, arbeidsgiveropplysninger, vedtaksperioder, arbeidsgiverperiode, aktivitetsloggMedVedtaksperiodekontekst),
             håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst),
             håndterHarFlereArbeidsforhold(arbeidsgiveropplysninger, aktivitetsloggMedVedtaksperiodekontekst)
         )
@@ -935,15 +947,17 @@ internal class Vedtaksperiode private constructor(
         aktivitetsloggMedVedtaksperiodekontekst.info(melding = "Beregnet agp ${behandlinger.dagerUtenNavAnsvar.dager} mens arbeidsgiver opplyser om ${oppgittArbeidsgiverperiode.perioder}")
     }
 
-    private fun <T> håndterOppgittArbeidsgiverperiode(eventBus: EventBus, arbeidsgiveropplysninger: T, vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
-        val oppgittArbeidgiverperiode = arbeidsgiveropplysninger.filterIsInstance<OppgittArbeidgiverperiode>().singleOrNull() ?: return emptyList()
+    private fun <T> håndterOppgittArbeidsgiverperiode(eventBus: EventBus, arbeidsgiveropplysninger: T, vedtaksperioder: List<Vedtaksperiode>, aktivitetslogg: IAktivitetslogg): Pair<List<Revurderingseventyr>, DagerUtenNavAnsvaravklaring> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+        val oppgittArbeidgiverperiode = arbeidsgiveropplysninger.filterIsInstance<OppgittArbeidgiverperiode>().singleOrNull() ?: return emptyList<Revurderingseventyr>() to behandlinger.dagerUtenNavAnsvar
         val eventyr = mutableListOf<Revurderingseventyr>()
         val initiell = OppgittArbeidsgiverperiodehåndtering.opprett(oppgittArbeidgiverperiode.perioder, arbeidsgiveropplysninger.metadata)
 
+        var beregnetArbeidsgiverperiode = behandlinger.dagerUtenNavAnsvar
         val rester = vedtaksperioder.fold(initiell) { acc, vedtaksperiode ->
             val arbeidsgiverperiodetidslinje = acc.sykdomstidslinje(vedtaksperiode)
             if (arbeidsgiverperiodetidslinje != null) {
                 eventyr.add(vedtaksperiode.håndterBitAvArbeidsgiverperiode(eventBus, arbeidsgiveropplysninger, aktivitetslogg, arbeidsgiverperiodetidslinje))
+                beregnetArbeidsgiverperiode = vedtaksperiode.behandlinger.dagerUtenNavAnsvar
             }
             acc.håndterVedtaksperiode(vedtaksperiode.periode)
         }
@@ -953,7 +967,7 @@ internal class Vedtaksperiode private constructor(
             aktivitetslogg.info("Det er rester igjen etter håndtering av dager ($antallDagerIgjen dager)")
         }
 
-        return eventyr
+        return eventyr to beregnetArbeidsgiverperiode
     }
 
     private fun <T> håndterBitAvArbeidsgiverperiode(eventBus: EventBus, arbeidsgiveropplysninger: T, aktivitetslogg: IAktivitetslogg, arbeidsgiverperiodetidslinje: Sykdomstidslinje): Revurderingseventyr where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
@@ -1191,25 +1205,47 @@ internal class Vedtaksperiode private constructor(
         return emptyList()
     }
 
-    private fun <T> håndterIkkeUtbetaltArbeidsgiverperiode(eventBus: EventBus, arbeidsgiveropplysninger: T, aktivitetslogg: IAktivitetslogg) : List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+    private fun <T> forkastDersomViIkkeStøtterBegrunnelseForReduksjon(eventBus: EventBus, arbeidsgiveropplysninger: T, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+        val begrunnelse = listOfNotNull(
+            arbeidsgiveropplysninger.filterIsInstance<IkkeUtbetaltArbeidsgiverperiode>().singleOrNull()?.begrunnelse,
+            arbeidsgiveropplysninger.filterIsInstance<RedusertUtbetaltBeløpIArbeidsgiverperioden>().singleOrNull()?.begrunnelse,
+            arbeidsgiveropplysninger.filterIsInstance<UtbetaltDelerAvArbeidsgiverperioden>().singleOrNull()?.begrunnelse
+        ).singleOrNull() ?: return null
+
+        if (begrunnelse.støttes) return null
+
+        sørgForNyBehandlingHvisIkkeÅpen(eventBus, arbeidsgiveropplysninger)
+        aktivitetslogg.funksjonellFeil(RV_IM_8)
+        forkast(eventBus, arbeidsgiveropplysninger, aktivitetslogg)
+        eventBus.emitArbeidsgiveropplysningerIkkeHåndtert(arbeidsgiveropplysninger.metadata.meldingsreferanseId, yrkesaktivitet.organisasjonsnummer)
+        return Revurderingseventyr.forkasting(arbeidsgiveropplysninger, skjæringstidspunkt, periode)
+    }
+
+    private fun <T> håndterIkkeUtbetaltArbeidsgiverperiode(eventBus: EventBus, arbeidsgiveropplysninger: T, vedtaksperioder: List<Vedtaksperiode>, arbeidsgiverperiode: DagerUtenNavAnsvaravklaring, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
         val ikkeUbetaltArbeidsgiverperiode = arbeidsgiveropplysninger.filterIsInstance<IkkeUtbetaltArbeidsgiverperiode>().singleOrNull() ?: return emptyList()
-        return håndterNavUtbetalerArbeidsgiverperiode(eventBus, aktivitetslogg, arbeidsgiveropplysninger) {
-            ikkeUbetaltArbeidsgiverperiode.valider(aktivitetslogg)
+        return vedtaksperioder.mapNotNull { vedtaksperiode ->
+            vedtaksperiode.håndterNavUtbetalerArbeidsgiverperiode(eventBus, aktivitetslogg, arbeidsgiveropplysninger, arbeidsgiverperiode.dager) {
+                ikkeUbetaltArbeidsgiverperiode.valider(vedtaksperiode.registrerKontekst(aktivitetslogg))
+            }
         }
     }
 
-    private fun <T> håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(eventBus: EventBus, arbeidsgiveropplysninger: T, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+    private fun <T> håndterRedusertUtbetaltBeløpIArbeidsgiverperioden(eventBus: EventBus, arbeidsgiveropplysninger: T, vedtaksperioder: List<Vedtaksperiode>, arbeidsgiverperiode: DagerUtenNavAnsvaravklaring, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
         val redusertUtbetaltBeløpIArbeidsgiverperioden = arbeidsgiveropplysninger.filterIsInstance<RedusertUtbetaltBeløpIArbeidsgiverperioden>().singleOrNull() ?: return emptyList()
-        return håndterNavUtbetalerArbeidsgiverperiode(eventBus, aktivitetslogg, arbeidsgiveropplysninger) {
-            redusertUtbetaltBeløpIArbeidsgiverperioden.valider(aktivitetslogg)
+        return vedtaksperioder.mapNotNull { vedtaksperiode ->
+            vedtaksperiode.håndterNavUtbetalerArbeidsgiverperiode(eventBus, aktivitetslogg, arbeidsgiveropplysninger, arbeidsgiverperiode.dager) {
+                redusertUtbetaltBeløpIArbeidsgiverperioden.valider(vedtaksperiode.registrerKontekst(aktivitetslogg))
+            }
         }
     }
 
-    private fun <T> håndterUtbetaltDelerAvArbeidsgiverperioden(eventBus: EventBus, arbeidsgiveropplysninger: T, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+    private fun <T> håndterUtbetaltDelerAvArbeidsgiverperioden(eventBus: EventBus, arbeidsgiveropplysninger: T, vedtaksperioder: List<Vedtaksperiode>, arbeidsgiverperiode: DagerUtenNavAnsvaravklaring, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
         val utbetaltDelerAvArbeidsgiverperioden = arbeidsgiveropplysninger.filterIsInstance<UtbetaltDelerAvArbeidsgiverperioden>().singleOrNull() ?: return emptyList()
-        val perioderNavUtbetaler = behandlinger.ventedager().dagerUtenNavAnsvar.dager.flatMap { it.uten(LocalDate.MIN til utbetaltDelerAvArbeidsgiverperioden.utbetaltTilOgMed) }
-        return håndterNavUtbetalerArbeidsgiverperiode(eventBus, aktivitetslogg, arbeidsgiveropplysninger, perioderNavUtbetaler = perioderNavUtbetaler) {
-            utbetaltDelerAvArbeidsgiverperioden.valider(aktivitetslogg)
+        return vedtaksperioder.mapNotNull { vedtaksperiode ->
+            val perioderNavUtbetaler = arbeidsgiverperiode.dager.flatMap { it.uten(LocalDate.MIN til utbetaltDelerAvArbeidsgiverperioden.utbetaltTilOgMed) }
+            vedtaksperiode.håndterNavUtbetalerArbeidsgiverperiode(eventBus, aktivitetslogg, arbeidsgiveropplysninger, perioderNavUtbetaler) {
+                utbetaltDelerAvArbeidsgiverperioden.valider(vedtaksperiode.registrerKontekst(aktivitetslogg))
+            }
         }
     }
 
@@ -1217,13 +1253,12 @@ internal class Vedtaksperiode private constructor(
         eventBus: EventBus,
         aktivitetslogg: IAktivitetslogg,
         arbeidsgiveropplysninger: T,
-        perioderNavUtbetaler: List<Periode> = behandlinger.ventedager().dagerUtenNavAnsvar.dager,
+        perioderNavUtbetaler: List<Periode>,
         valider: () -> Unit
-    ): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
-        val bit = sykNavBit(arbeidsgiveropplysninger, perioderNavUtbetaler)
-        if (bit == null) valider()
-        else håndterDager(eventBus, arbeidsgiveropplysninger, bit, aktivitetslogg, valider)
-        return listOf(Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, this.periode))
+    ): Revurderingseventyr? where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {
+        val bit = sykNavBit(arbeidsgiveropplysninger, perioderNavUtbetaler) ?: return null
+        håndterDager(eventBus, arbeidsgiveropplysninger, bit, aktivitetslogg, valider)
+        return Revurderingseventyr.arbeidsgiverperiode(arbeidsgiveropplysninger, skjæringstidspunkt, this.periode)
     }
 
     private fun <T> håndterOpphørAvNaturalytelser(arbeidsgiveropplysninger: T, aktivitetslogg: IAktivitetslogg): List<Revurderingseventyr> where T : Hendelse, T : Collection<Arbeidsgiveropplysning> {

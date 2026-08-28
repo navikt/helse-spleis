@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverper
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -17,12 +18,96 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
+
+    @Test
+    fun `Selvbestemt Arbeidsgiveropplysninger med reduksjon av AGP som er sendt på andre AUU biter også på den første`() {
+        a1 {
+
+            håndterSøknad(1.januar til 5.januar)
+            håndterSøknad(6.januar til 10.januar)
+
+            håndterSelvbestemtArbeidsgiveropplysninger(vedtaksperiodeId = 2.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
+            assertEquals(listOf(1.januar til 5.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+
+            assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+            assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `Selvbestemt Arbeidsgiveropplysninger med ikke utbetalt AGP som er sendt på andre AUU biter også på den første`() {
+        a1 {
+            håndterSøknad(1.januar til 5.januar)
+            håndterSøknad(6.januar til 10.januar)
+
+            håndterSelvbestemtArbeidsgiveropplysninger(vedtaksperiodeId = 2.vedtaksperiode, arbeidsgiverperioder = emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
+            assertEquals(listOf(1.januar til 5.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+
+            assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+            assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `Selvbestemt Arbeidsgiveropplysninger med delvis ikke utbetalt AGP som er sendt på andre AUU biter også på den første`() {
+        a1 {
+            håndterSøknad(1.januar til 5.januar)
+            håndterSøknad(6.januar til 10.januar)
+
+            håndterSelvbestemtArbeidsgiveropplysninger(vedtaksperiodeId = 2.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 4.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
+            assertEquals(listOf(5.januar til 5.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+            assertEquals(listOf(6.januar til 10.januar), inspektør.dagerNavOvertarAnsvar(2.vedtaksperiode))
+
+            assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+            assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `Selvbestemte Arbeidsgiveropplysninger med redusert AGP biter på ren AUU med hele AGP i forkant`() {
+        a1 {
+            håndterSøknad(1.januar til 16.januar)
+
+            håndterSøknad(17.januar til 31.januar)
+
+            håndterSelvbestemtArbeidsgiveropplysninger(vedtaksperiodeId = 2.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
+            assertEquals(listOf(1.januar til 16.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
+            assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(2.vedtaksperiode))
+
+            assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
+        }
+    }
 
     @Test
     fun `mottar selvbestemte arbeidsgiveropplysninger når vi ikke trenger en`() {
