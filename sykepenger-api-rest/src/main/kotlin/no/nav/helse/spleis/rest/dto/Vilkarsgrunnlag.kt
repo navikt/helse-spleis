@@ -37,15 +37,9 @@ data class ApiSpleisVilkarsgrunnlag(
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?,
     val forsikringsvurderingId: UUID?,
-    override val opptjeningsvurderingId: UUID
-) : ApiVilkarsgrunnlag {
-    val skjonnsmessigFastsattAarlig: Double? =
-        inntekter
-            .filter { it.deaktivert != true }
-            .mapNotNull { it.skjonnsmessigFastsatt }
-            .takeIf(List<*>::isNotEmpty)
-            ?.sumOf { it.belop }
-}
+    override val opptjeningsvurderingId: UUID,
+    val skjonnsmessigFastsattAarlig: Double?
+) : ApiVilkarsgrunnlag
 
 data class ApiInfotrygdVilkarsgrunnlag(
     override val id: UUID,

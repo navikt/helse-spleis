@@ -491,24 +491,32 @@ private fun Inntekt.tilOmregnetArsinntekt() = ApiOmregnetArsinntekt(
 
 internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
     when (vilkårsgrunnlag) {
-        is SpleisVilkårsgrunnlag -> ApiSpleisVilkarsgrunnlag(
-            id = id,
-            skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
-            omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
-            sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
-            beregningsgrunnlag = vilkårsgrunnlag.beregningsgrunnlag,
-            inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(vilkårsgrunnlag.skjæringstidspunkt, inntekt) },
-            grunnbelop = vilkårsgrunnlag.grunnbeløp,
-            sykepengegrunnlagsgrense = mapSykepengegrunnlagsgrense(vilkårsgrunnlag.sykepengegrunnlagsgrense),
-            antallOpptjeningsdagerErMinst = vilkårsgrunnlag.antallOpptjeningsdagerErMinst,
-            opptjeningFra = vilkårsgrunnlag.opptjeningFra,
-            oppfyllerKravOmMinstelonn = vilkårsgrunnlag.oppfyllerKravOmMinstelønn,
-            oppfyllerKravOmOpptjening = vilkårsgrunnlag.oppfyllerKravOmOpptjening,
-            oppfyllerKravOmMedlemskap = vilkårsgrunnlag.oppfyllerKravOmMedlemskap,
-            arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map { refusjon -> mapArbeidsgiverRefusjon(refusjon) },
-            forsikringsvurderingId = vilkårsgrunnlag.forsikringsvurderingId,
-            opptjeningsvurderingId = vilkårsgrunnlag.opptjeningsvurderingId
-        )
+        is SpleisVilkårsgrunnlag -> {
+            val inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(vilkårsgrunnlag.skjæringstidspunkt, inntekt) }
+            ApiSpleisVilkarsgrunnlag(
+                id = id,
+                skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
+                omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
+                sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
+                beregningsgrunnlag = vilkårsgrunnlag.beregningsgrunnlag,
+                inntekter = inntekter,
+                grunnbelop = vilkårsgrunnlag.grunnbeløp,
+                sykepengegrunnlagsgrense = mapSykepengegrunnlagsgrense(vilkårsgrunnlag.sykepengegrunnlagsgrense),
+                antallOpptjeningsdagerErMinst = vilkårsgrunnlag.antallOpptjeningsdagerErMinst,
+                opptjeningFra = vilkårsgrunnlag.opptjeningFra,
+                oppfyllerKravOmMinstelonn = vilkårsgrunnlag.oppfyllerKravOmMinstelønn,
+                oppfyllerKravOmOpptjening = vilkårsgrunnlag.oppfyllerKravOmOpptjening,
+                oppfyllerKravOmMedlemskap = vilkårsgrunnlag.oppfyllerKravOmMedlemskap,
+                arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map { refusjon -> mapArbeidsgiverRefusjon(refusjon) },
+                forsikringsvurderingId = vilkårsgrunnlag.forsikringsvurderingId,
+                opptjeningsvurderingId = vilkårsgrunnlag.opptjeningsvurderingId,
+                skjonnsmessigFastsattAarlig = inntekter
+                    .filter { it.deaktivert != true }
+                    .mapNotNull { it.skjonnsmessigFastsatt }
+                    .takeIf(List<*>::isNotEmpty)
+                    ?.sumOf { it.belop }
+            )
+        }
 
         is InfotrygdVilkårsgrunnlag -> ApiInfotrygdVilkarsgrunnlag(
             id = id,
