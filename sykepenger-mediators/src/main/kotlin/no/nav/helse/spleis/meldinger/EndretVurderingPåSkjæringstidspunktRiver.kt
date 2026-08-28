@@ -41,7 +41,9 @@ internal class EndretVurderingPåSkjæringstidspunktRiver(
         vurderingsformat = packet.vurderingsformat
     )
 
-    private val JsonMessage.vurderingsformat get() = vurderinger.singleOrNull {
-        it.eventName == get("@event_name").asText()
-    } ?: error("Ukjent vurdering for eventName ${get("@event_name").asText()}")
+    private val JsonMessage.vurderingsformat get() = interestedIn("@event_name").let {
+        vurderinger.singleOrNull {
+            it.eventName == get("@event_name").asText()
+        } ?: error("Ukjent vurdering for eventName ${get("@event_name").asText()}")
+    }
 }
