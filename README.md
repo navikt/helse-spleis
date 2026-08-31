@@ -27,27 +27,19 @@ ikke 30. april 2023.
 
 Dette forutsetter at det ikke er noen 26 ukers opphold i sykepengeutbetalinger mellom 30. april 2023 og 1. mai 2026.
 
-## Personoppslag: REST erstatter GraphQL
+## Personoppslag
 
-`sykepenger-api` eksponerer personsnapshotet på to måter:
-
-| Endepunkt | Status |
-| --- | --- |
-| `POST /graphql` | Under utfasing. Ikke ekte GraphQL — den plukker fnr ut av request-bodyen med regex, ignorerer feltseleksjon og returnerer alltid hele grafen. Feil svares med HTTP 200 og en `errors`-array. |
-| `POST /api/person` | Erstatteren. Vanlig REST. |
+`sykepenger-api` eksponerer personsnapshotet via `POST /api/person`.
 
 `POST /api/person` tar `{"fødselsnummer": "12345678910"}` og svarer med personobjektet direkte i bodyen.
 Feil følger RFC 9457 (`application/problem+json`): `400` ved ugyldig fødselsnummer, `401` uten gyldig
 token, `404` når personen ikke finnes, `500` ellers.
 
-JSON-modellen er den samme som i GraphQL-varianten, med ett unntak: diskriminatoren heter `type` i
-stedet for `__typename`, og verdiene er uten `GraphQL`-prefiks (`BeregnetPeriode` framfor
-`GraphQLBeregnetPeriode`). Hendelsene bruker sitt eksisterende `type`-felt som diskriminator.
+Diskriminatoren heter `type`, og verdiene er uten `GraphQL`-prefiks (f.eks. `BeregnetPeriode`).
+Hendelsene bruker sitt eksisterende `type`-felt som diskriminator.
 
 DTO-ene ligger i modulen `sykepenger-api-rest`, mappingen i
-`sykepenger-api/src/main/kotlin/no/nav/helse/spleis/rest/RestMapping.kt`. Så lenge begge API-ene lever
-er `RestMapping.kt` og `graphql/Mapping.kt` nesten identiske; `PersonApiTest` kjører samme person
-gjennom begge endepunktene og feiler hvis de divergerer.
+`sykepenger-api/src/main/kotlin/no/nav/helse/spleis/rest/RestMapping.kt`.
 
 ## Migrere JSON til siste skjema
 

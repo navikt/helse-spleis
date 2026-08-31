@@ -2,11 +2,7 @@ package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.signed_jwt_issuer_test.Issuer
 import com.github.navikt.tbd_libs.test_support.TestDataSource
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
@@ -23,8 +19,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.testhelpers.YrkesaktivitetHendelsefabrikk
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RestApiTest : AbstractApiTest() {
@@ -47,16 +41,16 @@ internal class RestApiTest : AbstractApiTest() {
 
     @Test
     fun `personApi krever gyldig access token`() = blackboxTestApplication(::opprettTestdata) {
-        runBlocking {
-            client.post("/api/person") {
-                contentType(ContentType.Application.Json)
-                setBody(mapOf("fødselsnummer" to UNG_PERSON_FNR))
-            }.also {
-                assertEquals(HttpStatusCode.Unauthorized, it.status)
-            }
-        }
+        val body = """{"fødselsnummer": "tullball"}"""
+        val annenIssuer = Issuer("annen", "annen_audience")
+
+        post("/api/person", body, HttpStatusCode.Unauthorized, accessToken = null)
+        post("/api/person", body, HttpStatusCode.Unauthorized, accessToken = issuer.accessToken {
+            withAudience("feil_audience")
+        })
+        post("/api/person", body, HttpStatusCode.Unauthorized, accessToken = annenIssuer.accessToken())
         // med gyldig token kommer vi forbi autentiseringen og helt fram til validering av requesten
-        "/api/person".httpPost(HttpStatusCode.BadRequest, mapOf("fødselsnummer" to "tullball"))
+        post("/api/person", body, HttpStatusCode.BadRequest, accessToken = issuer.accessToken())
     }
 
     @Test
@@ -68,27 +62,6 @@ internal class RestApiTest : AbstractApiTest() {
     fun `finner melding`() = blackboxTestApplication(::opprettTestdata) {
         "/api/hendelse-json/${MELDINGSREFERANSE}".httpGet(HttpStatusCode.OK)
     }
-
-    @Test
-    fun `request med manglende eller feil access token`() = blackboxTestApplication(::opprettTestdata) {
-        val query = """
-            {
-                person(fnr: \"${UNG_PERSON_FNR}\") { } 
-            }
-        """
-
-        val body = """{"query": "$query"}"""
-
-        val annenIssuer = Issuer("annen", "annen_audience")
-
-        post(body, HttpStatusCode.Unauthorized, accessToken = null)
-        post(body, HttpStatusCode.Unauthorized, accessToken = issuer.accessToken {
-            withAudience("feil_audience")
-        })
-        post(body, HttpStatusCode.Unauthorized, accessToken = annenIssuer.accessToken())
-        post(body, HttpStatusCode.OK, accessToken = issuer.accessToken())
-    }
-
 
     private fun opprettTestdata(testDataSource: TestDataSource) {
         val eventBus = EventBus()

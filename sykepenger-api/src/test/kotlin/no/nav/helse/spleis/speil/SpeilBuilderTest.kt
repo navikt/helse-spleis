@@ -1,4 +1,4 @@
-package no.nav.helse.spleis.graphql
+package no.nav.helse.spleis.speil
 
 import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime

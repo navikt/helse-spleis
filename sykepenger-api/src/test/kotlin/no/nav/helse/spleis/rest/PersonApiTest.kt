@@ -1,8 +1,5 @@
 package no.nav.helse.spleis.rest
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.naisful.test.TestContext
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -12,7 +9,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.mockk.every
 import io.mockk.mockk
-import java.net.URI
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
@@ -20,10 +16,9 @@ import no.nav.helse.person.EventBus
 import no.nav.helse.person.Person
 import no.nav.helse.spleis.AbstractSpleisApiTest
 import no.nav.helse.spleis.SpekematClient
-import no.nav.helse.spleis.graphql.Spekemat
 import no.nav.helse.spleis.objectMapper
+import no.nav.helse.spleis.testhelpers.Spekemat
 import no.nav.helse.spleis.testhelpers.TestObservatør
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
@@ -45,7 +40,7 @@ internal class PersonApiTest : AbstractSpleisApiTest() {
     }
 
     @Test
-    fun `REST-payloaden er identisk med GraphQL-payloaden`() {
+    fun `REST-payloaden for en person har forventet form`() {
         val spekemat = Spekemat()
         observatør = TestObservatør()
         val eventBus = EventBus().apply {
@@ -59,15 +54,9 @@ internal class PersonApiTest : AbstractSpleisApiTest() {
             every { spekematClient.hentSpekemat(UNG_PERSON_FNR, any()) } returns spekemat.resultat()
 
             val restBody = hentPerson("""{"fødselsnummer":"$UNG_PERSON_FNR"}""", HttpStatusCode.OK)
-            val graphqlBody = hentPersonViaGraphQL()
-
-            val forventet = objectMapper.readTree(graphqlBody.utenVariableVerdier)
-                .path("data")
-                .path("person")
-                .somRestKontrakt()
 
             JSONAssert.assertEquals(
-                objectMapper.writeValueAsString(forventet),
+                forventetPayload,
                 restBody.utenVariableVerdier,
                 STRICT
             )
@@ -82,26 +71,6 @@ internal class PersonApiTest : AbstractSpleisApiTest() {
         val responseBody = response.bodyAsText()
         assertEquals(forventetStatus, response.status, responseBody)
         return responseBody
-    }
-
-    private suspend fun TestContext.hentPersonViaGraphQL(): String {
-        val query = URI("https://raw.githubusercontent.com/navikt/helse-spesialist/main/clients/spesialist-client-spleis/src/main/resources/graphql/hentSnapshot.graphql")
-            .toURL()
-            .readText()
-
-        @Language("JSON")
-        val requestBody = """
-            {
-                "query": "$query",
-                "variables": {
-                  "fnr": "$UNG_PERSON_FNR"
-                },
-                "operationName": "HentSnapshot"
-            }
-        """
-        return client.post("/graphql") { setBody(requestBody) }
-            .also { assertEquals(HttpStatusCode.OK, it.status) }
-            .bodyAsText()
     }
 
     private companion object {
@@ -123,40 +92,11 @@ internal class PersonApiTest : AbstractSpleisApiTest() {
                 .replace(FagsystemIdRegex, FagsystemId)
 
         /**
-         * Felter GraphQL-varianten svarer med, men som REST-varianten bevisst utelater fordi
-         * spesialist verken ber om dem eller har dem i klientmodellen sin. Nøkkelen er
-         * "<klassenavn i GraphQL>.<felt>".
+         * Forventet payload for scenariet i `opprettTestdata`, hentet fra `/person-api-payload.json`.
+         * Fungerer som en regresjonstest på formen til REST-payloaden. Erstatter den tidligere
+         * live-sammenligningen mot GraphQL-payloaden (nå fjernet).
          */
-        private val bevisstUtelatt = setOf(
-            // spesialists `grunnlag`-fragment ber kun om skjonnsmessigFastsatt { belop, manedsbelop },
-            // og GraphQLArbeidsgiverinntekt i klienten deres har ikke feltet i det hele tatt.
-            // NB: SpleisVilkarsgrunnlag.skjonnsmessigFastsattAarlig er derimot i bruk.
-            "inntekter.skjonnsmessigFastsattAarlig"
-        )
-
-        /**
-         * Oversetter GraphQL-payloaden til det REST-APIet skal svare med: diskriminatoren `__typename`
-         * heter `type` og har ikke `GraphQL`-prefiks. Hendelsene har allerede et `type`-felt som brukes
-         * som diskriminator i REST-varianten, og der forsvinner `__typename` helt.
-         */
-        private fun JsonNode.somRestKontrakt(forelder: String = ""): JsonNode = when (this) {
-            is ObjectNode -> {
-                val typenavn = get("__typename")?.asText()
-                objectMapper.createObjectNode().also { kopi ->
-                    fields().forEach { (navn, verdi) ->
-                        if (navn == "__typename") return@forEach
-                        if ("$forelder.$navn" in bevisstUtelatt) return@forEach
-                        kopi.set<JsonNode>(navn, verdi.somRestKontrakt(navn))
-                    }
-                    if (typenavn != null && !has("type")) kopi.put("type", typenavn.removePrefix("GraphQL"))
-                }
-            }
-
-            is ArrayNode -> objectMapper.createArrayNode().also { kopi ->
-                forEach { kopi.add(it.somRestKontrakt(forelder)) }
-            }
-
-            else -> this
-        }
+        private val forventetPayload =
+            object {}.javaClass.getResource("/person-api-payload.json")!!.readText(Charsets.UTF_8)
     }
 }

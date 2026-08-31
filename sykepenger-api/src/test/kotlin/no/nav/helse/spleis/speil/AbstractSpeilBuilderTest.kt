@@ -1,4 +1,4 @@
-package no.nav.helse.spleis.graphql
+package no.nav.helse.spleis.speil
 
 import java.time.LocalDate
 import java.time.LocalDate.EPOCH
@@ -42,6 +42,7 @@ import no.nav.helse.spleis.testhelpers.Behovssamler
 import no.nav.helse.spleis.testhelpers.Behovssamler.Companion.yrkesaktivitetstypeOgOrgnummer
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.testhelpers.PersonHendelsefabrikk
+import no.nav.helse.spleis.testhelpers.Spekemat
 import no.nav.helse.spleis.testhelpers.TestObservatør
 import no.nav.helse.spleis.testhelpers.YrkesaktivitetHendelsefabrikk
 import no.nav.helse.utbetalingslinjer.Oppdragstatus

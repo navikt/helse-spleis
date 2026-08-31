@@ -30,8 +30,7 @@ private val sikkerlogger = LoggerFactory.getLogger("tjenestekall")
 private val fødselsnummerRegex = "\\d{11}".toRegex()
 
 /**
- * REST-varianten av personoppslaget. Lever side om side med `POST /graphql` og skal etter hvert
- * erstatte det.
+ * REST-endepunktet for personoppslag.
  */
 internal fun Application.personApi(
     speedClient: SpeedClient,

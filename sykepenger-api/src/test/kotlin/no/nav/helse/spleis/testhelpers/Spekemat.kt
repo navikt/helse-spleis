@@ -1,4 +1,4 @@
-package no.nav.helse.spleis.graphql
+package no.nav.helse.spleis.testhelpers
 
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.spekemat.fabrikk.Pølse

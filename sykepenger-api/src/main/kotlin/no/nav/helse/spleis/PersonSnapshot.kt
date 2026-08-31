@@ -37,8 +37,7 @@ internal data class PersonSnapshot(
 )
 
 /**
- * Henter og bygger speil-snapshotet for en person. Delt mellom GraphQL-apiet og REST-apiet slik at
- * begge har nøyaktig samme datagrunnlag – det eneste som skiller dem er mappingen til DTO-er.
+ * Henter og bygger speil-snapshotet for en person.
  */
 internal fun hentPersonSnapshot(
     spekematClient: SpekematClient,
