@@ -1,0 +1,623 @@
+{
+    "aktorId": "ikke_kult",
+    "fodselsnummer": "12029240045",
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "generasjoner": [
+                {
+                    "id": "00000000-0000-0000-0000-000000000000",
+                    "perioder": [
+                        {
+                            "type": "BeregnetPeriode",
+                            "behandlingId": "00000000-0000-0000-0000-000000000000",
+                            "kilde": "00000000-0000-0000-0000-000000000000",
+                            "fom": "2018-01-01",
+                            "tom": "2018-01-30",
+                            "tidslinje": [
+                                {
+                                    "dato": "2018-01-01",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-02",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-03",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-04",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-05",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-06",
+                                    "sykdomsdagtype": "SykHelgedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-07",
+                                    "sykdomsdagtype": "SykHelgedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-08",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-09",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-10",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-11",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-12",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-13",
+                                    "sykdomsdagtype": "SykHelgedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-14",
+                                    "sykdomsdagtype": "SykHelgedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-15",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-16",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-17",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "NavDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": {
+                                        "inntekt": null,
+                                        "utbetaling": 1431,
+                                        "personbelop": 0,
+                                        "arbeidsgiverbelop": 1431,
+                                        "refusjonsbelop": null,
+                                        "totalGrad": 100.0
+                                    },
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-18",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "NavDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": {
+                                        "inntekt": null,
+                                        "utbetaling": 1431,
+                                        "personbelop": 0,
+                                        "arbeidsgiverbelop": 1431,
+                                        "refusjonsbelop": null,
+                                        "totalGrad": 100.0
+                                    },
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-19",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "NavDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": {
+                                        "inntekt": null,
+                                        "utbetaling": 1431,
+                                        "personbelop": 0,
+                                        "arbeidsgiverbelop": 1431,
+                                        "refusjonsbelop": null,
+                                        "totalGrad": 100.0
+                                    },
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-20",
+                                    "sykdomsdagtype": "SykHelgedag",
+                                    "utbetalingsdagtype": "NavHelgDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-21",
+                                    "sykdomsdagtype": "SykHelgedag",
+                                    "utbetalingsdagtype": "NavHelgDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-22",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "NavDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": {
+                                        "inntekt": null,
+                                        "utbetaling": 1431,
+                                        "personbelop": 0,
+                                        "arbeidsgiverbelop": 1431,
+                                        "refusjonsbelop": null,
+                                        "totalGrad": 100.0
+                                    },
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-23",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "NavDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": {
+                                        "inntekt": null,
+                                        "utbetaling": 1431,
+                                        "personbelop": 0,
+                                        "arbeidsgiverbelop": 1431,
+                                        "refusjonsbelop": null,
+                                        "totalGrad": 100.0
+                                    },
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-24",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "NavDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": {
+                                        "inntekt": null,
+                                        "utbetaling": 1431,
+                                        "personbelop": 0,
+                                        "arbeidsgiverbelop": 1431,
+                                        "refusjonsbelop": null,
+                                        "totalGrad": 100.0
+                                    },
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-25",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "NavDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": {
+                                        "inntekt": null,
+                                        "utbetaling": 1431,
+                                        "personbelop": 0,
+                                        "arbeidsgiverbelop": 1431,
+                                        "refusjonsbelop": null,
+                                        "totalGrad": 100.0
+                                    },
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-26",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "NavDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": {
+                                        "inntekt": null,
+                                        "utbetaling": 1431,
+                                        "personbelop": 0,
+                                        "arbeidsgiverbelop": 1431,
+                                        "refusjonsbelop": null,
+                                        "totalGrad": 100.0
+                                    },
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-27",
+                                    "sykdomsdagtype": "SykHelgedag",
+                                    "utbetalingsdagtype": "NavHelgDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-28",
+                                    "sykdomsdagtype": "SykHelgedag",
+                                    "utbetalingsdagtype": "NavHelgDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": null,
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-29",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "NavDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": {
+                                        "inntekt": null,
+                                        "utbetaling": 1431,
+                                        "personbelop": 0,
+                                        "arbeidsgiverbelop": 1431,
+                                        "refusjonsbelop": null,
+                                        "totalGrad": 100.0
+                                    },
+                                    "begrunnelser": null
+                                },
+                                {
+                                    "dato": "2018-01-30",
+                                    "sykdomsdagtype": "Sykedag",
+                                    "utbetalingsdagtype": "NavDag",
+                                    "kilde": {
+                                        "id": "00000000-0000-0000-0000-000000000000",
+                                        "type": "Soknad"
+                                    },
+                                    "grad": 100.0,
+                                    "utbetalingsinfo": {
+                                        "inntekt": null,
+                                        "utbetaling": 1431,
+                                        "personbelop": 0,
+                                        "arbeidsgiverbelop": 1431,
+                                        "refusjonsbelop": null,
+                                        "totalGrad": 100.0
+                                    },
+                                    "begrunnelser": null
+                                }
+                            ],
+                            "periodetype": "Forstegangsbehandling",
+                            "erForkastet": false,
+                            "opprettet": "2018-01-01T00:00:00",
+                            "vedtaksperiodeId": "00000000-0000-0000-0000-000000000000",
+                            "periodetilstand": "Utbetalt",
+                            "skjaeringstidspunkt": "2018-01-01",
+                            "hendelser": [
+                                {
+                                    "id": "00000000-0000-0000-0000-000000000000",
+                                    "eksternDokumentId": "",
+                                    "fom": "2018-01-01",
+                                    "tom": "2018-01-30",
+                                    "rapportertDato": "2018-01-01T00:00:00",
+                                    "sendtNav": "2018-01-01T00:00:00",
+                                    "type": "SendtSoknadNav"
+                                },
+                                {
+                                    "id": "00000000-0000-0000-0000-000000000000",
+                                    "eksternDokumentId": "",
+                                    "mottattDato": "2018-01-01T00:00:00",
+                                    "beregnetInntekt": 0.0,
+                                    "type": "Inntektsmelding"
+                                }
+                            ],
+                            "pensjonsgivendeInntekter": [],
+                            "beregningId": "00000000-0000-0000-0000-000000000000",
+                            "gjenstaendeSykedager": 238,
+                            "forbrukteSykedager": 10,
+                            "maksdato": "2018-12-28",
+                            "utbetaling": {
+                                "id": "00000000-0000-0000-0000-000000000000",
+                                "typeEnum": "UTBETALING",
+                                "statusEnum": "Utbetalt",
+                                "arbeidsgiverNettoBelop": 14310,
+                                "personNettoBelop": 0,
+                                "arbeidsgiverFagsystemId": "ZZZZZZZZZZZZZZZZZZZZZZZZZZ",
+                                "personFagsystemId": "ZZZZZZZZZZZZZZZZZZZZZZZZZZ",
+                                "arbeidsgiveroppdrag": {
+                                    "fagsystemId": "ZZZZZZZZZZZZZZZZZZZZZZZZZZ",
+                                    "tidsstempel": "2018-01-01T00:00:00",
+                                    "simulering": {
+                                        "totalbelop": 2000,
+                                        "perioder": [
+                                            {
+                                                "fom": "2018-01-17",
+                                                "tom": "2018-01-30",
+                                                "utbetalinger": [
+                                                    {
+                                                        "utbetalesTilId": "987654321",
+                                                        "utbetalesTilNavn": "Org Orgesen AS",
+                                                        "forfall": "2018-01-31",
+                                                        "feilkonto": false,
+                                                        "detaljer": [
+                                                            {
+                                                                "faktiskFom": "2018-01-17",
+                                                                "faktiskTom": "2018-01-30",
+                                                                "konto": "81549300",
+                                                                "belop": 2000,
+                                                                "tilbakeforing": false,
+                                                                "sats": 1000.0,
+                                                                "typeSats": "DAG",
+                                                                "antallSats": 2,
+                                                                "uforegrad": 100,
+                                                                "klassekode": "SPREFAG-IOP",
+                                                                "klassekodeBeskrivelse": "Sykepenger, Refusjon arbeidsgiver",
+                                                                "utbetalingstype": "YTEL",
+                                                                "refunderesOrgNr": "987654321"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "utbetalingslinjer": []
+                                },
+                                "personoppdrag": {
+                                    "fagsystemId": "ZZZZZZZZZZZZZZZZZZZZZZZZZZ",
+                                    "tidsstempel": "2018-01-01T00:00:00",
+                                    "simulering": null,
+                                    "utbetalingslinjer": []
+                                },
+                                "vurdering": {
+                                    "godkjent": true,
+                                    "tidsstempel": "2018-01-01T00:00:00",
+                                    "automatisk": false,
+                                    "ident": "Ola Nordmann"
+                                }
+                            },
+                            "periodevilkar": {
+                                "sykepengedager": {
+                                    "skjaeringstidspunkt": "2018-01-01",
+                                    "maksdato": "2018-12-28",
+                                    "forbrukteSykedager": 10,
+                                    "gjenstaendeSykedager": 238,
+                                    "oppfylt": true
+                                },
+                                "alder": {
+                                    "alderSisteSykedag": 25,
+                                    "oppfylt": true
+                                }
+                            },
+                            "vilkarsgrunnlagId": "00000000-0000-0000-0000-000000000000",
+                            "annulleringskandidater": [
+                                {
+                                    "vedtaksperiodeId": "00000000-0000-0000-0000-000000000000",
+                                    "organisasjonsnummer": "987654321",
+                                    "fom": "2018-01-01",
+                                    "tom": "2018-01-30"
+                                }
+                            ],
+                            "inntektstype": "EnArbeidsgiver"
+                        }
+                    ],
+                    "kildeTilGenerasjon": "00000000-0000-0000-0000-000000000000"
+                }
+            ],
+            "ghostPerioder": []
+        }
+    ],
+    "dodsdato": null,
+    "versjon": 54,
+    "vilkarsgrunnlag": [
+        {
+            "type": "SpleisVilkarsgrunnlag",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "skjaeringstidspunkt": "2018-01-01",
+            "omregnetArsinntekt": 372000.0,
+            "sykepengegrunnlag": 372000.0,
+            "inntekter": [
+                {
+                    "arbeidsgiver": "987654321",
+                    "omregnetArsinntekt": {
+                        "kilde": "Inntektsmelding",
+                        "belop": 372000.0,
+                        "manedsbelop": 31000.0,
+                        "inntekterFraAOrdningen": null
+                    },
+                    "skjonnsmessigFastsatt": null,
+                    "fom": "2018-01-01",
+                    "tom": null,
+                    "deaktivert": false
+                }
+            ],
+            "arbeidsgiverrefusjoner": [
+                {
+                    "arbeidsgiver": "987654321",
+                    "refusjonsopplysninger": [
+                        {
+                            "fom": "2018-01-01",
+                            "tom": null,
+                            "belop": 31000.0,
+                            "meldingsreferanseId": "00000000-0000-0000-0000-000000000000"
+                        }
+                    ]
+                }
+            ],
+            "beregningsgrunnlag": 372000.0,
+            "grunnbelop": 93634,
+            "sykepengegrunnlagsgrense": {
+                "grunnbelop": 93634,
+                "grense": 561804,
+                "virkningstidspunkt": "2017-05-01"
+            },
+            "antallOpptjeningsdagerErMinst": 365,
+            "opptjeningFra": "2017-01-01",
+            "oppfyllerKravOmMinstelonn": true,
+            "oppfyllerKravOmOpptjening": true,
+            "oppfyllerKravOmMedlemskap": true,
+            "forsikringsvurderingId": null,
+            "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000000",
+            "skjonnsmessigFastsattAarlig": null
+        }
+    ]
+}
