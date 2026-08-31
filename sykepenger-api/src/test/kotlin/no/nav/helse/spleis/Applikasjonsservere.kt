@@ -171,8 +171,9 @@ internal class Applikasjonsservere(private val poolSize: Int) {
     }
 
     internal class BlackboxTestContext(val client: HttpClient, val issuer: Issuer) {
-        suspend fun post(body: String, forventetStatusCode: HttpStatusCode, accessToken: String?) =
-            client.post("/graphql") {
+        suspend fun post(path: String, body: String, forventetStatusCode: HttpStatusCode, accessToken: String?) =
+            client.post(path) {
+                contentType(ContentType.Application.Json)
                 accessToken?.also { bearerAuth(accessToken) }
                 setBody(body)
             }.also {
