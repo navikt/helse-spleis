@@ -118,7 +118,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
                 emptyList(),
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "BetvilerArbeidsufoerhet"
             )
-            assertFunksjonellFeil(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val behandlinger = inspektørForkastet(1.vedtaksperiode).behandlinger
             val sisteBehandling = behandlinger.last()

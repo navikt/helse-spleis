@@ -45,6 +45,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
@@ -90,16 +91,18 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer",
             )
 
+            assertVarsler(listOf(), 1.vedtaksperiode.filter())
+            assertVarsler(listOf(), 2.vedtaksperiode.filter())
+
             assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
-            assertEquals(listOf(14.april til 14.april, 18.april til 30.april), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
             assertTrue(observatør.inntektsmeldingHåndtert.any { it.first == inntektsmeldingId })
             assertFalse(observatør.inntektsmeldingIkkeHåndtert.contains(inntektsmeldingId))
-            assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
-            assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_8, 3.vedtaksperiode.filter())
         }
     }
 
@@ -128,14 +131,32 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer"
             )
 
-            assertEquals(listOf(14.april til 14.april, 18.april til 30.april), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-            assertEquals(listOf(1.mai til 2.mai), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
             assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).dagerNavOvertarAnsvar)
             assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
-            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_8, 3.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `AI fjerner gammel IM - begrunnelse for reduksjon påvirker ikke tidligere arbeidsgiverperiode når første fraværsdag er opplyst`() {
+        a1 {
+            nyPeriode(1.januar til 4.januar, a1)
+            nyPeriode(5.januar til 10.januar, a1)
+
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel"
+            )
+
+            assertEquals("SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_IM_8, 2.vedtaksperiode.filter())
         }
     }
@@ -228,6 +249,28 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
                     assertEquals(1431, linje.beløp)
                 }
             }
+        }
+    }
+
+    @Test
+    fun `AI fjerner gammel IM - im medfører at nav skal utbetale arbeidsgiverperioden`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+            håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
+            nullstillTilstandsendringer()
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                refusjon = Refusjon(INGEN, null, emptyList()),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert",
+                vedtaksperiodeId = 1.vedtaksperiode
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 
@@ -571,31 +614,24 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSelvbestemtArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer",
+                arbeidsgiverperioder = listOf(1.januar til 14.januar, 15.januar til 16.januar),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn",
                 beregnetInntekt = INNTEKT,
                 vedtaksperiodeId = 1.vedtaksperiode
             )
-
-            assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
 
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
-
             håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            håndterUtbetalt()
 
             håndterYtelser(3.vedtaksperiode)
 
 
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-            assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
 

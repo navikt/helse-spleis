@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -267,10 +267,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 14.mars))
-            håndterArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering")
+            håndterArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
             assertEquals(15.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
             assertEquals(listOf(15.mars, 1.januar), inspektør.skjæringstidspunkter(3.vedtaksperiode))
-            assertVarsel(Varselkode.RV_IM_25, 3.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_8, 3.vedtaksperiode.filter())
         }
         a1 {
             håndterSøknad(april)

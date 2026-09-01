@@ -567,16 +567,20 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
     @Test
     fun `AI fjerner gammel IM - korrigert søknad på kort periode som har hatt beregnet utbetaling`() {
-        // TODO: Mulig det er en bug her, at beregnet AGP når søknad er kun perm ikke går inn i dagerNavOvertarAnsvar på ManglerOpptjening. Vurder!
         a1 {
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 15.januar))
             håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterOverstyrTidslinje((1.januar til 15.januar).map { ManuellOverskrivingDag(it, Dagtype.Permisjonsdag) })
+            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
 
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 10.januar), Permisjon(14.januar, 15.januar))
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(3, behandlinger.size)
+                assertEquals(4, behandlinger.size)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[2].tilstand)
