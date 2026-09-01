@@ -256,3 +256,6 @@ spec:
         - team: tbd
           application: sp-vilkarsproving
           access: readwrite
+        - team: tbd
+          application: sp-vilkarsproving-opprydding-dev
+          access: readwrite
