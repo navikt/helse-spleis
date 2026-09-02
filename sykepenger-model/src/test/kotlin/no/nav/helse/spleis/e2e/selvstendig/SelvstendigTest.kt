@@ -38,7 +38,6 @@ import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel.PensjonsgivendeInntekt
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_46
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -866,24 +865,6 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
 
-        }
-    }
-
-    @Test
-    fun `perioden kastes ut når det er fravær før sykmelding`() {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar, fraværFørSykmelding = true)
-            assertFunksjonellFeil(RV_SØ_46, 1.vedtaksperiode.filter())
-            assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        }
-    }
-
-    @Test
-    fun `kaster ut når spørsmål om fravær før sykmelding ikke stilles`() {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar, fraværFørSykmelding = null)
-            assertFunksjonellFeil(Varselkode.RV_OV_4, 1.vedtaksperiode.filter())
-            assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 

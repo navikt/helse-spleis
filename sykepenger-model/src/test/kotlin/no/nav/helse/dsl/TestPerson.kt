@@ -412,7 +412,6 @@ internal class TestPerson(
             merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
             inntekterFraNyeArbeidsforhold: Boolean = false,
             pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>? = null,
-            fraværFørSykmelding: Boolean? = null,
             harOppgittAvvikling: Boolean? = null,
             harOppgittVarigEndring: Boolean? = null,
             harOppgittNyIArbeidslivet: Boolean? = null,
@@ -438,7 +437,6 @@ internal class TestPerson(
                     merknaderFraSykmelding = merknaderFraSykmelding,
                     inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
                     pensjonsgivendeInntekter = pensjonsgivendeInntekter,
-                    fraværFørSykmelding = fraværFørSykmelding,
                     harOppgittAvvikling = harOppgittAvvikling,
                     harOppgittVarigEndring = harOppgittVarigEndring,
                     harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
@@ -457,7 +455,6 @@ internal class TestPerson(
                 Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
             ),
             sendtTilNAVEllerArbeidsgiver: Temporal? = null,
-            fraværFørSykmelding: Boolean? = false,
             harOppgittAvvikling: Boolean? = null,
             harOppgittVarigEndring: Boolean? = null,
             harOppgittNyIArbeidslivet: Boolean? = null,
@@ -469,7 +466,6 @@ internal class TestPerson(
             arbeidssituasjon = arbeidssituasjon,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
-            fraværFørSykmelding = fraværFørSykmelding,
             harOppgittAvvikling = harOppgittAvvikling,
             harOppgittVarigEndring = harOppgittVarigEndring,
             harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
@@ -487,7 +483,6 @@ internal class TestPerson(
                 Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
             ),
             sendtTilNAVEllerArbeidsgiver: Temporal? = null,
-            fraværFørSykmelding: Boolean? = false,
             harOppgittAvvikling: Boolean? = null,
             harOppgittVarigEndring: Boolean? = null,
             harOppgittNyIArbeidslivet: Boolean? = null,
@@ -499,7 +494,6 @@ internal class TestPerson(
             arbeidssituasjon = arbeidssituasjon,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
-            fraværFørSykmelding = fraværFørSykmelding,
             harOppgittAvvikling = harOppgittAvvikling,
             harOppgittVarigEndring = harOppgittVarigEndring,
             harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
@@ -518,7 +512,6 @@ internal class TestPerson(
                 Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
             ),
             sendtTilNAVEllerArbeidsgiver: Temporal? = null,
-            fraværFørSykmelding: Boolean? = null,
             harOppgittAvvikling: Boolean? = null,
             harOppgittVarigEndring: Boolean? = null,
             harOppgittNyIArbeidslivet: Boolean? = null
@@ -527,7 +520,6 @@ internal class TestPerson(
             arbeidssituasjon = arbeidssituasjon,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
-            fraværFørSykmelding = fraværFørSykmelding,
             harOppgittAvvikling = harOppgittAvvikling,
             harOppgittVarigEndring = harOppgittVarigEndring,
             harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet

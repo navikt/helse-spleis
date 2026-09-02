@@ -52,6 +52,7 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
     fun `hent opptjeningsvurderinger for person som finnes`() = blackboxTestApplication(::opprettArbeidstakerTestdata) {
         "/api/opptjeningsvurderinger".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to FNR)) {
             val actual = assertOgNullifiserSpleisOpptjeningsvurderingIder(this)
+
             @Language("JSON")
             val expected = """
             {
@@ -119,6 +120,7 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
     fun `hent opptjeningsvurderinger for selvstendig som finnes`() = blackboxTestApplication(::opprettSelvstendigTestdata) {
         "/api/opptjeningsvurderinger".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to FNR)) {
             val actual = assertOgNullifiserSpleisOpptjeningsvurderingIder(this)
+
             @Language("JSON")
             val expected = """
             {
@@ -136,7 +138,7 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
         }
     }
 
-    private fun assertOgNullifiserSpleisOpptjeningsvurderingIder(response: String): String{
+    private fun assertOgNullifiserSpleisOpptjeningsvurderingIder(response: String): String {
         val spleisOpptjeningsvurderingIder = mutableListOf<UUID>()
         return objectMapper.readTree(response).apply {
             val forventetAntall = path("opptjeningsvurderinger").count { it.path("kilde").asText() == "SPLEIS" }
@@ -211,7 +213,6 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
         testDataSource.ds.lagrePerson(FNR, person)
     }
 
-
     private fun opprettSelvstendigTestdata(testDataSource: TestDataSource) {
         val eventBus = EventBus()
         val aktivitetslogg = Aktivitetslogg()
@@ -222,14 +223,15 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
 
         val fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Selvstendig)
 
-        val søknad = fabrikk.lagSøknad(Søknad.Søknadsperiode.Sykdom(fom = fom, tom = tom, sykmeldingsgrad = 100.prosent),
+        val søknad = fabrikk.lagSøknad(
+            Søknad.Søknadsperiode.Sykdom(fom = fom, tom = tom, sykmeldingsgrad = 100.prosent),
             arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             pensjonsgivendeInntekter = listOf(
                 PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
                 PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
                 PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
-            ),
-            fraværFørSykmelding = false)
+            )
+        )
         person.håndterSøknad(eventBus, søknad, aktivitetslogg)
 
         val vedtaksperiodeId = eventBus.events.filterIsInstance<EventSubscription.VedtaksperiodeOpprettet>().single().vedtaksperiodeId
@@ -264,6 +266,4 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
 
         testDataSource.ds.lagrePerson(FNR, person)
     }
-
-
 }

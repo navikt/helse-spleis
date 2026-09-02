@@ -319,7 +319,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         sendTilGosys: Boolean? = false,
         egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
         ventetid: Hendelseperiode,
-        fraværFørSykmelding: Boolean? = null,
         harOppgittAvvikling: Boolean? = null,
         harOppgittNyIArbeidslivet: Boolean? = null,
         harOppgittVarigEndring: Boolean? = null,
@@ -330,7 +329,6 @@ internal abstract class AbstractEndToEndMediatorTest {
             "NARINGSDRIVENDE_VIRKSOMHETEN_AVVIKLET" to (harOppgittAvvikling ?: false),
             "NARINGSDRIVENDE_NY_I_ARBEIDSLIVET" to (harOppgittNyIArbeidslivet ?: false),
             "NARINGSDRIVENDE_VARIG_ENDRING" to (harOppgittVarigEndring ?: false),
-            "FRAVAR_FOR_SYKMELDINGEN_V2" to (fraværFørSykmelding ?: false)
         )
         val (id, message) = meldingsfabrikk.lagSøknadSelvstendig(
             fnr = fnr,

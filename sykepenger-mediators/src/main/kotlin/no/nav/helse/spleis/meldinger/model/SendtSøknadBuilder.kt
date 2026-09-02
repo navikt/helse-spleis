@@ -23,7 +23,6 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
     private var ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
     private var utenlandskSykmelding: Boolean = false
     private var sendTilGosys: Boolean = false
-    private var fraværFørSykmelding: Boolean? = null
     private var harOppgittNyIArbeidslivet: Boolean? = null
     private var harOppgittVarigEndring: Boolean? = null
     private var harOppgittAvvikling: Boolean? = null
@@ -61,7 +60,6 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
         registrert = registrert,
         inntekterFraNyeArbeidsforhold = inntekterFraNyeArbeidsforhold,
         pensjonsgivendeInntekter = pensjonsgivendeInntekter,
-        fraværFørSykmelding = fraværFørSykmelding,
         harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
         harOppgittVarigEndring = harOppgittVarigEndring,
         harOppgittAvvikling = harOppgittAvvikling,
@@ -71,10 +69,6 @@ internal class SendtSøknadBuilder(arbeidssituasjon: String) : SøknadBuilder() 
 
     internal fun pensjonsgivendeInntekter(pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt>) = apply {
         this.pensjonsgivendeInntekter = pensjonsgivendeInntekter
-    }
-
-    internal fun fraværFørSykmelding(fraværFørSykmelding: Boolean?) = apply {
-        this.fraværFørSykmelding = fraværFørSykmelding
     }
 
     override fun inntektskilde(andreInntektskilder: Boolean) = apply {

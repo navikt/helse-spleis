@@ -67,7 +67,7 @@ enum class Varselkode(
 
     // Selvstendig søknader
     RV_SØ_45("Selvstendigsøknad med flere typer pensjonsgivende inntekter"),
-    RV_SØ_46("Selvstendigsøknad med fravær før sykmelding"),
+    RV_SØ_46("Selvstendigsøknad med fravær før sykmelding", avviklet = true),
     RV_SØ_47("Selvstendigsøknad hvor bruker har oppgitt at virksomheten er avviklet"),
     RV_SØ_48("Selvstendigsøknad hvor bruker har oppgitt at de er ny i arbeidslivet"),
     RV_SØ_49("Selvstendigsøknad hvor bruker har oppgitt at de har varig endring i inntekt"),
@@ -189,7 +189,7 @@ enum class Varselkode(
     RV_OV_1("Perioden er avslått på grunn av manglende opptjening"),
     RV_OV_2("Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige", avviklet = true),
     RV_OV_3("Det er ikke registrert inntekt i måneden før skjæringstidspunktet"),
-    RV_OV_4("Opptjening for selvstendig næringsdrivende er ikke vurdert"),
+    RV_OV_4("Opptjening for selvstendig næringsdrivende er ikke vurdert", avviklet = true),
 
     // MV: Medlemskapsvurdering
     RV_MV_1("Vurder lovvalg og medlemskap"),

@@ -37,7 +37,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.IdInnhenter
-import no.nav.helse.spleis.speil.serializePersonForSpeil
 import no.nav.helse.spleis.testhelpers.Behovssamler
 import no.nav.helse.spleis.testhelpers.Behovssamler.Companion.yrkesaktivitetstypeOgOrgnummer
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
@@ -140,7 +139,6 @@ internal abstract class AbstractSpeilBuilderTest {
         ventetid: Periode,
         grad: Prosentdel = 100.prosent,
         arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
-        fraværFørSykmelding: Boolean = false,
         pensjonsgivendeInntekter: List<PensjonsgivendeInntekt> = listOf(
             PensjonsgivendeInntekt(
                 inntektsår = Year.of(2017), næringsinntekt = 450000.årlig,
@@ -184,7 +182,6 @@ internal abstract class AbstractSpeilBuilderTest {
             id = søknadId,
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             arbeidssituasjon = arbeidssituasjon,
-            fraværFørSykmelding = fraværFørSykmelding
         )
 
         håndterSøknad(søknad)

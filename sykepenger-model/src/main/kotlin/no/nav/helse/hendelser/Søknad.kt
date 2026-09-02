@@ -76,7 +76,6 @@ class Søknad(
     registrert: LocalDateTime,
     private val inntekterFraNyeArbeidsforhold: Boolean,
     private val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>?,
-    private val fraværFørSykmelding: Boolean?,
     private val harOppgittNyIArbeidslivet: Boolean?,
     private val harOppgittVarigEndring: Boolean?,
     private val harOppgittAvvikling: Boolean?,
@@ -173,18 +172,8 @@ class Søknad(
 
         if (vilkårsgrunnlag == null && pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true) aktivitetslogg.varsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
 
-        vurderOpptjeningForSelvstendig(aktivitetslogg, skjæringstidspunkt)
     }
-
-    private fun vurderOpptjeningForSelvstendig(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) {
-        if (skjæringstidspunkt !in sykdomsperiode) return // Da er det ikke aktuelt å sjekke
-        when (fraværFørSykmelding) {
-            true -> aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_46)
-            null -> aktivitetslogg.funksjonellFeil(Varselkode.RV_OV_4)
-            false -> {} // Da er opptjening OK
-        }
-    }
-
+    
     private fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         val utlandsopphold = perioder.filterIsInstance<Søknadsperiode.Utlandsopphold>().map { it.periode }
         subsumsjonslogg.logg(`§ 8-9 ledd 1`(false, utlandsopphold, this.perioder.subsumsjonsFormat()))
