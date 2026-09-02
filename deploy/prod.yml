@@ -74,6 +74,8 @@ spec:
             value: "write,ddl,role"
           - name: pgaudit.log_parameter
             value: "on"
+          - name: pgaudit.log_relation
+            value: "on"
     permissions:
       - resource:
           apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
