@@ -24,7 +24,7 @@ on:
         type: boolean
         default: true
       dato_for_siste_feriepengekjoring_i_infotrygd:
-        description: "Dato i format YYYY-MM-DD"
+        description: "Dato for siste feriepengejøring i infotrygd. Format YYYY-MM-DD"
         required: true
         type: string
       opptjeningsar:
@@ -60,6 +60,7 @@ jobs:
       image: ${{ steps.prepare.outputs.image }}
       vars_file: ${{ steps.prepare.outputs.vars_file }}
       dryrun: ${{ steps.prepare.outputs.dryrun }}
+      ekstra_parametre: ${{ steps.prepare.outputs.ekstra_parametre }}
     steps:
       - name: Valider input
         id: prepare
@@ -117,12 +118,16 @@ jobs:
             vars_file="deploy/job-prod.json"
           fi
 
-          runtime_opts="feriepenger ${ARBEID_ID} ${DATO} ${OPPTJENINGSAAR}"
+          # RUNTIME_OPTS i deploy/job.yml settes til "{{jobb}} {{arbeid_id}} {{ekstra_parametre}}",
+          # så dato og opptjeningsår må sendes med som ekstra_parametre.
+          ekstra_parametre="${DATO} ${OPPTJENINGSAAR}"
+          runtime_opts="feriepenger ${ARBEID_ID} ${ekstra_parametre}"
 
           {
             echo "image=${IMAGE}"
             echo "vars_file=${vars_file}"
             echo "dryrun=${DRYRUN}"
+            echo "ekstra_parametre=${ekstra_parametre}"
           } >> "$GITHUB_OUTPUT"
 
           {
@@ -153,4 +158,4 @@ jobs:
           CLUSTER: ${{ github.event.inputs.cluster }}
           RESOURCE: deploy/job.yml
           VARS: ${{ needs.valider-og-forbered.outputs.vars_file }}
-          VAR: team=tbd,app=spleis-migrate,image=${{ needs.valider-og-forbered.outputs.image }},parallelism=${{ github.event.inputs.parallelism }},jobb=feriepenger,arbeid_id=${{ github.event.inputs.arbeid_id }},dryrun=${{ needs.valider-og-forbered.outputs.dryrun }},ekstra_parametre=
+          VAR: team=tbd,app=spleis-migrate,image=${{ needs.valider-og-forbered.outputs.image }},parallelism=${{ github.event.inputs.parallelism }},jobb=feriepenger,arbeid_id=${{ github.event.inputs.arbeid_id }},dryrun=${{ needs.valider-og-forbered.outputs.dryrun }},ekstra_parametre=${{ needs.valider-og-forbered.outputs.ekstra_parametre }}
