@@ -1,0 +1,156 @@
+name: Kjør feriepenger
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: "Full image-navn med tag. Finn det i https://github.com/navikt/helse-spleis/actions/workflows/spleis-jobs.yml -> siste kjøring av Spleis-jobs -> Summary -> build inputs -> tags."
+        required: true
+        type: string
+      cluster:
+        description: "Hvilket cluster jobben skal kjøres i"
+        required: true
+        type: choice
+        options:
+          - dev-gcp
+          - prod-gcp
+      arbeid_id:
+        description: "ArbeidId for batchen"
+        required: true
+        type: string
+      dryrun:
+        description: "Kjør i dryrun-modus"
+        required: true
+        type: boolean
+        default: true
+      dato_for_siste_feriepengekjoring_i_infotrygd:
+        description: "Dato i format YYYY-MM-DD"
+        required: true
+        type: string
+      opptjeningsar:
+        description: "Året feriepenger beregnes for"
+        required: true
+        type: string
+      parallelism:
+        description: "Parallelism for naisjob (heltall > 0)"
+        required: false
+        type: string
+        default: "30"
+      prod_bekreftelse:
+        description: "Må være START FERIEPENGER PROD ved prod-kjøring"
+        required: false
+        type: string
+      bekreft_arbeid_id:
+        description: "Må matche arbeid_id ved prod-kjøring"
+        required: false
+        type: string
+
+concurrency:
+  group: spleis-migrate-feriepenger-${{ github.event.inputs.cluster }}
+  cancel-in-progress: false
+
+jobs:
+  valider-og-forbered:
+    name: Valider input og klargjør deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      image: ${{ steps.prepare.outputs.image }}
+      vars_file: ${{ steps.prepare.outputs.vars_file }}
+      dryrun: ${{ steps.prepare.outputs.dryrun }}
+    steps:
+      - name: Valider input
+        id: prepare
+        env:
+          IMAGE: ${{ github.event.inputs.image }}
+          CLUSTER: ${{ github.event.inputs.cluster }}
+          ARBEID_ID: ${{ github.event.inputs.arbeid_id }}
+          DRYRUN: ${{ github.event.inputs.dryrun }}
+          DATO: ${{ github.event.inputs.dato_for_siste_feriepengekjoring_i_infotrygd }}
+          OPPTJENINGSAAR: ${{ github.event.inputs.opptjeningsar }}
+          PARALLELISM: ${{ github.event.inputs.parallelism }}
+          PROD_BEKREFTELSE: ${{ github.event.inputs.prod_bekreftelse }}
+          BEKREFT_ARBEID_ID: ${{ github.event.inputs.bekreft_arbeid_id }}
+        run: |
+          set -euo pipefail
+
+          if ! [[ "$IMAGE" == */*:* ]]; then
+            echo "::error::image må være full image-streng med tag."
+            exit 1
+          fi
+
+          if ! [[ "$DATO" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "::error::dato_for_siste_feriepengekjoring_i_infotrygd må være på format YYYY-MM-DD."
+            exit 1
+          fi
+          if ! date -d "$DATO" +%F >/dev/null 2>&1; then
+            echo "::error::dato_for_siste_feriepengekjoring_i_infotrygd er ikke en gyldig dato."
+            exit 1
+          fi
+
+          if ! [[ "$OPPTJENINGSAAR" =~ ^[0-9]{4}$ ]]; then
+            echo "::error::opptjeningsar må være et fire-sifret årstall."
+            exit 1
+          fi
+
+          if ! [[ "$PARALLELISM" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::parallelism må være et heltall større enn 0."
+            exit 1
+          fi
+
+          if [ "$CLUSTER" = "prod-gcp" ]; then
+            if [ "$PROD_BEKREFTELSE" != "START FERIEPENGER PROD" ]; then
+              echo "::error::prod_bekreftelse må være nøyaktig 'START FERIEPENGER PROD' for prod-kjøring."
+              exit 1
+            fi
+            if [ "$BEKREFT_ARBEID_ID" != "$ARBEID_ID" ]; then
+              echo "::error::bekreft_arbeid_id må matche arbeid_id for prod-kjøring."
+              exit 1
+            fi
+          fi
+
+          if [ "$CLUSTER" = "dev-gcp" ]; then
+            vars_file="deploy/job-dev.json"
+          else
+            vars_file="deploy/job-prod.json"
+          fi
+
+          runtime_opts="feriepenger ${ARBEID_ID} ${DATO} ${OPPTJENINGSAAR}"
+
+          {
+            echo "image=${IMAGE}"
+            echo "vars_file=${vars_file}"
+            echo "dryrun=${DRYRUN}"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Valgte deploy-verdier"
+            echo ""
+            echo "- cluster: \`${CLUSTER}\`"
+            echo "- image: \`${IMAGE}\`"
+            echo "- arbeid_id: \`${ARBEID_ID}\`"
+            echo "- dryrun: \`${DRYRUN}\`"
+            echo "- runtime_opts: \`${runtime_opts}\`"
+            echo "- parallelism: \`${PARALLELISM}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-feriepenger:
+    name: Deploy feriepenger-jobb
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: valider-og-forbered
+    if: ${{ needs.valider-og-forbered.result == 'success' }}
+    environment: ${{ github.event.inputs.cluster == 'prod-gcp' && 'spleis-feriepenger-prod' || 'spleis-feriepenger-dev' }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: nais/deploy/actions/deploy@027a91857992525139798892f2804b0ca21f4af6 # v2
+        env:
+          CLUSTER: ${{ github.event.inputs.cluster }}
+          RESOURCE: deploy/job.yml
+          VARS: ${{ needs.valider-og-forbered.outputs.vars_file }}
+          VAR: team=tbd,app=spleis-migrate,image=${{ needs.valider-og-forbered.outputs.image }},parallelism=${{ github.event.inputs.parallelism }},jobb=feriepenger,arbeid_id=${{ github.event.inputs.arbeid_id }},dryrun=${{ needs.valider-og-forbered.outputs.dryrun }},ekstra_parametre=
