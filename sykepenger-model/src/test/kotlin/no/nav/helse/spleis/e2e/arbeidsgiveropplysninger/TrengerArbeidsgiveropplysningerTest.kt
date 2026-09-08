@@ -120,6 +120,30 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
+    fun `Periode etter månedskifte fra AUU spør om inntekt`() {
+        a1 {
+            håndterSøknad(16.januar til 31.januar)
+        }
+        a2 {
+            håndterSøknad(1.februar til 16.februar)
+            håndterSøknad(17.februar til 28.februar)
+            assertEtterspurt(2.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
+            håndterArbeidsgiveropplysninger(
+                2.vedtaksperiode,
+                Arbeidsgiveropplysning.OppgittArbeidgiverperiode(
+                    perioder = listOf(1.februar til 16.februar)
+                ),
+                Arbeidsgiveropplysning.OppgittRefusjon(
+                    beløp = INNTEKT, endringer = listOf()
+                ),
+                Arbeidsgiveropplysning.OppgittInntekt(INNTEKT)
+            )
+            håndterYtelser(2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        }
+    }
+
+    @Test
     fun `Skal be om inntekt tross vilkårsprøvd skjæringstidspunkt ved sykdom etter AUU`() {
         a1 {
             håndterSøknad(januar)

@@ -95,6 +95,8 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
 
 
     private fun skalEtterspørreInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
+        if (!vedtaksperiode.harEksisterendeInntekt()) return true // "gammel funksjonalitet" (sørger for at vi ikke slutter å spørre på ting vi tidligere spurte om)
+
         // En periode på skjæringstidspunktet har en inntekt, så vi trenger ikke å etterspørre inntekt ✋
         if (vedtaksperiode.kanAvklareInntekt()) return false
 
