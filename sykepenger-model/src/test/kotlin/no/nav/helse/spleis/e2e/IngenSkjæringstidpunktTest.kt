@@ -198,7 +198,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
             håndterSykmelding(Sykmeldingsperiode(24.februar, 12.mars))
-            håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
+            håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar)) // burde be om inntekt også
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterSøknad(Sykdom(24.februar, 12.mars, 100.prosent))
 

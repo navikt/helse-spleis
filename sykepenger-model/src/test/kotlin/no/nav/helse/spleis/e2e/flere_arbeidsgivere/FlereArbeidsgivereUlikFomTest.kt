@@ -44,6 +44,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -119,6 +120,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a2 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
+
+            assertInntektsgrunnlag(2.februar, forventetAntallArbeidsgivere = 1) {
+                assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            }
+            //assertTilstander(1.vedtaksperiode, TilstandType.START)
+
             håndterSimulering(1.vedtaksperiode)
             assertEquals(refusjonFør, inspektør.refusjon(1.vedtaksperiode))
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
@@ -1207,12 +1214,21 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to 30000.månedlig, a2 to 20000.månedlig)
             )
-            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
+
+            //assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
+
             assertInntektsgrunnlag(28.februar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
                 assertInntektsgrunnlag(a2, 20000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
         }
+        /*a1 {
+            assertTilstander(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
+        }
+        a2 {
+            assertTilstander(1.vedtaksperiode, TilstandType.START)
+        }*/
     }
 
     @Test

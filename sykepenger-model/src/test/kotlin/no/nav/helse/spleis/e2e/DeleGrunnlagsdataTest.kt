@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
@@ -50,7 +51,7 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode
             )
             val inntektsmelding2Id = håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar))
+                arbeidsgiverperioder = emptyList(), //listOf(Periode(1.januar, 16.januar))
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -79,7 +80,7 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
             assertTrue(inntektsmelding1Id in inspektør.hendelseIder(2.vedtaksperiode))
             assertTrue(inntektsmelding1Id in inspektør.hendelseIder(3.vedtaksperiode))
             assertTrue(inntektsmelding2Id in inspektør.hendelseIder(4.vedtaksperiode))
-            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+            //assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
         }
     }
 

@@ -14,6 +14,7 @@ import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening
@@ -657,7 +658,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         setupLiteGapA2SammeSkjæringstidspunkt()
         a2 {
             val agp = listOf(2.januar til 17.januar)
-            håndterArbeidsgiveropplysninger(agp, vedtaksperiodeId = 2.vedtaksperiode)
+            håndterSelvbestemtArbeidsgiveropplysninger(agp, vedtaksperiodeId = 1.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(emptyList(), vedtaksperiodeId = 2.vedtaksperiode)
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
@@ -667,6 +669,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertEquals(0, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Arbeidsgiverperiode>().size)
             assertEquals(0, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Inntekt>().size)
             assertEquals(1, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Refusjon>().size)
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_AO_3, RV_IM_4)
         }
         a1 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)

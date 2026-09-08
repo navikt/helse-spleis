@@ -85,7 +85,7 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
             return true
         }
 
-        if (vedtaksperiode.harInntektOgRefusjon()) {
+        if (vedtaksperiode.harInntektOgRefusjon()) { // TODO ? Hmm...
             vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
             return true
         }
@@ -94,13 +94,16 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
     }
 
 
-    private fun skalEtterspørreInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
+    internal fun skalEtterspørreInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
         // En periode på skjæringstidspunktet har en inntekt, så vi trenger ikke å etterspørre inntekt ✋
         if (vedtaksperiode.kanAvklareInntekt()) return false
 
         // Skal ikke spørre arbeidsgiver om inntekt dersom første fraværsdag er i annen måned enn skjæringstidspunktet ✋
         // En eventuell inntekt vi mottar fra arberdisgiver i en slik situasjon vil uansett bli valgt bort til fordel for inntekt fra A-ordningen.
         // Uklart om HAG håndrer denne situasjonen slik at vi kunne fjernet denne sjekken. Da må den i tilfelle også fjernes fra inntektsturneringen hvor vi velger inntekt fra A-ordningen fremfor inntekt fra arbeidsgiver i en slik situasjon.
+
+        // Hvis ren feriesøknad: førsteFraværsdag?.yearMonth == NULL ... blir return false (?) // ref: IngenSkjæringstidspunktTest.`periode med ferie kant-i-kant med en periode med utbetalingsdag`()
+        // Hva vist ren arbeids-søknad ?? også NULL ?
         if (vedtaksperiode.førsteFraværsdag?.yearMonth != vedtaksperiode.skjæringstidspunkt.yearMonth) return false
 
         val gjeldendeVilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag ?: return true // Om skjæringstidspunktet ikke er tidligere vilkårsprøvd så må vi spørre om inntekt ✅

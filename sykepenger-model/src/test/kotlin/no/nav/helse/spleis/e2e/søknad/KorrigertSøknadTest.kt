@@ -82,13 +82,13 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
             forlengVedtak(mars)
 
             håndterSøknad(10.april til 30.april)
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 4.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(emptyList(), vedtaksperiodeId = 4.vedtaksperiode) //listOf(1.januar til 16.januar), vedtaksperiodeId = 4.vedtaksperiode)
+            /*håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)*/
             håndterVilkårsgrunnlag(4.vedtaksperiode)
             håndterYtelser(4.vedtaksperiode)
             håndterSimulering(4.vedtaksperiode)

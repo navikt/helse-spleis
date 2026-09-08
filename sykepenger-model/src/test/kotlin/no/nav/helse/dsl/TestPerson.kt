@@ -265,7 +265,7 @@ internal class TestPerson(
         }
 
         internal fun håndterArbeidsgiveropplysninger(
-            arbeidsgiverperioder: List<Periode>,
+            arbeidsgiverperioder: List<Periode>?,
             beregnetInntekt: Inntekt = INNTEKT,
             refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
             opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse> = emptyList(),
@@ -273,12 +273,20 @@ internal class TestPerson(
             id: UUID = UUID.randomUUID(),
             mottatt: LocalDateTime = LocalDateTime.now(),
             arbeidsforholdId: String? = null,
-            vedtaksperiodeId: UUID = sisteVedtaksperiode
+            vedtaksperiodeId: UUID = sisteVedtaksperiode,
+            sendSelvOmIkkeForespurt: Boolean = false, // sett til false for å avdekke mismatch i testene mellom forespurt og innsendt
         ): UUID {
+            val forespurte = observatør.trengerArbeidsgiveropplysningerVedtaksperioder
+                .filter { it.opplysninger.vedtaksperiodeId == vedtaksperiodeId }.flatMap {
+                    it.opplysninger.forespurteOpplysninger
+                }.toSet()
+
+            println("Forespurte: $forespurte          (agp=$arbeidsgiverperioder)")
+
             val opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
-                beregnetInntekt = beregnetInntekt,
-                refusjon = refusjon,
-                arbeidsgiverperioder = arbeidsgiverperioder,
+                beregnetInntekt = if (forespurte.contains(EventSubscription.Inntekt) || sendSelvOmIkkeForespurt) beregnetInntekt else null,
+                refusjon = if (forespurte.contains(EventSubscription.Refusjon) || sendSelvOmIkkeForespurt) refusjon else null,
+                arbeidsgiverperioder = if (forespurte.contains(EventSubscription.Arbeidsgiverperiode) || sendSelvOmIkkeForespurt) arbeidsgiverperioder else null,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 opphørAvNaturalytelser = opphørAvNaturalytelser,
                 harFlereArbeidsforhold = arbeidsforholdId != null

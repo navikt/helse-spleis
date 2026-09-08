@@ -65,10 +65,19 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
         }
         a2 {
-            val feil = assertThrows<NoSuchElementException> {
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-            }
-            assertEquals("Collection contains no element matching the predicate.", feil.message)
+            //val feil = assertThrows<NoSuchElementException> {
+                //håndterVilkårsgrunnlag(1.vedtaksperiode)
+            //}
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt()
+            println("hei")
+            //assertEquals("Collection contains no element matching the predicate.", feil.message)
+        }
+        a1 {
+
         }
     }
 

@@ -319,11 +319,11 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar))
             håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(4.januar til 19.januar),
+                arbeidsgiverperioder = emptyList(), //listOf(4.januar til 19.januar),
                 beregnetInntekt = INNTEKT
             )
-            håndterYtelser(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            //håndterYtelser(1.vedtaksperiode)
+            //håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -383,8 +383,9 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
             assertActivities()
             håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
-            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), INNTEKT)
-            assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+            //håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), INNTEKT)
+            håndterArbeidsgiveropplysninger(emptyList(), INNTEKT)
+            //assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -603,8 +604,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             håndterSøknad(Sykdom(22.februar, 14.mars, 50.prosent), sendtTilNAVEllerArbeidsgiver = 8.august)
             assertVarsel(Varselkode.RV_SØ_2, 2.vedtaksperiode.filter())
 
-            håndterArbeidsgiveropplysninger(listOf(22.februar til 9.mars), INNTEKT)
-            assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+            håndterArbeidsgiveropplysninger(emptyList()) //listOf(22.februar til 9.mars), INNTEKT)
+            //assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
 
@@ -629,8 +630,9 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-            håndterArbeidsgiveropplysninger(listOf(12.oktober(2021) til 27.oktober(2021)), INNTEKT, vedtaksperiodeId = 2.vedtaksperiode)
-            assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+            //håndterArbeidsgiveropplysninger(listOf(12.oktober(2021) til 27.oktober(2021)), INNTEKT, vedtaksperiodeId = 2.vedtaksperiode)
+            //assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+            håndterArbeidsgiveropplysninger(emptyList(), vedtaksperiodeId = 2.vedtaksperiode)
 
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)

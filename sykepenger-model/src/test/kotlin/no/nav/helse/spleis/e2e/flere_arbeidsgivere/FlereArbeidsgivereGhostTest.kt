@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
+import OpenInSpanner
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
@@ -512,18 +513,30 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(26.mars, 10.april))
             håndterSøknad(Sykdom(26.mars, 10.april, 100.prosent))
-            håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
+
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar), // hvorfor trigger dette en revurdering når arbeidsgiverperioden er den samme som før ?
                 refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
                 vedtaksperiodeId = 2.vedtaksperiode
             )
-            håndterYtelser(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+            /*håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar), // ?????? Hvis ikke sendes inn så går det et behov om InformasjonTilVilkårsprøving som ikke besvares
+                refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+                vedtaksperiodeId = 2.vedtaksperiode
+            )*/
+            håndterYtelser(1.vedtaksperiode) // fordi #1 går i revurdering når AGP kommer på #2
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode) // fordi #1 går i revurdering når AGP kommer på #2
+
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
+
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
+
+            // Hvis #2 sender AGP (selvbestemt) blir det 3 oppdrag hvor nr2=nr1 som "uendret" (pga REvurdering(?)), og det 3dje er for periode #2
+            // Hvis IKKE #2 sender AGP, blir det bare 2 oppdrag hvor oppdrag2 er for periode #2, d.v.s. fom 26.mars
 
             val førsteOppdrag = inspektør.utbetaling(0).arbeidsgiverOppdrag
             val a1Linje = førsteOppdrag.single()
@@ -966,6 +979,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
     }
 
     @Test
+    @OpenInSpanner
     fun `arbeidsgiver går fra å være ghost mens første arbeidsgiver står til godkjenning -- Ghost svarer på etterspurte arbeidsgiveropplysninger`()  {
         utbetalPeriodeMedGhost(tilGodkjenning = true)
 

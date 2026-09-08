@@ -2754,6 +2754,11 @@ internal class Vedtaksperiode private constructor(
         else -> ArbeidstakerFaktaavklartInntekt(UUID.randomUUID(), Inntektsdata.ingen(hendelse.metadata.meldingsreferanseId, skjæringstidspunkt), Arbeidstakerinntektskilde.AOrdningen(emptyList()))
     }
 
+    internal fun harRefusjonOgTrengerIkkeInntekt(): Boolean {
+        check(yrkesaktivitet.yrkesaktivitetstype is Arbeidstaker) { "gir bare mening å kalle denne funksjonen for arbeidstakere" }
+        return refusjonstidslinje.isNotEmpty() && !AvventerInntektsmelding.skalEtterspørreInntekt(this)
+    }
+
     private fun faktaavklartInntektForArbeidsgiver(
         eventBus: EventBus,
         hendelse: Hendelse,
@@ -2768,7 +2773,8 @@ internal class Vedtaksperiode private constructor(
         val benyttetFaktaavklartInntekt = when (inntektssituasjon) {
             is Inntektssituasjon.HarInntektFraArbeidsgiver -> inntektssituasjon.avklarInntekt(skjæringstidspunkt, skatteopplysning.somFaktaavklartInntekt(hendelse), flereArbeidsgivere, aktivitetsloggTilDenSomVilkårsprøver)
 
-            Inntektssituasjon.TrengerIkkeInntektFraArbeidsgiver -> skatteopplysning.somFaktaavklartInntekt(hendelse)
+            Inntektssituasjon.TrengerIkkeInntektFraArbeidsgiver ->
+                skatteopplysning.somFaktaavklartInntekt(hendelse)
 
             Inntektssituasjon.TidligereVilkårsprøvd -> {
                 // Her legger vi også skatt til grunn, men for å unngå at sykmeldte får gjentatte meldinger om skatteinntekter lagt til grunn blir det her kun varsel til saksbehandler
@@ -2776,7 +2782,7 @@ internal class Vedtaksperiode private constructor(
                 skatteopplysning.somFaktaavklartInntekt(hendelse)
             }
 
-            is Inntektssituasjon.GaOppÅVentePåArbeidsgiver -> {
+            is Inntektssituasjon.GaOppÅVentePåArbeidsgiver -> { // Havner her med harRefusjonOgTrengerIkkeInntekt-"hacket" ... litt rart ?
                 val faktaavklartSkatteinntekt = skatteopplysning.somFaktaavklartInntekt(hendelse)
                 val skatteinntekter = (faktaavklartSkatteinntekt.inntektsopplysningskilde as Arbeidstakerinntektskilde.AOrdningen).inntektsopplysninger
                 val omregnetÅrsinntekt = Skatteopplysning.omregnetÅrsinntekt(skatteinntekter)
@@ -4007,7 +4013,7 @@ private fun nesteTilstandEtterIgangsattOverstyring(
     AvsluttetUtenUtbetaling,
     AvventerInntektsmelding -> when {
         vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> when {
-            vedtaksperiode.harInntektOgRefusjon() -> nesteTilstandEtterInntekt(vedtaksperiode)
+            vedtaksperiode.harInntektOgRefusjon() || vedtaksperiode.harRefusjonOgTrengerIkkeInntekt() -> nesteTilstandEtterInntekt(vedtaksperiode)
             else -> AvventerInntektsmelding
         }
 
