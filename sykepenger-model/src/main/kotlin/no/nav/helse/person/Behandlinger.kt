@@ -99,7 +99,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     // alle behandlinger for vedtaksperioden
-    internal val behandlinger = behandlinger.toMutableList()
+    private val behandlinger = behandlinger.toMutableList()
+
+    internal fun behandlinger() = behandlinger.toList()
 
     // den siste behandlingen uavhengig er tilstand
     private val sisteBehandling get() = behandlinger.last()
@@ -461,7 +463,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal class Behandling private constructor(
         val id: UUID,
         tilstand: Tilstand,
-        internal val endringer: MutableList<Endring>,
+        private val endringer: MutableList<Endring>,
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?,
         internal val kilde: Behandlingkilde
@@ -472,6 +474,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             private set
         internal var vedtakFattet: LocalDateTime? = vedtakFattet
             private set
+        internal fun endringer() = endringer.toList()
         private val gjeldende get() = endringer.last()
         internal val periode: Periode get() = gjeldende.periode
         private val dokumentsporing get() = endringer.dokumentsporing

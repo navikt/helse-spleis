@@ -122,10 +122,10 @@ internal class Yrkesaktivitet private constructor(
     internal val sykdomshistorikk: Sykdomshistorikk,
     internal val sykmeldingsperioder: Sykmeldingsperioder,
     perioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
-    internal val vedtaksperioder: MutableList<Vedtaksperiode>,
-    internal val forkastede: MutableList<ForkastetVedtaksperiode>,
+    private val vedtaksperioder: MutableList<Vedtaksperiode>,
+    private val forkastede: MutableList<ForkastetVedtaksperiode>,
     private val _utbetalinger: MutableList<Utbetaling>,
-    internal val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
+    private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     internal val ubrukteRefusjonsopplysninger: Refusjonsservitør,
     private val regelverkslogg: Regelverkslogg
 ) : Aktivitetskontekst {
@@ -156,6 +156,10 @@ internal class Yrkesaktivitet private constructor(
         private set
 
     internal val utbetalinger get() = _utbetalinger.toList()
+
+    internal fun vedtaksperioder() = vedtaksperioder.toList()
+    internal fun forkastede() = forkastede.toList()
+    internal fun feriepengeutbetalinger() = feriepengeutbetalinger.toList()
 
     internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")

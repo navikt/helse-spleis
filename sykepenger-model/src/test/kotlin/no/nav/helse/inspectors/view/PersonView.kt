@@ -35,7 +35,7 @@ internal fun Yrkesaktivitet.view(): ArbeidsgiverView = ArbeidsgiverView(
     inntektshistorikk = inntektshistorikk.view(),
     sykmeldingsperioder = sykmeldingsperioder.view(),
     ubrukteRefusjonsopplysninger = ubrukteRefusjonsopplysninger.view(),
-    feriepengeutbetalinger = feriepengeutbetalinger.map { it.view() },
-    aktiveVedtaksperioder = vedtaksperioder.map { it.view() },
-    forkastetVedtaksperioder = forkastede.map { it.view() }
+    feriepengeutbetalinger = feriepengeutbetalinger().map { it.view() },
+    aktiveVedtaksperioder = vedtaksperioder().map { it.view() },
+    forkastetVedtaksperioder = forkastede().map { it.view() }
 )

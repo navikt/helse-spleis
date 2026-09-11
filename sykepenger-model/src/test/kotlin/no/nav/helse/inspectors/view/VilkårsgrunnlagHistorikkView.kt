@@ -35,7 +35,7 @@ internal data class InfotrygdView(
     override val inntektsgrunnlag: InntektsgrunnlagView,
 ): VilkårsgrunnlagView
 
-internal fun VilkårsgrunnlagHistorikk.view() = VilkårsgrunnlagHistorikkView(innslag = historikk.map { it.view() })
+internal fun VilkårsgrunnlagHistorikk.view() = VilkårsgrunnlagHistorikkView(innslag = historikk().map { it.view() })
 
 internal fun VilkårsgrunnlagHistorikk.Innslag.view() = VilkårsgrunnlagInnslagView(vilkårsgrunnlag = vilkårsgrunnlag.map { it.value.view() })
 

@@ -31,9 +31,11 @@ import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Companion.harUlikeGrunnbeløp
 
-internal class VilkårsgrunnlagHistorikk private constructor(internal val historikk: MutableList<Innslag>) {
+internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
 
     internal constructor() : this(mutableListOf())
+
+    internal fun historikk() = historikk.toList()
 
     private fun sisteInnlag() = historikk.firstOrNull()
 

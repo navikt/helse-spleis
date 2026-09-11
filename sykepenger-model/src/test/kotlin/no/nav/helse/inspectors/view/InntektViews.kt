@@ -55,7 +55,7 @@ internal fun Inntektsmeldinginntekt.view() = InntektsmeldinginntektView(
 )
 
 internal fun Inntektshistorikk.view() = InntektshistorikkView(
-    inntekter = historikk.map { it.view() }
+    inntekter = historikk().map { it.view() }
 )
 
 internal fun Inntektsgrunnlag.view() = InntektsgrunnlagView(
