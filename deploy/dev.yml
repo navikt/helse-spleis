@@ -10,12 +10,15 @@ spec:
   port: 8080
   strategy:
     type: Recreate
+  startup:
+    path: isready
+    initialDelay: 20
+    periodSeconds: 5
+    failureThreshold: 9
   liveness:
     path: isalive
-    initialDelay: 5
   readiness:
     path: isready
-    initialDelay: 5
   resources:
     limits:
       memory: 1024Mi
