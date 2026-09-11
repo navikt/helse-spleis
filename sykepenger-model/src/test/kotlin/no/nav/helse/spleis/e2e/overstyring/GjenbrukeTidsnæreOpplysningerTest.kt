@@ -34,7 +34,7 @@ import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
-import no.nav.helse.inspectors.view.InntektsgrunnlagView
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
@@ -1177,7 +1177,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest : AbstractDslTest() {
         }
     }
 
-    private fun assertTidsnærInntektsopplysning(orgnummer: String, inntektsgrunnlagFør: InntektsgrunnlagView, inntektsgrunnlagEtter: InntektsgrunnlagView) {
+    private fun assertTidsnærInntektsopplysning(orgnummer: String, inntektsgrunnlagFør: Inntektsgrunnlag, inntektsgrunnlagEtter: Inntektsgrunnlag) {
         val inntektsopplysningerFørEndring = inntektsgrunnlagFør.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)
         val inntektsopplysningerEtterEndring = inntektsgrunnlagEtter.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)
 

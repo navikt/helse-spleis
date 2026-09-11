@@ -2,28 +2,25 @@ package no.nav.helse.inspectors
 
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.inspectors.view.UtbetalingView
-import no.nav.helse.inspectors.view.view
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 
-val Utbetaling.inspektør get() = UtbetalingInspektør(this.view)
-val UtbetalingView.inspektør get() = UtbetalingInspektør(this)
+val Utbetaling.inspektør get() = UtbetalingInspektør(this)
 
-class UtbetalingInspektør(view: UtbetalingView) {
+class UtbetalingInspektør(utbetaling: Utbetaling) {
 
-    val utbetalingId: UUID = view.id
-    val korrelasjonsId: UUID = view.korrelasjonsId
-    val periode: Periode = view.periode
-    val tilstand: Utbetalingstatus = view.status
-    val arbeidsgiverOppdrag: Oppdrag = view.arbeidsgiverOppdrag
-    val personOppdrag: Oppdrag = view.personOppdrag
+    val utbetalingId: UUID = utbetaling.id
+    val korrelasjonsId: UUID = utbetaling.korrelasjonsId
+    val periode: Periode = utbetaling.periode
+    val tilstand: Utbetalingstatus = utbetaling.tilstand.status
+    val arbeidsgiverOppdrag: Oppdrag = utbetaling.arbeidsgiverOppdrag
+    val personOppdrag: Oppdrag = utbetaling.personOppdrag
     val nettobeløp = arbeidsgiverOppdrag.nettoBeløp() + personOppdrag.nettoBeløp()
-    val annulleringer = view.annulleringer
+    val annulleringer = utbetaling.annulleringer.map { it.id }
 
-    val type: Utbetalingtype = view.type
+    val type: Utbetalingtype = utbetaling.type
     var avstemmingsnøkkel: Long? = null
     val erUbetalt get() = tilstand == Utbetalingstatus.IKKE_UTBETALT
     val erForkastet get() = tilstand == Utbetalingstatus.FORKASTET

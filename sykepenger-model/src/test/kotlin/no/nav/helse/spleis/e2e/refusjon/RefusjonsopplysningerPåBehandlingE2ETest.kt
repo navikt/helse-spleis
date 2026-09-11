@@ -81,14 +81,14 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             )
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, arbeidsgiverId.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
             val fremITid = Beløpstidslinje.fra(februar, INNTEKT * 0.8, arbeidsgiverId.arbeidsgiver) + Beløpstidslinje.fra(1.mars.somPeriode(), INNTEKT * 0.6, arbeidsgiverId.arbeidsgiver)
-            assertBeløpstidslinje(fremITid, inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
+            assertBeløpstidslinje(fremITid, inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.values.single())
 
             val saksbehandlerId = håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
                 overstyringer = listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT))))
             ).metadata.meldingsreferanseId
 
-            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar til 1.mars, INNTEKT, saksbehandlerId.id.saksbehandler), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
+            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar til 1.mars, INNTEKT, saksbehandlerId.id.saksbehandler), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.values.single())
         }
     }
 
@@ -104,14 +104,14 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             )
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, id.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
             val fremITid = Beløpstidslinje.fra(februar, INNTEKT * 0.8, id.arbeidsgiver) + Beløpstidslinje.fra(1.mars.somPeriode(), INNTEKT * 0.6, id.arbeidsgiver)
-            assertBeløpstidslinje(fremITid, inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
+            assertBeløpstidslinje(fremITid, inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.values.single())
 
             val saksbehandlerId = håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
                 overstyringer = listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, refusjonsopplysninger = listOf(Triple(1.januar, 31.januar, INNTEKT), Triple(1.februar, null, INGEN))))
             ).metadata.meldingsreferanseId
 
-            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar til 1.mars, INGEN, saksbehandlerId.id.saksbehandler), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.values.single())
+            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar til 1.mars, INGEN, saksbehandlerId.id.saksbehandler), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.values.single())
         }
     }
 
@@ -182,7 +182,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             val ubrukteRefusjonsopplysninger = inspektør.ubrukteRefusjonsopplysninger
             assertBeløpstidslinje(
                 ARBEIDSGIVER.beløpstidslinje(1.februar til 19.februar, INNTEKT) + ARBEIDSGIVER.beløpstidslinje(20.februar.somPeriode(), INNTEKT / 2),
-                ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar),
+                ubrukteRefusjonsopplysninger.refusjonsrester.getValue(1.januar),
                 ignoreMeldingsreferanseId = true
             )
             håndterOverstyrArbeidsgiveropplysninger(
@@ -199,7 +199,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             val ubrukteRefusjonsopplysninger2 = inspektør.ubrukteRefusjonsopplysninger
             assertBeløpstidslinje(
                 SAKSBEHANDLER.beløpstidslinje(1.februar til 20.februar, INGEN),
-                ubrukteRefusjonsopplysninger2.refusjonstidslinjer.getValue(1.januar),
+                ubrukteRefusjonsopplysninger2.refusjonsrester.getValue(1.januar),
                 ignoreMeldingsreferanseId = true
             )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
@@ -340,8 +340,8 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 Beløpstidslinje.fra(1.februar til 28.februar, INNTEKT, Kilde(im, ARBEIDSGIVER, mottatt)) +
                     Beløpstidslinje.fra(1.mars.somPeriode(), INGEN, Kilde(im, ARBEIDSGIVER, mottatt))
 
-            assertEquals(setOf(1.januar), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.keys)
-            assertEquals(forventetUbruktEtterJanuarSøknad, inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar))
+            assertEquals(setOf(1.januar), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.keys)
+            assertEquals(forventetUbruktEtterJanuarSøknad, inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.getValue(1.januar))
             assertEquals(forventetUbruktEtterJanuarSøknad, gjenopprettBeløpstislinjeFor(1.januar))
 
             håndterSøknad(februar)
@@ -349,14 +349,14 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             val forventetUbruktEtterFebruarSøknad = Beløpstidslinje.fra(1.mars.somPeriode(), INGEN, Kilde(im, ARBEIDSGIVER, mottatt))
             val forventetBruktForFebruar = Beløpstidslinje.fra(februar, INNTEKT, Kilde(im, ARBEIDSGIVER, mottatt))
 
-            assertEquals(setOf(1.januar), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.keys)
-            assertEquals(forventetUbruktEtterFebruarSøknad, inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar))
+            assertEquals(setOf(1.januar), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.keys)
+            assertEquals(forventetUbruktEtterFebruarSøknad, inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.getValue(1.januar))
             assertEquals(forventetUbruktEtterFebruarSøknad, gjenopprettBeløpstislinjeFor(1.januar))
             assertEquals(forventetBruktForFebruar, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje)
 
             val forventetBruktForMars = Beløpstidslinje.fra(mars, INGEN, Kilde(im, ARBEIDSGIVER, mottatt))
             håndterSøknad(mars)
-            assertEquals(emptySet<LocalDate>(), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.keys)
+            assertEquals(emptySet<LocalDate>(), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.keys)
             assertEquals(forventetBruktForMars, inspektør.vedtaksperioder(3.vedtaksperiode).refusjonstidslinje)
         }
     }
@@ -365,24 +365,24 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
     fun `saksbehandler opplyser om endring i refusjon frem i tid`() {
         a1 {
             nyttVedtak(januar)
-            assertEquals(emptySet<LocalDate>(), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.keys)
+            assertEquals(emptySet<LocalDate>(), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.keys)
 
             val overstyringId = MeldingsreferanseId(UUID.randomUUID())
             val overstyringTidspunkt = LocalDateTime.now()
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.februar, null, INGEN)))), hendelseId = overstyringId.id, tidsstempel = overstyringTidspunkt)
-            assertEquals(setOf(1.januar), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.keys)
+            assertEquals(setOf(1.januar), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.keys)
 
             val forventetUbrukt =
                 Beløpstidslinje.fra(1.februar.somPeriode(), INGEN, Kilde(overstyringId, SAKSBEHANDLER, overstyringTidspunkt))
 
-            assertEquals(forventetUbrukt, inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar))
+            assertEquals(forventetUbrukt, inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.getValue(1.januar))
             assertEquals(forventetUbrukt, gjenopprettBeløpstislinjeFor(1.januar))
 
             val forventetBrukt =
                 Beløpstidslinje.fra(februar, INGEN, Kilde(overstyringId, SAKSBEHANDLER, overstyringTidspunkt))
 
             håndterSøknad(februar)
-            assertEquals(emptySet<LocalDate>(), inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.keys)
+            assertEquals(emptySet<LocalDate>(), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.keys)
             assertEquals(forventetBrukt, inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje)
         }
     }

@@ -3,6 +3,9 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.inspectors.beløp
+import no.nav.helse.inspectors.hendelseId
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2

@@ -15,11 +15,9 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import no.nav.helse.inspectors.view.view
 
 internal class SykdomshistorikkTest {
     private lateinit var historikk: Sykdomshistorikk
-    private val Sykdomshistorikk.inspektør get() = historikk.view().inspektør
     private val søknadkilde = Hendelseskilde.INGEN.copy(type = "Søknad")
     private val inntektsmeldingkilde = Hendelseskilde.INGEN.copy(type = "Inntektsmelding")
 

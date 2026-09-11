@@ -36,7 +36,6 @@ import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.inspectors.view.GrunnlagsdataView
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
@@ -79,7 +78,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import no.nav.helse.inspectors.view.view
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
@@ -131,8 +129,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
 
-            assertEquals(listOf(Utbetalingstatus.UTBETALT, Utbetalingstatus.IKKE_UTBETALT), inspektør.utbetalinger(2.vedtaksperiode).map { it.status })
-            assertEquals(listOf(Utbetalingstatus.UTBETALT), inspektør.utbetalinger(3.vedtaksperiode).map { it.status })
+            assertEquals(listOf(Utbetalingstatus.UTBETALT, Utbetalingstatus.IKKE_UTBETALT), inspektør.utbetalinger(2.vedtaksperiode).map { it.inspektør.tilstand })
+            assertEquals(listOf(Utbetalingstatus.UTBETALT), inspektør.utbetalinger(3.vedtaksperiode).map { it.inspektør.tilstand })
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -800,7 +798,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
 
-            assertEquals(2, inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.view().inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
+            assertEquals(2, inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
@@ -1451,7 +1449,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 {
             val vilkårsgrunnlag = a2.inspektør.vilkårsgrunnlag(1.vedtaksperiode)
             assertNotNull(vilkårsgrunnlag)
-            assertEquals(GrunnlagsdataView.MedlemskapstatusView.Ja, vilkårsgrunnlag.inspektør.medlemskapstatus)
+            assertEquals(Medlemskapsvurdering.Medlemskapstatus.Ja, vilkårsgrunnlag.inspektør.medlemskapstatus)
         }
         a1 { assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING) }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING) }

@@ -60,7 +60,6 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.fail
-import no.nav.helse.inspectors.view.view
 
 internal class TestPerson(
     private val observatør: TestObservatør,
@@ -101,7 +100,6 @@ internal class TestPerson(
     private val arbeidsgivere = mutableMapOf<String, TestArbeidsgiver>()
 
     internal fun <INSPEKTØR> inspiser(inspektør: (Person) -> INSPEKTØR) = inspektør(person)
-    internal fun view() = person.view()
 
     internal fun arbeidsgiver(orgnummer: String, behandlingsporing: Behandlingsporing.Yrkesaktivitet = orgnummer.tilYrkesaktivitet()) =
         arbeidsgivere.getOrPut(orgnummer) { TestArbeidsgiver(orgnummer, behandlingsporing) }
