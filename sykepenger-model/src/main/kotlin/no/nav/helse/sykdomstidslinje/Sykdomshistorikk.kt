@@ -9,9 +9,11 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.tournament.Dagturnering
 
 internal class Sykdomshistorikk private constructor(
-    internal val elementer: MutableList<Element>
+    private val elementer: MutableList<Element>
 ) {
     internal constructor() : this(mutableListOf())
+
+    internal fun elementer() = elementer.toList()
 
     internal val size get() = elementer.size
 

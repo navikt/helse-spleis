@@ -72,7 +72,7 @@ internal data class BehandlingkildeView(
 )
 
 internal fun Behandlinger.view() = BehandlingerView(
-    behandlinger = behandlinger.map { it.view() },
+    behandlinger = behandlinger().map { it.view() },
     hendelser = hendelseIder()
 )
 
@@ -100,7 +100,7 @@ internal fun Behandlinger.Behandling.view() = BehandlingView(
         Tilstand.UberegnetAnnullering -> BehandlingView.TilstandView.UBEREGNET_ANNULLERING
         Tilstand.OverførtAnnullering -> BehandlingView.TilstandView.OVERFØRT_ANNULLERING
     },
-    endringer = endringer.map { it.view() },
+    endringer = endringer().map { it.view() },
     faktaavklartInntekt = when (val fi = faktaavklartInntekt) {
         is SelvstendigFaktaavklartInntekt -> fi.view()
         is ArbeidstakerFaktaavklartInntekt -> fi.view()

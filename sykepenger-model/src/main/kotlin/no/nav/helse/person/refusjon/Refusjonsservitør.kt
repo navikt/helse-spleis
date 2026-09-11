@@ -15,7 +15,8 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 
 internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = emptyMap()) {
     private val refusjonstidslinjer = input.filterValues { it.isNotEmpty() }.toSortedMap()
-    internal val refusjonsrester = refusjonstidslinjer.toMutableMap()
+    private val refusjonsrester = refusjonstidslinjer.toMutableMap()
+    internal fun refusjonsrester() = refusjonsrester.toMap()
     internal operator fun get(dato: LocalDate) = refusjonsrester[dato]
     private fun leggTil(dato: LocalDate, beløpstidslinje: Beløpstidslinje) {
         val førsteDagIDenNyeTidslinjen = beløpstidslinje.firstOrNull()?.dato ?: return

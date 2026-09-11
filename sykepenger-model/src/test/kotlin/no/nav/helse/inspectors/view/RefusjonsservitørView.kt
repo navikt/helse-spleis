@@ -6,4 +6,4 @@ import no.nav.helse.person.refusjon.Refusjonsservitør
 
 internal data class RefusjonsservitørView(val refusjonstidslinjer: Map<LocalDate, Beløpstidslinje>)
 
-internal fun Refusjonsservitør.view() = RefusjonsservitørView(refusjonsrester.toMap())
+internal fun Refusjonsservitør.view() = RefusjonsservitørView(refusjonsrester())

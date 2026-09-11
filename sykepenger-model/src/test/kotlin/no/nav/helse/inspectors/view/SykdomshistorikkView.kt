@@ -15,7 +15,7 @@ internal data class SykdomshistorikkElementView(
     val beregnetSykdomstidslinje: Sykdomstidslinje
 )
 
-internal fun Sykdomshistorikk.view() = SykdomshistorikkView(elementer = elementer.map { it.view() })
+internal fun Sykdomshistorikk.view() = SykdomshistorikkView(elementer = elementer().map { it.view() })
 
 internal fun Sykdomshistorikk.Element.view() = SykdomshistorikkElementView(
     id = id,

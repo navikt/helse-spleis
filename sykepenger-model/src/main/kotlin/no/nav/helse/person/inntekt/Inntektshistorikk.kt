@@ -5,9 +5,11 @@ import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.serialisering.InntektshistorikkUtDto
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt.Companion.finnInntektsmeldingForSkjæringstidspunkt
 
-internal class Inntektshistorikk private constructor(internal val historikk: MutableList<Inntektsmeldinginntekt>) {
+internal class Inntektshistorikk private constructor(private val historikk: MutableList<Inntektsmeldinginntekt>) {
 
     internal constructor() : this(mutableListOf())
+
+    internal fun historikk() = historikk.toList()
 
     internal companion object {
         internal fun gjenopprett(dto: InntektshistorikkInnDto) = Inntektshistorikk(
