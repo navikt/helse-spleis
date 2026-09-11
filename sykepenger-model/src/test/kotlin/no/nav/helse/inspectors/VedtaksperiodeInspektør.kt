@@ -1,7 +1,7 @@
 package no.nav.helse.inspectors
 
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.VedtaksperiodeView
+import no.nav.helse.inspectors.view.VedtaksperiodeView
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 

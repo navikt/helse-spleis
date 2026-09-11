@@ -60,6 +60,7 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.fail
+import no.nav.helse.inspectors.view.view
 
 internal class TestPerson(
     private val observatør: TestObservatør,

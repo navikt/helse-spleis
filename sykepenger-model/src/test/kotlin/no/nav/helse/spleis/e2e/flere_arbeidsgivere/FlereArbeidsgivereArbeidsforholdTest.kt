@@ -17,7 +17,7 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.ArbeidstakerOpptjeningView
+import no.nav.helse.inspectors.view.ArbeidstakerOpptjeningView
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2

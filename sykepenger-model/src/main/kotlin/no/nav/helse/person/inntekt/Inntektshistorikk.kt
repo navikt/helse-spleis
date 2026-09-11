@@ -5,7 +5,7 @@ import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.serialisering.InntektshistorikkUtDto
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt.Companion.finnInntektsmeldingForSkjæringstidspunkt
 
-internal class Inntektshistorikk private constructor(private val historikk: MutableList<Inntektsmeldinginntekt>) {
+internal class Inntektshistorikk private constructor(internal val historikk: MutableList<Inntektsmeldinginntekt>) {
 
     internal constructor() : this(mutableListOf())
 
@@ -16,10 +16,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             }.toMutableList()
         )
     }
-
-    fun view() = InntektshistorikkView(
-        inntekter = historikk.map { it.view() }
-    )
 
     internal fun leggTil(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt)=
         leggTil(Inntektsmeldinginntekt(id = arbeidstakerFaktaavklartInntekt.id, inntektsdata = arbeidstakerFaktaavklartInntekt.inntektsdata))
@@ -38,5 +34,3 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         historikk = historikk.map { it.dto() }
     )
 }
-
-internal data class InntektshistorikkView(val inntekter: List<InntektsmeldinginntektView>)

@@ -12,11 +12,6 @@ internal data class Inntektsmeldinginntekt private constructor(
 ) {
     internal constructor(id: UUID, inntektsdata: Inntektsdata) : this(id, inntektsdata, Kilde.Arbeidsgiver)
 
-    internal fun view() = InntektsmeldinginntektView(
-        id = id,
-        inntektsdata = inntektsdata
-    )
-
     internal fun kanLagres(other: Inntektsmeldinginntekt) = this.inntektsdata.hendelseId != other.inntektsdata.hendelseId || this.inntektsdata.dato != other.inntektsdata.dato
 
     fun dto() =
@@ -49,24 +44,19 @@ internal data class Inntektsmeldinginntekt private constructor(
 
     internal companion object {
         internal fun gjenopprett(dto: InntektsmeldingInnDto): Inntektsmeldinginntekt {
-            return Inntektsmeldinginntekt(
-                id = dto.id,
-                inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
-                kilde = Kilde.gjenopprett(dto.kilde),
-            )
+        return Inntektsmeldinginntekt(
+            id = dto.id,
+            inntektsdata = Inntektsdata.gjenopprett(dto.inntektsdata),
+            kilde = Kilde.gjenopprett(dto.kilde),
+        )
         }
 
         internal fun List<Inntektsmeldinginntekt>.finnInntektsmeldingForSkjæringstidspunkt(
-            skjæringstidspunkt: LocalDate,
-            førsteFraværsdag: LocalDate?
+        skjæringstidspunkt: LocalDate,
+        førsteFraværsdag: LocalDate?
         ): Inntektsmeldinginntekt? {
-            val inntektsmeldinger = this.filter { it.inntektsdata.dato == skjæringstidspunkt || it.inntektsdata.dato == førsteFraværsdag }
-            return inntektsmeldinger.maxByOrNull { inntektsmelding -> inntektsmelding.inntektsdata.tidsstempel }
+        val inntektsmeldinger = this.filter { it.inntektsdata.dato == skjæringstidspunkt || it.inntektsdata.dato == førsteFraværsdag }
+        return inntektsmeldinger.maxByOrNull { inntektsmelding -> inntektsmelding.inntektsdata.tidsstempel }
         }
     }
 }
-
-internal data class InntektsmeldinginntektView(
-    val id: UUID,
-    val inntektsdata: Inntektsdata
-)

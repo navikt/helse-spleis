@@ -22,4 +22,5 @@ dependencies {
 
     testFixturesImplementation(project(":sykepenger-aktivitetslogg"))
     testFixturesImplementation(project(":sykepenger-primitiver"))
+    testFixturesImplementation(project(":sykepenger-økonomi"))
 }

@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.tournament.Dagturnering
 
 internal class Sykdomshistorikk private constructor(
-    private val elementer: MutableList<Element>
+    internal val elementer: MutableList<Element>
 ) {
     internal constructor() : this(mutableListOf())
 
@@ -20,8 +20,6 @@ internal class Sykdomshistorikk private constructor(
     internal fun harSykdom() = !isEmpty() && !elementer.first().isEmpty()
 
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
-
-    fun view() = SykdomshistorikkView(elementer = elementer.map { it.view() })
 
     internal fun håndter(meldingsreferanseId: MeldingsreferanseId, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         elementer.add(0, Element.opprett(this, meldingsreferanseId, sykdomstidslinje))
@@ -89,14 +87,6 @@ internal class Sykdomshistorikk private constructor(
             }
         }
 
-        internal fun view() = SykdomshistorikkElementView(
-            id = id,
-            hendelseId = hendelseId,
-            tidsstempel = tidsstempel,
-            hendelseSykdomstidslinje = hendelseSykdomstidslinje,
-            beregnetSykdomstidslinje = beregnetSykdomstidslinje
-        )
-
         internal fun dto() = SykdomshistorikkElementDto(
             id = id,
             hendelseId = hendelseId?.dto(),
@@ -119,12 +109,3 @@ internal class Sykdomshistorikk private constructor(
         }
     }
 }
-
-internal data class SykdomshistorikkView(val elementer: List<SykdomshistorikkElementView>)
-internal data class SykdomshistorikkElementView(
-    val id: UUID,
-    val hendelseId: MeldingsreferanseId?,
-    val tidsstempel: LocalDateTime,
-    val hendelseSykdomstidslinje: Sykdomstidslinje,
-    val beregnetSykdomstidslinje: Sykdomstidslinje
-)

@@ -79,7 +79,6 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.view.PersonView
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.NormalArbeidstaker
@@ -161,11 +160,6 @@ class Person private constructor(
 
     internal var skjæringstidspunkter: Skjæringstidspunkter = skjæringstidspunkter
         private set
-
-    internal fun view() = PersonView(
-        arbeidsgivere = yrkesaktiviteter.map { it.view() },
-        vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.view()
-    )
 
     fun håndterSykmelding(eventBus: EventBus, sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler sykmelding")

@@ -10,6 +10,7 @@ import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import org.junit.jupiter.api.fail
+import no.nav.helse.inspectors.view.view
 
 internal class TestArbeidsgiverInspektør(
     private val person: Person,

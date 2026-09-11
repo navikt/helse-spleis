@@ -36,7 +36,7 @@ import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.GrunnlagsdataView
+import no.nav.helse.inspectors.view.GrunnlagsdataView
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SY_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
@@ -79,6 +79,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import no.nav.helse.inspectors.view.view
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
 

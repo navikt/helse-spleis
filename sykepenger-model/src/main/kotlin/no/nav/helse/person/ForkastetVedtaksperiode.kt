@@ -19,11 +19,10 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_38
 import no.nav.helse.utbetalingslinjer.Utbetaling
 
 internal class ForkastetVedtaksperiode(
-    private val vedtaksperiode: Vedtaksperiode, // 🚨Denne skal bare brukes til view/dto 🚨
+    internal val vedtaksperiode: Vedtaksperiode, // 🚨Denne skal bare brukes til view/dto 🚨
     private val arbeidsgiver: String,
     private val periode: Periode) {
 
-    internal fun view() = vedtaksperiode.view()
     internal fun dto() = ForkastetVedtaksperiodeUtDto(vedtaksperiode.dto(null))
 
     internal companion object {

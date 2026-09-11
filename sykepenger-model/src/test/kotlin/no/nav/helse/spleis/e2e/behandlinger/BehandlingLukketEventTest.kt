@@ -13,11 +13,11 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.onsdag
-import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.person.BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST
-import no.nav.helse.person.BehandlingView.TilstandView.TIL_INFOTRYGD
-import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_FATTET
-import no.nav.helse.person.BehandlingView.TilstandView.VEDTAK_IVERKSATT
+import no.nav.helse.inspectors.view.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.inspectors.view.BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST
+import no.nav.helse.inspectors.view.BehandlingView.TilstandView.TIL_INFOTRYGD
+import no.nav.helse.inspectors.view.BehandlingView.TilstandView.VEDTAK_FATTET
+import no.nav.helse.inspectors.view.BehandlingView.TilstandView.VEDTAK_IVERKSATT
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode

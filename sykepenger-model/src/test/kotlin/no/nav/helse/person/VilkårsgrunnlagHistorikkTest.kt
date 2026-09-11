@@ -33,6 +33,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import no.nav.helse.inspectors.view.view
+import no.nav.helse.inspectors.view.GrunnlagsdataView
 
 internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk

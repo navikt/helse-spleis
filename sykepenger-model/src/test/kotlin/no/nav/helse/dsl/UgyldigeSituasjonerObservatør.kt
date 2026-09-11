@@ -4,11 +4,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.BehandlingView
-import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.inspectors.view.BehandlingView
+import no.nav.helse.inspectors.view.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.Person
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.VedtaksperiodeView
+import no.nav.helse.inspectors.view.VedtaksperiodeView
 import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
+import no.nav.helse.inspectors.view.view
 
 internal class UgyldigeSituasjonerObservatør(private val person: Person) : EventSubscription {
 

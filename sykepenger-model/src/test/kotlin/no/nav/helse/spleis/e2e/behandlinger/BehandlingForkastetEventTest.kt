@@ -10,8 +10,8 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
-import no.nav.helse.person.BehandlingView.TilstandView.ANNULLERT_PERIODE
-import no.nav.helse.person.BehandlingView.TilstandView.TIL_INFOTRYGD
+import no.nav.helse.inspectors.view.BehandlingView.TilstandView.ANNULLERT_PERIODE
+import no.nav.helse.inspectors.view.BehandlingView.TilstandView.TIL_INFOTRYGD
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType

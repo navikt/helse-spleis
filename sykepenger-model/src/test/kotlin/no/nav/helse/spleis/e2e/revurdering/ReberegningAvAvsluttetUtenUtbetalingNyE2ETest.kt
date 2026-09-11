@@ -23,7 +23,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.inspectors.view.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24

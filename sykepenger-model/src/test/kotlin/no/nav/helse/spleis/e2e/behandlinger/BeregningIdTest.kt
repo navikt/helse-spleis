@@ -6,8 +6,8 @@ import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.BehandlingView
-import no.nav.helse.person.BehandlingendringView
+import no.nav.helse.inspectors.view.BehandlingView
+import no.nav.helse.inspectors.view.BehandlingendringView
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals

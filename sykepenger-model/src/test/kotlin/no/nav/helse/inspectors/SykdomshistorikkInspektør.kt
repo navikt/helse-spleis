@@ -1,8 +1,8 @@
 package no.nav.helse.inspectors
 
 import java.util.UUID
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkElementView
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkView
+import no.nav.helse.inspectors.view.SykdomshistorikkElementView
+import no.nav.helse.inspectors.view.SykdomshistorikkView
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
 internal val SykdomshistorikkView.inspektør get() = SykdomshistorikkInspektør(this.elementer)

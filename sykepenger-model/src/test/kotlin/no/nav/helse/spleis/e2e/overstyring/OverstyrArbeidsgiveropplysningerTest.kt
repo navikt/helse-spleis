@@ -20,7 +20,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.InfotrygdView
+import no.nav.helse.inspectors.view.InfotrygdView
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
@@ -47,6 +47,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import no.nav.helse.inspectors.view.view
 
 internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
 
