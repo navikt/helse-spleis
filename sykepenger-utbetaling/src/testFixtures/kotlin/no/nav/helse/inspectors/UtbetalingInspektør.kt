@@ -2,9 +2,10 @@ package no.nav.helse.inspectors
 
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.inspectors.view.UtbetalingView
+import no.nav.helse.inspectors.view.view
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.UtbetalingView
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 

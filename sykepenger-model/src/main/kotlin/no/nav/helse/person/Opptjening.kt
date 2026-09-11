@@ -10,7 +10,6 @@ import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiodeOrNull
@@ -27,10 +26,10 @@ private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
 
 internal class ArbeidstakerOpptjening private constructor(
     private val skjæringstidspunkt: LocalDate,
-    private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>,
+    internal val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>,
     private val opptjeningsperiode: Periode
 ) {
-    private val opptjeningsdager by lazy { opptjeningsperiode.count() }
+    internal val opptjeningsdager by lazy { opptjeningsperiode.count() }
     internal val subsumsjon = `§ 8-2 ledd 1`(
         oppfylt = harTilstrekkeligAntallOpptjeningsdager(),
         skjæringstidspunkt = skjæringstidspunkt,
@@ -38,8 +37,6 @@ internal class ArbeidstakerOpptjening private constructor(
         arbeidsforhold = arbeidsforhold.arbeidsforholdForJurist(),
         antallOpptjeningsdager = opptjeningsdager
     )
-
-    internal fun view() = ArbeidstakerOpptjeningView(arbeidsforhold = arbeidsforhold, opptjeningsdager = opptjeningsdager, erOppfylt = erOppfylt())
 
     internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
         arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
@@ -209,5 +206,3 @@ internal class ArbeidstakerOpptjening private constructor(
         erOppfylt = erOppfylt()
     )
 }
-
-internal data class ArbeidstakerOpptjeningView(val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, val opptjeningsdager: Int, val erOppfylt: Boolean)

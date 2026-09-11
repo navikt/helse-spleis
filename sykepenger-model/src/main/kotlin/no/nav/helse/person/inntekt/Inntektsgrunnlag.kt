@@ -39,7 +39,7 @@ internal class Inntektsgrunnlag(
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
     val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
-    private val vurdertInfotrygd: Boolean,
+    internal val vurdertInfotrygd: Boolean,
     `6G`: Inntekt? = null
 ) : Comparable<Inntekt> {
 
@@ -52,15 +52,15 @@ internal class Inntektsgrunnlag(
         else -> selvstendigInntektsopplysning
     }
 
-    private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
+    internal val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
 
     // sum av alle inntekter foruten skjønnsmessig fastsatt beløp; da brukes inntekten den fastsatte
-    private val omregnetÅrsinntekt = arbeidsgiverInntektsopplysninger.totalOmregnetÅrsinntekt()
+    internal val omregnetÅrsinntekt = arbeidsgiverInntektsopplysninger.totalOmregnetÅrsinntekt()
 
     // summen av alle inntekter
     val beregningsgrunnlag = this.selvstendigInntektsopplysning?.beregningsgrunnlag ?: arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt()
     val sykepengegrunnlag = beregningsgrunnlag.coerceAtMost(this.`6G`)
-    private val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (beregningsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
+    internal val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (beregningsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
     internal constructor(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
@@ -138,19 +138,6 @@ internal class Inntektsgrunnlag(
             )
         }
     }
-
-    internal fun view() = InntektsgrunnlagView(
-        sykepengegrunnlag = sykepengegrunnlag,
-        omregnetÅrsinntekt = omregnetÅrsinntekt,
-        beregningsgrunnlag = beregningsgrunnlag,
-        `6G` = `6G`,
-        begrensning = begrensning,
-        vurdertInfotrygd = vurdertInfotrygd,
-        arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
-        selvstendigInntektsopplysning = selvstendigInntektsopplysning,
-        deaktiverteArbeidsgiverInntektsopplysninger = deaktiverteArbeidsforhold,
-        deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.map { it.orgnummer }
-    )
 
     internal fun vurderArbeidsgivere(aktivitetslogg: IAktivitetslogg, opptjening: ArbeidstakerOpptjening?, orgnummer: String) {
         if (opptjening != null) arbeidsgiverInntektsopplysninger.vurderArbeidsgivere(aktivitetslogg, opptjening, orgnummer)
@@ -316,16 +303,3 @@ internal class Inntektsgrunnlag(
         }
     }
 }
-
-internal data class InntektsgrunnlagView(
-    val sykepengegrunnlag: Inntekt,
-    val omregnetÅrsinntekt: Inntekt,
-    val beregningsgrunnlag: Inntekt,
-    val `6G`: Inntekt,
-    val begrensning: Inntektsgrunnlag.Begrensning,
-    val vurdertInfotrygd: Boolean,
-    val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-    val selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
-    val deaktiverteArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-    val deaktiverteArbeidsforhold: List<String>
-)

@@ -95,7 +95,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.refusjon.Refusjonsservitør
-import no.nav.helse.person.view.ArbeidsgiverView
 import no.nav.helse.sykdomstidslinje.Dag.Companion.bareNyeDager
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
@@ -119,15 +118,15 @@ internal class Yrkesaktivitet private constructor(
     private val person: Person,
     private val id: UUID,
     val yrkesaktivitetstype: Behandlingsporing.Yrkesaktivitet,
-    private val inntektshistorikk: Inntektshistorikk,
-    private val sykdomshistorikk: Sykdomshistorikk,
-    private val sykmeldingsperioder: Sykmeldingsperioder,
+    internal val inntektshistorikk: Inntektshistorikk,
+    internal val sykdomshistorikk: Sykdomshistorikk,
+    internal val sykmeldingsperioder: Sykmeldingsperioder,
     perioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
-    private val vedtaksperioder: MutableList<Vedtaksperiode>,
-    private val forkastede: MutableList<ForkastetVedtaksperiode>,
+    internal val vedtaksperioder: MutableList<Vedtaksperiode>,
+    internal val forkastede: MutableList<ForkastetVedtaksperiode>,
     private val _utbetalinger: MutableList<Utbetaling>,
-    private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
-    private val ubrukteRefusjonsopplysninger: Refusjonsservitør,
+    internal val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
+    internal val ubrukteRefusjonsopplysninger: Refusjonsservitør,
     private val regelverkslogg: Regelverkslogg
 ) : Aktivitetskontekst {
     internal constructor(person: Person, yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, regelverkslogg: Regelverkslogg) : this(
@@ -157,19 +156,6 @@ internal class Yrkesaktivitet private constructor(
         private set
 
     internal val utbetalinger get() = _utbetalinger.toList()
-
-    fun view(): ArbeidsgiverView = ArbeidsgiverView(
-        organisasjonsnummer = organisasjonsnummer,
-        yrkesaktivitetssporing = yrkesaktivitetstype,
-        sykdomshistorikk = sykdomshistorikk.view(),
-        utbetalinger = _utbetalinger.map { it.view },
-        inntektshistorikk = inntektshistorikk.view(),
-        sykmeldingsperioder = sykmeldingsperioder.view(),
-        ubrukteRefusjonsopplysninger = ubrukteRefusjonsopplysninger.view(),
-        feriepengeutbetalinger = feriepengeutbetalinger.map { it.view() },
-        aktiveVedtaksperioder = vedtaksperioder.map { it.view() },
-        forkastetVedtaksperioder = forkastede.map { it.view() }
-    )
 
     internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")

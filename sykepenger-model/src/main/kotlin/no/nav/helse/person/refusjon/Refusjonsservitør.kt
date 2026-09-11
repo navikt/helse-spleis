@@ -15,7 +15,7 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 
 internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = emptyMap()) {
     private val refusjonstidslinjer = input.filterValues { it.isNotEmpty() }.toSortedMap()
-    private val refusjonsrester = refusjonstidslinjer.toMutableMap()
+    internal val refusjonsrester = refusjonstidslinjer.toMutableMap()
     internal operator fun get(dato: LocalDate) = refusjonsrester[dato]
     private fun leggTil(dato: LocalDate, beløpstidslinje: Beløpstidslinje) {
         val førsteDagIDenNyeTidslinjen = beløpstidslinje.firstOrNull()?.dato ?: return
@@ -65,7 +65,6 @@ internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = empt
     }
 
     internal fun dto() = RefusjonsservitørDto(refusjonsrester.mapValues { (_, beløpstidslinje) -> beløpstidslinje.dto() })
-    internal fun view() = RefusjonsservitørView(refusjonsrester.toMap())
 
     internal companion object {
         private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
@@ -87,5 +86,3 @@ internal class Refusjonsservitør(input: Map<LocalDate, Beløpstidslinje> = empt
         internal fun gjenopprett(dto: RefusjonsservitørDto) = Refusjonsservitør(dto.refusjonstidslinjer.mapValues { (_, beløpstidslinje) -> Beløpstidslinje.gjenopprett(beløpstidslinje) }.toSortedMap())
     }
 }
-
-data class RefusjonsservitørView(val refusjonstidslinjer: Map<LocalDate, Beløpstidslinje>)

@@ -42,7 +42,7 @@ class Utbetaling private constructor(
     private val forbrukteSykedager: Int?,
     private val gjenståendeSykedager: Int?,
     // annulleringer brukes ikke mer, men finnes av historiske årsaker da listen kan være "ikke-tom" på tidligere utbetalinger
-    private val annulleringer: List<Utbetaling>,
+    internal val annulleringer: List<Utbetaling>,
     vurdering: Vurdering?,
     private var overføringstidspunkt: LocalDateTime?,
     private var avstemmingsnøkkel: Long?,
@@ -51,19 +51,6 @@ class Utbetaling private constructor(
 ) : Aktivitetskontekst {
     var vurdering: Vurdering? = vurdering
         private set
-    val view
-        get() = UtbetalingView(
-            id = id,
-            korrelasjonsId = korrelasjonsId,
-            periode = periode,
-            utbetalingstidslinje = utbetalingstidslinje,
-            arbeidsgiverOppdrag = arbeidsgiverOppdrag,
-            personOppdrag = personOppdrag,
-            status = tilstand.status,
-            type = type,
-            annulleringer = annulleringer.map { it.id },
-            erAvsluttet = erAvsluttet()
-        )
 
     constructor(
         periode: Periode,
@@ -703,16 +690,3 @@ enum class Klassekode(val verdi: String) {
         }
     }
 }
-
-data class UtbetalingView(
-    val id: UUID,
-    val korrelasjonsId: UUID,
-    val periode: Periode,
-    val utbetalingstidslinje: Utbetalingstidslinje,
-    val arbeidsgiverOppdrag: Oppdrag,
-    val personOppdrag: Oppdrag,
-    val status: Utbetalingstatus,
-    val type: Utbetalingtype,
-    val annulleringer: List<UUID>,
-    val erAvsluttet: Boolean
-)

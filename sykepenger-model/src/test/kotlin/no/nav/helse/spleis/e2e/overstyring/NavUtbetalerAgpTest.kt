@@ -27,7 +27,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.lørdag
 import no.nav.helse.mai
-import no.nav.helse.person.BehandlingView.TilstandView.UBEREGNET_OMGJØRING
+import no.nav.helse.inspectors.view.BehandlingView.TilstandView.UBEREGNET_OMGJØRING
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3

@@ -183,7 +183,6 @@ import no.nav.helse.person.tilstandsmaskin.SelvstendigTilUtbetaling
 import no.nav.helse.person.tilstandsmaskin.TilAnnullering
 import no.nav.helse.person.tilstandsmaskin.TilInfotrygd
 import no.nav.helse.person.tilstandsmaskin.TilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.Vedtaksperiodetilstand
 import no.nav.helse.person.tilstandsmaskin.nesteTilstandEtterInntekt
 import no.nav.helse.person.tilstandsmaskin.starttilstander
@@ -216,7 +215,7 @@ internal class Vedtaksperiode private constructor(
     tilstand: Vedtaksperiodetilstand,
     internal val behandlinger: Behandlinger,
     internal val opprettet: LocalDateTime,
-    private var oppdatert: LocalDateTime = opprettet,
+    oppdatert: LocalDateTime = opprettet,
     private val regelverkslogg: Regelverkslogg
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
@@ -263,6 +262,9 @@ internal class Vedtaksperiode private constructor(
     internal var tilstand: Vedtaksperiodetilstand = tilstand
         private set
 
+    internal var oppdatert: LocalDateTime = oppdatert
+        private set
+
     internal val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
     internal val periode get() = behandlinger.periode()
     internal val sykdomstidslinje get() = behandlinger.sykdomstidslinje()
@@ -281,19 +283,6 @@ internal class Vedtaksperiode private constructor(
     internal val EventBus.behandlingEventBus
         get() =
             BehandlingEventBus(this, yrkesaktivitet.yrkesaktivitetstype, id, behandlinger.søknadIder())
-
-    internal fun view() = VedtaksperiodeView(
-        id = id,
-        periode = periode,
-        tilstand = tilstand.type,
-        oppdatert = oppdatert,
-        skjæringstidspunkt = skjæringstidspunkt,
-        skjæringstidspunkter = behandlinger.skjæringstidspunkter(),
-        egenmeldingsdager = behandlinger.egenmeldingsdager(),
-        behandlinger = behandlinger.view(),
-        førsteFraværsdag = førsteFraværsdag,
-        annulleringskandidater = yrkesaktivitet.finnAnnulleringskandidater(this.id)
-    )
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to id.toString()))
@@ -3766,24 +3755,6 @@ internal class Vedtaksperiode private constructor(
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean
-
-internal data class VedtaksperiodeView(
-    val id: UUID,
-    val periode: Periode,
-    val tilstand: TilstandType,
-    val oppdatert: LocalDateTime,
-    val skjæringstidspunkt: LocalDate,
-    val skjæringstidspunkter: List<LocalDate>,
-    val egenmeldingsdager: List<Periode>,
-    val behandlinger: BehandlingerView,
-    val førsteFraværsdag: LocalDate?,
-    val annulleringskandidater: Set<Vedtaksperiode>
-) {
-    val sykdomstidslinje = behandlinger.behandlinger.last().endringer.last().sykdomstidslinje
-    val refusjonstidslinje = behandlinger.behandlinger.last().endringer.last().refusjonstidslinje
-    val avslagstidslinje = behandlinger.behandlinger.last().endringer.last().avslagstidslinje
-    val dagerNavOvertarAnsvar = behandlinger.behandlinger.last().endringer.last().dagerNavOvertarAnsvar
-}
 
 internal val HendelseMetadata.behandlingkilde
     get() =

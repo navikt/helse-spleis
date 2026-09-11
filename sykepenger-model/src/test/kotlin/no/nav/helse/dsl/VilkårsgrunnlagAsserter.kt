@@ -9,11 +9,12 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.AOrdningen
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Arbeidsgiver
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Infotrygd
-import no.nav.helse.person.inntekt.InntektsgrunnlagView
+import no.nav.helse.inspectors.view.InntektsgrunnlagView
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import org.junit.jupiter.api.Assertions.assertEquals
+import no.nav.helse.inspectors.view.view
 
 internal fun ArbeidsgiverInntektsopplysning.assertArbeidsgiverInntektsopplysning(
     forventetFaktaavklartInntekt: Inntekt,

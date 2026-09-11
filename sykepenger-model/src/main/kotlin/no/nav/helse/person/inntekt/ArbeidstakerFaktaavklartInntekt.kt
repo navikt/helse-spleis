@@ -3,7 +3,6 @@ package no.nav.helse.person.inntekt
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.ArbeidstakerFaktaavklartInntektInnDto
 import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
-import no.nav.helse.økonomi.Inntekt
 
 internal data class ArbeidstakerFaktaavklartInntekt(
     override val id: UUID,
@@ -24,8 +23,4 @@ internal data class ArbeidstakerFaktaavklartInntekt(
             inntektsopplysningskilde = Arbeidstakerinntektskilde.gjenopprett(dto.inntektsopplysningskilde)
         )
     }
-
-    internal fun view() = ArbeistakerFaktaavklartInntektView(inntektsdata.hendelseId.id, inntektsdata.beløp)
-
-    internal data class ArbeistakerFaktaavklartInntektView(override val hendelseId: UUID, override val beløp: Inntekt) : FaktaavklartInntektView
 }

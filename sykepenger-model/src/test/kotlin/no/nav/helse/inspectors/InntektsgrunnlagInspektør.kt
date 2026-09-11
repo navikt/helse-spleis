@@ -1,8 +1,9 @@
 package no.nav.helse.inspectors
 
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.person.inntekt.InntektsgrunnlagView
+import no.nav.helse.inspectors.view.InntektsgrunnlagView
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.inspectors.view.view
 
 internal val Inntektsgrunnlag.inspektør get() = view().inspektør
 internal val InntektsgrunnlagView.inspektør get() = InntektsgrunnlagInspektør(this)

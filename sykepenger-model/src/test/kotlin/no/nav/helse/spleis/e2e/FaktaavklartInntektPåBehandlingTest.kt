@@ -27,8 +27,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
-import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt.ArbeistakerFaktaavklartInntektView
-import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
+import no.nav.helse.inspectors.view.ArbeistakerFaktaavklartInntektView
+import no.nav.helse.inspectors.view.SelvstendigFaktaavklartInntektView
 import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -238,7 +238,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             håndterFørstegangssøknadSelvstendig(januar, søknadId = søknadId)
 
-            val faktaavklartInntekt = inspektør.faktaavklartInntekt(1.vedtaksperiode) as? SelvstendigFaktaavklartInntekt.SelvstendigFaktaavklartInntektView
+            val faktaavklartInntekt = inspektør.faktaavklartInntekt(1.vedtaksperiode) as? SelvstendigFaktaavklartInntektView
             assertNotNull(faktaavklartInntekt)
             assertEquals(460589.årlig, faktaavklartInntekt.beløp)
             assertEquals(søknadId, faktaavklartInntekt.hendelseId)
@@ -251,7 +251,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             håndterFørstegangssøknadSelvstendig(januar, søknadId = søknadId)
 
-            (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? SelvstendigFaktaavklartInntekt.SelvstendigFaktaavklartInntektView).also { faktaavklartInntekt ->
+            (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? SelvstendigFaktaavklartInntektView).also { faktaavklartInntekt ->
                 assertNotNull(faktaavklartInntekt)
                 assertEquals(460589.årlig, faktaavklartInntekt.beløp)
                 assertEquals(søknadId, faktaavklartInntekt.hendelseId)
@@ -268,7 +268,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 )
             )
 
-            (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? SelvstendigFaktaavklartInntekt.SelvstendigFaktaavklartInntektView).also { faktaavklartInntekt ->
+            (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? SelvstendigFaktaavklartInntektView).also { faktaavklartInntekt ->
                 assertNotNull(faktaavklartInntekt)
                 assertEquals(460589.årlig, faktaavklartInntekt.beløp)
                 assertForventetFeil(

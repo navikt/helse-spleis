@@ -1,11 +1,12 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import no.nav.helse.person.GrunnlagsdataView
+import no.nav.helse.inspectors.view.GrunnlagsdataView
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.VilkårsgrunnlagHistorikkView
-import no.nav.helse.person.VilkårsgrunnlagView
+import no.nav.helse.inspectors.view.VilkårsgrunnlagHistorikkView
+import no.nav.helse.inspectors.view.VilkårsgrunnlagView
 import org.junit.jupiter.api.fail
+import no.nav.helse.inspectors.view.view
 
 internal val VilkårsgrunnlagHistorikk.inspektør get() = this.view().inspektør
 internal val VilkårsgrunnlagHistorikkView.inspektør get() = Vilkårgrunnlagsinspektør(this)

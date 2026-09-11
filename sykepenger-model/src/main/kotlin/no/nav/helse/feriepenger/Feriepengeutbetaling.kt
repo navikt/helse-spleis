@@ -22,12 +22,12 @@ import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
 
 internal class Feriepengeutbetaling private constructor(
     private val feriepengegrunnlag: Feriepengeutbetalinggrunnlag,
-    private val infotrygdFeriepengebeløpPerson: Double,
-    private val infotrygdFeriepengebeløpArbeidsgiver: Double,
-    private val spleisFeriepengebeløpArbeidsgiver: Double,
-    private val spleisFeriepengebeløpPerson: Double,
-    private val oppdrag: Feriepengeoppdrag,
-    private val personoppdrag: Feriepengeoppdrag,
+    internal val infotrygdFeriepengebeløpPerson: Double,
+    internal val infotrygdFeriepengebeløpArbeidsgiver: Double,
+    internal val spleisFeriepengebeløpArbeidsgiver: Double,
+    internal val spleisFeriepengebeløpPerson: Double,
+    internal val oppdrag: Feriepengeoppdrag,
+    internal val personoppdrag: Feriepengeoppdrag,
     private val utbetalingId: UUID,
     private val sendTilOppdrag: Boolean,
     private val sendPersonoppdragTilOS: Boolean,
@@ -63,15 +63,6 @@ internal class Feriepengeutbetaling private constructor(
             )
         }
     }
-
-    internal fun view() = FeriepengeutbetalingView(
-        infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
-        infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
-        spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
-        spleisFeriepengebeløpPerson = spleisFeriepengebeløpPerson,
-        oppdrag = oppdrag,
-        personoppdrag = personoppdrag
-    )
 
     fun håndter(eventBus: EventBus, utbetalingHendelse: FeriepengeutbetalingHendelse, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) {
         if (utbetalingHendelse.utbetalingId != this.utbetalingId || utbetalingHendelse.fagsystemId !in setOf(oppdrag.fagsystemId, personoppdrag.fagsystemId)) return
@@ -307,12 +298,3 @@ internal class Feriepengeutbetaling private constructor(
         sendPersonoppdragTilOS = this.sendPersonoppdragTilOS
     )
 }
-
-internal data class FeriepengeutbetalingView(
-    val infotrygdFeriepengebeløpPerson: Double,
-    val infotrygdFeriepengebeløpArbeidsgiver: Double,
-    val spleisFeriepengebeløpArbeidsgiver: Double,
-    val spleisFeriepengebeløpPerson: Double,
-    val oppdrag: Feriepengeoppdrag,
-    val personoppdrag: Feriepengeoppdrag
-)

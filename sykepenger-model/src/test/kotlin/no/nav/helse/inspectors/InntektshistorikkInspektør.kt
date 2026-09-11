@@ -1,7 +1,7 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import no.nav.helse.person.inntekt.InntektshistorikkView
+import no.nav.helse.inspectors.view.InntektshistorikkView
 import no.nav.helse.økonomi.Inntekt
 
 

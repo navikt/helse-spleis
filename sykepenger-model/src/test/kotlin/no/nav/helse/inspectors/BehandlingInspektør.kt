@@ -5,12 +5,12 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.BehandlingView
+import no.nav.helse.inspectors.view.BehandlingView
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.UtbetalingView
+import no.nav.helse.inspectors.view.UtbetalingView
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal val BehandlingView.inspektør get() = BehandlingInspektør(this)

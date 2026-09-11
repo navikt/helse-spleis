@@ -34,7 +34,7 @@ import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
-import no.nav.helse.person.inntekt.InntektsgrunnlagView
+import no.nav.helse.inspectors.view.InntektsgrunnlagView
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING

@@ -10,7 +10,6 @@ internal class Sykmeldingsperioder(
     private var perioder: List<Periode> = listOf()
 ) {
 
-    fun view() = SykmeldingsperioderView(perioder)
     internal fun perioder() = perioder.toList()
 
     internal fun lagre(sykmelding: Sykmelding, aktivitetslogg: IAktivitetslogg) {
@@ -35,5 +34,3 @@ internal class Sykmeldingsperioder(
         }
     }
 }
-
-internal data class SykmeldingsperioderView(val perioder: List<Periode>)
