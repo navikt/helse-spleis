@@ -5,12 +5,13 @@ import java.util.UUID
 import no.nav.helse.feriepenger.Feriepengerendringskode
 import no.nav.helse.feriepenger.Feriepengerklassekode
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.Person
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import org.junit.jupiter.api.fail
-import no.nav.helse.inspectors.view.view
 
 internal class TestArbeidsgiverInspektør(
     private val person: Person,
@@ -23,30 +24,29 @@ internal class TestArbeidsgiverInspektør(
     }
 
     internal var yrkesaktivitet: Yrkesaktivitet = person.yrkesaktiviteter.first { it.organisasjonsnummer() == orgnummer }
-    private val view = person.view().arbeidsgivere.single { it.organisasjonsnummer == orgnummer }
 
     private val personInspektør = person.inspektør
-    internal val vedtaksperiodeTeller: Int = view.aktiveVedtaksperioder.size + view.forkastetVedtaksperioder.size
-    private val vedtaksperioder = (view.aktiveVedtaksperioder + view.forkastetVedtaksperioder)
+    internal val vedtaksperiodeTeller: Int = yrkesaktivitet.vedtaksperioder.size + yrkesaktivitet.forkastede.size
+    private val vedtaksperioder: Map<UUID, Vedtaksperiode> = (yrkesaktivitet.vedtaksperioder + yrkesaktivitet.forkastede.map(ForkastetVedtaksperiode::vedtaksperiode))
         .associateBy { it.id }
-    private val tilstander = (view.aktiveVedtaksperioder + view.forkastetVedtaksperioder)
-        .mapIndexed { index, periode -> index to periode.tilstand }
+    private val tilstander = (yrkesaktivitet.vedtaksperioder + yrkesaktivitet.forkastede.map(ForkastetVedtaksperiode::vedtaksperiode))
+        .mapIndexed { index, periode -> index to periode.tilstand.type }
         .toMap()
 
-    private val vedtaksperiodeindekser = (view.aktiveVedtaksperioder + view.forkastetVedtaksperioder).mapIndexed { index, periode ->
+    private val vedtaksperiodeindekser = (yrkesaktivitet.vedtaksperioder + yrkesaktivitet.forkastede.map(ForkastetVedtaksperiode::vedtaksperiode)).mapIndexed { index, periode ->
         periode.id to index
     }.toMap()
 
-    private val vedtaksperiodeForkastet = view.forkastetVedtaksperioder.map { it.id }.toSet()
-    internal val inntektInspektør get() = InntektshistorikkInspektør(view.inntektshistorikk)
-    val sykdomshistorikk = view.sykdomshistorikk.inspektør
+    private val vedtaksperiodeForkastet = yrkesaktivitet.forkastede.map { it.vedtaksperiode.id }.toSet()
+    internal val inntektInspektør get() = InntektshistorikkInspektør(yrkesaktivitet.inntektshistorikk)
+    val sykdomshistorikk = yrkesaktivitet.sykdomshistorikk.inspektør
     internal val sykdomstidslinje: Sykdomstidslinje get() = sykdomshistorikk.tidslinje(0)
-    internal val utbetalinger = view.utbetalinger.map { it.inspektør }
+    internal val utbetalinger = yrkesaktivitet.utbetalinger.map { it.inspektør }
     internal val antallUtbetalinger get() = utbetalinger.size
 
-    val ubrukteRefusjonsopplysninger = view.ubrukteRefusjonsopplysninger
+    val ubrukteRefusjonsopplysninger = yrkesaktivitet.ubrukteRefusjonsopplysninger
 
-    internal val feriepengeoppdrag = view.feriepengeutbetalinger
+    internal val feriepengeoppdrag = yrkesaktivitet.feriepengeutbetalinger
         .flatMap { listOf(it.oppdrag, it.personoppdrag) }
         .map {
             Feriepengeoppdrag(
@@ -56,14 +56,14 @@ internal class TestArbeidsgiverInspektør(
                 })
             )
         }
-    internal val infotrygdFeriepengebeløpPerson = view.feriepengeutbetalinger.map { it.infotrygdFeriepengebeløpPerson }
-    internal val infotrygdFeriepengebeløpArbeidsgiver = view.feriepengeutbetalinger.map { it.infotrygdFeriepengebeløpArbeidsgiver }
-    internal val spleisFeriepengebeløpArbeidsgiver = view.feriepengeutbetalinger.map { it.spleisFeriepengebeløpArbeidsgiver }
-    internal val spleisFeriepengebeløpPerson = view.feriepengeutbetalinger.map { it.spleisFeriepengebeløpPerson }
+    internal val infotrygdFeriepengebeløpPerson = yrkesaktivitet.feriepengeutbetalinger.map { it.infotrygdFeriepengebeløpPerson }
+    internal val infotrygdFeriepengebeløpArbeidsgiver = yrkesaktivitet.feriepengeutbetalinger.map { it.infotrygdFeriepengebeløpArbeidsgiver }
+    internal val spleisFeriepengebeløpArbeidsgiver = yrkesaktivitet.feriepengeutbetalinger.map { it.spleisFeriepengebeløpArbeidsgiver }
+    internal val spleisFeriepengebeløpPerson = yrkesaktivitet.feriepengeutbetalinger.map { it.spleisFeriepengebeløpPerson }
 
-    private val sykmeldingsperioder = view.sykmeldingsperioder.perioder
+    private val sykmeldingsperioder = yrkesaktivitet.sykmeldingsperioder.perioder()
 
-    internal fun vilkårsgrunnlaghistorikk() = person.view().vilkårsgrunnlaghistorikk.inspektør
+    internal fun vilkårsgrunnlaghistorikk() = person.vilkårsgrunnlagHistorikk.inspektør
     internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlaghistorikk().vilkårsgrunnlagHistorikkInnslag()
 
     internal data class Feriepengeoppdrag(
@@ -93,7 +93,7 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun sisteAvsluttedeUtbetalingForVedtaksperiode(vedtaksperiodeId: UUID) = avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId).last()
     internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.filter { it.inspektør.erUbetalt }
-    internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.filter { it.erAvsluttet }
+    internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.filter { it.erAvsluttet() }
     internal fun utbetalinger(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger
 
     internal fun utbetalingerInFlight() = utbetalinger.filter { it.tilstand == Utbetalingstatus.OVERFØRT }
@@ -140,11 +140,11 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun venteperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.dagerUtenNavAnsvar
 
-    internal fun egenmeldingsdager(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).egenmeldingsdager
+    internal fun egenmeldingsdager(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.egenmeldingsperioder
 
     internal fun refusjon(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).refusjonstidslinje
 
-    internal fun dagerNavOvertarAnsvar(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).dagerNavOvertarAnsvar
+    internal fun dagerNavOvertarAnsvar(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).inspektør.dagerNavOvertarAnsvar
 
     internal fun faktaavklartInntekt(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).inspektør.faktaavklartInntekt
     internal fun korrigertInntekt(vedtaksperiodeId: UUID) = vedtaksperioder.getValue(vedtaksperiodeId).inspektør.korrigertInntekt

@@ -1188,7 +1188,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalt()
 
             // Sjekk at forsikringen (dager nav overtar) er lagret på behandlingsendringen
-            assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertVarsler(1.vedtaksperiode, Varselkode.RV_AN_6)
 
         }
