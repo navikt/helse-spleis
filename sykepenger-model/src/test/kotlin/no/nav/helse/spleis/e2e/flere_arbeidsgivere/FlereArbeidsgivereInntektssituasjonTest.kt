@@ -26,14 +26,12 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVIN
 import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class FlereArbeidsgivereInntektssituasjonTest : AbstractDslTest() {
 
     @Test
-    @Disabled
     fun `finner periodenSomGaOpp når eneste kandidat står i AvventerAvsluttetUtenUtbetaling`() {
         a1 {
             håndterSøknad((27.mars til 26.april) i 2026)
@@ -67,7 +65,6 @@ internal class FlereArbeidsgivereInntektssituasjonTest : AbstractDslTest() {
     }
 
     @Test
-    @Disabled
     fun `finner periodenSomGaOpp når a2 har sendt inntektsopplysninger på den nyeste perioden`() {
         a1 {
             håndterSøknad((27.mars til 26.april) i 2026)
