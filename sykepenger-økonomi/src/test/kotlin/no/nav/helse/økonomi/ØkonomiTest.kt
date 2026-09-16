@@ -380,6 +380,28 @@ internal class ØkonomiTest {
     }
 
     @Test
+    fun `graderte andre ytelser bevarer totalsummen ved avrunding over flere arbeidsgivere`() {
+        val a = 100.prosent.inntekt(
+            1752.daglig,
+            refusjonsbeløp = 737.daglig
+        )
+        val b = 100.prosent.inntekt(
+            2128.daglig,
+            refusjonsbeløp = 995.daglig
+        )
+
+        val betalte = listOf(a, b).betal(3880.daglig, 50.prosent)
+
+        assertEquals(
+            1940,
+            betalte
+                .flatMap { listOfNotNull(it.inspektør.arbeidsgiverbeløp, it.inspektør.personbeløp) }
+                .summer()
+                .dagligInt
+        )
+    }
+
+    @Test
     fun `fordeling mellom arbeidsgivere med lik inntekt og refusjon 1`() {
         val a = 100.prosent.inntekt(15000.månedlig, refusjonsbeløp = 15000.månedlig)
         val b = 100.prosent.inntekt(15000.månedlig, refusjonsbeløp = 15000.månedlig)

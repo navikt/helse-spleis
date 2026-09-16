@@ -3,10 +3,12 @@ package no.nav.helse.økonomi
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosentdel.Companion.HundreProsent
 import no.nav.helse.økonomi.Prosentdel.Companion.NullProsent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import kotlin.math.abs
 
 data class Økonomi(
     val sykdomsgrad: Prosentdel,
@@ -80,11 +82,16 @@ data class Økonomi(
             val utbetalingsgradEtterAvkorting = totalUtbetalingsgrad(økonomiList, andreYtelser)
             val foreløpig = delteUtbetalinger(økonomiList)
             val fordelt = fordelBeløp(foreløpig, sykepengegrunnlagBegrenset6G, utbetalingsgradFørAvkorting)
-            return ProporsjonalAvkorting.fordel(
+            val proporsjonaltAvkortet = ProporsjonalAvkorting.fordel(
                 økonomiList = fordelt,
                 utbetalingsgradFørAvkorting = utbetalingsgradFørAvkorting,
                 utbetalingsgradEtterAvkorting = utbetalingsgradEtterAvkorting
-            ).map { it.betal() }
+            )
+            return if (utbetalingsgradEtterAvkorting == utbetalingsgradFørAvkorting || utbetalingsgradFørAvkorting == NullProsent) {
+                proporsjonaltAvkortet.map { it.betal() }
+            } else {
+                proporsjonaltAvkortet.betalMedAvrundingsjustering()
+            }
         }
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.map { it.reserver() }
@@ -157,11 +164,81 @@ data class Økonomi(
             }
         }
 
+        private fun List<Økonomi>.betalMedAvrundingsjustering(): List<Økonomi> {
+            val komponenter = flatMapIndexed { økonomiindeks, økonomi ->
+                listOf(
+                    Utbetalingskomponent(
+                        økonomiindeks = økonomiindeks,
+                        type = Utbetalingskomponent.Type.Arbeidsgiver,
+                        eksaktBeløp = økonomi.reservertArbeidsgiverbeløp!! * økonomi.dekningsgrad
+                    ),
+                    Utbetalingskomponent(
+                        økonomiindeks = økonomiindeks,
+                        type = Utbetalingskomponent.Type.Person,
+                        eksaktBeløp = økonomi.reservertPersonbeløp!! * økonomi.dekningsgrad
+                    )
+                )
+            }
+            val ønsketTotal = komponenter.map { it.eksaktBeløp }.summer().rundTilDaglig()
+            val justerteKomponenter = komponenter.justerTilTotal(ønsketTotal)
+            check(justerteKomponenter.map { it.avrundetBeløp }.summer() == ønsketTotal) {
+                "Det er et restbeløp på kr ${ønsketTotal - justerteKomponenter.map { it.avrundetBeløp }.summer()} etter proporsjonal avkorting"
+            }
+            return mapIndexed { økonomiindeks, økonomi ->
+                økonomi.copy(
+                    arbeidsgiverbeløp = justerteKomponenter.single { it.økonomiindeks == økonomiindeks && it.type == Utbetalingskomponent.Type.Arbeidsgiver }.avrundetBeløp,
+                    personbeløp = justerteKomponenter.single { it.økonomiindeks == økonomiindeks && it.type == Utbetalingskomponent.Type.Person }.avrundetBeløp
+                )
+            }
+        }
+
+        private fun List<Utbetalingskomponent>.justerTilTotal(ønsketTotal: Inntekt): List<Utbetalingskomponent> {
+            val avvik = ønsketTotal.dagligInt - map { it.avrundetBeløp }.summer().dagligInt
+            if (avvik == 0) return this
+
+            val kandidater = when {
+                avvik > 0 -> filter { it.avrundingsavvik > INGEN }.sortedByDescending { it.avrundingsavvik }
+                else -> filter { it.avrundingsavvik < INGEN }.sortedBy { it.avrundingsavvik }
+            }
+            check(kandidater.isNotEmpty()) { "Fant ingen komponenter å justere for avrundingsavvik på $avvik kr" }
+
+            val justeringer = mutableMapOf<Utbetalingskomponent, Int>()
+            repeat(abs(avvik)) { indeks ->
+                val kandidat = kandidater[indeks % kandidater.size]
+                justeringer[kandidat] = justeringer.getOrDefault(kandidat, 0) + if (avvik > 0) 1 else -1
+            }
+
+            return map { komponent ->
+                komponent.juster(justeringer.getOrDefault(komponent, 0))
+            }
+        }
+
         private fun reduserBeløpTilTotal(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt) -> Økonomi, getter: (Økonomi) -> Inntekt): List<Økonomi> {
             val ratio = reduksjon(grense, total)
             return økonomiList.map {
                 val redusertBeløp = getter(it).times(ratio)
                 setter(it, redusertBeløp)
+            }
+        }
+
+        private data class Utbetalingskomponent(
+            val økonomiindeks: Int,
+            val type: Type,
+            val eksaktBeløp: Inntekt,
+            val avrundetBeløp: Inntekt = eksaktBeløp.rundTilDaglig()
+        ) {
+            enum class Type {
+                Arbeidsgiver,
+                Person
+            }
+
+            val avrundingsavvik = eksaktBeløp - avrundetBeløp
+
+            fun juster(justering: Int): Utbetalingskomponent {
+                if (justering == 0) return this
+                val justertBeløp = avrundetBeløp.dagligInt + justering
+                check(justertBeløp >= 0) { "Kan ikke justere avrundet beløp under 0" }
+                return copy(avrundetBeløp = justertBeløp.daglig)
             }
         }
 
