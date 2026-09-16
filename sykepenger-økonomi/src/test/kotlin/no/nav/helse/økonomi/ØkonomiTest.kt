@@ -360,6 +360,26 @@ internal class ØkonomiTest {
     }
 
     @Test
+    fun `graderte andre ytelser gir proporsjonal nedskalering av arbeidsgiver og person`() {
+        val økonomi = 100.prosent.inntekt(
+            2000.daglig,
+            refusjonsbeløp = 1560.daglig
+        )
+        val betalte = listOf(økonomi).betal(2000.daglig, 40.prosent)
+        assertUtbetaling(betalte.single(), 936.0, 264.0)
+    }
+
+    @Test
+    fun `graderte andre ytelser gir proporsjonal nedskalering etter ordinær arbeidsgiverprioritering`() {
+        val økonomi = 100.prosent.inntekt(
+            2000.daglig,
+            refusjonsbeløp = 1000.daglig
+        )
+        val betalte = listOf(økonomi).betal(1500.daglig, 40.prosent)
+        assertUtbetaling(betalte.single(), 600.0, 300.0)
+    }
+
+    @Test
     fun `fordeling mellom arbeidsgivere med lik inntekt og refusjon 1`() {
         val a = 100.prosent.inntekt(15000.månedlig, refusjonsbeløp = 15000.månedlig)
         val b = 100.prosent.inntekt(15000.månedlig, refusjonsbeløp = 15000.månedlig)
@@ -501,4 +521,3 @@ private fun assertForventetFeil(forklaring: String? = null, nå: () -> Unit, øn
 }
 
 fun List<Økonomi>.betal(sykepengegrunnlagBegrenset6G: Inntekt, andreYtelser: Prosentdel = 0.prosent) = Økonomi.betal(sykepengegrunnlagBegrenset6G, this, andreYtelser)
-

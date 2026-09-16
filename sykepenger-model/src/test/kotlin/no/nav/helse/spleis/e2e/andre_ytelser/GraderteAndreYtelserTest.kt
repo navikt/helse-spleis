@@ -8,6 +8,7 @@ import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
 import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning.GraderteAndreYtelserForBeregningPeriode
 import no.nav.helse.hendelser.GraderteAndreYtelserType
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -110,6 +111,135 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 2050, 2050, subset = 31.januar til 31.januar)
 
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `graderte andre ytelser ved delvis refusjon gir proporsjonal nedskalering av arbeidsgiver og person`() {
+        a1 {
+            nyttVedtak(
+                januar,
+                beregnetInntekt = 520_000.årlig,
+                refusjon = Inntektsmelding.Refusjon(1560.daglig, null, emptyList())
+            )
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1560, 1560, forventetPersonbeløp = 440, subset = 17.januar til 31.januar)
+
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser = listOf(
+                    GraderteAndreYtelserForBeregning(
+                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 40)),
+                        graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
+                    )
+                )
+            )
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1560, 1560, forventetPersonbeløp = 440, subset = 17.januar til 19.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 936, 1560, forventetPersonbeløp = 264, subset = 20.januar til 30.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1560, 1560, forventetPersonbeløp = 440, subset = 31.januar til 31.januar)
+            assertEquals(60.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `graderte andre ytelser ved delvis refusjon og tilkommen inntekt gir proporsjonal nedskalering av arbeidsgiver og person`() {
+        a1 {
+            nyttVedtak(
+                januar,
+                beregnetInntekt = 520_000.årlig,
+                refusjon = Inntektsmelding.Refusjon(1400.daglig, null, emptyList())
+            )
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1400, 1400, forventetPersonbeløp = 600, subset = 17.januar til 31.januar)
+
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar til 30.januar, 250.daglig)),
+                graderteAndreYtelser = listOf(
+                    GraderteAndreYtelserForBeregning(
+                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.januar, 29.januar, 50)),
+                        graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER
+                    )
+                )
+            )
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 600, 1400, forventetPersonbeløp = 150, subset = 17.januar til 29.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1400, 1400, forventetPersonbeløp = 350, subset = 30.januar til 30.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1400, 1400, forventetPersonbeløp = 600, subset = 31.januar til 31.januar)
+            assertEquals(37.5.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+            assertEquals(87.5.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(30.januar))
+            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(31.januar))
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `graderte andre ytelser ved delvis refusjon og gradert sykmelding gir proporsjonal nedskalering av arbeidsgiver og person`() {
+        a1 {
+            nyttVedtak(
+                januar,
+                grad = 40.prosent,
+                beregnetInntekt = 520_000.årlig,
+                refusjon = Inntektsmelding.Refusjon(600.daglig, null, emptyList())
+            )
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 240, 600, forventetPersonbeløp = 560, subset = 17.januar til 31.januar)
+
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser = listOf(
+                    GraderteAndreYtelserForBeregning(
+                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 75)),
+                        graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER
+                    )
+                )
+            )
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 240, 600, forventetPersonbeløp = 560, subset = 17.januar til 19.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 150, 600, forventetPersonbeløp = 350, subset = 20.januar til 30.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 240, 600, forventetPersonbeløp = 560, subset = 31.januar til 31.januar)
+            assertEquals(25.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertEquals(25.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `graderte andre ytelser ved delvis refusjon og 6G-begrensning gir proporsjonal nedskalering av arbeidsgiver og person`() {
+        a1 {
+            nyttVedtak(
+                januar,
+                beregnetInntekt = 2_000_000.årlig,
+                refusjon = Inntektsmelding.Refusjon(1500.daglig, null, emptyList())
+            )
+            assertInntektsgrunnlag(1.januar, 1) {
+                assertInntektsgrunnlag(a1, 2_000_000.årlig)
+                assertSykepengegrunnlag(561_804.årlig)
+            }
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1500, 1500, forventetPersonbeløp = 661, subset = 17.januar til 31.januar)
+
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser = listOf(
+                    GraderteAndreYtelserForBeregning(
+                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 50)),
+                        graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
+                    )
+                )
+            )
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1500, 1500, forventetPersonbeløp = 661, subset = 17.januar til 19.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 750, 1500, forventetPersonbeløp = 330, subset = 20.januar til 30.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1500, 1500, forventetPersonbeløp = 661, subset = 31.januar til 31.januar)
+            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         }
     }
 

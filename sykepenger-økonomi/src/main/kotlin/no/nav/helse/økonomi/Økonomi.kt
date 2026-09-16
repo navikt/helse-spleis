@@ -76,10 +76,15 @@ data class Økonomi(
         }
 
         fun betal(sykepengegrunnlagBegrenset6G: Inntekt, økonomiList: List<Økonomi>, andreYtelser: Prosentdel): List<Økonomi> {
-            val utbetalingsgrad = totalUtbetalingsgrad(økonomiList, andreYtelser)
+            val utbetalingsgradFørAvkorting = totalUtbetalingsgrad(økonomiList, 0.prosent)
+            val utbetalingsgradEtterAvkorting = totalUtbetalingsgrad(økonomiList, andreYtelser)
             val foreløpig = delteUtbetalinger(økonomiList)
-            val fordelt = fordelBeløp(foreløpig, sykepengegrunnlagBegrenset6G, utbetalingsgrad)
-            return fordelt.map { it.betal() }
+            val fordelt = fordelBeløp(foreløpig, sykepengegrunnlagBegrenset6G, utbetalingsgradFørAvkorting)
+            return ProporsjonalAvkorting.fordel(
+                økonomiList = fordelt,
+                utbetalingsgradFørAvkorting = utbetalingsgradFørAvkorting,
+                utbetalingsgradEtterAvkorting = utbetalingsgradEtterAvkorting
+            ).map { it.betal() }
         }
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.map { it.reserver() }
@@ -127,6 +132,29 @@ data class Økonomi(
                 "Det er et restbeløp på kr $restbeløp etter all fordeling"
             }
             return this
+        }
+
+        private object ProporsjonalAvkorting {
+            fun fordel(
+                økonomiList: List<Økonomi>,
+                utbetalingsgradFørAvkorting: Prosentdel,
+                utbetalingsgradEtterAvkorting: Prosentdel
+            ): List<Økonomi> {
+                if (utbetalingsgradEtterAvkorting == utbetalingsgradFørAvkorting) {
+                    return økonomiList.map { it.copy(utbetalingsgrad = utbetalingsgradEtterAvkorting) }
+                }
+                if (utbetalingsgradFørAvkorting == NullProsent) {
+                    return økonomiList.map { it.copy(utbetalingsgrad = utbetalingsgradEtterAvkorting) }
+                }
+                val forholdstall = utbetalingsgradEtterAvkorting / utbetalingsgradFørAvkorting
+                return økonomiList.map { økonomi ->
+                    økonomi.copy(
+                        utbetalingsgrad = utbetalingsgradEtterAvkorting,
+                        reservertArbeidsgiverbeløp = økonomi.reservertArbeidsgiverbeløp!! * forholdstall,
+                        reservertPersonbeløp = økonomi.reservertPersonbeløp!! * forholdstall
+                    )
+                }
+            }
         }
 
         private fun reduserBeløpTilTotal(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt) -> Økonomi, getter: (Økonomi) -> Inntekt): List<Økonomi> {
