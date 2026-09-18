@@ -33,12 +33,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import no.nav.helse.inspectors.view.view
-import no.nav.helse.inspectors.view.GrunnlagsdataView
 
 internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
-    private val inspektør get() = Vilkårgrunnlagsinspektør(historikk.view())
+    private val inspektør get() = Vilkårgrunnlagsinspektør(historikk)
     private val regelverkslogg = SubsumsjonsListLog()
     private val subsumsjonslogg = BehandlingSubsumsjonslogg(regelverkslogg, "fnr", "orgnr", UUID.randomUUID(), UUID.randomUUID())
 
@@ -134,7 +132,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
 
         val grunnlagsdataInspektør = historikk.inspektør.grunnlagsdata(1.januar)
-        assertEquals(GrunnlagsdataView.MedlemskapstatusView.Ja, grunnlagsdataInspektør.medlemskapstatus)
+        assertEquals(Medlemskapsvurdering.Medlemskapstatus.Ja, grunnlagsdataInspektør.medlemskapstatus)
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[0])
     }
 
@@ -202,12 +200,12 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør1 =  historikk.inspektør.grunnlagsdata(1.januar)
-        assertEquals(GrunnlagsdataView.MedlemskapstatusView.Ja, grunnlagsdataInspektør1.medlemskapstatus)
+        assertEquals(Medlemskapsvurdering.Medlemskapstatus.Ja, grunnlagsdataInspektør1.medlemskapstatus)
 
         historikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør2 = historikk.inspektør.grunnlagsdata(1.januar)
-        assertEquals(GrunnlagsdataView.MedlemskapstatusView.Nei, grunnlagsdataInspektør2.medlemskapstatus)
+        assertEquals(Medlemskapsvurdering.Medlemskapstatus.Nei, grunnlagsdataInspektør2.medlemskapstatus)
 
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[0])
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
@@ -279,7 +277,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = vilkårsgrunnlagHistorikk.inspektør.grunnlagsdata(1.januar)
-        assertEquals(GrunnlagsdataView.MedlemskapstatusView.Ja, grunnlagsdataInspektør.medlemskapstatus)
+        assertEquals(Medlemskapsvurdering.Medlemskapstatus.Ja, grunnlagsdataInspektør.medlemskapstatus)
     }
 
     @Test
@@ -305,6 +303,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = vilkårsgrunnlagHistorikk.inspektør.grunnlagsdata(1.januar)
-        assertEquals(GrunnlagsdataView.MedlemskapstatusView.Nei, grunnlagsdataInspektør.medlemskapstatus)
+        assertEquals(Medlemskapsvurdering.Medlemskapstatus.Nei, grunnlagsdataInspektør.medlemskapstatus)
     }
 }

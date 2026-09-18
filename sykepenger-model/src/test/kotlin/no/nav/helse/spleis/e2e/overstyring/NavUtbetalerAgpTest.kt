@@ -27,7 +27,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.lørdag
 import no.nav.helse.mai
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.UBEREGNET_OMGJØRING
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.UberegnetOmgjøring
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
@@ -95,7 +95,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
             assertVarsler(listOf(), 2.vedtaksperiode.filter())
 
             assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
-            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -131,9 +131,9 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer"
             )
 
-            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
-            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
+            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
@@ -174,7 +174,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
                     begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer",
                 )
             )
-            assertEquals(listOf(1.januar til 5.januar, 10.januar til 20.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf(1.januar til 5.januar, 10.januar til 20.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertVarsler(listOf(RV_IM_8, RV_IV_11), 1.vedtaksperiode.filter())
             assertEquals(
                 setOf(
@@ -200,7 +200,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
             )
             assertEquals("HH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
             assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
-            assertEquals(listOf(6.januar til 20.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf(6.januar til 20.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
@@ -216,9 +216,9 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer"
             )
             assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
-            assertEquals(listOf(1.januar til 6.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf(1.januar til 6.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-            assertEquals(UBEREGNET_OMGJØRING, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().tilstand)
+            assertEquals(UberegnetOmgjøring, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().tilstand)
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
@@ -286,7 +286,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
             assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             val dagerFør = inspektør.sykdomstidslinje.inspektør.dager
-            assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -295,7 +295,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             val dagerEtter = inspektør.sykdomstidslinje.inspektør.dager
             (1.januar til 16.januar).forEach {
                 if (!it.erHelg()) assertTrue(dagerFør.getValue(it).kommerFra("Søknad")) { "$it kommer ikke fra Søknad" }
@@ -379,7 +379,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
             )
             assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
-            assertEquals(listOf(1.januar til 10.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf(1.januar til 10.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertInstanceOf<Sykedag>(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar])
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -404,7 +404,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
             )
             assertVarsel(RV_IM_25, 1.vedtaksperiode.filter())
-            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertInstanceOf<Sykedag>(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar])
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
@@ -420,8 +420,8 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
                 listOf(1.juni til 16.juni),
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
             )
-            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
@@ -476,9 +476,9 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
                 listOf(2.januar til 4.januar, 14.januar til 26.januar),
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel"
             )
-            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
-            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -501,7 +501,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_VV_4, Varselkode.RV_IM_8, Varselkode.RV_VV_2, Varselkode.RV_AO_3), 1.vedtaksperiode.filter())
-            assertEquals(listOf(2.januar til 17.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf(2.januar til 17.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertUtbetalingsdag(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[2.januar], expectedDagtype = Utbetalingsdag.AvvistDag::class, 11)
         }
@@ -553,7 +553,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(RV_IM_8, RV_SV_1), 1.vedtaksperiode.filter())
-            assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             (1.januar til 31.januar).filterNot { it.erHelg() }.forEach {
                 assertTrue(inspektør.sykdomstidslinje[it] is Sykedag)
             }

@@ -6,8 +6,7 @@ import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.inspectors.view.BehandlingView
-import no.nav.helse.inspectors.view.BehandlingendringView
+import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -19,10 +18,10 @@ internal class BeregningIdTest: AbstractDslTest() {
     fun `beholder samme beregningId helt frem til ny beregning av utbetalingstidslinje`() {
         a1 {
             tilGodkjenning(mars)
-            with(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger) {
+            with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(6, endringer.size)
+                    assertEquals(6, endringer().size)
                     assertLikBeregningId("IKKE_UTBETALT")
                 }
             }
@@ -30,19 +29,19 @@ internal class BeregningIdTest: AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
             håndterYtelser(1.vedtaksperiode)
 
-            with(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger) {
+            with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(9, endringer.size)
-                    assertNotEquals(endringer[5].beregningId, endringer.last().beregningId)
+                    assertEquals(9, endringer().size)
+                    assertNotEquals(endringer()[5].beregningId, endringer().last().beregningId)
                 }
             }
 
-            with(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger) {
+            with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(9, endringer.size)
-                    with(endringer.drop(6)) {
+                    assertEquals(9, endringer().size)
+                    with(endringer().drop(6)) {
                         assertLikBeregningId("IKKE_UTBETALT")
                     }
                 }
@@ -54,45 +53,45 @@ internal class BeregningIdTest: AbstractDslTest() {
     fun `En periode som annulleres`() {
         a1 {
             tilGodkjenning(januar)
-            with(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger) {
+            with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(6, endringer.size)
+                    assertEquals(6, endringer().size)
                     assertLikBeregningId("IKKE_UTBETALT")
                 }
             }
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            with(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger) {
+            with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(6, endringer.size)
+                    assertEquals(6, endringer().size)
                     assertLikBeregningId("UTBETALT")
                 }
             }
 
             håndterAnnullering(1.vedtaksperiode)
-            with(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger) {
+            with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(2, size)
                 with(get(1)) {
-                    assertEquals(2, endringer.size)
+                    assertEquals(2, endringer().size)
                     assertLikBeregningId("OVERFØRT")
                 }
             }
             håndterUtbetalt()
-            with(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger) {
+            with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(2, size)
                 with(get(1)) {
-                    assertEquals(2, endringer.size)
+                    assertEquals(2, endringer().size)
                     assertLikBeregningId("ANNULLERT")
                 }
             }
         }
     }
 
-    private fun BehandlingView.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null)  = endringer.assertLikBeregningId(forventetSisteUtbetalingstatus)
+    private fun Behandlinger.Behandling.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null)  = endringer().assertLikBeregningId(forventetSisteUtbetalingstatus)
 
-    private fun List<BehandlingendringView>.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null) {
+    private fun List<Behandlinger.Behandling.Endring>.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null) {
         val første = first().beregningId
         forEach { endring -> assertEquals(første, endring.beregningId) }
         val sisteUtbetalingStatus = last().utbetaling?.inspektør?.tilstand?.name

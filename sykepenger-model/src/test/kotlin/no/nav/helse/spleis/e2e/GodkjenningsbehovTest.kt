@@ -42,7 +42,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import no.nav.helse.inspectors.view.view
 
 internal class GodkjenningsbehovTest : AbstractDslTest() {
 
@@ -115,7 +114,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
                 tilGodkjenning(januar)
             }
-            val vilkårsgrunnlagId1 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inspektør.vilkårsgrunnlagId
+            val vilkårsgrunnlagId1 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.vilkårsgrunnlagId
             assertEquals(vilkårsgrunnlagId1, godkjenningsbehov.event.vilkårsgrunnlagId)
             nyPeriode(februar)
             nyPeriode(mars)
@@ -126,7 +125,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode
             )
             assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-            val vilkårsgrunnlagId2 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inspektør.vilkårsgrunnlagId
+            val vilkårsgrunnlagId2 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.vilkårsgrunnlagId
             assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagId2)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertEquals(vilkårsgrunnlagId1, godkjenningsbehov.event.vilkårsgrunnlagId)
@@ -142,7 +141,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
             nyPeriode(mars)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            val vilkårsgrunnlagId1 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inspektør.vilkårsgrunnlagId
+            val vilkårsgrunnlagId1 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.vilkårsgrunnlagId
             håndterYtelser(1.vedtaksperiode)
             nullstillTilstandsendringer()
             håndterKorrigerteArbeidsgiveropplysninger(
@@ -151,7 +150,7 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode
             )
             assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-            val vilkårsgrunnlagId2 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.view().inspektør.vilkårsgrunnlagId
+            val vilkårsgrunnlagId2 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.vilkårsgrunnlagId
             assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagId2)
             håndterYtelser(1.vedtaksperiode)
             val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {

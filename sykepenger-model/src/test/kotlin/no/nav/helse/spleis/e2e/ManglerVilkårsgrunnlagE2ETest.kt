@@ -13,7 +13,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.inspectors.view.InfotrygdView
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import no.nav.helse.inspectors.view.view
 
 internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
 
@@ -175,7 +174,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
                 val førsteUtbetalingsdagIInfotrygd = 1.januar
                 assertEquals(førsteUtbetalingsdagIInfotrygd, førsteVedtaksperiode.skjæringstidspunkt)
                 assertNotNull(testperson.person.vilkårsgrunnlagFor(førsteVedtaksperiode.skjæringstidspunkt))
-                assertTrue(testperson.person.vilkårsgrunnlagFor(førsteVedtaksperiode.skjæringstidspunkt)?.view() is InfotrygdView)
+                assertTrue(testperson.person.vilkårsgrunnlagFor(førsteVedtaksperiode.skjæringstidspunkt) is InfotrygdVilkårsgrunnlag)
             }
 
             assertTilstandFørInntektsmeldingHensyntas()

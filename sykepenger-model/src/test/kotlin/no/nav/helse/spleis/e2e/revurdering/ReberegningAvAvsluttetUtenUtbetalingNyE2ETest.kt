@@ -23,7 +23,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.AvsluttetUtenVedtak
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
@@ -1223,16 +1223,16 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
         )
 
-        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
         assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertTrue(im !in observatør.inntektsmeldingIkkeHåndtert)
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
             assertEquals(3, it.size)
-            assertEquals(AVSLUTTET_UTEN_VEDTAK, it[0].tilstand)
-            assertEquals(AVSLUTTET_UTEN_VEDTAK, it[1].tilstand)
-            assertEquals(AVSLUTTET_UTEN_VEDTAK, it[2].tilstand)
-            assertEquals(im, it[2].kilde.meldingsreferanseId)
+            assertEquals(AvsluttetUtenVedtak, it[0].tilstand)
+            assertEquals(AvsluttetUtenVedtak, it[1].tilstand)
+            assertEquals(AvsluttetUtenVedtak, it[2].tilstand)
+            assertEquals(im, it[2].kilde.meldingsreferanseId.id)
         }
         assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
         assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
@@ -1267,8 +1267,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
             assertEquals(3, it.size)
-            assertTrue(it.all { behalding -> behalding.tilstand == AVSLUTTET_UTEN_VEDTAK })
-            assertEquals(im, it[2].kilde.meldingsreferanseId)
+            assertTrue(it.all { behalding -> behalding.tilstand == AvsluttetUtenVedtak })
+            assertEquals(im, it[2].kilde.meldingsreferanseId.id)
         }
     }
 }

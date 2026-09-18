@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.nyttVedtak
@@ -149,7 +150,7 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
 
             inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
                 assertEquals(1, utbetalinger.size)
-                assertEquals(Utbetalingstatus.IKKE_UTBETALT, utbetalinger.single().status)
+                assertEquals(Utbetalingstatus.IKKE_UTBETALT, utbetalinger.single().inspektør.tilstand)
             }
 
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
@@ -171,11 +172,11 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
 
             inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
                 assertEquals(1, utbetalinger.size)
-                assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.single().status)
+                assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.single().inspektør.tilstand)
             }
             inspektør.utbetalinger(2.vedtaksperiode).also { utbetalinger ->
                 assertEquals(1, utbetalinger.size)
-                assertEquals(Utbetalingstatus.UTBETALT, utbetalinger.single().status)
+                assertEquals(Utbetalingstatus.UTBETALT, utbetalinger.single().inspektør.tilstand)
             }
 
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)

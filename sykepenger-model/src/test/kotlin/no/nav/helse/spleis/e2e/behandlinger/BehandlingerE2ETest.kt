@@ -25,19 +25,18 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingkilde
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.ANNULLERT_PERIODE
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.UBEREGNET_REVURDERING
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.VEDTAK_FATTET
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.VEDTAK_IVERKSATT
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.AnnullertPeriode
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.AvsluttetUtenVedtak
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.RevurdertVedtakAvvist
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.UberegnetRevurdering
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.VedtakFattet
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.VedtakIverksatt
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
@@ -102,9 +101,9 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
                 assertEquals(2, it.size)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, it[0].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, it[1].tilstand)
-                assertEquals(inntektsmeldingId, it[1].kilde.meldingsreferanseId)
+                assertEquals(AvsluttetUtenVedtak, it[0].tilstand)
+                assertEquals(AvsluttetUtenVedtak, it[1].tilstand)
+                assertEquals(inntektsmeldingId, it[1].kilde.meldingsreferanseId.id)
             }
         }
     }
@@ -119,8 +118,13 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(2, behandlinger.single().endringer.size)
-                assertEquals(Behandlingkilde(meldingsreferanseId = søknadId, innsendt = innsendt, registert = registrert, avsender = Avsender.SYKMELDT), behandlinger.single().kilde)
+                assertEquals(2, behandlinger.single().endringer().size)
+                behandlinger.single().kilde.also { kilde ->
+                    assertEquals(søknadId, kilde.meldingsreferanseId.id)
+                    assertEquals(innsendt, kilde.innsendt)
+                    assertEquals(registrert, kilde.registert)
+                    assertEquals(Avsender.SYKMELDT, kilde.avsender)
+                }
             }
         }
     }
@@ -138,7 +142,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(Behandlingkilde(meldingsreferanseId = inntektsmeldingId, innsendt = mottatt, registert = mottatt.plusSeconds(1), avsender = Avsender.ARBEIDSGIVER), behandlinger.last().kilde)
+                behandlinger.last().kilde.also { kilde ->
+                    assertEquals(inntektsmeldingId, kilde.meldingsreferanseId.id)
+                    assertEquals(mottatt, kilde.innsendt)
+                    assertEquals(mottatt.plusSeconds(1), kilde.registert)
+                    assertEquals(Avsender.ARBEIDSGIVER, kilde.avsender)
+                }
             }
         }
     }
@@ -160,7 +169,6 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
         val korrigerendeImA1 = UUID.randomUUID()
         val mottatt = LocalDateTime.now()
-        val forventetKilde = Behandlingkilde(meldingsreferanseId = korrigerendeImA1, innsendt = mottatt, registert = mottatt.plusSeconds(1), avsender = Avsender.ARBEIDSGIVER)
 
         a1 {
             håndterKorrigerteArbeidsgiveropplysninger(
@@ -175,14 +183,24 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(forventetKilde, behandlinger.last().kilde)
+                behandlinger.last().kilde.also { kilde ->
+                    assertEquals(korrigerendeImA1, kilde.meldingsreferanseId.id)
+                    assertEquals(mottatt, kilde.innsendt)
+                    assertEquals(mottatt.plusSeconds(1), kilde.registert)
+                    assertEquals(Avsender.ARBEIDSGIVER, kilde.avsender)
+                }
             }
         }
 
         a2 {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(forventetKilde, behandlinger.last().kilde)
+                behandlinger.last().kilde.also { kilde ->
+                    assertEquals(korrigerendeImA1, kilde.meldingsreferanseId.id)
+                    assertEquals(mottatt, kilde.innsendt)
+                    assertEquals(mottatt.plusSeconds(1), kilde.registert)
+                    assertEquals(Avsender.ARBEIDSGIVER, kilde.avsender)
+                }
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
@@ -219,7 +237,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetaling(1).tilstand)
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(ANNULLERT_PERIODE, behandlinger.last().tilstand)
+                assertEquals(AnnullertPeriode, behandlinger.last().tilstand)
             }
         }
     }
@@ -239,9 +257,9 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetaling(1).tilstand)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(3, behandlinger.size)
-                assertEquals(VEDTAK_IVERKSATT, behandlinger[0].tilstand)
-                assertEquals(REVURDERT_VEDTAK_AVVIST, behandlinger[1].tilstand)
-                assertEquals(UBEREGNET_REVURDERING, behandlinger[2].tilstand)
+                assertEquals(VedtakIverksatt, behandlinger[0].tilstand)
+                assertEquals(RevurdertVedtakAvvist, behandlinger[1].tilstand)
+                assertEquals(UberegnetRevurdering, behandlinger[2].tilstand)
             }
         }
     }
@@ -270,7 +288,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)
                 behandlinger.last().let {
                     assertEquals(Avsender.SYSTEM, it.kilde.avsender)
-                    assertEquals(id, it.kilde.meldingsreferanseId)
+                    assertEquals(id, it.kilde.meldingsreferanseId.id)
                 }
             }
         }
@@ -282,9 +300,9 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(3.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(2, behandlinger.single().endringer.size)
-                assertEquals(3.januar til 17.januar, behandlinger.first().endringer.first().sykmeldingsperiode)
-                assertEquals(3.januar, behandlinger.last().endringer.last().skjæringstidspunkt)
+                assertEquals(2, behandlinger.single().endringer().size)
+                assertEquals(3.januar til 17.januar, behandlinger.first().endringer().first().sykmeldingsperiode)
+                assertEquals(3.januar, behandlinger.last().endringer().last().skjæringstidspunkt)
             }
         }
     }
@@ -297,8 +315,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(19.januar, 20.januar), søknadId = søknad2.id)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(3, behandlinger.single().endringer.size)
-                assertEquals(Dokumentsporing.søknad(søknad2), behandlinger.single().endringer.last().dokumentsporing)
+                assertEquals(3, behandlinger.single().endringer().size)
+                assertEquals(Dokumentsporing.søknad(søknad2), behandlinger.single().endringer().last().dokumentsporing)
             }
         }
     }
@@ -315,8 +333,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(9, behandling.endringer.size)
-                    assertEquals(TilstandView.BEREGNET, behandling.tilstand)
+                    assertEquals(9, behandling.endringer().size)
+                    assertEquals(Tilstand.Beregnet, behandling.tilstand)
                 }
             }
         }
@@ -339,22 +357,22 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(7, behandling.endringer.size)
-                    assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer[0].dokumentsporing)
-                    assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer[1].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingDager(im), behandling.endringer[2].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingRefusjon(im), behandling.endringer[3].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[4].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[5].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[6].dokumentsporing)
-                    assertEquals(VEDTAK_FATTET, behandling.tilstand)
+                    assertEquals(7, behandling.endringer().size)
+                    assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer()[0].dokumentsporing)
+                    assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer()[1].dokumentsporing)
+                    assertEquals(Dokumentsporing.inntektsmeldingDager(im), behandling.endringer()[2].dokumentsporing)
+                    assertEquals(Dokumentsporing.inntektsmeldingRefusjon(im), behandling.endringer()[3].dokumentsporing)
+                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer()[4].dokumentsporing)
+                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer()[5].dokumentsporing)
+                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer()[6].dokumentsporing)
+                    assertEquals(VedtakFattet, behandling.tilstand)
                     assertEquals(vedtakFattetTidspunkt, behandling.vedtakFattet)
                     assertNull(behandling.avsluttet)
                 }
                 behandlinger[1].also { behandling ->
-                    assertEquals(2, behandling.endringer.size)
-                    assertEquals(Dokumentsporing.søknad(søknad2), behandling.endringer.last().dokumentsporing)
-                    assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
+                    assertEquals(2, behandling.endringer().size)
+                    assertEquals(Dokumentsporing.søknad(søknad2), behandling.endringer().last().dokumentsporing)
+                    assertEquals(UberegnetRevurdering, behandling.tilstand)
                 }
             }
         }
@@ -371,22 +389,22 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(6, behandling.endringer.size)
+                    assertEquals(6, behandling.endringer().size)
                 }
                 behandlinger[1].also { behandling ->
-                    assertEquals(2, behandling.endringer.size)
-                    assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
+                    assertEquals(2, behandling.endringer().size)
+                    assertEquals(UberegnetRevurdering, behandling.tilstand)
                 }
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(6, behandling.endringer.size)
-                    assertEquals(VEDTAK_FATTET, behandling.tilstand)
+                    assertEquals(6, behandling.endringer().size)
+                    assertEquals(VedtakFattet, behandling.tilstand)
                 }
                 behandlinger[1].also { behandling ->
-                    assertEquals(1, behandling.endringer.size)
-                    assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
+                    assertEquals(1, behandling.endringer().size)
+                    assertEquals(UberegnetRevurdering, behandling.tilstand)
                 }
             }
         }
@@ -400,8 +418,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[0].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[1].tilstand)
             }
         }
     }
@@ -414,8 +432,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[0].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[1].tilstand)
             }
         }
     }
@@ -430,17 +448,17 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertTrue(inntektsmeldingId.id in observatør.inntektsmeldingHåndtert.map { it.first })
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(UBEREGNET_REVURDERING, behandlinger.last().tilstand)
+                assertEquals(UberegnetRevurdering, behandlinger.last().tilstand)
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 val førsteBehandling = behandlinger.first()
                 val sisteBehandling = behandlinger.last()
-                assertEquals(2, sisteBehandling.endringer.size)
-                assertEquals(inntektsmeldingId.id, sisteBehandling.kilde.meldingsreferanseId)
-                assertEquals(førsteBehandling.endringer.last().dokumentsporing, sisteBehandling.endringer[0].dokumentsporing)
-                assertEquals(Dokumentsporing.inntektsmeldingRefusjon(inntektsmeldingId), sisteBehandling.endringer[1].dokumentsporing)
-                assertEquals(UBEREGNET_REVURDERING, sisteBehandling.tilstand)
+                assertEquals(2, sisteBehandling.endringer().size)
+                assertEquals(inntektsmeldingId.id, sisteBehandling.kilde.meldingsreferanseId.id)
+                assertEquals(førsteBehandling.endringer().last().dokumentsporing, sisteBehandling.endringer()[0].dokumentsporing)
+                assertEquals(Dokumentsporing.inntektsmeldingRefusjon(inntektsmeldingId), sisteBehandling.endringer()[1].dokumentsporing)
+                assertEquals(UberegnetRevurdering, sisteBehandling.tilstand)
             }
             assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_IM_24), 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -456,14 +474,14 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), søknadId = søknad1.id)
             håndterSøknad(Sykdom(3.januar, 27.januar, 100.prosent), søknadId = søknad2.id)
             inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().also { behandling ->
-                assertEquals(søknad1.id, behandling.kilde.meldingsreferanseId)
-                assertEquals(2, behandling.endringer.size)
-                assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer.last().dokumentsporing)
-                assertEquals(3.januar, behandling.endringer.last().skjæringstidspunkt)
+                assertEquals(søknad1.id, behandling.kilde.meldingsreferanseId.id)
+                assertEquals(2, behandling.endringer().size)
+                assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer().last().dokumentsporing)
+                assertEquals(3.januar, behandling.endringer().last().skjæringstidspunkt)
             }
             inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.single().also { behandling ->
-                assertEquals(søknad2.id, behandling.kilde.meldingsreferanseId)
-                assertEquals(Dokumentsporing.søknad(søknad2), behandling.endringer.single().dokumentsporing)
+                assertEquals(søknad2.id, behandling.kilde.meldingsreferanseId.id)
+                assertEquals(Dokumentsporing.søknad(søknad2), behandling.endringer().single().dokumentsporing)
             }
         }
     }
@@ -479,8 +497,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertEquals(8.august til 21.august, inspektør.periode(1.vedtaksperiode))
             assertEquals(10.august til 31.august, inspektør.periode(2.vedtaksperiode))
             inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().also { behandling ->
-                assertEquals(overlappende.id, behandling.kilde.meldingsreferanseId)
-                assertEquals(Dokumentsporing.søknad(overlappende), behandling.endringer.single().dokumentsporing)
+                assertEquals(overlappende.id, behandling.kilde.meldingsreferanseId.id)
+                assertEquals(Dokumentsporing.søknad(overlappende), behandling.endringer().single().dokumentsporing)
             }
             assertVarsler(listOf(Varselkode.`Mottatt søknad som delvis overlapper`), 1.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
@@ -518,13 +536,13 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+                assertEquals(VedtakIverksatt, behandlinger.single().tilstand)
             }
         }
         a2 {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[0].tilstand)
             }
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
@@ -542,25 +560,25 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[0].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[1].tilstand)
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(3, behandlinger.size)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[2].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[0].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[1].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[2].tilstand)
             }
             inspektør(3.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(3, behandlinger.size)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[2].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[0].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[1].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[2].tilstand)
             }
             inspektør(4.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(VEDTAK_IVERKSATT, behandlinger[0].tilstand)
-                assertEquals(UBEREGNET_REVURDERING, behandlinger[1].tilstand)
+                assertEquals(VedtakIverksatt, behandlinger[0].tilstand)
+                assertEquals(UberegnetRevurdering, behandlinger[1].tilstand)
             }
         }
     }
@@ -571,19 +589,19 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 15.januar))
             håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
-            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterOverstyrTidslinje((1.januar til 15.januar).map { ManuellOverskrivingDag(it, Dagtype.Permisjonsdag) })
-            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
 
             håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 10.januar), Permisjon(14.januar, 15.januar))
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(4, behandlinger.size)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
-                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[2].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[0].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[1].tilstand)
+                assertEquals(AvsluttetUtenVedtak, behandlinger[2].tilstand)
             }
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
@@ -599,33 +617,33 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(3, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(AvsluttetUtenVedtak, behandling.tilstand)
                     assertEquals(10.januar, behandling.skjæringstidspunkt)
                 }
                 behandlinger[1].also { behandling ->
-                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(AvsluttetUtenVedtak, behandling.tilstand)
                     assertEquals(5.januar, behandling.skjæringstidspunkt)
                 }
                 behandlinger[2].also { behandling ->
-                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(AvsluttetUtenVedtak, behandling.tilstand)
                     assertEquals(1.januar, behandling.skjæringstidspunkt)
                 }
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(AvsluttetUtenVedtak, behandling.tilstand)
                     assertEquals(5.januar, behandling.skjæringstidspunkt)
                 }
                 behandlinger[1].also { behandling ->
-                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(AvsluttetUtenVedtak, behandling.tilstand)
                     assertEquals(1.januar, behandling.skjæringstidspunkt)
                 }
             }
             inspektør(3.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(AvsluttetUtenVedtak, behandling.tilstand)
                     assertEquals(1.januar, behandling.skjæringstidspunkt)
                 }
             }
@@ -657,20 +675,20 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(VEDTAK_IVERKSATT, behandling.tilstand)
+                    assertEquals(VedtakIverksatt, behandling.tilstand)
                 }
                 behandlinger[1].also { behandling ->
-                    assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
+                    assertEquals(UberegnetRevurdering, behandling.tilstand)
                 }
                 assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             }
             inspektør(3.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(VEDTAK_IVERKSATT, behandling.tilstand)
+                    assertEquals(VedtakIverksatt, behandling.tilstand)
                 }
                 behandlinger[1].also { behandling ->
-                    assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
+                    assertEquals(UberegnetRevurdering, behandling.tilstand)
                 }
                 assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
             }
@@ -714,25 +732,25 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+                assertEquals(VedtakIverksatt, behandlinger.single().tilstand)
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+                assertEquals(VedtakIverksatt, behandlinger.single().tilstand)
             }
             inspektør(3.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+                assertEquals(VedtakIverksatt, behandlinger.single().tilstand)
             }
         }
         a2 {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+                assertEquals(VedtakIverksatt, behandlinger.single().tilstand)
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+                assertEquals(VedtakIverksatt, behandlinger.single().tilstand)
             }
         }
     }
@@ -783,20 +801,20 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(AvsluttetUtenVedtak, behandling.tilstand)
                 }
                 behandlinger[1].also { behandling ->
-                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(AvsluttetUtenVedtak, behandling.tilstand)
                 }
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(VEDTAK_IVERKSATT, behandling.tilstand)
+                    assertEquals(VedtakIverksatt, behandling.tilstand)
                 }
                 behandlinger[1].also { behandling ->
-                    assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
-                    assertEquals(inntektsmeldingId, behandling.kilde.meldingsreferanseId)
+                    assertEquals(UberegnetRevurdering, behandling.tilstand)
+                    assertEquals(inntektsmeldingId, behandling.kilde.meldingsreferanseId.id)
                 }
             }
         }

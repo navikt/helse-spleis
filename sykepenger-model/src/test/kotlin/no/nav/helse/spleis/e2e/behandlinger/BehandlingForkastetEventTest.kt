@@ -10,8 +10,8 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.ANNULLERT_PERIODE
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.TIL_INFOTRYGD
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.AnnullertPeriode
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.TilInfotrygd
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -40,7 +40,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
                 automatiskBehandling = true
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
-            assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
+            assertEquals(TilInfotrygd, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
         }
     }
@@ -63,7 +63,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
                 automatiskBehandling = true
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
-            assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
+            assertEquals(TilInfotrygd, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
         }
     }
@@ -83,7 +83,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
                 automatiskBehandling = false
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
-            assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
+            assertEquals(TilInfotrygd, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
         }
     }
@@ -105,7 +105,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(2, behandlinger.size)
-            assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
+            assertEquals(TilInfotrygd, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
         }
     }
@@ -131,7 +131,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(2, behandlinger.size)
-            assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
+            assertEquals(TilInfotrygd, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
         }
     }
@@ -156,7 +156,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
             assertTilstand(2.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(1, behandlinger.size)
-            assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
+            assertEquals(TilInfotrygd, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
         }
     }
@@ -178,7 +178,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(1, behandlinger.size)
-            assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
+            assertEquals(TilInfotrygd, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
         }
     }
@@ -209,7 +209,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
                 automatiskBehandling = false
             )
             assertEquals(2, behandlinger.size)
-            assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
+            assertEquals(AnnullertPeriode, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
         }
     }
@@ -230,7 +230,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
                 automatiskBehandling = false
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
-            assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
+            assertEquals(AnnullertPeriode, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
 
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer
@@ -261,7 +261,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
                 automatiskBehandling = false
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
-            assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
+            assertEquals(AnnullertPeriode, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingForkastetEvent)
 
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer

@@ -2,7 +2,6 @@ package no.nav.helse.inspectors
 
 import java.util.UUID
 import no.nav.helse.person.Person
-import no.nav.helse.inspectors.view.view
 
 internal val Person.inspektør get() = PersonInspektør(this)
 
@@ -19,21 +18,21 @@ internal class PersonInspektør(person: Person) {
 
     internal val utbetaltIInfotrygd get() = infotrygdhistorikk.betaltePerioder()
 
-    internal fun vedtaksperioder() = arbeidsgivere.mapValues { it.value.view().aktiveVedtaksperioder }
+    internal fun vedtaksperioder() = arbeidsgivere.mapValues { it.value.vedtaksperioder().toList() }
     internal fun vedtaksperiode(vedtaksperiodeId: UUID) = arbeidsgivere.firstNotNullOf { (_, arbeidsgiver) ->
-        arbeidsgiver.view().aktiveVedtaksperioder.firstOrNull { vedtaksperiode ->
-            vedtaksperiode.inspektør.id == vedtaksperiodeId
+        arbeidsgiver.vedtaksperioder().firstOrNull { vedtaksperiode ->
+            vedtaksperiode.id == vedtaksperiodeId
         }
     }
 
     internal fun forkastetVedtaksperiode(vedtaksperiodeId: UUID) = arbeidsgivere.firstNotNullOf { (_, arbeidsgiver) ->
-        arbeidsgiver.view().forkastetVedtaksperioder.firstOrNull { vedtaksperiode ->
-            vedtaksperiode.inspektør.id == vedtaksperiodeId
+        arbeidsgiver.forkastede().firstOrNull { forkastet ->
+            forkastet.vedtaksperiode.id == vedtaksperiodeId
         }
     }
 
     internal fun sisteVedtaksperiodeTilstander() = arbeidsgivere
-        .flatMap { (_, arbeidsgiver) -> arbeidsgiver.view().aktiveVedtaksperioder.map { it.id to it.tilstand } }
+        .flatMap { (_, arbeidsgiver) -> arbeidsgiver.vedtaksperioder().map { it.id to it.tilstand.type } }
         .toMap()
 
     internal fun arbeidsgivere() = arbeidsgivere.keys.toList()

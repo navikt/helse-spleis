@@ -13,11 +13,11 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.onsdag
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.TIL_INFOTRYGD
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.VEDTAK_FATTET
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.VEDTAK_IVERKSATT
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.AvsluttetUtenVedtak
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.RevurdertVedtakAvvist
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.TilInfotrygd
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.VedtakFattet
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.VedtakIverksatt
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -43,7 +43,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
                 behandlingId = forventetBehandlingId
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_UTBETALING)
-            assertEquals(VEDTAK_FATTET, sisteBehandling.tilstand)
+            assertEquals(VedtakFattet, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
         }
     }
@@ -56,7 +56,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             assertEquals(0, observatør.behandlingLukketEventer.size)
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.single()
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
-            assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
+            assertEquals(TilInfotrygd, sisteBehandling.tilstand)
         }
     }
 
@@ -77,7 +77,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             assertEquals(2, behandlinger.size)
             val sisteBehandling = behandlinger.last()
             assertTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING_REVURDERING)
-            assertEquals(REVURDERT_VEDTAK_AVVIST, sisteBehandling.tilstand)
+            assertEquals(RevurdertVedtakAvvist, sisteBehandling.tilstand)
         }
     }
 
@@ -99,7 +99,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
                 behandlingId = forventetBehandlingId
             )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
-            assertEquals(VEDTAK_IVERKSATT, sisteBehandling.tilstand)
+            assertEquals(VedtakIverksatt, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
         }
     }
@@ -117,7 +117,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
                 behandlingId = forventetBehandlingId
             )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
-            assertEquals(AVSLUTTET_UTEN_VEDTAK, sisteBehandling.tilstand)
+            assertEquals(AvsluttetUtenVedtak, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
         }
     }
@@ -141,7 +141,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
                 behandlingId = forventetBehandlingId
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_UTBETALING)
-            assertEquals(VEDTAK_FATTET, sisteBehandling.tilstand)
+            assertEquals(VedtakFattet, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
         }
     }
@@ -167,7 +167,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
                 behandlingId = forventetBehandlingId
             )
             assertTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING_REVURDERING)
-            assertEquals(REVURDERT_VEDTAK_AVVIST, sisteBehandling.tilstand)
+            assertEquals(RevurdertVedtakAvvist, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
         }
     }
@@ -191,7 +191,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
                 behandlingId = forventetBehandlingId
             )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
-            assertEquals(VEDTAK_IVERKSATT, sisteBehandling.tilstand)
+            assertEquals(VedtakIverksatt, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
         }
     }
@@ -216,7 +216,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
                 behandlingId = forventetBehandlingId
             )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
-            assertEquals(VEDTAK_IVERKSATT, sisteBehandling.tilstand)
+            assertEquals(VedtakIverksatt, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
         }
     }
@@ -244,7 +244,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
                 behandlingId = forventetBehandlingId
             )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
-            assertEquals(VEDTAK_IVERKSATT, sisteBehandling.tilstand)
+            assertEquals(VedtakIverksatt, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
         }
     }

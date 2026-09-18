@@ -20,7 +20,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.inspectors.view.InfotrygdView
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
@@ -47,7 +47,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import no.nav.helse.inspectors.view.view
 
 internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
 
@@ -311,7 +310,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
         medJSONPerson("/personer/infotrygdforlengelse.json", 334)
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
-            assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.view() is InfotrygdView)
+            assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode) is InfotrygdVilkårsgrunnlag)
             val antallHistorikkInnslagFør = inspektør.vilkårsgrunnlagHistorikkInnslag().size
             val nyInntekt = INNTEKT * 2
             nullstillTilstandsendringer()

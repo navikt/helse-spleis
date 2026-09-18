@@ -137,9 +137,9 @@ internal class AnalytiskDatapakkeTest : AbstractDslTest() {
             val events = observatør.analytiskDatapakkeEventer
 
             assertEquals(2, events.size)
-            assertEquals(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.size, 2)
-            assertEquals(events[0].behandlingId, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.first().id)
-            assertEquals(events[1].behandlingId, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger.last().id)
+            assertEquals(inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size, 2)
+            assertEquals(events[0].behandlingId, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().first().id)
+            assertEquals(events[1].behandlingId, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().id)
 
         }
     }

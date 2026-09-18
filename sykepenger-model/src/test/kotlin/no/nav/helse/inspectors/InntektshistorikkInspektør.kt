@@ -1,13 +1,12 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import no.nav.helse.inspectors.view.InntektshistorikkView
+import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.økonomi.Inntekt
 
+internal class InntektshistorikkInspektør(inntektshistorikk: Inntektshistorikk) {
 
-internal class InntektshistorikkInspektør(inntektshistorikk: InntektshistorikkView) {
-
-    private val inntektsopplysninger = inntektshistorikk.inntekter.map { Opplysning(it.inntektsdata.dato, it.inntektsdata.beløp) }
+    private val inntektsopplysninger = inntektshistorikk.historikk().map { Opplysning(it.inntektsdata.dato, it.inntektsdata.beløp) }
     internal val size get() = inntektsopplysninger.size
     internal val inntektsdatoer get() = inntektsopplysninger.map { it.dato }
 

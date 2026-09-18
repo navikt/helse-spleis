@@ -278,7 +278,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.utbetalingIder(vedtaksperiode: UUID) = inspektør.vedtaksperioder(vedtaksperiode).inspektør.behandlinger.flatMap { it.endringer.mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId } }
+    private fun TestPerson.TestArbeidsgiver.utbetalingIder(vedtaksperiode: UUID) = inspektør.vedtaksperioder(vedtaksperiode).inspektør.behandlinger.flatMap { it.endringer().mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId } }
 
 }
 

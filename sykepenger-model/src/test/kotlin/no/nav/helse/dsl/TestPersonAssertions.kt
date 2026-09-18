@@ -3,7 +3,7 @@ package no.nav.helse.dsl
 import java.time.LocalDate
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
-import no.nav.helse.inspectors.view.ArbeidstakerOpptjeningView
+import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.testhelpers.assertNotNull
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -13,13 +13,13 @@ internal class TestPersonAssertions(private val personInspektør: PersonInspekt�
     internal fun assertHarIkkeArbeidsforhold(skjæringstidspunkt: LocalDate, orgnummer: String) {
         val vilkårsgrunnlag = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt)
         assertNotNull(vilkårsgrunnlag)
-        assertFalse((vilkårsgrunnlag.opptjening as ArbeidstakerOpptjeningView).arbeidsforhold.any { it.orgnummer == orgnummer })
+        assertFalse((vilkårsgrunnlag.opptjening as ArbeidstakerOpptjening).arbeidsforhold.any { it.orgnummer == orgnummer })
     }
 
     internal fun assertHarArbeidsforhold(skjæringstidspunkt: LocalDate, orgnummer: String) {
         val vilkårsgrunnlag = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt)
         assertNotNull(vilkårsgrunnlag)
-        Assertions.assertTrue((vilkårsgrunnlag.opptjening as ArbeidstakerOpptjeningView).arbeidsforhold.any { it.orgnummer == orgnummer })
+        Assertions.assertTrue((vilkårsgrunnlag.opptjening as ArbeidstakerOpptjening).arbeidsforhold.any { it.orgnummer == orgnummer })
     }
 
     internal fun <R> assertSubsumsjoner(block: SubsumsjonInspektør.() -> R): R {

@@ -28,7 +28,7 @@ internal class InntektsmeldingMedRefusjonsopplForPerioderViEnnåIkkeHarMottatTes
                     opphørsdato = 31.januar,
                 )
             )
-            val fremtidigeRefusjonsopplysninger = inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer.getValue(1.januar)
+            val fremtidigeRefusjonsopplysninger = inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().getValue(1.januar)
             assertBeløpstidslinje(fremtidigeRefusjonsopplysninger, 1.februar.somPeriode(), INGEN)
             håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
@@ -38,7 +38,7 @@ internal class InntektsmeldingMedRefusjonsopplForPerioderViEnnåIkkeHarMottatTes
                 )
             )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            val reviderteOpplysninger = inspektør.ubrukteRefusjonsopplysninger.refusjonstidslinjer[1.januar]
+            val reviderteOpplysninger = inspektør.ubrukteRefusjonsopplysninger.refusjonsrester()[1.januar]
             assertBeløpstidslinje(reviderteOpplysninger!!, 1.februar.somPeriode(), INNTEKT)
         }
     }

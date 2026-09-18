@@ -4,11 +4,10 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.inspectors.view.BehandlingView
-import no.nav.helse.inspectors.view.BehandlingView.TilstandView.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.person.Behandlinger
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand
 import no.nav.helse.person.Person
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.inspectors.view.VedtaksperiodeView
 import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -28,7 +27,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
-import no.nav.helse.inspectors.view.view
 
 internal class UgyldigeSituasjonerObservatør(private val person: Person) : EventSubscription {
 
@@ -214,7 +212,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
 
     private fun validerSykdomshistorikk() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            val perioderPerHendelse = arbeidsgiver.view().sykdomshistorikk.inspektør.perioderPerHendelse()
+            val perioderPerHendelse = arbeidsgiver.sykdomshistorikk.inspektør.perioderPerHendelse()
             perioderPerHendelse.forEach { (_, sykdomstidslinjer) ->
                 check(sykdomstidslinjer.none { sykdomstidslinje ->
                     sykdomstidslinjer.filterNot { it === sykdomstidslinje }.any { it == sykdomstidslinje }
@@ -227,9 +225,9 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
 
     private fun validerSykdomstidslinjePåBehandlinger() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.view().aktiveVedtaksperioder.forEach { aktivVedtaksperiode ->
-                aktivVedtaksperiode.behandlinger.behandlinger.forEach { behandling ->
-                    behandling.endringer.forEach {
+            arbeidsgiver.vedtaksperioder().forEach { aktivVedtaksperiode ->
+                aktivVedtaksperiode.behandlinger.behandlinger().forEach { behandling ->
+                    behandling.endringer().forEach {
                         val førsteIkkeUkjenteDag = it.sykdomstidslinje.firstOrNull { dag -> dag !is UkjentDag }
                         val førsteDag = it.sykdomstidslinje[it.periode.start]
                         val normalSykdomstidslinje = førsteDag === førsteIkkeUkjenteDag
@@ -251,16 +249,16 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
     }
 
     private fun validerRefusjonsopplysningerPåBehandlinger() {
-        arbeidsgivere.map { it.view() }.forEach { arbeidsgiver ->
-            if (arbeidsgiver.yrkesaktivitetssporing !is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) return@forEach
-            arbeidsgiver.aktiveVedtaksperioder.forEach { vedtaksperiode ->
-                vedtaksperiode.behandlinger.behandlinger.forEach behandling@{ behandling ->
-                    behandling.endringer.last().let { endring ->
+        arbeidsgivere.forEach { arbeidsgiver ->
+            if (arbeidsgiver.yrkesaktivitetstype !is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) return@forEach
+            arbeidsgiver.vedtaksperioder().forEach { vedtaksperiode ->
+                vedtaksperiode.behandlinger.behandlinger().forEach behandling@{ behandling ->
+                    behandling.endringer().last().let { endring ->
                         if (endring.refusjonstidslinje.isEmpty()) {
-                            if (behandling.tilstand == AVSLUTTET_UTEN_VEDTAK) return@behandling // Ikke noe refusjonsopplysning på AUU er OK
-                            if (vedtaksperiode.tilstand == AVVENTER_AVSLUTTET_UTEN_UTBETALING) return@behandling // Dette ER være AUU'er som skal tilbake til AUU, de må ikke ha refusjonsopplysninger.
-                            if (vedtaksperiode.tilstand in setOf(AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)) return@behandling// Ikke fått refusjonsopplysninger enda da
-                            error("Burde ikke ha tom refusjonstidslinje i tilstand ${vedtaksperiode.tilstand}")
+                            if (behandling.tilstand == Tilstand.AvsluttetUtenVedtak) return@behandling // Ikke noe refusjonsopplysning på AUU er OK
+                            if (vedtaksperiode.tilstand.type == AVVENTER_AVSLUTTET_UTEN_UTBETALING) return@behandling // Dette ER være AUU'er som skal tilbake til AUU, de må ikke ha refusjonsopplysninger.
+                            if (vedtaksperiode.tilstand.type in setOf(AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)) return@behandling// Ikke fått refusjonsopplysninger enda da
+                            error("Burde ikke ha tom refusjonstidslinje i tilstand ${vedtaksperiode.tilstand.type}")
                         }
                         val perioder = endring.refusjonstidslinje.perioderMedBeløp
                         check(perioder.size == 1) { "Burde ikke være noen hull i refusjonstidslinjen." }
@@ -272,40 +270,40 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
     }
 
     private fun validerUtbetalingOgVilkårsgrunnlagPåBehandlinger() {
-        arbeidsgivere.map { it.view() }.forEach { arbeidsgiver ->
-            arbeidsgiver.aktiveVedtaksperioder.forEach { vedtaksperiode ->
-                vedtaksperiode.behandlinger.behandlinger.forEach { behandling ->
-                    behandling.endringer.last().let { endring ->
+        arbeidsgivere.forEach { arbeidsgiver ->
+            arbeidsgiver.vedtaksperioder().forEach { vedtaksperiode ->
+                vedtaksperiode.behandlinger.behandlinger().forEach { behandling ->
+                    behandling.endringer().last().let { endring ->
                         when (behandling.tilstand) {
-                            BehandlingView.TilstandView.BEREGNET,
-                            BehandlingView.TilstandView.BEREGNET_OMGJØRING,
-                            BehandlingView.TilstandView.BEREGNET_REVURDERING -> {
+                            Tilstand.Beregnet,
+                            Tilstand.BeregnetOmgjøring,
+                            Tilstand.BeregnetRevurdering -> {
                                 assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}" }
                                 assertNotNull(endring.grunnlagsdata) { "forventer vilkårsgrunnlag i ${behandling.tilstand}" }
                                 assertEquals(IKKE_UTBETALT, endring.utbetaling!!.inspektør.tilstand) { "forventer at utbetaling i behandlingstilstand ${behandling.tilstand} skal være IKKE_UTBETALT, men var ${endring.utbetaling.inspektør.tilstand}" }
                             }
 
-                            BehandlingView.TilstandView.REVURDERT_VEDTAK_AVVIST,
-                            BehandlingView.TilstandView.VEDTAK_FATTET,
-                            BehandlingView.TilstandView.OVERFØRT_ANNULLERING,
-                            BehandlingView.TilstandView.VEDTAK_IVERKSATT,
-                            BehandlingView.TilstandView.ANNULLERT_PERIODE -> {
+                            Tilstand.RevurdertVedtakAvvist,
+                            Tilstand.VedtakFattet,
+                            Tilstand.OverførtAnnullering,
+                            Tilstand.VedtakIverksatt,
+                            Tilstand.AnnullertPeriode -> {
                                 assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}" }
                                 assertNotNull(endring.grunnlagsdata) { "forventer vilkårsgrunnlag i ${behandling.tilstand}" }
                             }
 
-                            BehandlingView.TilstandView.TIL_INFOTRYGD,
-                            BehandlingView.TilstandView.UBEREGNET,
-                            BehandlingView.TilstandView.UBEREGNET_OMGJØRING,
-                            BehandlingView.TilstandView.UBEREGNET_ANNULLERING,
-                            BehandlingView.TilstandView.UBEREGNET_REVURDERING -> {
+                            Tilstand.TilInfotrygd,
+                            Tilstand.Uberegnet,
+                            Tilstand.UberegnetOmgjøring,
+                            Tilstand.UberegnetAnnullering,
+                            Tilstand.UberegnetRevurdering -> {
                                 assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}" }
                                 assertNull(endring.grunnlagsdata) { "forventer inget vilkårsgrunnlag i ${behandling.tilstand}" }
                                 assertEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}" }
                                 assertTrue(endring.utbetalingstidslinje.isEmpty()) { "forventer tom utbetalingstidslinje i ${behandling.tilstand}" }
                             }
 
-                            AVSLUTTET_UTEN_VEDTAK -> {
+                            Tilstand.AvsluttetUtenVedtak -> {
                                 assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}" }
                                 assertNull(endring.grunnlagsdata) { "forventer inget vilkårsgrunnlag i ${behandling.tilstand}" }
                                 assertEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}" }
@@ -319,12 +317,12 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
 
     private fun validerBeregningIder() {
         val oppbrukteBeregningIder = mutableSetOf<UUID>()
-        arbeidsgivere.map { it.view() }.forEach { arbeidsgiver ->
-            arbeidsgiver.aktiveVedtaksperioder.forEach { vedtaksperiode ->
-                vedtaksperiode.behandlinger.behandlinger.forEach { behandling ->
+        arbeidsgivere.forEach { arbeidsgiver ->
+            arbeidsgiver.vedtaksperioder().forEach { vedtaksperiode ->
+                vedtaksperiode.behandlinger.behandlinger().forEach { behandling ->
                     var forrigeBeregningId: UUID? = null
                     var forrigeUtbetalingId: UUID? = null
-                    behandling.endringer.forEach { endring ->
+                    behandling.endringer().forEach { endring ->
                         if (forrigeBeregningId == null) { // første endring
                             forrigeBeregningId = endring.beregningId
                             return@forEach
@@ -355,18 +353,16 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         }
     }
 
-    private fun BehandlingView.gyldigTilInfotrygd() = tilstand == BehandlingView.TilstandView.TIL_INFOTRYGD && avsluttet != null && vedtakFattet == null
-    private fun BehandlingView.gyldigAvsluttetUtenUtbetaling() = tilstand == AVSLUTTET_UTEN_VEDTAK && avsluttet != null && vedtakFattet == null
-    private fun BehandlingView.gyldigAvsluttet() = tilstand == BehandlingView.TilstandView.VEDTAK_IVERKSATT && avsluttet != null && vedtakFattet != null
-    private val BehandlingView.nøkkelinfo get() = "tilstand=$tilstand, avsluttet=$avsluttet, vedtakFattet=$vedtakFattet"
+    private fun Behandlinger.Behandling.gyldigTilInfotrygd() = tilstand == Tilstand.TilInfotrygd && avsluttet != null && vedtakFattet == null
+    private fun Behandlinger.Behandling.gyldigAvsluttetUtenUtbetaling() = tilstand == Tilstand.AvsluttetUtenVedtak && avsluttet != null && vedtakFattet == null
+    private fun Behandlinger.Behandling.gyldigAvsluttet() = tilstand == Tilstand.VedtakIverksatt && avsluttet != null && vedtakFattet != null
+    private val Behandlinger.Behandling.nøkkelinfo get() = "tilstand=$tilstand, avsluttet=$avsluttet, vedtakFattet=$vedtakFattet"
     private fun validerTilstandPåSisteBehandlingForFerdigbehandledePerioder() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            val view = arbeidsgiver.view()
-
-            view.aktiveVedtaksperioder
-                .filter { it.tilstand in setOf(TilstandType.AVSLUTTET, TilstandType.AVSLUTTET_UTEN_UTBETALING, TilstandType.TIL_INFOTRYGD) }
-                .groupBy(keySelector = { it.tilstand }) {
-                    it.behandlinger.behandlinger.last()
+            arbeidsgiver.vedtaksperioder()
+                .filter { it.tilstand.type in setOf(TilstandType.AVSLUTTET, TilstandType.AVSLUTTET_UTEN_UTBETALING, TilstandType.TIL_INFOTRYGD) }
+                .groupBy(keySelector = { it.tilstand.type }) {
+                    it.behandlinger.behandlinger().last()
                 }
                 .forEach { (tilstand, sisteBehandlinger) ->
                     when (tilstand) {
@@ -396,16 +392,16 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
 
     private fun bekreftTilstandPåSisteBehandlingForForkastedePerioder() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.view().forkastetVedtaksperioder.forEach { forkastetPeriode ->
-                check(forkastetPeriode.tilstand == TilstandType.TIL_INFOTRYGD) {
+            arbeidsgiver.forkastede().map { it.vedtaksperiode }.forEach { forkastetPeriode ->
+                check(forkastetPeriode.tilstand.type == TilstandType.TIL_INFOTRYGD) {
                     "Forventet at forkastet vedtaksperiode ${forkastetPeriode.id} er i tilstand TIL_INFOTRYGD"
                 }
-                forkastetPeriode.behandlinger.behandlinger.last().also { behandling ->
-                    val utbetalingstatus = behandling.endringer.asReversed().firstNotNullOfOrNull { it.utbetaling }?.status
+                forkastetPeriode.behandlinger.behandlinger().last().also { behandling ->
+                    val utbetalingstatus = behandling.endringer().asReversed().firstNotNullOfOrNull { it.utbetaling }?.inspektør?.tilstand
                     check(utbetalingstatus == null || utbetalingstatus in setOf(Utbetalingstatus.FORKASTET, Utbetalingstatus.IKKE_GODKJENT, Utbetalingstatus.ANNULLERT)) {
                         "Utbetalingstatus for forkastet behandling er ikke FORKASTET / IKKE_GODKJENT / ANNULLERT, men $utbetalingstatus"
                     }
-                    check(behandling.tilstand in setOf(BehandlingView.TilstandView.TIL_INFOTRYGD, BehandlingView.TilstandView.ANNULLERT_PERIODE)) {
+                    check(behandling.tilstand in setOf(Tilstand.TilInfotrygd, Tilstand.AnnullertPeriode)) {
                         "Forventet at siste behandling på forkastet vedtaksperiode ${forkastetPeriode.id} er i tilstand TIL_INFOTRYGD eller ANNULLERT_PERIODE"
                     }
                 }
@@ -415,12 +411,11 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
 
     private fun bekreftIngenOverlappende() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            var kanskjeForrigePeriode: VedtaksperiodeView? = null
-            val view = arbeidsgiver.view()
-            view.aktiveVedtaksperioder.forEach { current ->
+            var kanskjeForrigePeriode: no.nav.helse.person.Vedtaksperiode? = null
+            arbeidsgiver.vedtaksperioder().forEach { current ->
                 kanskjeForrigePeriode?.also { forrigePeriode ->
                     if (forrigePeriode.periode.overlapperMed(current.periode)) {
-                        error("For Arbeidsgiver ${view.organisasjonsnummer} overlapper Vedtaksperiode ${current.id} (${current.periode}) og Vedtaksperiode ${forrigePeriode.id} (${forrigePeriode.periode}) med hverandre!")
+                        error("For Arbeidsgiver ${arbeidsgiver.organisasjonsnummer()} overlapper Vedtaksperiode ${current.id} (${current.periode}) og Vedtaksperiode ${forrigePeriode.id} (${forrigePeriode.periode}) med hverandre!")
                     }
                 }
                 kanskjeForrigePeriode = current

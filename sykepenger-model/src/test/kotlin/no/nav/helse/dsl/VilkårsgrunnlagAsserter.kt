@@ -9,12 +9,11 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.AOrdningen
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Arbeidsgiver
 import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde.Infotrygd
-import no.nav.helse.inspectors.view.InntektsgrunnlagView
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import org.junit.jupiter.api.Assertions.assertEquals
-import no.nav.helse.inspectors.view.view
 
 internal fun ArbeidsgiverInntektsopplysning.assertArbeidsgiverInntektsopplysning(
     forventetFaktaavklartInntekt: Inntekt,
@@ -31,11 +30,11 @@ internal fun TestPerson.TestArbeidsgiver.assertInntektsgrunnlag(
     forventetAntallArbeidsgivere: Int,
     assertBlock: InntektsgrunnlagAssert.() -> Unit
 ) {
-    assertInntektsgrunnlag(inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.view().inntektsgrunnlag, forventetAntallArbeidsgivere, assertBlock)
+    assertInntektsgrunnlag(inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.inntektsgrunnlag, forventetAntallArbeidsgivere, assertBlock)
 }
 
 private fun assertInntektsgrunnlag(
-    inntektsgrunnlag: InntektsgrunnlagView,
+    inntektsgrunnlag: Inntektsgrunnlag,
     forventetAntallArbeidsgivere: Int,
     assertBlock: InntektsgrunnlagAssert.() -> Unit
 ) {
@@ -43,7 +42,7 @@ private fun assertInntektsgrunnlag(
     InntektsgrunnlagAssert(inntektsgrunnlag).apply(assertBlock).assert()
 }
 
-internal data class InntektsgrunnlagAssert(val inntektsgrunnlag: InntektsgrunnlagView) {
+internal data class InntektsgrunnlagAssert(val inntektsgrunnlag: Inntektsgrunnlag) {
     internal fun assertBeregningsgrunnlag(beløp: Inntekt) {
         assertEquals(beløp, inntektsgrunnlag.beregningsgrunnlag) { "feil beregningsgrunnlag" }
     }
@@ -70,7 +69,7 @@ internal data class InntektsgrunnlagAssert(val inntektsgrunnlag: Inntektsgrunnla
             .arbeidsgiverInntektsopplysninger
             .singleOrNull { it.orgnummer == orgnummer }
         val deaktiv = inntektsgrunnlag
-            .deaktiverteArbeidsgiverInntektsopplysninger
+            .deaktiverteArbeidsforhold
             .singleOrNull { it.orgnummer == orgnummer }
 
         val actual = aktiv ?: deaktiv

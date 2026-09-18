@@ -17,7 +17,6 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.inspectors.view.ArbeidstakerOpptjeningView
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
@@ -52,8 +51,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractDslTest() {
             val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.mars)
             assertNotNull(vilkårsgrunnlag)
 
-            assertEquals(1, (vilkårsgrunnlag.inspektør.opptjening as ArbeidstakerOpptjeningView).arbeidsforhold.single { it.orgnummer == a1 }.ansattPerioder.size)
-            assertEquals(1, (vilkårsgrunnlag.inspektør.opptjening as ArbeidstakerOpptjeningView).arbeidsforhold.single { it.orgnummer == a2 }.ansattPerioder.size)
+            assertEquals(1, vilkårsgrunnlag.inspektør.opptjening!!.arbeidsforhold.single { it.orgnummer == a1 }.ansattPerioder.size)
+            assertEquals(1, vilkårsgrunnlag.inspektør.opptjening!!.arbeidsforhold.single { it.orgnummer == a2 }.ansattPerioder.size)
         }
     }
 
@@ -183,7 +182,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractDslTest() {
                 ),
             )
             val grunnlagsdata = inspektør.vilkårsgrunnlag(1.mars)!!
-            assertEquals(4, (grunnlagsdata.inspektør.opptjening as ArbeidstakerOpptjeningView).arbeidsforhold.single { it.orgnummer == a1 }.ansattPerioder.size)
+            assertEquals(4, grunnlagsdata.inspektør.opptjening!!.arbeidsforhold.single { it.orgnummer == a1 }.ansattPerioder.size)
         }
     }
 

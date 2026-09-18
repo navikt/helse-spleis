@@ -82,8 +82,8 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
             nyttVedtak(mars)
             nyttVedtak(mai)
-            val korrelasjonsIdMars = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
-            inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
+            val korrelasjonsIdMars = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
+            inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
 
             håndterSøknad(juli)
             håndterArbeidsgiveropplysninger(listOf(1.juli til 16.juli), vedtaksperiodeId = 3.vedtaksperiode)
@@ -101,7 +101,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterYtelser(3.vedtaksperiode)
 
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
-            val juliutbetaling = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør
+            val juliutbetaling = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør
             val korrelasjonsIdJuli = juliutbetaling.korrelasjonsId
 
             assertEquals(4, inspektør.utbetalinger.size)
@@ -315,8 +315,8 @@ internal class YtelserE2ETest : AbstractDslTest() {
 
             assertVarsel(RV_AY_5, 2.vedtaksperiode.filter())
 
-            val korrelasjonsIdJanuar = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
-            val korrelasjonsIdMars = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
+            val korrelasjonsIdJanuar = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
+            val korrelasjonsIdMars = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
 
             assertNotEquals(korrelasjonsIdJanuar, korrelasjonsIdMars)
         }

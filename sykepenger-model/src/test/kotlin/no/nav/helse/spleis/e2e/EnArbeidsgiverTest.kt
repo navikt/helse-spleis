@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.util.UUID
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
@@ -63,8 +64,8 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
             )
 
-            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).dagerNavOvertarAnsvar)
-            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).dagerNavOvertarAnsvar)
+            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
+            assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_4, Varselkode.RV_IM_24, Varselkode.RV_IM_8), 2.vedtaksperiode.filter())
             assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 31.juli, listOf(31.juli til 15.august))
