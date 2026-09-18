@@ -8,7 +8,7 @@ import org.junit.jupiter.api.fail
 internal val VilkårsgrunnlagHistorikk.inspektør get() = Vilkårgrunnlagsinspektør(this)
 
 internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) {
-    private val innslag = historikk.historikk
+    private val innslag = historikk.historikk()
 
     val vilkårsgrunnlagTeller = innslag.mapIndexed { index, i -> index to i.vilkårsgrunnlag.size }.toMap()
     internal val aktiveSpleisSkjæringstidspunkt = innslag.getOrNull(0)?.vilkårsgrunnlag?.keys?.toSet() ?: emptySet()

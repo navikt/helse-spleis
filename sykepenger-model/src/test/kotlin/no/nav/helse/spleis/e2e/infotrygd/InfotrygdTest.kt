@@ -158,7 +158,7 @@ internal class InfotrygdTest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
             nyttVedtak(mars)
             nyttVedtak(mai)
-            val korrelasjonsIdMars = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
+            val korrelasjonsIdMars = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
 
             håndterSøknad(juli)
             håndterArbeidsgiveropplysninger(listOf(1.juli til 16.juli), vedtaksperiodeId = 3.vedtaksperiode)
@@ -175,7 +175,7 @@ internal class InfotrygdTest : AbstractDslTest() {
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-            val korrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
+            val korrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
             håndterUtbetalt()
 
             assertNotEquals(korrelasjonsIdMars, korrelasjonsIdJuli)
@@ -186,7 +186,7 @@ internal class InfotrygdTest : AbstractDslTest() {
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
 
-            val nyKorrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
+            val nyKorrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
             assertNotEquals(korrelasjonsIdMars, nyKorrelasjonsIdJuli)
             assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
             assertVarsler(listOf(RV_UT_23, RV_IT_3), 3.vedtaksperiode.filter())
@@ -310,5 +310,5 @@ internal class InfotrygdTest : AbstractDslTest() {
     }
 
     private fun gjeldendeKorrelasjonsId(vedtaksperiodeId: UUID) =
-        inspektør(a1).vedtaksperioder(vedtaksperiodeId).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
+        inspektør(a1).vedtaksperioder(vedtaksperiodeId).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
 }

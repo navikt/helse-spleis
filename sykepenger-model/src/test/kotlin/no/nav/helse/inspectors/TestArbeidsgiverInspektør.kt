@@ -26,18 +26,18 @@ internal class TestArbeidsgiverInspektør(
     internal var yrkesaktivitet: Yrkesaktivitet = person.yrkesaktiviteter.first { it.organisasjonsnummer() == orgnummer }
 
     private val personInspektør = person.inspektør
-    internal val vedtaksperiodeTeller: Int = yrkesaktivitet.vedtaksperioder.size + yrkesaktivitet.forkastede.size
-    private val vedtaksperioder: Map<UUID, Vedtaksperiode> = (yrkesaktivitet.vedtaksperioder + yrkesaktivitet.forkastede.map(ForkastetVedtaksperiode::vedtaksperiode))
+    internal val vedtaksperiodeTeller: Int = yrkesaktivitet.vedtaksperioder().size + yrkesaktivitet.forkastede().size
+    private val vedtaksperioder: Map<UUID, Vedtaksperiode> = (yrkesaktivitet.vedtaksperioder() + yrkesaktivitet.forkastede().map(ForkastetVedtaksperiode::vedtaksperiode))
         .associateBy { it.id }
-    private val tilstander = (yrkesaktivitet.vedtaksperioder + yrkesaktivitet.forkastede.map(ForkastetVedtaksperiode::vedtaksperiode))
+    private val tilstander = (yrkesaktivitet.vedtaksperioder() + yrkesaktivitet.forkastede().map(ForkastetVedtaksperiode::vedtaksperiode))
         .mapIndexed { index, periode -> index to periode.tilstand.type }
         .toMap()
 
-    private val vedtaksperiodeindekser = (yrkesaktivitet.vedtaksperioder + yrkesaktivitet.forkastede.map(ForkastetVedtaksperiode::vedtaksperiode)).mapIndexed { index, periode ->
+    private val vedtaksperiodeindekser = (yrkesaktivitet.vedtaksperioder() + yrkesaktivitet.forkastede().map(ForkastetVedtaksperiode::vedtaksperiode)).mapIndexed { index, periode ->
         periode.id to index
     }.toMap()
 
-    private val vedtaksperiodeForkastet = yrkesaktivitet.forkastede.map { it.vedtaksperiode.id }.toSet()
+    private val vedtaksperiodeForkastet = yrkesaktivitet.forkastede().map { it.vedtaksperiode.id }.toSet()
     internal val inntektInspektør get() = InntektshistorikkInspektør(yrkesaktivitet.inntektshistorikk)
     val sykdomshistorikk = yrkesaktivitet.sykdomshistorikk.inspektør
     internal val sykdomstidslinje: Sykdomstidslinje get() = sykdomshistorikk.tidslinje(0)
@@ -46,7 +46,7 @@ internal class TestArbeidsgiverInspektør(
 
     val ubrukteRefusjonsopplysninger = yrkesaktivitet.ubrukteRefusjonsopplysninger
 
-    internal val feriepengeoppdrag = yrkesaktivitet.feriepengeutbetalinger
+    internal val feriepengeoppdrag = yrkesaktivitet.feriepengeutbetalinger()
         .flatMap { listOf(it.oppdrag, it.personoppdrag) }
         .map {
             Feriepengeoppdrag(
@@ -56,10 +56,10 @@ internal class TestArbeidsgiverInspektør(
                 })
             )
         }
-    internal val infotrygdFeriepengebeløpPerson = yrkesaktivitet.feriepengeutbetalinger.map { it.infotrygdFeriepengebeløpPerson }
-    internal val infotrygdFeriepengebeløpArbeidsgiver = yrkesaktivitet.feriepengeutbetalinger.map { it.infotrygdFeriepengebeløpArbeidsgiver }
-    internal val spleisFeriepengebeløpArbeidsgiver = yrkesaktivitet.feriepengeutbetalinger.map { it.spleisFeriepengebeløpArbeidsgiver }
-    internal val spleisFeriepengebeløpPerson = yrkesaktivitet.feriepengeutbetalinger.map { it.spleisFeriepengebeløpPerson }
+    internal val infotrygdFeriepengebeløpPerson = yrkesaktivitet.feriepengeutbetalinger().map { it.infotrygdFeriepengebeløpPerson }
+    internal val infotrygdFeriepengebeløpArbeidsgiver = yrkesaktivitet.feriepengeutbetalinger().map { it.infotrygdFeriepengebeløpArbeidsgiver }
+    internal val spleisFeriepengebeløpArbeidsgiver = yrkesaktivitet.feriepengeutbetalinger().map { it.spleisFeriepengebeløpArbeidsgiver }
+    internal val spleisFeriepengebeløpPerson = yrkesaktivitet.feriepengeutbetalinger().map { it.spleisFeriepengebeløpPerson }
 
     private val sykmeldingsperioder = yrkesaktivitet.sykmeldingsperioder.perioder()
 

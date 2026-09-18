@@ -21,7 +21,7 @@ internal class BeregningIdTest: AbstractDslTest() {
             with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(6, endringer.size)
+                    assertEquals(6, endringer().size)
                     assertLikBeregningId("IKKE_UTBETALT")
                 }
             }
@@ -32,16 +32,16 @@ internal class BeregningIdTest: AbstractDslTest() {
             with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(9, endringer.size)
-                    assertNotEquals(endringer[5].beregningId, endringer.last().beregningId)
+                    assertEquals(9, endringer().size)
+                    assertNotEquals(endringer()[5].beregningId, endringer().last().beregningId)
                 }
             }
 
             with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(9, endringer.size)
-                    with(endringer.drop(6)) {
+                    assertEquals(9, endringer().size)
+                    with(endringer().drop(6)) {
                         assertLikBeregningId("IKKE_UTBETALT")
                     }
                 }
@@ -56,7 +56,7 @@ internal class BeregningIdTest: AbstractDslTest() {
             with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(6, endringer.size)
+                    assertEquals(6, endringer().size)
                     assertLikBeregningId("IKKE_UTBETALT")
                 }
             }
@@ -65,7 +65,7 @@ internal class BeregningIdTest: AbstractDslTest() {
             with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(1, size)
                 with(single()) {
-                    assertEquals(6, endringer.size)
+                    assertEquals(6, endringer().size)
                     assertLikBeregningId("UTBETALT")
                 }
             }
@@ -74,7 +74,7 @@ internal class BeregningIdTest: AbstractDslTest() {
             with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(2, size)
                 with(get(1)) {
-                    assertEquals(2, endringer.size)
+                    assertEquals(2, endringer().size)
                     assertLikBeregningId("OVERFØRT")
                 }
             }
@@ -82,14 +82,14 @@ internal class BeregningIdTest: AbstractDslTest() {
             with(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger) {
                 assertEquals(2, size)
                 with(get(1)) {
-                    assertEquals(2, endringer.size)
+                    assertEquals(2, endringer().size)
                     assertLikBeregningId("ANNULLERT")
                 }
             }
         }
     }
 
-    private fun Behandlinger.Behandling.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null)  = endringer.assertLikBeregningId(forventetSisteUtbetalingstatus)
+    private fun Behandlinger.Behandling.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null)  = endringer().assertLikBeregningId(forventetSisteUtbetalingstatus)
 
     private fun List<Behandlinger.Behandling.Endring>.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null) {
         val første = first().beregningId

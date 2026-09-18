@@ -6,7 +6,7 @@ import no.nav.helse.økonomi.Inntekt
 
 internal class InntektshistorikkInspektør(inntektshistorikk: Inntektshistorikk) {
 
-    private val inntektsopplysninger = inntektshistorikk.historikk.map { Opplysning(it.inntektsdata.dato, it.inntektsdata.beløp) }
+    private val inntektsopplysninger = inntektshistorikk.historikk().map { Opplysning(it.inntektsdata.dato, it.inntektsdata.beløp) }
     internal val size get() = inntektsopplysninger.size
     internal val inntektsdatoer get() = inntektsopplysninger.map { it.dato }
 

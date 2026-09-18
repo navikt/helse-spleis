@@ -99,10 +99,10 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
-            assertEquals(25.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().sykdomstidslinje.inspektør.førsteIkkeUkjenteDag)
+            assertEquals(25.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer().last().sykdomstidslinje.inspektør.førsteIkkeUkjenteDag)
             (25.januar til 31.januar).let { periode ->
                 assertEquals(periode, inspektør.periode(2.vedtaksperiode))
-                assertEquals(periode, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().sykdomstidslinje.periode())
+                assertEquals(periode, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer().last().sykdomstidslinje.periode())
             }
             assertVarsel(Varselkode.RV_IM_8, 2.vedtaksperiode.filter())
         }

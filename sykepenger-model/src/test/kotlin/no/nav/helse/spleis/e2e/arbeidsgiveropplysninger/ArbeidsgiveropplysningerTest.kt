@@ -233,13 +233,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             val kilde1 = Kilde(MeldingsreferanseId(id1), ARBEIDSGIVER, LocalDateTime.now())
             assertBeløpstidslinje(
                 Beløpstidslinje.fra(1.februar.somPeriode(), 0.daglig, kilde1),
-                inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.getValue(1.januar)
+                inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().getValue(1.januar)
             )
             val id2 = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittRefusjon(INNTEKT, endringer = listOf(Refusjonsendring(2.februar, 0.daglig))))
             val kilde2 = Kilde(MeldingsreferanseId(id2), ARBEIDSGIVER, LocalDateTime.now())
             assertBeløpstidslinje(
                 Beløpstidslinje.fra(1.februar.somPeriode(), INNTEKT, kilde2) + Beløpstidslinje.fra(2.februar.somPeriode(), 0.daglig, kilde2),
-                inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.getValue(1.januar)
+                inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().getValue(1.januar)
             )
         }
     }
@@ -362,7 +362,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittRefusjon(25_000.månedlig, listOf(Refusjonsendring(1.februar, INGEN)))
             )
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver1.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
-            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), INGEN, arbeidsgiver1.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.values.single())
+            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), INGEN, arbeidsgiver1.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().values.single())
 
             val arbeidsgiver2 = håndterKorrigerteArbeidsgiveropplysninger(
                 1.vedtaksperiode,
@@ -370,7 +370,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             )
 
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
-            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester.values.single())
+            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().values.single())
         }
     }
 
@@ -757,8 +757,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     private fun TestPerson.TestArbeidsgiver.assertDokumentsporingPåSisteBehandling(vedtaksperiode: UUID, vararg forventet: Dokumentsporing) {
-        val faktisk = inspektør.vedtaksperioder(vedtaksperiode).behandlinger.behandlinger
-            .last().endringer
+        val faktisk = inspektør.vedtaksperioder(vedtaksperiode).behandlinger.behandlinger()
+            .last().endringer()
             .map { it.dokumentsporing }.filter {
                 when (it.dokumentType) {
                     DokumentType.InntektsmeldingInntekt,

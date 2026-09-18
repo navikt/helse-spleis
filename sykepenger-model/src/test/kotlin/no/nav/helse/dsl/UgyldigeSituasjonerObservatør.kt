@@ -225,9 +225,9 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
 
     private fun validerSykdomstidslinjePåBehandlinger() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.vedtaksperioder.forEach { aktivVedtaksperiode ->
-                aktivVedtaksperiode.behandlinger.behandlinger.forEach { behandling ->
-                    behandling.endringer.forEach {
+            arbeidsgiver.vedtaksperioder().forEach { aktivVedtaksperiode ->
+                aktivVedtaksperiode.behandlinger.behandlinger().forEach { behandling ->
+                    behandling.endringer().forEach {
                         val førsteIkkeUkjenteDag = it.sykdomstidslinje.firstOrNull { dag -> dag !is UkjentDag }
                         val førsteDag = it.sykdomstidslinje[it.periode.start]
                         val normalSykdomstidslinje = førsteDag === førsteIkkeUkjenteDag
@@ -251,9 +251,9 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
     private fun validerRefusjonsopplysningerPåBehandlinger() {
         arbeidsgivere.forEach { arbeidsgiver ->
             if (arbeidsgiver.yrkesaktivitetstype !is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) return@forEach
-            arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
-                vedtaksperiode.behandlinger.behandlinger.forEach behandling@{ behandling ->
-                    behandling.endringer.last().let { endring ->
+            arbeidsgiver.vedtaksperioder().forEach { vedtaksperiode ->
+                vedtaksperiode.behandlinger.behandlinger().forEach behandling@{ behandling ->
+                    behandling.endringer().last().let { endring ->
                         if (endring.refusjonstidslinje.isEmpty()) {
                             if (behandling.tilstand == Tilstand.AvsluttetUtenVedtak) return@behandling // Ikke noe refusjonsopplysning på AUU er OK
                             if (vedtaksperiode.tilstand.type == AVVENTER_AVSLUTTET_UTEN_UTBETALING) return@behandling // Dette ER være AUU'er som skal tilbake til AUU, de må ikke ha refusjonsopplysninger.
@@ -271,9 +271,9 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
 
     private fun validerUtbetalingOgVilkårsgrunnlagPåBehandlinger() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
-                vedtaksperiode.behandlinger.behandlinger.forEach { behandling ->
-                    behandling.endringer.last().let { endring ->
+            arbeidsgiver.vedtaksperioder().forEach { vedtaksperiode ->
+                vedtaksperiode.behandlinger.behandlinger().forEach { behandling ->
+                    behandling.endringer().last().let { endring ->
                         when (behandling.tilstand) {
                             Tilstand.Beregnet,
                             Tilstand.BeregnetOmgjøring,
@@ -318,11 +318,11 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
     private fun validerBeregningIder() {
         val oppbrukteBeregningIder = mutableSetOf<UUID>()
         arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
-                vedtaksperiode.behandlinger.behandlinger.forEach { behandling ->
+            arbeidsgiver.vedtaksperioder().forEach { vedtaksperiode ->
+                vedtaksperiode.behandlinger.behandlinger().forEach { behandling ->
                     var forrigeBeregningId: UUID? = null
                     var forrigeUtbetalingId: UUID? = null
-                    behandling.endringer.forEach { endring ->
+                    behandling.endringer().forEach { endring ->
                         if (forrigeBeregningId == null) { // første endring
                             forrigeBeregningId = endring.beregningId
                             return@forEach
@@ -359,10 +359,10 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
     private val Behandlinger.Behandling.nøkkelinfo get() = "tilstand=$tilstand, avsluttet=$avsluttet, vedtakFattet=$vedtakFattet"
     private fun validerTilstandPåSisteBehandlingForFerdigbehandledePerioder() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.vedtaksperioder
+            arbeidsgiver.vedtaksperioder()
                 .filter { it.tilstand.type in setOf(TilstandType.AVSLUTTET, TilstandType.AVSLUTTET_UTEN_UTBETALING, TilstandType.TIL_INFOTRYGD) }
                 .groupBy(keySelector = { it.tilstand.type }) {
-                    it.behandlinger.behandlinger.last()
+                    it.behandlinger.behandlinger().last()
                 }
                 .forEach { (tilstand, sisteBehandlinger) ->
                     when (tilstand) {
@@ -392,12 +392,12 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
 
     private fun bekreftTilstandPåSisteBehandlingForForkastedePerioder() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.forkastede.map { it.vedtaksperiode }.forEach { forkastetPeriode ->
+            arbeidsgiver.forkastede().map { it.vedtaksperiode }.forEach { forkastetPeriode ->
                 check(forkastetPeriode.tilstand.type == TilstandType.TIL_INFOTRYGD) {
                     "Forventet at forkastet vedtaksperiode ${forkastetPeriode.id} er i tilstand TIL_INFOTRYGD"
                 }
-                forkastetPeriode.behandlinger.behandlinger.last().also { behandling ->
-                    val utbetalingstatus = behandling.endringer.asReversed().firstNotNullOfOrNull { it.utbetaling }?.inspektør?.tilstand
+                forkastetPeriode.behandlinger.behandlinger().last().also { behandling ->
+                    val utbetalingstatus = behandling.endringer().asReversed().firstNotNullOfOrNull { it.utbetaling }?.inspektør?.tilstand
                     check(utbetalingstatus == null || utbetalingstatus in setOf(Utbetalingstatus.FORKASTET, Utbetalingstatus.IKKE_GODKJENT, Utbetalingstatus.ANNULLERT)) {
                         "Utbetalingstatus for forkastet behandling er ikke FORKASTET / IKKE_GODKJENT / ANNULLERT, men $utbetalingstatus"
                     }
@@ -412,7 +412,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
     private fun bekreftIngenOverlappende() {
         arbeidsgivere.forEach { arbeidsgiver ->
             var kanskjeForrigePeriode: no.nav.helse.person.Vedtaksperiode? = null
-            arbeidsgiver.vedtaksperioder.forEach { current ->
+            arbeidsgiver.vedtaksperioder().forEach { current ->
                 kanskjeForrigePeriode?.also { forrigePeriode ->
                     if (forrigePeriode.periode.overlapperMed(current.periode)) {
                         error("For Arbeidsgiver ${arbeidsgiver.organisasjonsnummer()} overlapper Vedtaksperiode ${current.id} (${current.periode}) og Vedtaksperiode ${forrigePeriode.id} (${forrigePeriode.periode}) med hverandre!")

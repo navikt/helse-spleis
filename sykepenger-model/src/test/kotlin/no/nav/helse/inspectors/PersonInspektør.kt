@@ -18,21 +18,21 @@ internal class PersonInspektør(person: Person) {
 
     internal val utbetaltIInfotrygd get() = infotrygdhistorikk.betaltePerioder()
 
-    internal fun vedtaksperioder() = arbeidsgivere.mapValues { it.value.vedtaksperioder.toList() }
+    internal fun vedtaksperioder() = arbeidsgivere.mapValues { it.value.vedtaksperioder().toList() }
     internal fun vedtaksperiode(vedtaksperiodeId: UUID) = arbeidsgivere.firstNotNullOf { (_, arbeidsgiver) ->
-        arbeidsgiver.vedtaksperioder.firstOrNull { vedtaksperiode ->
+        arbeidsgiver.vedtaksperioder().firstOrNull { vedtaksperiode ->
             vedtaksperiode.id == vedtaksperiodeId
         }
     }
 
     internal fun forkastetVedtaksperiode(vedtaksperiodeId: UUID) = arbeidsgivere.firstNotNullOf { (_, arbeidsgiver) ->
-        arbeidsgiver.forkastede.firstOrNull { forkastet ->
+        arbeidsgiver.forkastede().firstOrNull { forkastet ->
             forkastet.vedtaksperiode.id == vedtaksperiodeId
         }
     }
 
     internal fun sisteVedtaksperiodeTilstander() = arbeidsgivere
-        .flatMap { (_, arbeidsgiver) -> arbeidsgiver.vedtaksperioder.map { it.id to it.tilstand.type } }
+        .flatMap { (_, arbeidsgiver) -> arbeidsgiver.vedtaksperioder().map { it.id to it.tilstand.type } }
         .toMap()
 
     internal fun arbeidsgivere() = arbeidsgivere.keys.toList()
