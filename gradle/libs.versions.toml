@@ -1,0 +1,82 @@
+[versions]
+kotlin = "2.3.0"
+docker-plugin = "10.0.0"
+rapids-and-rivers = "2026011411051768385145.e8ebad1177b4"
+postgres = "42.7.7"
+hikari = "6.3.0"
+cloudsql = "1.20.0"
+flyway = "11.5.0"
+logback = "1.5.25"
+logstash = "8.0"
+jackson = "2.18.3"
+tbd-libs = "20260626.0942"
+junit-jupiter = "6.0.2"
+kotlinx-coroutines = "1.9.0"
+ktor = "3.2.3"
+awaitility = "4.2.2"
+mockk = "1.13.17"
+jsonassert = "1.5.3"
+spekemat = "2024.03.07-12.49-d2ad6319"
+spill-av-im-matching = "2026.05.12-11.59-aa0ff460"
+syfokafka = "2026.05.13-10.24-d6649054"
+json-schema-validator = "1.0.70"
+commons-codec = "1.15"
+
+[libraries]
+rapids-and-rivers = { group = "com.github.navikt", name = "rapids-and-rivers", version.ref = "rapids-and-rivers" }
+
+jackson-kotlin = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
+jackson-datatype = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version.ref = "jackson" }
+jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
+
+logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+logstash = { group = "net.logstash.logback", name = "logstash-logback-encoder", version.ref = "logstash" }
+
+postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgres" }
+hikari = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikari" }
+tbd-sql = { group = "com.github.navikt.tbd-libs", name = "sql-dsl", version.ref = "tbd-libs" }
+tbd-kafka = { group = "com.github.navikt.tbd-libs", name = "kafka", version.ref = "tbd-libs" }
+tbd-naisful-app = { group = "com.github.navikt.tbd-libs", name = "naisful-app", version.ref = "tbd-libs" }
+tbd-naisful-postgres = { group = "com.github.navikt.tbd-libs", name = "naisful-postgres", version.ref = "tbd-libs" }
+tbd-azure-token-client-default = { group = "com.github.navikt.tbd-libs", name = "azure-token-client-default", version.ref = "tbd-libs" }
+tbd-retry = { group = "com.github.navikt.tbd-libs", name = "retry", version.ref = "tbd-libs" }
+tbd-speed-client = { group = "com.github.navikt.tbd-libs", name = "speed-client", version.ref = "tbd-libs" }
+tbd-naisful-test-app = { group = "com.github.navikt.tbd-libs", name = "naisful-test-app", version.ref = "tbd-libs" }
+tbd-mock-http-client = { group = "com.github.navikt.tbd-libs", name = "mock-http-client", version.ref = "tbd-libs" }
+tbd-postgres-testdatabaser = { group = "com.github.navikt.tbd-libs", name = "postgres-testdatabaser", version.ref = "tbd-libs" }
+tbd-signed-jwt-issuer-test = { group = "com.github.navikt.tbd-libs", name = "signed-jwt-issuer-test", version.ref = "tbd-libs" }
+tbd-rapids-and-rivers-test = { group = "com.github.navikt.tbd-libs", name = "rapids-and-rivers-test", version.ref = "tbd-libs" }
+
+cloudsql = { group = "com.google.cloud.sql", name = "postgres-socket-factory", version.ref = "cloudsql" }
+flyway-postgres = { group = "org.flywaydb", name = "flyway-database-postgresql", version.ref = "flyway" }
+
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+
+ktor-serialization-jackson = { group = "io.ktor", name = "ktor-serialization-jackson", version.ref = "ktor" }
+ktor-server-auth = { group = "io.ktor", name = "ktor-server-auth", version.ref = "ktor" }
+ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
+ktor-server-auth-jwt = { group = "io.ktor", name = "ktor-server-auth-jwt", version.ref = "ktor" }
+
+awaitility = { group = "org.awaitility", name = "awaitility", version.ref = "awaitility" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+jsonassert = { group = "org.skyscreamer", name = "jsonassert", version.ref = "jsonassert" }
+
+spekemat-fabrikk = { group = "com.github.navikt.spekemat", name = "fabrikk", version.ref = "spekemat" }
+spill-av-im-matching = { group = "com.github.navikt.spill_av_im", name = "matching", version.ref = "spill-av-im-matching" }
+syfokafka = { group = "no.nav.helse.flex", name = "sykepengesoknad-kafka", version.ref = "syfokafka" }
+json-schema-validator = { group = "com.networknt", name = "json-schema-validator", version.ref = "json-schema-validator" }
+commons-codec = { group = "commons-codec", name = "commons-codec", version.ref = "commons-codec" }
+
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit-jupiter" }
+junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
+
+[bundles]
+flyway = ["flyway-postgres"]
+database = ["postgresql", "hikari", "tbd-sql"]
+jackson = ["jackson-kotlin", "jackson-datatype"]
+logging = ["logback", "logstash"]
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+docker-remote-api = { id = "com.bmuschko.docker-remote-api", version.ref = "docker-plugin" }

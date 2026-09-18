@@ -1,7 +1,5 @@
-val commonsCodecVersion = "1.15"
-
 dependencies {
-    api("commons-codec:commons-codec:$commonsCodecVersion")
+    api(libs.commons.codec)
 
     // bruker "api" sånn at avhengigheten blir kopiert ut til konsumenter av denne modulen
     api(project(":sykepenger-utbetaling-dto"))

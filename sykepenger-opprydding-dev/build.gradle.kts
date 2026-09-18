@@ -1,22 +1,21 @@
 import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
 
 plugins {
-    id("com.bmuschko.docker-remote-api") version "10.0.0"
+    alias(libs.plugins.docker.remote.api)
 }
 
 val mainClass = "no.nav.helse.opprydding.AppKt"
-val tbdLibsVersion = "20260513.1819"
 
 dependencies {
     implementation(libs.rapids.and.rivers)
     implementation(libs.bundles.database)
     implementation(libs.cloudsql)
     implementation(project(":sykepenger-utbetaling"))
-    implementation("com.github.navikt.tbd-libs:naisful-postgres:$tbdLibsVersion")
+    implementation(libs.tbd.naisful.postgres)
 
     testImplementation(project(":sykepenger-mediators")) // for å få  tilgang på db/migrations-filene
-    testImplementation("com.github.navikt.tbd-libs:rapids-and-rivers-test:$tbdLibsVersion")
-    testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
+    testImplementation(libs.tbd.rapids.and.rivers.test)
+    testImplementation(libs.tbd.postgres.testdatabaser)
     testImplementation(libs.bundles.flyway)
 }
 

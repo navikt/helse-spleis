@@ -1,11 +1,10 @@
 import java.io.PrintWriter
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
-    kotlin("jvm") version "2.3.0" apply false
+    alias(libs.plugins.kotlin.jvm) apply false
 }
-
-val junitJupiterVersion = "6.0.2"
 
 allprojects {
     group = "no.nav.helse"
@@ -41,11 +40,14 @@ subprojects {
         Dersom det er flere som har behov så kan det være lurt å legge avhengigheten til
          dependencyResolutionManagement i settings.gradle.kts
      */
+    // libs-accessoren fra versjonskatalogen er ikke tilgjengelig inne i allprojects/subprojects-blokker
+    // (kjent Gradle-begrensning), så katalogen hentes eksplisitt her.
+    val versionCatalog = rootProject.the<VersionCatalogsExtension>().named("libs")
     val testImplementation by configurations
     val testRuntimeOnly by configurations
     dependencies {
-        testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
-        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+        testImplementation(versionCatalog.findLibrary("junit-jupiter").get())
+        testRuntimeOnly(versionCatalog.findLibrary("junit-platform-launcher").get())
     }
 
     configure<KotlinJvmProjectExtension> {

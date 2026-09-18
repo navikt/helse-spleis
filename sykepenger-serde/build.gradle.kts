@@ -1,5 +1,3 @@
-val jsonassertVersion = "1.5.0"
-
 dependencies {
     // bruker "implementation" fremfor "api" for å unngå
     // at avhengigheten blir transitiv, altså kopiert ut, til de som bruker denne modulen.
@@ -11,5 +9,5 @@ dependencies {
         exclude("com.fasterxml.jackson.dataformat")
     }
 
-    testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
+    testImplementation(libs.jsonassert)
 }

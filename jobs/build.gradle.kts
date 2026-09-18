@@ -1,6 +1,4 @@
 val mainClass = "no.nav.helse.spleis.jobs.AppKt"
-val tbdLibsVersion = "20260513.1819"
-val jacksonVersion = "2.18.3"
 
 tasks.withType<Test> {
     useJUnitPlatform()
@@ -10,10 +8,9 @@ tasks.withType<Test> {
 }
 
 dependencies {
-    implementation("com.github.navikt.tbd-libs:kafka:$tbdLibsVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    implementation(libs.tbd.kafka)
+    implementation(libs.bundles.jackson)
+    implementation(libs.kotlinx.coroutines.core)
     implementation(project(":sykepenger-model"))
     implementation(project(":sykepenger-serde"))
     implementation(libs.postgresql)

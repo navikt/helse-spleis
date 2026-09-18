@@ -1,15 +1,8 @@
 import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
 
 plugins {
-    id("com.bmuschko.docker-remote-api") version "10.0.0"
+    alias(libs.plugins.docker.remote.api)
 }
-
-val tbdLibsVersion = "20260513.1819"
-val spekematVersion = "2024.03.07-12.49-d2ad6319"
-val ktorVersion = "3.2.3"
-val awaitilityVersion = "4.2.2"
-val mockVersion = "1.13.13"
-val jsonassertVersion = "1.5.3"
 
 val mainClass = "no.nav.helse.spleis.AppKt"
 
@@ -18,11 +11,11 @@ dependencies {
     implementation(project(":sykepenger-serde"))
     implementation(project(":sykepenger-api-rest"))
     implementation(project(":sykepenger-api-dto"))
-    implementation("com.github.navikt.tbd-libs:naisful-app:$tbdLibsVersion")
-    implementation("com.github.navikt.tbd-libs:naisful-postgres:$tbdLibsVersion")
-    implementation("com.github.navikt.tbd-libs:azure-token-client-default:$tbdLibsVersion")
-    implementation("com.github.navikt.tbd-libs:retry:$tbdLibsVersion")
-    implementation("com.github.navikt.tbd-libs:speed-client:$tbdLibsVersion")
+    implementation(libs.tbd.naisful.app)
+    implementation(libs.tbd.naisful.postgres)
+    implementation(libs.tbd.azure.token.client.default)
+    implementation(libs.tbd.retry)
+    implementation(libs.tbd.speed.client)
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")
@@ -32,10 +25,10 @@ dependencies {
     implementation(libs.bundles.database)
     implementation(libs.cloudsql)
 
-    implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
-    implementation("io.ktor:ktor-server-auth:$ktorVersion")
-    implementation("io.ktor:ktor-client-cio:$ktorVersion")
-    implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion") {
+    implementation(libs.ktor.serialization.jackson)
+    implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.server.auth.jwt) {
         exclude(group = "junit")
     }
 
@@ -43,16 +36,16 @@ dependencies {
     testImplementation(project(":sykepenger-mediators")) // for å få tilgang på db/migrations-filene
     testImplementation(libs.bundles.flyway)
 
-    testImplementation("com.github.navikt.tbd-libs:naisful-test-app:$tbdLibsVersion")
-    testImplementation("org.awaitility:awaitility:$awaitilityVersion")
-    testImplementation("io.mockk:mockk:$mockVersion")
-    testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
+    testImplementation(libs.tbd.naisful.test.app)
+    testImplementation(libs.awaitility)
+    testImplementation(libs.mockk)
+    testImplementation(libs.jsonassert)
 
-    testImplementation("com.github.navikt.tbd-libs:mock-http-client:$tbdLibsVersion")
-    testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
-    testImplementation("com.github.navikt.tbd-libs:signed-jwt-issuer-test:$tbdLibsVersion")
+    testImplementation(libs.tbd.mock.http.client)
+    testImplementation(libs.tbd.postgres.testdatabaser)
+    testImplementation(libs.tbd.signed.jwt.issuer.test)
 
-    testImplementation("com.github.navikt.spekemat:fabrikk:$spekematVersion")
+    testImplementation(libs.spekemat.fabrikk)
 
     // for å kunne gjenopprette personer fra json
     testImplementation(project(":sykepenger-serde"))

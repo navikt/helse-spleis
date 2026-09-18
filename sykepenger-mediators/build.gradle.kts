@@ -1,17 +1,10 @@
 import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
 
 plugins {
-    id("com.bmuschko.docker-remote-api") version "10.0.0"
+    alias(libs.plugins.docker.remote.api)
 }
 
 val mainClass = "no.nav.helse.AppKt"
-
-val tbdLibsVersion = "20260626.0942"
-val tbdSpillAvImMatchingVersion = "2026.05.12-11.59-aa0ff460"
-val syfokafkaVersion = "2026.05.13-10.24-d6649054"
-val mockkVersion = "1.13.17"
-val jsonSchemaValidatorVersion = "1.0.70"
-val jsonassertVersion = "1.5.0"
 
 dependencies {
     implementation(project(":sykepenger-model"))
@@ -20,16 +13,16 @@ dependencies {
     implementation(libs.rapids.and.rivers)
     implementation(libs.bundles.database)
     implementation(libs.bundles.flyway)
-    implementation("com.github.navikt.tbd-libs:naisful-postgres:$tbdLibsVersion")
+    implementation(libs.tbd.naisful.postgres)
 
     testImplementation(testFixtures(project(":sykepenger-primitiver")))
-    testImplementation("com.github.navikt.tbd-libs:rapids-and-rivers-test:$tbdLibsVersion")
-    testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
-    testImplementation("com.networknt:json-schema-validator:$jsonSchemaValidatorVersion")
-    testImplementation("com.github.navikt.spill_av_im:matching:$tbdSpillAvImMatchingVersion")
-    testImplementation("no.nav.helse.flex:sykepengesoknad-kafka:$syfokafkaVersion")
-    testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
+    testImplementation(libs.tbd.rapids.and.rivers.test)
+    testImplementation(libs.tbd.postgres.testdatabaser)
+    testImplementation(libs.json.schema.validator)
+    testImplementation(libs.spill.av.im.matching)
+    testImplementation(libs.syfokafka)
+    testImplementation(libs.mockk)
+    testImplementation(libs.jsonassert)
 }
 
 val copyJars = tasks.register("copy-jars") {

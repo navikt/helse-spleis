@@ -1,6 +1,3 @@
-val jsonassertVersion = "1.5.0"
-val tbdSpillAvImMatchingVersion = "2026.05.12-11.59-aa0ff460"
-
 dependencies {
     // bruker "api" sånn at avhengigheten blir kopiert ut til konsumenter av denne modulen
     api(project(":sykepenger-model-dto"))
@@ -15,8 +12,8 @@ dependencies {
     testImplementation(testFixtures(project(":sykepenger-primitiver")))
     testImplementation(testFixtures(project(":sykepenger-økonomi")))
     testImplementation(testFixtures(project(":sykepenger-utbetaling")))
-    testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
-    testImplementation("com.github.navikt.spill_av_im:matching:$tbdSpillAvImMatchingVersion")
+    testImplementation(libs.jsonassert)
+    testImplementation(libs.spill.av.im.matching)
 
     testImplementation(project(":sykepenger-serde"))
 
