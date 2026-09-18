@@ -2731,7 +2731,8 @@ internal class Vedtaksperiode private constructor(
             alleForSammeArbeidsgiver.any { it.behandlinger.erTidligereVilkårsprøvd() } -> Inntektssituasjon.TidligereVilkårsprøvd
             else -> {
                 // Vi vet at vi skal "Behandles i speil", at vi ikke er tidligere vilkårsprøvd (så ikke noe revurderingscase) - så da er vi enten den som vilkårsprøver eller en annen arbeidsgiver som venter på vilkårsprøvingen
-                val periodenSomGaOpp = alleForSammeArbeidsgiver.first { it.tilstand in setOf(AvventerVilkårsprøving, AvventerBlokkerendePeriode, AvventerInntektsopplysningerForAnnenArbeidsgiver, AvventerAvsluttetUtenUtbetaling) }
+                val periodenSomGaOpp = alleForSammeArbeidsgiver.firstOrNull { it.tilstand in setOf(AvventerVilkårsprøving, AvventerBlokkerendePeriode, AvventerInntektsopplysningerForAnnenArbeidsgiver, AvventerAvsluttetUtenUtbetaling) }
+                    ?: error("Fant ikke noen periode i forventet tilstand, i forbindelse med å gå videre uten arbeidsgiveropplysninger")
                 Inntektssituasjon.GaOppÅVentePåArbeidsgiver(periodenSomGaOpp)
             }
         }
