@@ -2,21 +2,21 @@ package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
-import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.mockk.mockk
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
+import no.nav.helse.nyttFødselsnummer
 import no.nav.helse.spleis.dao.HendelseDao
+import no.nav.helse.testdatabase.TestDataSource
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class HendelseDaoTest {
 
-    private val UNG_PERSON_FNR = "12029240045"
+    private val UNG_PERSON_FNR = nyttFødselsnummer()
     private val meldingsReferanse = UUID.randomUUID()
     private lateinit var dataSource: TestDataSource
 
@@ -24,11 +24,6 @@ internal class HendelseDaoTest {
     internal fun setup() {
         dataSource = databaseContainer.nyTilkobling()
         dataSource.ds.lagreHendelse(meldingsReferanse)
-    }
-
-    @AfterEach
-    fun teardown() {
-        databaseContainer.droppTilkobling(dataSource)
     }
 
     private fun DataSource.lagreHendelse(

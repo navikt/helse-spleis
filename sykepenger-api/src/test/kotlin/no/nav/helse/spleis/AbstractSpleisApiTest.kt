@@ -10,7 +10,6 @@ import com.github.navikt.tbd_libs.sql_dsl.long
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.single
 import com.github.navikt.tbd_libs.sql_dsl.transaction
-import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.micrometer.prometheusmetrics.PrometheusConfig
@@ -31,6 +30,7 @@ import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.testhelpers.YrkesaktivitetHendelsefabrikk
+import no.nav.helse.testdatabase.TestDataSource
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.intellij.lang.annotations.Language
@@ -59,7 +59,6 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
         val testDataSource = databaseContainer.nyTilkobling()
         testdata(testDataSource)
         lagTestapplikasjon(speedClient = speedClient, spekematClient = spekematClient, testDataSource = testDataSource, testblokk = testblokk)
-        databaseContainer.droppTilkobling(testDataSource)
     }
 
     private fun lagTestapplikasjon(speedClient: SpeedClient, spekematClient: SpekematClient, testDataSource: TestDataSource, testblokk: suspend TestContext.() -> Unit) {

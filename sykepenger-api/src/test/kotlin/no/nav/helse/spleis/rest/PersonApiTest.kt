@@ -57,7 +57,7 @@ internal class PersonApiTest : AbstractSpleisApiTest() {
 
             JSONAssert.assertEquals(
                 forventetPayload,
-                restBody.utenVariableVerdier,
+                restBody.utenVariableVerdier(UNG_PERSON_FNR),
                 STRICT
             )
         }
@@ -84,12 +84,17 @@ internal class PersonApiTest : AbstractSpleisApiTest() {
         private val FagsystemIdRegex = "[A-Z,2-7]{26}".toRegex()
         private const val FagsystemId = "ZZZZZZZZZZZZZZZZZZZZZZZZZZ"
 
-        private val String.utenVariableVerdier
-            get() = replace(UUIDRegex, NullUUID)
+        private const val FnrMandagsfrø = "12029240045"
+
+        private fun String.utenVariableVerdier(fnr: String) =
+            replace(UUIDRegex, NullUUID)
                 .replace(LocalDateTimeRegex, LocalDateTimeMandagsfrø)
                 .replace(LocalDateTimePrecisionRegex, LocalDateTimeMandagsfrø)
                 .replace(TidsstempelRegex, TidsstempelMandagsfrø)
                 .replace(FagsystemIdRegex, FagsystemId)
+                // fødselsnummeret genereres unikt per test (delt database), men fixture-payloaden er
+                // bygget med et fast fødselsnummer — normaliser til det for stabil sammenligning
+                .replace(fnr, FnrMandagsfrø)
 
         /**
          * Forventet payload for scenariet i `opprettTestdata`, hentet fra `/person-api-payload.json`.

@@ -3,16 +3,18 @@ package no.nav.helse.spleis.mediator.e2e
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
+import no.nav.helse.nyttFødselsnummer
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
-    private companion object {
-        private const val FNR1 = "12029240045"
-        private const val FNR2 = "12029277777"
-    }
+    // FNR1 gjenbruker den arvede UNG_PERSON_FNR_2018 fordi `meldingsfabrikk` (i basisklassen,
+    // brukt av bl.a. sendUtbetalingshistorikk) er bygget med akkurat det fødselsnummeret -
+    // FNR1 må derfor være identisk med det for at utbetalingshistorikk skal kobles til riktig person.
+    private val FNR1 = UNG_PERSON_FNR_2018
+    private val FNR2 = nyttFødselsnummer()
 
     @Test
     fun `person får nytt fnr - behandling fortsetter på samme personjson`() {
@@ -28,8 +30,8 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
             testRapid.sendTestMessage(melding)
         }
 
-        assertEquals(1, antallPersoner())
-        assertEquals(2, antallPersonalias())
+        assertEquals(1, antallPersoner(FNR1, FNR2))
+        assertEquals(2, antallPersonalias(FNR1, FNR2))
         val meldinger = testRapid.inspektør.meldinger("vedtaksperiode_endret")
         assertEquals(8, meldinger.size)
         assertEquals(FNR1, meldinger[0].path("fødselsnummer").asText())
@@ -50,8 +52,8 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
 
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
 
-        assertEquals(2, antallPersoner())
-        assertEquals(2, antallPersonalias())
+        assertEquals(2, antallPersoner(FNR1, FNR2))
+        assertEquals(2, antallPersonalias(FNR1, FNR2))
         assertEquals(1, antallPersonalias(FNR1))
         assertEquals(1, antallPersonalias(FNR2))
         val meldinger = testRapid.inspektør.meldinger("vedtaksperiode_endret")
@@ -75,8 +77,8 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
     fun `endrer fødselsnummer ved opphørt ident`() {
         sendSøknad(fnr = FNR1, perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendIdentOpphørt(FNR1, FNR2)
-        assertEquals(1, antallPersoner())
-        assertEquals(2, antallPersonalias())
+        assertEquals(1, antallPersoner(FNR1, FNR2))
+        assertEquals(2, antallPersonalias(FNR1, FNR2))
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)))
         val meldinger = testRapid.inspektør.meldinger("vedtaksperiode_endret")
         assertEquals(3, meldinger.size)

@@ -11,12 +11,14 @@ import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.INNTEKT
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.ORGNUMMER
-import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagRiverTest : RiverTest() {
+    // ren mapping-test, rører ikke databasen, så det er trygt med et fast fødselsnummer
+    private val UNG_PERSON_FNR_2018 = "12029240045"
+
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
         VilkårsgrunnlagRiver(rapidsConnection, mediator)
     }

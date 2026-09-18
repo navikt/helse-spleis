@@ -5,7 +5,7 @@ import com.github.navikt.tbd_libs.sql_dsl.long
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.single
 import com.github.navikt.tbd_libs.sql_dsl.transaction
-import com.github.navikt.tbd_libs.test_support.TestDataSource
+import no.nav.helse.testdatabase.TestDataSource
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource

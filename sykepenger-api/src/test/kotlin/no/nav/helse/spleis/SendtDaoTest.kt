@@ -4,15 +4,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
-import com.github.navikt.tbd_libs.test_support.TestDataSource
 import java.util.UUID
 import kotlin.test.assertEquals
 import no.nav.helse.spleis.dao.SendtDao
 import no.nav.helse.spleis.dao.SendtDao.Companion.responseJson
 import no.nav.helse.spleis.dao.SendtMelding
 import no.nav.helse.spleis.dao.SendteMeldinger
+import no.nav.helse.testdatabase.TestDataSource
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
@@ -24,11 +23,6 @@ internal class SendtDaoTest {
     @BeforeEach
     fun setup() {
         dataSource = databaseContainer.nyTilkobling()
-    }
-
-    @AfterEach
-    fun teardown() {
-        databaseContainer.droppTilkobling(dataSource)
     }
 
     @Test
@@ -82,12 +76,14 @@ internal class SendtDaoTest {
         val sql = """
             INSERT INTO sendt (id, lopenummer, forarsaket_av, key, json, mottaker, opprettet, sendt)
             VALUES 
-                (gen_random_uuid(), 1, :forarsaket_av, null, '{"testJson": true}'::jsonb, 'RAPID', now(), '$sendt1'::timestamptz),
-                (gen_random_uuid(), 2, :forarsaket_av, 'foo-bar', '{"testSubsumsjon": "oui"}'::jsonb, 'SUBSUMSJON', now(), '$sendt2'::timestamptz);
+                (gen_random_uuid(), :lopenummer_forste, :forarsaket_av, null, '{"testJson": true}'::jsonb, 'RAPID', now(), '$sendt1'::timestamptz),
+                (gen_random_uuid(), :lopenummer_andre, :forarsaket_av, 'foo-bar', '{"testSubsumsjon": "oui"}'::jsonb, 'SUBSUMSJON', now(), '$sendt2'::timestamptz);
         """
         dataSource.ds.connection {
             prepareStatementWithNamedParameters(sql) {
                 withParameter("forarsaket_av", forårsaketAv)
+                withParameter("lopenummer_forste", lopenummerTeller.getAndIncrement())
+                withParameter("lopenummer_andre", lopenummerTeller.getAndIncrement())
             }.use { it.execute() }
         }
     }
@@ -96,5 +92,8 @@ internal class SendtDaoTest {
         private val sendt1 = "2026-07-07T14:55:44.123456Z"
         private val sendt2 = "2026-07-07T14:55:44.654321Z"
         private val objectMapper = jacksonObjectMapper()
+        // `sendt.lopenummer` er en unik kolonne (ikke en generert identitet), så vi må gi den
+        // garantert unike verdier for å unngå kollisjon med andre tester i den delte databasen.
+        private val lopenummerTeller = java.util.concurrent.atomic.AtomicLong(System.nanoTime())
     }
 }

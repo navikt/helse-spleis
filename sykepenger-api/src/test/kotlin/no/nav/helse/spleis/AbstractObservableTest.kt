@@ -37,6 +37,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.nyttFødselsnummer
 import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.spleis.testhelpers.TestObservatør
@@ -48,8 +49,10 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal abstract class AbstractObservableTest {
+    // unikt per testinstans - trygt å dele database med andre tester uten kollisjon
+    protected val UNG_PERSON_FNR = nyttFødselsnummer()
+
     protected companion object {
-        const val UNG_PERSON_FNR = "12029240045"
         val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         const val ORGNUMMER = "987654321"
         val INNTEKTSMELDING_ID: UUID = UUID.randomUUID()

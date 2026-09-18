@@ -11,7 +11,6 @@ import kotlin.uuid.Uuid
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.spleis.Behov
-import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FNR_2018
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -134,6 +133,9 @@ class UtgåendeMeldingTest {
     }
 
     internal companion object {
+        // ren in-memory-test, rører ikke databasen, så det er trygt med et fast fødselsnummer
+        private const val UNG_PERSON_FNR_2018 = "12029240045"
+
         @OptIn(ExperimentalUuidApi::class)
         internal fun nyUuidv7() = Uuid.generateV7().toString()
 

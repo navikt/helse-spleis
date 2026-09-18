@@ -3,7 +3,6 @@ package no.nav.helse.spleis
 import com.auth0.jwk.JwkProviderBuilder
 import com.github.navikt.tbd_libs.signed_jwt_issuer_test.Issuer
 import com.github.navikt.tbd_libs.speed.SpeedClient
-import com.github.navikt.tbd_libs.test_support.TestDataSource
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
@@ -21,8 +20,6 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.mockk
 import java.net.ServerSocket
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +29,7 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spleis.config.AzureAdAppConfig
+import no.nav.helse.testdatabase.TestDataSource
 import org.junit.jupiter.api.Assertions
 
 private class SuspendableIssuer {
@@ -53,26 +51,14 @@ private class SuspendableIssuer {
     }
 }
 
-internal class Applikasjonsservere(private val poolSize: Int) {
-    constructor() : this(POOL_SIZE)
-
-    companion object {
-        private val JUNIT_PARALLELISM = System.getProperty("junit.jupiter.execution.parallel.config.fixed.parallelism")?.toInt() ?: 1
-
-        private const val MIN_POOL_SIZE = 1
-        private val MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors()
-        private val POOL_SIZE = minOf(MAX_POOL_SIZE, maxOf(MIN_POOL_SIZE, JUNIT_PARALLELISM))
-    }
-
+internal class Applikasjonsservere {
     private val suspendableIssuer = SuspendableIssuer()
     private val azureConfig = AzureAdAppConfig(
         clientId = "spleis_azure_ad_app_id",
         issuer = suspendableIssuer.issuer.navn,
         jwkProvider = JwkProviderBuilder(suspendableIssuer.issuer.jwksUri().toURL()).build(),
     )
-    private val tilgjengelige by lazy {
-        ArrayBlockingQueue(poolSize, false, opprettApplikasjonsserver())
-    }
+    private val appserver by lazy { Applikasjonserver(azureConfig, suspendableIssuer.issuer) }
 
     init {
         runBlocking(Dispatchers.IO) {
@@ -80,39 +66,17 @@ internal class Applikasjonsservere(private val poolSize: Int) {
         }
     }
 
-    fun nyAppserver(): Applikasjonserver {
-        return tilgjengelige.poll(20, TimeUnit.SECONDS) ?: throw RuntimeException("Ventet i 20 sekunder uten å få en ledig appserver")
-    }
-
     fun kjørTest(testdata: (TestDataSource) -> Unit, testblokk: suspend BlackboxTestContext.() -> Unit) {
-        val appserver = nyAppserver()
-        try {
-            appserver.kjørTest(testdata, testblokk)
-        } finally {
-            returner(appserver)
-        }
-    }
-
-    fun returner(appserver: Applikasjonserver) {
-        check(tilgjengelige.offer(appserver)) {
-            "Kunne ikke returnere appserveren"
-        }
+        appserver.kjørTest(testdata, testblokk)
     }
 
     fun ryddOpp() {
         runBlocking(Dispatchers.IO) {
-            tilgjengelige
-                .map { async { it.stopp() } }
-                .plusElement(async { suspendableIssuer.stop() })
-                .awaitAll()
-
+            listOf(
+                async { appserver.stopp() },
+                async { suspendableIssuer.stop() },
+            ).awaitAll()
         }
-    }
-
-    private fun opprettApplikasjonsserver() = (1..poolSize).map {
-        val navn = "appserver_$it"
-        println("oppretter appserver $navn")
-        Applikasjonserver(azureConfig, suspendableIssuer.issuer)
     }
 
     internal class Applikasjonserver(azureConfig: AzureAdAppConfig, issuer: Issuer) {
@@ -130,13 +94,9 @@ internal class Applikasjonsservere(private val poolSize: Int) {
 
         fun kjørTest(testdata: (TestDataSource) -> Unit = {}, testblokk: suspend BlackboxTestContext.() -> Unit) {
             testDataSource = databaseContainer.nyTilkobling()
-            try {
-                startOpp(testdata)
-                runBlocking {
-                    testblokk(testContext)
-                }
-            } finally {
-                databaseContainer.droppTilkobling(testDataSource)
+            startOpp(testdata)
+            runBlocking {
+                testblokk(testContext)
             }
         }
 

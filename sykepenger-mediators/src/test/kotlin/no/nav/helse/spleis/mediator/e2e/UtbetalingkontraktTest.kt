@@ -43,7 +43,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
            {
               "@event_name": "vedtaksperiode_ny_utbetaling", 
-              "fødselsnummer": "12029240045",
+              "fødselsnummer": "$UNG_PERSON_FNR_2018",
               "yrkesaktivitetstype": "ARBEIDSTAKER",
               "organisasjonsnummer": "987654321",
               "vedtaksperiodeId": "<uuid>",
@@ -174,7 +174,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertEquals(2, utbetaling.path("utbetalingsdager").toList().filter { it["type"].asText() == "Feriedag" }.size)
         assertEquals(1, utbetaling.path("utbetalingsdager").toList().filter { it["type"].asText() == "Permisjonsdag" }.size)
     }
-    
+
     @Test
     fun `utbetaling med avviste dager`() {
         sendNySøknad(
@@ -238,7 +238,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
             {
                 "@event_name": "utbetaling_annullert",
-                "fødselsnummer": "12029240045",
+                "fødselsnummer": "$UNG_PERSON_FNR_2018",
                 "organisasjonsnummer": "987654321",
                 "yrkesaktivitetstype": "ARBEIDSTAKER",
                 "epost" : "siri.saksbehandler@nav.no",
@@ -278,7 +278,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
             {
                 "@event_name": "utbetaling_annullert",
-                "fødselsnummer": "12029240045",
+                "fødselsnummer": "$UNG_PERSON_FNR_2018",
                 "organisasjonsnummer": "987654321",
                 "yrkesaktivitetstype": "ARBEIDSTAKER",
                 "epost" : "siri.saksbehandler@nav.no",
@@ -316,7 +316,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
             {
                 "@event_name": "utbetaling_annullert",
-                "fødselsnummer": "12029240045",
+                "fødselsnummer": "$UNG_PERSON_FNR_2018",
                 "organisasjonsnummer": "987654321",
                 "yrkesaktivitetstype": "ARBEIDSTAKER",
                 "epost" : "siri.saksbehandler@nav.no",
@@ -458,14 +458,8 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     private val korrelasjonsId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("korrelasjonsId").let { UUID.fromString(it.asText()) }
 
 
-    private companion object {
-        private val FagsystemIdRegex = "[A-Z,2-7]{26}".toRegex()
-        private fun ObjectNode.assertOgFjernFagsystemId(key: String) {
-            assertOgFjern(key) { check(it.asText().matches(FagsystemIdRegex)) }
-        }
-
-        @Language("JSON")
-        private val utbetalingUtbetaltForventetJson = """
+    @Language("JSON")
+    private val utbetalingUtbetaltForventetJson = """
         {
             "@event_name": "utbetaling_utbetalt",
             "korrelasjonsId": "<uuid>",
@@ -501,7 +495,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
                 "tom": "2018-01-26"
             },
             "personOppdrag": {
-                "mottaker": "12029240045",
+                "mottaker": "$UNG_PERSON_FNR_2018",
                 "fagområde": "SP",
                 "linjer": [],
                 "nettoBeløp": 0,
@@ -678,9 +672,15 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
                 "sykdomsgrad": 100,
                 "begrunnelser": null
             }],
-            "fødselsnummer": "12029240045"
+            "fødselsnummer": "$UNG_PERSON_FNR_2018"
         }
     """
+
+    private companion object {
+        private val FagsystemIdRegex = "[A-Z,2-7]{26}".toRegex()
+        private fun ObjectNode.assertOgFjernFagsystemId(key: String) {
+            assertOgFjern(key) { check(it.asText().matches(FagsystemIdRegex)) }
+        }
     }
 }
 

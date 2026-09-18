@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.nyttFødselsnummer
 import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -176,7 +177,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `Sender event SelvstendigIngenDagerIgjenEvent når bruker blir 70 år i løpet av perioden`() {
-        val fødselsnummer = "20014812238"
+        val fødselsnummer = nyttFødselsnummer()
         val fødselsdato = 20.januar(1948)
         val meldingsfabrikk = TestMessageFactory(fødselsnummer, "SELVSTENDIG", INNTEKT, fødselsdato)
         val (_, nySøknad) = meldingsfabrikk.lagNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), opprettet = 1.januar.atStartOfDay(), fnr = fødselsnummer, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)

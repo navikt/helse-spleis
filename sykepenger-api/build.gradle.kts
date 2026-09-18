@@ -1,9 +1,3 @@
-import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
-
-plugins {
-    alias(libs.plugins.docker.remote.api)
-}
-
 val mainClass = "no.nav.helse.spleis.AppKt"
 
 dependencies {
@@ -42,7 +36,6 @@ dependencies {
     testImplementation(libs.jsonassert)
 
     testImplementation(libs.tbd.mock.http.client)
-    testImplementation(libs.tbd.postgres.testdatabaser)
     testImplementation(libs.tbd.signed.jwt.issuer.test)
 
     testImplementation(libs.spekemat.fabrikk)
@@ -72,38 +65,6 @@ tasks {
                 it.name
             }
         }
-        finalizedBy(":sykepenger-api:remove_spleis_api_db_container")
     }
 
-    withType<Test> {
-        systemProperty("junit.jupiter.execution.parallel.enabled", "true")
-        systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
-        systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
-        systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "8")
-    }
-}
-
-docker {
-    url = if (System.getenv("CI") == "true") {
-        "unix:///var/run/docker.sock"
-    } else {
-        val home = System.getProperty("user.home")
-        val candidates = listOf(
-            "$home/.colima/default/docker.sock",       // Colima
-            "/var/run/docker.sock",                    // Docker Desktop (Linux) / standard
-            "$home/.docker/run/docker.sock",           // Docker Desktop (macOS)
-        )
-        val socket = candidates.firstOrNull { File(it).exists() }
-            ?: error("No Docker socket found. Is Docker running?")
-        "unix://$socket"
-    }
-}
-tasks.register("remove_spleis_api_db_container", DockerRemoveContainer::class) {
-    targetContainerId("spleis-api")
-    dependsOn(":sykepenger-api:test")
-    setProperty("force", true)
-    onError {
-        if (!this.message!!.contains("No such container"))
-            throw this
-    }
 }

@@ -1,6 +1,5 @@
 [versions]
 kotlin = "2.3.0"
-docker-plugin = "10.0.0"
 rapids-and-rivers = "2026011411051768385145.e8ebad1177b4"
 postgres = "42.7.7"
 hikari = "6.3.0"
@@ -21,6 +20,7 @@ spill-av-im-matching = "2026.05.12-11.59-aa0ff460"
 syfokafka = "2026.05.13-10.24-d6649054"
 json-schema-validator = "1.0.70"
 commons-codec = "1.15"
+testcontainers = "2.0.5"
 
 [libraries]
 rapids-and-rivers = { group = "com.github.navikt", name = "rapids-and-rivers", version.ref = "rapids-and-rivers" }
@@ -43,12 +43,12 @@ tbd-retry = { group = "com.github.navikt.tbd-libs", name = "retry", version.ref 
 tbd-speed-client = { group = "com.github.navikt.tbd-libs", name = "speed-client", version.ref = "tbd-libs" }
 tbd-naisful-test-app = { group = "com.github.navikt.tbd-libs", name = "naisful-test-app", version.ref = "tbd-libs" }
 tbd-mock-http-client = { group = "com.github.navikt.tbd-libs", name = "mock-http-client", version.ref = "tbd-libs" }
-tbd-postgres-testdatabaser = { group = "com.github.navikt.tbd-libs", name = "postgres-testdatabaser", version.ref = "tbd-libs" }
 tbd-signed-jwt-issuer-test = { group = "com.github.navikt.tbd-libs", name = "signed-jwt-issuer-test", version.ref = "tbd-libs" }
 tbd-rapids-and-rivers-test = { group = "com.github.navikt.tbd-libs", name = "rapids-and-rivers-test", version.ref = "tbd-libs" }
 
 cloudsql = { group = "com.google.cloud.sql", name = "postgres-socket-factory", version.ref = "cloudsql" }
 flyway-postgres = { group = "org.flywaydb", name = "flyway-database-postgresql", version.ref = "flyway" }
+testcontainers-postgres = { group = "org.testcontainers", name = "testcontainers-postgresql", version.ref = "testcontainers" }
 
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
@@ -79,4 +79,3 @@ logging = ["logback", "logstash"]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-docker-remote-api = { id = "com.bmuschko.docker-remote-api", version.ref = "docker-plugin" }

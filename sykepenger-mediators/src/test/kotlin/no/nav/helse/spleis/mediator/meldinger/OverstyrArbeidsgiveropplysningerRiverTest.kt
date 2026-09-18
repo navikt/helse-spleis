@@ -13,7 +13,6 @@ import no.nav.helse.spleis.mediator.TestMessageFactory.Refusjonsopplysning
 import no.nav.helse.spleis.mediator.TestMessageFactory.Subsumsjon
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.INNTEKT
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.ORGNUMMER
-import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.spleis.meldinger.OverstyrArbeidsgiveropplysningerRiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -21,6 +20,8 @@ import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
 
 internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
+    // ren mapping-test, rører ikke databasen, så det er trygt med et fast fødselsnummer
+    private val UNG_PERSON_FNR_2018 = "12029240045"
 
     @Test
     fun `kan mappe melding om overstyring av arbeidsgiveropplysninger for en arbeidsgiver`() {

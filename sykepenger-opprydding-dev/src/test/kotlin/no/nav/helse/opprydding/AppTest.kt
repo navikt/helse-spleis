@@ -8,6 +8,7 @@ import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.single
 import com.github.navikt.tbd_libs.sql_dsl.transaction
 import java.util.UUID
+import no.nav.helse.nyttFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -27,31 +28,35 @@ internal class AppTest : DBTest() {
 
     @Test
     fun `slettemelding medfører at person slettes fra databasen`() {
-        opprettPerson("123")
-        testRapid.sendTestMessage(slettemelding("123"))
-        assertEquals(0, finnPerson("123"))
-        assertEquals(0, finnMelding("123"))
+        val fnr = nyttFødselsnummer()
+        opprettPerson(fnr)
+        testRapid.sendTestMessage(slettemelding(fnr))
+        assertEquals(0, finnPerson(fnr))
+        assertEquals(0, finnMelding(fnr))
     }
 
     @Test
     fun `sletter kun aktuelt fnr`() {
-        opprettPerson("123")
-        opprettPerson("1234")
-        testRapid.sendTestMessage(slettemelding("123"))
-        assertEquals(0, finnPerson("123"))
-        assertEquals(1, finnPerson("1234"))
-        assertEquals(0, finnMelding("123"))
-        assertEquals(1, finnMelding("1234"))
+        val fnr1 = nyttFødselsnummer()
+        val fnr2 = nyttFødselsnummer()
+        opprettPerson(fnr1)
+        opprettPerson(fnr2)
+        testRapid.sendTestMessage(slettemelding(fnr1))
+        assertEquals(0, finnPerson(fnr1))
+        assertEquals(1, finnPerson(fnr2))
+        assertEquals(0, finnMelding(fnr1))
+        assertEquals(1, finnMelding(fnr2))
     }
 
     @Test
     fun `sender kvittering etter at slettingen er gjort`() {
-        opprettPerson("123")
-        testRapid.sendTestMessage(slettemelding("123"))
-        assertEquals(0, finnPerson("123"))
+        val fnr = nyttFødselsnummer()
+        opprettPerson(fnr)
+        testRapid.sendTestMessage(slettemelding(fnr))
+        assertEquals(0, finnPerson(fnr))
         val kvittering = testRapid.inspektør.message(0)
         assertEquals("person_slettet", kvittering["@event_name"].asText())
-        assertEquals("123", kvittering["fødselsnummer"].asText())
+        assertEquals(fnr, kvittering["fødselsnummer"].asText())
     }
 
     private fun slettemelding(fødselsnummer: String) = JsonMessage.newMessage("slett_person", mapOf("fødselsnummer" to fødselsnummer)).toJson()

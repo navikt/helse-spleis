@@ -2,26 +2,26 @@ package no.nav.helse.spleis.mediator.db
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
-import com.github.navikt.tbd_libs.test_support.TestDataSource
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.MeldingsreferanseId
+import no.nav.helse.nyttFødselsnummer
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.meldinger.OverstyrArbeidsgiveropplysningerRiver.Companion.requireArbeidsgiveropplysninger
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessage
+import no.nav.helse.testdatabase.TestDataSource
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-private val fnr = Personidentifikator("01011012345")
-
 internal class HendelseRepositoryTest {
+    // unikt per testinstans - trygt å dele database med andre tester uten kollisjon
+    private val fnr = Personidentifikator(nyttFødselsnummer())
     private lateinit var dataSource: TestDataSource
 
     @BeforeEach
@@ -29,15 +29,10 @@ internal class HendelseRepositoryTest {
         dataSource = databaseContainer.nyTilkobling()
     }
 
-    @AfterEach
-    internal fun tearDown() {
-        databaseContainer.droppTilkobling(dataSource)
-    }
-
     @Test
     fun `skal klare å hente ny overstyr arbeidsgiveropplysninger-hendelse fra db`() {
         val hendelseId = MeldingsreferanseId(UUID.randomUUID())
-        val (id, navn) = lagre(TestMessages.overstyrArbeidsgiveropplysninger(hendelseId))
+        val (id, navn) = lagre(TestMessages.overstyrArbeidsgiveropplysninger(hendelseId, fnr))
         assertEquals(hendelseId.id, id)
         assertEquals("OVERSTYRARBEIDSGIVEROPPLYSNINGER", navn)
     }
@@ -60,7 +55,7 @@ private object TestMessages {
             validate(packet)
         }
 
-    fun overstyrArbeidsgiveropplysninger(id: MeldingsreferanseId): OverstyrArbeidsgiveropplysningerMessage {
+    fun overstyrArbeidsgiveropplysninger(id: MeldingsreferanseId, fnr: Personidentifikator): OverstyrArbeidsgiveropplysningerMessage {
         val now = LocalDateTime.now()
 
         @Language("JSON")

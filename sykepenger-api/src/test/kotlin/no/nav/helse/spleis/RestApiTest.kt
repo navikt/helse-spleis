@@ -1,7 +1,7 @@
 package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.signed_jwt_issuer_test.Issuer
-import com.github.navikt.tbd_libs.test_support.TestDataSource
+import no.nav.helse.testdatabase.TestDataSource
 import io.ktor.http.HttpStatusCode
 import java.time.LocalDate
 import java.util.UUID
@@ -12,6 +12,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
+import no.nav.helse.nyttFødselsnummer
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Person
@@ -22,11 +23,16 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class RestApiTest : AbstractApiTest() {
+    // unikt per testinstans - trygt å dele database med andre tester uten kollisjon
+    private val UNG_PERSON_FNR = nyttFødselsnummer()
+    // unik per testinstans - companion object ville delt samme melding_id på tvers av alle
+    // testmetodene i klassen og kollidert med unique-constrainten når databasen deles uten
+    // opprydding mellom tester
+    private val MELDINGSREFERANSE = UUID.randomUUID()
+
     companion object {
-        private const val UNG_PERSON_FNR = "12029240045"
         @JvmStatic private val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         private const val ORGNUMMER = "987654321"
-        @JvmStatic private val MELDINGSREFERANSE = UUID.randomUUID()
     }
 
     @Test

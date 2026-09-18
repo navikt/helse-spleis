@@ -6,11 +6,12 @@ import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.INNTEKT
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.ORGNUMMER
-import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdendringerRiverTest : RiverTest() {
+    // ren mapping-test, rører ikke databasen, så det er trygt med et fast fødselsnummer
+    private val UNG_PERSON_FNR_2018 = "12029240045"
 
     @Test
     fun `kan mappe melding om infotrygdendring uten feil`() {

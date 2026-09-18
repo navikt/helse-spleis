@@ -1,7 +1,8 @@
 package no.nav.helse.spleis.opptjening
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.github.navikt.tbd_libs.test_support.TestDataSource
+
+import no.nav.helse.testdatabase.TestDataSource
 import io.ktor.http.HttpStatusCode
 import java.time.LocalDate
 import java.time.Year
@@ -24,6 +25,7 @@ import no.nav.helse.hendelser.Søknad.PensjonsgivendeInntekt
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.nyttFødselsnummer
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.Person
@@ -43,8 +45,10 @@ import org.skyscreamer.jsonassert.JSONAssert
 
 class OpptjeningsvurderingApiTest : AbstractApiTest() {
 
+    // unikt per testmetode (ny instans per @Test) — deles av `sendt.person`/`person_alias`, som har `fnr` som unik kolonne i den delte databasen
+    private val FNR = nyttFødselsnummer()
+
     companion object {
-        private const val FNR = "12029240046"
         private const val ORGNUMMER = "987654322"
     }
 

@@ -209,7 +209,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
-          "fødselsnummer": "12029240045"
+          "fødselsnummer": "$UNG_PERSON_FNR_2018"
         }"""
 
     @Language("json")
@@ -249,7 +249,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
-          "fødselsnummer": "12029240045"
+          "fødselsnummer": "$UNG_PERSON_FNR_2018"
         }"""
 
     @Language("json")
@@ -284,7 +284,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
-          "fødselsnummer": "12029240045"
+          "fødselsnummer": "$UNG_PERSON_FNR_2018"
         }"""
 
     @Language("json")
@@ -319,7 +319,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
-          "fødselsnummer": "12029240045"
+          "fødselsnummer": "$UNG_PERSON_FNR_2018"
         }"""
 
     @Language("json")
@@ -352,7 +352,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "opplysningstype": "Refusjon"
             }
           ],
-          "fødselsnummer": "12029240045"
+          "fødselsnummer": "$UNG_PERSON_FNR_2018"
         }"""
 
     private fun forlengMedFebruar(a1: String) {

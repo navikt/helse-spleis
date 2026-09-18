@@ -16,7 +16,6 @@ import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.single
 import com.github.navikt.tbd_libs.sql_dsl.string
-import com.github.navikt.tbd_libs.test_support.TestDataSource
 import com.zaxxer.hikari.HikariDataSource
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -38,6 +37,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode as Hendelseperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.nyttFødselsnummer
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spill_av_im.Forespørsel
@@ -71,10 +71,10 @@ import no.nav.helse.spleis.utboks.TestUtsender
 import no.nav.helse.spleis.utboks.TestUtsenderObservatør
 import no.nav.helse.spleis.utboks.UtgåendeMelding
 import no.nav.helse.spleis.utboks.UtgåendeMelding.Mottaker.SUBSUMSJON
+import no.nav.helse.testdatabase.TestDataSource
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -84,12 +84,14 @@ import org.slf4j.LoggerFactory
 
 internal abstract class AbstractEndToEndMediatorTest {
     internal companion object {
-        internal const val UNG_PERSON_FNR_2018 = "12029240045"
         internal val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         internal const val ORGNUMMER = "987654321"
         internal const val INNTEKT = 31000.00
     }
 
+    // unikt per testinstans (JUnit lager ny instans per testmetode) slik at flere tester
+    // trygt kan dele samme database uten å kollidere på samme fødselsnummer
+    protected val UNG_PERSON_FNR_2018: String = nyttFødselsnummer()
     protected val meldingsfabrikk = TestMessageFactory(UNG_PERSON_FNR_2018, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
     protected lateinit var testRapid: TestRapid
     protected lateinit var hendelseRepository: HendelseRepository
@@ -123,26 +125,23 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.observer(InntektsmeldingerReplayObserver(testRapid, dataSource.ds))
     }
 
-    @AfterEach
-    fun tearDown() {
-        databaseContainer.droppTilkobling(dataSource)
-    }
-
     @BeforeEach
     internal fun setupEach() {
         testRapid.reset()
     }
 
-    protected fun antallPersoner() = dataSource.ds.connection {
-        prepareStatement("SELECT COUNT(1) FROM person").use {
+    // NB: filtrerer alltid på testens egne fødselsnumre. Databasen deles med andre tester
+    // (ingen truncate mellom tester), så en uskalert COUNT(*) ville tellet rader fra andre tester.
+    protected fun antallPersoner(vararg fnr: String = arrayOf(UNG_PERSON_FNR_2018)) = dataSource.ds.connection {
+        prepareStatement("SELECT COUNT(1) FROM person WHERE fnr IN (${fnr.joinToString(",") { it.toLong().toString() }})").use {
             it.executeQuery().use { rs ->
                 rs.single { it.long(1) }
             }
         }
     }
 
-    protected fun antallPersonalias(fnr: String? = null) = dataSource.ds.connection {
-        prepareStatement("SELECT COUNT(1) FROM person_alias ${fnr?.let { "WHERE fnr=${fnr.toLong()}" } ?: ""}").use {
+    protected fun antallPersonalias(vararg fnr: String = arrayOf(UNG_PERSON_FNR_2018)) = dataSource.ds.connection {
+        prepareStatement("SELECT COUNT(1) FROM person_alias WHERE fnr IN (${fnr.joinToString(",") { it.toLong().toString() }})").use {
             it.executeQuery().use { rs ->
                 rs.single { it.long(1) }
             }

@@ -5,4 +5,9 @@ dependencies {
     implementation(libs.bundles.jackson)
     implementation(project(":sykepenger-etterlevelse-api"))
     testFixturesImplementation(libs.junit.jupiter.api)
+
+    // delt testdatabase-oppsett (én gjenbrukt Testcontainers-database per modul, migrert med Flyway)
+    testFixturesImplementation(libs.bundles.database)
+    testFixturesImplementation(libs.bundles.flyway)
+    testFixturesImplementation(libs.testcontainers.postgres)
 }

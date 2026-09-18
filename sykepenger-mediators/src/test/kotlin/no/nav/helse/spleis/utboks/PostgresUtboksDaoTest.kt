@@ -3,20 +3,35 @@ package no.nav.helse.spleis.utboks
 import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
 import com.github.navikt.tbd_libs.sql_dsl.transaction
-import com.github.navikt.tbd_libs.test_support.TestDataSource
 import java.time.Instant
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.nyttFødselsnummer
 import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.utboks.PostgresUtboksDao.Companion.somUtgåendeMelding
-import org.junit.jupiter.api.AfterEach
+import no.nav.helse.spleis.utboks.UtgåendeMeldingTest.Companion.nyUuidv7
+import no.nav.helse.testdatabase.TestDataSource
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 
-import no.nav.helse.spleis.utboks.UtgåendeMeldingTest.Companion.nyUuidv7
-import org.junit.jupiter.api.Assertions.assertEquals
-
+// `utboks`-tabellen har global (ikke fnr-scoped) "broadcast"-semantikk for meldinger med
+// key=null (se PostgresUtboksDao.usendte: `WHERE (key = :key OR key IS NULL) ... FOR UPDATE
+// SKIP LOCKED`) — slike meldinger kan plukkes opp av HVILKEN SOM HELST kallende test som
+// spør etter usendte meldinger, ikke bare andre metoder i denne klassen. `@Isolated` sørger
+// for at ingen andre testklasser kjører samtidig med denne, slik at key=null-meldingene vi
+// oppretter her ikke blir "stjålet" av en annen test som også leser fra utboks-tabellen.
+@Isolated
 internal class PostgresUtboksDaoTest {
+
+    // Egne instansfelt (ikke companion object) fordi hver testmetode kjører mot samme delte
+    // database uten opprydding mellom tester — companion object-verdier ville vært delt (og
+    // dermed kollidert) på tvers av alle testmetodene i klassen.
+    private val personidentifikator = Personidentifikator(nyttFødselsnummer())
+    private val personidentifikator1 = Personidentifikator(nyttFødselsnummer())
+    private val personidentifikator2 = Personidentifikator(nyttFødselsnummer())
+    private val personidentifikator3 = Personidentifikator(nyttFødselsnummer())
 
     private lateinit var dataSource: TestDataSource
     private lateinit var dao: PostgresUtboksDao
@@ -27,11 +42,6 @@ internal class PostgresUtboksDaoTest {
         dao = PostgresUtboksDao(dataSource.ds)
     }
 
-    @AfterEach
-    fun tearDown() {
-        databaseContainer.droppTilkobling(dataSource)
-    }
-
     @Test
     fun `lagrer, sender og henter opp meldinger`() {
         val meldingerTilSykmeldt = listOf(nyMelding(), nyMelding(), nyMelding())
@@ -40,32 +50,30 @@ internal class PostgresUtboksDaoTest {
         lagreMeldingerSomSkalBeholdesEtterSending(meldinger)
         assertEquals(meldinger, usendte(personidentifikator))
         assertEquals(listOf(meldingUtenKey), håndterOgFåTilbakeUsendte(personidentifikator, sendOgFåTilbakeSendtOk = { meldingerTilSykmeldt }))
-        assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger())
+        assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger().intersect(setOf(personidentifikator)))
         assertEquals(emptyList<UtgåendeMelding>(), håndterOgFåTilbakeUsendte(personidentifikator, sendOgFåTilbakeSendtOk = { listOf(meldingUtenKey) }))
     }
 
 
     @Test
     fun `henter personer med usendte meldinger`() {
-        assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger())
-        val personidentifikator1 = Personidentifikator("12345678911")
-        val personidentifikator2 = Personidentifikator("12345678912")
-        val personidentifikator3 = Personidentifikator("12345678913")
+        val kjenteIdentifikatorer = setOf(personidentifikator1, personidentifikator2, personidentifikator3)
+        assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger().intersect(kjenteIdentifikatorer))
         val melding1 = nyMelding(personidentifikator1)
         val melding2 = nyMelding(personidentifikator2)
         val melding3 = nyMelding(personidentifikator3)
         lagreMeldingerSomSkalBeholdesEtterSending(listOf(melding1, melding2, melding3))
-        assertEquals(setOf(personidentifikator1, personidentifikator2, personidentifikator3), dao.personerMedUsendteMeldinger())
+        assertEquals(kjenteIdentifikatorer, dao.personerMedUsendteMeldinger().intersect(kjenteIdentifikatorer))
         assertEquals(listOf(melding1), usendte(personidentifikator1))
         assertEquals(listOf(melding2), usendte(personidentifikator2))
         assertEquals(listOf(melding3), usendte(personidentifikator3))
 
         håndterOgFåTilbakeUsendte(personidentifikator2, sendOgFåTilbakeSendtOk = { listOf(melding2 )})
-        assertEquals(setOf(personidentifikator1, personidentifikator3), dao.personerMedUsendteMeldinger())
+        assertEquals(setOf(personidentifikator1, personidentifikator3), dao.personerMedUsendteMeldinger().intersect(kjenteIdentifikatorer))
 
         håndterOgFåTilbakeUsendte(personidentifikator1, sendOgFåTilbakeSendtOk = { listOf(melding1) })
         håndterOgFåTilbakeUsendte(personidentifikator3, sendOgFåTilbakeSendtOk = { listOf(melding3) })
-        assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger())
+        assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger().intersect(kjenteIdentifikatorer))
     }
 
     @Test
@@ -165,9 +173,9 @@ internal class PostgresUtboksDaoTest {
         assertEquals(emptySet<UtgåendeMelding>(), erLagret) { "Ingen av disse burde være lagret utboks-tabellen, men her var det ${erLagret.size} stykk!" }
     }
 
+    private fun nyMelding(key: Personidentifikator? = personidentifikator, mottaker: UtgåendeMelding.Mottaker = UtgåendeMelding.Mottaker.RAPID, eventName: String = "test") = UtgåendeMelding(key?.toString(), """{"@id": "${nyUuidv7()}", "@event_name": "$eventName", "@opprettetUTC":"${Instant.now()}"}""", mottaker)
+
     private companion object {
-        private val personidentifikator = Personidentifikator("12345678910")
-        private fun nyMelding(key: Personidentifikator? = personidentifikator, mottaker: UtgåendeMelding.Mottaker = UtgåendeMelding.Mottaker.RAPID, eventName: String = "test") = UtgåendeMelding(key?.toString(), """{"@id": "${nyUuidv7()}", "@event_name": "$eventName", "@opprettetUTC":"${Instant.now()}"}""", mottaker)
         private fun List<UtgåendeMelding>.somKvittering(sendingsTidspunkt: Instant = Instant.now(), feilet: List<UtgåendeMelding> = emptyList()) = Kvittering(
             sendt = sendingsTidspunkt,
             ok = this,

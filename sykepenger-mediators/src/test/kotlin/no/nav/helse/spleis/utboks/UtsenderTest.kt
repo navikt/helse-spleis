@@ -2,13 +2,15 @@ package no.nav.helse.spleis.utboks
 
 import java.time.Instant
 import no.nav.helse.Personidentifikator
-import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FNR_2018
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import no.nav.helse.spleis.utboks.UtgåendeMeldingTest.Companion.nyUuidv7
 import org.junit.jupiter.api.assertThrows
 
 class UtsenderTest {
+
+    // ren in-memory-test, rører ikke databasen, så det er trygt med et fast fødselsnummer
+    private val UNG_PERSON_FNR_2018 = "12029240045"
 
     private val testUtsender = TestUtsender()
 

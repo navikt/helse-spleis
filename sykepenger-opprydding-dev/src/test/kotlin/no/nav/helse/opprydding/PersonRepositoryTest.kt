@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.single
 import com.github.navikt.tbd_libs.sql_dsl.transaction
 import java.util.*
+import no.nav.helse.nyttFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test
 internal class PersonRepositoryTest : DBTest() {
 
     private lateinit var personRepository: PersonRepository
+    private val fødselsnummer = nyttFødselsnummer()
 
     @BeforeEach
     fun `start postgres`() {
@@ -22,12 +24,12 @@ internal class PersonRepositoryTest : DBTest() {
 
     @Test
     fun `Kan slette person`() {
-        opprettDummyPerson("123")
-        assertEquals(1, finnPerson("123"))
-        assertEquals(1, finnMelding("123"))
-        personRepository.slett("123")
-        assertEquals(0, finnPerson("123"))
-        assertEquals(0, finnMelding("123"))
+        opprettDummyPerson(fødselsnummer)
+        assertEquals(1, finnPerson(fødselsnummer))
+        assertEquals(1, finnMelding(fødselsnummer))
+        personRepository.slett(fødselsnummer)
+        assertEquals(0, finnPerson(fødselsnummer))
+        assertEquals(0, finnMelding(fødselsnummer))
     }
 
     private fun finnPerson(fødselsnummer: String): Int {
