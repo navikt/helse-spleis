@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<title>Arbeidssituasjon → Yrkesaktivitet i Spleis</title>
+<style>
+  :root { color-scheme: light; }
+  body {
+    margin: 0; padding: 24px 32px 48px;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #f4f6f8; color: #1a1d20;
+  }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  p.sub { margin: 0 0 16px; color: #5b6570; font-size: 14px; }
+  .wrap { background: #fff; border: 1px solid #dde2e6; border-radius: 10px; padding: 8px; display: inline-block; }
+  canvas { display: block; }
+  .legend { margin-top: 14px; font-size: 13px; color: #5b6570; display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+  .legend span.k { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+  .hint { margin-top: 10px; font-size: 13px; color: #8a929b; }
+</style>
+</head>
+<body>
+<h1>Arbeidssituasjon og yrkesaktivitet i Spleis</h1>
+<p class="sub">Søknadens <code>Arbeidssituasjon</code> (8 verdier) mappes mange‑til‑én til <code>Behandlingsporing.Yrkesaktivitet</code> (4 varianter). Hold musa over en boks for å fremheve relasjonene.</p>
+
+<div class="wrap"><canvas id="c" width="1300" height="760"></canvas></div>
+
+<div class="legend">
+  <span class="k"><i class="sw" style="background:#2f6fd0"></i> Arbeidstaker</span>
+  <span class="k"><i class="sw" style="background:#2e8b57"></i> Selvstendig</span>
+  <span class="k"><i class="sw" style="background:#c9770c"></i> Frilans</span>
+  <span class="k"><i class="sw" style="background:#7a4fb5"></i> Arbeidsledig</span>
+  <span class="k"><i class="sw" style="background:#9aa3ac"></i> Ikke støttet i dag (funksjonell feil / TODO)</span>
+</div>
+<p class="hint">Stiplet pil = betinget mapping. Kilder: <code>hendelser/Hendelse.kt</code>, <code>hendelser/Søknad.kt</code>, <code>person/Yrkesaktivitet.kt</code>, <code>person/Behandlinger.kt</code>, <code>spleis/meldinger/model/*</code></p>
+
+<script>
+const COL = {
+  arbeidstaker: '#2f6fd0',
+  selvstendig:  '#2e8b57',
+  frilans:      '#c9770c',
+  arbeidsledig: '#7a4fb5',
+  muted:        '#9aa3ac'
+};
+
+// Venstre: Søknad.Arbeidssituasjon
+const situasjoner = [
+  { id: 'ARBEIDSTAKER',                label: 'ARBEIDSTAKER',                note: 'sendt_søknad_nav / _arbeidsgiver' },
+  { id: 'ARBEIDSLEDIG',                label: 'ARBEIDSLEDIG',                note: 'sendt_søknad_arbeidsledig' },
+  { id: 'FRILANSER',                   label: 'FRILANSER',                   note: 'sendt_søknad_frilans' },
+  { id: 'SELVSTENDIG_NÆRINGSDRIVENDE', label: 'SELVSTENDIG_NÆRINGSDRIVENDE', note: 'sendt_søknad_selvstendig' },
+  { id: 'BARNEPASSER',                 label: 'BARNEPASSER',                 note: 'egen klassekode' },
+  { id: 'JORDBRUKER',                  label: 'JORDBRUKER',                  note: 'toggle + RV_SØ_55, spesiell yrkesgruppe' },
+  { id: 'FISKER',                      label: 'FISKER',                      note: 'ikke støttet – funksjonell feil', muted: true },
+  { id: 'ANNET',                       label: 'ANNET',                       note: 'ikke støttet – funksjonell feil', muted: true }
+];
+
+// Midten: Behandlingsporing.Yrkesaktivitet
+const yrkes = [
+  { id: 'arbeidstaker', label: 'Arbeidstaker(orgnr)', kind: 'data class', color: COL.arbeidstaker },
+  { id: 'selvstendig',  label: 'Selvstendig',         kind: 'data object', color: COL.selvstendig },
+  { id: 'frilans',      label: 'Frilans',             kind: 'data object', color: COL.frilans },
+  { id: 'arbeidsledig', label: 'Arbeidsledig',        kind: 'data object', color: COL.arbeidsledig }
+];
+
+// Høyre: konsekvenser
+const effekter = {
+  arbeidstaker: ['organisasjonsnummer = orgnr', 'DTO: ARBEIDSTAKER', 'Klassekode: SykepengerArbeidstakerOrdinær', 'Eneste med feriepenger'],
+  selvstendig:  ['organisasjonsnummer = "SELVSTENDIG"', 'DTO: SELVSTENDIG', 'Klassekode avhenger av arbeidssituasjon', 'Kan gi RV_SØ_54 (selvstendig-ghost)'],
+  frilans:      ['organisasjonsnummer = "FRILANS"', 'DTO: FRILANS', 'Klassekode: TODO', 'Søknad blokkeres: RV_SØ_39'],
+  arbeidsledig: ['organisasjonsnummer = "ARBEIDSLEDIG"', 'DTO: ARBEIDSLEDIG', 'Klassekode: ArbeidstakerOrdinær', 'Lagrer ikke sykmeldingsperioder', 'Søknad blokkeres: RV_SØ_39']
+};
+
+const edges = [
+  { from: 'ARBEIDSTAKER',                to: 'arbeidstaker' },
+  { from: 'ARBEIDSLEDIG',                to: 'arbeidsledig' },
+  { from: 'ARBEIDSLEDIG',                to: 'arbeidstaker', dashed: true, label: 'hvis tidligereArbeidsgiverOrgnummer' },
+  { from: 'FRILANSER',                   to: 'frilans' },
+  { from: 'SELVSTENDIG_NÆRINGSDRIVENDE', to: 'selvstendig' },
+  { from: 'BARNEPASSER',                 to: 'selvstendig' },
+  { from: 'JORDBRUKER',                  to: 'selvstendig' },
+  { from: 'FISKER',                      to: 'selvstendig' },
+  { from: 'ANNET',                       to: 'selvstendig' }
+];
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const dpr = window.devicePixelRatio || 1;
+canvas.width = W * dpr; canvas.height = H * dpr;
+canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+ctx.scale(dpr, dpr);
+
+const LX = 40,  LW = 300, LH = 54, LGAP = 14, LY0 = 96;
+const MX = 470, MW = 260, MH = 76, MGAP = 44, MY0 = 140;
+const RX = 830, RW = 430;
+
+situasjoner.forEach((s, i) => { s.x = LX; s.y = LY0 + i * (LH + LGAP); s.w = LW; s.h = LH; });
+yrkes.forEach((y, i) => { y.x = MX; y.y = MY0 + i * (MH + MGAP); y.w = MW; y.h = MH; });
+yrkes.forEach(y => {
+  const lines = effekter[y.id];
+  y.rx = RX; y.rw = RW; y.rh = 26 + lines.length * 19;
+  y.ry = y.y + y.h / 2 - y.rh / 2;
+});
+
+const ingen = { x: MX, y: MY0 + 4 * (MH + MGAP) + 6, w: MW, h: 50 };
+
+let hover = null; // {type:'sit'|'yrke', id}
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function box(x, y, w, h, { fill = '#fff', stroke = '#c9d1d8', lw = 1.5, shadow = false } = {}) {
+  if (shadow) { ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.18)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 3; }
+  roundRect(x, y, w, h, 8);
+  ctx.fillStyle = fill; ctx.fill();
+  if (shadow) ctx.restore();
+  ctx.lineWidth = lw; ctx.strokeStyle = stroke; ctx.stroke();
+}
+
+function edgeActive(e) {
+  if (!hover) return true;
+  if (hover.type === 'sit') return e.from === hover.id;
+  return e.to === hover.id;
+}
+
+function arrow(x1, y1, x2, y2, color, dashed, alpha, label) {
+  const cx = (x1 + x2) / 2;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = dashed ? 1.8 : 2.2;
+  ctx.setLineDash(dashed ? [6, 5] : []);
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.bezierCurveTo(cx, y1, cx, y2, x2 - 9, y2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  // pilspiss
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - 10, y2 - 5);
+  ctx.lineTo(x2 - 10, y2 + 5);
+  ctx.closePath();
+  ctx.fillStyle = color; ctx.fill();
+  if (label && alpha > 0.7) {
+    ctx.font = '11px -apple-system, Segoe UI, sans-serif';
+    const tw = ctx.measureText(label).width;
+    const lx = cx - tw / 2, ly = (y1 + y2) / 2;
+    ctx.fillStyle = 'rgba(255,255,255,.92)';
+    roundRect(lx - 6, ly - 11, tw + 12, 18, 5); ctx.fill();
+    ctx.fillStyle = color;
+    ctx.fillText(label, lx, ly + 2);
+  }
+  ctx.restore();
+}
+
+function header(text, x, y, sub) {
+  ctx.fillStyle = '#1a1d20';
+  ctx.font = '600 14px -apple-system, Segoe UI, sans-serif';
+  ctx.fillText(text, x, y);
+  if (sub) {
+    ctx.fillStyle = '#8a929b';
+    ctx.font = '12px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.fillText(sub, x, y + 17);
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.textBaseline = 'alphabetic';
+
+  header('1. Søknad.Arbeidssituasjon', LX, 40, 'hendelser/Søknad.kt · enum, 8 verdier');
+  header('2. Behandlingsporing.Yrkesaktivitet', MX, 40, 'hendelser/Hendelse.kt · sealed, 4 varianter');
+  header('3. Konsekvenser i modellen', RX, 40, 'person/Yrkesaktivitet.kt · person/Behandlinger.kt');
+
+  // piler
+  edges.forEach(e => {
+    const s = situasjoner.find(x => x.id === e.from);
+    const y = yrkes.find(x => x.id === e.to);
+    const active = edgeActive(e);
+    arrow(s.x + s.w, s.y + s.h / 2, y.x, y.y + y.h / 2 + (e.dashed ? 14 : 0),
+          y.color, e.dashed, active ? 1 : 0.12, e.dashed && active ? e.label : null);
+  });
+
+  // venstre bokser
+  situasjoner.forEach(s => {
+    const target = edges.find(e => e.from === s.id);
+    const c = s.muted ? COL.muted : yrkes.find(y => y.id === target.to).color;
+    const on = !hover || (hover.type === 'sit' && hover.id === s.id) ||
+               (hover.type === 'yrke' && edges.some(e => e.from === s.id && e.to === hover.id));
+    ctx.globalAlpha = on ? 1 : 0.28;
+    box(s.x, s.y, s.w, s.h, { fill: on ? '#fff' : '#fafbfc', stroke: c, lw: on ? 2 : 1.2, shadow: on && !!hover });
+    ctx.fillStyle = c; ctx.fillRect(s.x + 1.5, s.y + 8, 4, s.h - 16);
+    ctx.fillStyle = '#1a1d20';
+    ctx.font = '600 13px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.fillText(s.label, s.x + 16, s.y + 23);
+    ctx.fillStyle = '#7b848d';
+    ctx.font = '11.5px -apple-system, Segoe UI, sans-serif';
+    ctx.fillText(s.note, s.x + 16, s.y + 40);
+    ctx.globalAlpha = 1;
+  });
+
+  // midtbokser
+  yrkes.forEach(y => {
+    const on = !hover || (hover.type === 'yrke' && hover.id === y.id) ||
+               (hover.type === 'sit' && edges.some(e => e.to === y.id && e.from === hover.id));
+    ctx.globalAlpha = on ? 1 : 0.28;
+    box(y.x, y.y, y.w, y.h, { fill: on ? tint(y.color) : '#fafbfc', stroke: y.color, lw: on ? 2.4 : 1.2, shadow: on && !!hover });
+    ctx.fillStyle = y.color;
+    ctx.font = '600 15px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.fillText(y.label, y.x + 16, y.y + 30);
+    ctx.fillStyle = '#6b757e';
+    ctx.font = '11.5px -apple-system, Segoe UI, sans-serif';
+    ctx.fillText(y.kind, y.x + 16, y.y + 50);
+    const n = edges.filter(e => e.to === y.id).length;
+    ctx.fillStyle = '#98a1a9';
+    ctx.fillText('← ' + n + ' arbeidssituasjon' + (n > 1 ? 'er' : ''), y.x + 16, y.y + 66);
+    ctx.globalAlpha = 1;
+
+    // høyre panel
+    ctx.globalAlpha = on ? 1 : 0.2;
+    box(y.rx, y.ry, y.rw, y.rh, { fill: '#fbfcfd', stroke: '#dde2e6', lw: 1.2 });
+    effekter[y.id].forEach((line, i) => {
+      const ly = y.ry + 22 + i * 19;
+      ctx.fillStyle = y.color;
+      ctx.beginPath(); ctx.arc(y.rx + 14, ly - 4, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = /TODO|blokkeres|Lagrer ikke/.test(line) ? '#b23c3c' : '#3d464f';
+      ctx.font = '12px -apple-system, Segoe UI, sans-serif';
+      ctx.fillText(line, y.rx + 26, ly);
+    });
+    ctx.globalAlpha = 1;
+  });
+
+  // IngenYrkesaktivitet
+  ctx.globalAlpha = hover ? 0.4 : 1;
+  ctx.setLineDash([5, 4]);
+  box(ingen.x, ingen.y, ingen.w, ingen.h, { fill: '#fafbfc', stroke: '#b6bec6', lw: 1.4 });
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#5b6570';
+  ctx.font = '600 13px ui-monospace, SFMono-Regular, Menlo, monospace';
+  ctx.fillText('IngenYrkesaktivitet', ingen.x + 16, ingen.y + 22);
+  ctx.fillStyle = '#8a929b';
+  ctx.font = '11.5px -apple-system, Segoe UI, sans-serif';
+  ctx.fillText('søsken i Behandlingsporing – personhendelser', ingen.x + 16, ingen.y + 39);
+  ctx.globalAlpha = 1;
+
+  // fotnote om sammenlikning
+  ctx.fillStyle = '#6b757e';
+  ctx.font = '12px -apple-system, Segoe UI, sans-serif';
+  ctx.fillText('erLik(...) sammenlikner type + orgnr   ·   erSammeYrkesaktivtetstype(...) sammenlikner kun type', LX, H - 22);
+}
+
+function tint(hex) {
+  const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},0.07)`;
+}
+
+function hit(mx, my) {
+  for (const s of situasjoner) if (mx >= s.x && mx <= s.x + s.w && my >= s.y && my <= s.y + s.h) return { type: 'sit', id: s.id };
+  for (const y of yrkes) {
+    if (mx >= y.x && mx <= y.x + y.w && my >= y.y && my <= y.y + y.h) return { type: 'yrke', id: y.id };
+    if (mx >= y.rx && mx <= y.rx + y.rw && my >= y.ry && my <= y.ry + y.rh) return { type: 'yrke', id: y.id };
+  }
+  return null;
+}
+
+canvas.addEventListener('mousemove', ev => {
+  const r = canvas.getBoundingClientRect();
+  const h = hit(ev.clientX - r.left, ev.clientY - r.top);
+  const changed = JSON.stringify(h) !== JSON.stringify(hover);
+  hover = h;
+  canvas.style.cursor = h ? 'pointer' : 'default';
+  if (changed) draw();
+});
+canvas.addEventListener('mouseleave', () => { hover = null; draw(); });
+
+draw();
+</script>
+</body>
+</html>

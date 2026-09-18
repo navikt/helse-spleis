@@ -8,7 +8,7 @@ import java.util.UUID
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
-import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage.Vurderingsformat.Forsikringsvudering
+import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage.Vurderingsformat.Forsikringsvurdering
 import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage.Vurderingsformat.Opptjeningsvurdering
 
 internal class EndretVurderingPåSkjæringstidspunktRiver(
@@ -17,7 +17,7 @@ internal class EndretVurderingPåSkjæringstidspunktRiver(
 ) : HendelseRiver(rapidsConnection, messageMediator) {
 
     private val vurderinger = setOf(
-        Forsikringsvudering,
+        Forsikringsvurdering,
         Opptjeningsvurdering
     )
 

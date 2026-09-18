@@ -19,7 +19,7 @@ internal class EndretVurderingPåSkjæringstidspunktMessage(
     private val vurderingId = UUID.fromString(packet[vurderingsformat.idPath].asText())
     internal val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     internal val vurdering = when (vurderingsformat) {
-        Vurderingsformat.Forsikringsvudering -> Vurdering.Forsikringsvurdering(vurderingId)
+        Vurderingsformat.Forsikringsvurdering -> Vurdering.Forsikringsvurdering(vurderingId)
         Vurderingsformat.Opptjeningsvurdering -> Vurdering.Opptjeningsvurdering(vurderingId)
     }
     internal val avsender = when (packet["manuellVurdering"].asBoolean(false)) {
@@ -43,7 +43,7 @@ internal class EndretVurderingPåSkjæringstidspunktMessage(
     sealed interface Vurderingsformat {
         val eventName: String
         val idPath: String
-        data object Forsikringsvudering: Vurderingsformat {
+        data object Forsikringsvurdering: Vurderingsformat {
             override val eventName = "endret_forsikringsvurdering"
             override val idPath = "forsikringsvurderingId"
         }

@@ -103,10 +103,10 @@ internal class SpeilGenerasjonerBuilder(
 
     private fun mapTilInfotrygdperiode(vedtaksperiode: VedtaksperiodeUtDto, forrigePeriode: SpeilTidslinjeperiode?, generasjon: BehandlingUtDto): UberegnetPeriode? {
         if (forrigePeriode == null) return null // todo: her kan vi mappe perioder som tas ut av Speil
-        return mapUberegnetPeriode(vedtaksperiode, generasjon, Periodetilstand.Annullert)
+        return mapUberegnetPeriode(vedtaksperiode, generasjon, Periodetilstand.Annullert, erForkastet = true)
     }
 
-    private fun mapUberegnetPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto, periodetilstand: Periodetilstand? = null): UberegnetPeriode {
+    private fun mapUberegnetPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto, periodetilstand: Periodetilstand? = null, erForkastet: Boolean = false): UberegnetPeriode {
         val sisteEndring = generasjon.endringer.last()
         val sykdomstidslinje = SykdomstidslinjeBuilder(
             sisteEndring.sykdomstidslinje,
@@ -123,7 +123,7 @@ internal class SpeilGenerasjonerBuilder(
             tom = sisteEndring.periode.tom,
             sammenslåttTidslinje = sykdomstidslinje.merge(utbetalingstidslinje),
             periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // feltet gir ikke mening for uberegnede perioder
-            erForkastet = false,
+            erForkastet = erForkastet,
             opprettet = generasjon.endringer.first().tidsstempel,
             oppdatert = sisteEndring.tidsstempel,
             skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,

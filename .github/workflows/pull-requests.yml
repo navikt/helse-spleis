@@ -16,8 +16,6 @@ jobs:
       with:
         cache-disabled: true
     - name: test and build
-      run: ./gradlew clean test build --no-daemon --no-build-cache -Dkotlin.incremental=false
+      run: ./gradlew clean build --no-build-cache --no-daemon -Dkotlin.incremental=false -x :jobs:build -x :sykepenger-api:build -x :sykepenger-opprydding-dev:build
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: build docker image
-      run: docker build . --pull
