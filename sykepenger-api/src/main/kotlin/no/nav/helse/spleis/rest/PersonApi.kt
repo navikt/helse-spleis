@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.github.navikt.tbd_libs.result_object.getOrThrow
 import com.github.navikt.tbd_libs.retry.retryBlocking
 import com.github.navikt.tbd_libs.speed.SpeedClient
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.BadRequestException
@@ -17,6 +18,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.io.IOException
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.dao.HendelseDao
@@ -47,11 +49,24 @@ internal fun Application.personApi(
                 if (ident == null || !ident.matches(fødselsnummerRegex)) throw BadRequestException("fødselsnummer må være 11 siffer")
 
                 val callId = call.callId ?: UUID.randomUUID().toString()
-                val person = withContext(Dispatchers.IO) {
+                withContext(Dispatchers.IO) {
                     try {
-                        hentPerson(speedClient, spekematClient, personDao, hendelseDao, ident, callId, meterRegistry)
-                    } catch (err: Exception) {
-                        logger.error("callId=$callId Kunne ikke bygge personsnapshot, sjekk tjenestekall-indeksen!")
+                        val person = hentPerson(speedClient, spekematClient, personDao, hendelseDao, ident, callId, meterRegistry)
+                            ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
+
+                        call.respond(person)
+                    }
+                    catch (err: IOException) {
+                        logger.warn("callId=$callId Kunne ikke bygge personsnapshot, se i Team Logs for detaljer.")
+                        sikkerlogger.warn(
+                            "callId=$callId {} Kunne ikke bygge personsnapshot: ${err.javaClass.simpleName} - ${err.message}",
+                            keyValue("fødselsnummer", ident),
+                            err
+                        )
+                        call.respond(HttpStatusCode.InternalServerError)
+                    }
+                    catch (err: Exception) {
+                        logger.error("callId=$callId Kunne ikke bygge personsnapshot, se i Team Logs for detaljer.")
                         sikkerlogger.error(
                             "callId=$callId {} Kunne ikke bygge personsnapshot: ${err.javaClass.simpleName} - ${err.message}",
                             keyValue("fødselsnummer", ident),
@@ -59,9 +74,7 @@ internal fun Application.personApi(
                         )
                         throw err
                     }
-                } ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-
-                call.respond(person)
+                }
             }
         }
     }
