@@ -242,12 +242,6 @@ spec:
           application: sparkel-forsikring
           access: readwrite
         - team: tbd
-          application: spiskammerset-mottak
-          access: readwrite
-        - team: tbd
-          application: spiskammerset-opprydding-dev
-          access: readwrite
-        - team: tbd
           application: sp-forsikring
           access: readwrite
         - team: tbd
