@@ -16,6 +16,7 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.every
 import io.mockk.mockk
+import java.net.BindException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -63,24 +64,44 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
 
     private fun lagTestapplikasjon(speedClient: SpeedClient, spekematClient: SpekematClient, testDataSource: TestDataSource, testblokk: suspend TestContext.() -> Unit) {
         val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
-        naisfulTestApp(
-            testApplicationModule = {
-                authentication {
-                    // setter opp en falsk autentisering som alltid svarer med en principal
-                    // uavhengig om requesten inneholder bearer eller ei
-                    provider {
-                        authenticate { context ->
-                            context.principal(JWTPrincipal(LokalePayload(mapOf("azp_name" to "spesialist"))))
+        retryVedBindException {
+            naisfulTestApp(
+                testApplicationModule = {
+                    authentication {
+                        // setter opp en falsk autentisering som alltid svarer med en principal
+                        // uavhengig om requesten inneholder bearer eller ei
+                        provider {
+                            authenticate { context ->
+                                context.principal(JWTPrincipal(LokalePayload(mapOf("azp_name" to "spesialist"))))
+                            }
                         }
                     }
-                }
-                val dataSource = testDataSource.ds
-                lagApplikasjonsmodul(speedClient, spekematClient, { dataSource }, meterRegistry)
-            },
-            objectMapper = objectMapper,
-            meterRegistry = meterRegistry,
-            testblokk = testblokk
-        )
+                    val dataSource = testDataSource.ds
+                    lagApplikasjonsmodul(speedClient, spekematClient, { dataSource }, meterRegistry)
+                },
+                objectMapper = objectMapper,
+                meterRegistry = meterRegistry,
+                testblokk = testblokk
+            )
+        }
+    }
+
+    private fun retryVedBindException(forsøkIgjen: Int = 3, blokk: () -> Unit) {
+        repeat(forsøkIgjen + 1) { forsøk ->
+            try {
+                blokk()
+                return
+            } catch (err: Throwable) {
+                if (forsøk == forsøkIgjen || !err.inneholderBindException()) throw err
+                System.gc()
+                Thread.sleep(50)
+            }
+        }
+    }
+
+    private fun Throwable.inneholderBindException(): Boolean {
+        if (this is BindException) return true
+        return cause?.inneholderBindException() == true
     }
 
     protected class Simuleringsutfisker : EventSubscription {
