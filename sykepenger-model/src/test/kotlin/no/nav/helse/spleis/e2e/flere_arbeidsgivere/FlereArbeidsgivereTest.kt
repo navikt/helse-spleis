@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -941,7 +941,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         // sender im på mursteinspølse hos a1
         a1 {
-            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 2.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
+            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 2.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
         }
 
         a1 {
@@ -955,7 +955,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         // sender im på siste mursteinspølse på a2
         a2 {
-            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 2.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
+            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 2.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
         }
 
         a1 {

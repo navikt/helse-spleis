@@ -717,7 +717,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null)
             )
         }
         a2 {
@@ -725,7 +725,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null)
             )
         }
         a1 {

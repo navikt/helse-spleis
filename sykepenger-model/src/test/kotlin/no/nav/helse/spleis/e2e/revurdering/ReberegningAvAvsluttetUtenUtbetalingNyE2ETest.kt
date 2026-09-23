@@ -1253,7 +1253,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
                     arbeidsgiverperioder = listOf(1.januar til 16.januar),
                     begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre",
                     opphørAvNaturalytelser = emptyList(),
-                    harFlereArbeidsforhold = false
+                    harFlereArbeidsforhold = false,
+                    refusjonskravGyldigFra = null
                 ).toTypedArray()
             )
         }

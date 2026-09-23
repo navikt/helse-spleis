@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
+import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
@@ -14,9 +15,8 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.april
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
@@ -85,7 +85,7 @@ internal class FlereArbeidsgivereInntektssituasjonTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 2.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf((3.august til 18.august) i 2026)),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null)
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)

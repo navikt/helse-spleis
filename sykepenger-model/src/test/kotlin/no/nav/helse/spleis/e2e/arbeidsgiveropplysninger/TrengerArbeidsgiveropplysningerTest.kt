@@ -71,7 +71,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `AI fjerner gammel IM - En annen vedtaksperiode håndterer innteksmelding, så forespørsel bli aldri kvittert ut`()  {
+    fun `AI fjerner gammel IM - En annen vedtaksperiode håndterer innteksmelding, så forespørsel bli aldri kvittert ut`() {
         a1 {
             håndterSøknad(1.januar til 16.januar)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -91,7 +91,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Ved 16 egenmeldingsdager i søknad, etterfulgt av lite gap før søknadsperioden, så bør det bes om AGP`()  {
+    fun `Ved 16 egenmeldingsdager i søknad, etterfulgt av lite gap før søknadsperioden, så bør det bes om AGP`() {
         a1 {
             håndterSøknad(18.januar til 10.februar, egenmeldinger = listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -134,7 +134,9 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
                     perioder = listOf(1.februar til 16.februar)
                 ),
                 Arbeidsgiveropplysning.OppgittRefusjon(
-                    beløp = INNTEKT, endringer = listOf()
+                    beløp = INNTEKT,
+                    endringer = listOf(),
+                    refusjonskravGyldigFra = null
                 ),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT)
             )
@@ -213,7 +215,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Skal ikke sende forespørsel for korte perioder etter at arbeidsgiver har sendt riktig AGP`()  {
+    fun `Skal ikke sende forespørsel for korte perioder etter at arbeidsgiver har sendt riktig AGP`() {
         a1 {
             håndterSøknad(Sykdom(6.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar til 5.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -283,7 +285,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `ber ikke om arbeidsgiveropplysninger på ghost når riktig inntektsmelding kommer`()  {
+    fun `ber ikke om arbeidsgiveropplysninger på ghost når riktig inntektsmelding kommer`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
@@ -307,7 +309,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.arbeidstaker.organisasjonsnummer == a2 })
 
         a2 {
-            håndterArbeidsgiveropplysninger(2.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
+            håndterArbeidsgiveropplysninger(2.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
         }
 
         assertEquals(2, observatør.inntektsmeldingHåndtert.size)
@@ -523,7 +525,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `sender med første fraværsdag på alle arbeidsgivere for skjæringstidspunktet`()  {
+    fun `sender med første fraværsdag på alle arbeidsgivere for skjæringstidspunktet`() {
         nyeVedtakMedUlikFom(
             mapOf(
                 a1 to (januar),
@@ -622,7 +624,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
-    fun `blir syk fra ghost`()  {
+    fun `blir syk fra ghost`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
@@ -649,7 +651,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
 
         nullstillTilstandsendringer()
         a2 {
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()), Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.februar til 16.februar)))
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.februar til 16.februar)))
         }
 
         a1 { assertVarsler(listOf(RV_VV_2), AktivitetsloggFilter.arbeidsgiver(a1)) }

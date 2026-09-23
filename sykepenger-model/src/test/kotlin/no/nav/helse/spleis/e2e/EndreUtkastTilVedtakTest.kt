@@ -28,14 +28,14 @@ internal class EndreUtkastTilVedtakTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
         }
         a2 {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
@@ -73,14 +73,14 @@ internal class EndreUtkastTilVedtakTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
         }
         a2 {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
@@ -136,14 +136,14 @@ internal class EndreUtkastTilVedtakTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
         }
         a2 {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()))
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)

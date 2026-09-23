@@ -59,7 +59,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
-            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittRefusjon(INNTEKT * 1.25, emptyList()))
+            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittRefusjon(INNTEKT * 1.25, emptyList(), refusjonskravGyldigFra = null))
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
@@ -73,7 +73,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
     fun `opplyser om korrigerert inntekt OG refusjon på en allerede utbetalt periode`() {
         a1 {
             nyttVedtak(januar)
-            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT * 1.25), OppgittRefusjon(INNTEKT * 1.25, emptyList()))
+            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT * 1.25), OppgittRefusjon(INNTEKT * 1.25, emptyList(), refusjonskravGyldigFra = null))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -103,7 +103,7 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
-            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()))
+            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {

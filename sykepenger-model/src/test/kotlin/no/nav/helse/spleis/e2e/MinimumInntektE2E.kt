@@ -13,8 +13,8 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -103,10 +103,10 @@ internal class MinimumInntektE2E : AbstractDslTest() {
         }
         a2 {
             nyPeriode(31.januar til 28.februar, a2)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(31.januar til 15.februar)), OppgittInntekt(500.daglig), OppgittRefusjon(500.daglig, emptyList()))
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(31.januar til 15.februar)), OppgittInntekt(500.daglig), OppgittRefusjon(500.daglig, emptyList(), refusjonskravGyldigFra = null))
         }
         a1 {
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)), OppgittInntekt(200.daglig), OppgittRefusjon(200.daglig, emptyList()))
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)), OppgittInntekt(200.daglig), OppgittRefusjon(200.daglig, emptyList(), refusjonskravGyldigFra = null))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

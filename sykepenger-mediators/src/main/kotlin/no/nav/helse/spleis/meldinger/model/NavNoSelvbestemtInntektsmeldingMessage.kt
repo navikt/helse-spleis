@@ -42,6 +42,7 @@ internal class NavNoSelvbestemtInntektsmeldingMessage(
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
     private val harFlereArbeidsforhold = packet["harFlereArbeidsforhold"].takeUnless { it.isMissingOrNull() }?.asBoolean() ?: false
+    private val refusjonskravGyldigFra = packet["refusjonskravGyldigFra"].takeUnless { it.isMissingOrNull() }?.asLocalDate()
 
 
     private val selvbestemteArbeidsgiveropplysninger get() = SelvbestemteArbeidsgiveropplysninger(
@@ -57,6 +58,7 @@ internal class NavNoSelvbestemtInntektsmeldingMessage(
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             harFlereArbeidsforhold = harFlereArbeidsforhold,
+            refusjonskravGyldigFra = refusjonskravGyldigFra
         )
     )
 

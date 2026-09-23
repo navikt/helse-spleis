@@ -27,7 +27,7 @@ sealed interface Arbeidsgiveropplysning {
     }
 
     data object OpphørAvNaturalytelser : Arbeidsgiveropplysning
-    data class OppgittRefusjon(val beløp: Inntekt, val endringer: List<Refusjonsendring>) : Arbeidsgiveropplysning {
+    data class OppgittRefusjon(val beløp: Inntekt, val endringer: List<Refusjonsendring>, val refusjonskravGyldigFra: LocalDate?) : Arbeidsgiveropplysning {
         data class Refusjonsendring(val fom: LocalDate, val beløp: Inntekt)
     }
 
@@ -122,7 +122,8 @@ sealed interface Arbeidsgiveropplysning {
             arbeidsgiverperioder: List<Periode>?,
             begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
             opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse>,
-            harFlereArbeidsforhold: Boolean
+            harFlereArbeidsforhold: Boolean,
+            refusjonskravGyldigFra: LocalDate?
         ): List<Arbeidsgiveropplysning> {
             val oppgittInntekt = beregnetInntekt
                 ?.takeUnless { it < INGEN }
@@ -138,17 +139,17 @@ sealed interface Arbeidsgiveropplysning {
             return listOfNotNull(
                 oppgittInntekt,
                 oppgittArbeidsgiverperiode,
-                refusjon?.somOppgittRefusjon(),
+                refusjon?.somOppgittRefusjon(refusjonskravGyldigFra),
                 begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(arbeidsgiverperioder?.sortedBy { it.start } ?: emptyList()),
                 oppgittOpphørAvNaturalytelser,
                 HarFlereArbeidsforhold.takeIf { harFlereArbeidsforhold }
             )
         }
 
-        private fun Inntektsmelding.Refusjon.somOppgittRefusjon(): OppgittRefusjon {
+        private fun Inntektsmelding.Refusjon.somOppgittRefusjon(refusjonskravGyldigFra: LocalDate?): OppgittRefusjon {
             val endringerIRefusjon = endringerIRefusjon.map { OppgittRefusjon.Refusjonsendring(it.endringsdato, it.beløp) }
             val opphørAvRefusjon = listOfNotNull(opphørsdato?.let { OppgittRefusjon.Refusjonsendring(it.nesteDag, INGEN) })
-            return OppgittRefusjon(beløp ?: INGEN, endringerIRefusjon + opphørAvRefusjon)
+            return OppgittRefusjon(beløp ?: INGEN, endringerIRefusjon + opphørAvRefusjon, refusjonskravGyldigFra)
         }
 
         private fun String.somArbeidsgiveropplysning(arbeidsgiverperioder: List<Periode>): Arbeidsgiveropplysning? {

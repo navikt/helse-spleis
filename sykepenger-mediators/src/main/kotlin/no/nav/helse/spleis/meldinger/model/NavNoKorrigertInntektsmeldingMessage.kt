@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -43,6 +42,7 @@ internal class NavNoKorrigertInntektsmeldingMessage(
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
     private val harFlereArbeidsforhold = packet["harFlereArbeidsforhold"].takeUnless { it.isMissingOrNull() }?.asBoolean() ?: false
+    private val refusjonskravGyldigFra = packet["refusjonskravGyldigFra"].takeUnless { it.isMissingOrNull() }?.asLocalDate()
 
 
     private val korrigerteArbeidsgiveropplysninger
@@ -59,6 +59,7 @@ internal class NavNoKorrigertInntektsmeldingMessage(
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 opphørAvNaturalytelser = opphørAvNaturalytelser,
                 harFlereArbeidsforhold = harFlereArbeidsforhold,
+                refusjonskravGyldigFra = refusjonskravGyldigFra
             )
         )
 

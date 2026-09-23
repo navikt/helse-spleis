@@ -51,4 +51,5 @@ internal fun standardInntektsmeldingvalidering(message: JsonMessage, pathPrefix:
     message.require(p("mottattDato"), JsonNode::asLocalDateTime)
     message.interestedIn(p("refusjon.opphoersdato"), JsonNode::asLocalDate)
     message.interestedIn(p("refusjon.beloepPrMnd"), p("begrunnelseForReduksjonEllerIkkeUtbetalt"))
+    message.interestedIn("refusjonskravGyldigFra")
 }

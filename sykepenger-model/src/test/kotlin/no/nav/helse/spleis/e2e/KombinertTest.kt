@@ -76,7 +76,7 @@ internal class KombinertTest : AbstractDslTest() {
             håndterArbeidsgiveropplysningerForForkastetPeriode(2.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null)
             )
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)

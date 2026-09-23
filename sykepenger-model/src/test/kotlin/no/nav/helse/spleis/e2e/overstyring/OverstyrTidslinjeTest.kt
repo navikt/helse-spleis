@@ -330,7 +330,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
                 2.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(10.januar til 25.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null)
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)

@@ -40,6 +40,7 @@ internal class NavNoInntektsmeldingMessage(
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
     private val harFlereArbeidsforhold = packet["harFlereArbeidsforhold"].takeUnless { it.isMissingOrNull() }?.asBoolean() ?: false
+    private val refusjonskravGyldigFra = packet["refusjonskravGyldigFra"].takeUnless { it.isMissingOrNull() }?.asLocalDate()
 
     private val arbeidsgiveropplysninger get() = Arbeidsgiveropplysninger(
         meldingsreferanseId = meldingsporing.id,
@@ -56,6 +57,7 @@ internal class NavNoInntektsmeldingMessage(
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             harFlereArbeidsforhold = harFlereArbeidsforhold,
+            refusjonskravGyldigFra = refusjonskravGyldigFra
         )
     )
 

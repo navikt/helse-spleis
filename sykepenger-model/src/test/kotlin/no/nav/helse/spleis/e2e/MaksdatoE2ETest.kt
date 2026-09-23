@@ -231,10 +231,10 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
         }
         a2 {
             nyPeriode(31.januar til 28.februar)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), OppgittArbeidgiverperiode(listOf(31.januar til 15.februar)))
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), OppgittArbeidgiverperiode(listOf(31.januar til 15.februar)))
         }
         a1 {
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList()), OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)))
+            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)))
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

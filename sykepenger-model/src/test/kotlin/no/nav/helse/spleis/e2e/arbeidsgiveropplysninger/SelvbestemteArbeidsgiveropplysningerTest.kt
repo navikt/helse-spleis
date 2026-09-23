@@ -32,7 +32,7 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 RedusertUtbetaltBeløpIArbeidsgiverperioden(LovligFravaer),
                 OppgittInntekt(INNTEKT * 1.25),
-                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList(), refusjonskravGyldigFra = null)
             )
             assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_8)
         }
@@ -55,7 +55,7 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(beløp = INNTEKT, endringer = emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = INNTEKT, endringer = emptyList(), refusjonskravGyldigFra = null)
             )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar), emptyList())
             assertVarsler(1.vedtaksperiode, RV_AO_3, Varselkode.RV_IV_10)
@@ -75,7 +75,7 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
                     )
                 ),
                 OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(beløp = INNTEKT, endringer = emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = INNTEKT, endringer = emptyList(), refusjonskravGyldigFra = null)
             )
             assertEquals(listOf(
                 2.januar til 3.januar,
@@ -92,7 +92,7 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode,
                 OppgittInntekt(INNTEKT * 1.25),
-                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList(), refusjonskravGyldigFra = null)
             )
             assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_4)
         }
@@ -107,7 +107,7 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 OppgittInntekt(INNTEKT),
                 IkkeUtbetaltArbeidsgiverperiode(begrunnelse = Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening),
-                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList(), refusjonskravGyldigFra = null)
             )
             assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_8)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING)
@@ -124,7 +124,7 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 OppgittInntekt(INNTEKT),
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
-                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList()),
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList(), refusjonskravGyldigFra = null),
             )
             assertVarsler(1.vedtaksperiode, RV_AO_3)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING)

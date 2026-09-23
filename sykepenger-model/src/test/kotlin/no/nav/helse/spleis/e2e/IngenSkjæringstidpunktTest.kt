@@ -268,7 +268,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
-            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList()), Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.februar til 16.februar)))
+            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.februar til 16.februar)))
 
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE)
         }

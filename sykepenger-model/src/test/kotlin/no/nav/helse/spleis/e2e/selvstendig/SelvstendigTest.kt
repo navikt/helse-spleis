@@ -1099,7 +1099,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null)
             )
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }

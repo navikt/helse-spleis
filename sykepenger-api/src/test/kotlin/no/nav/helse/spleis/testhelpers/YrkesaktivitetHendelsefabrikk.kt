@@ -138,6 +138,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         id: UUID = UUID.randomUUID(),
         mottatt: LocalDateTime = LocalDateTime.now(),
         harFlereArbeidsforhold: Boolean = false,
+        refusjonskravGyldigFra: LocalDate? = null
     ) = Arbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
@@ -150,7 +151,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             refusjon = refusjon,
-            harFlereArbeidsforhold = harFlereArbeidsforhold
+            harFlereArbeidsforhold = harFlereArbeidsforhold,
+            refusjonskravGyldigFra = refusjonskravGyldigFra
         )
     )
 
@@ -164,6 +166,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         id: UUID = UUID.randomUUID(),
         mottatt: LocalDateTime = LocalDateTime.now(),
         harFlereArbeidsforhold: Boolean = false,
+        refusjonskravGyldigFra: LocalDate? = null
     ) = KorrigerteArbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
@@ -176,7 +179,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             refusjon = refusjon,
-            harFlereArbeidsforhold = harFlereArbeidsforhold
+            harFlereArbeidsforhold = harFlereArbeidsforhold,
+            refusjonskravGyldigFra = refusjonskravGyldigFra
         )
     )
 
@@ -190,6 +194,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         id: UUID = UUID.randomUUID(),
         mottatt: LocalDateTime = LocalDateTime.now(),
         harFlereArbeidsforhold: Boolean = false,
+        refusjonskravGyldigFra: LocalDate? = null
     ) = SelvbestemteArbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
@@ -202,7 +207,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             refusjon = refusjon,
-            harFlereArbeidsforhold = harFlereArbeidsforhold
+            harFlereArbeidsforhold = harFlereArbeidsforhold,
+            refusjonskravGyldigFra = refusjonskravGyldigFra
         )
     )
 

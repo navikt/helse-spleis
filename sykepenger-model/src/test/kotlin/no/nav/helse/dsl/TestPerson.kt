@@ -272,7 +272,8 @@ internal class TestPerson(
             id: UUID = UUID.randomUUID(),
             mottatt: LocalDateTime = LocalDateTime.now(),
             arbeidsforholdId: String? = null,
-            vedtaksperiodeId: UUID = sisteVedtaksperiode
+            vedtaksperiodeId: UUID = sisteVedtaksperiode,
+            refusjonskravGyldigFra: LocalDate? = null
         ): UUID {
             val opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
                 beregnetInntekt = beregnetInntekt,
@@ -280,7 +281,8 @@ internal class TestPerson(
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 opphørAvNaturalytelser = opphørAvNaturalytelser,
-                harFlereArbeidsforhold = arbeidsforholdId != null
+                harFlereArbeidsforhold = arbeidsforholdId != null,
+                refusjonskravGyldigFra = refusjonskravGyldigFra
             )
             return håndterArbeidsgiveropplysninger(
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -299,7 +301,8 @@ internal class TestPerson(
             id: UUID = UUID.randomUUID(),
             mottatt: LocalDateTime = LocalDateTime.now(),
             arbeidsforholdId: String? = null,
-            vedtaksperiodeId: UUID = sisteVedtaksperiode
+            vedtaksperiodeId: UUID = sisteVedtaksperiode,
+            refusjonskravGyldigFra: LocalDate? = null
         ): UUID {
             val opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
                 beregnetInntekt = beregnetInntekt,
@@ -307,7 +310,8 @@ internal class TestPerson(
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 opphørAvNaturalytelser = opphørAvNaturalytelser,
-                harFlereArbeidsforhold = arbeidsforholdId != null
+                harFlereArbeidsforhold = arbeidsforholdId != null,
+                refusjonskravGyldigFra = refusjonskravGyldigFra
             )
             return håndterKorrigerteArbeidsgiveropplysninger(
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -326,7 +330,8 @@ internal class TestPerson(
             id: UUID = UUID.randomUUID(),
             mottatt: LocalDateTime = LocalDateTime.now(),
             arbeidsforholdId: String? = null,
-            vedtaksperiodeId: UUID = sisteVedtaksperiode
+            vedtaksperiodeId: UUID = sisteVedtaksperiode,
+            refusjonskravGyldigFra: LocalDate? = null
         ): UUID {
             val opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
                 beregnetInntekt = beregnetInntekt,
@@ -334,7 +339,8 @@ internal class TestPerson(
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 opphørAvNaturalytelser = opphørAvNaturalytelser,
-                harFlereArbeidsforhold = arbeidsforholdId != null
+                harFlereArbeidsforhold = arbeidsforholdId != null,
+                refusjonskravGyldigFra = refusjonskravGyldigFra
             )
             return håndterSelvbestemtArbeidsgiveropplysninger(
                 vedtaksperiodeId = vedtaksperiodeId,

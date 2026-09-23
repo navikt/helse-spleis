@@ -45,7 +45,15 @@ import no.nav.helse.oktober
 import no.nav.helse.person.Behandlinger.Behandling.Tilstand.AvsluttetUtenVedtak
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.*
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
@@ -392,7 +400,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
 
         var selvbestemtIm: UUID? = null
         a2 {
-            selvbestemtIm = håndterKorrigerteArbeidsgiveropplysninger(2.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(77.daglig, emptyList()))
+            selvbestemtIm = håndterKorrigerteArbeidsgiveropplysninger(2.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(77.daglig, emptyList(), refusjonskravGyldigFra = null))
             assertBeløpstidslinje(Beløpstidslinje.fra(15.februar til 28.februar, 77.daglig, selvbestemtIm!!.arbeidsgiver), inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje)
         }
 
@@ -472,7 +480,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT * 2),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT * 2, emptyList()),
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT * 2, emptyList(), refusjonskravGyldigFra = null),
             )
 
             assertTrue(korrigertId to 1.vedtaksperiode in observatør.inntektsmeldingHåndtert)
@@ -499,7 +507,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             val im = håndterArbeidsgiveropplysningerForForkastetPeriode(2.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(1.daglig, emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(1.daglig, emptyList(), refusjonskravGyldigFra = null)
             )
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
@@ -644,7 +652,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             håndterArbeidsgiveropplysningerForForkastetPeriode(1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null)
             )
         }
         a1 { assertSisteTilstand(1.vedtaksperiode, AVSLUTTET) }

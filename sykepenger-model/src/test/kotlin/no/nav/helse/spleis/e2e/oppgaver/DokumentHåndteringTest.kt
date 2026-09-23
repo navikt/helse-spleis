@@ -167,7 +167,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             val id = håndterArbeidsgiveropplysningerForForkastetPeriode(1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList())
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null)
             )
             val inntektsmelding = observatør.inntektsmeldingIkkeHåndtert.single()
             assertEquals(id, inntektsmelding)

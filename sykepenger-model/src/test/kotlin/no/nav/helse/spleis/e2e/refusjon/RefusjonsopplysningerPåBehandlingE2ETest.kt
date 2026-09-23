@@ -77,7 +77,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 1.vedtaksperiode,
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 OppgittInntekt(INNTEKT),
-                OppgittRefusjon(INNTEKT, listOf(Refusjonsendring(1.februar, INNTEKT * 0.8), Refusjonsendring(1.mars, INNTEKT * 0.6)))
+                OppgittRefusjon(INNTEKT, listOf(Refusjonsendring(1.februar, INNTEKT * 0.8), Refusjonsendring(1.mars, INNTEKT * 0.6)), refusjonskravGyldigFra = null)
             )
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, arbeidsgiverId.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
             val fremITid = Beløpstidslinje.fra(februar, INNTEKT * 0.8, arbeidsgiverId.arbeidsgiver) + Beløpstidslinje.fra(1.mars.somPeriode(), INNTEKT * 0.6, arbeidsgiverId.arbeidsgiver)
@@ -100,7 +100,7 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 1.vedtaksperiode,
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 OppgittInntekt(INNTEKT),
-                OppgittRefusjon(INNTEKT, listOf(Refusjonsendring(1.februar, INNTEKT * 0.8), Refusjonsendring(1.mars, INNTEKT * 0.6)))
+                OppgittRefusjon(INNTEKT, listOf(Refusjonsendring(1.februar, INNTEKT * 0.8), Refusjonsendring(1.mars, INNTEKT * 0.6)), refusjonskravGyldigFra = null)
             )
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, id.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
             val fremITid = Beløpstidslinje.fra(februar, INNTEKT * 0.8, id.arbeidsgiver) + Beløpstidslinje.fra(1.mars.somPeriode(), INNTEKT * 0.6, id.arbeidsgiver)
