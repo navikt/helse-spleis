@@ -1,21 +1,21 @@
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: AlertmanagerConfig
 metadata:
-  name: team-spleiselaget-alerts-slack
+  name: team-sas-alerts-slack
   namespace: tbd
   labels:
     team: tbd
-    alertmanagerConfig: team-spleiselaget-alerts-slack
+    alertmanagerConfig: team-sas-alerts-slack
 spec:
   receivers:
-    - name: team-spleiselaget-alerts-receiver
+    - name: team-sas-alerts-receiver
       slackConfigs:
         - apiURL:
             key: apiUrl
             name: slack-webhook
-          channel: "#team-spleiselaget-alerts"
-          iconEmoji: ":viggo:"
-          username: "viggo"
+          channel: "#team-sas-alerts"
+          iconEmoji: ":the-captain-speaking:"
+          username: "The captain speaking"
           sendResolved: true
           title: |-
             [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
@@ -50,10 +50,10 @@ spec:
     groupBy:
       - alertname
     matchers:
-      - name: "team_spleiselaget_alerts"
+      - name: "team_sas_alerts"
         matchType: "="
         value: "slack"
     groupInterval: 10s
     groupWait: 5s
-    receiver: team-spleiselaget-alerts-receiver
+    receiver: team-sas-alerts-receiver
     repeatInterval: 30m
