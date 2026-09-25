@@ -5,7 +5,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.BadRequestException
-import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.plugins.callid.callId
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -56,8 +55,6 @@ internal fun Application.personApi(
                                 callId = callId,
                                 meterRegistry = meterRegistry
                             )
-                                ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-
                         call.respond(person)
                     } catch (err: IOException) {
                         logger.warn("callId=$callId Kunne ikke bygge personsnapshot, se i Team Logs for detaljer.")
@@ -89,7 +86,7 @@ private fun hentPerson(
     ident: String,
     callId: String,
     meterRegistry: MeterRegistry
-): ApiPerson? {
+): ApiPerson {
     val snapshot =
         hentPersonSnapshot(
             spekematClient = spekematClient,
@@ -99,7 +96,12 @@ private fun hentPerson(
             callId = callId,
             meterRegistry = meterRegistry
         )
-            ?: return null
+            ?: return ApiPerson(
+                fodselsnummer = ident,
+                arbeidsgivere = emptyList(),
+                dodsdato = null,
+                vilkarsgrunnlag = emptyList()
+            )
     return mapTilPerson(person = snapshot.person, fnr = ident, hendelser = snapshot.hendelser)
 }
 

@@ -9,6 +9,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.mockk.every
 import io.mockk.mockk
+import kotlin.test.assertTrue
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
@@ -25,28 +26,38 @@ import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
 
 internal class PersonApiTest : AbstractSpleisApiTest() {
+    @Test
+    fun `ugyldig fødselsnummer gir 400`() =
+        spleisApiTestApplication {
+            hentPerson("""{"fødselsnummer":"tullball"}""", HttpStatusCode.BadRequest)
+            hentPerson("""{}""", HttpStatusCode.BadRequest)
+        }
 
     @Test
-    fun `ugyldig fødselsnummer gir 400`() = spleisApiTestApplication {
-        hentPerson("""{"fødselsnummer":"tullball"}""", HttpStatusCode.BadRequest)
-        hentPerson("""{}""", HttpStatusCode.BadRequest)
-    }
-
-    @Test
-    fun `person som ikke finnes gir 404`() = spleisApiTestApplication {
-        val body = hentPerson("""{"fødselsnummer":"40440440440"}""", HttpStatusCode.NotFound)
-        val problem = objectMapper.readTree(body)
-        assertEquals(404, problem.path("status").asInt())
-    }
+    fun `person som ikke finnes returnerer en tom person`() =
+        spleisApiTestApplication {
+            val fødselsnummer = "40440440440"
+            val body =
+                hentPerson(
+                    body = """{"fødselsnummer":"$fødselsnummer"}""",
+                    forventetStatus = HttpStatusCode.OK
+                )
+            val person = objectMapper.readTree(body)
+            assertEquals(fødselsnummer, person["fodselsnummer"].asText())
+            assertEquals("[]", person["arbeidsgivere"].toString())
+            assertTrue(person["dodsdato"].isNull)
+            assertEquals("[]", person["vilkarsgrunnlag"].toString())
+        }
 
     @Test
     fun `REST-payloaden for en person har forventet form`() {
         val spekemat = Spekemat()
         observatør = TestObservatør()
-        val eventBus = EventBus().apply {
-            register(spekemat)
-            register(observatør)
-        }
+        val eventBus =
+            EventBus().apply {
+                register(spekemat)
+                register(observatør)
+            }
         person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
 
         val spekematClient = mockk<SpekematClient>()
@@ -63,11 +74,15 @@ internal class PersonApiTest : AbstractSpleisApiTest() {
         }
     }
 
-    private suspend fun TestContext.hentPerson(body: String, forventetStatus: HttpStatusCode): String {
-        val response = client.post("/api/person") {
-            contentType(ContentType.Application.Json)
-            setBody(body)
-        }
+    private suspend fun TestContext.hentPerson(
+        body: String,
+        forventetStatus: HttpStatusCode
+    ): String {
+        val response =
+            client.post("/api/person") {
+                contentType(ContentType.Application.Json)
+                setBody(body)
+            }
         val responseBody = response.bodyAsText()
         assertEquals(forventetStatus, response.status, responseBody)
         return responseBody
