@@ -1,9 +1,6 @@
 package no.nav.helse.spleis.rest
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.github.navikt.tbd_libs.result_object.getOrThrow
-import com.github.navikt.tbd_libs.retry.retryBlocking
-import com.github.navikt.tbd_libs.speed.SpeedClient
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authenticate
@@ -35,7 +32,6 @@ private val fødselsnummerRegex = "\\d{11}".toRegex()
  * REST-endepunktet for personoppslag.
  */
 internal fun Application.personApi(
-    speedClient: SpeedClient,
     spekematClient: SpekematClient,
     hendelseDao: HendelseDao,
     personDao: PersonDao,
@@ -51,12 +47,19 @@ internal fun Application.personApi(
                 val callId = call.callId ?: UUID.randomUUID().toString()
                 withContext(Dispatchers.IO) {
                     try {
-                        val person = hentPerson(speedClient, spekematClient, personDao, hendelseDao, ident, callId, meterRegistry)
-                            ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
+                        val person =
+                            hentPerson(
+                                spekematClient = spekematClient,
+                                personDao = personDao,
+                                hendelseDao = hendelseDao,
+                                ident = ident,
+                                callId = callId,
+                                meterRegistry = meterRegistry
+                            )
+                                ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
 
                         call.respond(person)
-                    }
-                    catch (err: IOException) {
+                    } catch (err: IOException) {
                         logger.warn("callId=$callId Kunne ikke bygge personsnapshot, se i Team Logs for detaljer.")
                         sikkerlogger.warn(
                             "callId=$callId {} Kunne ikke bygge personsnapshot: ${err.javaClass.simpleName} - ${err.message}",
@@ -64,8 +67,7 @@ internal fun Application.personApi(
                             err
                         )
                         call.respond(HttpStatusCode.InternalServerError)
-                    }
-                    catch (err: Exception) {
+                    } catch (err: Exception) {
                         logger.error("callId=$callId Kunne ikke bygge personsnapshot, se i Team Logs for detaljer.")
                         sikkerlogger.error(
                             "callId=$callId {} Kunne ikke bygge personsnapshot: ${err.javaClass.simpleName} - ${err.message}",
@@ -81,7 +83,6 @@ internal fun Application.personApi(
 }
 
 private fun hentPerson(
-    speedClient: SpeedClient,
     spekematClient: SpekematClient,
     personDao: PersonDao,
     hendelseDao: HendelseDao,
@@ -89,9 +90,17 @@ private fun hentPerson(
     callId: String,
     meterRegistry: MeterRegistry
 ): ApiPerson? {
-    val snapshot = hentPersonSnapshot(spekematClient, personDao, hendelseDao, ident, callId, meterRegistry) ?: return null
-    val (_, aktørId) = retryBlocking { speedClient.hentFødselsnummerOgAktørId(ident, callId).getOrThrow() }
-    return mapTilPerson(snapshot.person, ident, aktørId, snapshot.hendelser)
+    val snapshot =
+        hentPersonSnapshot(
+            spekematClient = spekematClient,
+            personDao = personDao,
+            hendelseDao = hendelseDao,
+            fnr = ident,
+            callId = callId,
+            meterRegistry = meterRegistry
+        )
+            ?: return null
+    return mapTilPerson(person = snapshot.person, fnr = ident, hendelser = snapshot.hendelser)
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -9,7 +9,6 @@ dependencies {
     implementation(libs.tbd.naisful.postgres)
     implementation(libs.tbd.azure.token.client.default)
     implementation(libs.tbd.retry)
-    implementation(libs.tbd.speed.client)
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")

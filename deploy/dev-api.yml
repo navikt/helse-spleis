@@ -60,7 +60,6 @@ spec:
         - application: logging
           namespace: nais-system
         - application: spekemat
-        - application: speed-api
   filesFrom:
     - secret: google-sql-helse-spleis-spleis-spleis-api-cf4f5c2c
       mountPath: /var/run/secrets/spleis_sql

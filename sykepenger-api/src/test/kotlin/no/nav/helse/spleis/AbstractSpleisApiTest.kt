@@ -2,9 +2,6 @@ package no.nav.helse.spleis
 
 import com.github.navikt.tbd_libs.naisful.test.TestContext
 import com.github.navikt.tbd_libs.naisful.test.naisfulTestApp
-import com.github.navikt.tbd_libs.result_object.ok
-import com.github.navikt.tbd_libs.speed.IdentResponse
-import com.github.navikt.tbd_libs.speed.SpeedClient
 import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.long
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
@@ -14,7 +11,6 @@ import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -40,28 +36,21 @@ import org.intellij.lang.annotations.Language
  * testdatabase, med en falsk autentisering som alltid slipper igjennom.
  */
 internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
-
-    protected fun speedClient() = mockk<SpeedClient> {
-        every { hentFødselsnummerOgAktørId(any(), any()) } returns IdentResponse(
-            fødselsnummer = UNG_PERSON_FNR,
-            aktørId = "ikke_kult",
-            npid = null,
-            kilde = IdentResponse.KildeResponse.PDL
-        ).ok()
-    }
-
     protected fun spleisApiTestApplication(
-        speedClient: SpeedClient = speedClient(),
         spekematClient: SpekematClient = mockk<SpekematClient>(),
         testdata: (TestDataSource) -> Unit = { },
         testblokk: suspend TestContext.() -> Unit
     ) {
         val testDataSource = databaseContainer.nyTilkobling()
         testdata(testDataSource)
-        lagTestapplikasjon(speedClient = speedClient, spekematClient = spekematClient, testDataSource = testDataSource, testblokk = testblokk)
+        lagTestapplikasjon(spekematClient = spekematClient, testDataSource = testDataSource, testblokk = testblokk)
     }
 
-    private fun lagTestapplikasjon(speedClient: SpeedClient, spekematClient: SpekematClient, testDataSource: TestDataSource, testblokk: suspend TestContext.() -> Unit) {
+    private fun lagTestapplikasjon(
+        spekematClient: SpekematClient,
+        testDataSource: TestDataSource,
+        testblokk: suspend TestContext.() -> Unit
+    ) {
         val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         naisfulTestApp(
             testApplicationModule = {
@@ -75,7 +64,11 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
                     }
                 }
                 val dataSource = testDataSource.ds
-                lagApplikasjonsmodul(speedClient, spekematClient, { dataSource }, meterRegistry)
+                lagApplikasjonsmodul(
+                    spekematClient = spekematClient,
+                    dataSourceProvider = { dataSource },
+                    meterRegistry = meterRegistry
+                )
             },
             objectMapper = objectMapper,
             meterRegistry = meterRegistry,
@@ -99,12 +92,16 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
         }
     }
 
-    protected fun opprettTestdata(eventBus: EventBus): (TestDataSource) -> Unit {
-        return fun(testDataSource: TestDataSource) {
+    protected fun opprettTestdata(eventBus: EventBus): (TestDataSource) -> Unit =
+        fun(testDataSource: TestDataSource) {
             person.håndterSykmelding(eventBus, sykmelding(), Aktivitetslogg())
             person.håndterUtbetalingshistorikkEtterInfotrygdendring(eventBus, utbetalinghistorikk(), Aktivitetslogg())
             person.håndterSøknad(eventBus, søknad(), Aktivitetslogg())
-            val vedtaksperiodeId = eventBus.events.filterIsInstance<EventSubscription.VedtaksperiodeOpprettet>().single().vedtaksperiodeId
+            val vedtaksperiodeId =
+                eventBus.events
+                    .filterIsInstance<EventSubscription.VedtaksperiodeOpprettet>()
+                    .single()
+                    .vedtaksperiodeId
             person.håndterArbeidsgiveropplysninger(
                 eventBus,
                 YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER)).lagArbeidsgiveropplysninger(
@@ -154,23 +151,27 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
                 førsteFraværsdag = FOM
             )
         }
-    }
 
-    protected fun lagrePerson(dataSource: DataSource, fødselsnummer: String, person: Person) {
+    protected fun lagrePerson(
+        dataSource: DataSource,
+        fødselsnummer: String,
+        person: Person
+    ) {
         val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
         dataSource.connection {
             transaction {
                 @Language("PostgreSQL")
                 val opprettPerson = "INSERT INTO person(skjema_versjon, fnr, data) VALUES(:skjemaVersjon, :fnr, :data) RETURNING id"
-                val personId = prepareStatementWithNamedParameters(opprettPerson) {
-                    withParameter("fnr", fødselsnummer.toLong())
-                    withParameter("skjemaVersjon", serialisertPerson.skjemaVersjon)
-                    withParameter("data", serialisertPerson.json)
-                }.use {
-                    it.executeQuery().use { rs ->
-                        rs.single { it.long(1) }
+                val personId =
+                    prepareStatementWithNamedParameters(opprettPerson) {
+                        withParameter("fnr", fødselsnummer.toLong())
+                        withParameter("skjemaVersjon", serialisertPerson.skjemaVersjon)
+                        withParameter("data", serialisertPerson.json)
+                    }.use {
+                        it.executeQuery().use { rs ->
+                            rs.single { it.long(1) }
+                        }
                     }
-                }
 
                 @Language("PostgreSQL")
                 val opprettPersonAlias = "INSERT INTO person_alias (fnr, person_id) VALUES (:fnr, :personId)"
@@ -203,13 +204,20 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
         }
     }
 
-    protected fun lagreInntektsmelding(dataSource: DataSource, fødselsnummer: String, meldingsReferanse: UUID, beregnetInntekt: Inntekt, førsteFraværsdag: LocalDate) {
+    protected fun lagreInntektsmelding(
+        dataSource: DataSource,
+        fødselsnummer: String,
+        meldingsReferanse: UUID,
+        beregnetInntekt: Inntekt,
+        førsteFraværsdag: LocalDate
+    ) {
         lagreHendelse(
             dataSource = dataSource,
             fødselsnummer = fødselsnummer,
             meldingsReferanse = meldingsReferanse,
             meldingstype = HendelseDao.Meldingstype.NAV_NO_INNTEKTSMELDING,
-            data = """
+            data =
+                """
                 {
                     "beregnetInntekt": "$beregnetInntekt",
                     "mottattDato": "${LocalDateTime.now()}",
@@ -217,34 +225,49 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
                     "foersteFravaersdag": "$førsteFraværsdag",
                     "@id": "$meldingsReferanse"
                 }
-            """.trimIndent()
+                """.trimIndent()
         )
     }
 
-    protected fun lagreSykmelding(dataSource: DataSource, fødselsnummer: String, meldingsReferanse: UUID, fom: LocalDate, tom: LocalDate) {
+    protected fun lagreSykmelding(
+        dataSource: DataSource,
+        fødselsnummer: String,
+        meldingsReferanse: UUID,
+        fom: LocalDate,
+        tom: LocalDate
+    ) {
         lagreHendelse(
             dataSource = dataSource,
             fødselsnummer = fødselsnummer,
             meldingsReferanse = meldingsReferanse,
             meldingstype = HendelseDao.Meldingstype.NY_SØKNAD,
-            data = """
+            data =
+                """
                 {
                     "@opprettet": "${LocalDateTime.now()}",
                     "@id": "$meldingsReferanse",
                     "fom": "$fom",
                     "tom": "$tom"
                 }
-            """.trimIndent()
+                """.trimIndent()
         )
     }
 
-    protected fun lagreSøknadNav(dataSource: DataSource, fødselsnummer: String, meldingsReferanse: UUID, fom: LocalDate, tom: LocalDate, sendtNav: LocalDateTime) {
+    protected fun lagreSøknadNav(
+        dataSource: DataSource,
+        fødselsnummer: String,
+        meldingsReferanse: UUID,
+        fom: LocalDate,
+        tom: LocalDate,
+        sendtNav: LocalDateTime
+    ) {
         lagreHendelse(
             dataSource = dataSource,
             fødselsnummer = fødselsnummer,
             meldingsReferanse = meldingsReferanse,
             meldingstype = HendelseDao.Meldingstype.SENDT_SØKNAD_NAV,
-            data = """
+            data =
+                """
                 {
                     "@opprettet": "${LocalDateTime.now()}",
                     "@id": "$meldingsReferanse",
@@ -252,7 +275,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
                     "tom": "$tom",
                     "sendtNav": "$sendtNav"
                 }
-            """.trimIndent()
+                """.trimIndent()
         )
     }
 }

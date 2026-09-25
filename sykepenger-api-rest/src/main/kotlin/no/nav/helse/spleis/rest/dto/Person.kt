@@ -4,11 +4,9 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class ApiPerson(
-    val aktorId: String,
     val fodselsnummer: String,
     val arbeidsgivere: List<ApiArbeidsgiver>,
     val dodsdato: LocalDate?,
-    val versjon: Int,
     val vilkarsgrunnlag: List<ApiVilkarsgrunnlag>
 )
 

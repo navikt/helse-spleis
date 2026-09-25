@@ -1,5 +1,4 @@
 {
-    "aktorId": "ikke_kult",
     "fodselsnummer": "12029240045",
     "arbeidsgivere": [
         {
@@ -567,7 +566,6 @@
         }
     ],
     "dodsdato": null,
-    "versjon": 54,
     "vilkarsgrunnlag": [
         {
             "type": "SpleisVilkarsgrunnlag",
