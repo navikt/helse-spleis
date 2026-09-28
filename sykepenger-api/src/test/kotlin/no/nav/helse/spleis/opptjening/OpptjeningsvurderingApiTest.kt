@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.testdatabase.TestDataSource
 import io.ktor.http.HttpStatusCode
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
@@ -63,12 +64,14 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
               "opptjeningsvurderinger": [
                 {
                   "opptjeningsvurderingId": "b89e2ae5-59e3-388e-98cd-42a8e7350773",
+                  "opprettet": "2022-08-31T09:52:08.494020",
                   "type": "ARBEIDSTAKER",
                   "skjæringstidspunkt": "2018-01-01",
                   "kilde": "INFOTRYGD"
                 },
                 {
                   "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000000",
+                  "opprettet": "<opprettet>",
                   "type": "ARBEIDSTAKER",
                   "skjæringstidspunkt": "2018-04-01",
                   "kilde": "SPLEIS",
@@ -79,6 +82,7 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
                 },
                 {
                   "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000000",
+                  "opprettet": "<opprettet>",
                   "type": "ARBEIDSTAKER",
                   "skjæringstidspunkt": "2018-04-01",
                   "kilde": "SPLEIS",
@@ -131,6 +135,7 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
               "opptjeningsvurderinger": [
                 {
                   "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000000",
+                  "opprettet": "<opprettet>",
                   "skjæringstidspunkt": "2018-04-01",
                   "kilde": "SPLEIS",
                   "type": "SELVSTENDIG"
@@ -152,6 +157,8 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
                 val opptjeningsvurderingId = assertDoesNotThrow { UUID.fromString(opptjeningsvurdering.path("opptjeningsvurderingId").asText()) }
                 spleisOpptjeningsvurderingIder.add(opptjeningsvurderingId)
                 opptjeningsvurdering.put("opptjeningsvurderingId", "00000000-0000-0000-0000-000000000000")
+                assertDoesNotThrow { LocalDateTime.parse(opptjeningsvurdering.path("opprettet").asText()) }
+                opptjeningsvurdering.put("opprettet", "<opprettet>")
             }
             assertEquals(forventetAntall, spleisOpptjeningsvurderingIder.toSet().size)
         }.toString()
