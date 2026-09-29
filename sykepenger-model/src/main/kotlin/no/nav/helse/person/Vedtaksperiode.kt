@@ -1629,6 +1629,7 @@ internal class Vedtaksperiode private constructor(
         avslåtteDagerUtbetaltIInfotrygdObservatør.valider(aktivitetslogg)
         // steg 4.1: lag beregnede behandlinger
         val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
+        val forrigeMaksdato = if (behandlinger.harFattetVedtak()) behandlinger.forrigeBehandling.maksdato.maksdato else null
         lagBeregnetBehandlinger(
             perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor,
             grunnlagsdata = grunnlagsdata,
@@ -1662,6 +1663,9 @@ internal class Vedtaksperiode private constructor(
         when {
             behandlinger.harUtbetalinger() -> tilstand(eventBus, aktivitetslogg, nesteSimuleringtilstand) { aktivitetslogg.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""") }
             else -> tilstand(eventBus, aktivitetslogg, nesteGodkjenningtilstand) { aktivitetslogg.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""") }
+        }
+        if (forrigeMaksdato != null && forrigeMaksdato != behandlinger.maksdato.maksdato) {
+            person.igangsettRevurderingEtterEndretMaksdato(eventBus, ytelser, this, aktivitetslogg)
         }
     }
 

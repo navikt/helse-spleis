@@ -54,6 +54,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.Vedtaksperiode.Companion.SPEILRELATERT
+import no.nav.helse.person.Vedtaksperiode.Companion.igangsettOverstyring
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.Yrkesaktivitet.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Yrkesaktivitet.Companion.avventerSøknad
@@ -594,6 +595,18 @@ class Person private constructor(
 
     private fun igangsettOverstyring(eventBus: EventBus, revurdering: Revurderingseventyr, aktivitetslogg: IAktivitetslogg) {
         yrkesaktiviteter.igangsettOverstyring(eventBus, revurdering, aktivitetslogg)
+        revurdering.sendOverstyringIgangsattEvent(eventBus)
+        ryddOppVilkårsgrunnlag(aktivitetslogg)
+    }
+
+    internal fun igangsettRevurderingEtterEndretMaksdato(eventBus: EventBus, hendelse: Hendelse, vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+        val etterfølgendePerioder = vedtaksperioder {
+            it.periode.start > vedtaksperiode.periode.endInclusive &&
+                it.periode.start <= vedtaksperiode.periode.endInclusive.plusWeeks(26)
+        }
+        if (etterfølgendePerioder.isEmpty()) return
+        val revurdering = Revurderingseventyr.reberegning(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+        etterfølgendePerioder.igangsettOverstyring(eventBus, revurdering, aktivitetslogg)
         revurdering.sendOverstyringIgangsattEvent(eventBus)
         ryddOppVilkårsgrunnlag(aktivitetslogg)
     }

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -29,16 +28,8 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
                 ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2016), 31.desember(2016)))
             )
-            assertForventetFeil(
-                nå = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING)
-                    assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_REVURDERING)
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING)
-                    assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
-                }
-            )
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
         }
     }
 
@@ -50,19 +41,34 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
                 ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2016), 31.desember(2016)))
             )
-            assertForventetFeil(
-                nå = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
-                }
-            )
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
         }
     }
 
     @Test
-    fun `revurdering på tvers av 26 ukers gap pga forskyving av maksdato`() {
+    fun `infotrygdendring revurderer vedtaksperiode som begynner nøyaktig 26 uker etter endringen`() {
+        a1 {
+            nyttVedtak(2.juli(2018) til 31.juli(2018))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
+                ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2018), 1.januar(2018)))
+            )
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
+        }
+    }
+
+    @Test
+    fun `infotrygdendring revurderer ikke vedtaksperiode som begynner mer enn 26 uker etter endringen`() {
+        a1 {
+            nyttVedtak(3.juli(2018) til 31.juli(2018))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
+                ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2018), 1.januar(2018)))
+            )
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+        }
+    }
+
+    @Test
+    fun `endret maksdato revurderer på tvers av 26 uker fra infotrygdendringen`() {
         medMaksSykedager(15) // NB: Setter maksdato til 15 dager for å lettere kunne teste
         a1 {
             nyttVedtak(januar.i(2015)) // Bare for å få inn personen
@@ -83,7 +89,10 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
                 ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 1.desember(2017)))
             )
 
+            assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
+            assertSisteTilstand(3.vedtaksperiode, TilstandType.AVSLUTTET)
             håndterYtelser(2.vedtaksperiode)
+            assertSisteTilstand(3.vedtaksperiode, TilstandType.AVVENTER_REVURDERING)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()

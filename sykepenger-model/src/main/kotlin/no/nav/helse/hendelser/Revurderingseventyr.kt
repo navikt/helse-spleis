@@ -21,7 +21,6 @@ import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Sykdomstidsl
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.VedtaksperiodeData
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Revurderingseventyr private constructor(
     private val hvorfor: RevurderingÅrsak,
@@ -77,7 +76,8 @@ class Revurderingseventyr private constructor(
     }
 
     internal fun erIkkeRelevantFor(vedtaksperiode: Periode): Boolean {
-        return periodeForEndring.starterEtter(vedtaksperiode)
+        return periodeForEndring.starterEtter(vedtaksperiode) ||
+            (hvorfor == RevurderingÅrsak.Infotrygdendring && vedtaksperiode.start > periodeForEndring.start.plusWeeks(26))
     }
 
     internal fun sendOverstyringIgangsattEvent(eventBus: EventBus) {
