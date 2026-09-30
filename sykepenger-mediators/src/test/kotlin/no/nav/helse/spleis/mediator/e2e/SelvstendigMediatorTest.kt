@@ -333,7 +333,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Selvstendig søknad uten forsikring går gjennom til godkjenning`() = Toggle.SelvstendigForsikring.enable {
+    fun `Selvstendig søknad uten forsikring går gjennom til godkjenning`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()

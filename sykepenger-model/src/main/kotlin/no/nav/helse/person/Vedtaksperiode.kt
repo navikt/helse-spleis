@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`1G`
-import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
@@ -1763,18 +1762,15 @@ internal class Vedtaksperiode private constructor(
 
             Selvstendig -> {
                 if (forsikringsvurderingResultat?.harIndividuellForsikring == true) {
-                    if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_6)
-                    else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_6)
+                    aktivitetslogg.varsel(Varselkode.RV_AN_6)
                 }
 
                 if(forsikringsvurderingResultat?.villeHattForsikringOmDenVarBetalt == true){
-                    if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_7)
-                    else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_7)
+                    aktivitetslogg.varsel(Varselkode.RV_AN_7)
                 }
 
                 if(forsikringsvurderingResultat?.harForsikringSomIkkePasserMedSøknadstype == true){
-                    if (Toggle.SelvstendigForsikring.enabled) aktivitetslogg.varsel(Varselkode.RV_AN_8)
-                    else aktivitetslogg.funksjonellFeil(Varselkode.RV_AN_8)
+                    aktivitetslogg.varsel(Varselkode.RV_AN_8)
                 }
 
                 if (forsikringsvurderingResultat?.opphørsdato != null && forsikringsvurderingResultat.opphørsdato in periode) {

@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -25,7 +24,7 @@ import org.junit.jupiter.api.assertNotNull
 internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `Sender event SelvstendigIngenDagerIgjenEvent når bruker går til maks med forsikringsvurderingId når man har forsikring`() = Toggle.SelvstendigForsikring.enable {
+    fun `Sender event SelvstendigIngenDagerIgjenEvent når bruker går til maks med forsikringsvurderingId når man har forsikring`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar(2019), sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar(2019), sykmeldingsgrad = 100)), sendtNav = 1.januar.atStartOfDay(), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()
@@ -292,7 +291,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Sender event SelvstendigUtbetaltEtterVentetid for bruker med forsikring fra dag 1 når vi betaler utover ventetid`() = Toggle.SelvstendigForsikring.enable {
+    fun `Sender event SelvstendigUtbetaltEtterVentetid for bruker med forsikring fra dag 1 når vi betaler utover ventetid`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()
@@ -322,7 +321,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Sender event SelvstendigUtbetaltEtterVentetid bare på første periode når bruker med forsikring fra dag 1 når vi betaler utover ventetid`() = Toggle.SelvstendigForsikring.enable {
+    fun `Sender event SelvstendigUtbetaltEtterVentetid bare på første periode når bruker med forsikring fra dag 1 når vi betaler utover ventetid`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()
@@ -366,7 +365,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Sender ikke event SelvstendigUtbetaltEtterVentetid når bruker ikke har forsikring fra dag 1 når vi betaler utover ventetid`() = Toggle.SelvstendigForsikring.enable {
+    fun `Sender ikke event SelvstendigUtbetaltEtterVentetid når bruker ikke har forsikring fra dag 1 når vi betaler utover ventetid`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 1.februar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()
@@ -405,7 +404,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Sender event SelvstendigUtbetaltEtterVentetid etter periode med kun ventetid`() = Toggle.SelvstendigForsikring.enable {
+    fun `Sender event SelvstendigUtbetaltEtterVentetid etter periode med kun ventetid`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 10.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 10.januar, sykmeldingsgrad = 100)), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()
@@ -449,7 +448,7 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `Sender både SelvstendigIngenDagerIgjenEvent og SelvstendigUtbetaltEtterVentetidEvent når bruker dør iløpet av perioden, men etter ventetiden`() = Toggle.SelvstendigForsikring.enable {
+    fun `Sender både SelvstendigIngenDagerIgjenEvent og SelvstendigUtbetaltEtterVentetidEvent når bruker dør iløpet av perioden, men etter ventetiden`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), sendtNav = 1.januar.atStartOfDay(), ventetid = 1.januar til 16.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendDødsmelding(25.januar)

@@ -3,7 +3,6 @@ package no.nav.helse.spleis.speil
 import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -47,7 +46,7 @@ import org.junit.jupiter.api.Test
 internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
-    fun `Ventetidsdag med forsikring får melding til Nav dag foran som mappes riktig`() = Toggle.SelvstendigForsikring.enable {
+    fun `Ventetidsdag med forsikring får melding til Nav dag foran som mappes riktig`() {
         val søknadId = håndterSøknadSelvstendig(2.januar til 31.januar, 2.januar til 17.januar)
         val forsikringsvurderingId = UUID.randomUUID()
         val overstyringId = UUID.randomUUID()
@@ -108,7 +107,7 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
     }
 
     @Test
-    fun `Ventetidsdag med forsikring mappes riktig`() = Toggle.SelvstendigForsikring.enable {
+    fun `Ventetidsdag med forsikring mappes riktig`() {
         val kildeId = håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
         val forsikringsvurderingId = UUID.randomUUID()
         håndterVilkårsgrunnlag(forsikringsvurderingId = forsikringsvurderingId)

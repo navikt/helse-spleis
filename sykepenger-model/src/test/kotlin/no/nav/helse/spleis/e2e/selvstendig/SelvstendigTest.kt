@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.Year
 import java.util.UUID
 import kotlin.reflect.KClass
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -1154,7 +1153,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `foreslår utbetaling på 80 prosent dekning i ventetid ved denne type forsikring`() = Toggle.SelvstendigForsikring.enable {
+    fun `foreslår utbetaling på 80 prosent dekning i ventetid ved denne type forsikring`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -1195,7 +1194,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `gir varsel om ubetalt forsikring når toggle er på`() = Toggle.SelvstendigForsikring.enable {
+    fun `gir varsel om ubetalt forsikring`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -1223,7 +1222,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `gir varsel om forsikring som ikke passer med søknadstypen når toggle er på`() = Toggle.SelvstendigForsikring.enable {
+    fun `gir varsel om forsikring som ikke passer med søknadstypen`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -1249,7 +1248,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Kaster ut periode når forsikringen opphører inni perioden`() = Toggle.SelvstendigForsikring.enable {
+    fun `Kaster ut periode når forsikringen opphører inni perioden`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -1282,7 +1281,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `godtar forsikring som opphører etter perioden`() = Toggle.SelvstendigForsikring.enable {
+    fun `godtar forsikring som opphører etter perioden`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -1308,7 +1307,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `foreslår utbetaling på 100 prosent fra dag sytten`() = Toggle.SelvstendigForsikring.enable {
+    fun `foreslår utbetaling på 100 prosent fra dag sytten`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -1346,7 +1345,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `foreslår utbetaling på 100 prosent fra dag 1`() = Toggle.SelvstendigForsikring.enable {
+    fun `foreslår utbetaling på 100 prosent fra dag 1`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -1383,7 +1382,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Tillegg av melding til Nav dager før forsikringsdager`() = Toggle.SelvstendigForsikring.enable {
+    fun `Tillegg av melding til Nav dager før forsikringsdager`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -1424,7 +1423,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Melding til Nav dager midt i forsikringsperioden splitter dager Nav overtar ansvar for`() = Toggle.SelvstendigForsikring.enable {
+    fun `Melding til Nav dager midt i forsikringsperioden splitter dager Nav overtar ansvar for`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -1461,96 +1460,6 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertEquals("SSSSMOH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
             assertEquals("VVVVVVV VVVVVVV VVNNNHH NNNNNHH NNN", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
             assertEquals(0.årlig, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.personbeløp(5.januar))
-        }
-    }
-
-    @Test
-    fun `Kaster ut periode med selvstendig forsikring når toggle er av`() {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar)
-            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-
-            håndterYtelserSelvstendig(
-                1.vedtaksperiode,
-                forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                    forsikringsvurderingId = UUID.randomUUID(),
-                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
-                    opphørsdato = null,
-                    harIndividuellForsikring = true,
-                    villeHattForsikringOmDenVarBetalt = false,
-                    harForsikringSomIkkePasserMedSøknadstype = false,
-                )
-            )
-            assertForkastetPeriodeTilstander(
-                1.vedtaksperiode,
-                SELVSTENDIG_START,
-                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                SELVSTENDIG_AVVENTER_HISTORIKK,
-                TIL_INFOTRYGD,
-                varselkode = Varselkode.RV_AN_6
-            )
-        }
-    }
-
-    @Test
-    fun `Kaster ut periode med ubetalt selvstendig forsikring når toggle er av`() {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar)
-            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-
-            håndterYtelserSelvstendig(
-                1.vedtaksperiode,
-                forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                    forsikringsvurderingId = UUID.randomUUID(),
-                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
-                    opphørsdato = null,
-                    harIndividuellForsikring = false,
-                    villeHattForsikringOmDenVarBetalt = true,
-                    harForsikringSomIkkePasserMedSøknadstype = false,
-                )
-            )
-            assertForkastetPeriodeTilstander(
-                1.vedtaksperiode,
-                SELVSTENDIG_START,
-                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                SELVSTENDIG_AVVENTER_HISTORIKK,
-                TIL_INFOTRYGD,
-                varselkode = Varselkode.RV_AN_7
-            )
-        }
-    }
-
-    @Test
-    fun `Kaster ut periode med forsikring som ikke passer med søknadstypen når toggle er av`() {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar)
-            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-
-            håndterYtelserSelvstendig(
-                1.vedtaksperiode,
-                forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                    forsikringsvurderingId = UUID.randomUUID(),
-                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
-                    opphørsdato = null,
-                    harIndividuellForsikring = false,
-                    villeHattForsikringOmDenVarBetalt = false,
-                    harForsikringSomIkkePasserMedSøknadstype = true,
-                )
-            )
-            assertForkastetPeriodeTilstander(
-                1.vedtaksperiode,
-                SELVSTENDIG_START,
-                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                SELVSTENDIG_AVVENTER_HISTORIKK,
-                TIL_INFOTRYGD,
-                varselkode = Varselkode.RV_AN_8
-            )
         }
     }
 

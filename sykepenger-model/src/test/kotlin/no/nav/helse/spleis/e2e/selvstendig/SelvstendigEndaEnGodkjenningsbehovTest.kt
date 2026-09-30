@@ -96,7 +96,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
     }
 
     @Test
-    fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov med hundre prosent forsikring fra dag en`() = Toggle.SelvstendigForsikring.enable {
+    fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov med hundre prosent forsikring fra dag en`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             val forsikringsvurderingId = UUID.randomUUID()
@@ -191,7 +191,7 @@ internal class SelvstendigEndaEnGodkjenningsbehovTest : AbstractDslTest() {
     }
 
     @Test
-    fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov med hundre prosent forsikring fra dag sytten`() = Toggle.SelvstendigForsikring.enable {
+    fun `SelvstendigFaktaavklartInntekt - enda en godkjenningsbehov med hundre prosent forsikring fra dag sytten`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             val forsikringsvurderingId = UUID.randomUUID()

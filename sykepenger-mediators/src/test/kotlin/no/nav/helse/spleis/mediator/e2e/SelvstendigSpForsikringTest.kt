@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `Selvstendig med forsikringsvurdering går videre når forsikring-toggle er enabled`() = Toggle.SelvstendigForsikring.enable {
+    fun `Selvstendig med forsikringsvurdering går videre`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         val forsikringsvurderingId = UUID.randomUUID()
@@ -68,34 +68,6 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
             "SELVSTENDIG_AVVENTER_HISTORIKK",
             "SELVSTENDIG_AVVENTER_SIMULERING",
             "SELVSTENDIG_AVVENTER_GODKJENNING"
-        )
-    }
-
-    @Test
-    fun `Kaster ut selvstendig med forsikringsvurdering når forsikring-toggle er disabled`() = Toggle.SelvstendigForsikring.disable {
-        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
-        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
-        val forsikringsvurderingId = UUID.randomUUID()
-        sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelser(
-            vedtaksperiodeIndeks = 0,
-            forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                forsikringsvurderingId = forsikringsvurderingId,
-                dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
-                opphørsdato = null,
-                harIndividuellForsikring = true,
-                villeHattForsikringOmDenVarBetalt = false,
-                harForsikringSomIkkePasserMedSøknadstype = false,
-            ),
-            orgnummer = "SELVSTENDIG"
-        )
-        assertTilstander(
-            0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "TIL_INFOTRYGD"
         )
     }
 }

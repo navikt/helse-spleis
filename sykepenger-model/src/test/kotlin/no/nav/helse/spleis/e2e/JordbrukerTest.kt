@@ -75,35 +75,33 @@ internal class JordbrukerTest : AbstractDslTest() {
 
     @Test
     fun `jordbruker med ekstra tegnet forsikring har ting på stell`() = Toggle.Jordbruker.enable {
-        Toggle.SelvstendigForsikring.enable {
-            selvstendig {
-                håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
-                håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-                håndterYtelserSelvstendig(
-                    1.vedtaksperiode,
-                    forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                        forsikringsvurderingId = UUID.randomUUID(),
-                        dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
-                        opphørsdato = null,
-                        harIndividuellForsikring = true,
-                        villeHattForsikringOmDenVarBetalt = false,
-                        harForsikringSomIkkePasserMedSøknadstype = false,
-                    )
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelserSelvstendig(
+                1.vedtaksperiode,
+                forsikringsvurderingResultat = ForsikringsvurderingResultat(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
+                    opphørsdato = null,
+                    harIndividuellForsikring = true,
+                    villeHattForsikringOmDenVarBetalt = false,
+                    harForsikringSomIkkePasserMedSøknadstype = false,
                 )
-                håndterSimulering(1.vedtaksperiode)
-                assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            )
+            håndterSimulering(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
 
-                inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
-                    assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
-                    assertEquals(1, utbetalinginspektør.personOppdrag.size)
-                    utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
-                        assertEquals(1.januar til 31.januar, linje.periode)
-                        assertEquals(1771, linje.beløp)
-                        assertEquals(Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk, linje.klassekode)
-                    }
+            inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
+                assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
+                assertEquals(1, utbetalinginspektør.personOppdrag.size)
+                utbetalinginspektør.personOppdrag.single().inspektør.also { linje ->
+                    assertEquals(1.januar til 31.januar, linje.periode)
+                    assertEquals(1771, linje.beløp)
+                    assertEquals(Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk, linje.klassekode)
                 }
-                assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_55, Varselkode.RV_AN_6)
             }
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_SØ_55, Varselkode.RV_AN_6)
         }
     }
 }

@@ -70,8 +70,6 @@ spec:
       value: "true"
     - name: JORDBRUKER
       value: "true"
-    - name: SELVSTENDIG_FORSIKRING
-      value: "true"
     - name: GRADERTE_ANDRE_YTELSER
       value: "true"
     - name: OPPTJENINGSVURDERINGBEHOV
