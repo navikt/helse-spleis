@@ -89,14 +89,14 @@ class Ytelser(
             }
     }
 
-    internal fun andreYtelser() = graderteAndreYtelser.flatMap { graderteAndreYtelserForBeregning -> graderteAndreYtelserForBeregning.graderteAndreYtelserForBeregningPeriodeList }.fold(AndreYtelserTidslinje()) { sammenslått, graderteAndreYtelserForBeregningPeriode ->
-        sammenslått + AndreYtelserTidslinje(graderteAndreYtelserForBeregningPeriode.tilPeriode() to graderteAndreYtelserForBeregningPeriode.grad.prosent)
+    internal fun graderteAndreYtelser() = graderteAndreYtelser.flatMap { graderteAndreYtelserForBeregning -> graderteAndreYtelserForBeregning.graderteAndreYtelserForBeregningPeriodeList }.fold(GraderteAndreYtelserTidslinje()) { sammenslått, graderteAndreYtelserForBeregningPeriode ->
+        sammenslått + GraderteAndreYtelserTidslinje(graderteAndreYtelserForBeregningPeriode.tilPeriode() to graderteAndreYtelserForBeregningPeriode.grad.prosent)
     }
 }
 
 data class GradertPeriode(internal val periode: Periode, internal val grad: Int)
 
-internal class AndreYtelserTidslinje(vararg perioder: Pair<Periode, Prosentdel>): Tidslinje<Prosentdel, AndreYtelserTidslinje>(*perioder) {
-    override fun opprett(vararg perioder: Pair<Periode, Prosentdel>) = AndreYtelserTidslinje(*perioder)
+internal class GraderteAndreYtelserTidslinje(vararg perioder: Pair<Periode, Prosentdel>) : Tidslinje<Prosentdel, GraderteAndreYtelserTidslinje>(*perioder) {
+    override fun opprett(vararg perioder: Pair<Periode, Prosentdel>) = GraderteAndreYtelserTidslinje(*perioder)
     override fun pluss(eksisterendeVerdi: Prosentdel, nyVerdi: Prosentdel) = eksisterendeVerdi + nyVerdi
 }

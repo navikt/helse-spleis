@@ -60,9 +60,9 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             .takeUnless { it.isEmpty() }
             ?.reduce(Periode::plus)
 
-        fun betale(sykepengegrunnlagBegrenset6G: Inntekt, tidslinjer: List<Utbetalingstidslinje>, andreYtelser: (dato: LocalDate) -> Prosentdel): List<Utbetalingstidslinje> {
+        fun betale(sykepengegrunnlagBegrenset6G: Inntekt, tidslinjer: List<Utbetalingstidslinje>, graderteAndreYtelser: (dato: LocalDate) -> Prosentdel): List<Utbetalingstidslinje> {
             return beregnDagForDag(tidslinjer) { dato, økonomiList ->
-                økonomiList.betal(sykepengegrunnlagBegrenset6G, andreYtelser(dato))
+                økonomiList.betal(sykepengegrunnlagBegrenset6G, graderteAndreYtelser(dato))
             }
         }
 

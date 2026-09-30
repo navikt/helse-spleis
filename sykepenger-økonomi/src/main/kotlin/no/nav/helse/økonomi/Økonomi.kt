@@ -50,8 +50,8 @@ data class Økonomi(
             return totalgrad
         }
 
-        fun totalSykdomsgrad(økonomiList: List<Økonomi>, andreYtelser: Prosentdel = 0.prosent): List<Økonomi> {
-            val totalSykdomsgrad = totalGradMedAndreYtelser(økonomiList, Økonomi::sykdomsgrad, andreYtelser)
+        fun totalSykdomsgrad(økonomiList: List<Økonomi>, graderteAndreYtelser: Prosentdel = 0.prosent): List<Økonomi> {
+            val totalSykdomsgrad = totalGradMedGraderteAndreYtelser(økonomiList, Økonomi::sykdomsgrad, graderteAndreYtelser)
             return økonomiList.map { økonomi ->
                 økonomi.copy(totalSykdomsgrad = totalSykdomsgrad)
             }
@@ -59,24 +59,24 @@ data class Økonomi(
 
         fun List<Økonomi>.erUnderGrensen() = none { !it.totalSykdomsgrad.erUnderGrensen() }
 
-        internal fun totalUtbetalingsgrad(økonomiList: List<Økonomi>, andreYtelser: Prosentdel) =
-            totalGradMedAndreYtelser(økonomiList, Økonomi::utbetalingsgrad, andreYtelser)
+        internal fun totalUtbetalingsgrad(økonomiList: List<Økonomi>, graderteAndreYtelser: Prosentdel) =
+            totalGradMedGraderteAndreYtelser(økonomiList, Økonomi::utbetalingsgrad, graderteAndreYtelser)
 
-        private fun totalGradMedAndreYtelser(
+        private fun totalGradMedGraderteAndreYtelser(
             økonomiList: List<Økonomi>,
             gradStrategi: (Økonomi) -> Prosentdel,
-            andreYtelser: Prosentdel
+            graderteAndreYtelser: Prosentdel
         ): Prosentdel {
             val grad = totalGrad(økonomiList, gradStrategi)
-            if (andreYtelser == NullProsent) return grad
+            if (graderteAndreYtelser == NullProsent) return grad
 
             val gradUtenInntektjustering = totalGrad(økonomiList, gradStrategi, INGEN)
             val romForAndreYtelser = HundreProsent - gradUtenInntektjustering
-            return grad - (andreYtelser - romForAndreYtelser)
+            return grad - (graderteAndreYtelser - romForAndreYtelser)
         }
 
-        fun betal(sykepengegrunnlagBegrenset6G: Inntekt, økonomiList: List<Økonomi>, andreYtelser: Prosentdel): List<Økonomi> {
-            val utbetalingsgrad = totalUtbetalingsgrad(økonomiList, andreYtelser)
+        fun betal(sykepengegrunnlagBegrenset6G: Inntekt, økonomiList: List<Økonomi>, graderteAndreYtelser: Prosentdel): List<Økonomi> {
+            val utbetalingsgrad = totalUtbetalingsgrad(økonomiList, graderteAndreYtelser)
             val foreløpig = delteUtbetalinger(økonomiList)
             val fordelt = fordelBeløp(foreløpig, sykepengegrunnlagBegrenset6G, utbetalingsgrad)
             return fordelt.map { it.betal() }
@@ -217,4 +217,4 @@ data class Økonomi(
     )
 }
 
-fun List<Økonomi>.betal(sykepengegrunnlagBegrenset6G: Inntekt, andreYtelser: Prosentdel) = Økonomi.betal(sykepengegrunnlagBegrenset6G, this, andreYtelser)
+fun List<Økonomi>.betal(sykepengegrunnlagBegrenset6G: Inntekt, graderteAndreYtelser: Prosentdel) = Økonomi.betal(sykepengegrunnlagBegrenset6G, this, graderteAndreYtelser)

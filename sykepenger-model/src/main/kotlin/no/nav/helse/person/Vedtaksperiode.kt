@@ -1609,7 +1609,7 @@ internal class Vedtaksperiode private constructor(
 
         val avslåtteDagerUtbetaltIInfotrygdObservatør = AvslåtteDagerUtbetaltIInfotrygdObservatør(infotrygdtidslinje)
 
-        val andreYtelserTidslinje = ytelser.andreYtelser()
+        val graderteAndreYtelserTidslinje = ytelser.graderteAndreYtelser()
         val beregnetTidslinjePerVedtaksperiode = filtrerUtbetalingstidslinjer(
             uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
             harOpptjening = harOpptjening,
@@ -1623,7 +1623,7 @@ internal class Vedtaksperiode private constructor(
             historisktidslinje = historisktidslinje,
             perioderMedMinimumSykdomsgradVurdertOK = person.minimumSykdomsgradsvurdering.perioder,
             regler = person.regler,
-            andreYtelser = { dato -> andreYtelserTidslinje[dato] ?: 0.prosent },
+            graderteAndreYtelser = { dato -> graderteAndreYtelserTidslinje[dato] ?: 0.prosent },
             avslåttDag = avslåtteDagerUtbetaltIInfotrygdObservatør::avslåttDag
         )
         avslåtteDagerUtbetaltIInfotrygdObservatør.valider(aktivitetslogg)

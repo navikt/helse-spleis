@@ -29,9 +29,9 @@ internal fun List<Arbeidsgiverberegning>.avvisMaksimumSykepengerdager(maksdatobe
     return avvisteTidslinjer
 }
 
-internal fun List<Arbeidsgiverberegning>.maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G: Inntekt, andreYtelser: (dato: LocalDate) -> Prosentdel): List<Arbeidsgiverberegning> {
+internal fun List<Arbeidsgiverberegning>.maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G: Inntekt, graderteAndreYtelser: (dato: LocalDate) -> Prosentdel): List<Arbeidsgiverberegning> {
     val betalteTidslinjer = Utbetalingstidslinje
-        .betale(sykepengegrunnlagBegrenset6G, this.map { it.samletTidslinje }, andreYtelser)
+        .betale(sykepengegrunnlagBegrenset6G, this.map { it.samletTidslinje }, graderteAndreYtelser)
         .zip(this) { beregnetTidslinje, arbeidsgiver ->
             arbeidsgiver.copy(
                 vedtaksperioder = arbeidsgiver.vedtaksperioder.map { vedtaksperiode ->
@@ -69,9 +69,9 @@ internal fun List<Arbeidsgiverberegning>.avvisMedlemskap(erMedlemAvFolketrygden:
     return this.avvis(listOf(LocalDate.MIN til LocalDate.MAX), Begrunnelse.ManglerMedlemskap)
 }
 
-internal fun List<Arbeidsgiverberegning>.sykdomsgradsberegning(perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>, andreYtelser: (dato: LocalDate) -> Prosentdel): List<Arbeidsgiverberegning> {
+internal fun List<Arbeidsgiverberegning>.sykdomsgradsberegning(perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>, graderteAndreYtelser: (dato: LocalDate) -> Prosentdel): List<Arbeidsgiverberegning> {
     fun List<Arbeidsgiverberegning>.totalSykdomsgradsberegning(): List<Arbeidsgiverberegning> {
-        return Utbetalingstidslinje.totalSykdomsgrad(this.map { it.samletTidslinje }, andreYtelser)
+        return Utbetalingstidslinje.totalSykdomsgrad(this.map { it.samletTidslinje }, graderteAndreYtelser)
             .zip(this) { beregnetTidslinje, arbeidsgiver ->
                 arbeidsgiver.copy(
                     vedtaksperioder = arbeidsgiver.vedtaksperioder.map { vedtaksperiodeberegning ->

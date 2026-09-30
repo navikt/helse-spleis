@@ -202,7 +202,7 @@ class FiltrerUtbetalingstidslinjerTest {
         erUnderMinsteinntektEtterFylte67: Boolean = false,
         regler: MaksimumSykepengedagerregler = MaksimumSykepengedagerregler.Companion.NormalArbeidstaker,
         historiskTidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
-        andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }
+        graderteAndreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }
     ): List<BeregnetPeriode> {
         val result = filtrerUtbetalingstidslinjer(
             uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
@@ -217,7 +217,7 @@ class FiltrerUtbetalingstidslinjerTest {
             historisktidslinje = historiskTidslinje,
             perioderMedMinimumSykdomsgradVurdertOK = emptySet(),
             regler = regler,
-            andreYtelser = andreYtelser
+            graderteAndreYtelser = graderteAndreYtelser
         )
         return result
     }
