@@ -53,6 +53,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             behov,
             InntekterForSykepengegrunnlag,
             InntekterForOpptjeningsvurdering,
+            Behov.Behovstype.Opptjeningsvurdering,
             Medlemskap,
             Arbeidsforhold
         )
@@ -77,7 +78,8 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             InntekterForOpptjeningsvurdering,
             Medlemskap,
             Arbeidsforhold,
-            Behov.Behovstype.Forsikringsvurdering
+            Behov.Behovstype.Forsikringsvurdering,
+            Behov.Behovstype.Opptjeningsvurdering
         )
         assertMedlemskapdetaljer(behov)
         assertInntekterForSykepengegrunnlagdetaljer(behov)
@@ -101,6 +103,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             InntekterForOpptjeningsvurdering,
             Medlemskap,
             Arbeidsforhold,
+            Behov.Behovstype.Opptjeningsvurdering,
             Behov.Behovstype.Forsikringsvurdering
         )
         assertForsikringsvurderingdetaljer(behov, listOf("JORDBRUKER"))
