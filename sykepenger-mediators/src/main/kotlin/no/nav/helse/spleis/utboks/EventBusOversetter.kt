@@ -627,19 +627,17 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 "spesielleYrkesgrupper" to event.spesielleYrkesgrupper
             )
             ).takeIf { event.yrkesaktivitetssporing.somYrkesaktivitetstype == "SELVSTENDIG" },
-            if (Toggle.OpptjeningsvurderingBehov.enabled) {
-                Behov(
-                    Behov.Behovstype.Opptjeningsvurdering, mapOf(
-                    "skjæringstidspunkt" to event.skjæringstidspunkt,
-                    "arbeidssituasjon" to when (event.yrkesaktivitetssporing) {
-                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "Arbeidsledig"
-                        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> "Arbeidstaker"
-                        Behandlingsporing.Yrkesaktivitet.Frilans -> "Frilans"
-                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SelvstendigNæringsdrivende"
-                    }
-                )
-                )
-            } else null,
+            Behov(
+                Behov.Behovstype.Opptjeningsvurdering, mapOf(
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "arbeidssituasjon" to when (event.yrkesaktivitetssporing) {
+                    Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "Arbeidsledig"
+                    is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> "Arbeidstaker"
+                    Behandlingsporing.Yrkesaktivitet.Frilans -> "Frilans"
+                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SelvstendigNæringsdrivende"
+                }
+            )
+            )
         )
 
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
