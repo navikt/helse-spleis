@@ -1,10 +1,10 @@
-val mainClass = "no.nav.helse.spleis.jobs.AppKt"
+plugins {
+    id("no.nav.sykepenger.deployable")
+}
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
+sykepengerDeployable {
+    mainClass = "no.nav.helse.spleis.jobs.AppKt"
+    imageName = "helse-spleis-jobs"
 }
 
 dependencies {
@@ -19,26 +19,8 @@ dependencies {
     implementation(libs.tbd.sql)
 }
 
-tasks {
-    val copyJars = register("copy-jars") {
-        doLast {
-            configurations.runtimeClasspath.get().forEach {
-                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
-                if (!file.exists())
-                    it.copyTo(file)
-            }
-        }
-    }
-    get("build").finalizedBy(copyJars)
-
-    withType<Jar> {
-        archiveBaseName.set("app")
-
-        manifest {
-            attributes["Main-Class"] = mainClass
-            attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                it.name
-            }
-        }
+tasks.named<Test>("test") {
+    testLogging {
+        events("passed", "skipped", "failed")
     }
 }

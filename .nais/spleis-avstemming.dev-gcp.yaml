@@ -1,0 +1,15 @@
+spec:
+  kafka:
+    pool: nav-dev
+  envFrom:
+    - secret: google-sql-helse-spleis-spleis-spleis-avstemming-038f9535
+  gcp:
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+          name: tbd-dev-7ff9
+        role: roles/cloudsql.client
+  env:
+    - name: DATABASE_INSTANCE
+      value: helse-spleis

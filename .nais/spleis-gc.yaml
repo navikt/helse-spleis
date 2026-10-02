@@ -1,0 +1,20 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  labels:
+    team: tbd
+    db: spleis # trengs bare ifm. 'spleis-db-policy'
+  name: spleis-gc
+  namespace: tbd
+spec:
+  schedule: 0 2 * * SAT
+  accessPolicy:
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
+  env:
+    - name: DATABASE_REGION
+      value: europe-north1
+    - name: RUNTIME_OPTS
+      value: vacuum

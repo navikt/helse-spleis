@@ -1,0 +1,70 @@
+name: main - spleis-opprydding-dev - Bygg, test og deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      # Generelt oppsett - alt unntatt dokumentasjon / urelatert oppsett
+      - '**'
+      - '!**.md'
+      - '!CODEOWNERS'
+      - '!LICENSE'
+      - '!docs/**'
+      - '!.nais/**'
+      - '!.github/workflows/standard-dependabot-auto-merge.yml'
+      - '!.github/workflows/standard-dependency-submission.yml'
+      # Ressursene som deployes av denne workflowen
+      - '.nais/spleis-opprydding-dev.yaml'
+      # Spesielt for denne tjenesten ellers
+      - '!.github/workflows/standard-pr.yml'
+      - '!.github/workflows/main-sykepenger-mediators.yml'
+      - '!.github/workflows/main-sykepenger-api.yml'
+      - '!.github/workflows/main-jobs.yml'
+      - '!sykepenger-api/**'
+      - '!jobs/**'
+  schedule:
+    - cron: '0 4 * * 3'
+      timezone: 'Europe/Oslo'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read # for sarif
+  contents: read
+  security-events: write # push sarif to github security
+  id-token: write # for nais login
+
+jobs:
+  bygg-og-test:
+    name: Bygg og test
+    uses: navikt/sykepenger-github-workflows/.github/workflows/bygg-og-test-med-gradle.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+    permissions:
+      contents: read
+
+  bygg-image:
+    name: Bygg image
+    needs: bygg-og-test
+    uses: navikt/sykepenger-github-workflows/.github/workflows/bygg-modul-image-med-jib.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+    with:
+      modul: sykepenger-opprydding-dev
+    permissions:
+      actions: read # for sarif upload on private repos
+      contents: read
+      id-token: write # for nais login
+      security-events: write # push sarif to github security
+
+  deploy-dev:
+    name: Deploy til dev
+    needs: bygg-image
+    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy-v2.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+    with:
+      manifest: .nais/spleis-opprydding-dev.yaml
+      environment: dev-gcp
+      image: ${{ needs.bygg-image.outputs.image_ref }}
+    permissions:
+      contents: read
+      id-token: write # for nais login

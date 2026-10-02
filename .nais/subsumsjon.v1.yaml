@@ -1,0 +1,18 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: subsumsjon.v1
+  namespace: tbd
+  labels:
+    team: tbd
+spec:
+  config:
+    cleanupPolicy: delete
+    minimumInSyncReplicas: 1
+    partitions: 6
+    replication: 3
+    retentionBytes: -1
+  acl:
+    - team: tbd
+      application: spre-subsumsjon
+      access: read

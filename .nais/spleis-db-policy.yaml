@@ -10,10 +10,6 @@ metadata:
   name: spleis-db-policy
   namespace: tbd
 spec:
-  egress:
-    - to:
-        - ipBlock:
-            cidr: 34.88.185.194/32
   podSelector:
     matchLabels:
       db: spleis

@@ -1,0 +1,29 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: teknisk.v1
+  namespace: tbd
+  labels:
+    team: tbd
+spec:
+  config:
+    cleanupPolicy: delete
+    replication: 3
+    retentionBytes: -1
+    retentionHours: 24
+  acl:
+    - team: tbd
+      application: spleis
+      access: readwrite
+    - team: tbd
+      application: spleis-migrate
+      access: write
+    - team: tbd
+      application: spregulering
+      access: read
+    - team: tbd
+      application: spennende
+      access: readwrite
+    - team: tbd
+      application: sparkel-sykepengeperioder
+      access: read

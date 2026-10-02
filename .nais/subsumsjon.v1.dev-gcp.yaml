@@ -1,0 +1,8 @@
+spec:
+  pool: nav-dev
+  config:
+    retentionHours: 24
+  acl:
+    - team: tbd
+      application: helse-spleis
+      access: write

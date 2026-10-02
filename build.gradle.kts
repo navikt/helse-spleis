@@ -1,60 +1,19 @@
 import java.io.PrintWriter
-import org.gradle.api.artifacts.VersionCatalogsExtension
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
-    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.sykepenger.root)
+    alias(libs.plugins.sykepenger.kotlin) apply false
+    alias(libs.plugins.sykepenger.deployable) apply false
 }
 
 allprojects {
     group = "no.nav.helse"
     version = properties["version"] ?: "local-build"
-
-    // Sett opp repositories basert på om vi kjører i CI eller ikke
-    // Jf. https://github.com/navikt/utvikling/blob/main/docs/teknisk/Konsumere%20biblioteker%20fra%20Github%20Package%20Registry.md
-    repositories {
-        mavenCentral()
-        if (providers.environmentVariable("GITHUB_ACTIONS").orNull == "true") {
-            maven {
-                url = uri("https://maven.pkg.github.com/navikt/maven-release")
-                credentials {
-                    username = "token"
-                    password = providers.environmentVariable("GITHUB_TOKEN").orNull!!
-                }
-            }
-        } else {
-            maven("https://repo.adeo.no/repository/github-package-registry-navikt/")
-        }
-    }
 }
 
 subprojects {
-    apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin="java-library")
-    apply(plugin="java-test-fixtures")
-
-    /*
-        avhengigheter man legger til her blir lagt på -alle- prosjekter.
-        med mindre alle submodulene (modellen, apiet, jobs, osv) har behov for samme avhengighet,
-        bør det heller legges til de enkelte som har behov.
-        Dersom det er flere som har behov så kan det være lurt å legge avhengigheten til
-         dependencyResolutionManagement i settings.gradle.kts
-     */
-    // libs-accessoren fra versjonskatalogen er ikke tilgjengelig inne i allprojects/subprojects-blokker
-    // (kjent Gradle-begrensning), så katalogen hentes eksplisitt her.
-    val versionCatalog = rootProject.the<VersionCatalogsExtension>().named("libs")
-    val testImplementation by configurations
-    val testRuntimeOnly by configurations
-    dependencies {
-        testImplementation(versionCatalog.findLibrary("junit-jupiter").get())
-        testRuntimeOnly(versionCatalog.findLibrary("junit-platform-launcher").get())
-    }
-
-    configure<KotlinJvmProjectExtension> {
-        jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of("21"))
-        }
-    }
+    apply(plugin = "java-library")
+    apply(plugin = "java-test-fixtures")
 
     tasks {
         withType<Jar> {
@@ -63,10 +22,6 @@ subprojects {
 
         withType<Test> {
             maxHeapSize = "6G"
-            useJUnitPlatform()
-            testLogging {
-                events("skipped", "failed")
-            }
         }
     }
 }

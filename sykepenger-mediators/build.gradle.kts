@@ -1,4 +1,11 @@
-val mainClass = "no.nav.helse.AppKt"
+plugins {
+    id("no.nav.sykepenger.deployable")
+}
+
+sykepengerDeployable {
+    mainClass = "no.nav.helse.AppKt"
+    imageName = "helse-spleis-spleis"
+}
 
 dependencies {
     implementation(project(":sykepenger-model"))
@@ -18,25 +25,41 @@ dependencies {
     testImplementation(libs.jsonassert)
 }
 
-val copyJars = tasks.register("copy-jars") {
+// GCP Cloud Profiler-agenten lastes inn via JAVA_TOOL_OPTIONS (-agentpath:/opt/cprof/profiler_java_agent.so) i .nais/spleis.*.yaml
+val cloudProfilerArkiv = layout.buildDirectory.file("cloud-profiler/profiler_java_agent.tar.gz")
+val cloudProfilerRot = layout.buildDirectory.dir("cloud-profiler/root")
+
+val lastNedCloudProfiler = tasks.register("lastNedCloudProfiler") {
+    val arkiv = cloudProfilerArkiv
+    outputs.file(arkiv)
     doLast {
-        configurations.runtimeClasspath.get().forEach {
-            val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
-            if (!file.exists())
-                it.copyTo(file)
+        val fil = arkiv.get().asFile
+        fil.parentFile.mkdirs()
+        uri("https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent.tar.gz").toURL().openStream().use { inn ->
+            fil.outputStream().use { inn.copyTo(it) }
         }
     }
 }
 
-tasks.get("build").finalizedBy(copyJars)
+val pakkUtCloudProfiler = tasks.register<Sync>("pakkUtCloudProfiler") {
+    dependsOn(lastNedCloudProfiler)
+    from(tarTree(resources.gzip(cloudProfilerArkiv))) {
+        include("profiler_java_agent.so")
+    }
+    into(cloudProfilerRot.map { it.dir("opt/cprof") })
+}
 
-tasks.withType<Jar> {
-    archiveBaseName.set("app")
-
-    manifest {
-        attributes["Main-Class"] = mainClass
-        attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-            it.name
+jib {
+    extraDirectories {
+        paths {
+            path {
+                setFrom(cloudProfilerRot)
+                into = "/"
+            }
         }
     }
+}
+
+tasks.matching { it.name in setOf("jib", "jibDockerBuild", "jibBuildTar") }.configureEach {
+    dependsOn(pakkUtCloudProfiler)
 }

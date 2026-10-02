@@ -7,10 +7,7 @@ metadata:
     team: tbd
     db: spleis # trengs bare ifm. 'spleis-db-policy'
 spec:
-  image: {{image}}
   port: 8080
-  ingresses:
-   - https://spleis-api.intern.nav.no
   liveness:
     path: /isalive
     initialDelay: 5
@@ -18,16 +15,6 @@ spec:
     path: /isready
     initialDelay: 5
     periodSeconds: 1
-  resources:
-    limits:
-      memory: 5Gi
-    requests:
-      cpu: 100m
-      memory: 256Mi
-  replicas:
-    min: 2
-    max: 6
-    cpuThresholdPercentage: 75
   gcp:
     permissions:
       - resource:
@@ -43,12 +30,7 @@ spec:
       enabled: true
       claims:
         extra:
-          - "NAVident"
-        groups:
-          - id: "611669fa-de5c-4dc2-a0e8-6041a019992a" # speil-brukere
-          - id: "f787f900-6697-440d-a086-d5bb56e26a9c" # tbd
-          - id: "c0227409-2085-4eb2-b487-c4ba270986a3" # nais-tbd
-          - id: "382f42f4-f46b-40c1-849b-38d6b5a1f639" # sykepenger-spanner
+          - NAVident
   accessPolicy:
     inbound:
       rules:
@@ -61,14 +43,6 @@ spec:
         - application: logging
           namespace: nais-system
         - application: spekemat
-  filesFrom:
-    - secret: google-sql-spleis-spleis-spleis-api-e80c8e59
-      mountPath: /var/run/secrets/spleis_sql
-  env:
-  - name: DATABASE_INSTANCE
-    value: "spleis2"
-  - name: SPEKEMAT_SCOPE
-    value: "api://prod-gcp.tbd.spekemat/.default"
   observability:
     autoInstrumentation:
       enabled: true

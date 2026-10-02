@@ -1,0 +1,55 @@
+spec:
+  pool: nav-dev
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 6
+    retentionHours: 168
+  acl:
+    - team: tbd
+      application: spenn-opprydding-dev
+      access: readwrite
+    - team: tbd
+      application: spinnvill-opprydding-dev
+      access: readwrite
+    - team: tbd
+      application: helse-spleis
+      access: readwrite
+    - team: tbd
+      application: sparkel-sykepengeperioder-mock
+      access: readwrite
+    - team: tbd
+      application: risk-mock
+      access: readwrite
+    - team: tbd
+      application: spleis-testdata
+      access: readwrite
+    - team: tbd
+      application: spleis-opprydding-dev
+      access: readwrite
+    - team: tbd
+      application: spesialist-opprydding-dev
+      access: readwrite
+    - team: tbd
+      application: sparkel-medlemskap-mock
+      access: readwrite
+    - team: tbd
+      application: sparsom-opprydding
+      access: readwrite
+    - team: tbd
+      application: spoogle-opprydding-dev
+      access: readwrite
+    - team: tbd
+      application: spedisjon-opprydding-dev
+      access: readwrite
+    - team: tbd
+      application: spesidaler-opprydding-dev
+      access: readwrite
+    - team: tbd
+      application: sp-forsikring-opprydding-dev
+      access: readwrite
+    - team: tbd
+      application: sp-vilkarsproving-opprydding-dev
+      access: readwrite
+    - team: tbd
+      application: spock-opprydding-dev
+      access: readwrite

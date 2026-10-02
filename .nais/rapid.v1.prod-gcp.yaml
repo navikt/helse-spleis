@@ -1,0 +1,14 @@
+spec:
+  pool: nav-prod
+  config:
+    minimumInSyncReplicas: 2
+    partitions: 24
+    retentionHours: 2160 # 83 dager lagring på treig disk
+    localRetentionHours: 168 # 7 dager lagring på rask disk
+  acl:
+    - team: tbd
+      application: spleis
+      access: readwrite
+    - team: tbd
+      application: spleis-migrate
+      access: readwrite

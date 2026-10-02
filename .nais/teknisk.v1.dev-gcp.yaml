@@ -1,0 +1,5 @@
+spec:
+  pool: nav-dev
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 6

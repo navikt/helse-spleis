@@ -1,0 +1,12 @@
+spec:
+  pool: nav-prod
+  config:
+    minimumInSyncReplicas: 2
+    partitions: 24
+  acl:
+    - team: tbd
+      application: spre-styringsinfo
+      access: read
+    - team: tbd
+      application: spesialist-sidegig
+      access: readwrite

@@ -1,0 +1,5 @@
+spec:
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 34.88.185.194/32

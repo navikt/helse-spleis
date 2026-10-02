@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       image:
-        description: "Full image-navn med tag. Finn det i https://github.com/navikt/helse-spleis/actions/workflows/spleis-jobs.yml -> siste kjøring av Spleis-jobs -> Summary -> build inputs -> tags."
+        description: "Full image-navn med tag. Bygges av https://github.com/navikt/helse-spleis/actions/workflows/main-jobs.yml. Finn det med: kubectl get naisjob spleis-avstemming -n tbd -o jsonpath='{.spec.image}'"
         required: true
         type: string
       cluster:

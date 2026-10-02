@@ -1,20 +1,25 @@
 name: Deploy alerts
+
 on:
   push:
     branches:
       - main
     paths:
       - '.github/workflows/alerts.yml'
-      - 'deploy/prod-alertmanagerconfig.yml'
+      - '.nais/team-sas-alerts-slack.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # for nais login
 
 jobs:
-  apply-alerts:
-    runs-on: ubuntu-latest
+  deploy-prod:
+    name: Deploy til prod
+    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy-v2.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+    with:
+      manifest: .nais/team-sas-alerts-slack.yaml
+      environment: prod-gcp
     permissions:
-      id-token: write
-    steps:
-      - uses: actions/checkout@v6
-      - uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: prod-gcp
-          RESOURCE: deploy/prod-alertmanagerconfig.yml
+      contents: read
+      id-token: write # for nais login

@@ -1,0 +1,24 @@
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # Jobbnavnet må være copilot-setup-steps, ellers plukker Copilot den ikke opp.
+  copilot-setup-steps:
+    name: Sett opp miljø for Copilot
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - uses: navikt/sykepenger-github-workflows/.github/actions/copilot-setup-steps@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+        with:
+          kotlin: true

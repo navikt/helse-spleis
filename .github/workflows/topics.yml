@@ -3,34 +3,38 @@ name: Aiven config for de andre topicene våre
 on:
   push:
     branches:
-    - main
+      - main
     paths:
-    - 'deploy/aiven-teknisk-topic-dev.yml'
-    - 'deploy/aiven-teknisk-topic-prod.yml'
-    - 'deploy/aiven-subsumsjon-topic-dev.yml'
-    - 'deploy/aiven-subsumsjon-topic-prod.yml'
+      - '.github/workflows/topics.yml'
+      - '.nais/teknisk.v1.yaml'
+      - '.nais/teknisk.v1.*.yaml'
+      - '.nais/subsumsjon.v1.yaml'
+      - '.nais/subsumsjon.v1.*.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # for nais login
 
 jobs:
-  deployDev:
-    name: apply dev-gcp
-    runs-on: ubuntu-latest
+  deploy-dev:
+    name: Deploy til dev
+    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy-v2.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+    with:
+      manifest: .nais/teknisk.v1.yaml
+      environment: dev-gcp
+      extra_manifests: .nais/subsumsjon.v1.yaml
     permissions:
-      id-token: write
-    steps:
-      - uses: actions/checkout@v6
-      - uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: dev-gcp
-          RESOURCE: deploy/aiven-teknisk-topic-dev.yml,deploy/aiven-subsumsjon-topic-dev.yml
+      contents: read
+      id-token: write # for nais login
 
-  deployProd:
-    name: apply prod-gcp
-    runs-on: ubuntu-latest
+  deploy-prod:
+    name: Deploy til prod
+    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy-v2.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+    with:
+      manifest: .nais/teknisk.v1.yaml
+      environment: prod-gcp
+      extra_manifests: .nais/subsumsjon.v1.yaml
     permissions:
-      id-token: write
-    steps:
-      - uses: actions/checkout@v6
-      - uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: prod-gcp
-          RESOURCE: deploy/aiven-teknisk-topic-prod.yml,deploy/aiven-subsumsjon-topic-prod.yml
+      contents: read
+      id-token: write # for nais login

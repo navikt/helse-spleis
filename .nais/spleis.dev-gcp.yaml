@@ -1,24 +1,11 @@
-apiVersion: nais.io/v1alpha1
-kind: Application
 metadata:
   name: helse-spleis
-  namespace: tbd
-  labels:
-    team: tbd
 spec:
-  image: {{image}}
-  port: 8080
-  strategy:
-    type: Recreate
   startup:
     path: isready
     initialDelay: 20
     periodSeconds: 5
     failureThreshold: 9
-  liveness:
-    path: isalive
-  readiness:
-    path: isready
   resources:
     limits:
       memory: 1024Mi
@@ -29,16 +16,8 @@ spec:
     min: 1
     max: 1
     cpuThresholdPercentage: 90
-  prometheus:
-    enabled: true
-    path: /metrics
   kafka:
     pool: nav-dev
-  accessPolicy:
-    outbound:
-      rules:
-        - application: logging
-          namespace: nais-system
   gcp:
     sqlInstances:
       - type: POSTGRES_17
@@ -52,16 +31,7 @@ spec:
               - name: spleis-opprydding-dev
               - name: spleis-avstemming
               - name: spleis-migrate
-    permissions:
-      - resource:
-          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
-          kind: Project
-        role: roles/cloudprofiler.agent
   env:
-    - name: KAFKA_RAPID_TOPIC
-      value: tbd.rapid.v1
-    - name: KAFKA_CONSUMER_GROUP_ID
-      value: tbd-spleis-v1
     - name: KAFKA_RESET_POLICY
       value: EARLIEST
     - name: IDENTBYTTE
@@ -73,12 +43,4 @@ spec:
     - name: GRADERTE_ANDRE_YTELSER
       value: "true"
     - name: JAVA_TOOL_OPTIONS
-      value: "-agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-dev-7ff9,-logtostderr,-minloglevel=1"
-  observability:
-    autoInstrumentation:
-      enabled: true
-      runtime: java
-    logging:
-      destinations:
-        - id: elastic
-        - id: loki
+      value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-dev-7ff9,-logtostderr,-minloglevel=1

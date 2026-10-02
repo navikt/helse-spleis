@@ -1,28 +1,26 @@
 version: 2
 updates:
+  # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     commit-message:
       prefix: "⬆️ "
     schedule:
       interval: "daily"
-    # Lager kun pull requests ved sikkerhetsoppdateringer
-    open-pull-requests-limit: 0
+    cooldown:
+      default-days: 7
+      exclude:
+        - "navikt/sykepenger-github-workflows*"
 
-  - package-ecosystem: "docker"
-    directory: "/"
-    commit-message:
-      prefix: "⬆️ "
-    schedule:
-      interval: "daily"
-    # Lager kun pull requests ved sikkerhetsoppdateringer
-    open-pull-requests-limit: 0
-
+  # Maintain dependencies for gradle
   - package-ecosystem: "gradle"
     directory: "/"
     commit-message:
       prefix: "⬆️ "
     schedule:
       interval: "daily"
-    # Lager kun pull requests ved sikkerhetsoppdateringer
-    open-pull-requests-limit: 0
+    cooldown:
+      default-days: 7
+      exclude:
+        - "no.nav.sykepenger.*"
+        - "com.github.navikt.tbd-libs:*"

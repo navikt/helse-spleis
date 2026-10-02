@@ -1,4 +1,11 @@
-val mainClass = "no.nav.helse.spleis.AppKt"
+plugins {
+    id("no.nav.sykepenger.deployable")
+}
+
+sykepengerDeployable {
+    mainClass = "no.nav.helse.spleis.AppKt"
+    imageName = "helse-spleis-api"
+}
 
 dependencies {
     implementation(project(":sykepenger-model"))
@@ -35,35 +42,14 @@ dependencies {
     testImplementation(libs.jsonassert)
 
     testImplementation(libs.tbd.mock.http.client)
-    testImplementation(libs.tbd.signed.jwt.issuer.test)
+    testImplementation(libs.tbd.signed.jwt.issuer.test) {
+        // Jetty-BOM-en fra sykepenger-pluginene gir Jetty 12, så bruk WireMock-varianten for Jetty 12
+        exclude(group = "org.wiremock", module = "wiremock")
+    }
+    testImplementation(libs.wiremock)
 
     testImplementation(libs.spekemat.fabrikk)
 
     // for å kunne gjenopprette personer fra json
     testImplementation(project(":sykepenger-serde"))
-}
-
-tasks {
-    val copyJars = register("copy-jars") {
-        doLast {
-            configurations.runtimeClasspath.get().forEach {
-                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
-                if (!file.exists())
-                    it.copyTo(file)
-            }
-        }
-    }
-    get("build").finalizedBy(copyJars)
-
-    withType<Jar> {
-        archiveBaseName.set("app")
-
-        manifest {
-            attributes["Main-Class"] = mainClass
-            attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                it.name
-            }
-        }
-    }
-
 }

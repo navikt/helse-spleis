@@ -1,0 +1,28 @@
+spec:
+  ingresses:
+    - https://spleis-api.intern.dev.nav.no
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      cpu: 10m
+      memory: 128Mi
+  replicas:
+    min: 1
+    max: 2
+    cpuThresholdPercentage: 70
+  azure:
+    application:
+      tenant: trygdeetaten.no
+      claims:
+        groups:
+          - id: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
+          - id: 216b7219-3906-43c5-8e22-03fb74133b42 # 0000-CA-Speil_Lesetilgang
+  filesFrom:
+    - secret: google-sql-helse-spleis-spleis-spleis-api-cf4f5c2c
+      mountPath: /var/run/secrets/spleis_sql
+  env:
+    - name: DATABASE_INSTANCE
+      value: helse-spleis
+    - name: SPEKEMAT_SCOPE
+      value: api://dev-gcp.tbd.spekemat/.default

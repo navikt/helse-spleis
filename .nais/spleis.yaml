@@ -1,0 +1,41 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  namespace: tbd
+  labels:
+    team: tbd
+spec:
+  port: 8080
+  strategy:
+    type: Recreate
+  liveness:
+    path: isalive
+  readiness:
+    path: isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  accessPolicy:
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
+  gcp:
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+        role: roles/cloudprofiler.agent
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: tbd.rapid.v1
+    - name: KAFKA_CONSUMER_GROUP_ID
+      value: tbd-spleis-v1
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki

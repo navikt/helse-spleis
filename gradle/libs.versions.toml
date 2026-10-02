@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.3.0"
+sykepengerGradlePlugins = "20261001.1657"
 rapids-and-rivers = "2026011411051768385145.e8ebad1177b4"
 postgres = "42.7.7"
 hikari = "6.3.0"
@@ -7,13 +7,12 @@ cloudsql = "1.20.0"
 flyway = "11.5.0"
 logback = "1.5.25"
 logstash = "8.0"
-jackson = "2.18.3"
 tbd-libs = "20260626.0942"
 junit-jupiter = "6.0.2"
 kotlinx-coroutines = "1.9.0"
-ktor = "3.2.3"
 awaitility = "4.2.2"
-mockk = "1.13.17"
+mockk = "1.14.11"
+wiremock = "3.13.2"
 jsonassert = "1.5.3"
 spekemat = "2024.03.07-12.49-d2ad6319"
 spill-av-im-matching = "2026.05.12-11.59-aa0ff460"
@@ -25,9 +24,9 @@ testcontainers = "2.0.5"
 [libraries]
 rapids-and-rivers = { group = "com.github.navikt", name = "rapids-and-rivers", version.ref = "rapids-and-rivers" }
 
-jackson-kotlin = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
-jackson-datatype = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version.ref = "jackson" }
-jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
+jackson-kotlin = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin" }
+jackson-datatype = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310" }
+jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations" }
 
 logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
 logstash = { group = "net.logstash.logback", name = "logstash-logback-encoder", version.ref = "logstash" }
@@ -52,13 +51,14 @@ testcontainers-postgres = { group = "org.testcontainers", name = "testcontainers
 
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
-ktor-serialization-jackson = { group = "io.ktor", name = "ktor-serialization-jackson", version.ref = "ktor" }
-ktor-server-auth = { group = "io.ktor", name = "ktor-server-auth", version.ref = "ktor" }
-ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
-ktor-server-auth-jwt = { group = "io.ktor", name = "ktor-server-auth-jwt", version.ref = "ktor" }
+ktor-serialization-jackson = { group = "io.ktor", name = "ktor-serialization-jackson" }
+ktor-server-auth = { group = "io.ktor", name = "ktor-server-auth" }
+ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio" }
+ktor-server-auth-jwt = { group = "io.ktor", name = "ktor-server-auth-jwt" }
 
 awaitility = { group = "org.awaitility", name = "awaitility", version.ref = "awaitility" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+wiremock = { group = "org.wiremock", name = "wiremock-jetty12", version.ref = "wiremock" }
 jsonassert = { group = "org.skyscreamer", name = "jsonassert", version.ref = "jsonassert" }
 
 spekemat-fabrikk = { group = "com.github.navikt.spekemat", name = "fabrikk", version.ref = "spekemat" }
@@ -67,9 +67,7 @@ syfokafka = { group = "no.nav.helse.flex", name = "sykepengesoknad-kafka", versi
 json-schema-validator = { group = "com.networknt", name = "json-schema-validator", version.ref = "json-schema-validator" }
 commons-codec = { group = "commons-codec", name = "commons-codec", version.ref = "commons-codec" }
 
-junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit-jupiter" }
 junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit-jupiter" }
-junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
 
 [bundles]
 flyway = ["flyway-postgres"]
@@ -78,4 +76,6 @@ jackson = ["jackson-kotlin", "jackson-datatype"]
 logging = ["logback", "logstash"]
 
 [plugins]
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+sykepenger-deployable = { id = "no.nav.sykepenger.deployable", version.ref = "sykepengerGradlePlugins" }
+sykepenger-kotlin = { id = "no.nav.sykepenger.kotlin", version.ref = "sykepengerGradlePlugins" }
+sykepenger-root = { id = "no.nav.sykepenger.root", version.ref = "sykepengerGradlePlugins" }

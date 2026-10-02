@@ -1,0 +1,57 @@
+name: PR - Bygg og test alt
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-pr${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write # for nais login
+
+jobs:
+  bygg-og-test:
+    name: Bygg og test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # for nais login
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
+      - name: NAIS login
+        id: login
+        uses: nais/login@40b72a35a18ddf2ad74b632461139ab838cc2a2f # v0
+        with:
+          team: tbd
+
+      - name: gradlew clean build jibDockerBuild
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ./gradlew clean build jibDockerBuild -Djib.console=plain --build-cache
+
+  dependency-review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high # Fail if introducing high or critical vulnerabilities

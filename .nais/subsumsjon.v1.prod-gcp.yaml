@@ -1,0 +1,8 @@
+spec:
+  pool: nav-prod
+  config:
+    retentionHours: 168
+  acl:
+    - team: tbd
+      application: spleis
+      access: write

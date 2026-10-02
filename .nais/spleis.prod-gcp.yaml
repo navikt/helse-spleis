@@ -1,0 +1,58 @@
+metadata:
+  name: spleis
+spec:
+  liveness:
+    initialDelay: 5
+  readiness:
+    initialDelay: 5
+  resources:
+    limits:
+      memory: 8Gi
+    requests:
+      cpu: 200m
+      memory: 400Mi
+  replicas:
+    min: 8
+    max: 24
+    scalingStrategy:
+      kafka:
+        topic: tbd.rapid.v1
+        consumerGroup: tbd-spleis-v1
+        threshold: 200
+  kafka:
+    pool: nav-prod
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_17
+        diskAutoresize: true
+        pointInTimeRecovery: true
+        diskSize: 250
+        diskType: SSD
+        name: spleis2
+        tier: db-custom-16-20480
+        retainedBackups: 14
+        databases:
+          - name: spleis
+            envVarPrefix: DATABASE
+            users:
+              - name: spleis-api
+              - name: spleis-avstemming
+              - name: spleis-migrate
+        flags:
+          - name: max_connections
+            value: "350"
+          - name: cloudsql.enable_pgaudit
+            value: "true"
+          - name: pgaudit.log
+            value: write,ddl,role
+          - name: pgaudit.log_parameter
+            value: on
+          - name: pgaudit.log_relation
+            value: on
+  env:
+    - name: KAFKA_EXTRA_TOPIC
+      value: tbd.teknisk.v1
+    - name: KAFKA_RESET_POLICY
+      value: NONE
+    - name: JAVA_TOOL_OPTIONS
+      value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-prod-eacd,-logtostderr,-minloglevel=1

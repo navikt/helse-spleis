@@ -1,4 +1,5 @@
 plugins {
+    id("no.nav.sykepenger.kotlin")
     `maven-publish`
 }
 
