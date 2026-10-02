@@ -1,6 +1,6 @@
 [versions]
 sykepengerGradlePlugins = "20261001.1830"
-rapids-and-rivers = "2026011411051768385145.e8ebad1177b4"
+rapids-and-rivers = "2026091610031789545782"
 postgres = "42.7.12"
 hikari = "6.3.0"
 cloudsql = "1.20.0"
