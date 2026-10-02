@@ -91,6 +91,22 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
+    fun `påminnelse i avventer inntektsmelding sender ut forespørselen på nytt`() {
+        a1 {
+            håndterSøknad(januar)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            val forespørsler = { observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode } }
+            val opprinneligForespørsel = forespørsler().single()
+            assertEquals(1, forespørsler().size)
+
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertEquals(2, forespørsler().size)
+            assertEquals(opprinneligForespørsel, forespørsler().last())
+        }
+    }
+
+    @Test
     fun `Ved 16 egenmeldingsdager i søknad, etterfulgt av lite gap før søknadsperioden, så bør det bes om AGP`() {
         a1 {
             håndterSøknad(18.januar til 10.februar, egenmeldinger = listOf(1.januar til 16.januar))
