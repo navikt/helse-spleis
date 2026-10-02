@@ -1,7 +1,7 @@
 [versions]
 sykepengerGradlePlugins = "20261001.1830"
 rapids-and-rivers = "2026011411051768385145.e8ebad1177b4"
-postgres = "42.7.7"
+postgres = "42.7.12"
 hikari = "6.3.0"
 cloudsql = "1.20.0"
 flyway = "11.5.0"
