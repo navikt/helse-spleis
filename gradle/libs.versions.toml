@@ -1,5 +1,5 @@
 [versions]
-sykepengerGradlePlugins = "20261001.1657"
+sykepengerGradlePlugins = "20261001.1830"
 rapids-and-rivers = "2026011411051768385145.e8ebad1177b4"
 postgres = "42.7.7"
 hikari = "6.3.0"
