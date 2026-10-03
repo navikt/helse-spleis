@@ -1,24 +1,24 @@
 version: 2
-updates:
-  # Maintain dependencies for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    commit-message:
-      prefix: "⬆️ "
+multi-ecosystem-groups:
+  dependencies:
     schedule:
       interval: "daily"
+    commit-message:
+      prefix: "⬆️ "
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    multi-ecosystem-group: "dependencies"
+    patterns: ["*"]
     cooldown:
       default-days: 7
       exclude:
         - "navikt/sykepenger-github-workflows*"
 
-  # Maintain dependencies for gradle
   - package-ecosystem: "gradle"
     directory: "/"
-    commit-message:
-      prefix: "⬆️ "
-    schedule:
-      interval: "daily"
+    multi-ecosystem-group: "dependencies"
+    patterns: ["*"]
     cooldown:
       default-days: 7
       exclude:
