@@ -1,13 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import java.util.UUID
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.TestPerson
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -21,25 +14,9 @@ import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -48,9 +25,9 @@ import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import java.util.*
 
 internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
-
     @Test
     fun `ag2 strekkes tilbake før ag1 - ag2 er i utgangspunktet innenfor agp`() {
         a1 {
@@ -386,7 +363,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
         a1 { håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent)) }
         a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
         a2 { håndterArbeidsgiveropplysninger(listOf(2.januar til 17.januar), vedtaksperiodeId = 1.vedtaksperiode) }
-        a2 { observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class) }
+        a2 { observatør.assertEtterspurteArbeidsgiveropplysninger(2.vedtaksperiode, EventSubscription.Refusjon::class) }
 
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE) }
         a2 {
@@ -395,7 +372,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
         }
         a2 {
             håndterArbeidsgiveropplysninger(
-                listOf(2.januar til 17.januar)
+                listOf(2.januar til 17.januar),
             )
         }
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING) }
@@ -436,7 +413,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
         a2 { håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent)) }
         a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode) }
         a2 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode) }
-        a2 { observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class) }
+        a2 { observatør.assertEtterspurteArbeidsgiveropplysninger(2.vedtaksperiode, EventSubscription.Refusjon::class) }
 
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
         a2 {

@@ -15,22 +15,15 @@ import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class ForlengelseFraInfotrygdTest : AbstractDslTest() {
-
     @Test
     fun `forkaster ikke førstegangsbehandling selv om det er lagret inntekter i IT`() {
         a1 {
-
             håndterUtbetalingshistorikkEtterInfotrygdendring()
             håndterSøknad(januar)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -47,7 +40,11 @@ internal class ForlengelseFraInfotrygdTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(18.mars, 31.mars))
             håndterSøknad(Sykdom(18.mars, 31.mars, 100.prosent))
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
-            observatør.assertEtterspurt(1.vedtaksperiode, EventSubscription.Inntekt::class, EventSubscription.Refusjon::class)
+            observatør.assertEtterspurteArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                EventSubscription.Inntekt::class,
+                EventSubscription.Refusjon::class,
+            )
 
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
@@ -78,7 +75,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractDslTest() {
     fun `forlenger utbetaling i Infotrygd på samme arbeidsgiver`() {
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+                utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar)),
             )
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterSøknad(februar)
@@ -103,7 +100,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractDslTest() {
     fun `bare ferie - etter infotrygdutbetaling`() {
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 31.desember(2017))
+                ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 31.desember(2017)),
             )
             håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))

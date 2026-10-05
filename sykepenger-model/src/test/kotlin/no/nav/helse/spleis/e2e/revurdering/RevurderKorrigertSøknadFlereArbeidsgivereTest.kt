@@ -13,40 +13,28 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
-import no.nav.helse.sykdomstidslinje.Dag.Feriedag
-import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
 import no.nav.helse.økonomi.inspectors.inspektør
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 
 internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest() {
-
     @Test
     fun `Korrigerende søknad hos en arbeidsgiver - setter i gang revurdering`() {
         listOf(a1, a2).nyeVedtak(januar)
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 50.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
@@ -157,7 +145,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             (17..31).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
         a2 {
@@ -165,7 +158,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
-
         }
     }
 
@@ -183,7 +175,11 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars))
             håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
-            observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
+            observatør.assertEtterspurteArbeidsgiveropplysninger(
+                2.vedtaksperiode,
+                EventSubscription.Refusjon::class,
+                EventSubscription.Arbeidsgiverperiode::class,
+            )
             håndterArbeidsgiveropplysninger(listOf(24.februar til 11.mars), beregnetInntekt = INNTEKT)
         }
         a2 {
@@ -217,15 +213,21 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertEquals(
                 21,
-                inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Sykedag::class]
+                inspektør.sykdomstidslinje
+                    .subset(januar)
+                    .inspektør.dagteller[Sykedag::class],
             )
             assertEquals(
                 2,
-                inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Feriedag::class]
+                inspektør.sykdomstidslinje
+                    .subset(januar)
+                    .inspektør.dagteller[Feriedag::class],
             )
             assertEquals(
                 8,
-                inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[SykHelgedag::class]
+                inspektør.sykdomstidslinje
+                    .subset(januar)
+                    .inspektør.dagteller[SykHelgedag::class],
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -372,7 +374,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
             (17..31).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -385,7 +392,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
             (17..31).forEach {
-                assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    100.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
     }
@@ -478,7 +490,11 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars))
             håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
-            observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
+            observatør.assertEtterspurteArbeidsgiveropplysninger(
+                2.vedtaksperiode,
+                EventSubscription.Refusjon::class,
+                EventSubscription.Arbeidsgiverperiode::class,
+            )
             håndterArbeidsgiveropplysninger(listOf(24.februar til 11.mars), beregnetInntekt = INNTEKT)
         }
         a2 {
@@ -532,7 +548,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             (10..25).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.februar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -601,7 +622,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterSykmelding(Sykmeldingsperiode(10.februar, 10.mars))
             håndterSøknad(Sykdom(10.februar, 10.mars, 100.prosent))
-            observatør.assertEtterspurt(2.vedtaksperiode, EventSubscription.Refusjon::class)
+            observatør.assertEtterspurteArbeidsgiveropplysninger(2.vedtaksperiode, EventSubscription.Refusjon::class)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         }
         a2 {
@@ -651,7 +672,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             (10..25).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.februar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -691,10 +717,20 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
             (17..31).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
             (10..28).forEach {
-                assertEquals(100.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+                assertEquals(
+                    100.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(2.vedtaksperiode)[it.februar]
+                        .økonomi.inspektør.grad,
+                )
             }
             assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
         }
@@ -706,7 +742,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -715,7 +751,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
                 assertEquals(2, utbetalinger.size)
@@ -731,7 +767,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.fridagTeller)
 
             (17..29).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -746,7 +787,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
@@ -754,7 +795,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
                 assertEquals(2, utbetalinger.size)
@@ -770,7 +811,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.fridagTeller)
 
             (17..29).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -785,13 +831,13 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent),
-                Ferie(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -805,7 +851,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.fridagTeller)
 
             (17..29).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -832,7 +883,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             (17..31).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
 
@@ -844,7 +900,12 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             (17..31).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+                assertEquals(
+                    50.prosent,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[it.januar]
+                        .økonomi.inspektør.grad,
+                )
             }
         }
     }

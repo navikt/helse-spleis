@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import java.time.LocalDate
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
@@ -10,22 +9,19 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.lørdag
 import no.nav.helse.mandag
-import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.person.tilstandsmaskin.TilstandType.*
-import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
+import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
-internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest: AbstractDslTest() {
-
+internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest : AbstractDslTest() {
     @Test
     fun `Utbetalt fra første dag i Infotrygd`() {
         assertEquals(
             emptyList<Periode>(),
-            arbeidsgiverperiodeVed(vedtaksperiode = januar, infotrygdutbetaling = 1.januar)
+            arbeidsgiverperiodeVed(vedtaksperiode = januar, infotrygdutbetaling = 1.januar),
         )
         a1 {
             assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
@@ -37,7 +33,7 @@ internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest: AbstractDslTest() 
     fun `Utbetalt fra andre dag i Infotrygd`() {
         assertEquals(
             listOf(1.januar.somPeriode()),
-            arbeidsgiverperiodeVed(vedtaksperiode = januar, infotrygdutbetaling = 2.januar)
+            arbeidsgiverperiodeVed(vedtaksperiode = januar, infotrygdutbetaling = 2.januar),
         )
     }
 
@@ -45,7 +41,7 @@ internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest: AbstractDslTest() 
     fun `Vedtaksperiode starter på lørdag, Infotrygd utbetaler fra mandag`() {
         assertEquals(
             listOf(6.januar til 7.januar),
-            arbeidsgiverperiodeVed(vedtaksperiode = lørdag(6.januar) til 31.januar, infotrygdutbetaling = mandag(8.januar))
+            arbeidsgiverperiodeVed(vedtaksperiode = lørdag(6.januar) til 31.januar, infotrygdutbetaling = mandag(8.januar)),
         )
     }
 
@@ -56,7 +52,7 @@ internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest: AbstractDslTest() 
         assertEquals(15, infotrygdutbetaling.somPeriode().periodeMellom(vedtaksperiode.start)?.count())
         assertEquals(
             emptyList<Periode>(),
-            arbeidsgiverperiodeVed(vedtaksperiode, infotrygdutbetaling)
+            arbeidsgiverperiodeVed(vedtaksperiode, infotrygdutbetaling),
         )
     }
 
@@ -67,14 +63,18 @@ internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest: AbstractDslTest() 
         assertEquals(16, infotrygdutbetaling.somPeriode().periodeMellom(vedtaksperiode.start)?.count())
         assertEquals(
             listOf(18.januar til 2.februar),
-            arbeidsgiverperiodeVed(vedtaksperiode, infotrygdutbetaling)
+            arbeidsgiverperiodeVed(vedtaksperiode, infotrygdutbetaling),
         )
     }
 
-    private fun arbeidsgiverperiodeVed(vedtaksperiode: Periode, infotrygdutbetaling: LocalDate): List<Periode> = a1 {
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(orgnummer, infotrygdutbetaling, infotrygdutbetaling))
-        val vedtaksperiodeId = håndterSøknad(vedtaksperiode)!!
-        if (vedtaksperiode.overlapperMed(infotrygdutbetaling.somPeriode())) assertVarsler(vedtaksperiodeId, RV_IT_3)
-        inspektør.venteperiode(vedtaksperiodeId)
-    }
+    private fun arbeidsgiverperiodeVed(
+        vedtaksperiode: Periode,
+        infotrygdutbetaling: LocalDate,
+    ): List<Periode> =
+        a1 {
+            håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(orgnummer, infotrygdutbetaling, infotrygdutbetaling))
+            val vedtaksperiodeId = håndterSøknad(vedtaksperiode)!!
+            if (vedtaksperiode.overlapperMed(infotrygdutbetaling.somPeriode())) assertVarsler(vedtaksperiodeId, RV_IT_3)
+            inspektør.venteperiode(vedtaksperiodeId)
+        }
 }

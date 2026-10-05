@@ -1,92 +1,40 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
-import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.april
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Arbeidstakerkilde
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.TestPerson
-import no.nav.helse.dsl.UNG_PERSON_FNR_2018
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
-import no.nav.helse.februar
-import no.nav.helse.fredag
+import no.nav.helse.*
+import no.nav.helse.dsl.*
+import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.*
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.StreikEllerLockout
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon.Refusjonsendring
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OpphørAvNaturalytelser
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
-import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.mandag
-import no.nav.helse.mars
-import no.nav.helse.november
-import no.nav.helse.oktober
 import no.nav.helse.person.DokumentType
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.EventSubscription.Arbeidsgiverperiode
-import no.nav.helse.person.EventSubscription.Inntekt
-import no.nav.helse.person.EventSubscription.Refusjon
+import no.nav.helse.person.EventSubscription.*
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.*
 
 internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
-
     @Test
     fun `Arbeidsgiver opplyser om endret agp i forhold til initielt beregnet agp - ingen av dagene ligger i perioden som har spurt om opplysninger`() {
         a1 {
@@ -190,7 +138,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 2.vedtaksperiode,
                 OppgittArbeidgiverperiode(arbeidsgiverperioden),
                 OppgittInntekt(INNTEKT),
-                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null)
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
             )
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
@@ -233,13 +181,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             val kilde1 = Kilde(MeldingsreferanseId(id1), ARBEIDSGIVER, LocalDateTime.now())
             assertBeløpstidslinje(
                 Beløpstidslinje.fra(1.februar.somPeriode(), 0.daglig, kilde1),
-                inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().getValue(1.januar)
+                inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().getValue(1.januar),
             )
             val id2 = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittRefusjon(INNTEKT, endringer = listOf(Refusjonsendring(2.februar, 0.daglig)), refusjonskravGyldigFra = null))
             val kilde2 = Kilde(MeldingsreferanseId(id2), ARBEIDSGIVER, LocalDateTime.now())
             assertBeløpstidslinje(
                 Beløpstidslinje.fra(1.februar.somPeriode(), INNTEKT, kilde2) + Beløpstidslinje.fra(2.februar.somPeriode(), 0.daglig, kilde2),
-                inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().getValue(1.januar)
+                inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().getValue(1.januar),
             )
         }
     }
@@ -251,23 +199,25 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.clear()
             håndterSøknad(Sykdom(17.februar, 28.februar, 100.prosent), egenmeldinger = listOf(10.februar.somPeriode()))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            val forventet = EventSubscription.TrengerArbeidsgiveropplysningerEvent(
-                EventSubscription.TrengerArbeidsgiveropplysninger(
-                    personidentifikator = UNG_PERSON_FNR_2018,
-                    arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                    vedtaksperiodeId = 2.vedtaksperiode,
-                    skjæringstidspunkt = 17.februar,
-                    sykmeldingsperioder = listOf(17.februar til 28.februar),
-                    egenmeldingsperioder = listOf(10.februar.somPeriode()),
-                    førsteFraværsdager = listOf(
-                        EventSubscription.FørsteFraværsdag(
-                            arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                            førsteFraværsdag = 17.februar
-                        )
+            val forventet =
+                EventSubscription.TrengerArbeidsgiveropplysningerEvent(
+                    EventSubscription.TrengerArbeidsgiveropplysninger(
+                        personidentifikator = UNG_PERSON_FNR_2018,
+                        arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                        vedtaksperiodeId = 2.vedtaksperiode,
+                        skjæringstidspunkt = 17.februar,
+                        sykmeldingsperioder = listOf(17.februar til 28.februar),
+                        egenmeldingsperioder = listOf(10.februar.somPeriode()),
+                        førsteFraværsdager =
+                            listOf(
+                                EventSubscription.FørsteFraværsdag(
+                                    arbeidstaker = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                                    førsteFraværsdag = 17.februar,
+                                ),
+                            ),
+                        forespurteOpplysninger = setOf(Inntekt, Refusjon),
                     ),
-                    forespurteOpplysninger = setOf(Inntekt, Refusjon)
                 )
-            )
             assertEquals(forventet, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.singleOrNull())
         }
     }
@@ -340,12 +290,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 OppgittArbeidgiverperiode(listOf(1.februar til 16.februar)),
                 OppgittInntekt(INNTEKT),
-                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null)
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
             )
             assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAA", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             håndterKorrigerteArbeidsgiveropplysninger(
                 1.vedtaksperiode,
-                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar))
+                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
             )
             assertVarsler(1.vedtaksperiode, RV_IM_24, RV_IM_3)
         }
@@ -355,22 +305,36 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `oppgir refusjonopplysninger frem i tid, og så ombestemmer de seg`() {
         a1 {
             håndterSøknad(januar)
-            val arbeidsgiver1 = håndterArbeidsgiveropplysninger(
-                1.vedtaksperiode,
-                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
-                OppgittInntekt(25_000.månedlig),
-                OppgittRefusjon(25_000.månedlig, listOf(Refusjonsendring(1.februar, INGEN)), refusjonskravGyldigFra = null)
-            )
+            val arbeidsgiver1 =
+                håndterArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                    OppgittInntekt(25_000.månedlig),
+                    OppgittRefusjon(25_000.månedlig, listOf(Refusjonsendring(1.februar, INGEN)), refusjonskravGyldigFra = null),
+                )
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver1.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
-            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), INGEN, arbeidsgiver1.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().values.single())
-
-            val arbeidsgiver2 = håndterKorrigerteArbeidsgiveropplysninger(
-                1.vedtaksperiode,
-                OppgittRefusjon(25_000.månedlig, emptyList(), refusjonskravGyldigFra = null)
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(1.februar.somPeriode(), INGEN, arbeidsgiver1.arbeidsgiver),
+                inspektør.ubrukteRefusjonsopplysninger
+                    .refusjonsrester()
+                    .values
+                    .single(),
             )
+
+            val arbeidsgiver2 =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittRefusjon(25_000.månedlig, emptyList(), refusjonskravGyldigFra = null),
+                )
 
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
-            assertBeløpstidslinje(Beløpstidslinje.fra(1.februar.somPeriode(), 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().values.single())
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(1.februar.somPeriode(), 25_000.månedlig, arbeidsgiver2.arbeidsgiver),
+                inspektør.ubrukteRefusjonsopplysninger
+                    .refusjonsrester()
+                    .values
+                    .single(),
+            )
         }
     }
 
@@ -472,7 +436,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `oppgir at de ikke har utbetalt arbeidsgiverperioden på kort periode`() {
         a1 {
             håndterSøknad(Sykdom(3.januar, 18.januar, 69.prosent), egenmeldinger = listOf(1.januar til 2.januar))
-            observatør.assertEtterspurt(1.vedtaksperiode, Inntekt::class, Refusjon::class, Arbeidsgiverperiode::class)
+            observatør.assertEtterspurteArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                Inntekt::class,
+                Refusjon::class,
+                Arbeidsgiverperiode::class,
+            )
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), listOf(1.januar til 2.januar))
             assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
@@ -481,7 +450,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar))
             assertEquals(listOf(3.januar til 18.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
-            assertTrue(inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.filterIsInstance<Dag.Sykedag>().all { it.grad == 69.prosent })
+            assertTrue(
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .sykdomstidslinje
+                    .filterIsInstance<Dag.Sykedag>()
+                    .all { it.grad == 69.prosent },
+            )
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
@@ -531,7 +506,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittInntekt(INNTEKT),
                 OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
                 OppgittArbeidgiverperiode(listOf(1.januar til 6.januar, 10.januar til 15.januar, 20.januar til 23.januar)),
-                RedusertUtbetaltBeløpIArbeidsgiverperioden(ManglerOpptjening)
+                RedusertUtbetaltBeløpIArbeidsgiverperioden(ManglerOpptjening),
             )
             assertEquals("SSSSSHR AASSSHH SAAAAHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertEquals(listOf(1.januar til 6.januar, 10.januar til 15.januar, 20.januar til 23.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
@@ -552,7 +527,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittInntekt(INNTEKT),
                 OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
                 OppgittArbeidgiverperiode(listOf(1.januar til 6.januar, 10.januar til 15.januar)),
-                UtbetaltDelerAvArbeidsgiverperioden(ManglerOpptjening, 15.januar)
+                UtbetaltDelerAvArbeidsgiverperioden(ManglerOpptjening, 15.januar),
             )
             assertEquals("SSSSSHR AASSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertEquals(listOf(16.januar til 19.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
@@ -603,7 +578,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittInntekt(INNTEKT),
                 OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
                 OppgittArbeidgiverperiode(listOf(5.januar til 20.januar)),
-                RedusertUtbetaltBeløpIArbeidsgiverperioden(ManglerOpptjening)
+                RedusertUtbetaltBeløpIArbeidsgiverperioden(ManglerOpptjening),
             )
             assertEquals("AAAASHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertEquals(listOf(5.januar til 20.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
@@ -665,9 +640,24 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertEquals(agp, inspektør.venteperiode(1.vedtaksperiode))
             assertEquals(agp, inspektør.venteperiode(2.vedtaksperiode))
             val forespørselFebruar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode }
-            assertEquals(0, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Arbeidsgiverperiode>().size)
-            assertEquals(0, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Inntekt>().size)
-            assertEquals(1, forespørselFebruar.opplysninger.forespurteOpplysninger.filterIsInstance<Refusjon>().size)
+            assertEquals(
+                0,
+                forespørselFebruar.opplysninger.forespurteOpplysninger
+                    .filterIsInstance<Arbeidsgiverperiode>()
+                    .size,
+            )
+            assertEquals(
+                0,
+                forespørselFebruar.opplysninger.forespurteOpplysninger
+                    .filterIsInstance<Inntekt>()
+                    .size,
+            )
+            assertEquals(
+                1,
+                forespørselFebruar.opplysninger.forespurteOpplysninger
+                    .filterIsInstance<Refusjon>()
+                    .size,
+            )
         }
         a1 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
@@ -688,29 +678,31 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `dokumentsporing fra inntektsmelding`() {
         a1 {
             håndterSøknad(januar)
-            val id = håndterArbeidsgiveropplysninger(
-                1.vedtaksperiode,
-                OppgittInntekt(INNTEKT),
-                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
-                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar))
-            ).let { MeldingsreferanseId(it) }
-            assertDokumentsporingPåSisteBehandling(
-                1.vedtaksperiode,
-                Dokumentsporing.inntektsmeldingDager(id),
-                Dokumentsporing.inntektsmeldingInntekt(id),
-                Dokumentsporing.inntektsmeldingRefusjon(id)
-            )
-
-            val idKorrigert = håndterKorrigerteArbeidsgiveropplysninger(
-                1.vedtaksperiode,
-                OppgittInntekt(INNTEKT * 1.10)
-            ).let { MeldingsreferanseId(it) }
+            val id =
+                håndterArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittInntekt(INNTEKT),
+                    OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                    OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                ).let { MeldingsreferanseId(it) }
             assertDokumentsporingPåSisteBehandling(
                 1.vedtaksperiode,
                 Dokumentsporing.inntektsmeldingDager(id),
                 Dokumentsporing.inntektsmeldingInntekt(id),
                 Dokumentsporing.inntektsmeldingRefusjon(id),
-                Dokumentsporing.inntektsmeldingInntekt(idKorrigert)
+            )
+
+            val idKorrigert =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittInntekt(INNTEKT * 1.10),
+                ).let { MeldingsreferanseId(it) }
+            assertDokumentsporingPåSisteBehandling(
+                1.vedtaksperiode,
+                Dokumentsporing.inntektsmeldingDager(id),
+                Dokumentsporing.inntektsmeldingInntekt(id),
+                Dokumentsporing.inntektsmeldingRefusjon(id),
+                Dokumentsporing.inntektsmeldingInntekt(idKorrigert),
             )
             assertVarsler(1.vedtaksperiode, RV_IM_4)
         }
@@ -727,7 +719,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 2.vedtaksperiode,
                 OppgittInntekt(50_000.årlig),
                 OppgittRefusjon(INGEN, emptyList(), refusjonskravGyldigFra = null),
-                OppgittArbeidgiverperiode(listOf(10.oktober(2025) til 16.oktober(2025)))
+                OppgittArbeidgiverperiode(listOf(10.oktober(2025) til 16.oktober(2025))),
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertEquals(listOf(10.oktober(2025) til 25.oktober(2025)), inspektør.venteperiode(2.vedtaksperiode))
@@ -756,27 +748,38 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.assertDokumentsporingPåSisteBehandling(vedtaksperiode: UUID, vararg forventet: Dokumentsporing) {
-        val faktisk = inspektør.vedtaksperioder(vedtaksperiode).behandlinger.behandlinger()
-            .last().endringer()
-            .map { it.dokumentsporing }.filter {
-                when (it.dokumentType) {
-                    DokumentType.InntektsmeldingInntekt,
-                    DokumentType.InntektsmeldingRefusjon,
-                    DokumentType.InntektsmeldingDager -> true
+    private fun TestPerson.TestArbeidsgiver.assertDokumentsporingPåSisteBehandling(
+        vedtaksperiode: UUID,
+        vararg forventet: Dokumentsporing,
+    ) {
+        val faktisk =
+            inspektør
+                .vedtaksperioder(vedtaksperiode)
+                .behandlinger
+                .behandlinger()
+                .last()
+                .endringer()
+                .map { it.dokumentsporing }
+                .filter {
+                    when (it.dokumentType) {
+                        DokumentType.InntektsmeldingInntekt,
+                        DokumentType.InntektsmeldingRefusjon,
+                        DokumentType.InntektsmeldingDager,
+                        -> true
 
-                    DokumentType.Søknad,
-                    DokumentType.Sykmelding,
-                    DokumentType.InntektFraAOrdningen,
-                    DokumentType.OverstyrTidslinje,
-                    DokumentType.OverstyrInntekt,
-                    DokumentType.OverstyrRefusjon,
-                    DokumentType.OverstyrArbeidsgiveropplysninger,
-                    DokumentType.OverstyrArbeidsforhold,
-                    DokumentType.SkjønnsmessigFastsettelse,
-                    DokumentType.AndreYtelser -> false
+                        DokumentType.Søknad,
+                        DokumentType.Sykmelding,
+                        DokumentType.InntektFraAOrdningen,
+                        DokumentType.OverstyrTidslinje,
+                        DokumentType.OverstyrInntekt,
+                        DokumentType.OverstyrRefusjon,
+                        DokumentType.OverstyrArbeidsgiveropplysninger,
+                        DokumentType.OverstyrArbeidsforhold,
+                        DokumentType.SkjønnsmessigFastsettelse,
+                        DokumentType.AndreYtelser,
+                        -> false
+                    }
                 }
-            }
         assertEquals(forventet.toSet(), faktisk.toSet())
     }
 }

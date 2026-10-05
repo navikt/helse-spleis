@@ -1,15 +1,7 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.april
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.a3
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.forlengelseTilGodkjenning
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
-import no.nav.helse.februar
+import no.nav.helse.*
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Sykedag
 import no.nav.helse.hendelser.GradertPeriode
@@ -18,53 +10,23 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.juni
-import no.nav.helse.mai
-import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Overlapper med foreldrepenger`
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING_TIL_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.arbeidsgiveropplysninger.TrengerArbeidsgiveropplysningerTest.Companion.assertEtterspurt
 import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
-import no.nav.helse.utbetalingslinjer.Endringskode.NY
-import no.nav.helse.utbetalingslinjer.Endringskode.UEND
+import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
-
     @Test
     fun `Arbeidsgiver med kort gap mellom sykefravær blir forsøkt sklitaklet av annen arbeidsgiver som tetter gapet og flytter skjæringstidspunktet`() {
         a1 {
@@ -197,7 +159,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             nyPeriode(10.februar til 28.februar)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 3.vedtaksperiode
+                vedtaksperiodeId = 3.vedtaksperiode,
             )
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -237,7 +199,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
         a1 {
             nyPeriode(1.mars til 10.mars)
             håndterSelvbestemtArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(20.februar til 7.mars)
+                arbeidsgiverperioder = listOf(20.februar til 7.mars),
             )
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -248,7 +210,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -266,7 +228,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 1431,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 5.februar til 10.februar
+                subset = 5.februar til 10.februar,
             )
         }
     }
@@ -338,7 +300,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 15.januar, 17.januar til 17.januar),
-                vedtaksperiodeId = 3.vedtaksperiode
+                vedtaksperiodeId = 3.vedtaksperiode,
             )
 
             håndterVilkårsgrunnlag(3.vedtaksperiode)
@@ -409,7 +371,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             håndterSøknad(Sykdom(29.januar, 15.februar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 15.januar, 29.januar til 29.januar),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
 
             assertEquals(1.januar til 15.januar, inspektør.periode(1.vedtaksperiode))
@@ -436,7 +398,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
 
             nyPeriode(29.januar til 15.februar)
             håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar)
+                listOf(1.januar til 16.januar),
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -466,7 +428,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
 
             assertEquals(3, inspektør.antallUtbetalinger)
@@ -562,7 +524,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             nyPeriode(20.februar til 15.mars)
             håndterArbeidsgiveropplysninger(
                 listOf(20.februar til 7.mars),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
@@ -640,7 +602,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.april til 16.april),
                 beregnetInntekt = inntekt,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, a3)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
@@ -661,14 +623,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
                 beregnetInntekt = inntekt,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a3 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
                 beregnetInntekt = inntekt,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a2 {
@@ -702,7 +664,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.april til 16.april),
                 beregnetInntekt = inntekt,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2, a3)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
@@ -724,14 +686,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
                 beregnetInntekt = inntekt,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a3 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
                 beregnetInntekt = inntekt,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a2 {
@@ -785,7 +747,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             nyPeriode(januar)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 3.vedtaksperiode
+                vedtaksperiodeId = 3.vedtaksperiode,
             )
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -820,7 +782,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             nyPeriode(januar)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
 
             assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
@@ -848,7 +810,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
         }
@@ -862,7 +824,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             nyPeriode(januar)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             nullstillTilstandsendringer()
             håndterUtbetalt(Oppdragstatus.AVVIST)
@@ -887,7 +849,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -915,7 +877,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -925,7 +887,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -1059,7 +1021,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -1091,13 +1053,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(20.mars til 4.april),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a1 {
@@ -1117,9 +1079,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
         // siden perioden slutter på en fredag starter ikke oppholdstelling i arbeidsgiverperioden før mandagen.
         // 10.februar-2.mars hører derfor til samme arbeidsgiverperioden som 20.mars-4.april, ettersom avstanden mellom
         // 5.mars (påfølgende mandag)-20.mars er akkurat 16 dager
-        
+
         nyPeriode(10.februar til 2.mars, a2)
-        observatør.assertEtterspurt(2.vedtaksperiode(a2), EventSubscription.Refusjon::class, EventSubscription.Arbeidsgiverperiode::class)
+        observatør.assertEtterspurteArbeidsgiveropplysninger(
+            2.vedtaksperiode(a2),
+            EventSubscription.Refusjon::class,
+            EventSubscription.Arbeidsgiverperiode::class,
+        )
 
         a2 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING) }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING) }
@@ -1206,13 +1172,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
                 januarId,
                 forventetArbeidsgiverbeløp = 1431,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 17.januar til 31.januar
+                subset = 17.januar til 31.januar,
             )
             assertUtbetalingsbeløp(
                 februarId,
                 forventetArbeidsgiverbeløp = 1431,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = februar
+                subset = februar,
             )
         }
     }
@@ -1262,13 +1228,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
                 januarId,
                 forventetArbeidsgiverbeløp = 1431,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 17.januar til 31.januar
+                subset = 17.januar til 31.januar,
             )
             assertUtbetalingsbeløp(
                 februarId,
                 forventetArbeidsgiverbeløp = 1431,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = februar
+                subset = februar,
             )
         }
     }

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.UUID
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.EventSubscription
@@ -8,14 +7,24 @@ import no.nav.helse.person.EventSubscription.VedtaksperiodeEndretEvent
 import no.nav.helse.person.Person
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.somOrganisasjonsnummer
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.fail
+import java.util.*
+import kotlin.reflect.KClass
 
 internal typealias InntektsmeldingId = UUID
 internal typealias VedtaksperiodeId = UUID
 
-internal class TestObservatør(person: Person? = null, other: TestObservatør? = null) : EventSubscription {
-
-    internal val tilstandsendringer = person?.inspektør?.sisteVedtaksperiodeTilstander()?.mapValues { mutableListOf(it.value) }?.toMutableMap() ?: mutableMapOf()
+internal class TestObservatør(
+    person: Person? = null,
+    other: TestObservatør? = null,
+) : EventSubscription {
+    internal val tilstandsendringer =
+        person
+            ?.inspektør
+            ?.sisteVedtaksperiodeTilstander()
+            ?.mapValues { mutableListOf(it.value) }
+            ?.toMutableMap() ?: mutableMapOf()
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
     val trengerArbeidsgiveropplysningerVedtaksperioder = mutableListOf<EventSubscription.TrengerArbeidsgiveropplysningerEvent>()
     val trengerIkkeArbeidsgiveropplysningerVedtaksperioder = mutableListOf<EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent>()
@@ -49,21 +58,27 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
     val vedtaksperiodeUtbetalinger = mutableMapOf<String, MutableMap<UUID, List<UUID>>>()
 
     private lateinit var sisteVedtaksperiode: UUID
-    private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { (_, perioder) ->
-        perioder.map { it.inspektør.id }.toMutableSet()
-    }?.toMutableMap() ?: mutableMapOf()
+    private val vedtaksperioder =
+        person
+            ?.inspektør
+            ?.vedtaksperioder()
+            ?.mapValues { (_, perioder) ->
+                perioder.map { it.inspektør.id }.toMutableSet()
+            }?.toMutableMap() ?: mutableMapOf()
 
     val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
 
     private val forkastedeEventer = mutableMapOf<UUID, EventSubscription.VedtaksperiodeForkastetEvent>()
     val annulleringer = mutableListOf<EventSubscription.UtbetalingAnnullertEvent>()
 
-    fun hendelseider(vedtaksperiodeId: UUID) =
-        vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
-
+    fun hendelseider(vedtaksperiodeId: UUID) = vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
 
     fun sisteVedtaksperiodeId(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
-    fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
+
+    fun vedtaksperiode(
+        orgnummer: String,
+        indeks: Int,
+    ) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
 
     override fun analytiskDatapakke(event: EventSubscription.AnalytiskDatapakkeEvent) {
         this.analytiskDatapakkeEventer.add(event)
@@ -74,6 +89,7 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
     }
 
     fun forkastedePerioder() = forkastedeEventer.size
+
     fun forkastet(vedtaksperiodeId: UUID) = forkastedeEventer.getValue(vedtaksperiodeId)
 
     override fun utbetalingUtenUtbetaling(event: EventSubscription.UtbetalingUtenUtbetalingEvent) {
@@ -134,19 +150,26 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
     }
 
     private data class Forespørsel(
-        val opplysninger : Set<EventSubscription.ForespurtOpplysning>,
-        var tilstand: Tilstand = Tilstand.Åpen
+        val opplysninger: Set<EventSubscription.ForespurtOpplysning>,
+        var tilstand: Tilstand = Tilstand.Åpen,
     ) {
         sealed interface Tilstand {
             data object Åpen : Tilstand
-            data object Besvart: Tilstand
-            data object TrengteIkkeOpplysninger: Tilstand
-            data object ForkastetVedtaksperiode: Tilstand
+
+            data object Besvart : Tilstand
+
+            data object TrengteIkkeOpplysninger : Tilstand
+
+            data object ForkastetVedtaksperiode : Tilstand
         }
     }
 
     private val arbeidsgiverForespørsler = mutableMapOf<UUID, Forespørsel>()
-    private fun endrearbeidsgiverForespørselTilstand(vedtaksperiodeId: UUID, nyTilstand: Forespørsel.Tilstand) {
+
+    private fun endrearbeidsgiverForespørselTilstand(
+        vedtaksperiodeId: UUID,
+        nyTilstand: Forespørsel.Tilstand,
+    ) {
         val forespørsel = arbeidsgiverForespørsler[vedtaksperiodeId] ?: return
         if (forespørsel.tilstand == nyTilstand) return
         if (forespørsel.tilstand == Forespørsel.Tilstand.Åpen || nyTilstand == Forespørsel.Tilstand.ForkastetVedtaksperiode) {
@@ -164,7 +187,10 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
         check(arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.Besvart) { "Kan ikke korrigere arbeidsgiveropplysninger." }
     }
 
-    internal fun forsikreForespurteArbeidsgiveropplysninger(vedtaksperiodeId: UUID, vararg oppgitt: Arbeidsgiveropplysning) {
+    internal fun forsikreForespurteArbeidsgiveropplysninger(
+        vedtaksperiodeId: UUID,
+        vararg oppgitt: Arbeidsgiveropplysning,
+    ) {
         val forespørsel = arbeidsgiverForespørsler[vedtaksperiodeId] ?: error("Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId")
         if (oppgitt.isEmpty()) return
         val relevante = oppgitt.filter { it is Arbeidsgiveropplysning.OppgittInntekt || it is Arbeidsgiveropplysning.OppgittArbeidgiverperiode || it is Arbeidsgiveropplysning.OppgittRefusjon }
@@ -181,12 +207,23 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
         println("Spurte ikke om ${ikkeForespurt.joinToString { it.simpleName!! }}, men fikk det læll")
     }
 
+    internal fun assertEtterspurteArbeidsgiveropplysninger(
+        vedtaksperiode: UUID,
+        vararg forventet: KClass<out EventSubscription.ForespurtOpplysning>,
+    ) {
+        val forespurteOpplysninger =
+            trengerArbeidsgiveropplysningerVedtaksperioder.lastOrNull { it.opplysninger.vedtaksperiodeId == vedtaksperiode }?.opplysninger?.forespurteOpplysninger
+                ?: emptyList()
+        assertEquals(forventet.toSet(), forespurteOpplysninger.map { it::class }.toSet())
+    }
+
     private val EventSubscription.ForespurtOpplysning.somArbeidsgiveropplysning
-        get() = when (this) {
-            EventSubscription.Arbeidsgiverperiode -> Arbeidsgiveropplysning.OppgittArbeidgiverperiode::class
-            is EventSubscription.Inntekt -> Arbeidsgiveropplysning.OppgittInntekt::class
-            EventSubscription.Refusjon -> Arbeidsgiveropplysning.OppgittRefusjon::class
-        }
+        get() =
+            when (this) {
+                EventSubscription.Arbeidsgiverperiode -> Arbeidsgiveropplysning.OppgittArbeidgiverperiode::class
+                is EventSubscription.Inntekt -> Arbeidsgiveropplysning.OppgittInntekt::class
+                EventSubscription.Refusjon -> Arbeidsgiveropplysning.OppgittRefusjon::class
+            }
 
     override fun trengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
         trengerArbeidsgiveropplysningerVedtaksperioder.add(event)
@@ -212,7 +249,7 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
     }
 
     override fun overstyringIgangsatt(
-        event: EventSubscription.OverstyringIgangsatt
+        event: EventSubscription.OverstyringIgangsatt,
     ) {
         overstyringIgangsatt.add(event)
     }
@@ -270,7 +307,8 @@ internal class TestObservatør(person: Person? = null, other: TestObservatør? =
         trengerInformasjonTilBeregningEventer.add(event)
     }
 
-    fun vedtaksperiodeUtbetalinger(vedtaksperiodeId: UUID, orgnummer: String): List<UUID> {
-        return vedtaksperiodeUtbetalinger[orgnummer]?.get(vedtaksperiodeId) ?: emptyList()
-    }
+    fun vedtaksperiodeUtbetalinger(
+        vedtaksperiodeId: UUID,
+        orgnummer: String,
+    ): List<UUID> = vedtaksperiodeUtbetalinger[orgnummer]?.get(vedtaksperiodeId) ?: emptyList()
 }
