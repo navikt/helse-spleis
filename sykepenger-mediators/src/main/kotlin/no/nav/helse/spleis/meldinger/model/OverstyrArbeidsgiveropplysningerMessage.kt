@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -47,7 +47,7 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage, over
             val arbeidsgivere = get("arbeidsgivere").takeUnless { it.isMissingOrNull() } ?: return emptyList()
             val id = meldingsreferanseId()
             val opprettet = get("@opprettet").asLocalDateTime()
-            return arbeidsgivere.map { arbeidsgiveropplysning ->
+            return arbeidsgivere.values().map { arbeidsgiveropplysning ->
                 val orgnummer = arbeidsgiveropplysning["organisasjonsnummer"].asText()
                 val månedligInntekt = arbeidsgiveropplysning["månedligInntekt"].asDouble().månedlig
 

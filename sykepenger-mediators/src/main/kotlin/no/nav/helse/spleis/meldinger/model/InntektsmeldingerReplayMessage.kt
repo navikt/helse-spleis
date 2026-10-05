@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -53,7 +53,7 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
         val refusjon = Inntektsmelding.Refusjon(
             beløp = packet.path("refusjon").path("beloepPrMnd").takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
             opphørsdato = packet.path("refusjon").path("opphoersdato").asOptionalLocalDate(),
-            endringerIRefusjon = packet["endringIRefusjoner"].map {
+            endringerIRefusjon = packet["endringIRefusjoner"].values().map {
                 Inntektsmelding.Refusjon.EndringIRefusjon(
                     it.path("beloep").asDouble().månedlig,
                     it.path("endringsdato").asLocalDate()
@@ -64,7 +64,7 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
         val mottatt = packet.path("mottattDato").asLocalDateTime()
         val førsteFraværsdag = packet.path("foersteFravaersdag").asOptionalLocalDate()
         val beregnetInntekt = packet.path("beregnetInntekt").asDouble()
-        val arbeidsgiverperioder = packet.path("arbeidsgiverperioder").map(::asPeriode)
+        val arbeidsgiverperioder = packet.path("arbeidsgiverperioder").values().map(::asPeriode)
         val begrunnelseForReduksjonEllerIkkeUtbetalt = packet.path("begrunnelseForReduksjonEllerIkkeUtbetalt").takeIf(JsonNode::isTextual)?.asText()
         val opphørAvNaturalytelser = packet.path("opphoerAvNaturalytelser").tilOpphørAvNaturalytelser()
 
@@ -85,7 +85,7 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
 }
 
 internal fun JsonNode.tilOpphørAvNaturalytelser(): List<Inntektsmelding.OpphørAvNaturalytelse> {
-    return map { naturalytelse ->
+    return values().map { naturalytelse ->
         Inntektsmelding.OpphørAvNaturalytelse(
             beløp = naturalytelse["beloepPrMnd"].asDouble().månedlig,
             fom = naturalytelse["fom"].asLocalDate(),

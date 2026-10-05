@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -254,7 +254,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertDatotid(behov.path("@opprettet").asText())
         assertTrue(id.isNotEmpty())
         assertDoesNotThrow { UUID.fromString(id) }
-        assertTrue(typer.map(Behov.Behovstype::utgåendeNavn).containsAll(behov.path("@behov").map(JsonNode::asText)))
+        assertTrue(typer.map(Behov.Behovstype::utgåendeNavn).containsAll(behov.path("@behov").values().map(JsonNode::asText)))
     }
 
     private fun assertArbeidsavklaringspengerdetaljer(behov: JsonNode) {
@@ -293,7 +293,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertDato(behov.path(Behov.Behovstype.Forsikringsvurdering.utgåendeNavn).path("skjæringstidspunkt").asText())
         assertEquals(
             forventedeSpesielleYrkesgrupper,
-            behov.path(Behov.Behovstype.Forsikringsvurdering.utgåendeNavn).path("spesielleYrkesgrupper").map(JsonNode::asText)
+            behov.path(Behov.Behovstype.Forsikringsvurdering.utgåendeNavn).path("spesielleYrkesgrupper").values().map(JsonNode::asText)
         )
     }
 

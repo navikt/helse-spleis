@@ -1,8 +1,8 @@
 package no.nav.helse.dbscript
 
-import com.fasterxml.jackson.core.util.DefaultIndenter
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.core.util.DefaultIndenter
+import tools.jackson.core.util.DefaultPrettyPrinter
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.sql_dsl.firstOrNull
 import java.io.File
 import java.nio.file.Files
@@ -74,7 +74,7 @@ internal object Personeditor: DbScript() {
             }
             with(resultatfil) {
                 createNewFile()
-                writeText(objectMapper.writer(printer).writeValueAsString(objectMapper.readTree(data)))
+                writeText(objectMapper.writer().with(printer).writeValueAsString(objectMapper.readTree(data)))
             }
 
             println("## Nå er vi klar får å endre personen her 🥷")

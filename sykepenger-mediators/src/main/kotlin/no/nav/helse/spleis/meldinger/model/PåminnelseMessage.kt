@@ -19,7 +19,7 @@ internal class PåminnelseMessage(packet: JsonMessage, override val meldingspori
     private val tilstandsendringstidspunkt = packet["tilstandsendringstidspunkt"].asLocalDateTime()
     private val påminnelsestidspunkt = packet["påminnelsestidspunkt"].asLocalDateTime()
     private val nestePåminnelsestidspunkt = packet["nestePåminnelsestidspunkt"].asLocalDateTime()
-    private val flagg = packet["flagg"].map { it.asText() }.toSet()
+    private val flagg = packet["flagg"].values().map { it.asText() }.toSet()
 
     private val påminnelse get() = Påminnelse(
         meldingsreferanseId = meldingsporing.id,

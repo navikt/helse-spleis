@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.mediator
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
@@ -75,7 +75,7 @@ internal class VarseloppsamlerTest {
                     val id = UUID.fromString(varsel.path("id").asText())
                     val varselkode = Varselkode.valueOf(varsel.path("varselkode").asText())
                     val kontekster = varsel.path("kontekster")
-                        .map { it.path("kontekstmap") as ObjectNode }
+                        .values().map { it.path("kontekstmap") as ObjectNode }
                         .flatMap { kontekstmap -> kontekstmap.properties().map { it.key to it.value.asText() } }
                         .toMap()
                     Varsel(id, varselkode, kontekster)

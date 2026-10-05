@@ -1,9 +1,9 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.node.TextNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.databind.node.StringNode
 import no.nav.helse.serde.serdeObjectMapper
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
@@ -52,9 +52,9 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
 
             is ObjectNode -> {
                 if (actual is ObjectNode) {
-                    expected.fields().forEach { (key, value) ->
+                    expected.properties().forEach { (key, value) ->
                         when (value) {
-                            is TextNode -> {
+                            is StringNode -> {
                                 if (value.asText().matches(placeholderRegex)) {
                                     val valueNode = actual.path(key)
                                     expected.put(key, valueNode.asText())

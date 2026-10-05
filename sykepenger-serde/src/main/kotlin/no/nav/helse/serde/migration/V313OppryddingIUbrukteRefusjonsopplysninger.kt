@@ -1,7 +1,7 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import no.nav.helse.serde.serdeObjectMapper
 
@@ -18,8 +18,8 @@ internal class V313OppryddingIUbrukteRefusjonsopplysninger : JsonMigration(versi
                 }
             val ubrukteRefusjonsopplysninger = arbeidsgiver.path("ubrukteRefusjonsopplysninger") as ObjectNode
             val ubrukteRefusjonsopplysningerEtterMigrering = serdeObjectMapper.createObjectNode()
-            ubrukteRefusjonsopplysninger.fields().forEach { (dato, refusjonstidslinjer) ->
-                val futiristiske = refusjonstidslinjer.path("perioder").deepCopy<JsonNode>()
+            ubrukteRefusjonsopplysninger.properties().forEach { (dato, refusjonstidslinjer) ->
+                val futiristiske = refusjonstidslinjer.path("perioder").deepCopy()
                     .filter { periode -> periode.path("tom").dato().isAfter(sisteTomPåVedtaksperiode) }
                     .map { periode ->
                         (periode as ObjectNode)

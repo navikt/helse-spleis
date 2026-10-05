@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import java.time.LocalDate
 import no.nav.helse.februar
@@ -283,7 +283,7 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
     private companion object {
         private val objectMapper = jacksonObjectMapper()
         private fun Pair<String, String>.json(vararg behold: String) = (objectMapper.readTree(second) as ObjectNode).let { json ->
-            json.remove(json.fieldNames().asSequence().minus(behold.toSet()).toList())
+            json.remove(json.propertyNames().asSequence().minus(behold.toSet()).toList())
         }.toString()
     }
 }

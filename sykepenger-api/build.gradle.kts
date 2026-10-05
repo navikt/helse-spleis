@@ -25,7 +25,7 @@ dependencies {
     implementation(libs.bundles.database)
     implementation(libs.cloudsql)
 
-    implementation(libs.ktor.serialization.jackson)
+    implementation(libs.ktor.serialization.jackson3)
     implementation(libs.ktor.server.auth)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.server.auth.jwt) {

@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
@@ -45,7 +45,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(
         }
 
     private val feriepengehistorikk = packet["@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.feriepengehistorikk"]
-        .map { feriepenge ->
+        .values().map { feriepenge ->
             UtbetalingshistorikkForFeriepenger.Feriepenger(
                 orgnummer = feriepenge["orgnummer"].asText(),
                 beløp = feriepenge["beløp"].asInt(),
@@ -55,7 +55,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(
         }
 
     private val arbeidskategorikoder = packet["@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.arbeidskategorikoder"]
-        .map {
+        .values().map {
             val fom = it["fom"].asLocalDate()
             val tom = it["tom"].asLocalDate()
             val kode = it["kode"].asText()

@@ -26,11 +26,11 @@ internal class SimuleringMessage(packet: JsonMessage, override val meldingsporin
     private val simuleringResultat = if (simuleringOK) packet["@løsning.${Behovstype.Simulering.utgåendeNavn}.simulering"].let {
         SimuleringResultatDto(
             totalbeløp = it.path("totalBelop").asInt(),
-            perioder = it.path("periodeList").map { periode ->
+            perioder = it.path("periodeList").values().map { periode ->
                 SimuleringResultatDto.SimulertPeriode(
                     fom = periode.path("fom").asLocalDate(),
                     tom = periode.path("tom").asLocalDate(),
-                    utbetalinger = periode.path("utbetaling").map { utbetaling ->
+                    utbetalinger = periode.path("utbetaling").values().map { utbetaling ->
                         SimuleringResultatDto.SimulertUtbetaling(
                             forfallsdato = utbetaling.path("forfall").asLocalDate(),
                             utbetalesTil = SimuleringResultatDto.Mottaker(
@@ -38,7 +38,7 @@ internal class SimuleringMessage(packet: JsonMessage, override val meldingsporin
                                 navn = utbetaling.path("utbetalesTilNavn").asText()
                             ),
                             feilkonto = utbetaling.path("feilkonto").asBoolean(),
-                            detaljer = utbetaling.path("detaljer").map { detalj ->
+                            detaljer = utbetaling.path("detaljer").values().map { detalj ->
                                 SimuleringResultatDto.Detaljer(
                                     fom = detalj.path("faktiskFom").asLocalDate(),
                                     tom = detalj.path("faktiskTom").asLocalDate(),

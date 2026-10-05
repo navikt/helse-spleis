@@ -1,6 +1,6 @@
 package no.nav.helse.dbscript
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Base64
 import no.nav.helse.dbscript.DbScript.ConnectionInfo
 

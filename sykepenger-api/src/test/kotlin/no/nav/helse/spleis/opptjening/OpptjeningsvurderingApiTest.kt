@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.opptjening
 
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.node.ObjectNode
 
 import no.nav.helse.testdatabase.TestDataSource
 import io.ktor.http.HttpStatusCode

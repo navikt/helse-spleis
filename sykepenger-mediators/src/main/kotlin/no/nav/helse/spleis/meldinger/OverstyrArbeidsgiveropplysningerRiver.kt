@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -54,7 +54,7 @@ internal class OverstyrArbeidsgiveropplysningerRiver(
                 }
             }
             require("arbeidsgivere") { arbeidsgiveropplysning ->
-                val organisasjonsnummer = arbeidsgiveropplysning.map { it.path("organisasjonsnummer").asText() }
+                val organisasjonsnummer = arbeidsgiveropplysning.values().map { it.path("organisasjonsnummer").asText() }
                 require(organisasjonsnummer.size == organisasjonsnummer.toSet().size) { "Duplikate organisasjonsnummer $organisasjonsnummer" }
             }
         }

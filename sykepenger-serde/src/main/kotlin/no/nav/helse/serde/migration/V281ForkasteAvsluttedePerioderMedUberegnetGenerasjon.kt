@@ -1,8 +1,8 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
@@ -32,7 +32,7 @@ internal class V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon : JsonMigrat
 
             forkastinger.forEach { periode ->
                 val forkastetPeriode = serdeObjectMapper.createObjectNode().apply {
-                    set<ObjectNode>("vedtaksperiode", periode)
+                    set("vedtaksperiode", periode)
                 }
                 forkastede.add(forkastetPeriode)
                 val indeks = vedtaksperioder.indexOfFirst { vedtaksperiode -> vedtaksperiode.path("id").asText().uuid == periode.path("id").asText().uuid }

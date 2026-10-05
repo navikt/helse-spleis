@@ -1,9 +1,7 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.FailedMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
@@ -24,8 +22,6 @@ import org.slf4j.LoggerFactory
 internal class TestRapid(private val utstender: TestUtsender = TestUtsender()) : RapidsConnection() {
     private companion object {
         private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         private val log = LoggerFactory.getLogger(TestRapid::class.java)
     }
@@ -162,7 +158,7 @@ internal class TestRapid(private val utstender: TestUtsender = TestUtsender()) :
 
         private fun alleBehovsmeldingerSomInneholder(behovstype: Behov.Behovstype, filter: (behovsmelding: JsonNode) -> Boolean = { true }) = mutableListOf<JsonNode>().apply {
             events("behov") { behovsmelding ->
-                val etterspurteBehov = behovsmelding.path("@behov").map { it.asText() }
+                val etterspurteBehov = behovsmelding.path("@behov").values().map { it.asText() }
                 if (behovstype.utgåendeNavn in etterspurteBehov && filter(behovsmelding)) this.add(behovsmelding)
             }
         }.toList()

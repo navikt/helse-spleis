@@ -1,6 +1,4 @@
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.awt.Desktop
 import java.io.IOException
 import java.net.URI
@@ -28,8 +26,6 @@ class SpannerEtterTestInterceptor : TestWatcher {
 
     companion object {
         private val objectMapper = jacksonObjectMapper()
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .registerModule(JavaTimeModule())
     }
 
     override fun testFailed(context: ExtensionContext, cause: Throwable?) {

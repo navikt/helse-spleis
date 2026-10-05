@@ -1,8 +1,8 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.deser.std.StdDeserializer
 import java.util.UUID.fromString
 
 internal class SetDeserializer(t: Class<Set<*>>) : StdDeserializer<Set<*>>(t) {

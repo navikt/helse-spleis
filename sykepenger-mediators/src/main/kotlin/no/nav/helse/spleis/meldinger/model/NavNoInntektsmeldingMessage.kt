@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -25,7 +25,7 @@ internal class NavNoInntektsmeldingMessage(
     private val refusjon = Inntektsmelding.Refusjon(
         beløp = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
         opphørsdato = packet["refusjon.opphoersdato"].asOptionalLocalDate(),
-        endringerIRefusjon = packet["endringIRefusjoner"].map {
+        endringerIRefusjon = packet["endringIRefusjoner"].values().map {
             Inntektsmelding.Refusjon.EndringIRefusjon(
                 it.path("beloep").asDouble().månedlig,
                 it.path("endringsdato").asLocalDate()
@@ -36,7 +36,7 @@ internal class NavNoInntektsmeldingMessage(
     private val orgnummer = packet["virksomhetsnummer"].asText()
     private val mottatt = packet["mottattDato"].asLocalDateTime()
     private val beregnetInntekt = packet["beregnetInntekt"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()
-    private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
+    private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].values().map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
     private val harFlereArbeidsforhold = packet["harFlereArbeidsforhold"].takeUnless { it.isMissingOrNull() }?.asBoolean() ?: false

@@ -1,6 +1,6 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.module.kotlin.readValue
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.serde.migration.JsonMigration
 import no.nav.helse.serde.migration.JsonMigrationException

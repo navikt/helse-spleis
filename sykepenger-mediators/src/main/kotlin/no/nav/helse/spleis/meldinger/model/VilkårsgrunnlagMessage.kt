@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
@@ -104,7 +104,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage, override val melding
 
         private fun mapSkatteopplysninger(opplysninger: JsonNode) =
             opplysninger.flatMap { måned ->
-                måned["inntektsliste"].map { opplysning ->
+                måned["inntektsliste"].values().map { opplysning ->
                     (opplysning as ObjectNode).put("årMåned", måned.path("årMåned").asText())
                 }
             }

@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.mediator.etterlevelse
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import com.networknt.schema.JsonSchemaFactory
-import com.networknt.schema.SpecVersion
-import com.networknt.schema.ValidationMessage
+import com.networknt.schema.Error as SchemaError
+import com.networknt.schema.SchemaLocation
+import com.networknt.schema.SchemaRegistry
+import com.networknt.schema.SpecificationVersion
 import io.mockk.mockk
-import java.net.URI
 import java.util.UUID
 import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.etterlevelse.Tidslinjedag
@@ -55,14 +55,14 @@ internal class SubsumsjonsmeldingTest {
     }
 
     private val schema by lazy {
-        JsonSchemaFactory
-            .getInstance(SpecVersion.VersionFlag.V7)
-            .getSchema(URI("https://raw.githubusercontent.com/navikt/helse/6e2cd88991d8be659a179039b978aa91a0ff2092/subsumsjon/json-schema-1.0.0.json"))
+        SchemaRegistry
+            .withDefaultDialect(SpecificationVersion.DRAFT_7)
+            .getSchema(SchemaLocation.of("https://raw.githubusercontent.com/navikt/helse/6e2cd88991d8be659a179039b978aa91a0ff2092/subsumsjon/json-schema-1.0.0.json"))
     }
 
     private fun assertSubsumsjonsmelding(melding: JsonNode) {
         try {
-            assertEquals(emptySet<ValidationMessage>(), schema.validate(melding))
+            assertEquals(emptyList<SchemaError>(), schema.validate(melding))
         } catch (_: Exception) {
             LoggerFactory.getLogger(SubsumsjonsmeldingTest::class.java).warn("Kunne ikke kjøre kontrakttest for subsumsjoner. Mangler du internett?")
         }

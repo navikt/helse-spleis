@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.tilOpphørAvNaturalytelser

@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.Personidentifikator
 import no.nav.helse.spleis.BehandlingContext
@@ -11,6 +11,6 @@ import no.nav.helse.spleis.Personopplysninger
 internal class NyFrilansSøknadMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: NySøknadBuilder = NySøknadBuilder()) : SøknadMessage(packet, builder.frilans()) {
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: BehandlingContext) {
         builder.fremtidigSøknad(packet["fremtidig_søknad"].asBoolean())
-        mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
+        mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].values().map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
     }
 }

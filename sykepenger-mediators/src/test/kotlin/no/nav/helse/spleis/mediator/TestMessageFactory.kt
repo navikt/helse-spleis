@@ -1,10 +1,8 @@
 package no.nav.helse.spleis.mediator
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.module.kotlin.convertValue
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -57,8 +55,6 @@ internal class TestMessageFactory(
 
     private companion object {
         private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         private fun SykepengesoknadDTO.toMapMedFelterFraSpedisjon(fødselsdato: LocalDate, historiskeFolkeregisteridenter: List<String>): Map<String, Any> =
             objectMapper

@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
@@ -59,7 +59,7 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0)
         sendNyPåminnelse(0, TilstandType.TIL_UTBETALING)
         assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "OVERFØRT")
-        assertEquals(2, (0 until testRapid.inspektør.antall()).filter { "Utbetaling" in testRapid.inspektør.melding(it).path("@behov").map(JsonNode::asText) }.size)
+        assertEquals(2, (0 until testRapid.inspektør.antall()).filter { "Utbetaling" in testRapid.inspektør.melding(it).path("@behov").values().map(JsonNode::asText) }.size)
     }
 
     @Test

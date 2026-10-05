@@ -124,7 +124,7 @@ class UtgåendeMeldingTest {
         behov.assertStandardfelter("behov")
         assertDoesNotThrow { UUID.fromString(behov.json.path("@behovId").asText()) }
         assertEquals("behov", behov.json.path("@event_name").asText())
-        assertEquals(listOf("Medlemskap", "Simulering"), behov.json.path("@behov").map { it.asText() })
+        assertEquals(listOf("Medlemskap", "Simulering"), behov.json.path("@behov").values().map { it.asText() })
         assertEquals("""{"a":"b"}""", behov.json.path("Medlemskap").toString())
         assertEquals("""{"c":"d"}""", behov.json.path("Simulering").toString())
         assertEquals("f", behov.json.path("e").asText())

@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.utboks
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.time.Instant
 import java.util.concurrent.Future
 import org.apache.kafka.clients.producer.KafkaProducer
