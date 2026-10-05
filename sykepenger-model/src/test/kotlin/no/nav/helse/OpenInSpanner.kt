@@ -1,4 +1,5 @@
-import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.introspect.DefaultAccessorNamingStrategy
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 import java.awt.Desktop
 import java.io.IOException
 import java.net.URI
@@ -25,7 +26,9 @@ annotation class OpenInSpanner
 class SpannerEtterTestInterceptor : TestWatcher {
 
     companion object {
-        private val objectMapper = jacksonObjectMapper()
+        private val objectMapper = jacksonMapperBuilder()
+            .accessorNaming(DefaultAccessorNamingStrategy.Provider().withFirstCharAcceptance(true, true))
+            .build()
     }
 
     override fun testFailed(context: ExtensionContext, cause: Throwable?) {

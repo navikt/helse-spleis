@@ -939,7 +939,7 @@ internal abstract class AbstractEndToEndMediatorTest {
                 førsteFraværsdager = node.path("førsteFraværsdager").values().map { FørsteFraværsdag(it.path("organisasjonsnummer").textValue(), it.path("førsteFraværsdag").asLocalDate()) },
                 sykmeldingsperioder = node.path("sykmeldingsperioder").values().map { no.nav.helse.spill_av_im.Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) },
                 egenmeldinger = node.path("egenmeldinger").values().map { no.nav.helse.spill_av_im.Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) },
-                harForespurtArbeidsgiverperiode = node.path("trengerArbeidsgiverperiode").booleanValue()
+                harForespurtArbeidsgiverperiode = node.path("trengerArbeidsgiverperiode").asBoolean()
             )
 
             val replayMessage = lagInntektsmeldingerReplayMessage(forespørsel)

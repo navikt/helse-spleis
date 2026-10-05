@@ -23,7 +23,7 @@ internal class OverstyrTidslinjeMessage(packet: JsonMessage, override val meldin
             ManuellOverskrivingDag(
                 dato = dato,
                 type = dag["type"].asText().dagtype,
-                grad = dag.get("grad")?.intValue()
+                grad = dag.get("grad")?.intValue(0)
             )
         }
     }

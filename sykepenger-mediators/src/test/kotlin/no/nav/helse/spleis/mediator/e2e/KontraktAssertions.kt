@@ -49,7 +49,7 @@ internal object KontraktAssertions {
 
     private fun Pair<ObjectNode, ObjectNode>.assertOgFjernTemplates(template: String, assertOgFjern: (faktiskJson: ObjectNode, key: String) -> Unit) {
         val (faktiskJson, forventetJson) = this
-        val uuidTemplates = forventetJson.properties().filter { it.value.asText() == template }.map { it.key }
+        val uuidTemplates = forventetJson.properties().filter { it.value.isString && it.value.asString() == template }.map { it.key }
         uuidTemplates.forEach {
             forventetJson.remove(it)
             assertOgFjern(faktiskJson, it)

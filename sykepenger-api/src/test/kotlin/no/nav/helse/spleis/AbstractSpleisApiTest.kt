@@ -219,7 +219,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
             data =
                 """
                 {
-                    "beregnetInntekt": "$beregnetInntekt",
+                    "beregnetInntekt": ${beregnetInntekt.månedlig},
                     "mottattDato": "${LocalDateTime.now()}",
                     "@opprettet": "${LocalDateTime.now()}",
                     "foersteFravaersdag": "$førsteFraværsdag",

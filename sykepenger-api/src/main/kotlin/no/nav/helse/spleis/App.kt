@@ -2,6 +2,7 @@ package no.nav.helse.spleis
 
 import tools.jackson.core.util.DefaultIndenter
 import tools.jackson.core.util.DefaultPrettyPrinter
+import tools.jackson.databind.introspect.DefaultAccessorNamingStrategy
 import tools.jackson.module.kotlin.jacksonMapperBuilder
 import com.github.navikt.tbd_libs.naisful.naisApp
 import io.ktor.server.application.Application
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory
 internal val nyObjectmapper
     get() =
         jacksonMapperBuilder()
+            .accessorNaming(DefaultAccessorNamingStrategy.Provider().withFirstCharAcceptance(true, true))
             .defaultPrettyPrinter(
                 DefaultPrettyPrinter().apply {
                     indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance())
