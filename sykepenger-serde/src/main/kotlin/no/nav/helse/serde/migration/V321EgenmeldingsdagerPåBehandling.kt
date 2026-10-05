@@ -1,8 +1,8 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 import no.nav.helse.serde.serdeObjectMapper
 
 internal class V321EgenmeldingsdagerPåBehandling: JsonMigration(version = 321) {
@@ -21,7 +21,7 @@ internal class V321EgenmeldingsdagerPåBehandling: JsonMigration(version = 321) 
 
     private fun migrerVedtaksperiode(vedtaksperiode: JsonNode) {
         vedtaksperiode as ObjectNode
-        val egenmeldingsperioder = vedtaksperiode.path("egenmeldingsperioder").takeIf(JsonNode::isArray)?.deepCopy<ArrayNode>() ?: serdeObjectMapper.createArrayNode()
+        val egenmeldingsperioder = vedtaksperiode.path("egenmeldingsperioder").takeIf(JsonNode::isArray)?.deepCopy() as ArrayNode? ?: serdeObjectMapper.createArrayNode()
         vedtaksperiode.path("behandlinger").forEach { behandling ->
             behandling.path("endringer").forEach { endring ->
                 (endring as ObjectNode).putArray("egenmeldingsdager")

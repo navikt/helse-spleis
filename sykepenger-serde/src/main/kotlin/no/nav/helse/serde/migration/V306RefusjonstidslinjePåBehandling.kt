@@ -1,7 +1,7 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 
 internal class V306RefusjonstidslinjePåBehandling : JsonMigration(version = 306) {
     override val description = "lager en tom refusjonstidslinje på behandling"

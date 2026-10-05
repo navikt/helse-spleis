@@ -1,8 +1,8 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 
 internal class V294RenameTilBehandlinger : JsonMigration(version = 294) {
     override val description = "renamer generasjoner til behandlinger i json"
@@ -15,9 +15,9 @@ internal class V294RenameTilBehandlinger : JsonMigration(version = 294) {
     }
 
     private fun migrerVedtaksperiode(node: JsonNode) {
-        val generasjoner = node.path("generasjoner").deepCopy<ArrayNode>()
+        val generasjoner = node.path("generasjoner").deepCopy() as ArrayNode
         node as ObjectNode
-        node.set<ArrayNode>("behandlinger", generasjoner)
+        node.set("behandlinger", generasjoner)
         node.remove("generasjoner")
     }
 }

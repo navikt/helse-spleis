@@ -1,7 +1,7 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -16,9 +16,9 @@ internal class V323FikseFomPåUtbetalinger : JsonMigration(323) {
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             val fomForUtbetalinger = arbeidsgiver.path("utbetalinger")
-                .map {
-                    val arbeidsgiverfom = it.path("arbeidsgiverOppdrag").path("linjer").map { linje -> linje.path("fom").asText().dato }
-                    val personfom = it.path("personOppdrag").path("linjer").map { linje -> linje.path("fom").asText().dato }
+                .values().map {
+                    val arbeidsgiverfom = it.path("arbeidsgiverOppdrag").path("linjer").values().map { linje -> linje.path("fom").asText().dato }
+                    val personfom = it.path("personOppdrag").path("linjer").values().map { linje -> linje.path("fom").asText().dato }
                     val tidligsteOppdragslinjefom = (arbeidsgiverfom + personfom).minOrNull()
                     ForenkletUtbetaling(
                         korrelasjonsId = it.path("korrelasjonsId").asText().uuid,

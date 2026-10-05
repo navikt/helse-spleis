@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
@@ -44,9 +44,9 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     private val yrkesaktivitetssporing = packet.yrkesaktivitetssporing
 
     private val foreldrepengerytelse = packet["@løsning.${Behovstype.Foreldrepenger.utgåendeNavn}.Foreldrepengeytelse.perioder"]
-        .takeIf(JsonNode::isArray)?.map(::asGradertPeriode) ?: emptyList()
+        .takeIf(JsonNode::isArray)?.values()?.map(::asGradertPeriode) ?: emptyList()
     private val svangerskapsytelse = packet["@løsning.${Behovstype.Foreldrepenger.utgåendeNavn}.Svangerskapsytelse.perioder"]
-        .takeIf(JsonNode::isArray)?.map(::asGradertPeriode) ?: emptyList()
+        .takeIf(JsonNode::isArray)?.values()?.map(::asGradertPeriode) ?: emptyList()
 
     internal val foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepengerytelse)
     internal val svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapsytelse)
@@ -71,7 +71,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     internal val graderteAndreYtelser =
         packet.mapFraArrayEllerObjectMedArray("@løsning", Behovstype.GraderteAndreYtelserForBeregning.utgåendeNavn) { gradertAndreYtelse ->
             GraderteAndreYtelserForBeregning(
-                graderteAndreYtelserForBeregningPeriodeList = gradertAndreYtelse.path("graderteAndreYtelserPerioder").map { graderteAndreYtelserPeriode ->
+                graderteAndreYtelserForBeregningPeriodeList = gradertAndreYtelse.path("graderteAndreYtelserPerioder").values().map { graderteAndreYtelserPeriode ->
                     GraderteAndreYtelserForBeregning.GraderteAndreYtelserForBeregningPeriode(
                         fom = graderteAndreYtelserPeriode.path("fom").asLocalDate(),
                         tom = graderteAndreYtelserPeriode.path("tom").asLocalDate(),
@@ -82,7 +82,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
             )
         }
 
-    internal val inntekterForBeregning = InntekterForBeregning(packet["@løsning.${Behovstype.InntekterForBeregning.utgåendeNavn}.inntekter"].map {
+    internal val inntekterForBeregning = InntekterForBeregning(packet["@løsning.${Behovstype.InntekterForBeregning.utgåendeNavn}.inntekter"].values().map {
         InntekterForBeregning.Inntektsperiode(
             inntektskilde = it.path("inntektskilde").asText(),
             periode = it.path("fom").asLocalDate() til it.path("tom").asLocalDate(),
@@ -100,7 +100,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
 
     internal val arbeidsavklaringspengerV2 = Arbeidsavklaringspenger(
         packet["@løsning.${Behovstype.Arbeidsavklaringspenger.utgåendeNavn}.utbetalingsperioder"]
-            .map { Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) })
+            .values().map { Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) })
 
     internal val forsikringsvurderingResultat = packet["@løsning.${Behovstype.ForsikringsvurderingResultat.utgåendeNavn}"]
         .takeUnless { it.isMissingOrNull() }
@@ -124,7 +124,7 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
 
     internal val dagpengerV2 = Dagpenger(
         packet["@løsning.${Behovstype.Dagpenger.utgåendeNavn}.meldekortperioder"]
-            .map {
+            .values().map {
                 Periode(
                     it.path("fom").asLocalDate(),
                     it.path("tom").asLocalDate()

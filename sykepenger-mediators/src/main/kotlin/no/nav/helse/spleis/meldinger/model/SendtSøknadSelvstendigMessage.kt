@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -17,7 +17,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: SendtSøknadBuilder = SendtSøknadBuilder(packet["arbeidssituasjon"].asText())) : SøknadMessage(packet, builder.selvstendig()) {
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: BehandlingContext) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
-        val pensjonsgivendeInntekter = packet["selvstendigNaringsdrivende.inntekt.inntektsAar"].map {
+        val pensjonsgivendeInntekter = packet["selvstendigNaringsdrivende.inntekt.inntektsAar"].values().map {
             val pensjonsgivendeInntekt = it.path("pensjonsgivendeInntekt")
             Søknad.PensjonsgivendeInntekt(
                 inntektsår = Year.parse(it.path("aar").asText()),
@@ -52,6 +52,6 @@ internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val 
             builder.meldingTilNavDager(fom = it.path("fom").asLocalDate(), tom = it.path("tom").asLocalDate())
         }
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)
-        mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
+        mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].values().map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
     }
 }

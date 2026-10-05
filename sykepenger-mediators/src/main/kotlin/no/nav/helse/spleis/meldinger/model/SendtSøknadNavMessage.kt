@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -21,7 +21,7 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, override val meldings
     override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: BehandlingContext) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
         byggSendtSøknad(builder, packet)
-        mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
+        mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].values().map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
     }
 
     internal companion object {
@@ -29,7 +29,7 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, override val meldings
             builder.permittert(packet["permitteringer"].takeIf(JsonNode::isArray)?.takeUnless { it.isEmpty }?.let { true } ?: false)
             builder.egenmeldinger(packet["egenmeldingsdagerFraSykmelding"]
                 .takeIf(JsonNode::isArray)
-                ?.map { LocalDate.parse(it.asText()) }
+                ?.values()?.map { LocalDate.parse(it.asText()) }
                 ?.grupperSammenhengendePerioderMedHensynTilHelg()
                 ?: emptyList()
             )
@@ -68,6 +68,7 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, override val meldings
             if (andreInntektskilder !is ArrayNode) return emptyList()
             // fjerner ANDRE_ARBEIDSFORHOLD dersom <ikkeJobbetIDetSisteFraAnnetArbeidsforhold> er satt til true
             return andreInntektskilder
+                .values()
                 .map { it.path("type").asText() }
                 .filterNot { kilde -> kilde == "ANDRE_ARBEIDSFORHOLD" && ikkeJobbetIDetSisteFraAnnetArbeidsforhold }
         }

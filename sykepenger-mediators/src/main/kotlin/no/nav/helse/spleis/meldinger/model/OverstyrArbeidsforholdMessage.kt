@@ -11,7 +11,7 @@ internal class OverstyrArbeidsforholdMessage(val packet: JsonMessage, override v
 
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val overstyrteArbeidsforhold = packet["overstyrteArbeidsforhold"]
-        .map {
+        .values().map {
             OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
                 orgnummer = it["orgnummer"].asText(),
                 deaktivert = it["deaktivert"].asBoolean(),

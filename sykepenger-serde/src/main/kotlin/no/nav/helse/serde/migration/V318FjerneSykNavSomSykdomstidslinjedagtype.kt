@@ -1,9 +1,9 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.node.TextNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.databind.node.StringNode
 import java.time.LocalDate
 import java.util.UUID
 
@@ -59,7 +59,7 @@ internal class V318FjerneSykNavSomSykdomstidslinjedagtype : JsonMigration(versio
     private fun migrerSykdomstidslinje(sykNavDager: Map<LocalDate, List<Dag>>, sykdomstidslinje: JsonNode) {
         val endretSykdomstidslinje = (
             sykdomstidslinje
-                .deepCopy<ObjectNode>()
+                .deepCopy()
                 .path("dager") as ArrayNode
             )
             .datoer()
@@ -137,10 +137,10 @@ internal class V318FjerneSykNavSomSykdomstidslinjedagtype : JsonMigration(versio
     private fun ArrayNode.datoer() = flatMap { it.dagTilDatoer() }
 
     private fun JsonNode.dagTilDatoer(): List<Pair<LocalDate, ObjectNode>> {
-        val dato = (this.path("dato") as? TextNode)?.asText()?.dato
+        val dato = (this.path("dato") as? StringNode)?.asText()?.dato
         val interval = dato?.let { dato..dato } ?: (this.path("fom").asText().dato .. this.path("tom").asText().dato)
         return interval.start.datesUntil(interval.endInclusive.plusDays(1)).map { dato ->
-            dato to this.deepCopy<ObjectNode>().apply {
+            dato to (this.deepCopy() as ObjectNode).apply {
                 putNull("fom")
                 putNull("tom")
                 put("dato", dato.toString())

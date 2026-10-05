@@ -1,12 +1,11 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.treeToValue
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.convertValue
+import tools.jackson.module.kotlin.jacksonMapperBuilder
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
@@ -905,10 +904,9 @@ internal abstract class AbstractEndToEndMediatorTest {
     private class InntektsmeldingerReplayObserver(private val testRapid: TestRapid, private val dataSource: HikariDataSource) : TestRapid.TestRapidObserver, TestUtsenderObservatør {
         private companion object {
             private val log = LoggerFactory.getLogger(InntektsmeldingerReplayObserver::class.java)
-            private val objectMapper = jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
+            private val objectMapper = jacksonMapperBuilder()
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .build()
         }
 
         private val håndterteInntektsmeldinger = mutableListOf<UUID>()
@@ -939,9 +937,9 @@ internal abstract class AbstractEndToEndMediatorTest {
                 orgnr = orgnr,
                 vedtaksperiodeId = vedtaksperiodeId,
                 skjæringstidspunkt = node.path("skjæringstidspunkt").asLocalDate(),
-                førsteFraværsdager = node.path("førsteFraværsdager").map { FørsteFraværsdag(it.path("organisasjonsnummer").textValue(), it.path("førsteFraværsdag").asLocalDate()) },
-                sykmeldingsperioder = node.path("sykmeldingsperioder").map { no.nav.helse.spill_av_im.Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) },
-                egenmeldinger = node.path("egenmeldinger").map { no.nav.helse.spill_av_im.Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) },
+                førsteFraværsdager = node.path("førsteFraværsdager").values().map { FørsteFraværsdag(it.path("organisasjonsnummer").textValue(), it.path("førsteFraværsdag").asLocalDate()) },
+                sykmeldingsperioder = node.path("sykmeldingsperioder").values().map { no.nav.helse.spill_av_im.Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) },
+                egenmeldinger = node.path("egenmeldinger").values().map { no.nav.helse.spill_av_im.Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) },
                 harForespurtArbeidsgiverperiode = node.path("trengerArbeidsgiverperiode").booleanValue()
             )
 

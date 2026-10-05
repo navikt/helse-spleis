@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.jobs
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -26,14 +26,14 @@ class SykepengehistorikkForFeriepengerTest {
         assertDoesNotThrow { UUID.fromString(node.path("@id").asText()) }
         assertDoesNotThrow { LocalDateTime.parse(node.path("@opprettet").asText()) }
         assertEquals("behov", node.path("@event_name").asText())
-        assertEquals(listOf("SykepengehistorikkForFeriepenger"), node.path("@behov").map(JsonNode::asText))
+        assertEquals(listOf("SykepengehistorikkForFeriepenger"), node.path("@behov").values().map(JsonNode::asText))
         assertEquals("2020-01-01", node.path("SykepengehistorikkForFeriepenger").path("historikkFom").asText())
         assertEquals("2020-12-31", node.path("SykepengehistorikkForFeriepenger").path("historikkTom").asText())
         assertEquals("2021-05-10", node.path("SykepengehistorikkForFeriepenger").path("datoForSisteFeriepengekjøringIInfotrygd").asText())
 
         assertEquals(
             setOf("fødselsnummer", "@event_name", "@id", "@opprettet", "@behov", "SykepengehistorikkForFeriepenger"),
-            (node as ObjectNode).fieldNames().asSequence().toSet()
+            (node as ObjectNode).propertyNames().asSequence().toSet()
         )
     }
 }

@@ -2,11 +2,10 @@ package no.nav.helse.spleis.jobs
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonMapperBuilder
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -23,10 +22,9 @@ import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.serde.SerialisertPerson
 import org.apache.kafka.clients.producer.ProducerRecord
 
-private val objectMapper: ObjectMapper = jacksonObjectMapper()
-    .registerModule(JavaTimeModule())
+private val objectMapper: ObjectMapper = jacksonMapperBuilder()
     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    .build()
 
 fun startFeriepenger(factory: ConsumerProducerFactory, arbeidId: String, datoForSisteFeriepengekjøringIInfotrygd: LocalDate, opptjeningsår: Year, antallPersonerOmGangen: Int = 10, dryrun: Boolean = true) {
     sikkerlogg.info("Feriepengejobb starter med arbeidId=$arbeidId, datoForSisteFeriepengekjøringIInfotrygd=$datoForSisteFeriepengekjøringIInfotrygd, opptjeningsår=${opptjeningsår.value} og dryrun=$dryrun")

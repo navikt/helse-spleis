@@ -1,8 +1,8 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.DayOfWeek.MONDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
@@ -20,12 +20,12 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling : JsonMigration(ver
         val syttiårsdagen: LocalDate = fødselsdato.plusYears(70)
         val maksdatoSyttiåring = syttiårsdagen.forrigeVirkedagFør()
 
-        val infotrygdbetalteDager = jsonNode.path("infotrygdhistorikk").map { element ->
+        val infotrygdbetalteDager = jsonNode.path("infotrygdhistorikk").values().map { element ->
             val tidligsteTidspunkt = LocalDateTime.parse(element.path("tidsstempel").asText())
-            val arbeidsgiverutbetalinger = element.path("arbeidsgiverutbetalingsperioder").map { periode ->
+            val arbeidsgiverutbetalinger = element.path("arbeidsgiverutbetalingsperioder").values().map { periode ->
                 LocalDate.parse(periode.path("fom").asText())..LocalDate.parse(periode.path("tom").asText())
             }
-            val personutbetalinger = element.path("arbeidsgiverutbetalingsperioder").map { periode ->
+            val personutbetalinger = element.path("arbeidsgiverutbetalingsperioder").values().map { periode ->
                 LocalDate.parse(periode.path("fom").asText())..LocalDate.parse(periode.path("tom").asText())
             }
             Infotrygdutbetalinger(
@@ -62,7 +62,7 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling : JsonMigration(ver
                                 .any { it.asText() in maksdatobegrunnelser }
                         }
                         .map { dag ->
-                            val årsaker = dag.path("begrunnelser").map { it.asText() }
+                            val årsaker = dag.path("begrunnelser").values().map { it.asText() }
                             val maksdatobegrunnelse = Maksdatobegrunnelse.entries.first { it.name in årsaker }
                             val periode = dag.somPeriode()
                             maksdatobegrunnelse to periode

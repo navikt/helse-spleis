@@ -27,7 +27,7 @@ internal class UtboksRetryRiver(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
         try {
-            val fraMelding = packet["personidentifikatorer"].map { Personidentifikator(it.asText()) }.toSet()
+            val fraMelding = packet["personidentifikatorer"].values().map { Personidentifikator(it.asText()) }.toSet()
 
             val personerMedUsendteMeldinger = when (fraMelding.isNotEmpty()) {
                 true -> fraMelding

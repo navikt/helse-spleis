@@ -24,8 +24,7 @@ testcontainers = "2.0.5"
 [libraries]
 rapids-and-rivers = { group = "com.github.navikt", name = "rapids-and-rivers", version.ref = "rapids-and-rivers" }
 
-jackson-kotlin = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin" }
-jackson-datatype = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310" }
+jackson-kotlin = { group = "tools.jackson.module", name = "jackson-module-kotlin" }
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations" }
 
 logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
@@ -51,7 +50,7 @@ testcontainers-postgres = { group = "org.testcontainers", name = "testcontainers
 
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
-ktor-serialization-jackson = { group = "io.ktor", name = "ktor-serialization-jackson" }
+ktor-serialization-jackson3 = { group = "io.ktor", name = "ktor-serialization-jackson3" }
 ktor-server-auth = { group = "io.ktor", name = "ktor-server-auth" }
 ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio" }
 ktor-server-auth-jwt = { group = "io.ktor", name = "ktor-server-auth-jwt" }
@@ -72,7 +71,7 @@ junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", v
 [bundles]
 flyway = ["flyway-postgres"]
 database = ["postgresql", "hikari", "tbd-sql"]
-jackson = ["jackson-kotlin", "jackson-datatype"]
+jackson = ["jackson-kotlin"]
 logging = ["logback", "logstash"]
 
 [plugins]

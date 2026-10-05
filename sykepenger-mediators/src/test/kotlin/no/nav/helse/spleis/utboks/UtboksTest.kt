@@ -91,7 +91,7 @@ internal class UtboksTest {
             utgåendeMelding.json.path("@forårsaket_av").apply {
                 assertEquals("behov", path("event_name").asText())
                 assertEquals("$innkommendeMeldingId", path("id").asText())
-                assertEquals(listOf("Behov1", "Behov2"), path("behov").map { it.asText() })
+                assertEquals(listOf("Behov1", "Behov2"), path("behov").values().map { it.asText() })
                 assertDoesNotThrow { LocalDateTime.parse(path("opprettet").asText()) }
             }
         }

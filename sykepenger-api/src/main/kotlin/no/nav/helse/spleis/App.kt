@@ -1,10 +1,8 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.core.util.DefaultIndenter
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.core.util.DefaultIndenter
+import tools.jackson.core.util.DefaultPrettyPrinter
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 import com.github.navikt.tbd_libs.naisful.naisApp
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
@@ -25,15 +23,13 @@ import org.slf4j.LoggerFactory
 
 internal val nyObjectmapper
     get() =
-        jacksonObjectMapper()
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .registerModule(JavaTimeModule())
-            .setDefaultPrettyPrinter(
-                DefaultPrettyPrinter().apply {
-                    indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
-                    indentObjectsWith(DefaultIndenter("  ", "\n"))
-                }
+        jacksonMapperBuilder()
+            .defaultPrettyPrinter(
+                DefaultPrettyPrinter()
+                    .withArrayIndenter(DefaultPrettyPrinter.FixedSpaceIndenter.instance())
+                    .withObjectIndenter(DefaultIndenter("  ", "\n"))
             )
+            .build()
 
 internal val objectMapper = nyObjectmapper
 internal val logg = LoggerFactory.getLogger("no.nav.helse.spleis.api.Application")
