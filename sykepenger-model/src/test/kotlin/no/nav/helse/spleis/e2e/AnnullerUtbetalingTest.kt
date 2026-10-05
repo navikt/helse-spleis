@@ -1,25 +1,11 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
-import java.util.*
 import no.nav.helse.april
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Behovsoppsamler
-import no.nav.helse.dsl.TestPerson
+import no.nav.helse.dsl.*
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -27,48 +13,32 @@ import no.nav.helse.person.Behandlinger.Behandling.Tilstand
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING_TIL_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING_TIL_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import java.time.LocalDate
+import java.util.*
 
 internal class AnnullerUtbetalingTest : AbstractDslTest() {
-
     @Test
     fun `Vedtaksperioden skal være med i annulleringskandidater`() {
         a1 {
             nyttVedtak(januar)
 
-            val annulleringskandidater = inspektør.yrkesaktivitet.vedtaksperioder().first().inspektør.annulleringskandidater.map { it.id }
+            val annulleringskandidater =
+                inspektør.yrkesaktivitet
+                    .vedtaksperioder()
+                    .first()
+                    .inspektør.annulleringskandidater
+                    .map { it.id }
             assertEquals(listOf(1.vedtaksperiode), annulleringskandidater)
         }
     }
@@ -79,7 +49,12 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(januar)
             forlengVedtak(februar)
 
-            val annulleringskandidater = inspektør.yrkesaktivitet.vedtaksperioder().first().inspektør.annulleringskandidater.map { it.id }
+            val annulleringskandidater =
+                inspektør.yrkesaktivitet
+                    .vedtaksperioder()
+                    .first()
+                    .inspektør.annulleringskandidater
+                    .map { it.id }
             assertEquals(listOf(1.vedtaksperiode, 2.vedtaksperiode), annulleringskandidater)
         }
     }
@@ -90,7 +65,12 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(januar)
             forlengVedtak(februar)
 
-            val annulleringskandidater = inspektør.yrkesaktivitet.vedtaksperioder().last().inspektør.annulleringskandidater.map { it.id }
+            val annulleringskandidater =
+                inspektør.yrkesaktivitet
+                    .vedtaksperioder()
+                    .last()
+                    .inspektør.annulleringskandidater
+                    .map { it.id }
             assertEquals(listOf(2.vedtaksperiode), annulleringskandidater)
         }
     }
@@ -101,7 +81,12 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(januar)
             nyPeriode(februar)
 
-            val annulleringskandidater = inspektør.yrkesaktivitet.vedtaksperioder().first().inspektør.annulleringskandidater.map { it.id }
+            val annulleringskandidater =
+                inspektør.yrkesaktivitet
+                    .vedtaksperioder()
+                    .first()
+                    .inspektør.annulleringskandidater
+                    .map { it.id }
             assertEquals(listOf(1.vedtaksperiode), annulleringskandidater)
         }
     }
@@ -114,7 +99,12 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             nyttVedtak(april)
 
-            val annulleringskandidater = inspektør.yrkesaktivitet.vedtaksperioder().first().inspektør.annulleringskandidater.map { it.id }
+            val annulleringskandidater =
+                inspektør.yrkesaktivitet
+                    .vedtaksperioder()
+                    .first()
+                    .inspektør.annulleringskandidater
+                    .map { it.id }
             assertEquals(listOf(1.vedtaksperiode, 2.vedtaksperiode), annulleringskandidater)
         }
     }
@@ -219,11 +209,9 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         }
     }
 
-
     @Test
     fun `Annullerer en pågående revurdering`() {
         a1 {
-
             nyttVedtak(januar, grad = 50.prosent)
             forlengVedtak(februar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(23.januar, Dagtype.Sykedag, 100)))
@@ -242,31 +230,71 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
 
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             nullstillTilstandsendringer()
 
             håndterAnnullering(1.vedtaksperiode)
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-15741, Utbetalingstatus.OVERFØRT, 17.januar, 1.januar til 31.januar, annullering!!)
 
             håndterUtbetalt()
 
-            val utførtAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertAnnullering(-15741, Utbetalingstatus.ANNULLERT, 17.januar, 1.januar til 31.januar, utførtAnnullering!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
         }
     }
@@ -277,8 +305,22 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(januar)
             forlengVedtak(februar)
 
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             nullstillTilstandsendringer()
 
@@ -286,50 +328,121 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING)
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-15741, Utbetalingstatus.OVERFØRT, 17.januar, 1.januar til 31.januar, annullering!!)
 
             håndterUtbetalt()
 
-            val utførtAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertAnnullering(-15741, Utbetalingstatus.ANNULLERT, 17.januar, 1.januar til 31.januar, utførtAnnullering!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annulleringFebruar = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annulleringFebruar =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-28620, Utbetalingstatus.OVERFØRT, 1.februar, 1.februar til 28.februar, annulleringFebruar!!)
 
             håndterUtbetalt()
 
-            val utførtAnnulleringFebruar = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnulleringFebruar =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertAnnullering(-28620, Utbetalingstatus.ANNULLERT, 1.februar, 1.februar til 28.februar, utførtAnnulleringFebruar!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
         }
     }
@@ -340,8 +453,22 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(januar)
             forlengVedtak(februar)
 
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             nullstillTilstandsendringer()
 
@@ -349,31 +476,76 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(
                 Tilstand.VedtakIverksatt,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annullering = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-28620, Utbetalingstatus.OVERFØRT, 1.februar, 1.februar til 28.februar, annullering!!)
 
             håndterUtbetalt()
 
-            val utførtAnnulleringFebruar = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnulleringFebruar =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertAnnullering(-28620, Utbetalingstatus.ANNULLERT, 1.februar, 1.februar til 28.februar, utførtAnnulleringFebruar!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
         }
     }
@@ -385,9 +557,30 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             forlengVedtak(februar)
             forlengVedtak(mars)
 
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             nullstillTilstandsendringer()
 
@@ -396,29 +589,81 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING)
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(
                 Tilstand.VedtakIverksatt,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetAnnullering,
-                inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annullering = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-28620, Utbetalingstatus.OVERFØRT, 1.februar, 1.februar til 28.februar, annullering!!)
 
             håndterUtbetalt()
 
-            val utførtAnnulleringFebruar = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnulleringFebruar =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
@@ -426,25 +671,56 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertAnnullering(-28620, Utbetalingstatus.ANNULLERT, 1.februar, 1.februar til 28.februar, utførtAnnulleringFebruar!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annulleringMars = inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annulleringMars =
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertAnnullering(-31482, Utbetalingstatus.OVERFØRT, 1.mars, 1.mars til 31.mars, annulleringMars!!)
 
             håndterUtbetalt()
 
-            val utførtAnnulleringMars = inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnulleringMars =
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertAnnullering(-31482, Utbetalingstatus.ANNULLERT, 1.mars, 1.mars til 31.mars, utførtAnnulleringMars!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
         }
     }
@@ -456,9 +732,30 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             forlengVedtak(februar)
             nyttVedtak(april)
 
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             nullstillTilstandsendringer()
 
@@ -467,29 +764,81 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING)
             assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetRevurdering,
-                inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-15741, Utbetalingstatus.OVERFØRT, 17.januar, 1.januar til 31.januar, annullering!!)
 
             håndterUtbetalt()
 
-            val utførtAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertVarsel(Varselkode.RV_RV_7, 3.vedtaksperiode.filter())
 
@@ -499,7 +848,12 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertAnnullering(-15741, Utbetalingstatus.ANNULLERT, 17.januar, 1.januar til 31.januar, utførtAnnullering!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
         }
     }
@@ -510,8 +864,22 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(januar)
             nyttVedtak(10.februar til 28.februar)
 
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             nullstillTilstandsendringer()
 
@@ -519,31 +887,76 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING)
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-15741, Utbetalingstatus.OVERFØRT, 17.januar, 1.januar til 31.januar, annullering!!)
 
             håndterUtbetalt()
 
-            val utførtAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertAnnullering(-15741, Utbetalingstatus.ANNULLERT, 17.januar, 1.januar til 31.januar, utførtAnnullering!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
         }
     }
@@ -554,8 +967,22 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterSøknad(februar)
 
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             nullstillTilstandsendringer()
 
@@ -564,31 +991,76 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
 
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.Uberegnet,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-15741, Utbetalingstatus.OVERFØRT, 17.januar, 1.januar til 31.januar, annullering!!)
 
             håndterUtbetalt()
 
-            val utførtAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
             assertAnnullering(-15741, Utbetalingstatus.ANNULLERT, 17.januar, 1.januar til 31.januar, utførtAnnullering!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
         }
     }
@@ -600,8 +1072,22 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterSøknad(februar)
             håndterYtelser(2.vedtaksperiode)
 
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             nullstillTilstandsendringer()
 
@@ -611,31 +1097,76 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE)
             assertTrue(inspektør.utbetaling(1).erForkastet)
 
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.Uberegnet,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-15741, Utbetalingstatus.OVERFØRT, 17.januar, 1.januar til 31.januar, annullering!!)
 
             håndterUtbetalt()
 
-            val utførtAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
             assertAnnullering(-15741, Utbetalingstatus.ANNULLERT, 17.januar, 1.januar til 31.januar, utførtAnnullering!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
         }
     }
@@ -648,8 +1179,22 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(28.februar, Dagtype.Sykedag, 100)))
             håndterYtelser(2.vedtaksperiode)
 
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             nullstillTilstandsendringer()
 
@@ -659,42 +1204,100 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING, AVVENTER_ANNULLERING)
             assertTrue(inspektør.utbetaling(2).erForkastet)
 
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-15741, Utbetalingstatus.OVERFØRT, 17.januar, 1.januar til 31.januar, annullering!!)
 
             håndterUtbetalt()
 
-            val utførtAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertTilstander(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertAnnullering(-15741, Utbetalingstatus.ANNULLERT, 17.januar, 1.januar til 31.januar, utførtAnnullering!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
             håndterUtbetalt()
 
-            val utførtAnnulleringFebruar = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnulleringFebruar =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertAnnullering(-14300, Utbetalingstatus.ANNULLERT, 1.februar, 1.februar til 28.februar, utførtAnnulleringFebruar!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
         }
     }
@@ -706,8 +1309,22 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             forlengVedtak(februar, 50.prosent)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(28.februar, Dagtype.Sykedag, 100)))
 
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             nullstillTilstandsendringer()
 
@@ -716,42 +1333,100 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_ANNULLERING)
 
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-15741, Utbetalingstatus.OVERFØRT, 17.januar, 1.januar til 31.januar, annullering!!)
 
             håndterUtbetalt()
 
-            val utførtAnnullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertAnnullering(-15741, Utbetalingstatus.ANNULLERT, 17.januar, 1.januar til 31.januar, utførtAnnullering!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
             håndterUtbetalt()
 
-            val utførtAnnulleringFebruar = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val utførtAnnulleringFebruar =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertAnnullering(-14300, Utbetalingstatus.ANNULLERT, 1.februar, 1.februar til 28.februar, utførtAnnulleringFebruar!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
         }
     }
@@ -760,8 +1435,22 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     fun `annulleringer på vedtaksperioder med samme utbetaling`() {
         medJSONPerson("/personer/to_vedtak_samme_fagsystem_id.json", 334)
         a1 {
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             nullstillTilstandsendringer()
 
@@ -769,19 +1458,51 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING)
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-32913, Utbetalingstatus.OVERFØRT, 19.januar, 3.januar til 20.februar, annullering!!)
 
             håndterUtbetalt()
@@ -793,22 +1514,61 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
-            val forventet = setOf(
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().first().endringer().last().utbetaling,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().first().endringer().last().utbetaling,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling,
-            )
+            val forventet =
+                setOf(
+                    inspektør
+                        .vedtaksperioder(1.vedtaksperiode)
+                        .behandlinger
+                        .behandlinger()
+                        .first()
+                        .endringer()
+                        .last()
+                        .utbetaling,
+                    inspektør
+                        .vedtaksperioder(2.vedtaksperiode)
+                        .behandlinger
+                        .behandlinger()
+                        .first()
+                        .endringer()
+                        .last()
+                        .utbetaling,
+                    inspektør
+                        .vedtaksperioder(1.vedtaksperiode)
+                        .behandlinger
+                        .behandlinger()
+                        .last()
+                        .endringer()
+                        .last()
+                        .utbetaling,
+                    inspektør
+                        .vedtaksperioder(2.vedtaksperiode)
+                        .behandlinger
+                        .behandlinger()
+                        .last()
+                        .endringer()
+                        .last()
+                        .utbetaling,
+                )
             assertEquals(
                 forventet,
-                inspektør.yrkesaktivitet.utbetalinger.toSet()
+                inspektør.yrkesaktivitet.utbetalinger.toSet(),
             )
         }
     }
@@ -818,16 +1578,44 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         medJSONPerson("/personer/to_vedtak_samme_fagsystem_id.json", 334)
 
         a1 {
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             håndterAnnullering(2.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
             assertEquals(3, inspektør.utbetalinger.size)
             val utbetalingForlengelse = inspektør.utbetaling(1)
             val utbetalingRevurdering = inspektør.utbetaling(2)
@@ -845,11 +1633,21 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertEquals(
                 Tilstand.BeregnetRevurdering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
             håndterSimulering(1.vedtaksperiode)
@@ -862,7 +1660,15 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
 
-            val annullering = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertTomAnnulleringsutbetaling(annullering!!)
         }
@@ -873,9 +1679,30 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         medJSONPerson("/personer/tre_vedtak_samme_fagsystem_id.json", 320)
 
         a1 {
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             håndterAnnullering(2.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -883,9 +1710,30 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_ANNULLERING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(4, inspektør.utbetalinger.size)
             val utbetalingRevurdering = inspektør.utbetaling(3)
@@ -902,15 +1750,30 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertEquals(
                 Tilstand.BeregnetRevurdering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetAnnullering,
-                inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
             håndterSimulering(1.vedtaksperiode)
@@ -923,7 +1786,15 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
 
             assertEquals(listOf(2.vedtaksperiode, 3.vedtaksperiode), observatør.vedtaksperiodeAnnullertEventer.map { it.vedtaksperiodeId })
-            val annullering = inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertTomAnnulleringsutbetaling(annullering!!)
         }
@@ -945,9 +1816,30 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -970,9 +1862,169 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertEquals(listOf(3.vedtaksperiode), observatør.vedtaksperiodeAnnullertEventer.map { it.vedtaksperiodeId })
 
             assertEquals(6, inspektør.utbetalinger.size)
-            val annulleringsutbetaling = inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annulleringsutbetaling =
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
 
             assertTomAnnulleringsutbetaling(annulleringsutbetaling!!)
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `overstyring av arbeidsgiveropplysninger lar revurderinger fullføres før senere periode annulleres`(endreInntekt: Boolean) {
+        a1 {
+            nyttVedtak(januar)
+            forlengVedtak(februar)
+            forlengVedtak(mars)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Dagtype.Sykedag, 80)))
+            håndterAnnullering(3.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
+            assertEquals(
+                Tilstand.UberegnetAnnullering,
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
+            )
+            val annulleringsbehandling =
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+            val annulleringsendringer = annulleringsbehandling.endringer().toList()
+
+            val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
+            val overstyring =
+                if (endreInntekt) {
+                    OverstyrtArbeidsgiveropplysning(a1, 32000.månedlig, emptyList())
+                } else {
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        31000.månedlig,
+                        listOf(Triple(skjæringstidspunkt, null, 0.månedlig)),
+                    )
+                }
+
+            håndterOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, listOf(overstyring))
+
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
+            assertEquals(Tilstand.UberegnetAnnullering, annulleringsbehandling.tilstand)
+            assertEquals(
+                annulleringsbehandling,
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last(),
+            )
+            assertEquals(annulleringsendringer, annulleringsbehandling.endringer())
+            listOf(1.vedtaksperiode, 2.vedtaksperiode).forEach { vedtaksperiode ->
+                if (endreInntekt) {
+                    assertEquals(32000.månedlig, inspektør.korrigertInntekt(vedtaksperiode)?.inntektsdata?.beløp)
+                } else {
+                    assertEquals(
+                        0.månedlig,
+                        inspektør.refusjon(vedtaksperiode)[inspektør.periode(vedtaksperiode).start].beløp,
+                    )
+                }
+            }
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
+
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(3.vedtaksperiode, TIL_ANNULLERING)
+
+            håndterUtbetalt()
+            assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+
+            assertEquals(Tilstand.AnnullertPeriode, annulleringsbehandling.tilstand)
+            assertEquals(
+                listOf(3.vedtaksperiode),
+                observatør.vedtaksperiodeAnnullertEventer.map { it.vedtaksperiodeId },
+            )
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `overstyring hopper over annulleringsperioder også mens utbetaling pågår`(venterPåUtbetaling: Boolean) {
+        a1 {
+            nyttVedtak(januar)
+            forlengelseTilGodkjenning(februar)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            if (!venterPåUtbetaling) håndterUtbetalt()
+            håndterAnnullering(2.vedtaksperiode)
+
+            val forventetTilstand = if (venterPåUtbetaling) AVVENTER_ANNULLERING_TIL_UTBETALING else TIL_ANNULLERING
+            assertSisteTilstand(2.vedtaksperiode, forventetTilstand)
+            val annulleringsbehandling =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+            val behandlingstilstand = annulleringsbehandling.tilstand
+            val annulleringsendringer = annulleringsbehandling.endringer().toList()
+
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        32000.månedlig,
+                        listOf(Triple(1.januar, 31.mars, 16000.månedlig)),
+                    ),
+                ),
+            )
+
+            assertSisteTilstand(2.vedtaksperiode, forventetTilstand)
+            assertEquals(behandlingstilstand, annulleringsbehandling.tilstand)
+            assertEquals(
+                annulleringsbehandling,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last(),
+            )
+            assertEquals(annulleringsendringer, annulleringsbehandling.endringer())
+            assertEquals(32000.månedlig, inspektør.korrigertInntekt(1.vedtaksperiode)?.inntektsdata?.beløp)
+            assertEquals(16000.månedlig, inspektør.refusjon(1.vedtaksperiode)[17.januar].beløp)
+            val fremtidigRefusjon = inspektør.ubrukteRefusjonsopplysninger[1.januar]
+            assertEquals(1.mars, fremtidigRefusjon?.first()?.dato)
+            assertEquals(31.mars, fremtidigRefusjon?.last()?.dato)
+            assertEquals(16000.månedlig, fremtidigRefusjon?.get(1.mars)?.beløp)
         }
     }
 
@@ -981,9 +2033,30 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         medJSONPerson("/personer/tre_vedtak_samme_fagsystem_id_forste_periode_AUU.json", 320)
 
         a1 {
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             håndterAnnullering(1.vedtaksperiode)
 
@@ -991,23 +2064,59 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, TIL_ANNULLERING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
 
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(3, inspektør.utbetalinger.size)
 
             assertEquals(
                 Tilstand.AvsluttetUtenVedtak,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetAnnullering,
-                inspektør.vedtaksperioder(3.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
             nullstillTilstandsendringer()
@@ -1015,7 +2124,12 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
 
             assertEquals(
                 Tilstand.AnnullertPeriode,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
             assertEquals(listOf(2.vedtaksperiode, 3.vedtaksperiode), observatør.vedtaksperiodeAnnullertEventer.map { it.vedtaksperiodeId })
@@ -1024,7 +2138,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertForkastetPeriodeTilstander(2.vedtaksperiode, TIL_ANNULLERING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_ANNULLERING, TIL_INFOTRYGD)
         }
-
     }
 
     @Test
@@ -1032,46 +2145,130 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         (a1 og a2).nyeVedtak(januar, inntekt = 31000.månedlig)
         (a1 og a2).forlengVedtak(februar)
 
-        assertEquals(1, inspektør(a2).vedtaksperioder(1.vedtaksperiode(a2)).behandlinger.behandlinger().size)
-        assertEquals(1, inspektør(a2).vedtaksperioder(2.vedtaksperiode(a2)).behandlinger.behandlinger().size)
+        assertEquals(
+            1,
+            inspektør(a2)
+                .vedtaksperioder(1.vedtaksperiode(a2))
+                .behandlinger
+                .behandlinger()
+                .size,
+        )
+        assertEquals(
+            1,
+            inspektør(a2)
+                .vedtaksperioder(2.vedtaksperiode(a2))
+                .behandlinger
+                .behandlinger()
+                .size,
+        )
         a1 {
-            assertEquals(1, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(1, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                1,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             nullstillTilstandsendringer()
             håndterAnnullering(1.vedtaksperiode)
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING)
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(
                 Tilstand.OverførtAnnullering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetAnnullering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
 
-            val annullering = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().endringer().last().utbetaling
+            val annullering =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling
             assertAnnullering(-11880, Utbetalingstatus.OVERFØRT, 17.januar, 1.januar til 31.januar, annullering!!)
         }
 
         a2 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-            assertEquals(2, inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().size)
-            assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().size)
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
+            assertEquals(
+                2,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .size,
+            )
 
             assertEquals(
                 Tilstand.UberegnetRevurdering,
-                inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
             assertEquals(
                 Tilstand.UberegnetRevurdering,
-                inspektør.vedtaksperioder(2.vedtaksperiode).behandlinger.behandlinger().last().tilstand
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .tilstand,
             )
         }
     }
@@ -1089,9 +2286,10 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         a1 {
             nyttVedtak(3.januar til 26.januar, 100.prosent)
 
-            val annulleringnehov = annulleringsbehov(1.vedtaksperiode) {
-                håndterAnnullering(1.vedtaksperiode)
-            }
+            val annulleringnehov =
+                annulleringsbehov(1.vedtaksperiode) {
+                    håndterAnnullering(1.vedtaksperiode)
+                }
 
             assertIngenFunksjonelleFeil()
 
@@ -1104,7 +2302,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
                 assertEquals(19.januar, it.datoStatusFom(0))
             }
 
-            with (annulleringnehov) {
+            with(annulleringnehov) {
                 assertNull(maksdato)
                 assertEquals("SPREF", fagområde)
                 assertEquals("OPPH", linjer.single().statuskode)
@@ -1185,10 +2383,14 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.annulleringsbehov(vedtaksperiodeId: UUID, block: () -> Unit): Behovsoppsamler.Behovsdetaljer.Utbetaling{
-        val behovet = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Utbetaling> {
-            block()
-        }.single { it.vedtaksperiodeId == vedtaksperiodeId }
+    private fun TestPerson.TestArbeidsgiver.annulleringsbehov(
+        vedtaksperiodeId: UUID,
+        block: () -> Unit,
+    ): Behovsoppsamler.Behovsdetaljer.Utbetaling {
+        val behovet =
+            behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Utbetaling> {
+                block()
+            }.single { it.vedtaksperiodeId == vedtaksperiodeId }
         assertEquals(inspektør.sisteArbeidsgiveroppdragFagsystemId(vedtaksperiodeId), behovet.fagsystemId)
         assertEquals("OPPH", behovet.linjer.single().statuskode)
         return behovet
@@ -1246,7 +2448,6 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         }
     }
 
-
     @Test
     fun `Annullering av én periode fører kun til at sammehengende utbetalte perioder blir forkastet og værende i Avsluttet`() {
         a1 {
@@ -1273,7 +2474,7 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nyttVedtak(3.januar til 26.januar, 100.prosent)
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt(
-                status = Oppdragstatus.AKSEPTERT
+                status = Oppdragstatus.AKSEPTERT,
             )
 
             val annullering = observatør.annulleringer.lastOrNull()
@@ -1305,9 +2506,23 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             val annullering = inspektør.utbetaling(2)
 
             assertTrue(annullering.erAnnullering)
-            assertEquals(26.januar, annullering.arbeidsgiverOppdrag.inspektør.periode?.endInclusive)
-            assertEquals(19.januar, annullering.arbeidsgiverOppdrag.first().inspektør.fom)
-            assertEquals(26.januar, annullering.arbeidsgiverOppdrag.last().inspektør.tom)
+            assertEquals(
+                26.januar,
+                annullering.arbeidsgiverOppdrag.inspektør.periode
+                    ?.endInclusive,
+            )
+            assertEquals(
+                19.januar,
+                annullering.arbeidsgiverOppdrag
+                    .first()
+                    .inspektør.fom,
+            )
+            assertEquals(
+                26.januar,
+                annullering.arbeidsgiverOppdrag
+                    .last()
+                    .inspektør.tom,
+            )
         }
     }
 
@@ -1391,11 +2606,22 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
         }
     }
 
-    private fun assertAnnullering(nettobeløp: Int, status: Utbetalingstatus, datoStatusFom: LocalDate, periode: Periode, annullering: Utbetaling) {
+    private fun assertAnnullering(
+        nettobeløp: Int,
+        status: Utbetalingstatus,
+        datoStatusFom: LocalDate,
+        periode: Periode,
+        annullering: Utbetaling,
+    ) {
         assertEquals(true, annullering.inspektør.erAnnullering)
         assertEquals(status, annullering.inspektør.tilstand)
         assertEquals(nettobeløp, annullering.inspektør.nettobeløp)
-        assertEquals(datoStatusFom, annullering.inspektør.arbeidsgiverOppdrag.linjer.first().datoStatusFom)
+        assertEquals(
+            datoStatusFom,
+            annullering.inspektør.arbeidsgiverOppdrag.linjer
+                .first()
+                .datoStatusFom,
+        )
         assertEquals(periode, annullering.inspektør.periode)
     }
 
