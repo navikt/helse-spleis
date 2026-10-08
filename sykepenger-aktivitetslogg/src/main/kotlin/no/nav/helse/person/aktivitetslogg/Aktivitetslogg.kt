@@ -8,14 +8,16 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.*
 data class Aktivitetslogg(
     private val forelder: Aktivitetslogg? = null,
     private val kontekster: List<Aktivitetskontekst> = emptyList(),
-    val aktiviteter: MutableList<Aktivitet> = mutableListOf()
+    val aktiviteter: MutableList<Aktivitet> = mutableListOf(),
 ) : IAktivitetslogg {
-
     val info get() = aktiviteter.filterIsInstance<Info>()
     val varsel get() = aktiviteter.filterIsInstance<Varsel>()
     val funksjonellFeil get() = aktiviteter.filterIsInstance<FunksjonellFeil>()
 
-    override fun info(melding: String, vararg params: Any?) {
+    override fun info(
+        melding: String,
+        vararg params: Any?,
+    ) {
         val formatertMelding = if (params.isEmpty()) melding else String.format(melding, *params)
         add(Info.opprett(kontekster.toSpesifikk(), formatertMelding))
     }

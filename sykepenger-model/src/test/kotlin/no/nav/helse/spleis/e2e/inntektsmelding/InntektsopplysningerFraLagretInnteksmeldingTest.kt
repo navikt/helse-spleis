@@ -1,36 +1,28 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.inspectors.beløp
-import no.nav.helse.inspectors.hendelseId
-import no.nav.helse.inspectors.inspektør
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.beløp
+import no.nav.helse.inspectors.hendelseId
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_27
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
+import java.time.LocalDateTime
+import java.util.*
 
-internal class InntektsopplysningerFraLagretInnteksmeldingTest: AbstractDslTest() {
-
+internal class InntektsopplysningerFraLagretInnteksmeldingTest : AbstractDslTest() {
     @Test
     fun `periode i AvventerInntektsmelding`() {
         a1 {
@@ -47,7 +39,7 @@ internal class InntektsopplysningerFraLagretInnteksmeldingTest: AbstractDslTest(
                 inntekt = INNTEKT,
                 refusjon = INNTEKT * 0.8,
                 inntektssmeldingMeldingsreferanseId = inntektssmeldingMeldingsreferanseId,
-                inntektsmeldingMottatt = inntektsmeldingMottatt
+                inntektsmeldingMottatt = inntektsmeldingMottatt,
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(1.vedtaksperiode, RV_IM_27)
@@ -57,11 +49,12 @@ internal class InntektsopplysningerFraLagretInnteksmeldingTest: AbstractDslTest(
                 assertEquals(this?.hendelseId, inntektssmeldingMeldingsreferanseId.id)
             }
 
-            val forventetRefusjonstidslinje = Beløpstidslinje.fra(
-                periode = januar,
-                beløp = INNTEKT * 0.8,
-                kilde = Kilde(inntektssmeldingMeldingsreferanseId, ARBEIDSGIVER, inntektsmeldingMottatt)
-            )
+            val forventetRefusjonstidslinje =
+                Beløpstidslinje.fra(
+                    periode = januar,
+                    beløp = INNTEKT * 0.8,
+                    kilde = Kilde(inntektssmeldingMeldingsreferanseId, ARBEIDSGIVER, inntektsmeldingMottatt),
+                )
 
             assertEquals(forventetRefusjonstidslinje, inspektør.refusjon(1.vedtaksperiode))
 
@@ -78,7 +71,7 @@ internal class InntektsopplysningerFraLagretInnteksmeldingTest: AbstractDslTest(
             håndterInntektsopplysningerFraLagretInnteksmelding(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 inntekt = INNTEKT,
-                refusjon = INNTEKT
+                refusjon = INNTEKT,
             )
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
@@ -90,16 +83,14 @@ internal class InntektsopplysningerFraLagretInnteksmeldingTest: AbstractDslTest(
     fun `annen periode enn den som er til behandling mangler inntektsmelding`() {
         a1 {
             nyttVedtak(januar, ghosts = listOf(a2))
-            håndterOverstyrTidslinje((1.januar til 31.januar).map { ManuellOverskrivingDag (it, Dagtype.Svangerskapspengerdag)})
+            håndterOverstyrTidslinje((1.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Svangerskapspengerdag) })
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
             håndterSøknad(februar)
 
-
             assertVarsler(1.vedtaksperiode, Varselkode.RV_VV_2, Varselkode.RV_UT_23)
-
         }
 
         a2 {
@@ -111,7 +102,7 @@ internal class InntektsopplysningerFraLagretInnteksmeldingTest: AbstractDslTest(
             håndterInntektsopplysningerFraLagretInnteksmelding(
                 vedtaksperiodeId = 2.vedtaksperiode,
                 inntekt = INNTEKT,
-                refusjon = INNTEKT
+                refusjon = INNTEKT,
             )
             assertVarsler(2.vedtaksperiode, RV_IM_27)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)

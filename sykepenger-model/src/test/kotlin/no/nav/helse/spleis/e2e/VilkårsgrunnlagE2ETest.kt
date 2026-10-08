@@ -1,22 +1,12 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
+import no.nav.helse.*
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.mars
-import no.nav.helse.november
-import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -24,7 +14,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
-
     @Test
     fun `skjæringstidspunkt måneden før inntektsmelding`() {
         a1 {
@@ -45,7 +34,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
     @Test
     fun `negativt omregnet årsinntekt for ghost-arbeidsgiver`() {
         a1 {
-
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
@@ -86,12 +74,12 @@ internal class VilkårsgrunnlagE2ETest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INGEN),
-                arbeidsforhold = listOf(Triple(a1, 1.januar, null))
+                arbeidsforhold = listOf(Triple(a1, 1.januar, null)),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_IM_8, Varselkode.RV_VV_1, Varselkode.RV_OV_1), 1.vedtaksperiode.filter())

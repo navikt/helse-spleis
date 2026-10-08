@@ -8,11 +8,21 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal data object SelvstendigAvventerGodkjenning : Vedtaksperiodetilstand {
     override val type = TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
-    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+
+    override fun entering(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         vedtaksperiode.trengerGodkjenning(eventBus, aktivitetslogg)
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    override fun håndterPåminnelse(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        påminnelse: Påminnelse,
+        aktivitetslogg: IAktivitetslogg,
+    ): Revurderingseventyr? {
         vedtaksperiode.trengerGodkjenning(eventBus, aktivitetslogg)
         return null
     }

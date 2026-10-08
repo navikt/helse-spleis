@@ -3,7 +3,6 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL
 
 class AftereEachTestOpenSpannerExtension : AfterEachCallback {
-
     @Throws(Exception::class)
     override fun afterEach(context: ExtensionContext) {
         val testWatcher = SpannerEtterTestInterceptor()

@@ -1,6 +1,5 @@
 package no.nav.helse.bugs_showstoppers
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
@@ -10,22 +9,12 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mandag
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class ManglendeVilkårsgrunnlagTest : AbstractDslTest() {
-
     @Test
     fun `inntektsmelding avslutter to korte perioder og flytter nav-perioden uten å utføre vilkårsprøving`() {
         a1 {
@@ -43,9 +32,9 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractDslTest() {
                 listOf(
                     9.januar til 15.januar,
                     19.januar til 26.januar,
-                    29.januar til 29.januar
+                    29.januar til 29.januar,
                 ),
-                vedtaksperiodeId = 3.vedtaksperiode
+                vedtaksperiodeId = 3.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterYtelser(3.vedtaksperiode)
@@ -59,7 +48,7 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
+                AVVENTER_SIMULERING,
             )
         }
     }
@@ -87,8 +76,8 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractDslTest() {
                 listOf(
                     1.januar til 5.januar,
                     8.januar til 8.januar,
-                    24.januar til 2.februar
-                )
+                    24.januar til 2.februar,
+                ),
             )
             assertEquals(1.januar til 5.januar, inspektør.periode(1.vedtaksperiode))
             assertEquals(6.januar til 2.februar, inspektør.periode(2.vedtaksperiode))
@@ -98,11 +87,14 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
 
-            assertEquals(listOf(
-                1.januar til 5.januar,
-                8.januar til 8.januar,
-                24.januar til 2.februar
-            ), inspektør.venteperiode(3.vedtaksperiode))
+            assertEquals(
+                listOf(
+                    1.januar til 5.januar,
+                    8.januar til 8.januar,
+                    24.januar til 2.februar,
+                ),
+                inspektør.venteperiode(3.vedtaksperiode),
+            )
         }
     }
 }

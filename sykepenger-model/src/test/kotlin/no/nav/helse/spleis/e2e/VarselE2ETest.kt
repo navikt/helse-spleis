@@ -1,35 +1,14 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.Institusjonsopphold
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.*
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_9
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -37,13 +16,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class VarselE2ETest : AbstractDslTest() {
-
     @Test
     fun `varsel - Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling`() {
         a1 {
             håndterSøknad(
                 Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-                merknaderFraSykmelding = listOf(Søknad.Merknad("UGYLDIG_TILBAKEDATERING"))
+                merknaderFraSykmelding = listOf(Søknad.Merknad("UGYLDIG_TILBAKEDATERING")),
             )
             assertVarsel(RV_SØ_3, 1.vedtaksperiode.filter())
         }
@@ -106,8 +84,7 @@ internal class VarselE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
-            håndterUtbetalingshistorikkEtterInfotrygdendring(
-            )
+            håndterUtbetalingshistorikkEtterInfotrygdendring()
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
@@ -121,7 +98,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             forlengVedtak(februar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.februar, Dagtype.Feriedag)))
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar))
+                utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar)),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
@@ -142,7 +119,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             nullstillTilstandsendringer()
             assertEquals(listOf(10.januar til 25.januar), inspektør.venteperiode(1.vedtaksperiode))
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 9.januar))
+                utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 9.januar)),
             )
             assertEquals(emptyList<Periode>(), inspektør.venteperiode(1.vedtaksperiode))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -165,7 +142,7 @@ internal class VarselE2ETest : AbstractDslTest() {
 
             assertEquals(listOf(10.februar til 25.februar), inspektør.venteperiode(1.vedtaksperiode))
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                listOf(ArbeidsgiverUtbetalingsperiode(a1, 5.februar, 11.februar))
+                listOf(ArbeidsgiverUtbetalingsperiode(a1, 5.februar, 11.februar)),
             )
             assertEquals(emptyList<Periode>(), inspektør.venteperiode(1.vedtaksperiode))
 

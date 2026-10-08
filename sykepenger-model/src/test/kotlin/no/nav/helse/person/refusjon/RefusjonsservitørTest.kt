@@ -1,7 +1,5 @@
 package no.nav.helse.person.refusjon
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -13,13 +11,12 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.*
 
 internal class RefusjonsservitørTest {
-
     @Test
     fun `Ubrukte refusjonsopplysninger håndterer om vi har nyere opplysninger tilbake i tid`() {
         val tidspunkt1 = LocalDateTime.now()
@@ -85,7 +82,6 @@ internal class RefusjonsservitørTest {
 
         servitørFraKorrigerendeInntektsmelding.servér(servitørPåYrkesaktivitetsNivå, Aktivitetslogg())
         assertNull(servitørPåYrkesaktivitetsNivå[1.januar])
-
     }
 
     private companion object {

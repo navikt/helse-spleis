@@ -1,19 +1,21 @@
 package no.nav.helse.økonomi
 
-import kotlin.math.roundToInt
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.økonomi.Prosentdel.Companion.average
+import kotlin.math.roundToInt
 
-class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
-
+class Inntekt private constructor(
+    val årlig: Double,
+) : Comparable<Inntekt> {
     init {
         require(
-            this.årlig !in listOf(
-                Double.POSITIVE_INFINITY,
-                Double.NEGATIVE_INFINITY,
-                Double.NaN
-            )
+            this.årlig !in
+                listOf(
+                    Double.POSITIVE_INFINITY,
+                    Double.NEGATIVE_INFINITY,
+                    Double.NaN,
+                ),
         ) { "inntekt må være et gyldig, ikke-negativt tall" }
     }
 
@@ -22,19 +24,22 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
     val dagligInt = daglig.toInt()
 
     fun rundTilDaglig() = daglig.roundToInt().daglig
+
     fun rundNedTilDaglig() = dagligInt.daglig
 
     companion object {
-        //8-10 ledd 3
+        // 8-10 ledd 3
         private const val ARBEIDSDAGER_PER_ÅR = 260
 
-        fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>, inntektjustering: Inntekt): Prosentdel {
-            return parene.map { it.first to it.second.årlig }.average(inntektjustering.årlig)
-        }
+        fun vektlagtGjennomsnitt(
+            parene: List<Pair<Prosentdel, Inntekt>>,
+            inntektjustering: Inntekt,
+        ): Prosentdel = parene.map { it.first to it.second.årlig }.average(inntektjustering.årlig)
 
-        fun fraGradert(inntekt: Inntekt, grad: Prosentdel): Inntekt {
-            return grad.gradér(inntekt.daglig).daglig
-        }
+        fun fraGradert(
+            inntekt: Inntekt,
+            grad: Prosentdel,
+        ): Inntekt = grad.gradér(inntekt.daglig).daglig
 
         val Number.månedlig get() = Inntekt(this.toDouble() * 12)
 
@@ -46,14 +51,13 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
 
         val INGEN = 0.daglig
 
-        fun gjenopprett(dto: InntektbeløpDto): Inntekt {
-            return when (dto) {
+        fun gjenopprett(dto: InntektbeløpDto): Inntekt =
+            when (dto) {
                 is InntektbeløpDto.Årlig -> Inntekt(dto.beløp)
                 is InntektbeløpDto.DagligDouble -> dto.beløp.daglig
                 is InntektbeløpDto.DagligInt -> dto.beløp.daglig
                 is InntektbeløpDto.MånedligDouble -> dto.beløp.månedlig
             }
-        }
     }
 
     operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
@@ -76,19 +80,21 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
 
     override fun compareTo(other: Inntekt) = if (this == other) 0 else this.årlig.compareTo(other.årlig)
 
-    override fun toString(): String {
-        return "[Årlig: $årlig, Månedlig: ${månedlig}, Daglig: ${daglig}]"
-    }
+    override fun toString(): String = "[Årlig: $årlig, Månedlig: $månedlig, Daglig: $daglig]"
 
-    fun dto() = InntektDto(
-        årlig = dtoÅrlig(),
-        månedligDouble = dtoMånedligDouble(),
-        dagligInt = dtoDagligInt(),
-        dagligDouble = dtoDagligDouble()
-    )
+    fun dto() =
+        InntektDto(
+            årlig = dtoÅrlig(),
+            månedligDouble = dtoMånedligDouble(),
+            dagligInt = dtoDagligInt(),
+            dagligDouble = dtoDagligDouble(),
+        )
 
     private fun dtoÅrlig() = InntektbeløpDto.Årlig(this.årlig)
+
     fun dtoMånedligDouble() = InntektbeløpDto.MånedligDouble(månedlig)
+
     private fun dtoDagligDouble() = InntektbeløpDto.DagligDouble(daglig)
+
     private fun dtoDagligInt() = InntektbeløpDto.DagligInt(dagligInt)
 }

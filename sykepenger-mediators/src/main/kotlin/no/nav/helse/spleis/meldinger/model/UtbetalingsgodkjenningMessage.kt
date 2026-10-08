@@ -11,7 +11,10 @@ import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 
 // Understands a JSON message representing a Godkjenning-behov
-internal class UtbetalingsgodkjenningMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
+internal class UtbetalingsgodkjenningMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : BehovMessage(packet) {
     private val utbetalingId = packet["utbetalingId"].asText().toUUID()
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().toUUID()
     private val behandlingId = packet["behandlingId"].asText().toUUID()
@@ -23,7 +26,8 @@ internal class UtbetalingsgodkjenningMessage(packet: JsonMessage, override val m
     private val automatiskBehandling = packet["@løsning.${Godkjenning.utgåendeNavn}.automatiskBehandling"].asBoolean()
 
     private val utbetalingsgodkjenning
-        get() = Utbetalingsgodkjenning(
+        get() =
+            Utbetalingsgodkjenning(
                 meldingsreferanseId = meldingsporing.id,
                 behandlingsporing = behandlingsporing,
                 utbetalingId = utbetalingId,
@@ -33,10 +37,13 @@ internal class UtbetalingsgodkjenningMessage(packet: JsonMessage, override val m
                 saksbehandlerEpost = saksbehandlerEpost,
                 utbetalingGodkjent = utbetalingGodkjent,
                 godkjenttidspunkt = godkjenttidspunkt,
-                automatiskBehandling = automatiskBehandling
-        )
+                automatiskBehandling = automatiskBehandling,
+            )
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         mediator.behandle(this, utbetalingsgodkjenning, context)
     }
 }

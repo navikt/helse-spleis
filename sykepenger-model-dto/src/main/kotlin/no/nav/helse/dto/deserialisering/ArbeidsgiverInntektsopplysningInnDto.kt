@@ -4,5 +4,5 @@ data class ArbeidsgiverInntektsopplysningInnDto(
     val orgnummer: String,
     val faktaavklartInntekt: ArbeidstakerFaktaavklartInntektInnDto,
     val korrigertInntekt: SaksbehandlerInnDto?,
-    val skjønnsmessigFastsatt: SkjønnsmessigFastsattInnDto?
+    val skjønnsmessigFastsatt: SkjønnsmessigFastsattInnDto?,
 )

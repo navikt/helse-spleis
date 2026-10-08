@@ -1,15 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import java.util.*
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.a3
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -18,27 +9,24 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import no.nav.helse.økonomi.inspectors.inspektør
+import java.util.*
 
 internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
-
     @Test
     fun `Samme skjønnsmessig fastsettelse mange ganger`() {
         a1 {
@@ -72,7 +60,12 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
-            assertEquals(0, inspektør(1.vedtaksperiode).utbetalingstidslinje[17.mars].økonomi.inspektør.totalGrad)
+            assertEquals(
+                0,
+                inspektør(1.vedtaksperiode)
+                    .utbetalingstidslinje[17.mars]
+                    .økonomi.inspektør.totalGrad,
+            )
         }
     }
 
@@ -87,10 +80,11 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
 
             håndterSkjønnsmessigFastsettelse(
-                1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.månedlig),
-                OverstyrtArbeidsgiveropplysning(a2, INNTEKT - 500.månedlig)
-            )
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.månedlig),
+                    OverstyrtArbeidsgiveropplysning(a2, INNTEKT - 500.månedlig),
+                ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -135,10 +129,11 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
 
             håndterSkjønnsmessigFastsettelse(
-                1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.månedlig),
-                OverstyrtArbeidsgiveropplysning(a2, INNTEKT - 500.månedlig)
-            )
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.månedlig),
+                    OverstyrtArbeidsgiveropplysning(a2, INNTEKT - 500.månedlig),
+                ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -176,10 +171,12 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         (a1 og a2).nyeVedtak(januar)
 
         håndterSkjønnsmessigFastsettelse(
-            1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(a1, 19000.0.månedlig),
-            OverstyrtArbeidsgiveropplysning(a2, 21000.0.månedlig)
-        ))
+            1.januar,
+            listOf(
+                OverstyrtArbeidsgiveropplysning(a1, 19000.0.månedlig),
+                OverstyrtArbeidsgiveropplysning(a2, 21000.0.månedlig),
+            ),
+        )
 
         a1 {
             håndterYtelser(1.vedtaksperiode)
@@ -202,7 +199,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 beregnetInntekt = 20000.månedlig,
                 refusjon = Refusjon(20000.månedlig, opphørsdato = 31.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
@@ -261,10 +258,13 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
     fun `Ved deaktivering av arbeidsgivere må eventuell skjønnsmessig fastsettelse rulles tilbake`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 20_000.månedlig)
         a1 {
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = 40_000.månedlig),
-                OverstyrtArbeidsgiveropplysning(orgnummer = a2, inntekt = 40_000.månedlig),
-            ))
+            håndterSkjønnsmessigFastsettelse(
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = 40_000.månedlig),
+                    OverstyrtArbeidsgiveropplysning(orgnummer = a2, inntekt = 40_000.månedlig),
+                ),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -293,7 +293,6 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             assertVarsler(1.vedtaksperiode, RV_UT_23)
         }
     }
-
 
     @Test
     fun `saksbehandler-inntekt overstyres av en skjønnsmessig med samme beløp`() {
@@ -352,11 +351,12 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         }
         håndterSkjønnsmessigFastsettelse(
             skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2),
-                OverstyrtArbeidsgiveropplysning(orgnummer = a2, inntekt = INNTEKT * 2),
-                OverstyrtArbeidsgiveropplysning(orgnummer = a3, inntekt = INNTEKT * 2)
-            )
+            arbeidsgiveropplysninger =
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2),
+                    OverstyrtArbeidsgiveropplysning(orgnummer = a2, inntekt = INNTEKT * 2),
+                    OverstyrtArbeidsgiveropplysning(orgnummer = a3, inntekt = INNTEKT * 2),
+                ),
         )
         a1 {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 3) {
@@ -385,7 +385,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         a1 { nyttVedtak(januar) }
         håndterSkjønnsmessigFastsettelse(
             1.januar,
-            listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2))
+            listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)),
         )
         a1 {
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
@@ -430,7 +430,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(
-                listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag, 100))
+                listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag, 100)),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class AvbruttSøknadE2ETest : AbstractDslTest() {
-
     @Test
     fun `avbrutt søknad på ukjent arbeidsgiver`() {
         a1 {

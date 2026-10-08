@@ -3,36 +3,40 @@ package no.nav.helse.spleis.meldinger.model
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
-import java.time.LocalDateTime
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import java.time.LocalDateTime
 
-internal class SkjønnsmessigFastsettelseMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
-
+internal class SkjønnsmessigFastsettelseMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : HendelseMessage(packet) {
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val arbeidsgiveropplysninger = packet["arbeidsgivere"].asArbeidsgiveropplysninger()
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) =
-        mediator.behandle(
-            this, SkjønnsmessigFastsettelse(
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) = mediator.behandle(
+        this,
+        SkjønnsmessigFastsettelse(
             meldingsreferanseId = meldingsporing.id,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiveropplysninger = arbeidsgiveropplysninger,
-            opprettet = opprettet
+            opprettet = opprettet,
         ),
-            context
-        )
+        context,
+    )
 
-    private fun JsonNode.asArbeidsgiveropplysninger() = map { arbeidsgiveropplysning ->
-        val orgnummer = arbeidsgiveropplysning["organisasjonsnummer"].asText()
-        val årlig = arbeidsgiveropplysning["årlig"].asDouble().årlig
+    private fun JsonNode.asArbeidsgiveropplysninger() =
+        map { arbeidsgiveropplysning ->
+            val orgnummer = arbeidsgiveropplysning["organisasjonsnummer"].asText()
+            val årlig = arbeidsgiveropplysning["årlig"].asDouble().årlig
 
-        SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt(orgnummer, Inntektsdata(meldingsporing.id, skjæringstidspunkt, årlig, LocalDateTime.now()))
-    }
+            SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt(orgnummer, Inntektsdata(meldingsporing.id, skjæringstidspunkt, årlig, LocalDateTime.now()))
+        }
 }
-
-

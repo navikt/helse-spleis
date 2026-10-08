@@ -1,8 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
@@ -11,12 +8,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Merknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.november
@@ -27,32 +19,30 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
-import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 internal class SøknadTest {
-
     private companion object {
-        private val ungPersonFnr2018Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = "987654321",
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("987654321")
-        )
+        private val ungPersonFnr2018Hendelsefabrikk =
+            ArbeidsgiverHendelsefabrikk(
+                organisasjonsnummer = "987654321",
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("987654321"),
+            )
         private val november2 = 2.november(2000)
-        private val fyller18År2NovemberHendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = "987654321",
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("987654321")
-        )
+        private val fyller18År2NovemberHendelsefabrikk =
+            ArbeidsgiverHendelsefabrikk(
+                organisasjonsnummer = "987654321",
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("987654321"),
+            )
     }
 
     private lateinit var aktivitetslogg: Aktivitetslogg
@@ -106,7 +96,11 @@ internal class SøknadTest {
         `utlandsopphold og ferie`(Ferie(5.januar, 9.januar), Utlandsopphold(2.januar, 4.januar), true)
     }
 
-    private fun `utlandsopphold og ferie`(ferie: Ferie, utlandsopphold: Utlandsopphold, skalHaWarning: Boolean) {
+    private fun `utlandsopphold og ferie`(
+        ferie: Ferie,
+        utlandsopphold: Utlandsopphold,
+        skalHaWarning: Boolean,
+    ) {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), ferie, utlandsopphold)
         assertEquals(skalHaWarning, søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harVarslerEllerVerre())
         assertEquals(10, søknad.sykdomstidslinje.count())
@@ -291,17 +285,18 @@ internal class SøknadTest {
         merknaderFraSykmelding: List<Merknad> = emptyList(),
         hendelsefabrikk: ArbeidsgiverHendelsefabrikk = ungPersonFnr2018Hendelsefabrikk,
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
-        ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
+        ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false,
     ) {
         aktivitetslogg = Aktivitetslogg()
-        søknad = hendelsefabrikk.lagSøknad(
-            perioder = perioder,
-            andreInntektskilder = andreInntektskilder,
-            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive ?: LocalDate.now(),
-            sykmeldingSkrevet = LocalDateTime.now(),
-            ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
-            merknaderFraSykmelding = merknaderFraSykmelding,
-            permittert = permittert
-        )
+        søknad =
+            hendelsefabrikk.lagSøknad(
+                perioder = perioder,
+                andreInntektskilder = andreInntektskilder,
+                sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive ?: LocalDate.now(),
+                sykmeldingSkrevet = LocalDateTime.now(),
+                ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
+                merknaderFraSykmelding = merknaderFraSykmelding,
+                permittert = permittert,
+            )
     }
 }

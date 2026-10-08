@@ -1,14 +1,14 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.januar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 internal class InntektsopplysningTest {
     private companion object {
@@ -34,7 +34,8 @@ internal class InntektsopplysningTest {
         assertTrue(im2.kanLagres(im1))
     }
 
-    private fun inntektsmeldinginntekt(dato: LocalDate, hendelseId: UUID) =
-        Inntektsmeldinginntekt(UUID.randomUUID(), Inntektsdata(MeldingsreferanseId(hendelseId), dato, INNTEKT, LocalDateTime.now()))
-
+    private fun inntektsmeldinginntekt(
+        dato: LocalDate,
+        hendelseId: UUID,
+    ) = Inntektsmeldinginntekt(UUID.randomUUID(), Inntektsdata(MeldingsreferanseId(hendelseId), dato, INNTEKT, LocalDateTime.now()))
 }

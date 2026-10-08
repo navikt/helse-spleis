@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class DagerUtenNavAnsvaravklaringTest {
-
     @Test
     fun `En påstartet telling er det samme som en fortsatt eller ferdig avklart telling`() {
         val en = DagerUtenNavAnsvaravklaring(false, listOf(1.januar til 10.januar))

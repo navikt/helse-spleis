@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ForespørselOmArbeidsgiveropplysningerInfotrygdTest : AbstractDslTest() {
-
     @Test
     fun `sender ikke flagget trengerArbeidsgiveropplysninger i tilstander som har rukket å sende ut egne forespørsler`() {
         a1 {
@@ -86,7 +84,6 @@ internal class ForespørselOmArbeidsgiveropplysningerInfotrygdTest : AbstractDsl
 
             håndterSøknad(1.februar til 5.februar)
             assertTrue(observatør.forkastet(4.vedtaksperiode).trengerArbeidsgiveropplysninger)
-
         }
     }
 
@@ -101,7 +98,6 @@ internal class ForespørselOmArbeidsgiveropplysningerInfotrygdTest : AbstractDsl
 
             håndterSøknad(15.januar til 20.januar)
             assertFalse(observatør.forkastet(3.vedtaksperiode).trengerArbeidsgiveropplysninger)
-
         }
     }
 }

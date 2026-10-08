@@ -1,8 +1,5 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import java.time.LocalDate
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -15,12 +12,15 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
+import java.time.LocalDate
+import java.time.YearMonth
+import java.util.UUID
 
-internal class VilkårsgrunlagRiverMappingTest: RiverMappingTest<VilkårsgrunnlagMessage>(
-    hendelse = VilkårsgrunnlagMessage::class,
-    registrer = { rapid, mediator -> VilkårsgrunnlagRiver(rapid, mediator) }
-) {
-
+internal class VilkårsgrunlagRiverMappingTest :
+    RiverMappingTest<VilkårsgrunnlagMessage>(
+        hendelse = VilkårsgrunnlagMessage::class,
+        registrer = { rapid, mediator -> VilkårsgrunnlagRiver(rapid, mediator) },
+    ) {
     @Test
     fun `Mapping ved løsninger som array`() {
         val resultat = sendJson(medArray)
@@ -50,33 +50,47 @@ internal class VilkårsgrunlagRiverMappingTest: RiverMappingTest<Vilkårsgrunnla
     }
 
     private companion object {
-
-        private val forventetInntekterForOpptjening = listOf(ArbeidsgiverInntekt(
-            arbeidsgiver = "987654321",
-            inntekter = listOf(ArbeidsgiverInntekt.MånedligInntekt(
-                yearMonth = YearMonth.parse("2017-12"),
-                inntekt = 384_000.årlig,
-                fordel = "kontantytelse",
-                beskrivelse = "fastloenn",
-                type = LØNNSINNTEKT
-            ))
-        ))
-        private val forventetInntekterForSykepengegrunnlag = listOf(ArbeidsgiverInntekt(
-            arbeidsgiver = "987654322",
-            inntekter = listOf(ArbeidsgiverInntekt.MånedligInntekt(
-                yearMonth = YearMonth.parse("2017-12"),
-                inntekt = 384_000.årlig,
-                fordel = "kontantytelse",
-                beskrivelse = "fastloenn",
-                type = LØNNSINNTEKT
-            ))
-        ))
-        private val forventetArbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(
-            orgnummer = "987654321",
-            ansattFom = LocalDate.EPOCH,
-            ansattTom = null,
-            type = ORDINÆRT
-        ))
+        private val forventetInntekterForOpptjening =
+            listOf(
+                ArbeidsgiverInntekt(
+                    arbeidsgiver = "987654321",
+                    inntekter =
+                        listOf(
+                            ArbeidsgiverInntekt.MånedligInntekt(
+                                yearMonth = YearMonth.parse("2017-12"),
+                                inntekt = 384_000.årlig,
+                                fordel = "kontantytelse",
+                                beskrivelse = "fastloenn",
+                                type = LØNNSINNTEKT,
+                            ),
+                        ),
+                ),
+            )
+        private val forventetInntekterForSykepengegrunnlag =
+            listOf(
+                ArbeidsgiverInntekt(
+                    arbeidsgiver = "987654322",
+                    inntekter =
+                        listOf(
+                            ArbeidsgiverInntekt.MånedligInntekt(
+                                yearMonth = YearMonth.parse("2017-12"),
+                                inntekt = 384_000.årlig,
+                                fordel = "kontantytelse",
+                                beskrivelse = "fastloenn",
+                                type = LØNNSINNTEKT,
+                            ),
+                        ),
+                ),
+            )
+        private val forventetArbeidsforhold =
+            listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(
+                    orgnummer = "987654321",
+                    ansattFom = LocalDate.EPOCH,
+                    ansattTom = null,
+                    type = ORDINÆRT,
+                ),
+            )
         private val forventetMedlemskap = Medlemskapsvurdering.Medlemskapstatus.Ja
 
         @Language("JSON")
@@ -325,6 +339,5 @@ internal class VilkårsgrunlagRiverMappingTest: RiverMappingTest<Vilkårsgrunnla
           "@opprettet": "2026-03-16T09:03:00.359354"
         }
         """
-
     }
 }

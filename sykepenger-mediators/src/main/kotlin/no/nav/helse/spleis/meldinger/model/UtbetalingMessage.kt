@@ -11,7 +11,10 @@ import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 
-internal class UtbetalingMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
+internal class UtbetalingMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : BehovMessage(packet) {
     private val behandlingsporing = packet.yrkesaktivitetssporing
     private val fagsystemId = packet["${Utbetaling.utgåendeNavn}.fagsystemId"].asText().trim()
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().toUUID()
@@ -24,20 +27,24 @@ internal class UtbetalingMessage(packet: JsonMessage, override val meldingsporin
     private val overføringstidspunkt = packet["@løsning.${Utbetaling.utgåendeNavn}.overføringstidspunkt"].asLocalDateTime()
 
     private val utbetaling
-        get() = UtbetalingHendelse(
-            meldingsreferanseId = meldingsporing.id,
-            behandlingsporing = behandlingsporing,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            fagsystemId = fagsystemId,
-            utbetalingId = utbetalingId,
-            status = status,
-            melding = beskrivelse,
-            avstemmingsnøkkel = avstemmingsnøkkel,
-            overføringstidspunkt = overføringstidspunkt
-        )
+        get() =
+            UtbetalingHendelse(
+                meldingsreferanseId = meldingsporing.id,
+                behandlingsporing = behandlingsporing,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                fagsystemId = fagsystemId,
+                utbetalingId = utbetalingId,
+                status = status,
+                melding = beskrivelse,
+                avstemmingsnøkkel = avstemmingsnøkkel,
+                overføringstidspunkt = overføringstidspunkt,
+            )
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         if (status == Oppdragstatus.OVERFØRT) return // sender bare inn kvitteringer til modellen
         mediator.behandle(this, utbetaling, context)
     }

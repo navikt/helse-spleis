@@ -6,15 +6,11 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import org.junit.jupiter.api.Test
 
-internal class EgenmeldingsdagerTest: AbstractDslTest() {
-
+internal class EgenmeldingsdagerTest : AbstractDslTest() {
     @Test
     fun `egenmeldingsdager på forlengelsen av en auu`() {
         a1 {
@@ -54,7 +50,7 @@ internal class EgenmeldingsdagerTest: AbstractDslTest() {
                 ønsket = {
                     assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar), forventetEgenmeldinger = emptyList())
                     assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar), forventetEgenmeldinger = emptyList())
-                }
+                },
             )
         }
     }

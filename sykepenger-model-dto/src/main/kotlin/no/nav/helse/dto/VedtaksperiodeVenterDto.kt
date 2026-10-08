@@ -12,10 +12,10 @@ data class VedtaksperiodeVenterDto(
 data class VenterPåDto(
     val vedtaksperiodeId: UUID,
     val organisasjonsnummer: String,
-    val venteårsak: VenteårsakDto
+    val venteårsak: VenteårsakDto,
 )
 
 data class VenteårsakDto(
     val hva: String,
-    val hvorfor: String?
+    val hvorfor: String?,
 )

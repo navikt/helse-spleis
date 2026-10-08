@@ -9,7 +9,7 @@ import no.nav.helse.spleis.IMessageMediator
 
 internal abstract class SøknadRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     init {
         river.validate(::validateSøknad)

@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V337FjernerRevurderingFeilet : JsonMigration(337) {
     override val description = "Fjerner REVURDERING_FEILET og bytter den ut med TIL_INFOTRYGD"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("forkastede").forEach { vedtaksperiode ->
                 migrerVedtaksperiode(vedtaksperiode.path("vedtaksperiode"))

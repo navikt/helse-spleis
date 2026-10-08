@@ -11,7 +11,7 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadFiskerMessage
 
 internal class SendtFiskerSøknaderRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : SøknadRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("sendt_søknad_selvstendig")
     override val riverName = "Sendt søknad Fisker"
@@ -27,10 +27,12 @@ internal class SendtFiskerSøknaderRiver(
         message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys", "fravar", "papirsykmeldinger", "inntektFraNyttArbeidsforhold")
     }
 
-    override fun createMessage(packet: JsonMessage) = SendtSøknadFiskerMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fnr"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        SendtSøknadFiskerMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fnr"].asText(),
+            ),
+        )
 }

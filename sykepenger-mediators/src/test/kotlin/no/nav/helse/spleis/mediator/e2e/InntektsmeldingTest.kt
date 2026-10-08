@@ -1,21 +1,20 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
+import java.util.UUID
 
 internal class InntektsmeldingTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `Håndterer portalinntektsmelding uten inntektsdato`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
         sendNavNoInntektsmelding(
-            arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar))
+            arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar)),
         )
         sendVilkårsgrunnlag(vedtaksperiodeIndeks = 0)
     }
@@ -28,7 +27,7 @@ internal class InntektsmeldingTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 11.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 31.januar, sykmeldingsgrad = 100)))
         sendNavNoInntektsmelding(
-            arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar))
+            arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar)),
         )
 
         val inntektsmeldingHåndtertEvent = testRapid.inspektør.meldinger("inntektsmelding_håndtert").first()

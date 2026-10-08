@@ -14,9 +14,14 @@ internal class SendtSøknadArbeidsledigTidligereArbeidstakerMessage(
     packet: JsonMessage,
     orgnummer: String,
     override val meldingsporing: Meldingsporing,
-    private val builder: SendtSøknadBuilder = SendtSøknadBuilder(packet["arbeidssituasjon"].asText())
+    private val builder: SendtSøknadBuilder = SendtSøknadBuilder(packet["arbeidssituasjon"].asText()),
 ) : SøknadMessage(packet, builder.arbeidstaker(orgnummer)) {
-    override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: BehandlingContext) {
+    override fun _behandle(
+        mediator: IHendelseMediator,
+        personopplysninger: Personopplysninger,
+        packet: JsonMessage,
+        context: BehandlingContext,
+    ) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
         builder.arbeidsgjennopptatt(packet["friskmeldt"].asOptionalLocalDate())
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)

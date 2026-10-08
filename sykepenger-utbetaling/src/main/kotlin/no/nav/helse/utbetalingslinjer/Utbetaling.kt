@@ -1,14 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.dto.EndringskodeDto
-import no.nav.helse.dto.KlassekodeDto
-import no.nav.helse.dto.UtbetalingTilstandDto
-import no.nav.helse.dto.UtbetalingVurderingDto
-import no.nav.helse.dto.UtbetalingtypeDto
+import no.nav.helse.dto.*
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.forrigeDag
@@ -20,13 +13,13 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
-import no.nav.helse.utbetalingslinjer.Utbetalingtype.ETTERUTBETALING
-import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
-import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
+import no.nav.helse.utbetalingslinjer.Utbetalingtype.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 class Utbetaling private constructor(
     val id: UUID,
@@ -47,7 +40,7 @@ class Utbetaling private constructor(
     private var overføringstidspunkt: LocalDateTime?,
     private var avstemmingsnøkkel: Long?,
     private var avsluttet: LocalDateTime?,
-    private var oppdatert: LocalDateTime = tidsstempel
+    private var oppdatert: LocalDateTime = tidsstempel,
 ) : Aktivitetskontekst {
     var vurdering: Vurdering? = vurdering
         private set
@@ -61,7 +54,7 @@ class Utbetaling private constructor(
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        korrelasjonsId: UUID = UUID.randomUUID()
+        korrelasjonsId: UUID = UUID.randomUUID(),
     ) : this(
         UUID.randomUUID(),
         korrelasjonsId,
@@ -79,7 +72,7 @@ class Utbetaling private constructor(
         null,
         null,
         null,
-        null
+        null,
     )
 
     internal var tilstand: Tilstand = tilstand
@@ -88,41 +81,54 @@ class Utbetaling private constructor(
     val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
 
     fun periode() = periode
+
     private fun gyldig() = tilstand !in setOf(Ny, Forkastet)
+
     private fun erUbetalt() = tilstand == Ubetalt
+
     private fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
+
     private fun erAktiv() = erAvsluttet() || erInFlight()
+
     private fun erAktivEllerUbetalt() = erAktiv() || erUbetalt()
+
     fun erInFlight() = tilstand == Overført
+
     fun erAnnulleringInFlight() = erAnnullering() && erInFlight()
+
     fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
+
     private fun erAnnullering() = type == ANNULLERING
 
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
     // og at this er lik den siste aktive utbetalingen for fagsystemIden
-    fun hørerSammen(other: Utbetaling) =
-        this.korrelasjonsId == other.korrelasjonsId
+    fun hørerSammen(other: Utbetaling) = this.korrelasjonsId == other.korrelasjonsId
 
-    fun harOppdragMedUtbetalinger() =
-        arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
+    fun harOppdragMedUtbetalinger() = arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
 
     fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger() && personOppdrag.harUtbetalinger()
 
     fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
 
-    fun opprett(observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {
+    fun opprett(
+        observer: UtbetalingObserver,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         tilstand.opprett(this, observer, aktivitetsloggMedUtbetalingkontekst)
     }
 
-    fun håndterUtbetalingmodulHendelse(observer: UtbetalingObserver, utbetaling: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
+    fun håndterUtbetalingmodulHendelse(
+        observer: UtbetalingObserver,
+        utbetaling: UtbetalingmodulHendelse,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (!relevantFor(utbetaling)) return
         tilstand.kvittér(this, observer, utbetaling, aktivitetsloggMedUtbetalingkontekst)
     }
 
-    private fun relevantFor(utbetaling: UtbetalingmodulHendelse) =
-        utbetaling.utbetalingId == this.id && (utbetaling.fagsystemId in setOf(this.arbeidsgiverOppdrag.fagsystemId, this.personOppdrag.fagsystemId))
+    private fun relevantFor(utbetaling: UtbetalingmodulHendelse) = utbetaling.utbetalingId == this.id && (utbetaling.fagsystemId in setOf(this.arbeidsgiverOppdrag.fagsystemId, this.personOppdrag.fagsystemId))
 
     fun håndterSimuleringHendelse(simulering: SimuleringHendelse) {
         if (simulering.utbetalingId != this.id) return
@@ -130,13 +136,20 @@ class Utbetaling private constructor(
         arbeidsgiverOppdrag.håndterSimulering(simulering)
     }
 
-    fun valider(simulering: SimuleringHendelse, aktivitetslogg: IAktivitetslogg) {
+    fun valider(
+        simulering: SimuleringHendelse,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         validerSimuleringsresultat(simulering, aktivitetsloggMedUtbetalingkontekst, arbeidsgiverOppdrag)
         validerSimuleringsresultat(simulering, aktivitetsloggMedUtbetalingkontekst, personOppdrag)
     }
 
-    private fun validerSimuleringsresultat(simuleringHendelse: SimuleringHendelse, aktivitetslogg: IAktivitetslogg, oppdrag: Oppdrag) {
+    private fun validerSimuleringsresultat(
+        simuleringHendelse: SimuleringHendelse,
+        aktivitetslogg: IAktivitetslogg,
+        oppdrag: Oppdrag,
+    ) {
         if (simuleringHendelse.fagsystemId != oppdrag.fagsystemId) return
         if (simuleringHendelse.fagområde != oppdrag.fagområde) return
         if (!simuleringHendelse.simuleringOK) return aktivitetslogg.info("Feil under simulering: ${simuleringHendelse.melding}")
@@ -150,10 +163,11 @@ class Utbetaling private constructor(
         return lagAnnullering(aktivitetsloggMedUtbetalingkontekst)
     }
 
-    private fun lagAnnullering(aktivitetslogg: IAktivitetslogg): Utbetaling {
-        return when (tilstand) {
+    private fun lagAnnullering(aktivitetslogg: IAktivitetslogg): Utbetaling =
+        when (tilstand) {
             Utbetalt,
-            GodkjentUtenUtbetaling -> {
+            GodkjentUtenUtbetaling,
+            -> {
                 Utbetaling(
                     periode = periode,
                     utbetalingstidslinje = utbetalingstidslinje,
@@ -163,7 +177,7 @@ class Utbetaling private constructor(
                     maksdato = LocalDate.MAX,
                     forbrukteSykedager = null,
                     gjenståendeSykedager = null,
-                    korrelasjonsId = korrelasjonsId
+                    korrelasjonsId = korrelasjonsId,
                 ).also { aktivitetslogg.info("Oppretter annullering med id ${it.id}") }
             }
 
@@ -172,11 +186,14 @@ class Utbetaling private constructor(
             IkkeGodkjent,
             Ny,
             Overført,
-            Ubetalt -> error("Forventet ikke å annullere på utbetaling=${id} i tilstand=${this::class.simpleName}")
+            Ubetalt,
+            -> error("Forventet ikke å annullere på utbetaling=$id i tilstand=${this::class.simpleName}")
         }
-    }
 
-    fun forkast(observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {
+    fun forkast(
+        observer: UtbetalingObserver,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         tilstand.forkast(this, observer, aktivitetsloggMedUtbetalingkontekst)
     }
@@ -185,20 +202,30 @@ class Utbetaling private constructor(
 
     fun personOppdrag() = personOppdrag
 
-    override fun toSpesifikkKontekst() =
-        SpesifikkKontekst("Utbetaling", mapOf("utbetalingId" to "$id"))
+    override fun toSpesifikkKontekst() = SpesifikkKontekst("Utbetaling", mapOf("utbetalingId" to "$id"))
 
-    fun ikkeGodkjent(observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
+    fun ikkeGodkjent(
+        observer: UtbetalingObserver,
+        aktivitetslogg: IAktivitetslogg,
+        vurdering: Vurdering,
+    ) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         tilstand.ikkeGodkjent(this, observer, aktivitetsloggMedUtbetalingkontekst, vurdering)
     }
 
-    fun godkjent(observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
+    fun godkjent(
+        observer: UtbetalingObserver,
+        aktivitetslogg: IAktivitetslogg,
+        vurdering: Vurdering,
+    ) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         tilstand.godkjent(this, observer, aktivitetsloggMedUtbetalingkontekst, vurdering)
     }
 
-    private fun tilstand(observer: UtbetalingObserver, neste: Tilstand) {
+    private fun tilstand(
+        observer: UtbetalingObserver,
+        neste: Tilstand,
+    ) {
         oppdatert = LocalDateTime.now()
         val forrigeTilstand = tilstand
         tilstand = neste
@@ -209,7 +236,7 @@ class Utbetaling private constructor(
             personOppdrag,
             forrigeTilstand.status,
             neste.status,
-            korrelasjonsId
+            korrelasjonsId,
         )
         tilstand.entering(this)
     }
@@ -222,7 +249,7 @@ class Utbetaling private constructor(
         kladd: Utbetalingkladd,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
-        gjenståendeSykedager: Int
+        gjenståendeSykedager: Int,
     ): Utbetaling {
         val nyttArbeidsgiveroppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.arbeidsgiverOppdrag, kladd.arbeidsgiveroppdrag)
         val nyttPersonoppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.personOppdrag, kladd.personoppdrag)
@@ -239,25 +266,29 @@ class Utbetaling private constructor(
             type = type,
             maksdato = maksdato,
             forbrukteSykedager = forbrukteSykedager,
-            gjenståendeSykedager = gjenståendeSykedager
+            gjenståendeSykedager = gjenståendeSykedager,
         )
     }
 
-    private fun byggViderePåOppdrag(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, historiskOppdrag: Oppdrag, nyttOppdrag: Oppdrag): Oppdrag {
-        /* ta bort eventuell hale som er avkortet */
+    private fun byggViderePåOppdrag(
+        aktivitetslogg: IAktivitetslogg,
+        vedtaksperiode: Periode,
+        historiskOppdrag: Oppdrag,
+        nyttOppdrag: Oppdrag,
+    ): Oppdrag {
+        // ta bort eventuell hale som er avkortet
         val linjerFremTilOgMedUtbetalingsaken = historiskOppdrag.begrensTil(vedtaksperiode.endInclusive)
 
-        /* linjer forut før perioden */
+        // linjer forut før perioden
         val linjerFørVedtaksperioden = linjerFremTilOgMedUtbetalingsaken.begrensTil(vedtaksperiode.start.forrigeDag)
 
-        /* legg inn endringer fra perioden og sy sammen */
+        // legg inn endringer fra perioden og sy sammen
         val nyeArbeidsgiverlinjer = linjerFørVedtaksperioden + nyttOppdrag
 
         return Oppdrag(historiskOppdrag.mottaker, historiskOppdrag.fagområde, nyeArbeidsgiverlinjer).minus(historiskOppdrag, aktivitetslogg)
     }
 
     companion object {
-
         val log: Logger = LoggerFactory.getLogger("Utbetaling")
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -270,7 +301,7 @@ class Utbetaling private constructor(
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
-            type: Utbetalingtype = UTBETALING
+            type: Utbetalingtype = UTBETALING,
         ): Utbetaling {
             check(utbetalingstidslinje.periode() == periode) {
                 "forventer ikke at utbetalingstidslinje skal være forskjellig fra vedtaksperioden"
@@ -280,29 +311,34 @@ class Utbetaling private constructor(
             check(forrigeUtbetalte.size <= 1) { "finner flere enn én korrelerende utbetaling for periode $periode: ${forrigeUtbetalte.map { it.id }}" }
             val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull()
 
-            val utbetalingen = korrelerendeUtbetaling?.nyUtbetaling(
-                aktivitetslogg = aktivitetslogg,
-                type = type,
-                vedtaksperiode = periode,
-                utbetalingstidslinje = utbetalingstidslinje,
-                kladd = vedtaksperiodekladd,
-                maksdato = maksdato,
-                forbrukteSykedager = forbrukteSykedager,
-                gjenståendeSykedager = gjenståendeSykedager
-            ) ?: Utbetaling(
-                periode = periode,
-                utbetalingstidslinje = utbetalingstidslinje,
-                arbeidsgiverOppdrag = vedtaksperiodekladd.arbeidsgiveroppdrag,
-                personOppdrag = vedtaksperiodekladd.personoppdrag,
-                type = type,
-                maksdato = maksdato,
-                forbrukteSykedager = forbrukteSykedager,
-                gjenståendeSykedager = gjenståendeSykedager
-            )
+            val utbetalingen =
+                korrelerendeUtbetaling?.nyUtbetaling(
+                    aktivitetslogg = aktivitetslogg,
+                    type = type,
+                    vedtaksperiode = periode,
+                    utbetalingstidslinje = utbetalingstidslinje,
+                    kladd = vedtaksperiodekladd,
+                    maksdato = maksdato,
+                    forbrukteSykedager = forbrukteSykedager,
+                    gjenståendeSykedager = gjenståendeSykedager,
+                ) ?: Utbetaling(
+                    periode = periode,
+                    utbetalingstidslinje = utbetalingstidslinje,
+                    arbeidsgiverOppdrag = vedtaksperiodekladd.arbeidsgiveroppdrag,
+                    personOppdrag = vedtaksperiodekladd.personoppdrag,
+                    type = type,
+                    maksdato = maksdato,
+                    forbrukteSykedager = forbrukteSykedager,
+                    gjenståendeSykedager = gjenståendeSykedager,
+                )
             return utbetalingen
         }
 
-        fun lagTomUtbetaling(vedtaksperiodekladd: Utbetalingkladd, periode: Periode, type: Utbetalingtype) = Utbetaling(
+        fun lagTomUtbetaling(
+            vedtaksperiodekladd: Utbetalingkladd,
+            periode: Periode,
+            type: Utbetalingtype,
+        ) = Utbetaling(
             periode = periode,
             utbetalingstidslinje = Utbetalingstidslinje(),
             arbeidsgiverOppdrag = vedtaksperiodekladd.arbeidsgiveroppdrag,
@@ -310,14 +346,17 @@ class Utbetaling private constructor(
             type = type,
             maksdato = LocalDate.MAX,
             forbrukteSykedager = null,
-            gjenståendeSykedager = null
+            gjenståendeSykedager = null,
         )
 
         fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
+
         fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
-        fun List<Utbetaling>.aktive(periode: Periode) = this
-            .aktive()
-            .filter { utbetaling -> utbetaling.periode.overlapperMed(periode) }
+
+        fun List<Utbetaling>.aktive(periode: Periode) =
+            this
+                .aktive()
+                .filter { utbetaling -> utbetaling.periode.overlapperMed(periode) }
 
         private fun Collection<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this
@@ -331,28 +370,24 @@ class Utbetaling private constructor(
                 .filterNot(Utbetaling::erAnnullering)
                 .toList()
 
-        fun List<Utbetaling>.tillaterOpprettelseAvUtbetaling(other: Utbetaling): Boolean {
-            return !harOverlappendeUtbetalingsperioder(other)
-        }
+        fun List<Utbetaling>.tillaterOpprettelseAvUtbetaling(other: Utbetaling): Boolean = !harOverlappendeUtbetalingsperioder(other)
 
-        private fun List<Utbetaling>.harOverlappendeUtbetalingsperioder(nyUtbetaling: Utbetaling): Boolean {
-            return this
+        private fun List<Utbetaling>.harOverlappendeUtbetalingsperioder(nyUtbetaling: Utbetaling): Boolean =
+            this
                 .aktiveMedUbetalte()
                 .filterNot { it.hørerSammen(nyUtbetaling) }
                 .flatMap { other ->
                     other.arbeidsgiverOppdrag.overlappendeLinjer(nyUtbetaling.arbeidsgiverOppdrag) + other.personOppdrag.overlappendeLinjer(nyUtbetaling.personOppdrag)
-                }
-                .also { overlappendeLinjer ->
+                }.also { overlappendeLinjer ->
                     if (overlappendeLinjer.isNotEmpty()) {
-                        val feilmelding = "Vi har opprettet en utbetaling med periode ${nyUtbetaling.periode} & " +
-                            "korrelasjonsId ${nyUtbetaling.korrelasjonsId} som overlapper med " +
-                            "oppdragslinjer i eksisterende utbetalinger:\n" +
-                            overlappendeLinjer.joinToString(separator = "\n") { (fagområde, fagsystemId, linje) -> "* $fagområde - $fagsystemId - ${linje.periode}" }
+                        val feilmelding =
+                            "Vi har opprettet en utbetaling med periode ${nyUtbetaling.periode} & " +
+                                "korrelasjonsId ${nyUtbetaling.korrelasjonsId} som overlapper med " +
+                                "oppdragslinjer i eksisterende utbetalinger:\n" +
+                                overlappendeLinjer.joinToString(separator = "\n") { (fagområde, fagsystemId, linje) -> "* $fagområde - $fagsystemId - ${linje.periode}" }
                         sikkerlogg.error(feilmelding, kv("fødselsnummer", nyUtbetaling.personOppdrag.mottaker))
                     }
-                }
-                .isNotEmpty()
-        }
+                }.isNotEmpty()
 
         fun List<Utbetaling>.validerNyUtbetaling(nyUtbetaling: Utbetaling) {
             if (nyUtbetaling.erAnnullering()) return
@@ -361,33 +396,39 @@ class Utbetaling private constructor(
         }
 
         fun List<Utbetaling>.kunEnIkkeUtbetalt() {
-            val ikkeUtbetalte = this
-                .filterNot { it.erAnnullering() }
-                .filter { it.erUbetalt() }
+            val ikkeUtbetalte =
+                this
+                    .filterNot { it.erAnnullering() }
+                    .filter { it.erUbetalt() }
             check(ikkeUtbetalte.size <= 1) {
                 "Det er mer enn én utbetaling som er IKKE_UTBETALT:\n${ikkeUtbetalte.joinToString(separator = "\n") { "* ${it.id} - ${it.periode}" }}"
             }
         }
 
-        private fun Oppdrag.overlappendeLinjer(nyttOppdrag: Oppdrag): List<Triple<Fagområde, String, Utbetalingslinje>> {
-            return nyttOppdrag.linjerUtenOpphør().flatMap { linje ->
+        private fun Oppdrag.overlappendeLinjer(nyttOppdrag: Oppdrag): List<Triple<Fagområde, String, Utbetalingslinje>> =
+            nyttOppdrag.linjerUtenOpphør().flatMap { linje ->
                 this
                     .linjerUtenOpphør()
                     .filter { linje.periode.overlapperMed(it.periode) }
                     .map { Triple(this.fagområde, this.fagsystemId, it) }
             }
-        }
 
         // kan forkaste dersom ingen utbetalinger er utbetalt/in flight, eller de er annullert
-        fun kanForkastes(vedtaksperiodeUtbetalinger: List<Utbetaling>, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {
+        fun kanForkastes(
+            vedtaksperiodeUtbetalinger: List<Utbetaling>,
+            arbeidsgiverUtbetalinger: List<Utbetaling>,
+        ): Boolean {
             val annulleringer = arbeidsgiverUtbetalinger.filter { it.erAnnullering() && it.tilstand != Forkastet }
             return vedtaksperiodeUtbetalinger.filter { it.erAktiv() }.all { utbetaling ->
                 annulleringer.any { annullering -> annullering.hørerSammen(utbetaling) }
             }
         }
 
-        fun gjenopprett(dto: UtbetalingInnDto, utbetalinger: List<Utbetaling>): Utbetaling {
-            return Utbetaling(
+        fun gjenopprett(
+            dto: UtbetalingInnDto,
+            utbetalinger: List<Utbetaling>,
+        ): Utbetaling =
+            Utbetaling(
                 id = dto.id,
                 korrelasjonsId = dto.korrelasjonsId,
                 periode = Periode.gjenopprett(dto.periode),
@@ -395,22 +436,24 @@ class Utbetaling private constructor(
                 arbeidsgiverOppdrag = Oppdrag.gjenopprett(dto.arbeidsgiverOppdrag),
                 personOppdrag = Oppdrag.gjenopprett(dto.personOppdrag),
                 tidsstempel = dto.tidsstempel,
-                tilstand = when (dto.tilstand) {
-                    UtbetalingTilstandDto.ANNULLERT -> Annullert
-                    UtbetalingTilstandDto.FORKASTET -> Forkastet
-                    UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> GodkjentUtenUtbetaling
-                    UtbetalingTilstandDto.IKKE_GODKJENT -> IkkeGodkjent
-                    UtbetalingTilstandDto.IKKE_UTBETALT -> Ubetalt
-                    UtbetalingTilstandDto.NY -> Ny
-                    UtbetalingTilstandDto.OVERFØRT -> Overført
-                    UtbetalingTilstandDto.UTBETALT -> Utbetalt
-                },
-                type = when (dto.type) {
-                    UtbetalingtypeDto.UTBETALING -> UTBETALING
-                    UtbetalingtypeDto.ANNULLERING -> ANNULLERING
-                    UtbetalingtypeDto.ETTERUTBETALING -> ETTERUTBETALING
-                    UtbetalingtypeDto.REVURDERING -> REVURDERING
-                },
+                tilstand =
+                    when (dto.tilstand) {
+                        UtbetalingTilstandDto.ANNULLERT -> Annullert
+                        UtbetalingTilstandDto.FORKASTET -> Forkastet
+                        UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> GodkjentUtenUtbetaling
+                        UtbetalingTilstandDto.IKKE_GODKJENT -> IkkeGodkjent
+                        UtbetalingTilstandDto.IKKE_UTBETALT -> Ubetalt
+                        UtbetalingTilstandDto.NY -> Ny
+                        UtbetalingTilstandDto.OVERFØRT -> Overført
+                        UtbetalingTilstandDto.UTBETALT -> Utbetalt
+                    },
+                type =
+                    when (dto.type) {
+                        UtbetalingtypeDto.UTBETALING -> UTBETALING
+                        UtbetalingtypeDto.ANNULLERING -> ANNULLERING
+                        UtbetalingtypeDto.ETTERUTBETALING -> ETTERUTBETALING
+                        UtbetalingtypeDto.REVURDERING -> REVURDERING
+                    },
                 maksdato = dto.maksdato,
                 forbrukteSykedager = dto.forbrukteSykedager,
                 gjenståendeSykedager = dto.gjenståendeSykedager,
@@ -419,57 +462,70 @@ class Utbetaling private constructor(
                 overføringstidspunkt = dto.overføringstidspunkt,
                 avstemmingsnøkkel = dto.avstemmingsnøkkel,
                 avsluttet = dto.avsluttet,
-                oppdatert = dto.oppdatert
+                oppdatert = dto.oppdatert,
             )
-        }
     }
 
-    private fun håndterKvittering(observer: UtbetalingObserver, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
+    private fun håndterKvittering(
+        observer: UtbetalingObserver,
+        hendelse: UtbetalingmodulHendelse,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         when (hendelse.status) {
             Oppdragstatus.OVERFØRT,
-            Oppdragstatus.AKSEPTERT -> {} // all is good
+            Oppdragstatus.AKSEPTERT,
+            -> {} // all is good
             Oppdragstatus.AKSEPTERT_MED_FEIL -> aktivitetslogg.info("Utbetalingen ble gjennomført, men med advarsel")
             Oppdragstatus.AVVIST,
-            Oppdragstatus.FEIL -> aktivitetslogg.info("Utbetaling feilet med status ${hendelse.status}. Feilmelding fra Oppdragsystemet: ${hendelse.melding}")
+            Oppdragstatus.FEIL,
+            -> aktivitetslogg.info("Utbetaling feilet med status ${hendelse.status}. Feilmelding fra Oppdragsystemet: ${hendelse.melding}")
         }
 
         if (Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag)) return
 
-        val nesteTilstand = when (hendelse.status) {
-            Oppdragstatus.OVERFØRT,
-            Oppdragstatus.AVVIST,
-            Oppdragstatus.FEIL -> return // utbetaling gjør retry ved neste påminnelse
+        val nesteTilstand =
+            when (hendelse.status) {
+                Oppdragstatus.OVERFØRT,
+                Oppdragstatus.AVVIST,
+                Oppdragstatus.FEIL,
+                -> return // utbetaling gjør retry ved neste påminnelse
 
-            Oppdragstatus.AKSEPTERT,
-            Oppdragstatus.AKSEPTERT_MED_FEIL -> when (Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag)) {
-                true -> return // må vente på at begge oppdrag er uten feil
-                false -> when (Oppdrag.synkronisert(arbeidsgiverOppdrag, personOppdrag)) {
-                    false -> return // må vente på at begge oppdrag har samme status
-                    true -> when (type) {
-                        UTBETALING,
-                        REVURDERING -> Utbetalt
-                        ANNULLERING -> Annullert
-                        ETTERUTBETALING -> error("Forventer ikke denne typen her")
+                Oppdragstatus.AKSEPTERT,
+                Oppdragstatus.AKSEPTERT_MED_FEIL,
+                ->
+                    when (Oppdrag.harFeil(arbeidsgiverOppdrag, personOppdrag)) {
+                        true -> return // må vente på at begge oppdrag er uten feil
+                        false ->
+                            when (Oppdrag.synkronisert(arbeidsgiverOppdrag, personOppdrag)) {
+                                false -> return // må vente på at begge oppdrag har samme status
+                                true ->
+                                    when (type) {
+                                        UTBETALING,
+                                        REVURDERING,
+                                        -> Utbetalt
+                                        ANNULLERING -> Annullert
+                                        ETTERUTBETALING -> error("Forventer ikke denne typen her")
+                                    }
+                            }
                     }
-                }
             }
-        }
 
         tilstand(observer, nesteTilstand)
     }
 
-    fun overlapperMed(other: Periode): Boolean {
-        return this.periode.overlapperMed(other)
-    }
+    fun overlapperMed(other: Periode): Boolean = this.periode.overlapperMed(other)
 
-    fun overlapperMed(other: Utbetaling): Boolean {
-        return this.periode.overlapperMed(other.periode)
-    }
+    fun overlapperMed(other: Utbetaling): Boolean = this.periode.overlapperMed(other.periode)
 
-    private fun lagreOverføringsinformasjon(aktivitetslogg: IAktivitetslogg, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
+    private fun lagreOverføringsinformasjon(
+        aktivitetslogg: IAktivitetslogg,
+        avstemmingsnøkkel: Long,
+        tidspunkt: LocalDateTime,
+    ) {
         aktivitetslogg.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, og har fått avstemmingsnøkkel $avstemmingsnøkkel.\n")
-        if (this.avstemmingsnøkkel != null && this.avstemmingsnøkkel != avstemmingsnøkkel)
+        if (this.avstemmingsnøkkel != null && this.avstemmingsnøkkel != avstemmingsnøkkel) {
             aktivitetslogg.info("Avstemmingsnøkkel har endret seg.\nTidligere verdi: ${this.avstemmingsnøkkel}")
+        }
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = tidspunkt
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = avstemmingsnøkkel
     }
@@ -478,9 +534,18 @@ class Utbetaling private constructor(
 
     internal sealed interface Tilstand {
         val status: Utbetalingstatus
-        fun forkast(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {}
 
-        fun opprett(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {
+        fun forkast(
+            utbetaling: Utbetaling,
+            observer: UtbetalingObserver,
+            aktivitetslogg: IAktivitetslogg,
+        ) {}
+
+        fun opprett(
+            utbetaling: Utbetaling,
+            observer: UtbetalingObserver,
+            aktivitetslogg: IAktivitetslogg,
+        ) {
             error("Forventet ikke å opprette utbetaling i tilstand=${this::class.simpleName}")
         }
 
@@ -488,7 +553,7 @@ class Utbetaling private constructor(
             utbetaling: Utbetaling,
             observer: UtbetalingObserver,
             aktivitetslogg: IAktivitetslogg,
-            vurdering: Vurdering
+            vurdering: Vurdering,
         ) {
             error("Forventet ikke godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
@@ -497,12 +562,17 @@ class Utbetaling private constructor(
             utbetaling: Utbetaling,
             observer: UtbetalingObserver,
             aktivitetslogg: IAktivitetslogg,
-            vurdering: Vurdering
+            vurdering: Vurdering,
         ) {
             error("Forventet ikke godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun kvittér(utbetaling: Utbetaling, observer: UtbetalingObserver, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
+        fun kvittér(
+            utbetaling: Utbetaling,
+            observer: UtbetalingObserver,
+            hendelse: UtbetalingmodulHendelse,
+            aktivitetslogg: IAktivitetslogg,
+        ) {
             error("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
@@ -511,36 +581,59 @@ class Utbetaling private constructor(
 
     internal data object Ny : Tilstand {
         override val status = Utbetalingstatus.NY
-        override fun opprett(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {
+
+        override fun opprett(
+            utbetaling: Utbetaling,
+            observer: UtbetalingObserver,
+            aktivitetslogg: IAktivitetslogg,
+        ) {
             utbetaling.tilstand(observer, Ubetalt)
         }
     }
 
     internal data object Ubetalt : Tilstand {
         override val status = Utbetalingstatus.IKKE_UTBETALT
-        override fun forkast(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg) {
+
+        override fun forkast(
+            utbetaling: Utbetaling,
+            observer: UtbetalingObserver,
+            aktivitetslogg: IAktivitetslogg,
+        ) {
             aktivitetslogg.info("Forkaster utbetaling")
             utbetaling.tilstand(observer, Forkastet)
         }
 
-        override fun ikkeGodkjent(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
+        override fun ikkeGodkjent(
+            utbetaling: Utbetaling,
+            observer: UtbetalingObserver,
+            aktivitetslogg: IAktivitetslogg,
+            vurdering: Vurdering,
+        ) {
             utbetaling.vurdering = vurdering
             utbetaling.tilstand(observer, IkkeGodkjent)
         }
 
-        override fun godkjent(utbetaling: Utbetaling, observer: UtbetalingObserver, aktivitetslogg: IAktivitetslogg, vurdering: Vurdering) {
+        override fun godkjent(
+            utbetaling: Utbetaling,
+            observer: UtbetalingObserver,
+            aktivitetslogg: IAktivitetslogg,
+            vurdering: Vurdering,
+        ) {
             utbetaling.vurdering = vurdering
-            utbetaling.tilstand(observer, when {
-                utbetaling.harOppdragMedUtbetalinger() -> Overført
-                utbetaling.type == ANNULLERING -> Annullert
-                else -> GodkjentUtenUtbetaling
-            }
+            utbetaling.tilstand(
+                observer,
+                when {
+                    utbetaling.harOppdragMedUtbetalinger() -> Overført
+                    utbetaling.type == ANNULLERING -> Annullert
+                    else -> GodkjentUtenUtbetaling
+                },
             )
         }
     }
 
     internal data object GodkjentUtenUtbetaling : Tilstand {
         override val status = Utbetalingstatus.GODKJENT_UTEN_UTBETALING
+
         override fun entering(utbetaling: Utbetaling) {
             check(!utbetaling.harOppdragMedUtbetalinger())
             utbetaling.avsluttet = LocalDateTime.now()
@@ -550,7 +643,12 @@ class Utbetaling private constructor(
     internal data object Overført : Tilstand {
         override val status = Utbetalingstatus.OVERFØRT
 
-        override fun kvittér(utbetaling: Utbetaling, observer: UtbetalingObserver, hendelse: UtbetalingmodulHendelse, aktivitetslogg: IAktivitetslogg) {
+        override fun kvittér(
+            utbetaling: Utbetaling,
+            observer: UtbetalingObserver,
+            hendelse: UtbetalingmodulHendelse,
+            aktivitetslogg: IAktivitetslogg,
+        ) {
             utbetaling.lagreOverføringsinformasjon(aktivitetslogg, hendelse.avstemmingsnøkkel, hendelse.overføringstidspunkt)
             utbetaling.arbeidsgiverOppdrag.lagreOverføringsinformasjon(hendelse)
             utbetaling.personOppdrag.lagreOverføringsinformasjon(hendelse)
@@ -560,6 +658,7 @@ class Utbetaling private constructor(
 
     internal data object Annullert : Tilstand {
         override val status = Utbetalingstatus.ANNULLERT
+
         override fun entering(utbetaling: Utbetaling) {
             utbetaling.avsluttet = LocalDateTime.now()
         }
@@ -567,6 +666,7 @@ class Utbetaling private constructor(
 
     internal data object Utbetalt : Tilstand {
         override val status = Utbetalingstatus.UTBETALT
+
         override fun entering(utbetaling: Utbetaling) {
             utbetaling.avsluttet = LocalDateTime.now()
         }
@@ -585,63 +685,66 @@ class Utbetaling private constructor(
         val ident: String,
         val epost: String,
         private val tidspunkt: LocalDateTime,
-        val automatiskBehandling: Boolean
+        val automatiskBehandling: Boolean,
     ) {
-        fun dto() = UtbetalingVurderingDto(
-            godkjent = godkjent,
-            ident = ident,
-            epost = epost,
-            tidspunkt = tidspunkt,
-            automatiskBehandling = automatiskBehandling
-        )
+        fun dto() =
+            UtbetalingVurderingDto(
+                godkjent = godkjent,
+                ident = ident,
+                epost = epost,
+                tidspunkt = tidspunkt,
+                automatiskBehandling = automatiskBehandling,
+            )
 
         internal companion object {
-            fun gjenopprett(dto: UtbetalingVurderingDto): Vurdering {
-                return Vurdering(
+            fun gjenopprett(dto: UtbetalingVurderingDto): Vurdering =
+                Vurdering(
                     godkjent = dto.godkjent,
                     ident = dto.ident,
                     epost = dto.epost,
                     tidspunkt = dto.tidspunkt,
-                    automatiskBehandling = dto.automatiskBehandling
+                    automatiskBehandling = dto.automatiskBehandling,
                 )
-            }
         }
     }
 
-    fun dto() = UtbetalingUtDto(
-        id = this.id,
-        korrelasjonsId = this.korrelasjonsId,
-        periode = this.periode.dto(),
-        utbetalingstidslinje = this.utbetalingstidslinje.dto(),
-        arbeidsgiverOppdrag = this.arbeidsgiverOppdrag.dto(),
-        personOppdrag = this.personOppdrag.dto(),
-        tidsstempel = this.tidsstempel,
-        tilstand = when (tilstand) {
-            Annullert -> UtbetalingTilstandDto.ANNULLERT
-            Forkastet -> UtbetalingTilstandDto.FORKASTET
-            GodkjentUtenUtbetaling -> UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING
-            IkkeGodkjent -> UtbetalingTilstandDto.IKKE_GODKJENT
-            Ny -> UtbetalingTilstandDto.NY
-            Overført -> UtbetalingTilstandDto.OVERFØRT
-            Ubetalt -> UtbetalingTilstandDto.IKKE_UTBETALT
-            Utbetalt -> UtbetalingTilstandDto.UTBETALT
-        },
-        type = when (type) {
-            UTBETALING -> UtbetalingtypeDto.UTBETALING
-            ETTERUTBETALING -> UtbetalingtypeDto.ETTERUTBETALING
-            ANNULLERING -> UtbetalingtypeDto.ANNULLERING
-            REVURDERING -> UtbetalingtypeDto.REVURDERING
-        },
-        maksdato = this.maksdato,
-        forbrukteSykedager = this.forbrukteSykedager,
-        gjenståendeSykedager = this.gjenståendeSykedager,
-        annulleringer = this.annulleringer.map { it.id },
-        vurdering = this.vurdering?.dto(),
-        overføringstidspunkt = overføringstidspunkt,
-        avstemmingsnøkkel = avstemmingsnøkkel,
-        avsluttet = avsluttet,
-        oppdatert = oppdatert
-    )
+    fun dto() =
+        UtbetalingUtDto(
+            id = this.id,
+            korrelasjonsId = this.korrelasjonsId,
+            periode = this.periode.dto(),
+            utbetalingstidslinje = this.utbetalingstidslinje.dto(),
+            arbeidsgiverOppdrag = this.arbeidsgiverOppdrag.dto(),
+            personOppdrag = this.personOppdrag.dto(),
+            tidsstempel = this.tidsstempel,
+            tilstand =
+                when (tilstand) {
+                    Annullert -> UtbetalingTilstandDto.ANNULLERT
+                    Forkastet -> UtbetalingTilstandDto.FORKASTET
+                    GodkjentUtenUtbetaling -> UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING
+                    IkkeGodkjent -> UtbetalingTilstandDto.IKKE_GODKJENT
+                    Ny -> UtbetalingTilstandDto.NY
+                    Overført -> UtbetalingTilstandDto.OVERFØRT
+                    Ubetalt -> UtbetalingTilstandDto.IKKE_UTBETALT
+                    Utbetalt -> UtbetalingTilstandDto.UTBETALT
+                },
+            type =
+                when (type) {
+                    UTBETALING -> UtbetalingtypeDto.UTBETALING
+                    ETTERUTBETALING -> UtbetalingtypeDto.ETTERUTBETALING
+                    ANNULLERING -> UtbetalingtypeDto.ANNULLERING
+                    REVURDERING -> UtbetalingtypeDto.REVURDERING
+                },
+            maksdato = this.maksdato,
+            forbrukteSykedager = this.forbrukteSykedager,
+            gjenståendeSykedager = this.gjenståendeSykedager,
+            annulleringer = this.annulleringer.map { it.id },
+            vurdering = this.vurdering?.dto(),
+            overføringstidspunkt = overføringstidspunkt,
+            avstemmingsnøkkel = avstemmingsnøkkel,
+            avsluttet = avsluttet,
+            oppdatert = oppdatert,
+        )
 }
 
 enum class Utbetalingstatus {
@@ -653,40 +756,51 @@ enum class Utbetalingstatus {
     GODKJENT,
     GODKJENT_UTEN_UTBETALING,
     ANNULLERT,
-    FORKASTET;
+    FORKASTET,
 }
 
 enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING }
+
 enum class Endringskode {
-    NY, UEND, ENDR;
+    NY,
+    UEND,
+    ENDR,
+    ;
 
     companion object {
-        fun gjenopprett(dto: EndringskodeDto) = when (dto) {
-            EndringskodeDto.ENDR -> ENDR
-            EndringskodeDto.NY -> NY
-            EndringskodeDto.UEND -> UEND
-        }
+        fun gjenopprett(dto: EndringskodeDto) =
+            when (dto) {
+                EndringskodeDto.ENDR -> ENDR
+                EndringskodeDto.NY -> NY
+                EndringskodeDto.UEND -> UEND
+            }
     }
 }
 
-enum class Klassekode(val verdi: String) {
+enum class Klassekode(
+    val verdi: String,
+) {
     RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP"),
     SykepengerArbeidstakerOrdinær(verdi = "SPATORD"),
     SelvstendigNæringsdrivendeOppgavepliktig(verdi = "SPSND-OP"),
     SelvstendigNæringsdrivendeFisker(verdi = "SPSNDFISK"),
     SelvstendigNæringsdrivendeJordbrukOgSkogbruk(verdi = "SPSNDJORD"),
-    SelvstendigNæringsdrivendeBarnepasserOppgavepliktig(verdi = "SPSNDDM-OP");
+    SelvstendigNæringsdrivendeBarnepasserOppgavepliktig(verdi = "SPSNDDM-OP"),
+    ;
 
     companion object {
         private val map = entries.associateBy(Klassekode::verdi)
+
         fun from(verdi: String) = requireNotNull(map[verdi]) { "Støtter ikke klassekode: $verdi" }
-        fun gjenopprett(dto: KlassekodeDto) = when (dto) {
-            KlassekodeDto.RefusjonIkkeOpplysningspliktig -> RefusjonIkkeOpplysningspliktig
-            KlassekodeDto.SykepengerArbeidstakerOrdinær -> SykepengerArbeidstakerOrdinær
-            KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> SelvstendigNæringsdrivendeOppgavepliktig
-            KlassekodeDto.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig -> SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
-            KlassekodeDto.SelvstendigNæringsdrivendeFisker -> SelvstendigNæringsdrivendeFisker
-            KlassekodeDto.SelvstendigNæringsdrivendeJordbrukOgSkogbruk -> SelvstendigNæringsdrivendeJordbrukOgSkogbruk
-        }
+
+        fun gjenopprett(dto: KlassekodeDto) =
+            when (dto) {
+                KlassekodeDto.RefusjonIkkeOpplysningspliktig -> RefusjonIkkeOpplysningspliktig
+                KlassekodeDto.SykepengerArbeidstakerOrdinær -> SykepengerArbeidstakerOrdinær
+                KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> SelvstendigNæringsdrivendeOppgavepliktig
+                KlassekodeDto.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig -> SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
+                KlassekodeDto.SelvstendigNæringsdrivendeFisker -> SelvstendigNæringsdrivendeFisker
+                KlassekodeDto.SelvstendigNæringsdrivendeJordbrukOgSkogbruk -> SelvstendigNæringsdrivendeJordbrukOgSkogbruk
+            }
     }
 }

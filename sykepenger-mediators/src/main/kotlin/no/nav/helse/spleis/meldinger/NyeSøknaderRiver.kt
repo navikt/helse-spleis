@@ -8,7 +8,7 @@ import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 
 internal class NyeSøknaderRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : SøknadRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("ny_søknad")
     override val riverName = "Ny søknad"
@@ -19,10 +19,12 @@ internal class NyeSøknaderRiver(
         message.interestedIn("fremtidig_søknad")
     }
 
-    override fun createMessage(packet: JsonMessage) = NySøknadMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fnr"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        NySøknadMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fnr"].asText(),
+            ),
+        )
 }

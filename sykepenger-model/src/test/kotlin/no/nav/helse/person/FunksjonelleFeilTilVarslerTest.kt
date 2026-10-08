@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class FunksjonelleFeilTilVarslerTest {
-
     private lateinit var aktivitetslogg: IAktivitetslogg
 
     @BeforeEach

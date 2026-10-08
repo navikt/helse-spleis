@@ -10,7 +10,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class YrkesskadeE2ETest : AbstractDslTest() {
-
     @Test
     fun `søknad med yrkesskade gir varsel om yrkesskade`() {
         a1 {

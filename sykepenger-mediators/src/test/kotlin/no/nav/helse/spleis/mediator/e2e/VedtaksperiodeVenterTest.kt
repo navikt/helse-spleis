@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `sender ut vedtaksperiode venter`() {
         assertAntallOgSisteÅrsak(0)
@@ -66,16 +65,27 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
     }
 
     private val vedtaksperiodeVenter
-        get() = testRapid.inspektør.meldinger("vedtaksperioder_venter").flatMap { node ->
-            node.path("vedtaksperioder")
-        }
+        get() =
+            testRapid.inspektør.meldinger("vedtaksperioder_venter").flatMap { node ->
+                node.path("vedtaksperioder")
+            }
 
-    private fun assertAntallOgSisteÅrsak(forventetAntall: Int, forventetÅrsak: String? = null) {
+    private fun assertAntallOgSisteÅrsak(
+        forventetAntall: Int,
+        forventetÅrsak: String? = null,
+    ) {
         val vedtaksperiodeVenter = vedtaksperiodeVenter
         assertEquals(forventetAntall, vedtaksperiodeVenter.size)
         forventetÅrsak?.let {
-            assertEquals(it, vedtaksperiodeVenter.last().path("venterPå").path("venteårsak").path("hva").asText())
+            assertEquals(
+                it,
+                vedtaksperiodeVenter
+                    .last()
+                    .path("venterPå")
+                    .path("venteårsak")
+                    .path("hva")
+                    .asText(),
+            )
         }
     }
-
 }

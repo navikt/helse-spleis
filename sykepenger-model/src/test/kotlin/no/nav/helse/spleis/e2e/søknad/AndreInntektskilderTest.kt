@@ -9,18 +9,14 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-internal class AndreInntektskilderTest: AbstractDslTest() {
-
+internal class AndreInntektskilderTest : AbstractDslTest() {
     @Test
-    fun `Andre inntektskilder out of order`(){
+    fun `Andre inntektskilder out of order`() {
         a1 {
             håndterSøknad(februar, andreInntektskilder = false)
             håndterSøknad(januar, andreInntektskilder = true)
@@ -61,6 +57,8 @@ internal class AndreInntektskilderTest: AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.håndterSøknad(periode: Periode, andreInntektskilder: Boolean) =
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), andreInntektskilder = andreInntektskilder)
+    private fun TestPerson.TestArbeidsgiver.håndterSøknad(
+        periode: Periode,
+        andreInntektskilder: Boolean,
+    ) = håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), andreInntektskilder = andreInntektskilder)
 }

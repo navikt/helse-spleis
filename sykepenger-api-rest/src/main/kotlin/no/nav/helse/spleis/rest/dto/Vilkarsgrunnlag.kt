@@ -9,7 +9,7 @@ import java.util.UUID
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(value = ApiSpleisVilkarsgrunnlag::class, name = "SpleisVilkarsgrunnlag"),
-    JsonSubTypes.Type(value = ApiInfotrygdVilkarsgrunnlag::class, name = "InfotrygdVilkarsgrunnlag")
+    JsonSubTypes.Type(value = ApiInfotrygdVilkarsgrunnlag::class, name = "InfotrygdVilkarsgrunnlag"),
 )
 sealed interface ApiVilkarsgrunnlag {
     val id: UUID
@@ -38,7 +38,7 @@ data class ApiSpleisVilkarsgrunnlag(
     val oppfyllerKravOmMedlemskap: Boolean?,
     val forsikringsvurderingId: UUID?,
     override val opptjeningsvurderingId: UUID,
-    val skjonnsmessigFastsattAarlig: Double?
+    val skjonnsmessigFastsattAarlig: Double?,
 ) : ApiVilkarsgrunnlag
 
 data class ApiInfotrygdVilkarsgrunnlag(
@@ -48,13 +48,13 @@ data class ApiInfotrygdVilkarsgrunnlag(
     override val sykepengegrunnlag: Double,
     override val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjon>,
     override val inntekter: List<ApiArbeidsgiverinntekt>,
-    override val opptjeningsvurderingId: UUID
+    override val opptjeningsvurderingId: UUID,
 ) : ApiVilkarsgrunnlag
 
 data class ApiSykepengegrunnlagsgrense(
     val grunnbelop: Int,
     val grense: Int,
-    val virkningstidspunkt: LocalDate
+    val virkningstidspunkt: LocalDate,
 )
 
 enum class ApiInntektskilde {
@@ -62,24 +62,24 @@ enum class ApiInntektskilde {
     Inntektsmelding,
     Infotrygd,
     AOrdningen,
-    IkkeRapportert
+    IkkeRapportert,
 }
 
 data class ApiInntekterFraAOrdningen(
     val maned: YearMonth,
-    val sum: Double
+    val sum: Double,
 )
 
 data class ApiSkjonnsmessigFastsatt(
     val belop: Double,
-    val manedsbelop: Double
+    val manedsbelop: Double,
 )
 
 data class ApiOmregnetArsinntekt(
     val kilde: ApiInntektskilde,
     val belop: Double,
     val manedsbelop: Double,
-    val inntekterFraAOrdningen: List<ApiInntekterFraAOrdningen>?
+    val inntekterFraAOrdningen: List<ApiInntekterFraAOrdningen>?,
 )
 
 data class ApiArbeidsgiverinntekt(
@@ -89,17 +89,17 @@ data class ApiArbeidsgiverinntekt(
     val skjonnsmessigFastsatt: ApiSkjonnsmessigFastsatt?,
     val fom: LocalDate,
     val tom: LocalDate?,
-    val deaktivert: Boolean? = null
+    val deaktivert: Boolean? = null,
 )
 
 data class ApiArbeidsgiverrefusjon(
     val arbeidsgiver: String,
-    val refusjonsopplysninger: List<ApiRefusjonselement>
+    val refusjonsopplysninger: List<ApiRefusjonselement>,
 )
 
 data class ApiRefusjonselement(
     val fom: LocalDate,
     val tom: LocalDate?,
     val belop: Double,
-    val meldingsreferanseId: UUID
+    val meldingsreferanseId: UUID,
 )

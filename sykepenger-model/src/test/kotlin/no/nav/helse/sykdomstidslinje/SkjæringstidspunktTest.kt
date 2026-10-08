@@ -1,50 +1,21 @@
 package no.nav.helse.sykdomstidslinje
 
-import java.time.LocalDate
-import no.nav.helse.desember
+import no.nav.helse.*
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.erRettFør
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Periode.Companion.periode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
-import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.juni
-import no.nav.helse.mars
-import no.nav.helse.perioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.AIG
-import no.nav.helse.testhelpers.F
-import no.nav.helse.testhelpers.FORELDET
-import no.nav.helse.testhelpers.H
-import no.nav.helse.testhelpers.K
-import no.nav.helse.testhelpers.P
-import no.nav.helse.testhelpers.S
-import no.nav.helse.testhelpers.U
-import no.nav.helse.testhelpers.UK
-import no.nav.helse.testhelpers.YF
-import no.nav.helse.testhelpers.opphold
-import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class SkjæringstidspunktTest {
-
     @BeforeEach
     fun setup() {
         resetSeed()
@@ -57,9 +28,9 @@ internal class SkjæringstidspunktTest {
             assertEquals(
                 listOf(
                     1.januar til 30.januar,
-                    31.januar til 9.februar
+                    31.januar til 9.februar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -68,9 +39,9 @@ internal class SkjæringstidspunktTest {
             assertEquals(
                 listOf(
                     1.januar til 30.januar,
-                    31.januar til 9.februar
+                    31.januar til 9.februar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -78,9 +49,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 10.F + 10.YF + 10.S }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    21.januar til 30.januar
+                    21.januar til 30.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -89,9 +60,9 @@ internal class SkjæringstidspunktTest {
             assertEquals(
                 listOf(
                     1.januar til 20.januar,
-                    21.januar til 30.januar
+                    21.januar til 30.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -100,9 +71,9 @@ internal class SkjæringstidspunktTest {
             assertEquals(
                 listOf(
                     1.januar til 30.januar,
-                    31.januar til 9.februar
+                    31.januar til 9.februar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -110,9 +81,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 10.S + 10.F + 10.S }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    1.januar til 30.januar
+                    1.januar til 30.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -120,9 +91,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 10.F + 10.S }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    11.januar til 20.januar
+                    11.januar til 20.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -130,9 +101,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 10.YF + 10.S }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    11.januar til 20.januar
+                    11.januar til 20.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -140,9 +111,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 5.S + 2.opphold + 10.S }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    1.januar til 17.januar
+                    1.januar til 17.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -151,9 +122,9 @@ internal class SkjæringstidspunktTest {
             assertEquals(
                 listOf(
                     1.januar til 7.januar,
-                    9.januar til 18.januar
+                    9.januar til 18.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -161,9 +132,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 5.U + 2.opphold + 10.S }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    1.januar til 17.januar
+                    1.januar til 17.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -171,9 +142,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 5.S + 2.F + 10.U }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    1.januar til 17.januar
+                    1.januar til 17.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -181,9 +152,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 5.S + 2.F + 10.AIG }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    1.januar til 17.januar
+                    1.januar til 17.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -191,9 +162,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 10.K + 2.F + 10.S }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    1.januar til 22.januar
+                    1.januar til 22.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -201,9 +172,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 10.S + 2.F + 10.K }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    1.januar til 22.januar
+                    1.januar til 22.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -211,9 +182,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 10.P + 2.F + 10.S }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    13.januar til 22.januar
+                    13.januar til 22.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -221,9 +192,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 10.S + 2.F + 10.P }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    1.januar til 22.januar
+                    1.januar til 22.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
 
@@ -231,9 +202,9 @@ internal class SkjæringstidspunktTest {
         resetSeed { 10.S + 2.F + 5.P + 5.S }.also { tidslinjer ->
             assertEquals(
                 listOf(
-                    1.januar til 22.januar
+                    1.januar til 22.januar,
                 ),
-                beregnSkjæringstidspunkter(tidslinjer)
+                beregnSkjæringstidspunkter(tidslinjer),
             )
         }
     }
@@ -419,12 +390,14 @@ internal class SkjæringstidspunktTest {
     fun `sykeperiode starter på skjæringstidspunkt`() {
         val søknad = søknad(Søknadsperiode.Sykdom(4.februar(2020), 21.februar(2020), 100.prosent))
         val skjæringstidspunkt = 4.februar(2020)
-        val inntektsmelding = inntektsmelding(
-            listOf(
-                Periode(20.januar(2020), 20.januar(2020)),
-                Periode(4.februar(2020), 18.februar(2020))
-            ), førsteFraværsdag = skjæringstidspunkt
-        )
+        val inntektsmelding =
+            inntektsmelding(
+                listOf(
+                    Periode(20.januar(2020), 20.januar(2020)),
+                    Periode(4.februar(2020), 18.februar(2020)),
+                ),
+                førsteFraværsdag = skjæringstidspunkt,
+            )
         assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
@@ -432,12 +405,14 @@ internal class SkjæringstidspunktTest {
     fun `skjæringstidspunkt er riktig selv om første fraværsdag er satt for tidlig`() {
         val søknad = søknad(Søknadsperiode.Sykdom(4.februar(2020), 21.februar(2020), 100.prosent))
         val skjæringstidspunkt = 4.februar(2020)
-        val inntektsmelding = inntektsmelding(
-            listOf(
-                Periode(20.januar(2020), 20.januar(2020)),
-                Periode(4.februar(2020), 18.februar(2020))
-            ), førsteFraværsdag = 20.januar(2020)
-        )
+        val inntektsmelding =
+            inntektsmelding(
+                listOf(
+                    Periode(20.januar(2020), 20.januar(2020)),
+                    Periode(4.februar(2020), 18.februar(2020)),
+                ),
+                førsteFraværsdag = 20.januar(2020),
+            )
         assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
@@ -445,12 +420,14 @@ internal class SkjæringstidspunktTest {
     fun `skjæringstidspunkt er riktig selv om første fraværsdag er satt for sent`() {
         val søknad = søknad(Søknadsperiode.Sykdom(4.februar(2020), 21.februar(2020), 100.prosent))
         val skjæringstidspunkt = 4.februar(2020)
-        val inntektsmelding = inntektsmelding(
-            listOf(
-                Periode(20.januar(2020), 20.januar(2020)),
-                Periode(4.februar(2020), 18.februar(2020))
-            ), førsteFraværsdag = 18.februar(2020)
-        )
+        val inntektsmelding =
+            inntektsmelding(
+                listOf(
+                    Periode(20.januar(2020), 20.januar(2020)),
+                    Periode(4.februar(2020), 18.februar(2020)),
+                ),
+                førsteFraværsdag = 18.februar(2020),
+            )
         assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
@@ -458,12 +435,14 @@ internal class SkjæringstidspunktTest {
     fun `sykeperioden starter etter skjæringstidspunkt`() {
         val søknad = søknad(Søknadsperiode.Sykdom(29.januar(2020), 16.februar(2020), 100.prosent))
         val skjæringstidspunkt = 20.januar(2020)
-        val inntektsmelding = inntektsmelding(
-            listOf(
-                Periode(13.januar(2020), 17.januar(2020)),
-                Periode(20.januar(2020), 30.januar(2020))
-            ), førsteFraværsdag = skjæringstidspunkt
-        )
+        val inntektsmelding =
+            inntektsmelding(
+                listOf(
+                    Periode(13.januar(2020), 17.januar(2020)),
+                    Periode(20.januar(2020), 30.januar(2020)),
+                ),
+                førsteFraværsdag = skjæringstidspunkt,
+            )
         assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
@@ -471,13 +450,15 @@ internal class SkjæringstidspunktTest {
     fun `arbeidsgiverperiode med enkeltdager før skjæringstidspunkt`() {
         val søknad = søknad(Søknadsperiode.Sykdom(12.februar(2020), 19.februar(2020), 100.prosent))
         val skjæringstidspunkt = 3.februar(2020)
-        val inntektsmelding = inntektsmelding(
-            listOf(
-                Periode(14.januar(2020), 14.januar(2020)),
-                Periode(28.januar(2020), 28.januar(2020)),
-                Periode(3.februar(2020), 16.februar(2020))
-            ), førsteFraværsdag = skjæringstidspunkt
-        )
+        val inntektsmelding =
+            inntektsmelding(
+                listOf(
+                    Periode(14.januar(2020), 14.januar(2020)),
+                    Periode(28.januar(2020), 28.januar(2020)),
+                    Periode(3.februar(2020), 16.februar(2020)),
+                ),
+                førsteFraværsdag = skjæringstidspunkt,
+            )
         assertSkjæringstidspunkt(skjæringstidspunkt, søknad, inntektsmelding)
     }
 
@@ -627,19 +608,24 @@ internal class SkjæringstidspunktTest {
         assertSkjæringstidspunkt(1.januar, februar, tidslinje)
     }
 
-    private fun assertSkjæringstidspunkt(forventetSkjæringstidspunkt: LocalDate?, periode: Periode, vararg tidslinje: Sykdomstidslinje) {
+    private fun assertSkjæringstidspunkt(
+        forventetSkjæringstidspunkt: LocalDate?,
+        periode: Periode,
+        vararg tidslinje: Sykdomstidslinje,
+    ) {
         assertEquals(forventetSkjæringstidspunkt, Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinje.toList()).sisteOrNull(periode))
     }
 
     private fun assertSkjæringstidspunkt(
         forventetSkjæringstidspunkt: LocalDate,
         søknad: Søknad,
-        im: BitAvArbeidsgiverperiode
+        im: BitAvArbeidsgiverperiode,
     ) {
-        val a = Sykdomshistorikk().apply {
-            håndter(søknad.metadata.meldingsreferanseId, søknad.sykdomstidslinje)
-            håndter(im.metadata.meldingsreferanseId, im.sykdomstidslinje)
-        }
+        val a =
+            Sykdomshistorikk().apply {
+                håndter(søknad.metadata.meldingsreferanseId, søknad.sykdomstidslinje)
+                håndter(im.metadata.meldingsreferanseId, im.sykdomstidslinje)
+            }
 
         val tidslinje = a.sykdomstidslinje()
 
@@ -651,12 +637,11 @@ internal class SkjæringstidspunktTest {
         }
     }
 
-    private fun søknad(vararg perioder: Søknadsperiode): Søknad {
-        return hendelsefabrikk.lagSøknad(
+    private fun søknad(vararg perioder: Søknadsperiode): Søknad =
+        hendelsefabrikk.lagSøknad(
             perioder = perioder,
-            sendtTilNAVEllerArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive
+            sendtTilNAVEllerArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
         )
-    }
 
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
@@ -664,20 +649,21 @@ internal class SkjæringstidspunktTest {
         beregnetInntekt: Inntekt = INNTEKT_PR_MÅNED,
         førsteFraværsdag: LocalDate = 1.januar,
         refusjonOpphørsdato: LocalDate = 31.desember,
-        endringerIRefusjon: List<Inntektsmelding.Refusjon.EndringIRefusjon> = emptyList()
+        endringerIRefusjon: List<Inntektsmelding.Refusjon.EndringIRefusjon> = emptyList(),
     ): BitAvArbeidsgiverperiode {
-        val inntektsmelding = hendelsefabrikk.lagInntektsmelding(
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            beregnetInntekt = beregnetInntekt,
-            førsteFraværsdag = førsteFraværsdag,
-            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null
-        )
+        val inntektsmelding =
+            hendelsefabrikk.lagInntektsmelding(
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                beregnetInntekt = beregnetInntekt,
+                førsteFraværsdag = førsteFraværsdag,
+                refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            )
         val aktivitetslogg = Aktivitetslogg()
 
         return inntektsmelding.dager().bitAvInntektsmelding(
             aktivitetslogg,
-            arbeidsgiverperioder.plusElement(førsteFraværsdag.somPeriode()).periode()!!
+            arbeidsgiverperioder.plusElement(førsteFraværsdag.somPeriode()).periode()!!,
         )!!
     }
 
@@ -685,25 +671,27 @@ internal class SkjæringstidspunktTest {
         private const val ORGNUMMER = "987654321"
         private const val INNTEKT = 31000.00
         private val INNTEKT_PR_MÅNED = INNTEKT.månedlig
-        private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = ORGNUMMER,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER)
-        )
+        private val hendelsefabrikk =
+            ArbeidsgiverHendelsefabrikk(
+                organisasjonsnummer = ORGNUMMER,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER),
+            )
 
-        private fun beregnSkjæringstidspunkter(tidslinje: Sykdomstidslinje) =
-            Skjæringstidspunkt(tidslinje).alle().skjæringstidspunkter
+        private fun beregnSkjæringstidspunkter(tidslinje: Sykdomstidslinje) = Skjæringstidspunkt(tidslinje).alle().skjæringstidspunkter
 
-        private fun beregnSkjæringstidspunkt(tidslinje: Sykdomstidslinje, søkeperiode: Periode) =
-            Skjæringstidspunkt(tidslinje).alle().sisteOrNull(søkeperiode)
+        private fun beregnSkjæringstidspunkt(
+            tidslinje: Sykdomstidslinje,
+            søkeperiode: Periode,
+        ) = Skjæringstidspunkt(tidslinje).alle().sisteOrNull(søkeperiode)
 
         private fun assertDagenErSkjæringstidspunkt(
             dagen: LocalDate,
-            sykdomstidslinje: Sykdomstidslinje
+            sykdomstidslinje: Sykdomstidslinje,
         ) {
             val skjæringstidspunkt = beregnSkjæringstidspunkt(sykdomstidslinje, sykdomstidslinje.periode()!!)
             assertEquals(
                 dagen,
-                skjæringstidspunkt
+                skjæringstidspunkt,
             ) { "Forventet $dagen, men fikk $skjæringstidspunkt.\nPeriode: ${sykdomstidslinje.periode()}\nTidslinjen:\n$sykdomstidslinje" }
         }
 
@@ -714,7 +702,7 @@ internal class SkjæringstidspunktTest {
 
         private fun assertFørsteDagErSkjæringstidspunkt(
             perioden: Sykdomstidslinje,
-            sykdomstidslinje: Sykdomstidslinje
+            sykdomstidslinje: Sykdomstidslinje,
         ) {
             val førsteDag = perioden.periode()?.start ?: fail { "Tom periode" }
             assertNotNull(førsteDag)

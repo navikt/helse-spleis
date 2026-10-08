@@ -29,25 +29,27 @@ dependencies {
 val cloudProfilerArkiv = layout.buildDirectory.file("cloud-profiler/profiler_java_agent.tar.gz")
 val cloudProfilerRot = layout.buildDirectory.dir("cloud-profiler/root")
 
-val lastNedCloudProfiler = tasks.register("lastNedCloudProfiler") {
-    val arkiv = cloudProfilerArkiv
-    outputs.file(arkiv)
-    doLast {
-        val fil = arkiv.get().asFile
-        fil.parentFile.mkdirs()
-        uri("https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent.tar.gz").toURL().openStream().use { inn ->
-            fil.outputStream().use { inn.copyTo(it) }
+val lastNedCloudProfiler =
+    tasks.register("lastNedCloudProfiler") {
+        val arkiv = cloudProfilerArkiv
+        outputs.file(arkiv)
+        doLast {
+            val fil = arkiv.get().asFile
+            fil.parentFile.mkdirs()
+            uri("https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent.tar.gz").toURL().openStream().use { inn ->
+                fil.outputStream().use { inn.copyTo(it) }
+            }
         }
     }
-}
 
-val pakkUtCloudProfiler = tasks.register<Sync>("pakkUtCloudProfiler") {
-    dependsOn(lastNedCloudProfiler)
-    from(tarTree(resources.gzip(cloudProfilerArkiv))) {
-        include("profiler_java_agent.so")
+val pakkUtCloudProfiler =
+    tasks.register<Sync>("pakkUtCloudProfiler") {
+        dependsOn(lastNedCloudProfiler)
+        from(tarTree(resources.gzip(cloudProfilerArkiv))) {
+            include("profiler_java_agent.so")
+        }
+        into(cloudProfilerRot.map { it.dir("opt/cprof") })
     }
-    into(cloudProfilerRot.map { it.dir("opt/cprof") })
-}
 
 jib {
     extraDirectories {

@@ -8,7 +8,6 @@ import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.dto.tilSpannerPersonDto
@@ -19,11 +18,12 @@ import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dao.SendtDao
 import no.nav.helse.spleis.dao.SendtDao.Companion.responseJson
 import no.nav.helse.spleis.sporing.serializePersonForSporing
+import java.util.*
 
 internal fun Application.spannerApi(
     hendelseDao: HendelseDao,
     personDao: PersonDao,
-    sendtDao: SendtDao
+    sendtDao: SendtDao,
 ) {
     routing {
         authenticate {
@@ -41,11 +41,12 @@ internal fun Application.spannerApi(
                 withContext(Dispatchers.IO) {
                     val hendelseId = call.parameters["hendelse"] ?: throw IllegalArgumentException("Kall Mangler hendelse referanse")
 
-                    val meldingsReferanse = try {
-                        UUID.fromString(hendelseId)
-                    } catch (_: IllegalArgumentException) {
-                        throw BadRequestException("meldingsreferanse bør/skal være en UUID")
-                    }
+                    val meldingsReferanse =
+                        try {
+                            UUID.fromString(hendelseId)
+                        } catch (_: IllegalArgumentException) {
+                            throw BadRequestException("meldingsreferanse bør/skal være en UUID")
+                        }
 
                     val hendelse =
                         hendelseDao.hentHendelse(meldingsReferanse) ?: throw NotFoundException("Kunne ikke finne hendelse for hendelsereferanse = $hendelseId")
@@ -58,11 +59,12 @@ internal fun Application.spannerApi(
                 withContext(Dispatchers.IO) {
                     val hendelseId = call.parameters["forarsaketAv"] ?: throw IllegalArgumentException("Kall Mangler forarsaketAv")
 
-                    val forarsaketAv = try {
-                        UUID.fromString(hendelseId)
-                    } catch (_: IllegalArgumentException) {
-                        throw BadRequestException("forarsaketAv skal være en UUID")
-                    }
+                    val forarsaketAv =
+                        try {
+                            UUID.fromString(hendelseId)
+                        } catch (_: IllegalArgumentException) {
+                            throw BadRequestException("forarsaketAv skal være en UUID")
+                        }
 
                     val sendteMeldinger = sendtDao.sendteMeldinger(forarsaketAv)
 
@@ -90,5 +92,5 @@ internal fun Application.sporingApi(personDao: PersonDao) {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private data class PersonRequest(
-    val fødselsnummer: String
+    val fødselsnummer: String,
 )

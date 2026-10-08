@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VentetidberegnerTest {
-
     @Test
     fun `ventetiden utgjør de første 16 dagene - foreldet`() {
         val tidslinje = resetSeed { 17.FORELDET }
@@ -283,7 +282,7 @@ internal class VentetidberegnerTest {
     fun `starter ny ventetid hvis forrige ventetid på 16 dager slutter på søndag`() {
         listOf(
             resetSeed(frøDato = 4.januar) { 18.S + 1.opphold + 10.S },
-            resetSeed(frøDato = 4.januar) { 18.S + 1.A + 10.S }
+            resetSeed(frøDato = 4.januar) { 18.S + 1.A + 10.S },
         ).forEach { tidslinje ->
             val resultat = tidslinje.ventetid()
             assertEquals(2, resultat.size)
@@ -304,7 +303,7 @@ internal class VentetidberegnerTest {
     fun `samme ventetid hvis det er utbetalt sykepenger og inntil 15 dager sammenhengende opphold melom`() {
         listOf(
             resetSeed { 17.S + 15.opphold + 10.S + 15.opphold + 10.S },
-            resetSeed { 17.S + 15.A + 10.S + 15.A + 10.S }
+            resetSeed { 17.S + 15.A + 10.S + 15.A + 10.S },
         ).forEach { tidslinje ->
             val resultat = tidslinje.ventetid()
             assertEquals(1, resultat.size)
@@ -320,7 +319,7 @@ internal class VentetidberegnerTest {
     fun `samme ventetid hvis det er utbetalt sykepenger og inntil 15 dager opphold mellom`() {
         listOf(
             resetSeed { 17.S + 15.opphold + 10.S },
-            resetSeed { 17.S + 15.A + 10.S }
+            resetSeed { 17.S + 15.A + 10.S },
         ).forEach { tidslinje ->
             val resultat = tidslinje.ventetid()
             assertEquals(1, resultat.size)
@@ -336,7 +335,7 @@ internal class VentetidberegnerTest {
     fun `ny ventetid hvis det er utbetalt sykepenger til og med fredag og det er 15 dager opphold mellom påfølgende mandag og ny periode`() {
         listOf(
             resetSeed(frøDato = 3.januar) { 17.S + 2.opphold + 15.opphold + 10.S },
-            resetSeed(frøDato = 3.januar) { 17.S + 2.A + 15.A + 10.S }
+            resetSeed(frøDato = 3.januar) { 17.S + 2.A + 15.A + 10.S },
         ).forEach { tidslinje ->
             val resultat = tidslinje.ventetid()
             assertEquals(2, resultat.size)
@@ -357,7 +356,7 @@ internal class VentetidberegnerTest {
     fun `ny ventetid hvis det er utbetalt sykepenger og mer enn 15 dager opphold mellom`() {
         listOf(
             resetSeed { 17.S + 16.opphold + 10.S },
-            resetSeed { 17.S + 16.A + 10.S }
+            resetSeed { 17.S + 16.A + 10.S },
         ).forEach { tidslinje ->
             val resultat = tidslinje.ventetid()
             assertEquals(2, resultat.size)
@@ -378,7 +377,7 @@ internal class VentetidberegnerTest {
     fun `ny ventetid hvis det er opphold i ventetiden`() {
         listOf(
             resetSeed { 10.S + 1.opphold + 10.S },
-            resetSeed { 10.S + 1.A + 10.S }
+            resetSeed { 10.S + 1.A + 10.S },
         ).forEach { tidslinje ->
             val resultat = tidslinje.ventetid()
             assertEquals(2, resultat.size)
@@ -486,7 +485,7 @@ internal class VentetidberegnerTest {
     fun `ulik ventetid hvis det er opphold i helg og fredagen`() {
         listOf(
             resetSeed { 4.S + 3.opphold + 12.S },
-            resetSeed { 4.S + 3.A + 12.S }
+            resetSeed { 4.S + 3.A + 12.S },
         ).forEach { tidslinje ->
             val resultat = tidslinje.ventetid()
             assertEquals(2, resultat.size)
@@ -527,7 +526,7 @@ internal class VentetidberegnerTest {
 
     @Test
     fun `melding til nav-dag etter opphold skal telle som del av neste ventetid`() {
-        val tidslinje = resetSeed (frøDato = 4.januar) { 9.S + 1.A + 3.M + 15.S }
+        val tidslinje = resetSeed(frøDato = 4.januar) { 9.S + 1.A + 3.M + 15.S }
         val resultat = tidslinje.ventetid()
         assertEquals(2, resultat.size)
         resultat[0].also {
@@ -540,7 +539,6 @@ internal class VentetidberegnerTest {
         }
     }
 
-
     @Test
     fun `Samme ventetid fortsetter ved melding til nav dag`() {
         val tidslinje = resetSeed { 6.S + 1.M + 14.S }
@@ -551,7 +549,6 @@ internal class VentetidberegnerTest {
             assertTrue(it.ferdigAvklart)
         }
     }
-
 
     private fun Sykdomstidslinje.ventetid(): List<PeriodeUtenNavAnsvar> {
         val beregner = Ventetidberegner()

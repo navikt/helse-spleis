@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V328InntektjusteringerPåBehandling : JsonMigration(328) {
     override val description = "Legger til inntektjusteringer på alle behandlinger"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { vedtaksperiode ->
                 migrerVedtaksperiode(vedtaksperiode)

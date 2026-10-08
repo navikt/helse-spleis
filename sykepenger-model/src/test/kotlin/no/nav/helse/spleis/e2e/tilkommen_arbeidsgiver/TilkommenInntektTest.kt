@@ -1,26 +1,17 @@
 package no.nav.helse.spleis.e2e.tilkommen_arbeidsgiver
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Arbeidstakerkilde
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.InntekterForBeregning
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Test
 
 internal class TilkommenInntektTest : AbstractDslTest() {
-
     @Test
     fun `tilkommen inntekt legges til etter perioden er utbetalt`() {
         a1 {

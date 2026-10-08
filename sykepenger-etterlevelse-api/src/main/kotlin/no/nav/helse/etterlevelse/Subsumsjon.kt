@@ -1,14 +1,14 @@
 package no.nav.helse.etterlevelse
 
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 data class Regelverksporing(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
-    val subsumsjon: Subsumsjon
+    val subsumsjon: Subsumsjon,
 )
 
 data class Subsumsjon(
@@ -21,15 +21,16 @@ data class Subsumsjon(
     val punktum: Punktum? = null,
     val bokstav: Bokstav? = null,
     val input: Map<String, Any>,
-    val output: Map<String, Any>
+    val output: Map<String, Any>,
 ) {
-    val lovreferanse = Lovreferanse(
-        lovverk = lovverk,
-        paragraf = paragraf,
-        ledd = ledd,
-        punktum = punktum,
-        bokstav = bokstav
-    )
+    val lovreferanse =
+        Lovreferanse(
+            lovverk = lovverk,
+            paragraf = paragraf,
+            ledd = ledd,
+            punktum = punktum,
+            bokstav = bokstav,
+        )
 
     companion object {
         fun enkelSubsumsjon(
@@ -41,9 +42,9 @@ data class Subsumsjon(
             punktum: Punktum? = null,
             bokstav: Bokstav? = null,
             input: Map<String, Any>,
-            output: Map<String, Any>
-        ): Subsumsjon {
-            return Subsumsjon(
+            output: Map<String, Any>,
+        ): Subsumsjon =
+            Subsumsjon(
                 type = Subsumsjonstype.ENKEL,
                 lovverk = lovverk,
                 utfall = utfall,
@@ -53,9 +54,8 @@ data class Subsumsjon(
                 punktum = punktum,
                 bokstav = bokstav,
                 input = input,
-                output = output
+                output = output,
             )
-        }
 
         fun periodisertSubsumsjon(
             perioder: Collection<ClosedRange<LocalDate>>,
@@ -67,16 +67,19 @@ data class Subsumsjon(
             punktum: Punktum? = null,
             bokstav: Bokstav? = null,
             output: Map<String, Any> = emptyMap(),
-            input: Map<String, Any>
+            input: Map<String, Any>,
         ): Subsumsjon {
-            val outputMedPerioder = output + mapOf(
-                "perioder" to perioder.map {
+            val outputMedPerioder =
+                output +
                     mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
+                        "perioder" to
+                            perioder.map {
+                                mapOf(
+                                    "fom" to it.start,
+                                    "tom" to it.endInclusive,
+                                )
+                            },
                     )
-                }
-            )
             return Subsumsjon(
                 type = Subsumsjonstype.PERIODISERT,
                 lovverk = lovverk,
@@ -87,24 +90,26 @@ data class Subsumsjon(
                 punktum = punktum,
                 bokstav = bokstav,
                 input = input,
-                output = outputMedPerioder
+                output = outputMedPerioder,
             )
         }
     }
 
     enum class Subsumsjonstype {
-        ENKEL, PERIODISERT
+        ENKEL,
+        PERIODISERT,
     }
 
     enum class Utfall {
-        VILKAR_OPPFYLT, VILKAR_IKKE_OPPFYLT, VILKAR_UAVKLART, VILKAR_BEREGNET
+        VILKAR_OPPFYLT,
+        VILKAR_IKKE_OPPFYLT,
+        VILKAR_UAVKLART,
+        VILKAR_BEREGNET,
     }
 
     fun er(lovreferanse: Lovreferanse) = this.lovreferanse == lovreferanse
 
-    override fun toString(): String {
-        return "$lovreferanse [$utfall]"
-    }
+    override fun toString(): String = "$lovreferanse [$utfall]"
 }
 
 fun Subsumsjon.erTomPeriode(): Boolean {
@@ -114,7 +119,13 @@ fun Subsumsjon.erTomPeriode(): Boolean {
     return perioder.isEmpty()
 }
 
-data class Lovreferanse(val lovverk: String, val paragraf: Paragraf?, val ledd: Ledd?, val punktum: Punktum?, val bokstav: Bokstav?) {
+data class Lovreferanse(
+    val lovverk: String,
+    val paragraf: Paragraf?,
+    val ledd: Ledd?,
+    val punktum: Punktum?,
+    val bokstav: Bokstav?,
+) {
     override fun toString(): String {
         val parts = listOfNotNull(lovverk, paragraf?.toString(), ledd?.toString(), punktum?.toString(), bokstav?.toString())
         return parts.joinToString(separator = " ")

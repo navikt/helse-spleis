@@ -9,25 +9,37 @@ import java.util.UUID
 internal class V315AuuerSomIkkeRapportertInntekt : JsonMigration(version = 315) {
     override val description = "legger til en deaktivert IkkeRapportert inntekt for alle auuer som har et vilkårsgrunnlag"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    ) {
         if (jsonNode.path("vilkårsgrunnlagHistorikk").isEmpty) return
 
         val tidsstempel = LocalDateTime.now().toString()
         val sisteInnslag = jsonNode.path("vilkårsgrunnlagHistorikk").path(0).deepCopy<ObjectNode>()
 
-        val aktiveVilkårsgrunnlag = sisteInnslag.path("vilkårsgrunnlag").associate { element ->
-            element.path("skjæringstidspunkt").asText().dato to element
-        }
+        val aktiveVilkårsgrunnlag =
+            sisteInnslag.path("vilkårsgrunnlag").associate { element ->
+                element.path("skjæringstidspunkt").asText().dato to element
+            }
 
-        val arbeidsgiverePerSkjæringstidspunkt = jsonNode.path("arbeidsgivere").mapNotNull { arbeidsgiver ->
-            val orgnr = arbeidsgiver.path("organisasjonsnummer").asText()
-            val skjæringstidspunkter = arbeidsgiver.path("vedtaksperioder")
-                .map { vedtaksperiode -> vedtaksperiode.path("skjæringstidspunkt").asText().dato }
-                .filter { it in aktiveVilkårsgrunnlag }
-                .toSet()
-            if (skjæringstidspunkter.isEmpty()) null
-            else orgnr to skjæringstidspunkter
-        }.toMap()
+        val arbeidsgiverePerSkjæringstidspunkt =
+            jsonNode
+                .path("arbeidsgivere")
+                .mapNotNull { arbeidsgiver ->
+                    val orgnr = arbeidsgiver.path("organisasjonsnummer").asText()
+                    val skjæringstidspunkter =
+                        arbeidsgiver
+                            .path("vedtaksperioder")
+                            .map { vedtaksperiode -> vedtaksperiode.path("skjæringstidspunkt").asText().dato }
+                            .filter { it in aktiveVilkårsgrunnlag }
+                            .toSet()
+                    if (skjæringstidspunkter.isEmpty()) {
+                        null
+                    } else {
+                        orgnr to skjæringstidspunkter
+                    }
+                }.toMap()
 
         val endredeSkjæringstidspunkter = mutableSetOf<LocalDate>()
 

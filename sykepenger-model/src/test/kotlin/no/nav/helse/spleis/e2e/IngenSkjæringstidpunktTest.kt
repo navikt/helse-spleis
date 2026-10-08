@@ -1,45 +1,25 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.UUID
 import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.TestPerson
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
-
-
     @Test
     fun `Bruker faktisk ikke skatteinntekter ved kort gap til periode med kun ferie`() {
         a1 {
@@ -94,7 +74,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             håndterSøknad(Sykdom(5.februar, 24.februar, 100.prosent), Ferie(5.februar, 11.februar))
             håndterSelvbestemtArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(5.februar til 20.februar),
-                vedtaksperiodeId = 3.vedtaksperiode
+                vedtaksperiodeId = 3.vedtaksperiode,
             )
 
             håndterYtelser(2.vedtaksperiode)
@@ -118,7 +98,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             // Utbetaling revurderes og skal trekke penger tilbake for 21.-23.februar
             håndterSelvbestemtArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(12.februar til 27.februar),
-                vedtaksperiodeId = 3.vedtaksperiode
+                vedtaksperiodeId = 3.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             assertEquals(12.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
@@ -167,7 +147,6 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             assertFalse(utbetalingenSomTrekkerPenger.utbetalingId in utbetalingIder(4.vedtaksperiode))
         }
     }
-
 
     @Test
     fun `bare ferie (sykdomsforlengelse) - etter tilbakevennende sykdom`() {
@@ -247,7 +226,7 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
@@ -278,7 +257,9 @@ internal class IngenSkjæringstidpunktTest : AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.utbetalingIder(vedtaksperiode: UUID) = inspektør.vedtaksperioder(vedtaksperiode).inspektør.behandlinger.flatMap { it.endringer().mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId } }
-
+    private fun TestPerson.TestArbeidsgiver.utbetalingIder(vedtaksperiode: UUID) =
+        inspektør
+            .vedtaksperioder(vedtaksperiode)
+            .inspektør.behandlinger
+            .flatMap { it.endringer().mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId } }
 }
-

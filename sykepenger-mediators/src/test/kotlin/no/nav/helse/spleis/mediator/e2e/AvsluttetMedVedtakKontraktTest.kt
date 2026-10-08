@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
@@ -16,18 +15,20 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `vedtak med utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        val søknadId = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        )
-        val (inntektsmeldingId, _) = sendNavNoInntektsmelding(
-            listOf(Periode(fom = 3.januar, tom = 18.januar))
-        )
+        val søknadId =
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            )
+        val (inntektsmeldingId, _) =
+            sendNavNoInntektsmelding(
+                listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
@@ -68,13 +69,15 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `vedtak med utbetaling hvor sykepengegrunnlaget er fastsatt ved skjønn`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        val søknadId = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        )
-        val (inntektsmeldingId, _) = sendNavNoInntektsmelding(
-            listOf(Periode(fom = 3.januar, tom = 18.januar)),
-            beregnetInntekt = 45000.00
-        )
+        val søknadId =
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            )
+        val (inntektsmeldingId, _) =
+            sendNavNoInntektsmelding(
+                listOf(Periode(fom = 3.januar, tom = 18.januar)),
+                beregnetInntekt = 45000.00,
+            )
         sendVilkårsgrunnlag(0)
         sendSkjønnsmessigFastsettelse(3.januar, listOf(TestMessageFactory.SkjønnsmessigFastsatt(ORGNUMMER, 47500.00 * 12)))
         sendYtelser(0)
@@ -118,9 +121,10 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `vedtak uten utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 18.januar, sykmeldingsgrad = 100))
-        val søknadId = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 18.januar, sykmeldingsgrad = 100))
-        )
+        val søknadId =
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 18.januar, sykmeldingsgrad = 100)),
+            )
 
         @Language("JSON")
         val forventet = """
@@ -149,7 +153,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
     fun `vedtak med utbetaling uten utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         val (innteksmeldingId, _) = sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
@@ -159,10 +163,11 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
 
         sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        val søknadId = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
-            fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.FERIE))
-        )
+        val søknadId =
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+                fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.FERIE)),
+            )
         sendYtelser(1)
         sendUtbetalingsgodkjenning(1)
         @Language("JSON")
@@ -202,25 +207,27 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `vedtak med utbetaling selvstendig`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
-        val søknadId = sendSelvstendigsøknad(
-            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            ventetid = 3.januar til 18.januar
-        )
+        val søknadId =
+            sendSelvstendigsøknad(
+                arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+                ventetid = 3.januar til 18.januar,
+            )
 
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
-            forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                forsikringsvurderingId = forsikringsvurderingId,
-                dekning = null,
-                opphørsdato = null,
-                harIndividuellForsikring = false,
-                villeHattForsikringOmDenVarBetalt = false,
-                harForsikringSomIkkePasserMedSøknadstype = false,
-            ),
-            orgnummer = "SELVSTENDIG"
+            forsikringsvurderingResultat =
+                ForsikringsvurderingResultat(
+                    forsikringsvurderingId = forsikringsvurderingId,
+                    dekning = null,
+                    opphørsdato = null,
+                    harIndividuellForsikring = false,
+                    villeHattForsikringOmDenVarBetalt = false,
+                    harForsikringSomIkkePasserMedSøknadstype = false,
+                ),
+            orgnummer = "SELVSTENDIG",
         )
         sendSimuleringSelvstendig(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenningSelvstendig(0)
@@ -252,12 +259,17 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
     }
 
-    private fun assertVedtakFattet(forventetMelding: String, forventetUtbetalingEventNavn: String) {
+    private fun assertVedtakFattet(
+        forventetMelding: String,
+        forventetUtbetalingEventNavn: String,
+    ) {
         val vedtakFattet = testRapid.assertUtgåendeMelding(forventetMelding)
         val vedtakFattetUtbetalingId = vedtakFattet.path("utbetalingId").asText()
-        val utbetalingEventUtbetalingId = testRapid.inspektør.siste(forventetUtbetalingEventNavn).path("utbetalingId").asText()
+        val utbetalingEventUtbetalingId =
+            testRapid.inspektør
+                .siste(forventetUtbetalingEventNavn)
+                .path("utbetalingId")
+                .asText()
         assertEquals(vedtakFattetUtbetalingId, utbetalingEventUtbetalingId)
     }
 }
-
-

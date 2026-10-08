@@ -1,9 +1,9 @@
 package no.nav.helse.dto.deserialisering
 
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.dto.InfotrygdFerieperiodeDto
 import no.nav.helse.dto.MeldingsreferanseDto
+import java.time.LocalDateTime
+import java.util.*
 
 data class InfotrygdhistorikkelementInnDto(
     val id: UUID,
@@ -12,5 +12,5 @@ data class InfotrygdhistorikkelementInnDto(
     val ferieperioder: List<InfotrygdFerieperiodeDto>,
     val arbeidsgiverutbetalingsperioder: List<InfotrygdArbeidsgiverutbetalingsperiodeInnDto>,
     val personutbetalingsperioder: List<InfotrygdPersonutbetalingsperiodeInnDto>,
-    val oppdatert: LocalDateTime
+    val oppdatert: LocalDateTime,
 )

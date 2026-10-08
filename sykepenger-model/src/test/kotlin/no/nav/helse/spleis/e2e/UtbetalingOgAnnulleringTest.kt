@@ -1,11 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Behovsoppsamler
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -16,32 +11,17 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.OVERFØRT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
-
     @Test
     fun `vedtaksperiode oppretter utbetaling for seg selv og andre`() {
         nyPeriode(januar, a1, a2)
@@ -81,9 +61,10 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
         a1 {
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            val m = assertThrows<IllegalStateException> {
-                håndterYtelser(2.vedtaksperiode)
-            }
+            val m =
+                assertThrows<IllegalStateException> {
+                    håndterYtelser(2.vedtaksperiode)
+                }
             assertEquals("Har laget en overlappende utbetaling", m.message)
         }
     }
@@ -151,7 +132,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
             håndterSøknad(Sykdom(20.februar, 20.mars, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(20.februar til 7.mars),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -180,7 +161,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
             håndterSøknad(Sykdom(3.mars, 26.mars, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(3.mars til 18.mars),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -237,7 +218,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
-                TIL_UTBETALING
+                TIL_UTBETALING,
             )
             assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
         }
@@ -265,7 +246,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
-                TIL_UTBETALING
+                TIL_UTBETALING,
             )
             assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
         }
@@ -293,7 +274,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
-                TIL_UTBETALING
+                TIL_UTBETALING,
             )
             assertEquals(OVERFØRT, inspektør.utbetalingtilstand(0))
         }
@@ -320,7 +301,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
-                TIL_UTBETALING
+                TIL_UTBETALING,
             )
         }
     }
@@ -351,7 +332,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -379,7 +360,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -394,14 +375,16 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            val utbetalingsbehov = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Utbetaling> {
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            }.single { it.fagsystemId == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
+            val utbetalingsbehov =
+                behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Utbetaling> {
+                    håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+                }.single { it.fagsystemId == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
 
             håndterUtbetalt()
-            val annuleringsbehov = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Utbetaling> {
-                håndterAnnullering(1.vedtaksperiode) // Stale
-            }.single { it.fagsystemId == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
+            val annuleringsbehov =
+                behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Utbetaling> {
+                    håndterAnnullering(1.vedtaksperiode) // Stale
+                }.single { it.fagsystemId == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
 
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
@@ -440,8 +423,16 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
             håndterUtbetalt()
             assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
 
-            val avvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
-            val ikkeAvvisteDager = observatør.utbetalingMedUtbetalingEventer.first().utbetalingsdager.filter { it.type != EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+            val avvisteDager =
+                observatør.utbetalingMedUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+            val ikkeAvvisteDager =
+                observatør.utbetalingMedUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type != EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
 
             assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
             assertEquals(7, avvisteDager.size)

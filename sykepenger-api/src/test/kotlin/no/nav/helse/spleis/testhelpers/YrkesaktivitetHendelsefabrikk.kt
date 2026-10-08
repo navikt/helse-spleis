@@ -1,8 +1,5 @@
 package no.nav.helse.spleis.testhelpers
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
@@ -54,24 +51,27 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
-internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Behandlingsporing.Yrkesaktivitet) {
-
+internal class YrkesaktivitetHendelsefabrikk(
+    private val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
+) {
     private val sykmeldinger = mutableListOf<Sykmelding>()
     private val søknader = mutableListOf<Søknad>()
 
     internal fun lagSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
-        id: UUID = UUID.randomUUID()
-    ): Sykmelding {
-        return Sykmelding(
+        id: UUID = UUID.randomUUID(),
+    ): Sykmelding =
+        Sykmelding(
             meldingsreferanseId = MeldingsreferanseId(id),
             behandlingsporing = behandlingsporing,
-            sykeperioder = listOf(*sykeperioder)
+            sykeperioder = listOf(*sykeperioder),
         ).apply {
             sykmeldinger.add(this)
         }
-    }
 
     internal fun lagSøknad(
         vararg perioder: Søknad.Søknadsperiode,
@@ -81,7 +81,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false,
         id: UUID = UUID.randomUUID(),
         merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
-        permittert: Boolean = false, korrigerer: UUID? = null,
+        permittert: Boolean = false,
+        korrigerer: UUID? = null,
         utenlandskSykmelding: Boolean = false,
         arbeidUtenforNorge: Boolean = false,
         sendTilGosys: Boolean = false,
@@ -96,9 +97,9 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         harOppgittVarigEndring: Boolean? = null,
         harOppgittOpprettholdtInntekt: Boolean? = null,
         harOppgittOppholdIUtlandet: Boolean? = null,
-        arbeidssituasjon: Søknad.Arbeidssituasjon
-    ): Søknad {
-        return Søknad(
+        arbeidssituasjon: Søknad.Arbeidssituasjon,
+    ): Søknad =
+        Søknad(
             meldingsreferanseId = MeldingsreferanseId(id),
             behandlingsporing = behandlingsporing,
             perioder = listOf(*perioder),
@@ -122,11 +123,10 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             harOppgittNyIArbeidslivet = harOppgittNyIArbeidslivet,
             harOppgittVarigEndring = harOppgittVarigEndring,
             harOppgittOpprettholdtInntekt = harOppgittOpprettholdtInntekt,
-            harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet
+            harOppgittOppholdIUtlandet = harOppgittOppholdIUtlandet,
         ).apply {
             søknader.add(this)
         }
-    }
 
     internal fun lagArbeidsgiveropplysninger(
         arbeidsgiverperioder: List<Periode>?,
@@ -138,22 +138,23 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         id: UUID = UUID.randomUUID(),
         mottatt: LocalDateTime = LocalDateTime.now(),
         harFlereArbeidsforhold: Boolean = false,
-        refusjonskravGyldigFra: LocalDate? = null
+        refusjonskravGyldigFra: LocalDate? = null,
     ) = Arbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
         registrert = mottatt.plusSeconds(1),
         behandlingsporing = behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         vedtaksperiodeId = vedtaksperiodeId,
-        opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            beregnetInntekt = beregnetInntekt,
-            opphørAvNaturalytelser = opphørAvNaturalytelser,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            refusjon = refusjon,
-            harFlereArbeidsforhold = harFlereArbeidsforhold,
-            refusjonskravGyldigFra = refusjonskravGyldigFra
-        )
+        opplysninger =
+            Arbeidsgiveropplysning.fraInntektsmelding(
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                beregnetInntekt = beregnetInntekt,
+                opphørAvNaturalytelser = opphørAvNaturalytelser,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                refusjon = refusjon,
+                harFlereArbeidsforhold = harFlereArbeidsforhold,
+                refusjonskravGyldigFra = refusjonskravGyldigFra,
+            ),
     )
 
     internal fun lagKorrigerendeArbeidsgiveropplysninger(
@@ -166,22 +167,23 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         id: UUID = UUID.randomUUID(),
         mottatt: LocalDateTime = LocalDateTime.now(),
         harFlereArbeidsforhold: Boolean = false,
-        refusjonskravGyldigFra: LocalDate? = null
+        refusjonskravGyldigFra: LocalDate? = null,
     ) = KorrigerteArbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
         registrert = mottatt.plusSeconds(1),
         behandlingsporing = behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         vedtaksperiodeId = vedtaksperiodeId,
-        opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            beregnetInntekt = beregnetInntekt,
-            opphørAvNaturalytelser = opphørAvNaturalytelser,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            refusjon = refusjon,
-            harFlereArbeidsforhold = harFlereArbeidsforhold,
-            refusjonskravGyldigFra = refusjonskravGyldigFra
-        )
+        opplysninger =
+            Arbeidsgiveropplysning.fraInntektsmelding(
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                beregnetInntekt = beregnetInntekt,
+                opphørAvNaturalytelser = opphørAvNaturalytelser,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                refusjon = refusjon,
+                harFlereArbeidsforhold = harFlereArbeidsforhold,
+                refusjonskravGyldigFra = refusjonskravGyldigFra,
+            ),
     )
 
     internal fun lagSelvbestemteArbeidsgiveropplysninger(
@@ -194,59 +196,58 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         id: UUID = UUID.randomUUID(),
         mottatt: LocalDateTime = LocalDateTime.now(),
         harFlereArbeidsforhold: Boolean = false,
-        refusjonskravGyldigFra: LocalDate? = null
+        refusjonskravGyldigFra: LocalDate? = null,
     ) = SelvbestemteArbeidsgiveropplysninger(
         meldingsreferanseId = MeldingsreferanseId(id),
         innsendt = mottatt,
         registrert = mottatt.plusSeconds(1),
         behandlingsporing = behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
         vedtaksperiodeId = vedtaksperiodeId,
-        opplysninger = Arbeidsgiveropplysning.fraInntektsmelding(
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            beregnetInntekt = beregnetInntekt,
-            opphørAvNaturalytelser = opphørAvNaturalytelser,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            refusjon = refusjon,
-            harFlereArbeidsforhold = harFlereArbeidsforhold,
-            refusjonskravGyldigFra = refusjonskravGyldigFra
-        )
+        opplysninger =
+            Arbeidsgiveropplysning.fraInntektsmelding(
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                beregnetInntekt = beregnetInntekt,
+                opphørAvNaturalytelser = opphørAvNaturalytelser,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                refusjon = refusjon,
+                harFlereArbeidsforhold = harFlereArbeidsforhold,
+                refusjonskravGyldigFra = refusjonskravGyldigFra,
+            ),
     )
 
-
-    internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) =
-        InntektsmeldingerReplay(MeldingsreferanseId(UUID.randomUUID()), behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker, vedtaksperiodeId, emptyList())
+    internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) = InntektsmeldingerReplay(MeldingsreferanseId(UUID.randomUUID()), behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker, vedtaksperiodeId, emptyList())
 
     internal fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
         utbetalinger: List<Infotrygdperiode> = listOf(),
-        besvart: LocalDateTime = LocalDateTime.now()
-    ) =
-        Utbetalingshistorikk(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = behandlingsporing,
-            vedtaksperiodeId = vedtaksperiodeId,
-            element = InfotrygdhistorikkElement.opprett(
+        besvart: LocalDateTime = LocalDateTime.now(),
+    ) = Utbetalingshistorikk(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        behandlingsporing = behandlingsporing,
+        vedtaksperiodeId = vedtaksperiodeId,
+        element =
+            InfotrygdhistorikkElement.opprett(
                 oppdatert = besvart,
                 hendelseId = MeldingsreferanseId(UUID.randomUUID()),
-                perioder = utbetalinger
+                perioder = utbetalinger,
             ),
-            besvart = LocalDateTime.now()
-        )
+        besvart = LocalDateTime.now(),
+    )
 
     internal fun lagUtbetalingshistorikkEtterInfotrygdendring(
         utbetalinger: List<Infotrygdperiode> = listOf(),
         besvart: LocalDateTime = LocalDateTime.now(),
-        id: UUID = UUID.randomUUID()
-    ) =
-        UtbetalingshistorikkEtterInfotrygdendring(
-            meldingsreferanseId = MeldingsreferanseId(id),
-            element = InfotrygdhistorikkElement.opprett(
+        id: UUID = UUID.randomUUID(),
+    ) = UtbetalingshistorikkEtterInfotrygdendring(
+        meldingsreferanseId = MeldingsreferanseId(id),
+        element =
+            InfotrygdhistorikkElement.opprett(
                 oppdatert = besvart,
                 hendelseId = MeldingsreferanseId(UUID.randomUUID()),
-                perioder = utbetalinger
+                perioder = utbetalinger,
             ),
-            besvart = LocalDateTime.now()
-        )
+        besvart = LocalDateTime.now(),
+    )
 
     internal fun lagVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
@@ -255,9 +256,9 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
         inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
-        forsikringsvurderingId: UUID?
-    ): Vilkårsgrunnlag {
-        return Vilkårsgrunnlag(
+        forsikringsvurderingId: UUID?,
+    ): Vilkårsgrunnlag =
+        Vilkårsgrunnlag(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             skjæringstidspunkt = skjæringstidspunkt,
@@ -269,7 +270,6 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             forsikringsvurderingId = forsikringsvurderingId,
             opptjeningsvurderingId = null,
         )
-    }
 
     internal fun lagYtelser(
         vedtaksperiodeId: UUID,
@@ -290,24 +290,30 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
             behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
-            foreldrepenger = Foreldrepenger(
-                foreldrepengeytelse = foreldrepenger,
-            ),
-            svangerskapspenger = Svangerskapspenger(
-                svangerskapsytelse = svangerskapspenger
-            ),
-            pleiepenger = Pleiepenger(
-                perioder = pleiepenger
-            ),
-            omsorgspenger = Omsorgspenger(
-                perioder = omsorgspenger
-            ),
-            opplæringspenger = Opplæringspenger(
-                perioder = opplæringspenger
-            ),
-            institusjonsopphold = Institusjonsopphold(
-                perioder = institusjonsoppholdsperioder
-            ),
+            foreldrepenger =
+                Foreldrepenger(
+                    foreldrepengeytelse = foreldrepenger,
+                ),
+            svangerskapspenger =
+                Svangerskapspenger(
+                    svangerskapsytelse = svangerskapspenger,
+                ),
+            pleiepenger =
+                Pleiepenger(
+                    perioder = pleiepenger,
+                ),
+            omsorgspenger =
+                Omsorgspenger(
+                    perioder = omsorgspenger,
+                ),
+            opplæringspenger =
+                Opplæringspenger(
+                    perioder = opplæringspenger,
+                ),
+            institusjonsopphold =
+                Institusjonsopphold(
+                    perioder = institusjonsoppholdsperioder,
+                ),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspengerV2),
             inntekterForBeregning = InntekterForBeregning(inntekterForBeregning),
             dagpenger = Dagpenger(dagpengerV2),
@@ -322,9 +328,9 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         fagsystemId: String,
         fagområde: String,
         simuleringOK: Boolean,
-        simuleringsresultat: SimuleringResultatDto?
-    ): Simulering {
-        return Simulering(
+        simuleringsresultat: SimuleringResultatDto?,
+    ): Simulering =
+        Simulering(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             vedtaksperiodeId = vedtaksperiodeId.toString(),
             behandlingsporing = behandlingsporing,
@@ -333,9 +339,8 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             simuleringOK = simuleringOK,
             melding = "",
             utbetalingId = utbetalingId,
-            simuleringsResultat = simuleringsresultat
+            simuleringsResultat = simuleringsresultat,
         )
-    }
 
     internal fun lagUtbetalingsgodkjenning(
         vedtaksperiodeId: UUID,
@@ -343,7 +348,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         utbetalingGodkjent: Boolean,
         automatiskBehandling: Boolean,
         utbetalingId: UUID,
-        godkjenttidspunkt: LocalDateTime = LocalDateTime.now()
+        godkjenttidspunkt: LocalDateTime = LocalDateTime.now(),
     ) = Utbetalingsgodkjenning(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         behandlingsporing = behandlingsporing,
@@ -362,7 +367,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         behandlingId: UUID,
         utbetalingId: UUID,
         automatisert: Boolean = true,
-        vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()
+        vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now(),
     ) = VedtakFattet(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         behandlingsporing = behandlingsporing,
@@ -372,14 +377,14 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         saksbehandlerIdent = "Vedtak fattesen",
         saksbehandlerEpost = "vedtak.fattesen@nav.no",
         vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-        automatisert = automatisert
+        automatisert = automatisert,
     )
 
     internal fun lagKanIkkeBehandlesHer(
         vedtaksperiodeId: UUID,
         behandlingId: UUID,
         utbetalingId: UUID,
-        automatisert: Boolean = true
+        automatisert: Boolean = true,
     ) = KanIkkeBehandlesHer(
         meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         behandlingsporing = behandlingsporing,
@@ -389,7 +394,7 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         saksbehandlerIdent = "Info trygdesen",
         saksbehandlerEpost = "info.trygdesen@nav.no",
         opprettet = LocalDateTime.now(),
-        automatisert = automatisert
+        automatisert = automatisert,
     )
 
     internal fun lagUtbetalinghendelse(
@@ -398,20 +403,19 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
         utbetalingId: UUID,
         fagsystemId: String,
         status: Oppdragstatus,
-        meldingsreferanseId: UUID = UUID.randomUUID()
-    ) =
-        UtbetalingHendelse(
-            meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-            behandlingsporing = behandlingsporing,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            fagsystemId = fagsystemId,
-            utbetalingId = utbetalingId,
-            status = status,
-            melding = "hei",
-            avstemmingsnøkkel = 123456L,
-            overføringstidspunkt = LocalDateTime.now()
-        )
+        meldingsreferanseId: UUID = UUID.randomUUID(),
+    ) = UtbetalingHendelse(
+        meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
+        behandlingsporing = behandlingsporing,
+        vedtaksperiodeId = vedtaksperiodeId,
+        behandlingId = behandlingId,
+        fagsystemId = fagsystemId,
+        utbetalingId = utbetalingId,
+        status = status,
+        melding = "hei",
+        avstemmingsnøkkel = 123456L,
+        overføringstidspunkt = LocalDateTime.now(),
+    )
 
     internal fun lagAnnullering(vedtaksperiodeId: UUID) =
         AnnullerUtbetaling(
@@ -422,55 +426,63 @@ internal class YrkesaktivitetHendelsefabrikk(private val behandlingsporing: Beha
             saksbehandlerEpost = "tbd@nav.no",
             opprettet = LocalDateTime.now(),
             årsaker = listOf("Annet"),
-            begrunnelse = ""
+            begrunnelse = "",
         )
 
     internal fun lagIdentOpphørt() =
         IdentOpphørt(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID())
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
         )
 
-    internal fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime, flagg: Set<String> = emptySet()) =
-        Påminnelse(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = behandlingsporing,
-            vedtaksperiodeId = vedtaksperiodeId.toString(),
-            antallGangerPåminnet = 0,
-            tilstand = tilstand,
-            tilstandsendringstidspunkt = tilstandsendringstidspunkt,
-            påminnelsestidspunkt = LocalDateTime.now(),
-            nestePåminnelsestidspunkt = LocalDateTime.now(),
-            opprettet = LocalDateTime.now(),
-            flagg = flagg
-        )
+    internal fun lagPåminnelse(
+        vedtaksperiodeId: UUID,
+        tilstand: TilstandType,
+        tilstandsendringstidspunkt: LocalDateTime,
+        flagg: Set<String> = emptySet(),
+    ) = Påminnelse(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        behandlingsporing = behandlingsporing,
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        antallGangerPåminnet = 0,
+        tilstand = tilstand,
+        tilstandsendringstidspunkt = tilstandsendringstidspunkt,
+        påminnelsestidspunkt = LocalDateTime.now(),
+        nestePåminnelsestidspunkt = LocalDateTime.now(),
+        opprettet = LocalDateTime.now(),
+        flagg = flagg,
+    )
 
     internal fun lagGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =
         Grunnbeløpsregulering(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             skjæringstidspunkt = skjæringstidspunkt,
-            opprettet = LocalDateTime.now()
+            opprettet = LocalDateTime.now(),
         )
 
     internal fun lagHåndterForkastSykmeldingsperioder(periode: Periode) =
         ForkastSykmeldingsperioder(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
             behandlingsporing = behandlingsporing,
-            periode = periode
+            periode = periode,
         )
 
-    internal fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID, force: Boolean = false) =
-        AnmodningOmForkasting(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            behandlingsporing = behandlingsporing,
-            vedtaksperiodeId = vedtaksperiodeId,
-            force = force
-        )
+    internal fun lagAnmodningOmForkasting(
+        vedtaksperiodeId: UUID,
+        force: Boolean = false,
+    ) = AnmodningOmForkasting(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        behandlingsporing = behandlingsporing,
+        vedtaksperiodeId = vedtaksperiodeId,
+        force = force,
+    )
 
-    internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>, meldingsreferanseId: UUID = UUID.randomUUID()) =
-        OverstyrTidslinje(
-            meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
-            behandlingsporing = behandlingsporing,
-            dager = overstyringsdager,
-            opprettet = LocalDateTime.now()
-        )
+    internal fun lagHåndterOverstyrTidslinje(
+        overstyringsdager: List<ManuellOverskrivingDag>,
+        meldingsreferanseId: UUID = UUID.randomUUID(),
+    ) = OverstyrTidslinje(
+        meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId),
+        behandlingsporing = behandlingsporing,
+        dager = overstyringsdager,
+        opprettet = LocalDateTime.now(),
+    )
 }

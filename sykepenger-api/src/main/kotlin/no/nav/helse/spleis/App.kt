@@ -6,14 +6,12 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.naisful.naisApp
-import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.auth.principal
-import io.ktor.server.request.header
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import io.ktor.server.request.*
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import javax.sql.DataSource
 import no.nav.helse.spleis.config.ApplicationConfiguration
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.dao.HendelseDao
@@ -22,6 +20,7 @@ import no.nav.helse.spleis.dao.SendtDao
 import no.nav.helse.spleis.opptjening.opptjeningApi
 import no.nav.helse.spleis.rest.personApi
 import org.slf4j.LoggerFactory
+import javax.sql.DataSource
 
 internal val nyObjectmapper
     get() =
@@ -32,7 +31,7 @@ internal val nyObjectmapper
                 DefaultPrettyPrinter().apply {
                     indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
                     indentObjectsWith(DefaultIndenter("  ", "\n"))
-                }
+                },
             )
 
 internal val objectMapper = nyObjectmapper
@@ -50,7 +49,7 @@ fun main() {
             azureConfig = config.azureConfig,
             spekematClient = config.spekematClient,
             dataSourceProvider = { config.dataSource },
-            meterRegistry = meterRegistry
+            meterRegistry = meterRegistry,
         )
     app.start(wait = true)
 }
@@ -60,7 +59,7 @@ internal fun createApp(
     spekematClient: SpekematClient,
     dataSourceProvider: () -> DataSource,
     meterRegistry: PrometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
-    port: Int = 8080
+    port: Int = 8080,
 ) = naisApp(
     meterRegistry = meterRegistry,
     objectMapper = objectMapper,
@@ -76,7 +75,7 @@ internal fun createApp(
     mdcEntries =
         mapOf(
             "azp_name" to { call: ApplicationCall -> call.principal<JWTPrincipal>()?.get("azp_name") },
-            "konsument" to { call: ApplicationCall -> call.request.header("L5d-Client-Id") }
+            "konsument" to { call: ApplicationCall -> call.request.header("L5d-Client-Id") },
         ),
     port = port,
     applicationModule = {
@@ -84,15 +83,15 @@ internal fun createApp(
         lagApplikasjonsmodul(
             spekematClient = spekematClient,
             dataSourceProvider = dataSourceProvider,
-            meterRegistry = meterRegistry
+            meterRegistry = meterRegistry,
         )
-    }
+    },
 )
 
 internal fun Application.lagApplikasjonsmodul(
     spekematClient: SpekematClient,
     dataSourceProvider: () -> DataSource,
-    meterRegistry: PrometheusMeterRegistry
+    meterRegistry: PrometheusMeterRegistry,
 ) {
     requestResponseTracing(LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"), meterRegistry)
 
@@ -106,7 +105,7 @@ internal fun Application.lagApplikasjonsmodul(
         spekematClient = spekematClient,
         hendelseDao = hendelseDao,
         personDao = personDao,
-        meterRegistry = meterRegistry
+        meterRegistry = meterRegistry,
     )
     opptjeningApi(personDao)
 }

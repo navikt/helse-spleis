@@ -10,32 +10,32 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertNull
 
 internal class InntektsmeldingMedRefusjonsopplForPerioderViEnnåIkkeHarMottatTest : AbstractDslTest() {
-
     @Test
     fun `AI fjerner gammel IM - håndterer korrigerte refusjonsopplysinger frem i tid som sier at det er refusjon allikevel`() {
         a1 {
             nyttVedtak(
                 periode = januar,
-                refusjon = Inntektsmelding.Refusjon(
-                    beløp = INNTEKT,
-                    opphørsdato = 31.januar,
-                )
+                refusjon =
+                    Inntektsmelding.Refusjon(
+                        beløp = INNTEKT,
+                        opphørsdato = 31.januar,
+                    ),
             )
             val fremtidigeRefusjonsopplysninger = inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().getValue(1.januar)
             assertBeløpstidslinje(fremtidigeRefusjonsopplysninger, 1.februar.somPeriode(), INGEN)
             håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                refusjon = Inntektsmelding.Refusjon(
-                    beløp = INNTEKT,
-                    opphørsdato = null,
-                )
+                refusjon =
+                    Inntektsmelding.Refusjon(
+                        beløp = INNTEKT,
+                        opphørsdato = null,
+                    ),
             )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             val reviderteOpplysninger = inspektør.ubrukteRefusjonsopplysninger.refusjonsrester()[1.januar]

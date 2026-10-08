@@ -15,20 +15,32 @@ internal sealed interface Vedtaksperiodetilstand {
     val type: TilstandType
     val erFerdigBehandlet: Boolean get() = false
 
-    fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {}
+    fun entering(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        aktivitetslogg: IAktivitetslogg,
+    ) {}
 
     fun timeout(): Timeout = Timeout.Ingen
 
-    fun replayUtført(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {}
+    fun replayUtført(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        hendelse: Hendelse,
+        aktivitetslogg: IAktivitetslogg,
+    ) {}
 
-    fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
-        return null
-    }
+    fun håndterPåminnelse(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        påminnelse: Påminnelse,
+        aktivitetslogg: IAktivitetslogg,
+    ): Revurderingseventyr? = null
 
     fun håndterOverstyrArbeidsgiveropplysninger(
         vedtaksperiode: Vedtaksperiode,
         hendelse: OverstyrArbeidsgiveropplysninger,
-        aktivitetslogg: IAktivitetslogg
+        aktivitetslogg: IAktivitetslogg,
     ) {
     }
 
@@ -36,10 +48,13 @@ internal sealed interface Vedtaksperiodetilstand {
         vedtaksperiode: Vedtaksperiode,
         eventBus: EventBus,
         hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg
+        aktivitetslogg: IAktivitetslogg,
     ) {
         aktivitetslogg.info("Tidligere periode ferdigbehandlet, men gjør ingen tilstandsendring.")
     }
 
-    fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {}
+    fun leaving(
+        vedtaksperiode: Vedtaksperiode,
+        aktivitetslogg: IAktivitetslogg,
+    ) {}
 }

@@ -1,8 +1,8 @@
 package no.nav.helse.testhelpers
 
+import org.junit.jupiter.api.Assertions
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
-import org.junit.jupiter.api.Assertions
 
 @OptIn(ExperimentalContracts::class)
 fun <T : Any> assertNotNull(value: T?) {

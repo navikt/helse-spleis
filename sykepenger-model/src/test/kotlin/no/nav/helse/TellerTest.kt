@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class TellerTest {
-
     private val grenseverdi = 10
     private lateinit var observatør: Observatør
     private lateinit var teller: Teller

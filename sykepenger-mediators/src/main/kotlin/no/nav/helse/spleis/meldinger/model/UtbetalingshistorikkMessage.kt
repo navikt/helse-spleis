@@ -8,47 +8,51 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.spleis.Behov.Behovstype.Sykepengehistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.spleis.BehandlingContext
+import no.nav.helse.spleis.Behov.Behovstype.Sykepengehistorikk
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 
 // Understands a JSON message representing an Ytelserbehov
-internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
-
+internal class UtbetalingshistorikkMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : BehovMessage(packet) {
     companion object {
-        internal fun JsonMessage.utbetalinger() = this["@løsning.${Sykepengehistorikk.utgåendeNavn}"]
-            .flatMap { it.path("utbetalteSykeperioder") }
-            .filter(::erGyldigPeriode)
-            .mapNotNull { utbetaling ->
-                val fom = utbetaling["fom"].asLocalDate()
-                val tom = utbetaling["tom"].asLocalDate()
-                when (utbetaling["typeKode"].asText()) {
-                    "0", "1" -> {
-                        val orgnummer = utbetaling["orgnummer"].asText()
-                        PersonUtbetalingsperiode(orgnummer, fom, tom)
-                    }
+        internal fun JsonMessage.utbetalinger() =
+            this["@løsning.${Sykepengehistorikk.utgåendeNavn}"]
+                .flatMap { it.path("utbetalteSykeperioder") }
+                .filter(::erGyldigPeriode)
+                .mapNotNull { utbetaling ->
+                    val fom = utbetaling["fom"].asLocalDate()
+                    val tom = utbetaling["tom"].asLocalDate()
+                    when (utbetaling["typeKode"].asText()) {
+                        "0", "1" -> {
+                            val orgnummer = utbetaling["orgnummer"].asText()
+                            PersonUtbetalingsperiode(orgnummer, fom, tom)
+                        }
 
-                    "5", "6" -> {
-                        val orgnummer = utbetaling["orgnummer"].asText()
-                        ArbeidsgiverUtbetalingsperiode(orgnummer, fom, tom)
-                    }
+                        "5", "6" -> {
+                            val orgnummer = utbetaling["orgnummer"].asText()
+                            ArbeidsgiverUtbetalingsperiode(orgnummer, fom, tom)
+                        }
 
-                    "9" -> Friperiode(fom, tom)
-                    else -> null
+                        "9" -> Friperiode(fom, tom)
+                        else -> null
+                    }
                 }
-            }
 
-        private fun erGyldigPeriode(node: JsonNode): Boolean {
-            return if (erUtbetalingsperiode(node)) {
+        private fun erGyldigPeriode(node: JsonNode): Boolean =
+            if (erUtbetalingsperiode(node)) {
                 harGyldigUtbetalingsgrad(node) && harGyldigTidsintervall(node)
-            } else harGyldigTidsintervall(node)
-        }
+            } else {
+                harGyldigTidsintervall(node)
+            }
 
         private fun harGyldigUtbetalingsgrad(node: JsonNode): Boolean {
             val utbetalingsGrad = node["utbetalingsGrad"].asInt()
@@ -74,7 +78,7 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
         InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
             hendelseId = meldingsreferanseId,
-            perioder = utbetalinger
+            perioder = utbetalinger,
         )
 
     private fun utbetalingshistorikk() =
@@ -83,10 +87,13 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage, override val mel
             behandlingsporing = behandlingsporing,
             vedtaksperiodeId = vedtaksperiodeId.toUUID(),
             element = infotrygdhistorikk(meldingsporing.id),
-            besvart = besvart
+            besvart = besvart,
         )
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         mediator.behandle(this, utbetalingshistorikk(), context)
     }
 }

@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.speil.dto
 
-import java.util.UUID
+import java.util.*
 
 data class AktivitetDTO(
     val vedtaksperiodeId: UUID,
     val alvorlighetsgrad: String,
     val melding: String,
-    val tidsstempel: String
+    val tidsstempel: String,
 )

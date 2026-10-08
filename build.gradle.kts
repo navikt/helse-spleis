@@ -45,14 +45,17 @@ tasks.create("tegn_modul_graf") {
     }
 }
 
-fun hentPrinter() = if (ext.properties["utputt"] != null) {
-    val paff = "${project.rootDir.absolutePath}/doc/${ext.properties["utputt"]}"
-    val fail = File(paff)
-    if (!fail.exists()) {
-        fail.createNewFile()
+fun hentPrinter() =
+    if (ext.properties["utputt"] != null) {
+        val paff = "${project.rootDir.absolutePath}/doc/${ext.properties["utputt"]}"
+        val fail = File(paff)
+        if (!fail.exists()) {
+            fail.createNewFile()
+        }
+        fail.printWriter()
+    } else {
+        PrintWriter(System.out, true)
     }
-    fail.printWriter()
-} else PrintWriter(System.out, true)
 
 fun Project.listUtModulAvhengigheter(printer: PrintWriter) {
     val deps = mutableSetOf<String>()
@@ -69,4 +72,3 @@ fun Project.listUtModulAvhengigheter(printer: PrintWriter) {
         deps.forEach { printer.println("\t${this.name}-->$it") }
     }
 }
-

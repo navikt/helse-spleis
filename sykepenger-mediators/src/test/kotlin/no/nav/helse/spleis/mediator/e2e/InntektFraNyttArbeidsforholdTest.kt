@@ -8,24 +8,23 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_5
 import org.junit.jupiter.api.Test
 
 internal class InntektFraNyttArbeidsforholdTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `inntekt fra nytt arbeidsforhold med harJobbet = false`() {
         nyttVedtak(1.januar, 31.januar)
 
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)),
-            inntektFraNyttArbeidsforhold = listOf(
-                InntektFraNyttArbeidsforholdDTO(
-                    fom = 1.februar,
-                    tom = 28.februar,
-                    belop = null,
-                    arbeidsstedOrgnummer = "4",
-                    opplysningspliktigOrgnummer = "5",
-                    harJobbet = false
-                )
-            )
-
+            inntektFraNyttArbeidsforhold =
+                listOf(
+                    InntektFraNyttArbeidsforholdDTO(
+                        fom = 1.februar,
+                        tom = 28.februar,
+                        belop = null,
+                        arbeidsstedOrgnummer = "4",
+                        opplysningspliktigOrgnummer = "5",
+                        harJobbet = false,
+                    ),
+                ),
         )
 
         assertTilstander(1, "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_HISTORIKK")
@@ -38,17 +37,17 @@ internal class InntektFraNyttArbeidsforholdTest : AbstractEndToEndMediatorTest()
 
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)),
-            inntektFraNyttArbeidsforhold = listOf(
-                InntektFraNyttArbeidsforholdDTO(
-                    fom = 1.februar,
-                    tom = 28.februar,
-                    belop = 1000,
-                    arbeidsstedOrgnummer = "4",
-                    opplysningspliktigOrgnummer = "5",
-                    harJobbet = true
-                )
-            )
-
+            inntektFraNyttArbeidsforhold =
+                listOf(
+                    InntektFraNyttArbeidsforholdDTO(
+                        fom = 1.februar,
+                        tom = 28.februar,
+                        belop = 1000,
+                        arbeidsstedOrgnummer = "4",
+                        opplysningspliktigOrgnummer = "5",
+                        harJobbet = true,
+                    ),
+                ),
         )
 
         assertTilstander(1, "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_HISTORIKK")

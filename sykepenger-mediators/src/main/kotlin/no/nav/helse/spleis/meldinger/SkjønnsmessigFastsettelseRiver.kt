@@ -10,19 +10,20 @@ import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
 
 internal class SkjønnsmessigFastsettelseRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-
     override val eventNames = setOf("skjønnsmessig_fastsettelse")
 
     override val riverName = "Skjønnsmessig fastsettelse"
 
-    override fun createMessage(packet: JsonMessage) = SkjønnsmessigFastsettelseMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        SkjønnsmessigFastsettelseMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 
     override fun validate(message: JsonMessage) {
         message.requireKey("fødselsnummer")

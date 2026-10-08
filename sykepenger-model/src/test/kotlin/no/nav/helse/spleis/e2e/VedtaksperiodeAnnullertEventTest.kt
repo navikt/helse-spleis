@@ -1,11 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -21,7 +17,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
-
     @Test
     fun `vi sender vedtaksperiode annullert-hendelse når saksbehandler annullerer en vedtaksperiode`() {
         a1 {
@@ -64,7 +59,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
             assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
             assertEquals(
                 april,
-                observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom
+                observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom,
             )
         }
     }
@@ -77,7 +72,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -88,13 +83,14 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
 
             nullstillTilstandsendringer()
 
-            håndterOverstyrTidslinje((februar).map {
-
-                ManuellOverskrivingDag(
-                    it,
-                    Dagtype.ArbeidIkkeGjenopptattDag
-                )
-            })
+            håndterOverstyrTidslinje(
+                (februar).map {
+                    ManuellOverskrivingDag(
+                        it,
+                        Dagtype.ArbeidIkkeGjenopptattDag,
+                    )
+                },
+            )
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)

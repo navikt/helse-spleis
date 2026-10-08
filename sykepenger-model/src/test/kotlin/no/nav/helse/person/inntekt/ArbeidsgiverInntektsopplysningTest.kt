@@ -1,8 +1,5 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Paragraf
@@ -22,14 +19,14 @@ import no.nav.helse.testhelpers.assertInstanceOf
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 internal class ArbeidsgiverInntektsopplysningTest {
-
     private val regelverkslogg = SubsumsjonsListLog()
     private val subsumsjonslogg = BehandlingSubsumsjonslogg(regelverkslogg, "fnr", "orgnr", UUID.randomUUID(), UUID.randomUUID())
 
@@ -91,13 +88,16 @@ internal class ArbeidsgiverInntektsopplysningTest {
     @Test
     fun `ny inntektsmelding uten endring i beløp i forhold Skatt endrer kun omregnet årsinntekt for skjønnsmessig fastsatt`() {
         val skjæringstidspunkt = 1.januar
-        val skattA1 = skattSykepengegrunnlag(
-            UUID.randomUUID(), skjæringstidspunkt, listOf(
-            Skatteopplysning(MeldingsreferanseId(UUID.randomUUID()), 1000.månedlig, skjæringstidspunkt.minusMonths(1).yearMonth, LØNNSINNTEKT, "", ""),
-            Skatteopplysning(MeldingsreferanseId(UUID.randomUUID()), 1000.månedlig, skjæringstidspunkt.minusMonths(2).yearMonth, LØNNSINNTEKT, "", ""),
-            Skatteopplysning(MeldingsreferanseId(UUID.randomUUID()), 1000.månedlig, skjæringstidspunkt.minusMonths(3).yearMonth, LØNNSINNTEKT, "", "")
-        )
-        )
+        val skattA1 =
+            skattSykepengegrunnlag(
+                UUID.randomUUID(),
+                skjæringstidspunkt,
+                listOf(
+                    Skatteopplysning(MeldingsreferanseId(UUID.randomUUID()), 1000.månedlig, skjæringstidspunkt.minusMonths(1).yearMonth, LØNNSINNTEKT, "", ""),
+                    Skatteopplysning(MeldingsreferanseId(UUID.randomUUID()), 1000.månedlig, skjæringstidspunkt.minusMonths(2).yearMonth, LØNNSINNTEKT, "", ""),
+                    Skatteopplysning(MeldingsreferanseId(UUID.randomUUID()), 1000.månedlig, skjæringstidspunkt.minusMonths(3).yearMonth, LØNNSINNTEKT, "", ""),
+                ),
+            )
         val arbeidsgiverinntektA2 = arbeidsgiverinntekt(skjæringstidspunkt, 2000.månedlig)
         val arbeidsgiverinntektA3 = arbeidsgiverinntekt(skjæringstidspunkt, 3000.månedlig)
 
@@ -151,13 +151,14 @@ internal class ArbeidsgiverInntektsopplysningTest {
             ledd = null,
             punktum = null,
             bokstav = null,
-            input = mapOf(
-                "organisasjonsnummer" to "a2",
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "inntekterSisteTreMåneder" to emptyList<Any>(),
-                "forklaring" to "Denne må bort"
-            ),
-            output = mapOf("arbeidsforholdAvbrutt" to "a2")
+            input =
+                mapOf(
+                    "organisasjonsnummer" to "a2",
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "inntekterSisteTreMåneder" to emptyList<Any>(),
+                    "forklaring" to "Denne må bort",
+                ),
+            output = mapOf("arbeidsforholdAvbrutt" to "a2"),
         )
     }
 
@@ -179,13 +180,14 @@ internal class ArbeidsgiverInntektsopplysningTest {
             ledd = null,
             punktum = null,
             bokstav = null,
-            input = mapOf(
-                "organisasjonsnummer" to "a2",
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "inntekterSisteTreMåneder" to emptyList<Any>(),
-                "forklaring" to "Denne må tilbake"
-            ),
-            output = mapOf("aktivtArbeidsforhold" to "a2")
+            input =
+                mapOf(
+                    "organisasjonsnummer" to "a2",
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "inntekterSisteTreMåneder" to emptyList<Any>(),
+                    "forklaring" to "Denne må tilbake",
+                ),
+            output = mapOf("aktivtArbeidsforhold" to "a2"),
         )
     }
 
@@ -194,74 +196,82 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val inntektID = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
         val tidsstempel = LocalDateTime.now()
-        val inntektsopplysning1 = ArbeidsgiverInntektsopplysning(
-            orgnummer = "orgnummer",
-            faktaavklartInntekt = infotrygd(
-                id = inntektID,
-                dato = 1.januar,
-                hendelseId = hendelseId,
-                beløp = 25000.månedlig,
-                tidsstempel = tidsstempel
-            ),
-            korrigertInntekt = null,
-            skjønnsmessigFastsatt = null
-        )
-        assertTrue(
-            inntektsopplysning1.funksjoneltLik(
-                ArbeidsgiverInntektsopplysning(
-                    orgnummer = "orgnummer",
-                    faktaavklartInntekt = infotrygd(
+        val inntektsopplysning1 =
+            ArbeidsgiverInntektsopplysning(
+                orgnummer = "orgnummer",
+                faktaavklartInntekt =
+                    infotrygd(
                         id = inntektID,
                         dato = 1.januar,
                         hendelseId = hendelseId,
                         beløp = 25000.månedlig,
-                        tidsstempel = tidsstempel
+                        tidsstempel = tidsstempel,
                     ),
-                    korrigertInntekt = null,
-                    skjønnsmessigFastsatt = null
-                )
+                korrigertInntekt = null,
+                skjønnsmessigFastsatt = null,
             )
+        assertTrue(
+            inntektsopplysning1.funksjoneltLik(
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = "orgnummer",
+                    faktaavklartInntekt =
+                        infotrygd(
+                            id = inntektID,
+                            dato = 1.januar,
+                            hendelseId = hendelseId,
+                            beløp = 25000.månedlig,
+                            tidsstempel = tidsstempel,
+                        ),
+                    korrigertInntekt = null,
+                    skjønnsmessigFastsatt = null,
+                ),
+            ),
         )
         assertFalse(
             inntektsopplysning1.funksjoneltLik(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "orgnummer2",
-                    faktaavklartInntekt = infotrygd(
-                        id = inntektID,
-                        dato = 1.januar,
-                        hendelseId = hendelseId,
-                        beløp = 25000.månedlig,
-                        tidsstempel = tidsstempel
-                    ),
+                    faktaavklartInntekt =
+                        infotrygd(
+                            id = inntektID,
+                            dato = 1.januar,
+                            hendelseId = hendelseId,
+                            beløp = 25000.månedlig,
+                            tidsstempel = tidsstempel,
+                        ),
                     korrigertInntekt = null,
-                    skjønnsmessigFastsatt = null
-                )
-            )
+                    skjønnsmessigFastsatt = null,
+                ),
+            ),
         )
         assertTrue(
             inntektsopplysning1.funksjoneltLik(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "orgnummer",
-                    faktaavklartInntekt = infotrygd(
-                        id = inntektID,
-                        dato = 5.januar,
-                        hendelseId = hendelseId,
-                        beløp = 25000.månedlig,
-                        tidsstempel = tidsstempel
-                    ),
+                    faktaavklartInntekt =
+                        infotrygd(
+                            id = inntektID,
+                            dato = 5.januar,
+                            hendelseId = hendelseId,
+                            beløp = 25000.månedlig,
+                            tidsstempel = tidsstempel,
+                        ),
                     korrigertInntekt = null,
-                    skjønnsmessigFastsatt = null
-                )
-            )
+                    skjønnsmessigFastsatt = null,
+                ),
+            ),
         )
     }
 }
 
-private fun List<ArbeidsgiverInntektsopplysning>.håndterKorrigerteInntekterITest(korrigerteInntekter: List<KorrigertArbeidsgiverInntektsopplysning>) =
-    håndterKorrigerteInntekter(korrigerteInntekter).map { it.arbeidsgiverInntektsopplysning }
+private fun List<ArbeidsgiverInntektsopplysning>.håndterKorrigerteInntekterITest(korrigerteInntekter: List<KorrigertArbeidsgiverInntektsopplysning>) = håndterKorrigerteInntekter(korrigerteInntekter).map { it.arbeidsgiverInntektsopplysning }
 
-private fun List<ArbeidsgiverInntektsopplysning>.håndterArbeidstakerFaktaavklartInntektITest(orgnr: String, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt, skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate = skjæringstidspunkt) =
-    håndterArbeidstakerFaktaavklartInntekt(orgnr, skjæringstidspunkt, førsteFraværsdag, arbeidstakerFaktaavklartInntekt).map { it.arbeidsgiverInntektsopplysning }
+private fun List<ArbeidsgiverInntektsopplysning>.håndterArbeidstakerFaktaavklartInntektITest(
+    orgnr: String,
+    arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
+    skjæringstidspunkt: LocalDate,
+    førsteFraværsdag: LocalDate = skjæringstidspunkt,
+) = håndterArbeidstakerFaktaavklartInntekt(orgnr, skjæringstidspunkt, førsteFraværsdag, arbeidstakerFaktaavklartInntekt).map { it.arbeidsgiverInntektsopplysning }
 
 internal fun List<ArbeidsgiverInntektsopplysning>.funksjoneltLik(other: List<ArbeidsgiverInntektsopplysning>): Boolean {
     if (this.size != other.size) return false
@@ -270,6 +280,4 @@ internal fun List<ArbeidsgiverInntektsopplysning>.funksjoneltLik(other: List<Arb
         .none { it == false }
 }
 
-internal fun ArbeidsgiverInntektsopplysning.funksjoneltLik(other: ArbeidsgiverInntektsopplysning): Boolean {
-    return this.orgnummer == other.orgnummer && this.faktaavklartInntekt.inntektsdata.beløp == other.faktaavklartInntekt.inntektsdata.beløp && this.faktaavklartInntekt.inntektsopplysningskilde::class == other.faktaavklartInntekt.inntektsopplysningskilde::class
-}
+internal fun ArbeidsgiverInntektsopplysning.funksjoneltLik(other: ArbeidsgiverInntektsopplysning): Boolean = this.orgnummer == other.orgnummer && this.faktaavklartInntekt.inntektsdata.beløp == other.faktaavklartInntekt.inntektsdata.beløp && this.faktaavklartInntekt.inntektsopplysningskilde::class == other.faktaavklartInntekt.inntektsopplysningskilde::class

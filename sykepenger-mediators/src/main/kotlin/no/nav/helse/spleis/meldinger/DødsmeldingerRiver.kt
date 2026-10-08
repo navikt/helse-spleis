@@ -10,9 +10,8 @@ import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 
 internal class DødsmeldingerRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-
     override val eventNames = setOf("dødsmelding")
     override val riverName = "Dødsmelding"
 
@@ -21,10 +20,12 @@ internal class DødsmeldingerRiver(
         message.require("dødsdato", JsonNode::asLocalDate)
     }
 
-    override fun createMessage(packet: JsonMessage) = DødsmeldingMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        DødsmeldingMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

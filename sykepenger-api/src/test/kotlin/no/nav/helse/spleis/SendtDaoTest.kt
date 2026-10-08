@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
-import java.util.UUID
-import kotlin.test.assertEquals
 import no.nav.helse.spleis.dao.SendtDao
 import no.nav.helse.spleis.dao.SendtDao.Companion.responseJson
 import no.nav.helse.spleis.dao.SendtMelding
@@ -15,9 +13,10 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
+import java.util.*
+import kotlin.test.assertEquals
 
 internal class SendtDaoTest {
-
     private lateinit var dataSource: TestDataSource
 
     @BeforeEach
@@ -34,13 +33,15 @@ internal class SendtDaoTest {
 
         assertEquals(SendteMeldinger(antallMeldinger = 0, meldinger = emptyList()), dao.sendteMeldinger(UUID.randomUUID()))
 
-        val forventet = SendteMeldinger(
-            antallMeldinger = 2,
-            meldinger = listOf(
-                SendtMelding(key = null, json = objectMapper.readTree("""{"testJson": true}""") as ObjectNode, mottaker = "RAPID", sendt1),
-                SendtMelding(key = "foo-bar", json = objectMapper.readTree("""{"testSubsumsjon": "oui"}""") as ObjectNode, mottaker = "SUBSUMSJON", sendt2),
+        val forventet =
+            SendteMeldinger(
+                antallMeldinger = 2,
+                meldinger =
+                    listOf(
+                        SendtMelding(key = null, json = objectMapper.readTree("""{"testJson": true}""") as ObjectNode, mottaker = "RAPID", sendt1),
+                        SendtMelding(key = "foo-bar", json = objectMapper.readTree("""{"testSubsumsjon": "oui"}""") as ObjectNode, mottaker = "SUBSUMSJON", sendt2),
+                    ),
             )
-        )
         assertEquals(forventet, dao.sendteMeldinger(forårsaketAv))
 
         @Language("JSON")
@@ -92,8 +93,11 @@ internal class SendtDaoTest {
         private val sendt1 = "2026-07-07T14:55:44.123456Z"
         private val sendt2 = "2026-07-07T14:55:44.654321Z"
         private val objectMapper = jacksonObjectMapper()
+
         // `sendt.lopenummer` er en unik kolonne (ikke en generert identitet), så vi må gi den
         // garantert unike verdier for å unngå kollisjon med andre tester i den delte databasen.
-        private val lopenummerTeller = java.util.concurrent.atomic.AtomicLong(System.nanoTime())
+        private val lopenummerTeller =
+            java.util.concurrent.atomic
+                .AtomicLong(System.nanoTime())
     }
 }

@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V306RefusjonstidslinjePåBehandling : JsonMigration(version = 306) {
     override val description = "lager en tom refusjonstidslinje på behandling"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 migrerVedtaksperiode(periode)

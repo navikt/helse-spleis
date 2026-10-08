@@ -1,31 +1,15 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.april
-import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyPeriode
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
-import no.nav.helse.februar
+import no.nav.helse.*
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.mars
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeForkastetE2ETest : AbstractDslTest() {
-
     @Test
     fun `vedtaksperioder forkastes`() {
         a1 {

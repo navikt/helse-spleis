@@ -1,5 +1,5 @@
 package no.nav.helse.dto.serialisering
 
 data class VilkårsgrunnlaghistorikkUtDto(
-    val historikk: List<VilkårsgrunnlagInnslagUtDto>
+    val historikk: List<VilkårsgrunnlagInnslagUtDto>,
 )

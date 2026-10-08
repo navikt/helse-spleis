@@ -8,7 +8,7 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 
 internal class AnnullerUtbetalingerRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("annullering")
     override val riverName = "annullering"
@@ -20,16 +20,18 @@ internal class AnnullerUtbetalingerRiver(
             "saksbehandler",
             "saksbehandler.epostaddresse",
             "saksbehandler.ident",
-            "vedtaksperiodeId"
+            "vedtaksperiodeId",
         )
         message.requireArray("begrunnelser")
         message.interestedIn("kommentar", "yrkesaktivitetstype", "organisasjonsnummer")
     }
 
-    override fun createMessage(packet: JsonMessage) = AnnulleringMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        AnnulleringMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

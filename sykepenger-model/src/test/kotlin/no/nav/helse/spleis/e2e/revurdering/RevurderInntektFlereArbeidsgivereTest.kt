@@ -1,30 +1,13 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDate
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.TestPerson
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.a3
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -33,12 +16,12 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import no.nav.helse.økonomi.inspectors.inspektør
+import java.time.LocalDate
 
 internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
-
     @Test
     fun `over 6G -- revurder inntekt ned på a1 når begge er i Avsluttet`() {
         (a1 og a2).nyeVedtak(januar, inntekt = 32000.månedlig)
@@ -61,7 +44,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertDag(17.januar, 1063.0.daglig, aktuellDagsinntekt = 31000.månedlig)
         }
@@ -78,7 +61,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertDag(17.januar, 1098.0.daglig, aktuellDagsinntekt = 32000.månedlig)
         }
@@ -137,7 +120,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 15000.månedlig,
-                refusjon = Refusjon(7500.månedlig, opphørsdato = null)
+                refusjon = Refusjon(7500.månedlig, opphørsdato = null),
             )
         }
         a1 {
@@ -220,7 +203,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertDag(17.januar, 705.0.daglig, aktuellDagsinntekt = 31000.månedlig)
         }
@@ -237,7 +220,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertDag(17.januar, 728.0.daglig, aktuellDagsinntekt = 32000.månedlig)
         }
@@ -278,7 +261,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
         a2 {
@@ -295,7 +278,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -331,7 +314,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
         a2 {
@@ -347,7 +330,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -402,7 +385,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING
+                AVVENTER_SIMULERING_REVURDERING,
             )
             assertDag(17.januar, 1062.daglig, aktuellDagsinntekt = 23000.månedlig)
         }
@@ -433,7 +416,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING
+                AVVENTER_SIMULERING_REVURDERING,
             )
             assertDag(17.januar, 1062.daglig, aktuellDagsinntekt = 23000.månedlig)
         }
@@ -466,7 +449,7 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING
+                AVVENTER_SIMULERING_REVURDERING,
             )
             assertDag(17.januar, 1062.daglig, aktuellDagsinntekt = 23000.månedlig)
         }
@@ -515,10 +498,11 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, LocalDate.EPOCH, null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, LocalDate.EPOCH, null),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -532,7 +516,12 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {
+    private fun TestPerson.TestArbeidsgiver.assertDag(
+        dato: LocalDate,
+        arbeidsgiverbeløp: Inntekt,
+        personbeløp: Inntekt = INGEN,
+        aktuellDagsinntekt: Inntekt = INGEN,
+    ) {
         inspektør.utbetalingstidslinjer(1.vedtaksperiode)[dato].let {
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)

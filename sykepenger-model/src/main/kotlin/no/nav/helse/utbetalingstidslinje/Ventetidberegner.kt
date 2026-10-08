@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -15,92 +14,117 @@ import no.nav.helse.utbetalingstidslinje.Ventetidberegner.Ventetidtilstand.Tilst
 import no.nav.helse.utbetalingstidslinje.Ventetidberegner.Ventetidtilstand.VentetidFerdigAvklart
 import no.nav.helse.utbetalingstidslinje.Ventetidberegner.Ventetidtilstand.VentetidFerdigAvventerUtbetaltDag
 import no.nav.helse.utbetalingstidslinje.Ventetidberegner.Ventetidtilstand.VentetidPåbegynt
+import java.time.LocalDate
 
 internal class Ventetidberegner {
-
     fun result(sykdomstidslinje: Sykdomstidslinje): List<PeriodeUtenNavAnsvar> {
         val ventetider = mutableListOf<PeriodeUtenNavAnsvar>()
         var aktivVentetid: Ventetidtelling? = null
         sykdomstidslinje.forEach { dag ->
-            aktivVentetid = when (dag) {
-                is Dag.Sykedag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
+            aktivVentetid =
+                when (dag) {
+                    is Dag.Sykedag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
 
-                is Dag.SykHelgedag,
-                is Dag.MeldingTilNavDag,
-                is Dag.MeldingTilNavHelgedag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvventerUtbetaltDag)
+                    is Dag.SykHelgedag,
+                    is Dag.MeldingTilNavDag,
+                    is Dag.MeldingTilNavHelgedag,
+                    -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvventerUtbetaltDag)
 
-                is Dag.ForeldetSykedag -> when (dag.dato.erHelg()) {
-                    true -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvventerUtbetaltDag)
-                    false -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
+                    is Dag.ForeldetSykedag ->
+                        when (dag.dato.erHelg()) {
+                            true -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvventerUtbetaltDag)
+                            false -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
+                        }
+
+                    is Dag.UkjentDag -> oppholdsdag(ventetider, aktivVentetid, dag.dato, dag.dato.erHelg())
+
+                    is Dag.Arbeidsdag,
+                    is Dag.FriskHelgedag,
+                    is Dag.AndreYtelser,
+                    -> oppholdsdag(ventetider, aktivVentetid, dag.dato, false)
+
+                    is Dag.ArbeidIkkeGjenopptattDag,
+                    is Dag.ArbeidsgiverHelgedag,
+                    is Dag.Arbeidsgiverdag,
+                    is Dag.Feriedag,
+                    is Dag.Permisjonsdag,
+                    is Dag.ProblemDag,
+                    -> error("forventer ikke dag av type ${dag::class.simpleName} i ventetidsberegning")
                 }
-
-                is Dag.UkjentDag -> oppholdsdag(ventetider, aktivVentetid, dag.dato, dag.dato.erHelg())
-
-                is Dag.Arbeidsdag,
-                is Dag.FriskHelgedag,
-                is Dag.AndreYtelser -> oppholdsdag(ventetider, aktivVentetid, dag.dato, false)
-
-                is Dag.ArbeidIkkeGjenopptattDag,
-                is Dag.ArbeidsgiverHelgedag,
-                is Dag.Arbeidsgiverdag,
-                is Dag.Feriedag,
-                is Dag.Permisjonsdag,
-                is Dag.ProblemDag -> error("forventer ikke dag av type ${dag::class.simpleName} i ventetidsberegning")
-
-            }
         }
         return ventetider.toList() + listOfNotNull(aktivVentetid?.somAvklaring())
     }
 
-    private fun avslutt(ventetider: MutableList<PeriodeUtenNavAnsvar>, ventetid: Ventetidtelling, avsluttetTilstand: Ventetidtilstand): Nothing? {
+    private fun avslutt(
+        ventetider: MutableList<PeriodeUtenNavAnsvar>,
+        ventetid: Ventetidtelling,
+        avsluttetTilstand: Ventetidtilstand,
+    ): Nothing? {
         ventetider.add(ventetid.copy(tilstand = avsluttetTilstand).somAvklaring())
         return null
     }
 
-    private fun oppholdsdag(ventetider: MutableList<PeriodeUtenNavAnsvar>, ventetid: Ventetidtelling?, dato: LocalDate, erImplsittHelg: Boolean): Ventetidtelling? {
-        return when (ventetid?.tilstand) {
-            OppholdEtterVentetidFerdigAvklart -> when (MAKSIMALT_ANTALL_OPPHOLDSDAGER) {
-                (ventetid.oppholdsdager.size + 1) -> avslutt(ventetider, ventetid, TilstrekkeligOppholdFerdigAvklart)
-                else -> ventetid.opphold(dato, ventetid.tilstand)
-            }
+    private fun oppholdsdag(
+        ventetider: MutableList<PeriodeUtenNavAnsvar>,
+        ventetid: Ventetidtelling?,
+        dato: LocalDate,
+        erImplsittHelg: Boolean,
+    ): Ventetidtelling? =
+        when (ventetid?.tilstand) {
+            OppholdEtterVentetidFerdigAvklart ->
+                when (MAKSIMALT_ANTALL_OPPHOLDSDAGER) {
+                    (ventetid.oppholdsdager.size + 1) -> avslutt(ventetider, ventetid, TilstrekkeligOppholdFerdigAvklart)
+                    else -> ventetid.opphold(dato, ventetid.tilstand)
+                }
             VentetidFerdigAvklart -> ventetid.opphold(dato, OppholdEtterVentetidFerdigAvklart)
             VentetidFerdigAvventerUtbetaltDag -> if (erImplsittHelg) ventetid.kjentDag(dato, VentetidFerdigAvventerUtbetaltDag) else avslutt(ventetider, ventetid, OppholdPåbegyntVentetid)
-            VentetidPåbegynt -> if (erImplsittHelg) ventetid.utvid(dato, vurderOmVentetidenErFerdig(ventetid)) else avslutt(ventetider, ventetid,  OppholdPåbegyntVentetid)
+            VentetidPåbegynt -> if (erImplsittHelg) ventetid.utvid(dato, vurderOmVentetidenErFerdig(ventetid)) else avslutt(ventetider, ventetid, OppholdPåbegyntVentetid)
             TilstrekkeligOppholdFerdigAvklart,
-            OppholdPåbegyntVentetid -> error("kan ikke ha opphold i en ventetid i tilstanden ${ventetid.tilstand}")
+            OppholdPåbegyntVentetid,
+            -> error("kan ikke ha opphold i en ventetid i tilstanden ${ventetid.tilstand}")
             null -> null
         }
-    }
 
-    private fun sykedag(ventetid: Ventetidtelling?, dato: LocalDate, tilstandHvisAvventerUtbetaltDag: Ventetidtilstand): Ventetidtelling {
+    private fun sykedag(
+        ventetid: Ventetidtelling?,
+        dato: LocalDate,
+        tilstandHvisAvventerUtbetaltDag: Ventetidtilstand,
+    ): Ventetidtelling {
         if (ventetid == null) return Ventetidtelling.ny(dato)
         val nyTilstand = tilstandForSykedag(ventetid, tilstandHvisAvventerUtbetaltDag)
         return ventetid.utvid(dato, nyTilstand)
     }
 
-    private fun tilstandForSykedag(ventetid: Ventetidtelling, tilstandHvisAvventerUtbetaltDag: Ventetidtilstand) =
-        when (ventetid.tilstand) {
-            VentetidFerdigAvventerUtbetaltDag -> tilstandHvisAvventerUtbetaltDag
-            OppholdEtterVentetidFerdigAvklart -> VentetidFerdigAvklart
-            VentetidPåbegynt -> vurderOmVentetidenErFerdig(ventetid)
-            VentetidFerdigAvklart -> ventetid.tilstand
-            TilstrekkeligOppholdFerdigAvklart,
-            OppholdPåbegyntVentetid -> error("kan ikke utvide en ventetid i tilstanden ${ventetid.tilstand}")
-        }
+    private fun tilstandForSykedag(
+        ventetid: Ventetidtelling,
+        tilstandHvisAvventerUtbetaltDag: Ventetidtilstand,
+    ) = when (ventetid.tilstand) {
+        VentetidFerdigAvventerUtbetaltDag -> tilstandHvisAvventerUtbetaltDag
+        OppholdEtterVentetidFerdigAvklart -> VentetidFerdigAvklart
+        VentetidPåbegynt -> vurderOmVentetidenErFerdig(ventetid)
+        VentetidFerdigAvklart -> ventetid.tilstand
+        TilstrekkeligOppholdFerdigAvklart,
+        OppholdPåbegyntVentetid,
+        -> error("kan ikke utvide en ventetid i tilstanden ${ventetid.tilstand}")
+    }
 
-    private fun vurderOmVentetidenErFerdig(ventetid: Ventetidtelling): Ventetidtilstand {
-        return when (MAKSIMALT_ANTALL_VENTETIDSDAGER) {
+    private fun vurderOmVentetidenErFerdig(ventetid: Ventetidtelling): Ventetidtilstand =
+        when (MAKSIMALT_ANTALL_VENTETIDSDAGER) {
             (ventetid.dager.size + 1) -> VentetidFerdigAvventerUtbetaltDag
             else -> ventetid.tilstand
         }
-    }
 
     private sealed interface Ventetidtilstand {
         data object VentetidPåbegynt : Ventetidtilstand
+
         data object VentetidFerdigAvventerUtbetaltDag : Ventetidtilstand
+
         data object VentetidFerdigAvklart : Ventetidtilstand
+
         data object OppholdEtterVentetidFerdigAvklart : Ventetidtilstand
+
         data object TilstrekkeligOppholdFerdigAvklart : Ventetidtilstand
+
         data object OppholdPåbegyntVentetid : Ventetidtilstand
     }
 
@@ -108,25 +132,36 @@ internal class Ventetidberegner {
         val omsluttendePeriode: Periode,
         val dager: Set<LocalDate>,
         val oppholdsdager: Set<LocalDate>,
-        val tilstand: Ventetidtilstand
+        val tilstand: Ventetidtilstand,
     ) {
         val ventetid = dager.take(MAKSIMALT_ANTALL_VENTETIDSDAGER)
         val ferdigAvklart = tilstand in setOf(VentetidFerdigAvklart, OppholdEtterVentetidFerdigAvklart, TilstrekkeligOppholdFerdigAvklart)
 
-        fun utvid(dato: LocalDate, tilstand: Ventetidtilstand) = copy(
+        fun utvid(
+            dato: LocalDate,
+            tilstand: Ventetidtilstand,
+        ) = copy(
             omsluttendePeriode = omsluttendePeriode.oppdaterTom(dato),
             dager = this.dager + dato,
             oppholdsdager = emptySet(),
-            tilstand = tilstand
+            tilstand = tilstand,
         )
-        fun opphold(dato: LocalDate, tilstand: Ventetidtilstand) = copy(
+
+        fun opphold(
+            dato: LocalDate,
+            tilstand: Ventetidtilstand,
+        ) = copy(
             omsluttendePeriode = omsluttendePeriode.oppdaterTom(dato),
             oppholdsdager = this.oppholdsdager + dato,
-            tilstand = tilstand
+            tilstand = tilstand,
         )
-        fun kjentDag(dato: LocalDate, tilstand: Ventetidtilstand) = copy(
+
+        fun kjentDag(
+            dato: LocalDate,
+            tilstand: Ventetidtilstand,
+        ) = copy(
             omsluttendePeriode = omsluttendePeriode.oppdaterTom(dato),
-            tilstand = tilstand
+            tilstand = tilstand,
         )
 
         companion object {
@@ -138,7 +173,7 @@ internal class Ventetidberegner {
                     omsluttendePeriode = dato.somPeriode(),
                     dager = setOf(dato),
                     oppholdsdager = emptySet(),
-                    tilstand = VentetidPåbegynt
+                    tilstand = VentetidPåbegynt,
                 )
         }
     }
@@ -147,7 +182,6 @@ internal class Ventetidberegner {
         PeriodeUtenNavAnsvar(
             omsluttendePeriode = omsluttendePeriode,
             dagerUtenAnsvar = ventetid.grupperSammenhengendePerioder(),
-            ferdigAvklart = ferdigAvklart
+            ferdigAvklart = ferdigAvklart,
         )
-
 }

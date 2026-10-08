@@ -8,6 +8,5 @@ data class OpptjeningUtDto(
     val opptjeningsperiode: PeriodeDto,
     val reellOpptjeningsperiode: PeriodeDto?,
     val opptjeningsdager: Int,
-    val erOppfylt: Boolean
+    val erOppfylt: Boolean,
 )
-

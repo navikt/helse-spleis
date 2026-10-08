@@ -10,9 +10,17 @@ import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
 
 // Understands a JSON message representing a Søknad that is only sent to the employer
-internal class SendtSøknadArbeidsgiverMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: SendtSøknadBuilder = SendtSøknadBuilder(packet["arbeidssituasjon"].asText())) : SøknadMessage(packet, builder.arbeidstaker(packet["arbeidsgiver.orgnummer"].asText())) {
-
-    override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: BehandlingContext) {
+internal class SendtSøknadArbeidsgiverMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+    private val builder: SendtSøknadBuilder = SendtSøknadBuilder(packet["arbeidssituasjon"].asText()),
+) : SøknadMessage(packet, builder.arbeidstaker(packet["arbeidsgiver.orgnummer"].asText())) {
+    override fun _behandle(
+        mediator: IHendelseMediator,
+        personopplysninger: Personopplysninger,
+        packet: JsonMessage,
+        context: BehandlingContext,
+    ) {
         builder.sendt(packet["sendtArbeidsgiver"].asLocalDateTime())
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)
         mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())

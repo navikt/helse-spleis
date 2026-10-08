@@ -1,14 +1,13 @@
 package no.nav.helse.spleis.utboks
 
-import java.time.Instant
 import no.nav.helse.Personidentifikator
+import no.nav.helse.spleis.utboks.UtgåendeMeldingTest.Companion.nyUuidv7
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import no.nav.helse.spleis.utboks.UtgåendeMeldingTest.Companion.nyUuidv7
 import org.junit.jupiter.api.assertThrows
+import java.time.Instant
 
 class UtsenderTest {
-
     // ren in-memory-test, rører ikke databasen, så det er trygt med et fast fødselsnummer
     private val UNG_PERSON_FNR_2018 = "12029240045"
 
@@ -16,27 +15,31 @@ class UtsenderTest {
 
     @Test
     fun `Meldinger som går bra, og meldinger som går leit`() {
-        val okMelding = UtgåendeMelding.nyRapidmelding(
-            personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
-            eventName = "fungerende-event",
-            innhold = mapOf("a" to "b")
-        )
+        val okMelding =
+            UtgåendeMelding.nyRapidmelding(
+                personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
+                eventName = "fungerende-event",
+                innhold = mapOf("a" to "b"),
+            )
 
-        val feilMelding = UtgåendeMelding.nyRapidmelding(
-            personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
-            eventName = "feilende-event",
-            innhold = mapOf("feil" to "jeg skal feile")
-        )
+        val feilMelding =
+            UtgåendeMelding.nyRapidmelding(
+                personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
+                eventName = "feilende-event",
+                innhold = mapOf("feil" to "jeg skal feile"),
+            )
 
-        val okSubumsjon = UtgåendeMelding.nySubsumsjonsmelding(Personidentifikator(UNG_PERSON_FNR_2018)) { _, _ ->
-            mapOf("paragraf" to "1")
-        }
+        val okSubumsjon =
+            UtgåendeMelding.nySubsumsjonsmelding(Personidentifikator(UNG_PERSON_FNR_2018)) { _, _ ->
+                mapOf("paragraf" to "1")
+            }
 
-        val okMeldingUtenKey = UtgåendeMelding(
-            key = null,
-            json = """{"@id": "${nyUuidv7()}", "@opprettetUTC":"${Instant.now()}"}""",
-            mottaker = UtgåendeMelding.Mottaker.RAPID
-        )
+        val okMeldingUtenKey =
+            UtgåendeMelding(
+                key = null,
+                json = """{"@id": "${nyUuidv7()}", "@opprettetUTC":"${Instant.now()}"}""",
+                mottaker = UtgåendeMelding.Mottaker.RAPID,
+            )
 
         val (sendt, ok, feil) = testUtsender.send(listOf(okMelding, feilMelding, okSubumsjon, okMeldingUtenKey))
         assertEquals(3, ok.size)
@@ -48,26 +51,32 @@ class UtsenderTest {
         assertEquals(feilMelding, feil.single()) // De som feiler har ikke @sendt ettersom de ikke er sendt
     }
 
-        @Test
-        fun `Feiler ved duplikate id'er`() {
-            val melding1 = UtgåendeMelding.nyRapidmelding(
+    @Test
+    fun `Feiler ved duplikate id'er`() {
+        val melding1 =
+            UtgåendeMelding.nyRapidmelding(
                 personidentifikator = Personidentifikator(UNG_PERSON_FNR_2018),
                 eventName = "fungerende-event",
-                innhold = mapOf("a" to "b")
+                innhold = mapOf("a" to "b"),
             )
 
-            val melding2 = melding1.copy()
+        val melding2 = melding1.copy()
 
-            val error = assertThrows<IllegalStateException> {
+        val error =
+            assertThrows<IllegalStateException> {
                 testUtsender.send(listOf(melding1, melding2))
             }
 
-            assertEquals("Duplikate id'er i utgående meldinger", error.message)
-        }
+        assertEquals("Duplikate id'er i utgående meldinger", error.message)
+    }
 
-        private companion object {
-            private fun UtgåendeMelding.stappInnSendt(sendt: Instant) = copy(json = json.apply {
-                put("@sendt", sendt.toString())
-            })
-        }
+    private companion object {
+        private fun UtgåendeMelding.stappInnSendt(sendt: Instant) =
+            copy(
+                json =
+                    json.apply {
+                        put("@sendt", sendt.toString())
+                    },
+            )
+    }
 }

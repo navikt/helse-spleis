@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -11,29 +10,13 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNotSame
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertSame
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class DeleGrunnlagsdataTest : AbstractDslTest() {
-
     @Test
     fun `vilkårsgrunnlag deles med påfølgende tilstøtende perioder`() {
         a1 {
@@ -45,13 +28,15 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
             håndterSøknad(februar)
             håndterSøknad(mars)
             håndterSøknad(5.april til 30.april)
-            val inntektsmelding1Id = håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-                vedtaksperiodeId = 1.vedtaksperiode
-            )
-            val inntektsmelding2Id = håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar))
-            )
+            val inntektsmelding1Id =
+                håndterArbeidsgiveropplysninger(
+                    arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                )
+            val inntektsmelding2Id =
+                håndterArbeidsgiveropplysninger(
+                    arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+                )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -93,7 +78,7 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterSøknad(februar)
@@ -121,7 +106,7 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(Periode(18.januar, 1.februar)),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
 
             assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
@@ -163,7 +148,7 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
-                AVSLUTTET_UTEN_UTBETALING
+                AVSLUTTET_UTEN_UTBETALING,
             )
             assertTilstander(
                 2.vedtaksperiode,
@@ -172,7 +157,7 @@ internal class DeleGrunnlagsdataTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
+                AVVENTER_SIMULERING,
             )
             assertEquals(2, inspektør.hendelseIder(2.vedtaksperiode).size)
             assertTrue(inspektør.hendelseIder(2.vedtaksperiode).containsAll(listOf(søknadId, inntektsmeldingId)))

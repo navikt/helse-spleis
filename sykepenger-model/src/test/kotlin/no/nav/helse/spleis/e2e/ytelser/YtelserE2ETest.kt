@@ -1,66 +1,22 @@
 package no.nav.helse.spleis.e2e.ytelser
 
-import no.nav.helse.april
-import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
-import no.nav.helse.fredag
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.Institusjonsopphold
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.*
+import no.nav.helse.dsl.*
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.mai
-import no.nav.helse.mars
-import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_11
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_12
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_6
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.september
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.søndag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class YtelserE2ETest : AbstractDslTest() {
-
     @Test
     fun `bruker arbeidsavklaringspengerV2 i ytelser`() {
         a1 {
@@ -69,7 +25,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(
                 1.vedtaksperiode,
-                arbeidsavklaringspengerV2 = listOf(Periode(1.januar, 31.januar))
+                arbeidsavklaringspengerV2 = listOf(Periode(1.januar, 31.januar)),
             )
 
             assertVarsel(Varselkode.RV_AY_3, 1.vedtaksperiode.filter())
@@ -82,8 +38,23 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
             nyttVedtak(mars)
             nyttVedtak(mai)
-            val korrelasjonsIdMars = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
-            inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
+            val korrelasjonsIdMars =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling!!
+                    .inspektør.korrelasjonsId
+            inspektør
+                .vedtaksperioder(2.vedtaksperiode)
+                .inspektør.behandlinger
+                .last()
+                .endringer()
+                .last()
+                .utbetaling!!
+                .inspektør.korrelasjonsId
 
             håndterSøknad(juli)
             håndterArbeidsgiveropplysninger(listOf(1.juli til 16.juli), vedtaksperiodeId = 3.vedtaksperiode)
@@ -101,7 +72,15 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterYtelser(3.vedtaksperiode)
 
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
-            val juliutbetaling = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør
+            val juliutbetaling =
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling!!
+                    .inspektør
             val korrelasjonsIdJuli = juliutbetaling.korrelasjonsId
 
             assertEquals(4, inspektør.utbetalinger.size)
@@ -137,7 +116,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
             ) // Denn må jo være satt da
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -169,7 +148,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1))
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1)),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -214,13 +193,13 @@ internal class YtelserE2ETest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a1 {
@@ -261,13 +240,13 @@ internal class YtelserE2ETest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(28.januar til 12.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a1 {
@@ -308,15 +287,31 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterSøknad(mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(mars, 100)))
 
             assertVarsel(RV_AY_5, 2.vedtaksperiode.filter())
 
-            val korrelasjonsIdJanuar = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
-            val korrelasjonsIdMars = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
+            val korrelasjonsIdJanuar =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling!!
+                    .inspektør.korrelasjonsId
+            val korrelasjonsIdMars =
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling!!
+                    .inspektør.korrelasjonsId
 
             assertNotEquals(korrelasjonsIdJanuar, korrelasjonsIdMars)
         }
@@ -457,7 +452,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
                 svangerskapspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
                 omsorgspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
                 opplæringspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
-                pleiepenger = listOf(GradertPeriode(20.januar til 31.januar, 100))
+                pleiepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
             )
             assertVarsler(listOf(RV_AY_5, RV_AY_6, RV_AY_7, RV_AY_8, RV_AY_11, RV_UT_23), 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
@@ -469,7 +464,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
                 svangerskapspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
                 omsorgspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
                 opplæringspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
-                pleiepenger = listOf(GradertPeriode(20.januar til 31.januar, 100))
+                pleiepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
             )
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
         }
@@ -509,10 +504,11 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(
                 1.vedtaksperiode,
-                svangerskapspenger = listOf(
-                    GradertPeriode(20.februar til 28.februar, 100),
-                    GradertPeriode(mai, 100)
-                )
+                svangerskapspenger =
+                    listOf(
+                        GradertPeriode(20.februar til 28.februar, 100),
+                        GradertPeriode(mai, 100),
+                    ),
             )
             assertIngenFunksjonelleFeil()
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
@@ -524,7 +520,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
     fun `skal ikke ha varsler om andre ytelser ved sammenhengende sykdom etter nådd maksdato`() {
         medMaksSykedager(11)
         a1 {
-            //createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 11)
+            // createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 11)
 
             nyttVedtak(januar)
 
@@ -544,7 +540,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
     fun `skal ikke ha funksjonelle feil om andre ytelser ved sammenhengende sykdom etter nådd maksdato`() {
         medMaksSykedager(11)
         a1 {
-            //createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 11)
+            // createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 11)
 
             nyttVedtak(januar)
 
@@ -557,7 +553,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
                 pleiepenger = listOf(GradertPeriode(februar, 100)),
                 omsorgspenger = listOf(GradertPeriode(februar, 100)),
                 opplæringspenger = listOf(GradertPeriode(februar, 100)),
-                institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar))
+                institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar)),
             )
 
             assertIngenFunksjonelleFeil()
@@ -583,7 +579,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
                 omsorgspenger = listOf(GradertPeriode(februar, 100)),
                 opplæringspenger = listOf(GradertPeriode(februar, 100)),
                 institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar)),
-                dagpenger = listOf(februar)
+                dagpenger = listOf(februar),
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
@@ -621,12 +617,12 @@ internal class YtelserE2ETest : AbstractDslTest() {
             nyPeriode(26.januar til 31.januar)
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar)
+                listOf(1.januar til 16.januar),
             )
         }
         a1 {
@@ -635,14 +631,12 @@ internal class YtelserE2ETest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-
         }
         a2 {
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-
         }
         a1 {
             håndterYtelser(3.vedtaksperiode)
@@ -672,7 +666,6 @@ internal class YtelserE2ETest : AbstractDslTest() {
             assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
         }
         a1 {
-
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()

@@ -9,7 +9,7 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 
 internal class SimuleringerRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Simulering)
     override val riverName = "Simulering"
@@ -33,10 +33,12 @@ internal class SimuleringerRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = SimuleringMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        SimuleringMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.person.inntekt
 
-import java.time.Year
 import no.nav.helse.Grunnbeløp.Companion.`1G`
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.juni
@@ -9,16 +8,17 @@ import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt.Pensjonsgivend
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.Year
 
 internal class PensjonsgivendeInntektTest {
-
     @Test
     fun `fastsatt årsinntekt under 6g`() {
-        val inntekter = listOf(
-            PensjonsgivendeInntekt(Year.of(2016), 500000.årlig),
-            PensjonsgivendeInntekt(Year.of(2015), 450000.årlig),
-            PensjonsgivendeInntekt(Year.of(2014), 380000.årlig),
-        )
+        val inntekter =
+            listOf(
+                PensjonsgivendeInntekt(Year.of(2016), 500000.årlig),
+                PensjonsgivendeInntekt(Year.of(2015), 450000.årlig),
+                PensjonsgivendeInntekt(Year.of(2014), 380000.årlig),
+            )
 
         val anvendtGrunnbeløp = `1G`.beløp(16.juni)
         val normalinntekt = SelvstendigFaktaavklartInntekt.normalinntekt(inntekter, anvendtGrunnbeløp)
@@ -29,11 +29,12 @@ internal class PensjonsgivendeInntektTest {
 
     @Test
     fun `fastsatt årsinntekt over 6g`() {
-        val inntekter = listOf(
-            PensjonsgivendeInntekt(Year.of(2016), 670000.årlig),
-            PensjonsgivendeInntekt(Year.of(2015), 590000.årlig),
-            PensjonsgivendeInntekt(Year.of(2014), 490000.årlig),
-        )
+        val inntekter =
+            listOf(
+                PensjonsgivendeInntekt(Year.of(2016), 670000.årlig),
+                PensjonsgivendeInntekt(Year.of(2015), 590000.årlig),
+                PensjonsgivendeInntekt(Year.of(2014), 490000.årlig),
+            )
 
         val anvendtGrunnbeløp = `1G`.beløp(12.mai)
         val normalinntekt = SelvstendigFaktaavklartInntekt.normalinntekt(inntekter, anvendtGrunnbeløp)
@@ -44,11 +45,12 @@ internal class PensjonsgivendeInntektTest {
 
     @Test
     fun `fastsatt årsinntekt over 12g`() {
-        val inntekter = listOf(
-            PensjonsgivendeInntekt(Year.of(2016), 1500000.årlig),
-            PensjonsgivendeInntekt(Year.of(2015), 0.årlig),
-            PensjonsgivendeInntekt(Year.of(2014), 0.årlig),
-        )
+        val inntekter =
+            listOf(
+                PensjonsgivendeInntekt(Year.of(2016), 1500000.årlig),
+                PensjonsgivendeInntekt(Year.of(2015), 0.årlig),
+                PensjonsgivendeInntekt(Year.of(2014), 0.årlig),
+            )
 
         val skjæringstidspunkt = 12.mai
         val anvendtGrunnbeløp = `1G`.beløp(skjæringstidspunkt)

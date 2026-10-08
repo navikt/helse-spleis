@@ -1,20 +1,29 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.yearMonth
+import java.time.LocalDate
 
 internal sealed interface Inntektssituasjon {
-    data class HarInntektFraArbeidsgiver(private val arbeidstakerFaktaavklarteInntekter: ArbeidstakerFaktaavklarteInntekter) : Inntektssituasjon {
+    data class HarInntektFraArbeidsgiver(
+        private val arbeidstakerFaktaavklarteInntekter: ArbeidstakerFaktaavklarteInntekter,
+    ) : Inntektssituasjon {
         private val vurderbarArbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklarteInntekter.besteInntekt()
         private val førsteFraværsdag = arbeidstakerFaktaavklarteInntekter.førsteFraværsdag
         private val inntektFraArbeidsgiver = vurderbarArbeidstakerFaktaavklartInntekt.faktaavklartInntekt
 
-        init { check(inntektFraArbeidsgiver.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) }
+        init {
+            check(inntektFraArbeidsgiver.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver)
+        }
 
-        internal fun avklarInntekt(skjæringstidspunkt: LocalDate, skatteopplysning: ArbeidstakerFaktaavklartInntekt, flereArbeidsgivere: Boolean, aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt {
+        internal fun avklarInntekt(
+            skjæringstidspunkt: LocalDate,
+            skatteopplysning: ArbeidstakerFaktaavklartInntekt,
+            flereArbeidsgivere: Boolean,
+            aktivitetslogg: IAktivitetslogg,
+        ): ArbeidstakerFaktaavklartInntekt {
             check(skatteopplysning.inntektsopplysningskilde is Arbeidstakerinntektskilde.AOrdningen)
             return when (flereArbeidsgivere) {
                 true -> vedFlereArbeidsgivere(skjæringstidspunkt, skatteopplysning, aktivitetslogg)
@@ -22,7 +31,11 @@ internal sealed interface Inntektssituasjon {
             }
         }
 
-        private fun vedFlereArbeidsgivere(skjæringstidspunkt: LocalDate, skatteopplysning: ArbeidstakerFaktaavklartInntekt, aktivitetslogg: IAktivitetslogg): ArbeidstakerFaktaavklartInntekt {
+        private fun vedFlereArbeidsgivere(
+            skjæringstidspunkt: LocalDate,
+            skatteopplysning: ArbeidstakerFaktaavklartInntekt,
+            aktivitetslogg: IAktivitetslogg,
+        ): ArbeidstakerFaktaavklartInntekt {
             if (skjæringstidspunkt.yearMonth == førsteFraværsdag.yearMonth) return brukInntektFraArbeidsgiver(aktivitetslogg)
             aktivitetslogg.varsel(Varselkode.RV_VV_2)
             return skatteopplysning
@@ -34,9 +47,11 @@ internal sealed interface Inntektssituasjon {
         }
     }
 
-    data class GaOppÅVentePåArbeidsgiver(val periodenSomGaOpp: Vedtaksperiode): Inntektssituasjon
+    data class GaOppÅVentePåArbeidsgiver(
+        val periodenSomGaOpp: Vedtaksperiode,
+    ) : Inntektssituasjon
 
-    data object TidligereVilkårsprøvd: Inntektssituasjon
+    data object TidligereVilkårsprøvd : Inntektssituasjon
 
-    data object TrengerIkkeInntektFraArbeidsgiver: Inntektssituasjon
+    data object TrengerIkkeInntektFraArbeidsgiver : Inntektssituasjon
 }

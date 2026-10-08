@@ -6,14 +6,20 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
-internal class MigrateMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
-
+internal class MigrateMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : HendelseMessage(packet) {
     private val migrate
-        get() = Migrate(
-            meldingsreferanseId = meldingsporing.id
-        )
+        get() =
+            Migrate(
+                meldingsreferanseId = meldingsporing.id,
+            )
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         mediator.behandle(this, migrate, context)
     }
 }

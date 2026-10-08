@@ -1,27 +1,15 @@
 package no.nav.helse.spleis.e2e.søknad
 
+import no.nav.helse.*
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mai
-import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_2
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -59,7 +47,7 @@ internal class ForeldetSøknadE2ETest : AbstractDslTest() {
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_GODKJENNING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -71,7 +59,7 @@ internal class ForeldetSøknadE2ETest : AbstractDslTest() {
             håndterSøknad(
                 Sykdom(15.januar, 16.februar, 100.prosent),
                 Ferie(1.februar, 16.februar),
-                sendtTilNAVEllerArbeidsgiver = 1.mai
+                sendtTilNAVEllerArbeidsgiver = 1.mai,
             )
             håndterArbeidsgiveropplysninger(listOf(15.januar til 30.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -88,7 +76,7 @@ internal class ForeldetSøknadE2ETest : AbstractDslTest() {
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_GODKJENNING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -100,7 +88,7 @@ internal class ForeldetSøknadE2ETest : AbstractDslTest() {
             håndterSøknad(
                 Sykdom(16.januar, 16.februar, 100.prosent),
                 Ferie(1.februar, 16.februar),
-                sendtTilNAVEllerArbeidsgiver = 1.mai
+                sendtTilNAVEllerArbeidsgiver = 1.mai,
             )
             håndterArbeidsgiveropplysninger(listOf(16.januar til 31.januar))
             assertVarsel(RV_SØ_2, 1.vedtaksperiode.filter())
@@ -136,7 +124,7 @@ internal class ForeldetSøknadE2ETest : AbstractDslTest() {
             // foreldet søknad :(
             håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
             håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar)
+                listOf(1.januar til 16.januar),
             )
 
             håndterYtelser(1.vedtaksperiode)
@@ -184,7 +172,7 @@ internal class ForeldetSøknadE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(19.februar, 12.mars, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.juli)
             håndterArbeidsgiveropplysninger(
                 listOf(19.februar til 6.mars),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)

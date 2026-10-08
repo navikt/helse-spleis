@@ -1,52 +1,15 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Behovsoppsamler
+import no.nav.helse.*
+import no.nav.helse.dsl.*
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.forlengelseTilGodkjenning
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.mai
-import no.nav.helse.mars
-import no.nav.helse.november
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_ANNULLERING_TIL_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING_TIL_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
@@ -55,14 +18,12 @@ import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.*
 
 internal class RevurderTidslinjeTest : AbstractDslTest() {
-
     @Test
     fun `revurdere mens en forlengelse er til utbetaling`() {
         a1 {
@@ -301,7 +262,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
-                AVSLUTTET
+                AVSLUTTET,
             )
 
             assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(1))
@@ -317,7 +278,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
 
-            håndterOverstyrTidslinje((19.januar til 22.januar).map { manuellFeriedag(it) })  // ferie på første navdag
+            håndterOverstyrTidslinje((19.januar til 22.januar).map { manuellFeriedag(it) }) // ferie på første navdag
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -341,7 +302,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
 
             assertTilstander(
@@ -353,7 +314,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
             )
             val revurdering = inspektør.utbetaling(2)
             assertIngenFunksjonelleFeil()
@@ -382,13 +343,13 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertTilstander(
                 2.vedtaksperiode,
                 AVVENTER_HISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
             )
             assertIngenFunksjonelleFeil()
         }
@@ -444,7 +405,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertTilstander(
                 2.vedtaksperiode,
@@ -456,7 +417,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertTilstander(
                 3.vedtaksperiode,
@@ -473,7 +434,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -502,7 +463,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 TIL_UTBETALING,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_HISTORIKK_REVURDERING
+                AVVENTER_HISTORIKK_REVURDERING,
             )
             assertTilstander(
                 2.vedtaksperiode,
@@ -513,7 +474,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
-                AVVENTER_BLOKKERENDE_PERIODE
+                AVVENTER_BLOKKERENDE_PERIODE,
             )
         }
     }
@@ -603,7 +564,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(1.januar, 16.januar)),
-                førsteFraværsdag = 1.januar
+                førsteFraværsdag = 1.januar,
             )
             håndterSøknad(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -634,7 +595,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING
+                AVVENTER_GODKJENNING_REVURDERING,
             )
         }
     }
@@ -661,7 +622,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             håndterSykmelding(januar)
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(1.januar, 16.januar)),
-                førsteFraværsdag = 1.januar
+                førsteFraværsdag = 1.januar,
             )
             håndterSøknad(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -673,7 +634,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             håndterOverstyrTidslinje(listOf(manuellFeriedag(18.januar)))
             håndterYtelser(
                 1.vedtaksperiode,
-                foreldrepenger = listOf(GradertPeriode(16.januar til 28.januar, 100))
+                foreldrepenger = listOf(GradertPeriode(16.januar til 28.januar, 100)),
             )
             assertVarsler(listOf(Varselkode.RV_AY_5, RV_UT_23), 1.vedtaksperiode.filter())
             håndterAnnullering(1.vedtaksperiode)
@@ -696,7 +657,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_ANNULLERING,
                 TIL_ANNULLERING,
-                TIL_INFOTRYGD
+                TIL_INFOTRYGD,
             )
         }
     }
@@ -728,7 +689,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING
+                AVVENTER_GODKJENNING_REVURDERING,
             )
         }
     }
@@ -762,7 +723,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
 
             assertTilstander(
@@ -772,7 +733,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
             )
             assertIngenFunksjonelleFeil()
         }
@@ -817,7 +778,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
 
             assertIngenFunksjonelleFeil()
@@ -916,17 +877,19 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             }
 
-            val simuleringsbehov = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Simulering> {
-                håndterYtelser(1.vedtaksperiode)
-                assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-                håndterPåminnelse(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
-            }
+            val simuleringsbehov =
+                behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Simulering> {
+                    håndterYtelser(1.vedtaksperiode)
+                    assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
+                    håndterPåminnelse(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+                }
             assertEquals(2, simuleringsbehov.size)
 
-            val godkjenningsbehov = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Godkjenning> {
-                håndterSimulering(1.vedtaksperiode)
-                håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-            }
+            val godkjenningsbehov =
+                behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Godkjenning> {
+                    håndterSimulering(1.vedtaksperiode)
+                    håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+                }
             assertEquals(2, godkjenningsbehov.size)
         }
     }
@@ -944,7 +907,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar)
+                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar),
             )
             håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
             håndterYtelser(1.vedtaksperiode)
@@ -991,7 +954,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar)
+                ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar),
             )
             håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
             håndterYtelser(1.vedtaksperiode)
@@ -1007,7 +970,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(2.januar, 17.januar)),
-                førsteFraværsdag = 2.januar
+                førsteFraværsdag = 2.januar,
             )
             håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -1044,7 +1007,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
-                listOf(Periode(1.januar, 16.januar))
+                listOf(Periode(1.januar, 16.januar)),
             )
             håndterSøknad(januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -1056,7 +1019,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
         nullstillTilstandsendringer()
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                ArbeidsgiverUtbetalingsperiode(a1, 1.november(2017), 30.november(2017))
+                ArbeidsgiverUtbetalingsperiode(a1, 1.november(2017), 30.november(2017)),
             )
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
 
@@ -1071,7 +1034,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING
+                AVVENTER_SIMULERING_REVURDERING,
             )
         }
     }
@@ -1084,7 +1047,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             val hendelseId = UUID.randomUUID()
             håndterOverstyrTidslinje(
                 meldingsreferanseId = hendelseId,
-                overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) }
+                overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) },
             )
             assertEquals(januar, inspektør.periode(1.vedtaksperiode))
             assertEquals(februar, inspektør.periode(2.vedtaksperiode))
@@ -1102,7 +1065,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             val hendelseId = UUID.randomUUID()
             håndterOverstyrTidslinje(
                 meldingsreferanseId = hendelseId,
-                overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) }
+                overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) },
             )
             assertEquals(januar, inspektør.periode(1.vedtaksperiode))
             assertEquals(2.februar til 28.februar, inspektør.periode(2.vedtaksperiode))
@@ -1117,7 +1080,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             nyttVedtak(1.januar til 20.januar)
             håndterSøknad(Sykdom(25.januar, 25.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar)
+                listOf(1.januar til 16.januar),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1168,7 +1131,7 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             håndterUtbetalt()
 
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                ArbeidsgiverUtbetalingsperiode(a1, 1.mars, 31.mars)
+                ArbeidsgiverUtbetalingsperiode(a1, 1.mars, 31.mars),
             )
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Sykedag, 80)))
             håndterYtelser(1.vedtaksperiode)
@@ -1177,7 +1140,11 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
         }
     }
 
-    private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeId: UUID, block: () -> Unit) {
+    private fun assertEtterspurteYtelser(
+        expected: Int,
+        vedtaksperiodeId: UUID,
+        block: () -> Unit,
+    ) {
         val faktiskAntallBehov = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker> { block() }.filter { it.vedtaksperiodeId == vedtaksperiodeId }.size
         assertEquals(expected, faktiskAntallBehov)
     }

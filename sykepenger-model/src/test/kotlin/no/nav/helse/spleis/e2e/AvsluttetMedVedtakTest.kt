@@ -1,31 +1,16 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.UUID
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.dsl.*
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterHovedregel
-import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterSkjønn
-import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.*
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -33,9 +18,9 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class AvsluttetMedVedtakTest : AbstractDslTest() {
-
     @Test
     fun `sender ikke vedtak fattet for perioder innenfor arbeidsgiverperioden`() {
         a1 {
@@ -46,14 +31,19 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
             assertEquals(0, observatør.utbetalingUtenUtbetalingEventer.size)
             assertEquals(0, observatør.utbetalingMedUtbetalingEventer.size)
             1.vedtaksperiode.assertIngenVedtakFattet()
-            assertEquals(1.januar til 10.januar, 1.vedtaksperiode.avsluttetUtenVedtakEventer.single().periode)
+            assertEquals(
+                1.januar til 10.januar,
+                1
+                    .vedtaksperiode.avsluttetUtenVedtakEventer
+                    .single()
+                    .periode,
+            )
         }
     }
 
     @Test
     fun `sender vedtak fattet for perioder utenfor arbeidsgiverperioden`() {
         a1 {
-
             nyttVedtak(januar, 100.prosent)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertEquals(1, inspektør.antallUtbetalinger)
@@ -63,12 +53,13 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
             val event = observatør.avsluttetMedVedtakEvent.getValue(1.vedtaksperiode)
             assertEquals(inspektør.utbetaling(0).utbetalingId, event.utbetalingId)
             assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetaling(0).tilstand)
-            val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
-                omregnetÅrsinntekt = 372_000.0,
-                sykepengegrunnlag = 372_000.0,
-                `6G` = 561_804.0,
-                arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372_000.0, Inntektskilde.Arbeidsgiver))
-            )
+            val forventetSykepengegrunnlagsfakta =
+                FastsattEtterHovedregel(
+                    omregnetÅrsinntekt = 372_000.0,
+                    sykepengegrunnlag = 372_000.0,
+                    `6G` = 561_804.0,
+                    arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372_000.0, Inntektskilde.Arbeidsgiver)),
+                )
             assertEquals(forventetSykepengegrunnlagsfakta, event.sykepengegrunnlagsfakta)
         }
     }
@@ -91,7 +82,6 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
     @Test
     fun `sender vedtak fattet for forlengelseperioder utenfor arbeidsgiverperioden med bare ferie`() {
         a1 {
-
             nyttVedtak(1.januar til 20.januar, 100.prosent)
             håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
             håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
@@ -105,12 +95,13 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
             val event = observatør.avsluttetMedVedtakEvent.getValue(2.vedtaksperiode)
             assertEquals(inspektør.utbetaling(1).utbetalingId, event.utbetalingId)
             assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetaling(1).tilstand)
-            val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
-                omregnetÅrsinntekt = 372_000.0,
-                `6G` = 561804.0,
-                sykepengegrunnlag = 372_000.0,
-                arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372000.0, Inntektskilde.Arbeidsgiver))
-            )
+            val forventetSykepengegrunnlagsfakta =
+                FastsattEtterHovedregel(
+                    omregnetÅrsinntekt = 372_000.0,
+                    `6G` = 561804.0,
+                    sykepengegrunnlag = 372_000.0,
+                    arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372000.0, Inntektskilde.Arbeidsgiver)),
+                )
             assertEquals(forventetSykepengegrunnlagsfakta, event.sykepengegrunnlagsfakta)
         }
     }
@@ -133,14 +124,14 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar(2020) til 16.januar(2020)),
                 beregnetInntekt = INNTEKT,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar(2020) til 16.januar(2020)),
                 beregnetInntekt = INNTEKT,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a1 {
@@ -159,19 +150,27 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
             assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
         }
 
-        val a1Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a1 }.sykepengegrunnlagsfakta
-        val a2Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 }.sykepengegrunnlagsfakta
+        val a1Sykepengegrunnlagsfakta =
+            observatør.avsluttetMedVedtakEvent.values
+                .first { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a1 }
+                .sykepengegrunnlagsfakta
+        val a2Sykepengegrunnlagsfakta =
+            observatør.avsluttetMedVedtakEvent.values
+                .first { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 }
+                .sykepengegrunnlagsfakta
         assertEquals(a1Sykepengegrunnlagsfakta, a2Sykepengegrunnlagsfakta)
 
-        val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
-            omregnetÅrsinntekt = 744_000.0,
-            `6G` = 599_148.0,
-            sykepengegrunnlag = 599_148.0,
-            arbeidsgivere = listOf(
-                FastsattEtterHovedregel.Arbeidsgiver(a1, 372_000.0, Inntektskilde.Arbeidsgiver),
-                FastsattEtterHovedregel.Arbeidsgiver(a2, 372_000.0, Inntektskilde.Arbeidsgiver),
+        val forventetSykepengegrunnlagsfakta =
+            FastsattEtterHovedregel(
+                omregnetÅrsinntekt = 744_000.0,
+                `6G` = 599_148.0,
+                sykepengegrunnlag = 599_148.0,
+                arbeidsgivere =
+                    listOf(
+                        FastsattEtterHovedregel.Arbeidsgiver(a1, 372_000.0, Inntektskilde.Arbeidsgiver),
+                        FastsattEtterHovedregel.Arbeidsgiver(a2, 372_000.0, Inntektskilde.Arbeidsgiver),
+                    ),
             )
-        )
         assertEquals(forventetSykepengegrunnlagsfakta, a1Sykepengegrunnlagsfakta)
     }
 
@@ -210,8 +209,8 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
                 1.januar(2020),
                 listOf(
                     OverstyrtArbeidsgiveropplysning(a1, 46000.månedlig),
-                    OverstyrtArbeidsgiveropplysning(a2, 45000.månedlig)
-                )
+                    OverstyrtArbeidsgiveropplysning(a2, 45000.månedlig),
+                ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -226,19 +225,27 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
 
             assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
         }
-        val a1Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a1 }.sykepengegrunnlagsfakta
-        val a2Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.first { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 }.sykepengegrunnlagsfakta
+        val a1Sykepengegrunnlagsfakta =
+            observatør.avsluttetMedVedtakEvent.values
+                .first { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a1 }
+                .sykepengegrunnlagsfakta
+        val a2Sykepengegrunnlagsfakta =
+            observatør.avsluttetMedVedtakEvent.values
+                .first { it.yrkesaktivitetssporing.somOrganisasjonsnummer == a2 }
+                .sykepengegrunnlagsfakta
         assertEquals(a1Sykepengegrunnlagsfakta, a2Sykepengegrunnlagsfakta)
 
-        val forventetSykepengegrunnlagsfakta = FastsattEtterSkjønn(
-            omregnetÅrsinntekt = 1_068_000.0,
-            `6G` = 599_148.0,
-            sykepengegrunnlag = 599_148.0,
-            arbeidsgivere = listOf(
-                FastsattEtterSkjønn.Arbeidsgiver(a1, 540_000.0, 552_000.0, Inntektskilde.Saksbehandler),
-                FastsattEtterSkjønn.Arbeidsgiver(a2, 528_000.0, 540_000.0, Inntektskilde.Saksbehandler),
+        val forventetSykepengegrunnlagsfakta =
+            FastsattEtterSkjønn(
+                omregnetÅrsinntekt = 1_068_000.0,
+                `6G` = 599_148.0,
+                sykepengegrunnlag = 599_148.0,
+                arbeidsgivere =
+                    listOf(
+                        FastsattEtterSkjønn.Arbeidsgiver(a1, 540_000.0, 552_000.0, Inntektskilde.Saksbehandler),
+                        FastsattEtterSkjønn.Arbeidsgiver(a2, 528_000.0, 540_000.0, Inntektskilde.Saksbehandler),
+                    ),
             )
-        )
         assertEquals(forventetSykepengegrunnlagsfakta, a1Sykepengegrunnlagsfakta)
     }
 
@@ -248,19 +255,21 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             håndterSøknad(1.januar til 16.januar, søknadId = søknadId)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            val inntektsmeldingId = håndterSelvbestemtArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
-                refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()),
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
-            )
+            val inntektsmeldingId =
+                håndterSelvbestemtArbeidsgiveropplysninger(
+                    listOf(1.januar til 16.januar),
+                    refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()),
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+                )
             assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            val liste = (1..16).map {
-                ManuellOverskrivingDag(it.januar, Dagtype.Feriedag)
-            }
+            val liste =
+                (1..16).map {
+                    ManuellOverskrivingDag(it.januar, Dagtype.Feriedag)
+                }
             håndterOverstyrTidslinje(liste)
             assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -268,14 +277,19 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
             assertEquals(Utbetalingstatus.FORKASTET, utbetaling.tilstand)
             1.vedtaksperiode.assertIngenVedtakFattet()
             assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
-            assertEquals(setOf(søknadId, inntektsmeldingId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
+            assertEquals(
+                setOf(søknadId, inntektsmeldingId),
+                1
+                    .vedtaksperiode.avsluttetUtenVedtakEventer
+                    .last()
+                    .hendelseIder,
+            )
         }
     }
 
     @Test
     fun `Periode med kun ferie etter kort gap etter kort auu tagges ikke med IngenNyArbeidsgiverperiode`() {
         a1 {
-
             håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
             håndterSøknad(1.januar til 10.januar)
             håndterSykmelding(Sykmeldingsperiode(15.januar, 31.januar))
@@ -293,7 +307,6 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
     @Test
     fun `sender med tidligere dokumenter etter revurdering`() {
         a1 {
-
             nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
@@ -310,5 +323,6 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
     }
 
     private val UUID.avsluttetUtenVedtakEventer get() = observatør.avsluttetUtenVedtakEventer.getValue(this)
+
     private fun UUID.assertIngenVedtakFattet() = assertEquals(emptyList<EventSubscription.AvsluttetMedVedtakEvent>(), observatør.avsluttetMedVedtakEventer[this] ?: emptyList<EventSubscription.AvsluttetMedVedtakEvent>())
 }

@@ -45,5 +45,4 @@ internal class TidslinjeShortenTest {
         assertEquals(8, inspektør.navDagTeller)
         assertEquals(2, inspektør.navHelgDagTeller)
     }
-
 }

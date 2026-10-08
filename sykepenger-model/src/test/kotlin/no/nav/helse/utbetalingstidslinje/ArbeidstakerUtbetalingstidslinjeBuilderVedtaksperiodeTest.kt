@@ -7,13 +7,12 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.inspectors.inspektør
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiodeTest {
-
     @Test
     fun `setter inntekt på økonomi`() {
         val utbetalingstidslinjeBuilderVedtaksperiode = utbetalingstidslinjeBuilderVedtaksperiode()
@@ -41,6 +40,6 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiodeTest {
             arbeidsgiverperiode = listOf(1.januar til 16.januar),
             dagerNavOvertarAnsvar = emptyList(),
             refusjonstidslinje = Beløpstidslinje(),
-            avslagstidslinje = Avslagstidslinje()
+            avslagstidslinje = Avslagstidslinje(),
         )
 }

@@ -10,19 +10,20 @@ import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessa
 
 internal class OverstyrArbeidsgiveropplysningerRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-
     override val eventNames = setOf("overstyr_inntekt_og_refusjon")
 
     override val riverName = "Overstyr inntekt og refusjon"
 
-    override fun createMessage(packet: JsonMessage) = OverstyrArbeidsgiveropplysningerMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        OverstyrArbeidsgiveropplysningerMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 
     override fun validate(message: JsonMessage) {
         message.requireKey("fødselsnummer")

@@ -2,12 +2,12 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import java.time.LocalDateTime
-import java.util.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
+import java.util.*
 
 internal class JsonMigrationTest {
     private val objectMapper = jacksonObjectMapper()
@@ -23,16 +23,24 @@ internal class JsonMigrationTest {
         listOf(
             object : JsonMigration(1) {
                 override val description = ""
-                override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+
+                override fun doMigration(
+                    jsonNode: ObjectNode,
+                    meldingerSupplier: MeldingerSupplier,
+                ) {
                     meldinger.add(meldingerSupplier.hentMeldinger())
                 }
             },
             object : JsonMigration(2) {
                 override val description = ""
-                override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+
+                override fun doMigration(
+                    jsonNode: ObjectNode,
+                    meldingerSupplier: MeldingerSupplier,
+                ) {
                     meldinger.add(meldingerSupplier.hentMeldinger())
                 }
-            }
+            },
         ).migrate(0, "{}", supplier)
 
         assertEquals(1, invocationCount)
@@ -46,8 +54,9 @@ internal class JsonMigrationTest {
         val expectedField = "field_1"
         val expectedValue = "value"
 
-        val (migratedSkjemaversjon, migratedJson) = (0 to "{}")
-            .migrate(AddFieldMigration(version, expectedField, expectedValue))
+        val (migratedSkjemaversjon, migratedJson) =
+            (0 to "{}")
+                .migrate(AddFieldMigration(version, expectedField, expectedValue))
 
         assertEquals(version, migratedSkjemaversjon)
         assertEquals(expectedValue, objectMapper.readTree(migratedJson)[expectedField].textValue())
@@ -62,9 +71,10 @@ internal class JsonMigrationTest {
         val field2 = "field_2"
         val value2 = "value2"
 
-        val (migratedSkjemaversjon, migratedJson) = (0 to "{}")
-            .migrate(AddFieldMigration(version1, field1, value1))
-            .migrate(AddFieldMigration(version2, field2, value2))
+        val (migratedSkjemaversjon, migratedJson) =
+            (0 to "{}")
+                .migrate(AddFieldMigration(version1, field1, value1))
+                .migrate(AddFieldMigration(version2, field2, value2))
 
         assertEquals(version2, migratedSkjemaversjon)
         assertEquals(value1, objectMapper.readTree(migratedJson)[field1].textValue())
@@ -80,9 +90,10 @@ internal class JsonMigrationTest {
         val field2 = "field_2"
         val value2 = "value2"
 
-        val (migratedSkjemaversjon, migratedJson) = (0 to "{}")
-            .migrate(AddFieldMigration(version2, field2, value2))
-            .migrate(AddFieldMigration(version1, field1, value1))
+        val (migratedSkjemaversjon, migratedJson) =
+            (0 to "{}")
+                .migrate(AddFieldMigration(version2, field2, value2))
+                .migrate(AddFieldMigration(version1, field1, value1))
 
         assertEquals(version2, migratedSkjemaversjon)
         assertFalse(objectMapper.readTree(migratedJson).has(field1))
@@ -98,10 +109,11 @@ internal class JsonMigrationTest {
         val field2 = "field_2"
         val value2 = "value2"
 
-        val migrations = listOf(
-            AddFieldMigration(version2, field2, value2),
-            AddFieldMigration(version1, field1, value1)
-        )
+        val migrations =
+            listOf(
+                AddFieldMigration(version2, field2, value2),
+                AddFieldMigration(version1, field1, value1),
+            )
 
         val (migratedSkjemaversjon, migratedJson) = migrations.migrate(0, "{}")
 
@@ -112,21 +124,28 @@ internal class JsonMigrationTest {
 
     @Test
     fun `versjoner må være unike`() {
-        val migrations = listOf(
-            AddFieldMigration(1, "foo", "bar"),
-            AddFieldMigration(1, "foo", "bar")
-        )
+        val migrations =
+            listOf(
+                AddFieldMigration(1, "foo", "bar"),
+                AddFieldMigration(1, "foo", "bar"),
+            )
 
         assertThrows<IllegalArgumentException> { migrations.migrate(0, "{}") }
     }
 
     private fun Pair<Int, String>.migrate(migration: JsonMigration) = listOf(migration).migrate(this.first, this.second)
 
-    private class AddFieldMigration(version: Int, private val field: String, private val value: String) :
-        JsonMigration(version) {
+    private class AddFieldMigration(
+        version: Int,
+        private val field: String,
+        private val value: String,
+    ) : JsonMigration(version) {
         override val description = "Test migration"
 
-        override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+        override fun doMigration(
+            jsonNode: ObjectNode,
+            meldingerSupplier: MeldingerSupplier,
+        ) {
             jsonNode.put(field, value)
         }
     }

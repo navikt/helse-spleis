@@ -10,18 +10,20 @@ import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
 
 internal class OverstyrArbeidsforholdRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("overstyr_arbeidsforhold")
 
     override val riverName = "Overstyr arbeidsforhold"
 
-    override fun createMessage(packet: JsonMessage) = OverstyrArbeidsforholdMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        OverstyrArbeidsforholdMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 
     override fun validate(message: JsonMessage) {
         message.requireKey("fødselsnummer")

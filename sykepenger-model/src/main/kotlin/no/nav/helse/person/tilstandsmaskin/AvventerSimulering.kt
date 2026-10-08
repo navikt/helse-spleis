@@ -8,17 +8,31 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal data object AvventerSimulering : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_SIMULERING
-    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+
+    override fun entering(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         trengerSimulering(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    override fun håndterPåminnelse(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        påminnelse: Påminnelse,
+        aktivitetslogg: IAktivitetslogg,
+    ): Revurderingseventyr? {
         trengerSimulering(vedtaksperiode, eventBus, aktivitetslogg)
         return null
     }
 }
 
-internal fun trengerSimulering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+internal fun trengerSimulering(
+    vedtaksperiode: Vedtaksperiode,
+    eventBus: EventBus,
+    aktivitetslogg: IAktivitetslogg,
+) {
     val utbetaling = checkNotNull(vedtaksperiode.behandlinger.utbetaling)
     val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(utbetaling)
 
@@ -28,7 +42,7 @@ internal fun trengerSimulering(vedtaksperiode: Vedtaksperiode, eventBus: EventBu
             vedtaksperiodeId = vedtaksperiode.id,
             behandlingId = vedtaksperiode.behandlinger.sisteBehandlingId,
             utbetalingId = utbetaling.id,
-            oppdragsdetaljer = it
+            oppdragsdetaljer = it,
         )
         val aktivitetsloggMedOppdragkontekst = aktivitetsloggMedUtbetalingkontekst.kontekst(utbetaling.arbeidsgiverOppdrag)
         aktivitetsloggMedOppdragkontekst.info("Sender ut event om at utbetalingen til arbeidsgiver skal simuleres")
@@ -40,7 +54,7 @@ internal fun trengerSimulering(vedtaksperiode: Vedtaksperiode, eventBus: EventBu
             vedtaksperiodeId = vedtaksperiode.id,
             behandlingId = vedtaksperiode.behandlinger.sisteBehandlingId,
             utbetalingId = utbetaling.id,
-            oppdragsdetaljer = it
+            oppdragsdetaljer = it,
         )
         val aktivitetsloggMedOppdragkontekst = aktivitetsloggMedUtbetalingkontekst.kontekst(utbetaling.personOppdrag)
         aktivitetsloggMedOppdragkontekst.info("Sender ut event om at utbetalingen til sykmeldt skal simuleres")

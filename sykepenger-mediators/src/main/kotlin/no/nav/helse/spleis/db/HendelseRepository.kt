@@ -1,130 +1,46 @@
 package no.nav.helse.spleis.db
 
-import com.github.navikt.tbd_libs.sql_dsl.boolean
-import com.github.navikt.tbd_libs.sql_dsl.connection
-import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
-import com.github.navikt.tbd_libs.sql_dsl.offsetDateTime
-import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
-import com.github.navikt.tbd_libs.sql_dsl.single
-import com.github.navikt.tbd_libs.sql_dsl.singleOrNull
-import com.github.navikt.tbd_libs.sql_dsl.string
-import java.util.UUID
-import javax.sql.DataSource
+import com.github.navikt.tbd_libs.sql_dsl.*
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.serde.migration.Hendelse
 import no.nav.helse.spleis.PostgresProbe
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.ANMODNING_OM_FORKASTING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.AVBRUTT_SØKNAD
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.DØDSMELDING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.FERIEPENGEUTBETALING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.FORKAST_SYKMELDINGSPERIODER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GRUNNBELØPSREGULERING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.IDENT_OPPHØRT
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDINGER_REPLAY
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSOPPLYSNINGER_FRA_LAGRET_INNTEKTSMELDING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.KANSELLER_UTBETALING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.MINIMUM_SYKDOMSGRAD_VURDERT
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NAV_NO_INNTEKTSMELDING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NAV_NO_KORRIGERT_INNTEKTSMELDING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NAV_NO_SELVBESTEMT_INNTEKTSMELDING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_ARBEIDSLEDIG
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_FRILANS
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_SELVSTENDIG
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_TIDLIGERE_ARBEIDSTAKER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSFORHOLD
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSGIVEROPPLYSNINGER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRTIDSLINJE
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ANNET
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_FISKER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_FRILANS
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_NAV
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_SELVSTENDIG
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SKJØNNSMESSIG_FASTSETTELSE
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGODKJENNING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_ETTER_IT_ENDRING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_FOR_FERIEPENGER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.VILKÅRSGRUNNLAG
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.YTELSER
-import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
-import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
-import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
-import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
-import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.EndretGrunnlagForBeregningMessage
-import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
-import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
-import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
-import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
-import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
-import no.nav.helse.spleis.meldinger.model.HendelseMessage
-import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
-import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
-import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.MigrateMessage
-import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
-import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NyArbeidsledigTidligereArbeidstakerSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NySøknadMessage
-import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
-import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessage
-import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
-import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
-import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadAnnetMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadFiskerMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
-import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
-import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
-import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.*
+import no.nav.helse.spleis.meldinger.model.*
 import org.intellij.lang.annotations.Language
+import java.util.*
+import javax.sql.DataSource
 
-internal class HendelseRepository(private val dataSource: DataSource) {
+internal class HendelseRepository(
+    private val dataSource: DataSource,
+) {
     fun lagreMelding(melding: HendelseMessage) {
         melding.lagreMelding(this)
     }
 
-    internal fun lagreMelding(melding: HendelseMessage, personidentifikator: Personidentifikator, meldingId: MeldingsreferanseId, json: String) {
+    internal fun lagreMelding(
+        melding: HendelseMessage,
+        personidentifikator: Personidentifikator,
+        meldingId: MeldingsreferanseId,
+        json: String,
+    ) {
         val meldingtype = meldingstype(melding) ?: return
 
         @Language("PostgreSQL")
         val sql = "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (:fnr, :meldingId, :meldingType, cast(:data as json)) ON CONFLICT(melding_id) DO NOTHING"
-        dataSource.connection {
-            prepareStatementWithNamedParameters(sql) {
-                withParameter("fnr", personidentifikator.toLong())
-                withParameter("meldingId", meldingId.id)
-                withParameter("meldingType", meldingtype.name)
-                withParameter("data", json)
-            }.use { stmt ->
-                stmt.execute()
+        dataSource
+            .connection {
+                prepareStatementWithNamedParameters(sql) {
+                    withParameter("fnr", personidentifikator.toLong())
+                    withParameter("meldingId", meldingId.id)
+                    withParameter("meldingType", meldingtype.name)
+                    withParameter("data", json)
+                }.use { stmt ->
+                    stmt.execute()
+                }
+            }.also {
+                PostgresProbe.hendelseSkrevetTilDb()
             }
-        }.also {
-            PostgresProbe.hendelseSkrevetTilDb()
-        }
     }
 
     fun markerSomBehandlet(meldingId: MeldingsreferanseId) {
@@ -139,82 +55,90 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         }
     }
 
-    fun erBehandlet(meldingId: MeldingsreferanseId) = dataSource.connection {
-        @Language("PostgreSQL")
-        val sql = "SELECT exists(select 1 FROM melding WHERE melding_id = CAST(:meldingId as text) and behandlet_tidspunkt is not null)"
-        true == prepareStatementWithNamedParameters(sql) {
-            withParameter("meldingId", meldingId.id)
-        }.single { rs -> rs.boolean(1) }
-    }
+    fun erBehandlet(meldingId: MeldingsreferanseId) =
+        dataSource.connection {
+            @Language("PostgreSQL")
+            val sql = "SELECT exists(select 1 FROM melding WHERE melding_id = CAST(:meldingId as text) and behandlet_tidspunkt is not null)"
+            true ==
+                prepareStatementWithNamedParameters(sql) {
+                    withParameter("meldingId", meldingId.id)
+                }.single { rs -> rs.boolean(1) }
+        }
 
-    private fun meldingstype(melding: HendelseMessage) = when (melding) {
-        is NySøknadMessage -> NY_SØKNAD
-        is NyFrilansSøknadMessage -> NY_SØKNAD_FRILANS
-        is NySelvstendigSøknadMessage -> NY_SØKNAD_SELVSTENDIG
-        is NyArbeidsledigSøknadMessage -> NY_SØKNAD_ARBEIDSLEDIG
-        is NyArbeidsledigTidligereArbeidstakerSøknadMessage -> NY_SØKNAD_TIDLIGERE_ARBEIDSTAKER
-        is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
-        is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
-        is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
-        is SendtSøknadSelvstendigMessage -> SENDT_SØKNAD_SELVSTENDIG
-        is SendtSøknadFiskerMessage -> SENDT_SØKNAD_FISKER
-        is SendtSøknadAnnetMessage -> SENDT_SØKNAD_ANNET
-        is SendtSøknadArbeidsledigTidligereArbeidstakerMessage -> SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER
-        is SendtSøknadArbeidsledigMessage -> SENDT_SØKNAD_ARBEIDSLEDIG
-        is NavNoSelvbestemtInntektsmeldingMessage -> NAV_NO_SELVBESTEMT_INNTEKTSMELDING
-        is NavNoKorrigertInntektsmeldingMessage -> NAV_NO_KORRIGERT_INNTEKTSMELDING
-        is NavNoInntektsmeldingMessage -> NAV_NO_INNTEKTSMELDING
-        is YtelserMessage -> YTELSER
-        is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
-        is SimuleringMessage -> SIMULERING
-        is UtbetalingsgodkjenningMessage -> UTBETALINGSGODKJENNING
-        is UtbetalingMessage -> UTBETALING
-        is FeriepengeutbetalingMessage -> FERIEPENGEUTBETALING
-        is AnnulleringMessage -> KANSELLER_UTBETALING
-        is GrunnbeløpsreguleringMessage -> GRUNNBELØPSREGULERING
-        is OverstyrTidslinjeMessage -> OVERSTYRTIDSLINJE
-        is OverstyrArbeidsforholdMessage -> OVERSTYRARBEIDSFORHOLD
-        is OverstyrArbeidsgiveropplysningerMessage -> OVERSTYRARBEIDSGIVEROPPLYSNINGER
-        is UtbetalingshistorikkForFeriepengerMessage -> UTBETALINGSHISTORIKK_FOR_FERIEPENGER
-        is UtbetalingshistorikkEtterInfotrygdendringMessage -> UTBETALINGSHISTORIKK_ETTER_IT_ENDRING
-        is DødsmeldingMessage -> DØDSMELDING
-        is ForkastSykmeldingsperioderMessage -> FORKAST_SYKMELDINGSPERIODER
-        is AnmodningOmForkastingMessage -> ANMODNING_OM_FORKASTING
-        is IdentOpphørtMessage -> IDENT_OPPHØRT
-        is SkjønnsmessigFastsettelseMessage -> SKJØNNSMESSIG_FASTSETTELSE
-        is AvbruttSøknadMessage -> AVBRUTT_SØKNAD
-        is InntektsmeldingerReplayMessage -> INNTEKTSMELDINGER_REPLAY
-        is MinimumSykdomsgradVurdertMessage -> MINIMUM_SYKDOMSGRAD_VURDERT
-        is InntektsopplysningerFraLagretInntektsmeldingMessage -> INNTEKTSOPPLYSNINGER_FRA_LAGRET_INNTEKTSMELDING
+    private fun meldingstype(melding: HendelseMessage) =
+        when (melding) {
+            is NySøknadMessage -> NY_SØKNAD
+            is NyFrilansSøknadMessage -> NY_SØKNAD_FRILANS
+            is NySelvstendigSøknadMessage -> NY_SØKNAD_SELVSTENDIG
+            is NyArbeidsledigSøknadMessage -> NY_SØKNAD_ARBEIDSLEDIG
+            is NyArbeidsledigTidligereArbeidstakerSøknadMessage -> NY_SØKNAD_TIDLIGERE_ARBEIDSTAKER
+            is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
+            is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
+            is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
+            is SendtSøknadSelvstendigMessage -> SENDT_SØKNAD_SELVSTENDIG
+            is SendtSøknadFiskerMessage -> SENDT_SØKNAD_FISKER
+            is SendtSøknadAnnetMessage -> SENDT_SØKNAD_ANNET
+            is SendtSøknadArbeidsledigTidligereArbeidstakerMessage -> SENDT_SØKNAD_ARBEIDSLEDIG_TIDLIGERE_ARBEIDSTAKER
+            is SendtSøknadArbeidsledigMessage -> SENDT_SØKNAD_ARBEIDSLEDIG
+            is NavNoSelvbestemtInntektsmeldingMessage -> NAV_NO_SELVBESTEMT_INNTEKTSMELDING
+            is NavNoKorrigertInntektsmeldingMessage -> NAV_NO_KORRIGERT_INNTEKTSMELDING
+            is NavNoInntektsmeldingMessage -> NAV_NO_INNTEKTSMELDING
+            is YtelserMessage -> YTELSER
+            is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
+            is SimuleringMessage -> SIMULERING
+            is UtbetalingsgodkjenningMessage -> UTBETALINGSGODKJENNING
+            is UtbetalingMessage -> UTBETALING
+            is FeriepengeutbetalingMessage -> FERIEPENGEUTBETALING
+            is AnnulleringMessage -> KANSELLER_UTBETALING
+            is GrunnbeløpsreguleringMessage -> GRUNNBELØPSREGULERING
+            is OverstyrTidslinjeMessage -> OVERSTYRTIDSLINJE
+            is OverstyrArbeidsforholdMessage -> OVERSTYRARBEIDSFORHOLD
+            is OverstyrArbeidsgiveropplysningerMessage -> OVERSTYRARBEIDSGIVEROPPLYSNINGER
+            is UtbetalingshistorikkForFeriepengerMessage -> UTBETALINGSHISTORIKK_FOR_FERIEPENGER
+            is UtbetalingshistorikkEtterInfotrygdendringMessage -> UTBETALINGSHISTORIKK_ETTER_IT_ENDRING
+            is DødsmeldingMessage -> DØDSMELDING
+            is ForkastSykmeldingsperioderMessage -> FORKAST_SYKMELDINGSPERIODER
+            is AnmodningOmForkastingMessage -> ANMODNING_OM_FORKASTING
+            is IdentOpphørtMessage -> IDENT_OPPHØRT
+            is SkjønnsmessigFastsettelseMessage -> SKJØNNSMESSIG_FASTSETTELSE
+            is AvbruttSøknadMessage -> AVBRUTT_SØKNAD
+            is InntektsmeldingerReplayMessage -> INNTEKTSMELDINGER_REPLAY
+            is MinimumSykdomsgradVurdertMessage -> MINIMUM_SYKDOMSGRAD_VURDERT
+            is InntektsopplysningerFraLagretInntektsmeldingMessage -> INNTEKTSOPPLYSNINGER_FRA_LAGRET_INNTEKTSMELDING
 
-        is MigrateMessage,
-        is AvstemmingMessage,
-        is PersonPåminnelseMessage,
-        is PåminnelseMessage,
-        is GjenopptaBehandlingMessage,
-        is UtbetalingshistorikkMessage,
-        is InfotrygdendringMessage,
-        is EndretVurderingPåSkjæringstidspunktMessage,
-        is EndretGrunnlagForBeregningMessage  -> null // Disse trenger vi ikke å lagre
-    }
+            is MigrateMessage,
+            is AvstemmingMessage,
+            is PersonPåminnelseMessage,
+            is PåminnelseMessage,
+            is GjenopptaBehandlingMessage,
+            is UtbetalingshistorikkMessage,
+            is InfotrygdendringMessage,
+            is EndretVurderingPåSkjæringstidspunktMessage,
+            is EndretGrunnlagForBeregningMessage,
+            -> null // Disse trenger vi ikke å lagre
+        }
 
     internal fun hentAlleHendelser(personidentifikator: Personidentifikator): Map<UUID, Hendelse> {
         @Language("PostgreSQL")
         val sql = "SELECT melding_id, melding_type, lest_dato FROM melding WHERE fnr = :fnr"
-        return dataSource.connection {
-            prepareStatementWithNamedParameters(sql) {
-                withParameter("fnr", personidentifikator.toLong())
-            }.mapNotNull { row ->
-                Hendelse(
-                    meldingsreferanseId = UUID.fromString(row.string("melding_id")),
-                    meldingstype = row.string("melding_type"),
-                    lestDato = row.offsetDateTime("lest_dato").toLocalDateTime()
-                )
-            }
-        }.associateBy { it.meldingsreferanseId }
+        return dataSource
+            .connection {
+                prepareStatementWithNamedParameters(sql) {
+                    withParameter("fnr", personidentifikator.toLong())
+                }.mapNotNull { row ->
+                    Hendelse(
+                        meldingsreferanseId = UUID.fromString(row.string("melding_id")),
+                        meldingstype = row.string("melding_type"),
+                        lestDato = row.offsetDateTime("lest_dato").toLocalDateTime(),
+                    )
+                }
+            }.associateBy { it.meldingsreferanseId }
     }
 
-    internal fun hentInntektsmelding(personidentifikator: Personidentifikator, meldingId: MeldingsreferanseId): String? {
+    internal fun hentInntektsmelding(
+        personidentifikator: Personidentifikator,
+        meldingId: MeldingsreferanseId,
+    ): String? {
         @Language("PostgreSQL")
         val sql = "SELECT data FROM melding WHERE fnr = :fnr AND melding_id = :meldingId AND (melding_type='INNTEKTSMELDING' OR melding_type = 'NAV_NO_SELVBESTEMT_INNTEKTSMELDING' OR melding_type = 'NAV_NO_KORRIGERT_INNTEKTSMELDING' OR melding_type = 'NAV_NO_INNTEKTSMELDING')"
         return dataSource.connection {
@@ -278,6 +202,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         INNTEKTSMELDINGER_REPLAY,
         MINIMUM_SYKDOMSGRAD_VURDERT,
         SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER,
-        INNTEKTSOPPLYSNINGER_FRA_LAGRET_INNTEKTSMELDING
+        INNTEKTSOPPLYSNINGER_FRA_LAGRET_INNTEKTSMELDING,
     }
 }

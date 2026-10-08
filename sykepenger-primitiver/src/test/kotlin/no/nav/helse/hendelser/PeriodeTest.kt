@@ -35,16 +35,22 @@ internal class PeriodeTest {
 
     @Test
     fun `flatten til mutable list`() {
-        val perioder = listOf(
-            3.juli til 4.juli,
-            1.juli til 5.juli,
-            5.juli til 7.juli
-        )
-        val expected = mutableSetOf(
-            3.juli, 4.juli,
-            1.juli, 2.juli, 5.juli,
-            6.juli, 7.juli
-        )
+        val perioder =
+            listOf(
+                3.juli til 4.juli,
+                1.juli til 5.juli,
+                5.juli til 7.juli,
+            )
+        val expected =
+            mutableSetOf(
+                3.juli,
+                4.juli,
+                1.juli,
+                2.juli,
+                5.juli,
+                6.juli,
+                7.juli,
+            )
         Assertions.assertEquals(expected, perioder.flattenMutableSet())
     }
 
@@ -75,15 +81,15 @@ internal class PeriodeTest {
 
     @Test
     fun mursteinsperioder() {
-        val perioder = listOf(
-            1.januar til 10.januar,
-            5.januar til 19.januar,
-            13.januar til 14.januar,
-            17.januar til 21.januar,
-
-            23.januar til 25.januar,
-            26.januar til 28.januar
-        ).shuffled()
+        val perioder =
+            listOf(
+                1.januar til 10.januar,
+                5.januar til 19.januar,
+                13.januar til 14.januar,
+                17.januar til 21.januar,
+                23.januar til 25.januar,
+                26.januar til 28.januar,
+            ).shuffled()
 
         Assertions.assertEquals(
             listOf(
@@ -92,7 +98,7 @@ internal class PeriodeTest {
                 13.januar til 14.januar,
                 17.januar til 21.januar,
             ),
-            perioder.mursteinsperioder(1.januar til 10.januar)
+            perioder.mursteinsperioder(1.januar til 10.januar),
         )
 
         Assertions.assertEquals(
@@ -102,7 +108,7 @@ internal class PeriodeTest {
                 13.januar til 14.januar,
                 17.januar til 21.januar,
             ),
-            perioder.mursteinsperioder(13.januar til 14.januar)
+            perioder.mursteinsperioder(13.januar til 14.januar),
         )
     }
 
@@ -137,31 +143,34 @@ internal class PeriodeTest {
 
     @Test
     fun `grupperer perioder`() {
-        val perioder = listOf(
-            1.januar til 31.januar,
-            5.januar til 6.januar,
-            1.desember(2017) til 10.desember(2017),
-            4.mai til 20.mai,
-            28.desember(2017) til 31.desember(2017),
-            1.mai til 3.mai
-        )
+        val perioder =
+            listOf(
+                1.januar til 31.januar,
+                5.januar til 6.januar,
+                1.desember(2017) til 10.desember(2017),
+                4.mai til 20.mai,
+                28.desember(2017) til 31.desember(2017),
+                1.mai til 3.mai,
+            )
 
-        val forventet = listOf(
-            1.desember(2017) til 10.desember(2017),
-            28.desember(2017) til 31.januar,
-            1.mai til 20.mai
-        )
+        val forventet =
+            listOf(
+                1.desember(2017) til 10.desember(2017),
+                28.desember(2017) til 31.januar,
+                1.mai til 20.mai,
+            )
 
         Assertions.assertEquals(forventet, perioder.grupperSammenhengendePerioder())
     }
 
     @Test
     fun `siste periode linker alle sammen`() {
-        val perioder = listOf(
-            1.januar til 2.januar,
-            4.januar til 4.januar,
-            3.januar til 3.januar
-        )
+        val perioder =
+            listOf(
+                1.januar til 2.januar,
+                4.januar til 4.januar,
+                3.januar til 3.januar,
+            )
         val forventet = listOf(1.januar til 4.januar)
         Assertions.assertEquals(forventet, perioder.grupperSammenhengendePerioderMedHensynTilHelg())
     }
@@ -198,15 +207,15 @@ internal class PeriodeTest {
         Assertions.assertNull((4.januar til 5.januar).overlappendePeriode(1.januar til 3.januar))
         Assertions.assertEquals(
             3.januar til 5.januar,
-            ((1.januar til 10.januar).overlappendePeriode(3.januar til 5.januar))
+            ((1.januar til 10.januar).overlappendePeriode(3.januar til 5.januar)),
         )
         Assertions.assertEquals(
             3.januar til 5.januar,
-            ((1.januar til 5.januar).overlappendePeriode(3.januar til 10.januar))
+            ((1.januar til 5.januar).overlappendePeriode(3.januar til 10.januar)),
         )
         Assertions.assertEquals(
             3.januar til 5.januar,
-            ((3.januar til 10.januar).overlappendePeriode(1.januar til 5.januar))
+            ((3.januar til 10.januar).overlappendePeriode(1.januar til 5.januar)),
         )
     }
 
@@ -360,20 +369,20 @@ internal class PeriodeTest {
         Assertions.assertTrue(emptyList<LocalDate>().grupperSammenhengendePerioder().isEmpty())
         Assertions.assertEquals(
             listOf(1.januar til 1.januar),
-            listOf(1.januar, 1.januar).grupperSammenhengendePerioder()
+            listOf(1.januar, 1.januar).grupperSammenhengendePerioder(),
         )
         Assertions.assertEquals(listOf(1.januar til 1.januar), listOf(1.januar).grupperSammenhengendePerioder())
         Assertions.assertEquals(
             listOf(1.januar til 2.januar),
-            listOf(2.januar, 1.januar).grupperSammenhengendePerioder()
+            listOf(2.januar, 1.januar).grupperSammenhengendePerioder(),
         )
         Assertions.assertEquals(
             listOf(1.januar til 1.januar, 3.januar til 3.januar),
-            listOf(1.januar, 3.januar).grupperSammenhengendePerioder()
+            listOf(1.januar, 3.januar).grupperSammenhengendePerioder(),
         )
         Assertions.assertEquals(
             listOf(1.januar til 5.januar, 8.januar til 8.januar),
-            listOf(1.januar, 2.januar, 3.januar, 4.januar, 5.januar, 8.januar).grupperSammenhengendePerioder()
+            listOf(1.januar, 2.januar, 3.januar, 4.januar, 5.januar, 8.januar).grupperSammenhengendePerioder(),
         )
     }
 
@@ -381,7 +390,7 @@ internal class PeriodeTest {
     fun `strekk en periode for å dekke en annen periode`() {
         Assertions.assertEquals(
             1.januar til 31.januar,
-            (15.januar til 31.januar).plus(1.januar til 20.januar)
+            (15.januar til 31.januar).plus(1.januar til 20.januar),
         )
     }
 
@@ -428,8 +437,8 @@ internal class PeriodeTest {
             listOf(
                 1.desember(2017) til 31.desember(2017),
                 1.januar til 31.januar,
-                1.februar til 28.februar
-            ).overlapper()
+                1.februar til 28.februar,
+            ).overlapper(),
         )
         Assertions.assertTrue(listOf(1.desember(2017) til 1.januar, 1.januar til 31.januar).overlapper())
         Assertions.assertTrue(listOf(1.januar til 31.januar, 31.januar til 28.februar).overlapper())
@@ -470,7 +479,7 @@ internal class PeriodeTest {
         val result = perioder.utenPerioder(listOf(5.januar til 15.januar, 23.januar til 26.januar, 30.januar til 1.februar))
         Assertions.assertEquals(
             listOf(1.januar til 4.januar, 16.januar til 20.januar, 27.januar til 29.januar),
-            result
+            result,
         )
         Assertions.assertEquals(emptyList<Periode>(), perioder.utenPerioder(perioder))
     }
@@ -478,15 +487,18 @@ internal class PeriodeTest {
     @Test
     fun `liste av perioder trimmer annen`() {
         val periode = 5.januar til 31.januar
-        val result = periode.uten(listOf(
-            1.januar til 5.januar,
-            10.januar til 14.januar,
-            28.januar til 29.januar
-        ))
+        val result =
+            periode.uten(
+                listOf(
+                    1.januar til 5.januar,
+                    10.januar til 14.januar,
+                    28.januar til 29.januar,
+                ),
+            )
 
         Assertions.assertEquals(
             listOf(6.januar til 9.januar, 15.januar til 27.januar, 30.januar til 31.januar),
-            result
+            result,
         )
     }
 
@@ -507,15 +519,15 @@ internal class PeriodeTest {
         // trimmer perioden i to deler
         Assertions.assertEquals(
             listOf(5.januar.somPeriode(), 20.januar.somPeriode()),
-            periode.uten(6.januar til 19.januar)
+            periode.uten(6.januar til 19.januar),
         )
         Assertions.assertEquals(
             listOf(5.januar til 9.januar, 16.januar til 20.januar),
-            periode.uten(10.januar til 15.januar)
+            periode.uten(10.januar til 15.januar),
         )
         Assertions.assertEquals(
             listOf(5.januar til 13.januar, 15.januar til 20.januar),
-            periode.uten(14.januar.somPeriode())
+            periode.uten(14.januar.somPeriode()),
         )
 
         // trimmer bort snute
@@ -535,11 +547,11 @@ internal class PeriodeTest {
         Assertions.assertEquals(listOf(perioden), emptyList<Periode>().merge(perioden))
         Assertions.assertEquals(
             listOf(4.januar.somPeriode(), 5.januar til 10.januar, 11.januar.somPeriode()),
-            listOf(4.januar til 11.januar).merge(perioden)
+            listOf(4.januar til 11.januar).merge(perioden),
         )
         Assertions.assertEquals(
             listOf(1.januar til 4.januar, 5.januar til 10.januar, 11.januar til 12.januar),
-            listOf(11.januar til 12.januar, 1.januar til 5.januar).merge(perioden)
+            listOf(11.januar til 12.januar, 1.januar til 5.januar).merge(perioden),
         )
     }
 
@@ -565,7 +577,10 @@ internal class PeriodeTest {
         Assertions.assertTrue(emptyList<Periode>().lik(emptyList()))
     }
 
-    private fun assertSize(expected: Int, periode: Periode) {
+    private fun assertSize(
+        expected: Int,
+        periode: Periode,
+    ) {
         var count = 0
         periode.forEach { _ -> count++ }
         Assertions.assertEquals(expected, count)

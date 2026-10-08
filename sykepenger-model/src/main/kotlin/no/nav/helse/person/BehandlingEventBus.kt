@@ -1,47 +1,47 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.person.EventSubscription.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class BehandlingEventBus(
     private val eventBus: EventBus,
     private val yrkesaktivitetstype: Behandlingsporing.Yrkesaktivitet,
     private val vedtaksperiodeId: UUID,
-    private val tidligereSøknadIder: Set<MeldingsreferanseId>
+    private val tidligereSøknadIder: Set<MeldingsreferanseId>,
 ) : UtbetalingObserver {
     fun behandlingLukket(
-        behandlingId: UUID
+        behandlingId: UUID,
     ) {
         eventBus.behandlingLukket(
             EventSubscription.BehandlingLukketEvent(
                 yrkesaktivitetssporing = yrkesaktivitetstype,
                 vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId
-            )
+                behandlingId = behandlingId,
+            ),
         )
     }
 
     fun behandlingForkastet(
         behandlingId: UUID,
-        automatiskBehandling: Boolean
+        automatiskBehandling: Boolean,
     ) {
         eventBus.behandlingForkastet(
             EventSubscription.BehandlingForkastetEvent(
                 yrkesaktivitetssporing = yrkesaktivitetstype,
                 vedtaksperiodeId = vedtaksperiodeId,
                 behandlingId = behandlingId,
-                automatiskBehandling = automatiskBehandling
-            )
+                automatiskBehandling = automatiskBehandling,
+            ),
         )
     }
 
@@ -53,18 +53,19 @@ internal class BehandlingEventBus(
         registert: LocalDateTime,
         avsender: Avsender,
         type: EventSubscription.BehandlingOpprettetEvent.Type,
-        søknadIder: Set<MeldingsreferanseId>
+        søknadIder: Set<MeldingsreferanseId>,
     ) {
-        val event = EventSubscription.BehandlingOpprettetEvent(
-            yrkesaktivitetssporing = yrkesaktivitetstype,
-            vedtaksperiodeId = vedtaksperiodeId,
-            søknadIder = (tidligereSøknadIder + søknadIder).map { it.id }.toSet(),
-            behandlingId = id,
-            fom = periode.start,
-            tom = periode.endInclusive,
-            type = type,
-            kilde = EventSubscription.BehandlingOpprettetEvent.Kilde(meldingsreferanseId.id, innsendt, registert, avsender)
-        )
+        val event =
+            EventSubscription.BehandlingOpprettetEvent(
+                yrkesaktivitetssporing = yrkesaktivitetstype,
+                vedtaksperiodeId = vedtaksperiodeId,
+                søknadIder = (tidligereSøknadIder + søknadIder).map { it.id }.toSet(),
+                behandlingId = id,
+                fom = periode.start,
+                tom = periode.endInclusive,
+                type = type,
+                kilde = EventSubscription.BehandlingOpprettetEvent.Kilde(meldingsreferanseId.id, innsendt, registert, avsender),
+            )
         eventBus.nyBehandling(event)
     }
 
@@ -76,7 +77,7 @@ internal class BehandlingEventBus(
         godkjenttidspunkt: LocalDateTime,
         saksbehandlerEpost: String,
         saksbehandlerIdent: String,
-        arbeidsgiverFagsystemId: String
+        arbeidsgiverFagsystemId: String,
     ) {
         eventBus.annullert(
             EventSubscription.UtbetalingAnnullertEvent(
@@ -89,8 +90,8 @@ internal class BehandlingEventBus(
                 tom = periode.endInclusive,
                 annullertAvSaksbehandler = godkjenttidspunkt,
                 saksbehandlerEpost = saksbehandlerEpost,
-                saksbehandlerIdent = saksbehandlerIdent
-            )
+                saksbehandlerIdent = saksbehandlerIdent,
+            ),
         )
     }
 
@@ -109,7 +110,7 @@ internal class BehandlingEventBus(
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: List<EventSubscription.Utbetalingsdag>,
-        ident: String
+        ident: String,
     ) {
         eventBus.utbetalingUtbetalt(
             EventSubscription.UtbetalingUtbetaltEvent(
@@ -129,8 +130,8 @@ internal class BehandlingEventBus(
                 arbeidsgiverOppdrag = EventSubscription.OppdragEventDetaljer.mapOppdrag(arbeidsgiverOppdrag),
                 personOppdrag = EventSubscription.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = utbetalingstidslinje,
-                ident = ident
-            )
+                ident = ident,
+            ),
         )
     }
 
@@ -149,7 +150,7 @@ internal class BehandlingEventBus(
         tidspunkt: LocalDateTime,
         automatiskBehandling: Boolean,
         utbetalingstidslinje: List<EventSubscription.Utbetalingsdag>,
-        epost: String
+        epost: String,
     ) {
         eventBus.utbetalingUtenUtbetaling(
             EventSubscription.UtbetalingUtenUtbetalingEvent(
@@ -169,8 +170,8 @@ internal class BehandlingEventBus(
                 personOppdrag = EventSubscription.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = utbetalingstidslinje,
                 ident = ident,
-                korrelasjonsId = korrelasjonsId
-            )
+                korrelasjonsId = korrelasjonsId,
+            ),
         )
     }
 
@@ -181,7 +182,7 @@ internal class BehandlingEventBus(
         personOppdrag: Oppdrag,
         forrigeTilstand: Utbetalingstatus,
         nesteTilstand: Utbetalingstatus,
-        korrelasjonsId: UUID
+        korrelasjonsId: UUID,
     ) {
         eventBus.utbetalingEndret(
             EventSubscription.UtbetalingEndretEvent(
@@ -192,8 +193,8 @@ internal class BehandlingEventBus(
                 gjeldendeStatus = nesteTilstand.name,
                 arbeidsgiverOppdrag = OppdragEventDetaljer.mapOppdrag(arbeidsgiverOppdrag),
                 personOppdrag = OppdragEventDetaljer.mapOppdrag(personOppdrag),
-                korrelasjonsId = korrelasjonsId
-            )
+                korrelasjonsId = korrelasjonsId,
+            ),
         )
     }
 }

@@ -9,18 +9,25 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
-internal class AvbruttSøknadMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, val behandlingsporing: Behandlingsporing.Yrkesaktivitet) : HendelseMessage(packet) {
-
+internal class AvbruttSøknadMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+    val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
+) : HendelseMessage(packet) {
     internal val periode = packet["fom"].asLocalDate() til packet["tom"].asLocalDate()
 
     private val avbruttSøknad
-        get() = AvbruttSøknad(
-            meldingsreferanseId = meldingsporing.id,
-            behandlingsporing = behandlingsporing,
-            periode = periode
-        )
+        get() =
+            AvbruttSøknad(
+                meldingsreferanseId = meldingsporing.id,
+                behandlingsporing = behandlingsporing,
+                periode = periode,
+            )
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         mediator.behandle(this, avbruttSøknad, context)
     }
 }

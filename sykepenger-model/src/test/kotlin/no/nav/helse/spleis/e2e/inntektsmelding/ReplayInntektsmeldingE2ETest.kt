@@ -1,35 +1,22 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import java.time.LocalDateTime
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
-
     @Test
     fun `En inntektsmelding gjør at en annen nå plutselig er relevant for replay - ingen endring i dager eller refusjon, kun inntekt`() {
         a1 {
@@ -89,7 +76,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 21.januar
+                førsteFraværsdag = 21.januar,
             )
             håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -104,7 +91,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 25.januar
+                førsteFraværsdag = 25.januar,
             )
             håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -120,7 +107,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
             assertEquals(listOf(1.januar), inspektør.inntektInspektør.inntektsdatoer)
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                førsteFraværsdag = 13.februar
+                førsteFraværsdag = 13.februar,
             )
             håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
 
@@ -134,7 +121,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
             nyttVedtak(mars)
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                beregnetInntekt = INNTEKT + 500.daglig
+                beregnetInntekt = INNTEKT + 500.daglig,
             )
 
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
@@ -143,8 +130,8 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
             håndterSkjønnsmessigFastsettelse(
                 1.mars,
                 listOf(
-                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig)
-                )
+                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig),
+                ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -158,7 +145,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
 
             håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar)
+                listOf(1.januar til 16.januar),
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)

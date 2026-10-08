@@ -10,6 +10,6 @@ interface UtbetalingObserver {
         personOppdrag: Oppdrag,
         forrigeTilstand: Utbetalingstatus,
         nesteTilstand: Utbetalingstatus,
-        korrelasjonsId: UUID
+        korrelasjonsId: UUID,
     )
 }

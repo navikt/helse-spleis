@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class MinimumSykdomsgradVurdertTest : AbstractDslTest() {
-
     @Test
     fun `Saksbehandler overstyrer avslag pga minimum sykdomsgrad`() {
         a1 {
@@ -40,9 +39,24 @@ internal class MinimumSykdomsgradVurdertTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
 
             assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertEquals(0, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
-            assertEquals(11, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.size)
-            assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.all { it.økonomi.inspektør.totalGrad == 10 })
+            assertEquals(
+                0,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.avvistedager.size,
+            )
+            assertEquals(
+                11,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.navdager.size,
+            )
+            assertTrue(
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.navdager
+                    .all { it.økonomi.inspektør.totalGrad == 10 },
+            )
         }
     }
 
@@ -58,21 +72,30 @@ internal class MinimumSykdomsgradVurdertTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertEquals(10, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].økonomi.inspektør.totalGrad)
-
+            assertEquals(
+                10,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[17.januar]
+                    .økonomi.inspektør.totalGrad,
+            )
         }
         a2 {
             nyPeriode(januar, a2, grad = 10.prosent)
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 beregnetInntekt = 81000.månedlig,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)
 
-            assertEquals(19, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].økonomi.inspektør.totalGrad)
+            assertEquals(
+                19,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[17.januar]
+                    .økonomi.inspektør.totalGrad,
+            )
 
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         }
@@ -83,10 +106,20 @@ internal class MinimumSykdomsgradVurdertTest : AbstractDslTest() {
             håndterUtbetalt()
         }
         a1 {
-            assertEquals(0, inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
+            assertEquals(
+                0,
+                inspektør(a1)
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.avvistedager.size,
+            )
         }
         a2 {
-            assertEquals(0, inspektør(a2).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
+            assertEquals(
+                0,
+                inspektør(a2)
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.avvistedager.size,
+            )
             assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter())
         }
     }
@@ -105,17 +138,47 @@ internal class MinimumSykdomsgradVurdertTest : AbstractDslTest() {
     fun `Saksbehandler angrer vurdering`() {
         a1 {
             settOppAvslagPåMinimumSykdomsgrad()
-            assertEquals(11, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
-            assertEquals(0, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.size)
+            assertEquals(
+                11,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.avvistedager.size,
+            )
+            assertEquals(
+                0,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.navdager.size,
+            )
             håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar))
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter())
-            assertEquals(0, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
-            assertEquals(11, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.size)
+            assertEquals(
+                0,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.avvistedager.size,
+            )
+            assertEquals(
+                11,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.navdager.size,
+            )
             håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = emptyList(), perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar))
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(11, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
-            assertEquals(0, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.size)
+            assertEquals(
+                11,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.avvistedager.size,
+            )
+            assertEquals(
+                0,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.navdager.size,
+            )
         }
     }
 
@@ -123,12 +186,32 @@ internal class MinimumSykdomsgradVurdertTest : AbstractDslTest() {
     fun `bare enkeltdager i vedtaksperioden er vurdert ok`() {
         a1 {
             settOppAvslagPåMinimumSykdomsgrad()
-            assertEquals(11, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
-            assertEquals(0, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.size)
+            assertEquals(
+                11,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.avvistedager.size,
+            )
+            assertEquals(
+                0,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.navdager.size,
+            )
             håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(1.januar til 20.januar))
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(8, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
-            assertEquals(3, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navdager.size)
+            assertEquals(
+                8,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.avvistedager.size,
+            )
+            assertEquals(
+                3,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.navdager.size,
+            )
             assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter())
         }
     }
@@ -138,7 +221,7 @@ internal class MinimumSykdomsgradVurdertTest : AbstractDslTest() {
         håndterArbeidsgiveropplysninger(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             beregnetInntekt = 10000.månedlig,
-            vedtaksperiodeId = 1.vedtaksperiode
+            vedtaksperiodeId = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,

@@ -1,9 +1,6 @@
 package no.nav.helse.spleis.mediator.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.Behov.Behovstype.Sykepengehistorikk
@@ -13,9 +10,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `sender infotrygdendring`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
@@ -42,19 +41,20 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
                     fom = 3.januar,
                     tom = 26.januar,
                     arbeidskategorikode = "01",
-                    utbetalteSykeperioder = listOf(
-                        UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
-                            fom = 3.januar,
-                            tom = 26.januar,
-                            dagsats = 1400.0,
-                            typekode = "0",
-                            utbetalingsgrad = "100",
-                            organisasjonsnummer = ORGNUMMER
-                        )
-                    ),
-                    inntektsopplysninger = emptyList()
-                )
-            )
+                    utbetalteSykeperioder =
+                        listOf(
+                            UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
+                                fom = 3.januar,
+                                tom = 26.januar,
+                                dagsats = 1400.0,
+                                typekode = "0",
+                                utbetalingsgrad = "100",
+                                organisasjonsnummer = ORGNUMMER,
+                            ),
+                        ),
+                    inntektsopplysninger = emptyList(),
+                ),
+            ),
         )
         val event = testRapid.inspektør.siste("overlappende_infotrygdperioder")
         assertNotNull(event)
@@ -101,5 +101,4 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
         Assertions.assertDoesNotThrow { UUID.fromString(id) }
         assertEquals(Sykepengehistorikk.utgåendeNavn, behov.path("@behov").firstOrNull()?.asText())
     }
-
 }

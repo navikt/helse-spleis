@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.serde.serdeObjectMapper
 
-internal class V321EgenmeldingsdagerPåBehandling: JsonMigration(version = 321) {
+internal class V321EgenmeldingsdagerPåBehandling : JsonMigration(version = 321) {
     override val description = "Legger til egenmeldingsdager på siste endring på siste behandling"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 migrerVedtaksperiode(periode)
@@ -27,7 +30,14 @@ internal class V321EgenmeldingsdagerPåBehandling: JsonMigration(version = 321) 
                 (endring as ObjectNode).putArray("egenmeldingsdager")
             }
         }
-        (vedtaksperiode.path("behandlinger").last().path("endringer").last().path("egenmeldingsdager") as ArrayNode).apply {
+        (
+            vedtaksperiode
+                .path("behandlinger")
+                .last()
+                .path("endringer")
+                .last()
+                .path("egenmeldingsdager") as ArrayNode
+        ).apply {
             addAll(egenmeldingsperioder)
         }
     }

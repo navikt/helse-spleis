@@ -1,6 +1,5 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import java.time.LocalDate
 import no.nav.helse.dto.deserialisering.InfotrygdArbeidsgiverutbetalingsperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdPersonutbetalingsperiodeInnDto
 import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtDto
@@ -12,22 +11,26 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.HundreProsent
 import no.nav.helse.økonomi.Økonomi
+import java.time.LocalDate
 
 sealed class Utbetalingsperiode(
     val orgnr: String,
     fom: LocalDate,
-    tom: LocalDate
+    tom: LocalDate,
 ) : Infotrygdperiode(fom, tom) {
-    override fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje {
-        return Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, HundreProsent, kilde)
-    }
+    override fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje = Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, HundreProsent, kilde)
 
     override fun utbetalingstidslinje() =
-        Utbetalingstidslinje.Builder().apply {
-            periode.forEach { dag -> nyDag(this, dag) }
-        }.build()
+        Utbetalingstidslinje
+            .Builder()
+            .apply {
+                periode.forEach { dag -> nyDag(this, dag) }
+            }.build()
 
-    private fun nyDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
+    private fun nyDag(
+        builder: Utbetalingstidslinje.Builder,
+        dato: LocalDate,
+    ) {
         if (dato.erHelg()) return builder.addHelg(dato, Økonomi.ikkeBetalt())
         builder.addNAVdag(dato, Økonomi.ikkeBetalt())
     }
@@ -41,13 +44,16 @@ sealed class Utbetalingsperiode(
     }
 }
 
-class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate) :
-    Utbetalingsperiode(orgnr, fom, tom) {
-
-    internal fun dto() = InfotrygdArbeidsgiverutbetalingsperiodeUtDto(
-        orgnr = orgnr,
-        periode = periode.dto()
-    )
+class ArbeidsgiverUtbetalingsperiode(
+    orgnr: String,
+    fom: LocalDate,
+    tom: LocalDate,
+) : Utbetalingsperiode(orgnr, fom, tom) {
+    internal fun dto() =
+        InfotrygdArbeidsgiverutbetalingsperiodeUtDto(
+            orgnr = orgnr,
+            periode = periode.dto(),
+        )
 
     internal companion object {
         internal fun gjenopprett(dto: InfotrygdArbeidsgiverutbetalingsperiodeInnDto): ArbeidsgiverUtbetalingsperiode {
@@ -55,19 +61,22 @@ class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDa
             return ArbeidsgiverUtbetalingsperiode(
                 orgnr = dto.orgnr,
                 fom = periode.start,
-                tom = periode.endInclusive
+                tom = periode.endInclusive,
             )
         }
     }
 }
 
-class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate) :
-    Utbetalingsperiode(orgnr, fom, tom) {
-
-    internal fun dto() = InfotrygdPersonutbetalingsperiodeUtDto(
-        orgnr = orgnr,
-        periode = periode.dto()
-    )
+class PersonUtbetalingsperiode(
+    orgnr: String,
+    fom: LocalDate,
+    tom: LocalDate,
+) : Utbetalingsperiode(orgnr, fom, tom) {
+    internal fun dto() =
+        InfotrygdPersonutbetalingsperiodeUtDto(
+            orgnr = orgnr,
+            periode = periode.dto(),
+        )
 
     internal companion object {
         internal fun gjenopprett(dto: InfotrygdPersonutbetalingsperiodeInnDto): PersonUtbetalingsperiode {
@@ -75,7 +84,7 @@ class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate) :
             return PersonUtbetalingsperiode(
                 orgnr = dto.orgnr,
                 fom = periode.start,
-                tom = periode.endInclusive
+                tom = periode.endInclusive,
             )
         }
     }

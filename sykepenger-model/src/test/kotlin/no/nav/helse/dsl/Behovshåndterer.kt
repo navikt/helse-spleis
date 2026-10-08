@@ -1,8 +1,5 @@
 package no.nav.helse.dsl
 
-import java.math.BigDecimal
-import java.util.UUID
-import kotlin.collections.single
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
@@ -16,13 +13,18 @@ import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.assertNotNull
+import java.math.BigDecimal
+import java.util.*
 
-class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubscription {
+class Behovshåndterer(
+    private val behovsoppsamler: Behovsoppsamler,
+) : EventSubscription {
     private val tilstander = mutableMapOf<UUID, TilstandType>()
     private val uhåndterteInntektsmeldinger = mutableMapOf<UUID, Inntektsmeldingdetaljer>()
 
-    fun utbetalingsdetaljer(orgnummer: String): List<Behovsoppsamler.Behovsdetaljer.Utbetaling> {
-        return behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Utbetaling>()
+    fun utbetalingsdetaljer(orgnummer: String): List<Behovsoppsamler.Behovsdetaljer.Utbetaling> =
+        behovsoppsamler
+            .behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Utbetaling>()
             .filter { it.organisasjonsnummer == orgnummer }
             .groupBy { "${it.utbetalingId}-${it.fagsystemId}" }
             // velger bare siste behov per utbetalingId-fagsystemId-kombinasjon for å håndtere at vedtaksperioden kan ha blitt påminnet og produsert behovet flere ganger
@@ -30,20 +32,22 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
             .values
             .toList()
             .also { if (it.isEmpty()) fail("Forventet at det skal være spurt om utbetaling, men det var det ikke!") }
-    }
 
     fun simuleringsdetaljer(vedtaksperiodeId: UUID) =
-        behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Simulering>().filter { it.vedtaksperiodeId == vedtaksperiodeId }
+        behovsoppsamler
+            .behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Simulering>()
+            .filter { it.vedtaksperiodeId == vedtaksperiodeId }
             .also { if (it.isEmpty()) fail("Forventet at det skal være spurt om simulering, men det var det ikke!") }
 
     fun godkjenningsdetaljer(vedtaksperiodeId: UUID): Behovsoppsamler.Behovsdetaljer.Godkjenning {
         val godkjenningsdetaljer = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().filter { it.vedtaksperiodeId == vedtaksperiodeId }
-        assert(godkjenningsdetaljer.size == 1) { "Forventet at det skulle være forspurt nøyaktig én godkjenning. Fant ${godkjenningsdetaljer.size}"}
+        assert(godkjenningsdetaljer.size == 1) { "Forventet at det skulle være forspurt nøyaktig én godkjenning. Fant ${godkjenningsdetaljer.size}" }
         return godkjenningsdetaljer.single()
     }
 
     fun feriepengerutbetalingsdetaljer() =
-        behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling>()
+        behovsoppsamler
+            .behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling>()
             .also { if (it.isEmpty()) fail("Forventet at det skal være spurt om feriepengerutbetaling, men det var det ikke!") }
 
     fun bekreftForespurtVilkårsprøving(vedtaksperiodeId: UUID) =
@@ -76,11 +80,12 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
     fun håndterBehovSomOppstårAutomatisk(
         operasjon: () -> Unit,
         håndterInntektsmeldingerReplay: (inntektsmeldingerReplay: InntektsmeldingerReplay) -> Unit,
-        håndterInitiellHistorikkFraInfotrygd: (utbetalingshistorikk: Utbetalingshistorikk) -> Unit
+        håndterInitiellHistorikkFraInfotrygd: (utbetalingshistorikk: Utbetalingshistorikk) -> Unit,
     ) {
-        val nyeBehov = alleBehovSomOppstårSomFølgeAv {
-            operasjon()
-        }
+        val nyeBehov =
+            alleBehovSomOppstårSomFølgeAv {
+                operasjon()
+            }
 
         nyeBehov.filterIsInstance<Behovsoppsamler.Behovsdetaljer.InitiellHistorikFraInfotrygd>().forEach { initiellHistorikFraInfotrygdBehov ->
             val fabrikk = initiellHistorikFraInfotrygdBehov.yrkesaktivitetssporing.let { ArbeidsgiverHendelsefabrikk(it.somOrganisasjonsnummer, it) }
@@ -90,49 +95,54 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
 
         nyeBehov.filterIsInstance<Behovsoppsamler.Behovsdetaljer.InntektsmeldingReplay>().forEach { trengerInntektsmeldingReplayBehov ->
             val fabrikk = trengerInntektsmeldingReplayBehov.forespørsel.orgnr.let { ArbeidsgiverHendelsefabrikk(it, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(it)) }
-            val inntektsmeldinger = uhåndterteInntektsmeldinger.values
-                .filter { inntektsmeldingdetaljer -> trengerInntektsmeldingReplayBehov.forespørsel.orgnr == inntektsmeldingdetaljer.inntektsmelding.behandlingsporing.organisasjonsnummer}
-                .filter { inntektsmeldingdetaljer -> trengerInntektsmeldingReplayBehov.forespørsel.erInntektsmeldingRelevant(inntektsmeldingdetaljer.eksternKontrakt) }
-                .map { it.inntektsmelding }
-                .sortedBy { it.metadata.innsendt }
+            val inntektsmeldinger =
+                uhåndterteInntektsmeldinger.values
+                    .filter { inntektsmeldingdetaljer -> trengerInntektsmeldingReplayBehov.forespørsel.orgnr == inntektsmeldingdetaljer.inntektsmelding.behandlingsporing.organisasjonsnummer }
+                    .filter { inntektsmeldingdetaljer -> trengerInntektsmeldingReplayBehov.forespørsel.erInntektsmeldingRelevant(inntektsmeldingdetaljer.eksternKontrakt) }
+                    .map { it.inntektsmelding }
+                    .sortedBy { it.metadata.innsendt }
 
-            val løsning = fabrikk.lagInntektsmeldingReplay(
-                vedtaksperiodeId = trengerInntektsmeldingReplayBehov.vedtaksperiodeId,
-                inntektsmeldinger = inntektsmeldinger
-            )
+            val løsning =
+                fabrikk.lagInntektsmeldingReplay(
+                    vedtaksperiodeId = trengerInntektsmeldingReplayBehov.vedtaksperiodeId,
+                    inntektsmeldinger = inntektsmeldinger,
+                )
             behovsoppsamler.besvart(trengerInntektsmeldingReplayBehov)
             håndterInntektsmeldingerReplay(løsning)
         }
     }
 
-    internal inline fun <reified R: Behovsoppsamler.Behovsdetaljer> behovSomOppstårSomFølgeAv(block:() -> Unit): Set<R>{
+    internal inline fun <reified R : Behovsoppsamler.Behovsdetaljer> behovSomOppstårSomFølgeAv(block: () -> Unit): Set<R> {
         val før = behovsoppsamler.behovsdetaljer<R>().toSet()
         block()
         val etter = behovsoppsamler.behovsdetaljer<R>().toSet()
         return etter - før
     }
 
-    private inline fun alleBehovSomOppstårSomFølgeAv(block:() -> Unit) = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer>(block)
+    private inline fun alleBehovSomOppstårSomFølgeAv(block: () -> Unit) = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer>(block)
 
     private class Inntektsmeldingdetaljer private constructor(
         val inntektsmelding: Inntektsmelding,
-        val eksternKontrakt: no.nav.inntektsmeldingkontrakt.Inntektsmelding
+        val eksternKontrakt: no.nav.inntektsmeldingkontrakt.Inntektsmelding,
     ) {
-        constructor(inntektsmelding: Inntektsmelding): this(inntektsmelding.kopier(), inntektsmelding.somEksternKontrakt())
+        constructor(inntektsmelding: Inntektsmelding) : this(inntektsmelding.kopier(), inntektsmelding.somEksternKontrakt())
+
         private companion object {
             // Må lage en kopi av inntektsmeldingen slik at Spleis får håndtere den helt på ny
             // .. er enkelte verdier rundt daghåndtering og refusjon som blir lagret i selve objektet, så blir feil å sende inn samme objektet på nytt
-            private fun Inntektsmelding.kopier() = Inntektsmelding(
-                meldingsreferanseId = metadata.meldingsreferanseId,
-                refusjon = refusjon,
-                behandlingsporing = behandlingsporing,
-                beregnetInntekt = faktaavklartInntekt.inntektsdata.beløp,
-                arbeidsgiverperioder = arbeidsgiverperioder,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                opphørAvNaturalytelser = opphørAvNaturalytelser,
-                førsteFraværsdag = førsteFraværsdag,
-                mottatt = metadata.innsendt
-            )
+            private fun Inntektsmelding.kopier() =
+                Inntektsmelding(
+                    meldingsreferanseId = metadata.meldingsreferanseId,
+                    refusjon = refusjon,
+                    behandlingsporing = behandlingsporing,
+                    beregnetInntekt = faktaavklartInntekt.inntektsdata.beløp,
+                    arbeidsgiverperioder = arbeidsgiverperioder,
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                    opphørAvNaturalytelser = opphørAvNaturalytelser,
+                    førsteFraværsdag = førsteFraværsdag,
+                    mottatt = metadata.innsendt,
+                )
+
             private fun Inntektsmelding.somEksternKontrakt(): no.nav.inntektsmeldingkontrakt.Inntektsmelding {
                 val beregnetInntekt = faktaavklartInntekt.inntektsdata.beløp
                 return no.nav.inntektsmeldingkontrakt.Inntektsmelding(
@@ -149,9 +159,10 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
                     endringIRefusjoner = emptyList(),
                     opphoerAvNaturalytelser = emptyList(),
                     gjenopptakelseNaturalytelser = emptyList(),
-                    arbeidsgiverperioder = arbeidsgiverperioder.map {
-                        no.nav.inntektsmeldingkontrakt.Periode(it.start, it.endInclusive)
-                    },
+                    arbeidsgiverperioder =
+                        arbeidsgiverperioder.map {
+                            no.nav.inntektsmeldingkontrakt.Periode(it.start, it.endInclusive)
+                        },
                     status = Status.GYLDIG,
                     arkivreferanse = "",
                     ferieperioder = emptyList(),
@@ -161,7 +172,7 @@ class Behovshåndterer(private val behovsoppsamler: Behovsoppsamler): EventSubsc
                     naerRelasjon = null,
                     avsenderSystem = AvsenderSystem("SpleisModell"),
                     innsenderTelefon = "tlfnr",
-                    innsenderFulltNavn = "SPLEIS Modell"
+                    innsenderFulltNavn = "SPLEIS Modell",
                 )
             }
         }

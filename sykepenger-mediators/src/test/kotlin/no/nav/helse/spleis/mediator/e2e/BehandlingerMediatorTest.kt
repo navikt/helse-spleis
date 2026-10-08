@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.mediator.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
@@ -14,9 +12,10 @@ import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
 internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `vedtak iverksatt`() {
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
@@ -46,21 +45,22 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
         sendSelvstendigsøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
-            ventetid = 1.januar til 16.januar
+            ventetid = 1.januar til 16.januar,
         )
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
-            forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                forsikringsvurderingId = forsikringsvurderingId,
-                dekning = null,
-                opphørsdato = null,
-                harIndividuellForsikring = false,
-                villeHattForsikringOmDenVarBetalt = false,
-                harForsikringSomIkkePasserMedSøknadstype = false,
-            ),
-            orgnummer = "SELVSTENDIG"
+            forsikringsvurderingResultat =
+                ForsikringsvurderingResultat(
+                    forsikringsvurderingId = forsikringsvurderingId,
+                    dekning = null,
+                    opphørsdato = null,
+                    harIndividuellForsikring = false,
+                    villeHattForsikringOmDenVarBetalt = false,
+                    harForsikringSomIkkePasserMedSøknadstype = false,
+                ),
+            orgnummer = "SELVSTENDIG",
         )
         sendSimuleringSelvstendig(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenningSelvstendig(0)

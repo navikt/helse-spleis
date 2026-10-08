@@ -7,22 +7,26 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.serde.SerialisertPerson
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.MDC
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
-private val objectMapper: ObjectMapper = jacksonObjectMapper()
-    .registerModule(JavaTimeModule())
-    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+private val objectMapper: ObjectMapper =
+    jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-fun migrereGrunnbeløp(factory: ConsumerProducerFactory, arbeidId: String) {
+fun migrereGrunnbeløp(
+    factory: ConsumerProducerFactory,
+    arbeidId: String,
+) {
     factory.createProducer().use { producer ->
         opprettOgUtførArbeid(arbeidId, size = 500) { session, fnr ->
             hentPerson(session, fnr)?.let { (skjemaVersjon, data) ->
@@ -36,7 +40,6 @@ fun migrereGrunnbeløp(factory: ConsumerProducerFactory, arbeidId: String) {
                     val melding = objectMapper.writeValueAsString(event)
                     producer.send(ProducerRecord("tbd.teknisk.v1", null, fødselsnummer, melding))
                     sikkerlogg.info("Skrev grunnbeløp til tbd.teknisk.v1 for:\n{}", melding)
-
                 } catch (err: Exception) {
                     log.info("person lar seg ikke serialisere: ${err.message}")
                     sikkerlogg.error("person lar seg ikke serialisere: ${err.message}", err)
@@ -61,17 +64,16 @@ private fun finnGrunnbeløp(person: PersonInnDto): List<Grunnbeløp> {
     return siste.vilkårsgrunnlag.filterNot { it.inntektsgrunnlag.vurdertInfotrygd }.map { spleisVilkårsgrunnlag ->
         Grunnbeløp(
             skjæringstidspunkt = spleisVilkårsgrunnlag.skjæringstidspunkt,
-            `6G` = spleisVilkårsgrunnlag.inntektsgrunnlag.`6G`.beløp
+            `6G` = spleisVilkårsgrunnlag.inntektsgrunnlag.`6G`.beløp,
         )
     }
 }
-
 
 private fun fødselsnummerSomString(fnr: Long) = fnr.toString().let { if (it.length == 11) it else "0$it" }
 
 private data class GrunnbeløpEvent(
     val fødselsnummer: String,
-    val grunnbeløp: List<Grunnbeløp>
+    val grunnbeløp: List<Grunnbeløp>,
 ) {
     @JsonProperty("@event_name")
     val eventName: String = "grunnbeløp"
@@ -85,6 +87,5 @@ private data class GrunnbeløpEvent(
 
 private data class Grunnbeløp(
     val skjæringstidspunkt: LocalDate,
-    val `6G`: Double
+    val `6G`: Double,
 )
-

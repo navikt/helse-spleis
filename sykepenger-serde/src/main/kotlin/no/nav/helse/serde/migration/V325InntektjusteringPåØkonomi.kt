@@ -6,9 +6,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V325InntektjusteringPåØkonomi : JsonMigration(325) {
     override val description = "setter beregningsgrunnlag lik aktuellDagsinntekt på alle økonomiobjekter"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
-            arbeidsgiver.path("utbetalinger")
+            arbeidsgiver
+                .path("utbetalinger")
                 .onEach { utbetaling -> migrerUtbetaling(utbetaling) }
             arbeidsgiver.path("vedtaksperioder").forEach { migrerVedtaksperiode(it) }
             arbeidsgiver.path("forkastede").forEach { migrerVedtaksperiode(it.path("vedtaksperiode")) }

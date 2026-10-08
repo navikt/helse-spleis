@@ -7,19 +7,19 @@ data class ApiPerson(
     val fodselsnummer: String,
     val arbeidsgivere: List<ApiArbeidsgiver>,
     val dodsdato: LocalDate?,
-    val vilkarsgrunnlag: List<ApiVilkarsgrunnlag>
+    val vilkarsgrunnlag: List<ApiVilkarsgrunnlag>,
 )
 
 data class ApiArbeidsgiver(
     val organisasjonsnummer: String,
     val generasjoner: List<ApiGenerasjon>,
-    val ghostPerioder: List<ApiGhostPeriode>
+    val ghostPerioder: List<ApiGhostPeriode>,
 )
 
 data class ApiGenerasjon(
     val id: UUID,
     val perioder: List<ApiTidslinjeperiode>,
-    val kildeTilGenerasjon: UUID
+    val kildeTilGenerasjon: UUID,
 )
 
 data class ApiGhostPeriode(
@@ -28,5 +28,5 @@ data class ApiGhostPeriode(
     val tom: LocalDate,
     val skjaeringstidspunkt: LocalDate,
     val vilkarsgrunnlagId: UUID,
-    val deaktivert: Boolean
+    val deaktivert: Boolean,
 )

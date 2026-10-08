@@ -1,8 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Companion.valider
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.nesteDag
@@ -10,44 +7,69 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 sealed interface Arbeidsgiveropplysning {
-    class OppgittArbeidgiverperiode(perioder: List<Periode>) : Arbeidsgiveropplysning {
+    class OppgittArbeidgiverperiode(
+        perioder: List<Periode>,
+    ) : Arbeidsgiveropplysning {
         init {
             check(perioder.isNotEmpty()) { "Må være minst en periode med agp!" }
             check(perioder.flatten().size <= 16) { "Tøysete med en agp mer enn 16" }
         }
+
         val perioder = perioder.sortedBy { it.start }
     }
 
-    data class OppgittInntekt(val inntekt: Inntekt) : Arbeidsgiveropplysning {
+    data class OppgittInntekt(
+        val inntekt: Inntekt,
+    ) : Arbeidsgiveropplysning {
         init {
             check(inntekt >= INGEN) { "Inntekten må være minst 0 kroner!" }
         }
     }
 
     data object OpphørAvNaturalytelser : Arbeidsgiveropplysning
-    data class OppgittRefusjon(val beløp: Inntekt, val endringer: List<Refusjonsendring>, val refusjonskravGyldigFra: LocalDate?) : Arbeidsgiveropplysning {
-        data class Refusjonsendring(val fom: LocalDate, val beløp: Inntekt)
+
+    data class OppgittRefusjon(
+        val beløp: Inntekt,
+        val endringer: List<Refusjonsendring>,
+        val refusjonskravGyldigFra: LocalDate?,
+    ) : Arbeidsgiveropplysning {
+        data class Refusjonsendring(
+            val fom: LocalDate,
+            val beløp: Inntekt,
+        )
     }
 
-    data class IkkeUtbetaltArbeidsgiverperiode(private val begrunnelse: Begrunnelse) : Arbeidsgiveropplysning {
+    data class IkkeUtbetaltArbeidsgiverperiode(
+        private val begrunnelse: Begrunnelse,
+    ) : Arbeidsgiveropplysning {
         internal fun valider(aktivitetslogg: IAktivitetslogg) = begrunnelse.valider(aktivitetslogg)
     }
 
-    data class RedusertUtbetaltBeløpIArbeidsgiverperioden(private val begrunnelse: Begrunnelse) : Arbeidsgiveropplysning {
+    data class RedusertUtbetaltBeløpIArbeidsgiverperioden(
+        private val begrunnelse: Begrunnelse,
+    ) : Arbeidsgiveropplysning {
         internal fun valider(aktivitetslogg: IAktivitetslogg) = begrunnelse.valider(aktivitetslogg)
     }
 
-    data class UtbetaltDelerAvArbeidsgiverperioden(private val begrunnelse: Begrunnelse, val utbetaltTilOgMed: LocalDate) : Arbeidsgiveropplysning {
+    data class UtbetaltDelerAvArbeidsgiverperioden(
+        private val begrunnelse: Begrunnelse,
+        val utbetaltTilOgMed: LocalDate,
+    ) : Arbeidsgiveropplysning {
         internal fun valider(aktivitetslogg: IAktivitetslogg) = begrunnelse.valider(aktivitetslogg)
     }
 
-    data object HarFlereArbeidsforhold: Arbeidsgiveropplysning
+    data object HarFlereArbeidsforhold : Arbeidsgiveropplysning
 
     data object IkkeNyArbeidsgiverperiode : Arbeidsgiveropplysning
 
-    enum class Begrunnelse(private val støttes: Boolean) {
+    enum class Begrunnelse(
+        private val støttes: Boolean,
+    ) {
         LovligFravaer(støttes = true),
         ArbeidOpphoert(støttes = true),
         ManglerOpptjening(støttes = true),
@@ -64,7 +86,8 @@ sealed interface Arbeidsgiveropplysning {
         StreikEllerLockout(støttes = false),
         FravaerUtenGyldigGrunn(støttes = false),
         BeskjedGittForSent(støttes = false),
-        IkkeLoenn(støttes = false);
+        IkkeLoenn(støttes = false),
+        ;
 
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: $name")
@@ -87,16 +110,19 @@ sealed interface Arbeidsgiveropplysning {
                 "Det kan maks oppgis én opplysning relatert til begrunnelse. Fant ${opplysningerFraBegrunnelse.size}: ${map { it::class.simpleName }.joinToString()}"
             }
 
-            val arbeidsgiverperiode = this
-                .filterIsInstance<OppgittArbeidgiverperiode>()
-                .singleOrNull()?.perioder ?: emptyList()
+            val arbeidsgiverperiode =
+                this
+                    .filterIsInstance<OppgittArbeidgiverperiode>()
+                    .singleOrNull()
+                    ?.perioder ?: emptyList()
 
             val antallDager = arbeidsgiverperiode.flatten().size
 
             when (val opplysning = opplysningerFraBegrunnelse.singleOrNull()) {
-                is IkkeUtbetaltArbeidsgiverperiode -> check(antallDager == 0) {
-                    "IkkeUtbetaltArbeidsgiverperiode kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Kan ikke være oppgitt noen arbeidsgiverperiode med denne opplysningstypen."
-                }
+                is IkkeUtbetaltArbeidsgiverperiode ->
+                    check(antallDager == 0) {
+                        "IkkeUtbetaltArbeidsgiverperiode kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Kan ikke være oppgitt noen arbeidsgiverperiode med denne opplysningstypen."
+                    }
 
                 is UtbetaltDelerAvArbeidsgiverperioden -> {
                     check(antallDager in 1..15) {
@@ -108,9 +134,10 @@ sealed interface Arbeidsgiveropplysning {
                     }
                 }
 
-                is RedusertUtbetaltBeløpIArbeidsgiverperioden -> check(antallDager == 16) {
-                    "RedusertUtbetaltBeløpIArbeidsgiverperioden kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Må være oppgitt en full arbeidsigverperiode på 16 dager med denne opplysningstypen."
-                }
+                is RedusertUtbetaltBeløpIArbeidsgiverperioden ->
+                    check(antallDager == 16) {
+                        "RedusertUtbetaltBeløpIArbeidsgiverperioden kan ikke kombineres med arbeidsgiverperiode på $antallDager dager: $arbeidsgiverperiode. Må være oppgitt en full arbeidsigverperiode på 16 dager med denne opplysningstypen."
+                    }
 
                 else -> {}
             }
@@ -123,18 +150,21 @@ sealed interface Arbeidsgiveropplysning {
             begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
             opphørAvNaturalytelser: List<Inntektsmelding.OpphørAvNaturalytelse>,
             harFlereArbeidsforhold: Boolean,
-            refusjonskravGyldigFra: LocalDate?
+            refusjonskravGyldigFra: LocalDate?,
         ): List<Arbeidsgiveropplysning> {
-            val oppgittInntekt = beregnetInntekt
-                ?.takeUnless { it < INGEN }
-                ?.let { OppgittInntekt(it) }
+            val oppgittInntekt =
+                beregnetInntekt
+                    ?.takeUnless { it < INGEN }
+                    ?.let { OppgittInntekt(it) }
 
-            val oppgittArbeidsgiverperiode = arbeidsgiverperioder
-                ?.takeUnless { it.isEmpty() }
-                ?.let { OppgittArbeidgiverperiode(it) }
+            val oppgittArbeidsgiverperiode =
+                arbeidsgiverperioder
+                    ?.takeUnless { it.isEmpty() }
+                    ?.let { OppgittArbeidgiverperiode(it) }
 
-            val oppgittOpphørAvNaturalytelser = OpphørAvNaturalytelser
-                .takeIf { opphørAvNaturalytelser.isNotEmpty() }
+            val oppgittOpphørAvNaturalytelser =
+                OpphørAvNaturalytelser
+                    .takeIf { opphørAvNaturalytelser.isNotEmpty() }
 
             return listOfNotNull(
                 oppgittInntekt,
@@ -142,7 +172,7 @@ sealed interface Arbeidsgiveropplysning {
                 refusjon?.somOppgittRefusjon(refusjonskravGyldigFra),
                 begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(arbeidsgiverperioder?.sortedBy { it.start } ?: emptyList()),
                 oppgittOpphørAvNaturalytelser,
-                HarFlereArbeidsforhold.takeIf { harFlereArbeidsforhold }
+                HarFlereArbeidsforhold.takeIf { harFlereArbeidsforhold },
             )
         }
 
@@ -175,20 +205,21 @@ class Arbeidsgiveropplysninger(
     registrert: LocalDateTime,
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     val vedtaksperiodeId: UUID,
-    val opplysninger: List<Arbeidsgiveropplysning>
-) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
-
+    val opplysninger: List<Arbeidsgiveropplysning>,
+) : Collection<Arbeidsgiveropplysning> by opplysninger,
+    Hendelse {
     init {
         opplysninger.valider()
     }
 
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = ARBEIDSGIVER,
-        innsendt = innsendt,
-        registrert = registrert,
-        automatiskBehandling = false
-    )
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = ARBEIDSGIVER,
+            innsendt = innsendt,
+            registrert = registrert,
+            automatiskBehandling = false,
+        )
 }
 
 class KorrigerteArbeidsgiveropplysninger(
@@ -198,19 +229,20 @@ class KorrigerteArbeidsgiveropplysninger(
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     val vedtaksperiodeId: UUID,
     val opplysninger: List<Arbeidsgiveropplysning>,
-) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
-
+) : Collection<Arbeidsgiveropplysning> by opplysninger,
+    Hendelse {
     init {
         opplysninger.valider()
     }
 
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = ARBEIDSGIVER,
-        innsendt = innsendt,
-        registrert = registrert,
-        automatiskBehandling = false
-    )
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = ARBEIDSGIVER,
+            innsendt = innsendt,
+            registrert = registrert,
+            automatiskBehandling = false,
+        )
 }
 
 class SelvbestemteArbeidsgiveropplysninger(
@@ -220,17 +252,18 @@ class SelvbestemteArbeidsgiveropplysninger(
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
     val vedtaksperiodeId: UUID,
     val opplysninger: List<Arbeidsgiveropplysning>,
-) : Collection<Arbeidsgiveropplysning> by opplysninger, Hendelse {
-
+) : Collection<Arbeidsgiveropplysning> by opplysninger,
+    Hendelse {
     init {
         opplysninger.valider()
     }
 
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = ARBEIDSGIVER,
-        innsendt = innsendt,
-        registrert = registrert,
-        automatiskBehandling = false
-    )
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = ARBEIDSGIVER,
+            innsendt = innsendt,
+            registrert = registrert,
+            automatiskBehandling = false,
+        )
 }

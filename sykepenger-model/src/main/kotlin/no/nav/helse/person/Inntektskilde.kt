@@ -3,7 +3,9 @@ package no.nav.helse.person
 import no.nav.helse.dto.InntektskildeDto
 
 @JvmInline
-value class Inntektskilde(val id: String) {
+value class Inntektskilde(
+    val id: String,
+) {
     fun dto() = InntektskildeDto(id)
 
     companion object {

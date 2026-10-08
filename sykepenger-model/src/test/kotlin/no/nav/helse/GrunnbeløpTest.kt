@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class GrunnbeløpTest {
-
     @Test
     fun dagsats() {
         assertEquals(2304.daglig, Grunnbeløp.`6G`.dagsats(1.mai(2019)))
@@ -47,7 +46,6 @@ internal class GrunnbeløpTest {
         assertEquals(101351.årlig, Grunnbeløp.`1G`.beløp(10.oktober(2020), 21.september(2020)))
     }
 
-
     @Test
     fun `virkningstidspunktet for regulering av kravet til minsteinntekt`() {
         val halvG2018 = Grunnbeløp.halvG.beløp(30.april(2019))
@@ -74,7 +72,6 @@ internal class GrunnbeløpTest {
         val virkningstidspunkt = Grunnbeløp.virkningstidspunktFor(beløp)
         assertEquals(1.mai(2019), virkningstidspunkt)
     }
-
 
     @Test
     fun `virkningstidspunkt etter ny G sitt virkningstidspunkt`() {

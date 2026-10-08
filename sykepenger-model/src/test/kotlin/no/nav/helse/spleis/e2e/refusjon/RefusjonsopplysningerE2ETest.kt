@@ -1,12 +1,7 @@
 package no.nav.helse.spleis.e2e.refusjon
 
 import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Inntektsmelding
@@ -15,14 +10,10 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -30,7 +21,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
-
     @Test
     fun `Trenger nye refusjonsopplysninger ved oppholdsdager på arbeidsgiver`() {
         listOf(a1, a2).nyeVedtak(januar)
@@ -68,7 +58,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             assertBeløpstidslinje(
                 ARBEIDSGIVER.beløpstidslinje(januar, INGEN),
                 inspektør.refusjon(1.vedtaksperiode),
-                ignoreMeldingsreferanseId = true
+                ignoreMeldingsreferanseId = true,
             )
         }
     }
@@ -106,7 +96,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterKorrigerteArbeidsgiveropplysninger(
                 id = inntektsmeldingId,
                 arbeidsgiverperioder = arbeidsgiverperiode,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)

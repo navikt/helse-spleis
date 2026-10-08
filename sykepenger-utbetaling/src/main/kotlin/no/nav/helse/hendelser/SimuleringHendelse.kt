@@ -1,8 +1,8 @@
 package no.nav.helse.hendelser
 
-import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.utbetalingslinjer.Fagområde
+import java.util.*
 
 interface SimuleringHendelse {
     val utbetalingId: UUID

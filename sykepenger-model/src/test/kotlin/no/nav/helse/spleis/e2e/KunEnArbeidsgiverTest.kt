@@ -1,52 +1,24 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.august
-import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
+import no.nav.helse.*
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.mai
-import no.nav.helse.mars
-import no.nav.helse.november
-import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.september
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class KunEnArbeidsgiverTest : AbstractDslTest() {
-
     @Test
     fun `ingen historie med inntektsmelding først`() {
         a1 {
@@ -83,7 +55,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertTrue(1.vedtaksperiode in observatør.utbetalteVedtaksperioder)
             inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
@@ -126,7 +98,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
-                AVSLUTTET_UTEN_UTBETALING
+                AVSLUTTET_UTEN_UTBETALING,
             )
             assertTilstander(
                 2.vedtaksperiode,
@@ -135,7 +107,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
-                AVSLUTTET_UTEN_UTBETALING
+                AVSLUTTET_UTEN_UTBETALING,
             )
             assertTilstander(
                 3.vedtaksperiode,
@@ -143,7 +115,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
             )
         }
     }
@@ -182,7 +154,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
-                AVSLUTTET_UTEN_UTBETALING
+                AVSLUTTET_UTEN_UTBETALING,
             )
             assertTilstander(
                 2.vedtaksperiode,
@@ -191,7 +163,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
-                AVSLUTTET_UTEN_UTBETALING
+                AVSLUTTET_UTEN_UTBETALING,
             )
             assertTilstander(
                 3.vedtaksperiode,
@@ -199,7 +171,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
             )
         }
     }
@@ -236,11 +208,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertTrue(1.vedtaksperiode in observatør.utbetalteVedtaksperioder)
         }
-
     }
 
     @Test
@@ -283,7 +254,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
             )
         }
     }
@@ -296,7 +267,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
             assertEquals("GG UUUUUGG UUUUUGG SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -320,7 +291,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(4.januar til 19.januar),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -363,7 +334,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
-                AVVENTER_GODKJENNING
+                AVVENTER_GODKJENNING,
             )
         }
     }
@@ -404,7 +375,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertTilstander(
                 2.vedtaksperiode,
@@ -416,7 +387,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -448,7 +419,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -489,7 +460,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertTilstander(
                 2.vedtaksperiode,
@@ -500,7 +471,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -530,13 +501,13 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
-                TIL_UTBETALING
+                TIL_UTBETALING,
             )
             assertTilstander(
                 2.vedtaksperiode,
                 START,
                 AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE
+                AVVENTER_BLOKKERENDE_PERIODE,
             )
         }
     }
@@ -564,7 +535,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
-                TIL_UTBETALING
+                TIL_UTBETALING,
             )
         }
     }
@@ -598,7 +569,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             nyttVedtak(15.januar til 7.februar)
 
             håndterSykmelding(
-                Sykmeldingsperiode(22.februar, 14.mars)
+                Sykmeldingsperiode(22.februar, 14.mars),
             )
             håndterSøknad(Sykdom(22.februar, 14.mars, 50.prosent), sendtTilNAVEllerArbeidsgiver = 8.august)
             assertVarsel(Varselkode.RV_SØ_2, 2.vedtaksperiode.filter())
@@ -641,7 +612,12 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            assertTrue(inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.erNavdag(18.oktober(2021)))
+            assertTrue(
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.utbetalingstidslinje.inspektør
+                    .erNavdag(18.oktober(2021)),
+            )
         }
     }
 }

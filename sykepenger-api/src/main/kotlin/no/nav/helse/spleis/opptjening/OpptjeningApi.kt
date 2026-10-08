@@ -8,7 +8,6 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import java.time.LocalDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
@@ -18,21 +17,23 @@ import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.objectMapper
+import java.time.LocalDateTime
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private data class PersonRequest(
-    val fødselsnummer: String
+    val fødselsnummer: String,
 )
 
 internal data class Opptjeningsvurdering(
     val opprettet: LocalDateTime,
-    val vilkårsgrunnlag: VilkårsgrunnlagUtDto
+    val vilkårsgrunnlag: VilkårsgrunnlagUtDto,
 )
 
 internal fun opptjeningsvurderinger(historikk: List<VilkårsgrunnlagInnslagUtDto>): List<Opptjeningsvurdering> {
-    fun tidligstOpprettet(vilkårsgrunnlag: VilkårsgrunnlagUtDto) = historikk
-        .filter { innslag -> innslag.vilkårsgrunnlag.any { it.opptjeningsvurderingId == vilkårsgrunnlag.opptjeningsvurderingId } }
-        .minOf { it.opprettet }
+    fun tidligstOpprettet(vilkårsgrunnlag: VilkårsgrunnlagUtDto) =
+        historikk
+            .filter { innslag -> innslag.vilkårsgrunnlag.any { it.opptjeningsvurderingId == vilkårsgrunnlag.opptjeningsvurderingId } }
+            .minOf { it.opprettet }
 
     return historikk
         .flatMap { it.vilkårsgrunnlag }
@@ -41,14 +42,16 @@ internal fun opptjeningsvurderinger(historikk: List<VilkårsgrunnlagInnslagUtDto
 }
 
 internal fun Application.opptjeningApi(personDao: PersonDao) {
-
     fun vilkårsgrunnlagHistorikk(fødselsnummer: String): VilkårsgrunnlaghistorikkUtDto {
         val serialisertPerson = personDao.hentPersonFraFnr(fødselsnummer.toLong()) ?: return VilkårsgrunnlaghistorikkUtDto(emptyList())
         val utDto = Person.gjenopprett(EmptyLog, serialisertPerson.tilPersonDto()).dto()
         return utDto.vilkårsgrunnlagHistorikk
     }
 
-    fun somJson(opprettet: LocalDateTime, vilkårsgrunnlag: VilkårsgrunnlagUtDto) = objectMapper.createObjectNode().apply {
+    fun somJson(
+        opprettet: LocalDateTime,
+        vilkårsgrunnlag: VilkårsgrunnlagUtDto,
+    ) = objectMapper.createObjectNode().apply {
         put("opptjeningsvurderingId", vilkårsgrunnlag.opptjeningsvurderingId.toString())
         put("opprettet", opprettet.toString())
         put("skjæringstidspunkt", vilkårsgrunnlag.skjæringstidspunkt.toString())
@@ -63,10 +66,11 @@ internal fun Application.opptjeningApi(personDao: PersonDao) {
                     put("oppfylt", arbeidstakerOpptjening.erOppfylt)
                     when (val opptjeningsperiode = arbeidstakerOpptjening.reellOpptjeningsperiode) {
                         null -> putNull("opptjeningsperiode")
-                        else -> putObject("opptjeningsperiode").apply {
-                            put("fom", opptjeningsperiode.fom.toString())
-                            put("tom", opptjeningsperiode.tom.toString())
-                        }
+                        else ->
+                            putObject("opptjeningsperiode").apply {
+                                put("fom", opptjeningsperiode.fom.toString())
+                                put("tom", opptjeningsperiode.tom.toString())
+                            }
                     }
                     put("antallDager", arbeidstakerOpptjening.opptjeningsdager.takeUnless { arbeidstakerOpptjening.reellOpptjeningsperiode == null } ?: 0)
                     putArray("arbeidsforhold").apply {
@@ -105,12 +109,16 @@ internal fun Application.opptjeningApi(personDao: PersonDao) {
                 withContext(Dispatchers.IO) {
                     val vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk(request.fødselsnummer)
 
-                    val opptjeningsvurderinger = opptjeningsvurderinger(vilkårsgrunnlagHistorikk.historikk)
-                        .map { somJson(it.opprettet, it.vilkårsgrunnlag) }
+                    val opptjeningsvurderinger =
+                        opptjeningsvurderinger(vilkårsgrunnlagHistorikk.historikk)
+                            .map { somJson(it.opprettet, it.vilkårsgrunnlag) }
 
-                    val response = objectMapper.createObjectNode().apply {
-                        putArray("opptjeningsvurderinger").addAll(opptjeningsvurderinger)
-                    }.toString()
+                    val response =
+                        objectMapper
+                            .createObjectNode()
+                            .apply {
+                                putArray("opptjeningsvurderinger").addAll(opptjeningsvurderinger)
+                            }.toString()
 
                     call.respondText(response, ContentType.Application.Json)
                 }

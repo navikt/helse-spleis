@@ -13,25 +13,34 @@ import no.nav.helse.spleis.Personopplysninger
 // Understands a JSON message representing a Søknad
 internal sealed class SøknadMessage(
     private val packet: JsonMessage,
-    private val builder: SøknadBuilder
+    private val builder: SøknadBuilder,
 ) : HendelseMessage(packet) {
-
     private val sykmeldingSkrevet = packet["sykmeldingSkrevet"].asLocalDateTime()
 
-    final override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
-        val personopplysninger = Personopplysninger(
-            personidentifikator = Personidentifikator(meldingsporing.fødselsnummer),
-            fødselsdato = packet["fødselsdato"].asLocalDate(),
-            dødsdato = packet["dødsdato"].asOptionalLocalDate()
-        )
+    final override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
+        val personopplysninger =
+            Personopplysninger(
+                personidentifikator = Personidentifikator(meldingsporing.fødselsnummer),
+                fødselsdato = packet["fødselsdato"].asLocalDate(),
+                dødsdato = packet["dødsdato"].asOptionalLocalDate(),
+            )
         bygg()
         _behandle(mediator, personopplysninger, packet, context)
     }
 
-    protected abstract fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: BehandlingContext)
+    protected abstract fun _behandle(
+        mediator: IHendelseMediator,
+        personopplysninger: Personopplysninger,
+        packet: JsonMessage,
+        context: BehandlingContext,
+    )
 
     private fun bygg() {
-        builder.fødselsdato(packet["fødselsdato"].asLocalDate())
+        builder
+            .fødselsdato(packet["fødselsdato"].asLocalDate())
             .sykmeldingSkrevet(sykmeldingSkrevet)
             .fom(packet["fom"].asLocalDate())
             .tom(packet["tom"].asLocalDate())
@@ -39,15 +48,17 @@ internal sealed class SøknadMessage(
             .yrkesskade(packet["yrkesskade"].asBoolean())
 
         packet["soknadsperioder"].forEach {
-            val arbeidshelse = it.path("faktiskGrad")
-                .takeIf(JsonNode::isIntegralNumber)
-                ?.asInt()
-                ?.coerceIn(0, 100)
+            val arbeidshelse =
+                it
+                    .path("faktiskGrad")
+                    .takeIf(JsonNode::isIntegralNumber)
+                    ?.asInt()
+                    ?.coerceIn(0, 100)
             builder.periode(
                 fom = it.path("fom").asLocalDate(),
                 tom = it.path("tom").asLocalDate(),
                 grad = it.path("sykmeldingsgrad").asInt(),
-                arbeidshelse = arbeidshelse
+                arbeidshelse = arbeidshelse,
             )
         }
     }

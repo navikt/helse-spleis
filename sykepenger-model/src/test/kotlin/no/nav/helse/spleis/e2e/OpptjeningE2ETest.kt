@@ -1,21 +1,7 @@
 package no.nav.helse.spleis.e2e
 
-import java.lang.Boolean.parseBoolean
-import java.time.LocalDate
-import java.util.UUID
-import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
-import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Arbeidstakerkilde
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.lagStandardSykepengegrunnlag
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
+import no.nav.helse.*
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.YTELSE_FRA_OFFENTLIGE
@@ -25,20 +11,9 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.mai
-import no.nav.helse.mars
-import no.nav.helse.november
-import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.ManglerOpptjening
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -47,9 +22,11 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.lang.Boolean.parseBoolean
+import java.time.LocalDate
+import java.util.*
 
 internal class OpptjeningE2ETest : AbstractDslTest() {
-
     @Test
     fun `opptjeningsvurderingId fra sp-vilkarsproving blir lagt på`() {
         a1 {
@@ -70,17 +47,18 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a2, 1.januar(2017), 15.desember(2017)),
-                    Triple(a1, 1.januar, null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a2, 1.januar(2017), 15.desember(2017)),
+                        Triple(a1, 1.januar, null),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
 
             assertForventetFeil(
                 nå = { assertAntallOpptjeningsdager(1, skjæringstidspunkt = 28.desember(2017)) },
                 ønsket = { assertAntallOpptjeningsdager(0, skjæringstidspunkt = 28.desember(2017)) },
-                forklaring = "Opptjening.opptjeningsperiode() returnerer 'dagenFør' når det ikke er noen opptjeningsperiode"
+                forklaring = "Opptjening.opptjeningsperiode() returnerer 'dagenFør' når det ikke er noen opptjeningsperiode",
             )
 
             assertErIkkeOppfylt(skjæringstidspunkt = 28.desember(2017))
@@ -88,7 +66,6 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             assertVarsel(RV_OV_1, 1.vedtaksperiode.filter())
         }
     }
-
 
     @Test
     fun `lagrer arbeidsforhold brukt til opptjening`() {
@@ -124,10 +101,11 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, 20.desember(2017), null),
-                    Triple(a2, LocalDate.EPOCH, 19.desember(2017))
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, 20.desember(2017), null),
+                        Triple(a2, LocalDate.EPOCH, 19.desember(2017)),
+                    ),
             )
         }
         assertHarArbeidsforhold(1.januar, a1)
@@ -143,10 +121,11 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, 1.desember(2017), null),
-                    Triple(a2, LocalDate.EPOCH, 24.desember(2017))
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, 1.desember(2017), null),
+                        Triple(a2, LocalDate.EPOCH, 24.desember(2017)),
+                    ),
             )
         }
         assertHarArbeidsforhold(1.januar, a1)
@@ -156,17 +135,18 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
     @ParameterizedTest
     @ValueSource(strings = ["true", "false", "null"])
     fun `manglende opptjening overstyres av opptjeningsvurderingResultatOk hvis angitt`(opptjeningsvurderingResultatOkString: String) {
-        val opptjeningsvurderingResultatOk : Boolean? = opptjeningsvurderingResultatOkString.let {
-            if (it == "null") null else parseBoolean(it)
-        }
+        val opptjeningsvurderingResultatOk: Boolean? =
+            opptjeningsvurderingResultatOkString.let {
+                if (it == "null") null else parseBoolean(it)
+            }
         a1 {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = emptyList<Arbeidsforhold>(), skatteinntekter = emptyList())
             håndterYtelser(1.vedtaksperiode, opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk)
-            
+
             assertErIkkeOppfylt() // I den lagrede modellen ligger det ikke-oppfylt, men det kan overstyres av opptjeningsvurderingResultatOk
-            
+
             assertVarsel(RV_OV_3, 1.vedtaksperiode.filter())
             assertVarsel(RV_VV_1, 1.vedtaksperiode.filter()) // Rart ikke-reelt case dette. Egentlig ikke opptjening men opptjeningsvurderingResultatOk sier OK
 
@@ -176,22 +156,32 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
 
             val dagbeløp = if (opptjeningsvurderingResultatOk in listOf(false, null)) 0 else 1431
 
-            assertUtbetalingsbeløp(1.vedtaksperiode, dagbeløp, 1431, 0,  subset = 17.januar til 31.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, dagbeløp, 1431, 0, subset = 17.januar til 31.januar)
         }
     }
 
     @ParameterizedTest
     @ValueSource(strings = ["true", "false", "null"])
     fun `faktisk opptjening overstyres av opptjeningsvurderingResultatOk hvis angitt`(opptjeningsvurderingResultatOkString: String) {
-        val opptjeningsvurderingResultatOk : Boolean? = opptjeningsvurderingResultatOkString.let {
-            if (it == "null") null else parseBoolean(it)
-        }
+        val opptjeningsvurderingResultatOk: Boolean? =
+            opptjeningsvurderingResultatOkString.let {
+                if (it == "null") null else parseBoolean(it)
+            }
         a1 {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Arbeidsforhold(
-                orgnummer = a1, ansettelseperiode = 1.november(2017) til 31.desember(2017), type = Arbeidsforhold.Arbeidsforholdtype.FORENKLET_OPPGJØRSORDNING
-            )), skatteinntekter = emptyList())
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                arbeidsforhold =
+                    listOf(
+                        Arbeidsforhold(
+                            orgnummer = a1,
+                            ansettelseperiode = 1.november(2017) til 31.desember(2017),
+                            type = Arbeidsforhold.Arbeidsforholdtype.FORENKLET_OPPGJØRSORDNING,
+                        ),
+                    ),
+                skatteinntekter = emptyList(),
+            )
             håndterYtelser(1.vedtaksperiode, opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk)
 
             assertVarsel(RV_OV_3, 1.vedtaksperiode.filter())
@@ -202,10 +192,9 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
 
             val dagbeløp = if (opptjeningsvurderingResultatOk in listOf(true, null)) 1431 else 0
 
-            assertUtbetalingsbeløp(1.vedtaksperiode, dagbeløp, 1431, 0,  subset = 17.januar til 31.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, dagbeløp, 1431, 0, subset = 17.januar til 31.januar)
         }
     }
-
 
     @Test
     fun `opptjening er ikke oppfylt siden det ikke er nok opptjeningsdager`() {
@@ -216,9 +205,10 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, 31.desember(2017), null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, 31.desember(2017), null),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
 
@@ -239,15 +229,17 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         a1 {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                månedligeInntekter = mapOf(
-                    desember(2017) to listOf(a1 to INNTEKT, a2 to INNTEKT),
-                    november(2017) to listOf(a1 to INNTEKT),
-                    oktober(2017) to listOf(a1 to INNTEKT),
-                ),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, 1.desember(2017), 31.desember(2017))
-                )
+                månedligeInntekter =
+                    mapOf(
+                        desember(2017) to listOf(a1 to INNTEKT, a2 to INNTEKT),
+                        november(2017) to listOf(a1 to INNTEKT),
+                        oktober(2017) to listOf(a1 to INNTEKT),
+                    ),
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, 1.desember(2017), 31.desember(2017)),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -268,7 +260,7 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntekterForOpptjeningsvurdering = listOf(a1 to INGEN)
+                inntekterForOpptjeningsvurdering = listOf(a1 to INGEN),
             )
 
             assertVarsel(RV_OV_3, 1.vedtaksperiode.filter())
@@ -362,7 +354,10 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         }
     }
 
-    private fun setupOpptjeningFraOffentligYtelse(ansattTom: LocalDate, inntektsmeldingKomAldri: Boolean = false) {
+    private fun setupOpptjeningFraOffentligYtelse(
+        ansattTom: LocalDate,
+        inntektsmeldingKomAldri: Boolean = false,
+    ) {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
@@ -370,17 +365,22 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(22.april til 22.mai)
-            if (inntektsmeldingKomAldri) håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
-            else håndterArbeidsgiveropplysninger(listOf(22.april til 7.mai))
+            if (inntektsmeldingKomAldri) {
+                håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+            } else {
+                håndterArbeidsgiveropplysninger(listOf(22.april til 7.mai))
+            }
             håndterVilkårsgrunnlag(
-                arbeidsforhold = listOf(
-                    Arbeidsforhold(orgnummer = a1, ansattFom = 1.januar, ansattTom = ansattTom, type = ORDINÆRT),
-                    Arbeidsforhold(orgnummer = a2, ansattFom = 1.april, ansattTom = null, type = ORDINÆRT),
-                ),
-                inntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(
-                    listOf(ArbeidsgiverInntekt(a1, inntekter = listOf(MånedligInntekt(mars(2018), INNTEKT, YTELSE_FRA_OFFENTLIGE, "ja", "beskrivelse"))))
-                ),
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a2, INNTEKT, 22.april)
+                arbeidsforhold =
+                    listOf(
+                        Arbeidsforhold(orgnummer = a1, ansattFom = 1.januar, ansattTom = ansattTom, type = ORDINÆRT),
+                        Arbeidsforhold(orgnummer = a2, ansattFom = 1.april, ansattTom = null, type = ORDINÆRT),
+                    ),
+                inntekterForOpptjeningsvurdering =
+                    InntekterForOpptjeningsvurdering(
+                        listOf(ArbeidsgiverInntekt(a1, inntekter = listOf(MånedligInntekt(mars(2018), INNTEKT, YTELSE_FRA_OFFENTLIGE, "ja", "beskrivelse")))),
+                    ),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a2, INNTEKT, 22.april),
             )
             håndterYtelser(1.vedtaksperiode)
         }

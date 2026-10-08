@@ -1,35 +1,27 @@
 package no.nav.helse.dsl
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.Behandlinger
+import no.nav.helse.person.*
 import no.nav.helse.person.Behandlinger.Behandling.Tilstand
-import no.nav.helse.person.Person
-import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
 import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_UTBETALT
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat.Bestemmelse.IKKE_VURDERT
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
+import java.util.*
 
-internal class UgyldigeSituasjonerObservatør(private val person: Person) : EventSubscription {
-
+internal class UgyldigeSituasjonerObservatør(
+    private val person: Person,
+) : EventSubscription {
     private val arbeidsgivereMap = mutableMapOf<String, Yrkesaktivitet>()
     private val gjeldendeTilstander = mutableMapOf<UUID, TilstandType>()
     private val gjeldendeBehandlingstatus = mutableMapOf<UUID, MutableList<Pair<LocalDateTime, Behandlingstatus>>>()
@@ -41,7 +33,10 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
     private val behandlingLukketEventer = mutableListOf<EventSubscription.BehandlingLukketEvent>()
     private val behandlingForkastetEventer = mutableListOf<EventSubscription.BehandlingForkastetEvent>()
 
-    private fun loggBehandlingstatus(vedtaksperiodeId: UUID, status: Behandlingstatus) {
+    private fun loggBehandlingstatus(
+        vedtaksperiodeId: UUID,
+        status: Behandlingstatus,
+    ) {
         gjeldendeBehandlingstatus.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(0, LocalDateTime.now() to status)
     }
 
@@ -103,7 +98,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
     }
 
     override fun vedtaksperiodeEndret(
-        event: EventSubscription.VedtaksperiodeEndretEvent
+        event: EventSubscription.VedtaksperiodeEndretEvent,
     ) {
         arbeidsgivereMap.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { person.arbeidsgiver(event.yrkesaktivitetssporing.somOrganisasjonsnummer) }
         gjeldendeTilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
@@ -113,12 +108,13 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         søknader[event.meldingsreferanseId] = null
     }
 
-    override fun vedtaksperioderVenter(event: EventSubscription.VedtaksperioderVenterEvent) = sjekk {
-        event.vedtaksperioder.forEach { event ->
-            sjekkUgyldigeVentesituasjoner(event)
-            sjekkSøknadIdEierskap(event.vedtaksperiodeId, event.hendelser)
+    override fun vedtaksperioderVenter(event: EventSubscription.VedtaksperioderVenterEvent) =
+        sjekk {
+            event.vedtaksperioder.forEach { event ->
+                sjekkUgyldigeVentesituasjoner(event)
+                sjekkSøknadIdEierskap(event.vedtaksperiodeId, event.hendelser)
+            }
         }
-    }
 
     private fun sjekkUgyldigeVentesituasjoner(event: EventSubscription.VedtaksperiodeVenterEvent) {
         if (event.venterPå.venteårsak.hva != "HJELP") return // Om vi venter på noe annet enn hjelp er det OK 👍
@@ -130,18 +126,24 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         """.let { throw IllegalStateException(it) }
     }
 
-    private fun sjekkSøknadIdEierskap(vedtaksperiodeId: UUID, hendelseIder: Set<UUID>) {
+    private fun sjekkSøknadIdEierskap(
+        vedtaksperiodeId: UUID,
+        hendelseIder: Set<UUID>,
+    ) {
         val søknadIder = hendelseIder.intersect(søknader.keys)
         søknadIder.forEach { søknadId ->
             val eier = søknader[søknadId]
-            if (eier == null) søknader[søknadId] = vedtaksperiodeId
-            else check(eier == vedtaksperiodeId) { "Både vedtaksperiode $eier og $vedtaksperiodeId peker på søknaden $søknadId" }
+            if (eier == null) {
+                søknader[søknadId] = vedtaksperiodeId
+            } else {
+                check(eier == vedtaksperiodeId) { "Både vedtaksperiode $eier og $vedtaksperiodeId peker på søknaden $søknadId" }
+            }
         }
     }
 
     override fun trengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
         if (event.opplysninger.vedtaksperiodeId in kvittertUtArbeidsgiveropplysninger) {
-            throw UgyldigSituasjonException(IllegalStateException("Vedtaksperioden har allerede kvittert ut arbeidsgiveropplysninger! Hvorfor blir det forespurt på ny?\n\t${event}"))
+            throw UgyldigSituasjonException(IllegalStateException("Vedtaksperioden har allerede kvittert ut arbeidsgiveropplysninger! Hvorfor blir det forespurt på ny?\n\t$event"))
         }
     }
 
@@ -153,17 +155,21 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         kvittertUtArbeidsgiveropplysninger.add(event.vedtaksperiodeId)
         IM.håndtert(event.meldingsreferanseId)
     }
+
     override fun inntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent) = IM.ikkeHåndtert(event.meldingsreferanseId)
+
     override fun inntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent) = IM.førSøknad(event.inntektsmeldingId)
+
     override fun overstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt) {
         check(event.berørtePerioder.isNotEmpty()) { "Forventet ikke en igangsatt overstyring uten berørte perioder." }
         if (event.årsak == "KORRIGERT_INNTEKTSMELDING") IM.korrigertInntekt(event.meldingsreferanseId)
     }
 
-    private fun EventSubscription.VedtaksperiodeVenterEvent.tilstander() = when (vedtaksperiodeId == venterPå.vedtaksperiodeId) {
-        true -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} trenger hjelp${venterPå.venteårsak.hvorfor?.let { " fordi $it" } ?: ""}! 😱"
-        false -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} venter på en annen vedtaksperiode i ${gjeldendeTilstander[venterPå.vedtaksperiodeId]} som trenger${venterPå.venteårsak.hvorfor?.let { " fordi $it" } ?: ""}! 😱"
-    }
+    private fun EventSubscription.VedtaksperiodeVenterEvent.tilstander() =
+        when (vedtaksperiodeId == venterPå.vedtaksperiodeId) {
+            true -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} trenger hjelp${venterPå.venteårsak.hvorfor?.let { " fordi $it" } ?: ""}! 😱"
+            false -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} venter på en annen vedtaksperiode i ${gjeldendeTilstander[venterPå.vedtaksperiodeId]} som trenger${venterPå.venteårsak.hvorfor?.let { " fordi $it" } ?: ""}! 😱"
+        }
 
     override fun behandlingUtført() {
         bekreftIngenUgyldigeSituasjoner()
@@ -179,31 +185,35 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         }
     }
 
-    private fun bekreftIngenUgyldigeSituasjoner() = sjekk {
-        bekreftIngenOverlappende()
-        validerSykdomshistorikk()
-        validerSykdomstidslinjePåBehandlinger()
-        validerTilstandPåSisteBehandlingForFerdigbehandledePerioder()
-        bekreftTilstandPåSisteBehandlingForForkastedePerioder()
-        validerRefusjonsopplysningerPåBehandlinger()
-        validerUtbetalingOgVilkårsgrunnlagPåBehandlinger()
-        validerBeregningIder()
-        IM.bekreftEntydighåndtering()
-    }
+    private fun bekreftIngenUgyldigeSituasjoner() =
+        sjekk {
+            bekreftIngenOverlappende()
+            validerSykdomshistorikk()
+            validerSykdomstidslinjePåBehandlinger()
+            validerTilstandPåSisteBehandlingForFerdigbehandledePerioder()
+            bekreftTilstandPåSisteBehandlingForForkastedePerioder()
+            validerRefusjonsopplysningerPåBehandlinger()
+            validerUtbetalingOgVilkårsgrunnlagPåBehandlinger()
+            validerBeregningIder()
+            IM.bekreftEntydighåndtering()
+        }
 
     internal fun bekreftVarselHarKnytningTilVedtaksperiode(varsler: List<Aktivitet.Varsel>) {
         varsler.forEach { aktivitet ->
             // disse opprettes utenfor en vedtaksperiode/eller på en lukket vedtaksperiode 💀
             if (aktivitet.kode in setOf(Varselkode.RV_RV_7)) return@forEach
 
-            val vedtaksperiodekontekst = checkNotNull(aktivitet.kontekster.firstOrNull { it.kontekstType == "Vedtaksperiode" }) {
-                "Det er opprettet et varsel utenom Vedtaksperiode:\n${aktivitet}"
-            }
+            val vedtaksperiodekontekst =
+                checkNotNull(aktivitet.kontekster.firstOrNull { it.kontekstType == "Vedtaksperiode" }) {
+                    "Det er opprettet et varsel utenom Vedtaksperiode:\n$aktivitet"
+                }
             val vedtaksperiodeId = UUID.fromString(vedtaksperiodekontekst.kontekstMap.getValue("vedtaksperiodeId"))
-            val behandlingstatusPåTidspunkt = gjeldendeBehandlingstatus
-                .getValue(vedtaksperiodeId)
-                .firstOrNull { (tidspunkt, _) -> tidspunkt < aktivitet.tidsstempel }?.second
-                ?: error("Finner ikke behandling forut før varselstidspunktet (vedtaksperiode $vedtaksperiodeId)")
+            val behandlingstatusPåTidspunkt =
+                gjeldendeBehandlingstatus
+                    .getValue(vedtaksperiodeId)
+                    .firstOrNull { (tidspunkt, _) -> tidspunkt < aktivitet.tidsstempel }
+                    ?.second
+                    ?: error("Finner ikke behandling forut før varselstidspunktet (vedtaksperiode $vedtaksperiodeId)")
             check(behandlingstatusPåTidspunkt == Behandlingstatus.ÅPEN) {
                 "Det er opprettet et varsel (${aktivitet.melding}) utenom en åpen behandling (status = $behandlingstatusPåTidspunkt)"
             }
@@ -214,9 +224,11 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         arbeidsgivere.forEach { arbeidsgiver ->
             val perioderPerHendelse = arbeidsgiver.sykdomshistorikk.inspektør.perioderPerHendelse()
             perioderPerHendelse.forEach { (_, sykdomstidslinjer) ->
-                check(sykdomstidslinjer.none { sykdomstidslinje ->
-                    sykdomstidslinjer.filterNot { it === sykdomstidslinje }.any { it == sykdomstidslinje }
-                }) {
+                check(
+                    sykdomstidslinjer.none { sykdomstidslinje ->
+                        sykdomstidslinjer.filterNot { it === sykdomstidslinje }.any { it == sykdomstidslinje }
+                    },
+                ) {
                     "Samme hendelse er blitt lagt til flere ganger med lik sykdomstidslinje"
                 }
             }
@@ -240,7 +252,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
                 Periode på sykdomstidslinje: ${it.sykdomstidslinje.periode()}
                 FørsteIkkeUkjenteDag=${it.sykdomstidslinje.inspektør.førsteIkkeUkjenteDag}
                 Periode på endring: ${it.periode}
-            """
+            """,
                         )
                     }
                 }
@@ -257,7 +269,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
                         if (endring.refusjonstidslinje.isEmpty()) {
                             if (behandling.tilstand == Tilstand.AvsluttetUtenVedtak) return@behandling // Ikke noe refusjonsopplysning på AUU er OK
                             if (vedtaksperiode.tilstand.type == AVVENTER_AVSLUTTET_UTEN_UTBETALING) return@behandling // Dette ER være AUU'er som skal tilbake til AUU, de må ikke ha refusjonsopplysninger.
-                            if (vedtaksperiode.tilstand.type in setOf(AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)) return@behandling// Ikke fått refusjonsopplysninger enda da
+                            if (vedtaksperiode.tilstand.type in setOf(AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)) return@behandling // Ikke fått refusjonsopplysninger enda da
                             error("Burde ikke ha tom refusjonstidslinje i tilstand ${vedtaksperiode.tilstand.type}")
                         }
                         val perioder = endring.refusjonstidslinje.perioderMedBeløp
@@ -277,7 +289,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
                         when (behandling.tilstand) {
                             Tilstand.Beregnet,
                             Tilstand.BeregnetOmgjøring,
-                            Tilstand.BeregnetRevurdering -> {
+                            Tilstand.BeregnetRevurdering,
+                            -> {
                                 assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}" }
                                 assertNotNull(endring.grunnlagsdata) { "forventer vilkårsgrunnlag i ${behandling.tilstand}" }
                                 assertEquals(IKKE_UTBETALT, endring.utbetaling!!.inspektør.tilstand) { "forventer at utbetaling i behandlingstilstand ${behandling.tilstand} skal være IKKE_UTBETALT, men var ${endring.utbetaling.inspektør.tilstand}" }
@@ -287,7 +300,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
                             Tilstand.VedtakFattet,
                             Tilstand.OverførtAnnullering,
                             Tilstand.VedtakIverksatt,
-                            Tilstand.AnnullertPeriode -> {
+                            Tilstand.AnnullertPeriode,
+                            -> {
                                 assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}" }
                                 assertNotNull(endring.grunnlagsdata) { "forventer vilkårsgrunnlag i ${behandling.tilstand}" }
                             }
@@ -296,7 +310,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
                             Tilstand.Uberegnet,
                             Tilstand.UberegnetOmgjøring,
                             Tilstand.UberegnetAnnullering,
-                            Tilstand.UberegnetRevurdering -> {
+                            Tilstand.UberegnetRevurdering,
+                            -> {
                                 assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}" }
                                 assertNull(endring.grunnlagsdata) { "forventer inget vilkårsgrunnlag i ${behandling.tilstand}" }
                                 assertEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}" }
@@ -354,35 +369,42 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
     }
 
     private fun Behandlinger.Behandling.gyldigTilInfotrygd() = tilstand == Tilstand.TilInfotrygd && avsluttet != null && vedtakFattet == null
+
     private fun Behandlinger.Behandling.gyldigAvsluttetUtenUtbetaling() = tilstand == Tilstand.AvsluttetUtenVedtak && avsluttet != null && vedtakFattet == null
+
     private fun Behandlinger.Behandling.gyldigAvsluttet() = tilstand == Tilstand.VedtakIverksatt && avsluttet != null && vedtakFattet != null
+
     private val Behandlinger.Behandling.nøkkelinfo get() = "tilstand=$tilstand, avsluttet=$avsluttet, vedtakFattet=$vedtakFattet"
+
     private fun validerTilstandPåSisteBehandlingForFerdigbehandledePerioder() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            arbeidsgiver.vedtaksperioder()
+            arbeidsgiver
+                .vedtaksperioder()
                 .filter { it.tilstand.type in setOf(TilstandType.AVSLUTTET, TilstandType.AVSLUTTET_UTEN_UTBETALING, TilstandType.TIL_INFOTRYGD) }
                 .groupBy(keySelector = { it.tilstand.type }) {
                     it.behandlinger.behandlinger().last()
-                }
-                .forEach { (tilstand, sisteBehandlinger) ->
+                }.forEach { (tilstand, sisteBehandlinger) ->
                     when (tilstand) {
-                        TilstandType.TIL_INFOTRYGD -> sisteBehandlinger.filterNot { it.gyldigTilInfotrygd() }.let {
-                            check(it.isEmpty()) {
-                                "Disse ${it.size} periodene i TilInfotrygd har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"
+                        TilstandType.TIL_INFOTRYGD ->
+                            sisteBehandlinger.filterNot { it.gyldigTilInfotrygd() }.let {
+                                check(it.isEmpty()) {
+                                    "Disse ${it.size} periodene i TilInfotrygd har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"
+                                }
                             }
-                        }
 
-                        TilstandType.AVSLUTTET_UTEN_UTBETALING -> sisteBehandlinger.filterNot { it.gyldigAvsluttetUtenUtbetaling() }.let {
-                            check(it.isEmpty()) {
-                                "Disse ${it.size} periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"
+                        TilstandType.AVSLUTTET_UTEN_UTBETALING ->
+                            sisteBehandlinger.filterNot { it.gyldigAvsluttetUtenUtbetaling() }.let {
+                                check(it.isEmpty()) {
+                                    "Disse ${it.size} periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"
+                                }
                             }
-                        }
 
-                        TilstandType.AVSLUTTET -> sisteBehandlinger.filterNot { it.gyldigAvsluttet() }.let {
-                            check(it.isEmpty()) {
-                                "Disse ${it.size} periodene i Avsluttet har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"
+                        TilstandType.AVSLUTTET ->
+                            sisteBehandlinger.filterNot { it.gyldigAvsluttet() }.let {
+                                check(it.isEmpty()) {
+                                    "Disse ${it.size} periodene i Avsluttet har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"
+                                }
                             }
-                        }
 
                         else -> error("Svært snedig at perioder i ${tilstand::class.simpleName} er ferdig behandlet")
                     }
@@ -397,7 +419,13 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
                     "Forventet at forkastet vedtaksperiode ${forkastetPeriode.id} er i tilstand TIL_INFOTRYGD"
                 }
                 forkastetPeriode.behandlinger.behandlinger().last().also { behandling ->
-                    val utbetalingstatus = behandling.endringer().asReversed().firstNotNullOfOrNull { it.utbetaling }?.inspektør?.tilstand
+                    val utbetalingstatus =
+                        behandling
+                            .endringer()
+                            .asReversed()
+                            .firstNotNullOfOrNull { it.utbetaling }
+                            ?.inspektør
+                            ?.tilstand
                     check(utbetalingstatus == null || utbetalingstatus in setOf(Utbetalingstatus.FORKASTET, Utbetalingstatus.IKKE_GODKJENT, Utbetalingstatus.ANNULLERT)) {
                         "Utbetalingstatus for forkastet behandling er ikke FORKASTET / IKKE_GODKJENT / ANNULLERT, men $utbetalingstatus"
                     }
@@ -425,6 +453,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
 
     private class Inntektsmeldinger {
         private val signaler = mutableMapOf<UUID, MutableList<Signal>>()
+
         fun håndtert(inntektsmeldingId: UUID) {
             signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.HÅNDTERT)
         }
@@ -442,17 +471,22 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
         }
 
         fun behandlingUtført() = signaler.clear()
+
         fun bekreftEntydighåndtering() {
             if (signaler.isEmpty()) return // En behandling uten håndtering av inntektsmeldinger 🤤
             signaler.forEach { (_, signaler) ->
                 val unikeSignaler = signaler.toSet()
 
-                if (Signal.IKKE_HÅNDTERT in signaler) check(unikeSignaler == setOf(Signal.IKKE_HÅNDTERT)) {
-                    "Signalet om at inntektsmelding ikke er håndtert er sendt i kombinasjon med konflikterende signaler: $signaler"
+                if (Signal.IKKE_HÅNDTERT in signaler) {
+                    check(unikeSignaler == setOf(Signal.IKKE_HÅNDTERT)) {
+                        "Signalet om at inntektsmelding ikke er håndtert er sendt i kombinasjon med konflikterende signaler: $signaler"
+                    }
                 }
 
-                if (Signal.FØR_SØKNAD in signaler) check(unikeSignaler == setOf(Signal.FØR_SØKNAD)) {
-                    "Signalet om at inntektsmelding kom før søknad er sendt i kombinasjon med konflikterende signaler: $signaler"
+                if (Signal.FØR_SØKNAD in signaler) {
+                    check(unikeSignaler == setOf(Signal.FØR_SØKNAD)) {
+                        "Signalet om at inntektsmelding kom før søknad er sendt i kombinasjon med konflikterende signaler: $signaler"
+                    }
                 }
             }
         }
@@ -466,13 +500,22 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person) : Even
     }
 
     private enum class Behandlingstatus {
-        ÅPEN, LUKKET, AVBRUTT, ANNULLERT, AVSLUTTET
+        ÅPEN,
+        LUKKET,
+        AVBRUTT,
+        ANNULLERT,
+        AVSLUTTET,
     }
 
     internal companion object {
-        internal class UgyldigSituasjonException(cause: Throwable) : Throwable(cause.message, cause)
+        internal class UgyldigSituasjonException(
+            cause: Throwable,
+        ) : Throwable(cause.message, cause)
 
-        internal fun assertUgyldigSituasjon(forventetUgyldigSituasjon: String, block: () -> Unit) {
+        internal fun assertUgyldigSituasjon(
+            forventetUgyldigSituasjon: String,
+            block: () -> Unit,
+        ) {
             val ugyldigSituasjon = assertThrows<UgyldigSituasjonException> { block() }.message
             assertTrue(ugyldigSituasjon?.contains(forventetUgyldigSituasjon) == true) {
                 "Forventet ugyldig situasjon '$forventetUgyldigSituasjon', men var '$ugyldigSituasjon'"

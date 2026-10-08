@@ -1,9 +1,9 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.hendelser.Avsender.SYSTEM
+import java.time.LocalDateTime
+import java.util.*
 
 class KanIkkeBehandlesHer(
     meldingsreferanseId: MeldingsreferanseId,
@@ -14,17 +14,19 @@ class KanIkkeBehandlesHer(
     private val saksbehandlerIdent: String,
     private val saksbehandlerEpost: String,
     opprettet: LocalDateTime,
-    override val automatisert: Boolean
+    override val automatisert: Boolean,
 ) : Behandlingsavgjørelse {
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = if (automatisert) SYSTEM else SAKSBEHANDLER,
-        innsendt = opprettet,
-        registrert = LocalDateTime.now(),
-        automatiskBehandling = automatisert
-    )
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = if (automatisert) SYSTEM else SAKSBEHANDLER,
+            innsendt = opprettet,
+            registrert = LocalDateTime.now(),
+            automatiskBehandling = automatisert,
+        )
 
     override val avgjørelsestidspunkt = opprettet
     override val godkjent = false
+
     override fun saksbehandler() = Saksbehandler(saksbehandlerIdent, saksbehandlerEpost)
 }

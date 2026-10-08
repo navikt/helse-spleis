@@ -1,15 +1,6 @@
 package no.nav.helse.spleis.db
 
-import com.github.navikt.tbd_libs.sql_dsl.connection
-import com.github.navikt.tbd_libs.sql_dsl.int
-import com.github.navikt.tbd_libs.sql_dsl.long
-import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
-import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
-import com.github.navikt.tbd_libs.sql_dsl.single
-import com.github.navikt.tbd_libs.sql_dsl.string
-import com.github.navikt.tbd_libs.sql_dsl.transaction
-import java.sql.Connection
-import javax.sql.DataSource
+import com.github.navikt.tbd_libs.sql_dsl.*
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.person.Person
@@ -20,9 +11,13 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.intellij.lang.annotations.Language
+import java.sql.Connection
+import javax.sql.DataSource
 
-internal class PersonDao(private val dataSource: DataSource, private val STØTTER_IDENTBYTTE: Boolean) {
-
+internal class PersonDao(
+    private val dataSource: DataSource,
+    private val STØTTER_IDENTBYTTE: Boolean,
+) {
     fun hentEllerOpprettPerson(
         regelverkslogg: Regelverkslogg,
         personidentifikator: Personidentifikator,
@@ -31,7 +26,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         hendelseRepository: HendelseRepository,
         behandlingContext: BehandlingContext,
         lagNyPerson: () -> Person?,
-        håndterPerson: (Person) -> Unit
+        håndterPerson: (Person) -> Unit,
     ) {
         /* finner eksisterende person og låser den for oppdatering, slik at andre
             selects mot samme person (som inkluderer 'FOR UPDATE') blokkeres frem til transaksjonen slutter.
@@ -50,8 +45,9 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
          */
         dataSource.connection {
             transaction {
-                val (personId, person) = hentPersonEllerOpprettNy(this, regelverkslogg, hendelseRepository, personidentifikator, lagNyPerson, historiskeFolkeregisteridenter)
-                    ?: return@transaction behandlingContext.lagreMeldingerIUtboks(this)
+                val (personId, person) =
+                    hentPersonEllerOpprettNy(this, regelverkslogg, hendelseRepository, personidentifikator, lagNyPerson, historiskeFolkeregisteridenter)
+                        ?: return@transaction behandlingContext.lagreMeldingerIUtboks(this)
 
                 knyttPersonTilHistoriskeIdenter(this, personId, personidentifikator, historiskeFolkeregisteridenter)
 
@@ -67,26 +63,45 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         }
     }
 
-    private fun hentPersonEllerOpprettNy(connection: Connection, regelverkslogg: Regelverkslogg, hendelseRepository: HendelseRepository, personidentifikator: Personidentifikator, lagNyPerson: () -> Person?, historiskeFolkeregisteridenter: Set<Personidentifikator>): Pair<Long, Person>? {
-        return gjenopprettFraTidligereBehandling(connection, regelverkslogg, hendelseRepository, personidentifikator, historiskeFolkeregisteridenter) ?: opprettNyPerson(connection, lagNyPerson)
-    }
+    private fun hentPersonEllerOpprettNy(
+        connection: Connection,
+        regelverkslogg: Regelverkslogg,
+        hendelseRepository: HendelseRepository,
+        personidentifikator: Personidentifikator,
+        lagNyPerson: () -> Person?,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ): Pair<Long, Person>? = gjenopprettFraTidligereBehandling(connection, regelverkslogg, hendelseRepository, personidentifikator, historiskeFolkeregisteridenter) ?: opprettNyPerson(connection, lagNyPerson)
 
-    private fun gjenopprettFraTidligereBehandling(connection: Connection, regelverkslogg: Regelverkslogg, hendelseRepository: HendelseRepository, personidentifikator: Personidentifikator, historiskeFolkeregisteridenter: Set<Personidentifikator>): Pair<Long, Person>? {
-        val (personId, serialisertPerson, tidligerePersoner) = hentPersonOgLåsPersonForBehandling(connection, personidentifikator, historiskeFolkeregisteridenter)
-            ?: hentPersonFraHistoriskeIdenter(connection, personidentifikator, historiskeFolkeregisteridenter)
-            ?: return null
+    private fun gjenopprettFraTidligereBehandling(
+        connection: Connection,
+        regelverkslogg: Regelverkslogg,
+        hendelseRepository: HendelseRepository,
+        personidentifikator: Personidentifikator,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ): Pair<Long, Person>? {
+        val (personId, serialisertPerson, tidligerePersoner) =
+            hentPersonOgLåsPersonForBehandling(connection, personidentifikator, historiskeFolkeregisteridenter)
+                ?: hentPersonFraHistoriskeIdenter(connection, personidentifikator, historiskeFolkeregisteridenter)
+                ?: return null
         val tidligereBehandlinger = tidligerePersoner.map { tidligerePerson -> Person.gjenopprett(regelverkslogg, tidligerePerson.tilPersonDto()) }
         val personInn = serialisertPerson.tilPersonDto { hendelseRepository.hentAlleHendelser(personidentifikator) }
         return personId to Person.gjenopprett(regelverkslogg, personInn, tidligereBehandlinger)
     }
 
-    private fun opprettNyPerson(connection: Connection, lagNyPerson: () -> Person?): Pair<Long, Person>? {
+    private fun opprettNyPerson(
+        connection: Connection,
+        lagNyPerson: () -> Person?,
+    ): Pair<Long, Person>? {
         val person = lagNyPerson() ?: return null
         val personId = opprettNyPersonversjon(connection, person.personidentifikator, 0, "{}")
         return personId to person
     }
 
-    private fun hentTidligereBehandledeIdenter(connection: Connection, personId: Long, historiskeFolkeregisteridenter: Set<Personidentifikator>): List<SerialisertPerson> {
+    private fun hentTidligereBehandledeIdenter(
+        connection: Connection,
+        personId: Long,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ): List<SerialisertPerson> {
         if (historiskeFolkeregisteridenter.isEmpty()) return emptyList()
         // forventer én rad tilbake ellers kastes en exception siden vi da kan knytte
         // flere ulike person-rader til samme person, og personen må merges manuelt
@@ -95,23 +110,35 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
             .map { (_, person) -> person }
     }
 
-    private fun hentPersonOgLåsPersonForBehandling(connection: Connection, personidentifikator: Personidentifikator, historiskeFolkeregisteridenter: Set<Personidentifikator>): Triple<Long, SerialisertPerson, List<SerialisertPerson>>? {
+    private fun hentPersonOgLåsPersonForBehandling(
+        connection: Connection,
+        personidentifikator: Personidentifikator,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ): Triple<Long, SerialisertPerson, List<SerialisertPerson>>? {
         @Language("PostgreSQL")
         val statement = "SELECT id, skjema_versjon, data FROM person WHERE fnr = ? FOR UPDATE"
-        val (personId, person) = connection.prepareStatement(statement).use {
-            it.setLong(1, personidentifikator.toLong())
-            it.mapNotNull { row ->
-                row.long("id") to SerialisertPerson(
-                    json = row.string("data"),
-                    skjemaVersjon = row.int("skjema_versjon")
-                )
-            }
-        }.singleOrNullOrThrow() ?: return null
+        val (personId, person) =
+            connection
+                .prepareStatement(statement)
+                .use {
+                    it.setLong(1, personidentifikator.toLong())
+                    it.mapNotNull { row ->
+                        row.long("id") to
+                            SerialisertPerson(
+                                json = row.string("data"),
+                                skjemaVersjon = row.int("skjema_versjon"),
+                            )
+                    }
+                }.singleOrNullOrThrow() ?: return null
 
         return Triple(personId, person, hentTidligereBehandledeIdenter(connection, personId, historiskeFolkeregisteridenter))
     }
 
-    private fun hentPersonFraHistoriskeIdenter(connection: Connection, personidentifikator: Personidentifikator, historiskeFolkeregisteridenter: Set<Personidentifikator>): Triple<Long, SerialisertPerson, List<SerialisertPerson>>? {
+    private fun hentPersonFraHistoriskeIdenter(
+        connection: Connection,
+        personidentifikator: Personidentifikator,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ): Triple<Long, SerialisertPerson, List<SerialisertPerson>>? {
         if (!STØTTER_IDENTBYTTE) return null
         val identer = historiskeFolkeregisteridenter.plusElement(personidentifikator)
 
@@ -120,7 +147,10 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
             ?.let { (personId, person) -> Triple(personId, person, emptyList()) }
     }
 
-    private fun hentIdenter(connection: Connection, identer: Collection<Personidentifikator>): List<Pair<Long, SerialisertPerson>> {
+    private fun hentIdenter(
+        connection: Connection,
+        identer: Collection<Personidentifikator>,
+    ): List<Pair<Long, SerialisertPerson>> {
         @Language("PostgreSQL")
         val statement = """
             SELECT p.id, p.skjema_versjon, p.data FROM person p
@@ -130,19 +160,24 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         """
         // forventer én rad tilbake ellers kastes en exception siden vi da kan knytte
         // flere ulike person-rader til samme person, og personen må merges manuelt
-        return connection.prepareStatementWithNamedParameters(statement) {
-            withParameter("identer", identer.map { it.toLong() })
-        }
-            .mapNotNull { row ->
-                row.long("id") to SerialisertPerson(
-                    json = row.string("data"),
-                    skjemaVersjon = row.int("skjema_versjon")
-                )
-            }
-            .distinctBy { (personId, _) -> personId }
+        return connection
+            .prepareStatementWithNamedParameters(statement) {
+                withParameter("identer", identer.map { it.toLong() })
+            }.mapNotNull { row ->
+                row.long("id") to
+                    SerialisertPerson(
+                        json = row.string("data"),
+                        skjemaVersjon = row.int("skjema_versjon"),
+                    )
+            }.distinctBy { (personId, _) -> personId }
     }
 
-    private fun knyttPersonTilHistoriskeIdenter(connection: Connection, personId: Long, personidentifikator: Personidentifikator, historiskeFolkeregisteridenter: Set<Personidentifikator>) {
+    private fun knyttPersonTilHistoriskeIdenter(
+        connection: Connection,
+        personId: Long,
+        personidentifikator: Personidentifikator,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {
         val identer = if (STØTTER_IDENTBYTTE) historiskeFolkeregisteridenter.plusElement(personidentifikator) else setOf(personidentifikator)
 
         @Language("PostgreSQL")
@@ -156,28 +191,42 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
     }
 
     private fun <R> Collection<R>.singleOrNullOrThrow() =
-        if (size < 2) this.firstOrNull()
-        else throw IllegalStateException("Listen inneholder mer enn ett element!")
+        if (size < 2) {
+            this.firstOrNull()
+        } else {
+            throw IllegalStateException("Listen inneholder mer enn ett element!")
+        }
 
-    private fun opprettNyPersonversjon(connection: Connection, personidentifikator: Personidentifikator, skjemaVersjon: Int, personJson: String): Long {
+    private fun opprettNyPersonversjon(
+        connection: Connection,
+        personidentifikator: Personidentifikator,
+        skjemaVersjon: Int,
+        personJson: String,
+    ): Long {
         @Language("PostgreSQL")
         val statement = """ INSERT INTO person (fnr, skjema_versjon, data) VALUES (:fnr, :skjemaversjon, :data) RETURNING id """
-        return connection.prepareStatementWithNamedParameters(statement) {
-            withParameter("fnr", personidentifikator.toLong())
-            withParameter("skjemaversjon", skjemaVersjon)
-            withParameter("data", personJson)
-        }.single { it.long("id") }
+        return connection
+            .prepareStatementWithNamedParameters(statement) {
+                withParameter("fnr", personidentifikator.toLong())
+                withParameter("skjemaversjon", skjemaVersjon)
+                withParameter("data", personJson)
+            }.single { it.long("id") }
     }
 
-    private fun oppdaterAvstemmingtidspunkt(connection: Connection, message: HendelseMessage, personidentifikator: Personidentifikator) {
+    private fun oppdaterAvstemmingtidspunkt(
+        connection: Connection,
+        message: HendelseMessage,
+        personidentifikator: Personidentifikator,
+    ) {
         if (message !is AvstemmingMessage) return
         @Language("PostgreSQL")
         val statement = "UPDATE person SET sist_avstemt = now() WHERE fnr = :fnr"
-        connection.prepareStatementWithNamedParameters(statement) {
-            withParameter("fnr", personidentifikator.toLong())
-        }.use { stmt ->
-            stmt.execute()
-        }
+        connection
+            .prepareStatementWithNamedParameters(statement) {
+                withParameter("fnr", personidentifikator.toLong())
+            }.use { stmt ->
+                stmt.execute()
+            }
     }
 
     internal fun manglerAvstemming(): Int {
@@ -190,17 +239,24 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         }
     }
 
-    private fun oppdaterPersonversjon(connection: Connection, personId: Long, skjemaVersjon: Int, personJson: String) {
+    private fun oppdaterPersonversjon(
+        connection: Connection,
+        personId: Long,
+        skjemaVersjon: Int,
+        personJson: String,
+    ) {
         @Language("PostgreSQL")
         val statement = """ UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE id=:personId; """
         check(
-            1 == connection.prepareStatementWithNamedParameters(statement) {
-                withParameter("skjemaversjon", skjemaVersjon)
-                withParameter("data", personJson)
-                withParameter("personId", personId)
-            }.use { stmt ->
-                stmt.executeUpdate()
-            }
+            1 ==
+                connection
+                    .prepareStatementWithNamedParameters(statement) {
+                        withParameter("skjemaversjon", skjemaVersjon)
+                        withParameter("data", personJson)
+                        withParameter("personId", personId)
+                    }.use { stmt ->
+                        stmt.executeUpdate()
+                    },
         ) {
             "Forventet å påvirke én og bare én rad!"
         }

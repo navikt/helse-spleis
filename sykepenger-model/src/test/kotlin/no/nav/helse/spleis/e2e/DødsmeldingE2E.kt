@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class DødsmeldingE2E : AbstractDslTest() {
-
     @Test
     fun `registrerer dødsdato`() {
         val dødsdato = 10.januar
@@ -35,7 +34,12 @@ internal class DødsmeldingE2E : AbstractDslTest() {
                     assertEquals(listOf(Begrunnelse.EtterDødsdato), it.begrunnelse(dag))
                 }
             }
-            assertEquals(9, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.avvistDagTeller)
+            assertEquals(
+                9,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.utbetalingstidslinje.inspektør.avvistDagTeller,
+            )
         }
     }
 
@@ -47,7 +51,12 @@ internal class DødsmeldingE2E : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(Periode(1.januar, 16.januar)), INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(0, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.avvistDagTeller)
+            assertEquals(
+                0,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.utbetalingstidslinje.inspektør.avvistDagTeller,
+            )
         }
     }
 

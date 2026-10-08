@@ -5,15 +5,14 @@ import com.github.navikt.tbd_libs.sql_dsl.int
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.single
 import com.github.navikt.tbd_libs.sql_dsl.transaction
-import java.util.*
 import no.nav.helse.nyttFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class PersonRepositoryTest : DBTest() {
-
     private lateinit var personRepository: PersonRepository
     private val fødselsnummer = nyttFødselsnummer()
 
@@ -32,8 +31,8 @@ internal class PersonRepositoryTest : DBTest() {
         assertEquals(0, finnMelding(fødselsnummer))
     }
 
-    private fun finnPerson(fødselsnummer: String): Int {
-        return dataSource.ds.connection {
+    private fun finnPerson(fødselsnummer: String): Int =
+        dataSource.ds.connection {
             prepareStatementWithNamedParameters("SELECT COUNT(1) FROM person WHERE fnr = :fnr") {
                 withParameter("fnr", fødselsnummer.toLong())
             }.use {
@@ -42,10 +41,9 @@ internal class PersonRepositoryTest : DBTest() {
                 }
             }
         }
-    }
 
-    private fun finnMelding(fødselsnummer: String): Int {
-        return dataSource.ds.connection {
+    private fun finnMelding(fødselsnummer: String): Int =
+        dataSource.ds.connection {
             prepareStatementWithNamedParameters("SELECT COUNT(1) FROM melding WHERE fnr = :fnr") {
                 withParameter("fnr", fødselsnummer.toLong())
             }.use {
@@ -54,7 +52,6 @@ internal class PersonRepositoryTest : DBTest() {
                 }
             }
         }
-    }
 
     private fun opprettDummyPerson(fødselsnummer: String) {
         dataSource.ds.connection {
@@ -75,7 +72,6 @@ internal class PersonRepositoryTest : DBTest() {
                     it.execute()
                 }
             }
-
         }
     }
 }

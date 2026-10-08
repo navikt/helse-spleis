@@ -6,13 +6,18 @@ import java.util.UUID
 internal class V345LeggeTilOpptjeningsvurderingId : JsonMigration(version = 345) {
     override val description = "Legger til opptjeningsburderingId på alle vilkårsgrunnlag"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    ) {
         jsonNode.path("vilkårsgrunnlagHistorikk").forEach { historikkInnslag ->
             historikkInnslag.path("vilkårsgrunnlag").forEach { vilkårsgrunnlag ->
                 vilkårsgrunnlag as ObjectNode
                 val vilkårsgrunnlagId = vilkårsgrunnlag["vilkårsgrunnlagId"].asText()
-                vilkårsgrunnlag.put("opptjeningsvurderingId",
-                    UUID.nameUUIDFromBytes("$vilkårsgrunnlagId:Opptjening".toByteArray()).toString())
+                vilkårsgrunnlag.put(
+                    "opptjeningsvurderingId",
+                    UUID.nameUUIDFromBytes("$vilkårsgrunnlagId:Opptjening".toByteArray()).toString(),
+                )
             }
         }
     }

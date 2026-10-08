@@ -12,7 +12,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 
 internal class FeriepengeutbetalingerRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Feriepengeutbetaling)
     override val riverName = "Feriepengeutbetaling"
@@ -33,8 +33,9 @@ internal class FeriepengeutbetalingerRiver(
         message.require("@løsning.${Feriepengeutbetaling.utgåendeNavn}.overføringstidspunkt", JsonNode::asLocalDateTime)
     }
 
-    override fun createMessage(packet: JsonMessage) = FeriepengeutbetalingMessage(
-        packet = packet,
-        meldingsporing = Meldingsporing(id = packet.meldingsreferanseId(), fødselsnummer = packet["fødselsnummer"].asText())
-    )
+    override fun createMessage(packet: JsonMessage) =
+        FeriepengeutbetalingMessage(
+            packet = packet,
+            meldingsporing = Meldingsporing(id = packet.meldingsreferanseId(), fødselsnummer = packet["fødselsnummer"].asText()),
+        )
 }

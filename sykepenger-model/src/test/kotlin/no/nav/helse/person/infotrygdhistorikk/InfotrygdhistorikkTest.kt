@@ -1,8 +1,5 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.dsl.Behovsoppsamler
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.februar
@@ -21,24 +18,23 @@ import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.resetSeed
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 internal class InfotrygdhistorikkTest {
-
     @Test
     fun `må oppfriske tom historikk`() {
         infotrygdhistorikkTest(
             setup = { historikk, eventBus, aktivitetslogg ->
-                 historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
+                historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
             },
             assertions = { historikk, nyeBehov, _ ->
                 assertEquals(1, nyeBehov.size)
                 assertEquals(0, historikk.inspektør.elementer())
-            }
+            },
         )
     }
 
@@ -53,7 +49,7 @@ internal class InfotrygdhistorikkTest {
                 val behov = nyeBehov.single()
                 assertEquals(tidligsteDato.minusYears(4), behov.periode.start)
                 assertEquals(LocalDate.now(), behov.periode.endInclusive)
-            }
+            },
         )
 
         infotrygdhistorikkTest(
@@ -65,7 +61,7 @@ internal class InfotrygdhistorikkTest {
                 val behov = nyeBehov.single()
                 assertEquals(1.februar.minusYears(4), behov.periode.start)
                 assertEquals(LocalDate.now(), behov.periode.endInclusive)
-            }
+            },
         )
     }
 
@@ -79,7 +75,7 @@ internal class InfotrygdhistorikkTest {
             assertions = { historikk, nyeBehov, _ ->
                 assertEquals(1, nyeBehov.size)
                 assertEquals(0, historikk.inspektør.elementer())
-            }
+            },
         )
     }
 
@@ -94,8 +90,8 @@ internal class InfotrygdhistorikkTest {
             },
             assertions = { historikk, nyeBehov, _ ->
                 assertEquals(1, nyeBehov.size)
-                assertEquals(1,historikk.inspektør.elementer())
-            }
+                assertEquals(1, historikk.inspektør.elementer())
+            },
         )
     }
 
@@ -108,8 +104,8 @@ internal class InfotrygdhistorikkTest {
                 historikk.oppdaterHistorikk(
                     historikkelement(
                         oppdatert = tidsstempel,
-                        perioder = listOf(Friperiode(1.januar, 10.januar))
-                    )
+                        perioder = listOf(Friperiode(1.januar, 10.januar)),
+                    ),
                 )
                 historikk.tøm()
                 historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
@@ -117,7 +113,7 @@ internal class InfotrygdhistorikkTest {
             assertions = { historikk, nyeBehov, _ ->
                 assertEquals(1, nyeBehov.size)
                 assertEquals(1, historikk.inspektør.elementer())
-            }
+            },
         )
     }
 
@@ -131,14 +127,14 @@ internal class InfotrygdhistorikkTest {
                 historikk.oppdaterHistorikk(
                     historikkelement(
                         oppdatert = tidsstempel1,
-                        perioder = listOf(Friperiode(1.januar, 5.januar))
-                    )
+                        perioder = listOf(Friperiode(1.januar, 5.januar)),
+                    ),
                 )
                 historikk.oppdaterHistorikk(
                     historikkelement(
                         oppdatert = tidsstempel2,
-                        perioder = listOf(Friperiode(1.januar, 10.januar))
-                    )
+                        perioder = listOf(Friperiode(1.januar, 10.januar)),
+                    ),
                 )
                 historikk.tøm()
                 historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
@@ -147,21 +143,22 @@ internal class InfotrygdhistorikkTest {
                 assertEquals(1, nyeBehov.size)
                 assertTrue(tidsstempel2 < historikk.inspektør.opprettet(0))
                 assertEquals(tidsstempel2, historikk.inspektør.oppdatert(0))
-            }
+            },
         )
     }
 
     @Test
     fun `tømme historikk - etter lagring av tom inntektliste`() {
         infotrygdhistorikkTest(
-            historikk = Infotrygdhistorikk.gjenopprett(
-                InfotrygdhistorikkInnDto(
-                    listOf(
-                        eksisterendeInfotrygdHistorikkelement(),
-                        eksisterendeInfotrygdHistorikkelement()
-                    )
-                )
-            ),
+            historikk =
+                Infotrygdhistorikk.gjenopprett(
+                    InfotrygdhistorikkInnDto(
+                        listOf(
+                            eksisterendeInfotrygdHistorikkelement(),
+                            eksisterendeInfotrygdHistorikkelement(),
+                        ),
+                    ),
+                ),
             setup = { historikk, eventBus, aktivitetslogg ->
                 historikk.tøm()
                 historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
@@ -169,7 +166,7 @@ internal class InfotrygdhistorikkTest {
             assertions = { historikk, nyeBehov, _ ->
                 assertEquals(1, nyeBehov.size)
                 assertEquals(1, historikk.inspektør.elementer())
-            }
+            },
         )
     }
 
@@ -183,7 +180,7 @@ internal class InfotrygdhistorikkTest {
             assertions = { historikk, nyeBehov, _ ->
                 assertEquals(1, nyeBehov.size)
                 assertEquals(1, historikk.inspektør.elementer())
-            }
+            },
         )
     }
 
@@ -198,7 +195,7 @@ internal class InfotrygdhistorikkTest {
             assertions = { historikk, nyeBehov, _ ->
                 assertEquals(1, nyeBehov.size)
                 assertEquals(1, historikk.inspektør.elementer())
-            }
+            },
         )
     }
 
@@ -211,7 +208,7 @@ internal class InfotrygdhistorikkTest {
             },
             assertions = { _, nyeBehov, _ ->
                 assertEquals(1, nyeBehov.size)
-            }
+            },
         )
     }
 
@@ -221,9 +218,10 @@ internal class InfotrygdhistorikkTest {
 
         infotrygdhistorikkTest(
             setup = { historikk, eventBus, aktivitetslogg ->
-                val perioder = listOf(
-                    ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar)
-                )
+                val perioder =
+                    listOf(
+                        ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar),
+                    )
                 val gammel = nå.minusHours(24)
                 assertEquals(1.januar, historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = gammel)))
                 assertNull(historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = nå)))
@@ -233,7 +231,7 @@ internal class InfotrygdhistorikkTest {
                 assertEquals(1, historikk.inspektør.elementer())
                 assertTrue(nå < historikk.inspektør.opprettet(0))
                 assertEquals(nå, historikk.inspektør.oppdatert(0))
-            }
+            },
         )
     }
 
@@ -241,9 +239,9 @@ internal class InfotrygdhistorikkTest {
     fun `tom utbetalingstidslinje`() {
         infotrygdhistorikkTest(
             setup = { _, _, _ -> },
-            assertions = { historikk, _,_ ->
+            assertions = { historikk, _, _ ->
                 assertTrue(historikk.utbetalingstidslinje().isEmpty())
-            }
+            },
         )
     }
 
@@ -254,45 +252,50 @@ internal class InfotrygdhistorikkTest {
                 historikk.oppdaterHistorikk(
                     historikkelement(
                         listOf(
-                            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar)
-                        )
-                    )
+                            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar),
+                        ),
+                    ),
                 )
             },
-            assertions = { historikk, _,_ ->
+            assertions = { historikk, _, _ ->
                 historikk.utbetalingstidslinje().also {
                     assertEquals(januar, it.periode())
                 }
-            }
+            },
         )
     }
 
     @Test
     fun `rekkefølge respekteres ved deserialisering`() {
-        val perioder = listOf(
-            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar),
-            ArbeidsgiverUtbetalingsperiode("orgnr", 1.februar, 28.februar),
-            Friperiode(1.mars, 31.mars)
-        )
-        val nå = LocalDateTime.now()
-        val gjenopprettetHistorikk = Infotrygdhistorikk.gjenopprett(
-            InfotrygdhistorikkInnDto(
-                elementer = listOf(
-                    PersonData.InfotrygdhistorikkElementData(
-                        id = UUID.randomUUID(),
-                        tidsstempel = nå,
-                        hendelseId = UUID.randomUUID(),
-                        ferieperioder = listOf(PersonData.InfotrygdhistorikkElementData.FerieperiodeData(1.mars, 31.mars)),
-                        arbeidsgiverutbetalingsperioder = listOf(
-                            PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.februar, 28.februar),
-                            PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.januar, 31.januar)
-                        ),
-                        personutbetalingsperioder = emptyList(),
-                        oppdatert = nå
-                    ).tilDto()
-                )
+        val perioder =
+            listOf(
+                ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar),
+                ArbeidsgiverUtbetalingsperiode("orgnr", 1.februar, 28.februar),
+                Friperiode(1.mars, 31.mars),
             )
-        )
+        val nå = LocalDateTime.now()
+        val gjenopprettetHistorikk =
+            Infotrygdhistorikk.gjenopprett(
+                InfotrygdhistorikkInnDto(
+                    elementer =
+                        listOf(
+                            PersonData
+                                .InfotrygdhistorikkElementData(
+                                    id = UUID.randomUUID(),
+                                    tidsstempel = nå,
+                                    hendelseId = UUID.randomUUID(),
+                                    ferieperioder = listOf(PersonData.InfotrygdhistorikkElementData.FerieperiodeData(1.mars, 31.mars)),
+                                    arbeidsgiverutbetalingsperioder =
+                                        listOf(
+                                            PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.februar, 28.februar),
+                                            PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.januar, 31.januar),
+                                        ),
+                                    personutbetalingsperioder = emptyList(),
+                                    oppdatert = nå,
+                                ).tilDto(),
+                        ),
+                ),
+            )
 
         infotrygdhistorikkTest(
             historikk = gjenopprettetHistorikk,
@@ -301,7 +304,7 @@ internal class InfotrygdhistorikkTest {
                 assertEquals(1, historikk.inspektør.elementer())
                 assertNull(historikk.oppdaterHistorikk(historikkelement(perioder)))
                 assertEquals(1, historikk.inspektør.elementer())
-            }
+            },
         )
     }
 
@@ -312,7 +315,7 @@ internal class InfotrygdhistorikkTest {
             assertions = { historikk, nyeBehov, aktivitetslogg ->
                 assertTrue(historikk.validerMedFunksjonellFeil(aktivitetslogg, 1.januar til 31.januar))
                 assertFalse(aktivitetslogg.harFunksjonelleFeil())
-            }
+            },
         )
     }
 
@@ -323,9 +326,9 @@ internal class InfotrygdhistorikkTest {
                 historikkelement(
                     listOf(
                         ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 15.februar),
-                        Friperiode(15.mars, 20.mars)
-                    )
-                )
+                        Friperiode(15.mars, 20.mars),
+                    ),
+                ),
             )
         }
 
@@ -337,7 +340,7 @@ internal class InfotrygdhistorikkTest {
                 historikk.validerNyereOpplysninger(aktivitetslogg, 1.januar til 31.januar)
                 assertFalse(aktivitetslogg.harFunksjonelleFeil())
                 aktivitetslogg.assertVarsel(Varselkode.RV_IT_1)
-            }
+            },
         )
 
         infotrygdhistorikkTest(
@@ -348,7 +351,7 @@ internal class InfotrygdhistorikkTest {
                 assertFalse(historikk.validerMedFunksjonellFeil(aktivitetslogg, 20.februar til 28.februar))
                 assertTrue(aktivitetslogg.harVarslerEllerVerre())
                 aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IT_37)
-            }
+            },
         )
 
         infotrygdhistorikkTest(
@@ -358,7 +361,7 @@ internal class InfotrygdhistorikkTest {
             assertions = { historikk, nyeBehov, aktivitetslogg ->
                 assertTrue(historikk.validerMedFunksjonellFeil(aktivitetslogg, 1.mai til 5.mai))
                 assertFalse(aktivitetslogg.harVarslerEllerVerre())
-            }
+            },
         )
     }
 
@@ -373,15 +376,15 @@ internal class InfotrygdhistorikkTest {
                             Friperiode(11.januar, 12.januar),
                             ArbeidsgiverUtbetalingsperiode("ag2", 13.januar, 15.januar),
                             ArbeidsgiverUtbetalingsperiode("ag1", 16.januar, 20.januar),
-                            ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar)
-                        )
-                    )
+                            ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar),
+                        ),
+                    ),
                 )
             },
             assertions = { historikk, _, _ ->
                 assertEquals(5.januar, historikk.skjæringstidspunkt(emptyList()).sisteOrNull(5.januar til 31.januar))
                 assertEquals(1.januar, historikk.skjæringstidspunkt(listOf(2.S, 3.S)).sisteOrNull(januar))
-            }
+            },
         )
     }
 
@@ -393,9 +396,10 @@ internal class InfotrygdhistorikkTest {
         resetSeed(1.januar)
         val aktivitetslogg = Aktivitetslogg()
         val behovsoppsamler = Behovsoppsamler.FraEventBus()
-        val eventBus = EventBus().apply {
-            register(behovsoppsamler)
-        }
+        val eventBus =
+            EventBus().apply {
+                register(behovsoppsamler)
+            }
         val behovFør = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.OppdatertHistorikkFraInfotrygd>().toSet()
         setup(historikk, eventBus, aktivitetslogg)
         val nyeBehov = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.OppdatertHistorikkFraInfotrygd>().toSet() - behovFør
@@ -406,13 +410,12 @@ internal class InfotrygdhistorikkTest {
     private fun historikkelement(
         perioder: List<Infotrygdperiode> = emptyList(),
         hendelseId: UUID = UUID.randomUUID(),
-        oppdatert: LocalDateTime = LocalDateTime.now()
-    ) =
-        InfotrygdhistorikkElement.opprett(
-            oppdatert = oppdatert,
-            hendelseId = MeldingsreferanseId(hendelseId),
-            perioder = perioder
-        )
+        oppdatert: LocalDateTime = LocalDateTime.now(),
+    ) = InfotrygdhistorikkElement.opprett(
+        oppdatert = oppdatert,
+        hendelseId = MeldingsreferanseId(hendelseId),
+        perioder = perioder,
+    )
 
     private companion object {
         private val tidligsteDato = 1.januar

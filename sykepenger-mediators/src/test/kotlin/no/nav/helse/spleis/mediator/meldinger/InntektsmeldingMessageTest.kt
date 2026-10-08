@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingMessageTest {
-
     @Test
     fun `mapper naturalytelser fra json`() {
         assertEquals(emptyList<Inntektsmelding.OpphørAvNaturalytelse>(), objectMapper.readTree(naturalytelseTom).tilOpphørAvNaturalytelser())

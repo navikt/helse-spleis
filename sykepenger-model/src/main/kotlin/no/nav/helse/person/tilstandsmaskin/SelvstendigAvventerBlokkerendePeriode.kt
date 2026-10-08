@@ -9,7 +9,12 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
-    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+
+    override fun entering(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
@@ -17,15 +22,19 @@ internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilst
         vedtaksperiode: Vedtaksperiode,
         eventBus: EventBus,
         hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg
-    ) =
-        if (vedtaksperiode.vilkårsgrunnlag == null) {
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerVilkårsprøving)
-        } else {
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerHistorikk)
-        }
+        aktivitetslogg: IAktivitetslogg,
+    ) = if (vedtaksperiode.vilkårsgrunnlag == null) {
+        vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerVilkårsprøving)
+    } else {
+        vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerHistorikk)
+    }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    override fun håndterPåminnelse(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        påminnelse: Påminnelse,
+        aktivitetslogg: IAktivitetslogg,
+    ): Revurderingseventyr? {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         return null
     }

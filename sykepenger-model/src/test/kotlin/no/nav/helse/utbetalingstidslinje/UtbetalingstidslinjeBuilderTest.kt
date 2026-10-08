@@ -35,11 +35,11 @@ import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import no.nav.helse.økonomi.inspectors.inspektør
 
 internal class UtbetalingstidslinjeBuilderTest {
     @Test
@@ -59,8 +59,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 15.januar,
                 dagerUtenAnsvar = listOf(1.januar til 15.januar),
-                ferdigAvklart = false
-            ), perioder.single()
+                ferdigAvklart = false,
+            ),
+            perioder.single(),
         )
     }
 
@@ -75,8 +76,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 15.januar,
                 dagerUtenAnsvar = listOf(1.januar til 15.januar),
-                ferdigAvklart = false
-            ), perioder.single()
+                ferdigAvklart = false,
+            ),
+            perioder.single(),
         )
     }
 
@@ -91,8 +93,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 15.januar,
                 dagerUtenAnsvar = listOf(1.januar til 15.januar),
-                ferdigAvklart = false
-            ), perioder.single()
+                ferdigAvklart = false,
+            ),
+            perioder.single(),
         )
     }
 
@@ -108,8 +111,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 31.januar,
                 dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -126,8 +130,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 31.januar,
                 dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
         utbetalingstidslinje[1.januar].økonomi.inspektør.also {
             assertEquals(31000.månedlig, it.aktuellDagsinntekt)
@@ -146,8 +151,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 15.januar,
                 dagerUtenAnsvar = emptyList(),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -165,8 +171,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 28.februar,
                 dagerUtenAnsvar = emptyList(),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -183,8 +190,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 15.januar,
                 dagerUtenAnsvar = listOf(1.januar til 9.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -201,8 +209,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 15.januar,
                 dagerUtenAnsvar = emptyList(),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -220,15 +229,17 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 17.januar,
                 dagerUtenAnsvar = emptyList(),
-                ferdigAvklart = true
-            ), perioder.first()
+                ferdigAvklart = true,
+            ),
+            perioder.first(),
         )
         assertEquals(
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 18.januar til 3.februar,
                 dagerUtenAnsvar = listOf(18.januar til 2.februar),
-                ferdigAvklart = true
-            ), perioder.last()
+                ferdigAvklart = true,
+            ),
+            perioder.last(),
         )
     }
 
@@ -246,8 +257,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 3.februar,
                 dagerUtenAnsvar = emptyList(),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -263,8 +275,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 1.februar,
                 dagerUtenAnsvar = listOf(1.januar til 9.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -323,7 +336,8 @@ internal class UtbetalingstidslinjeBuilderTest {
                 omsluttendePeriode = 1.januar til 16.februar,
                 dagerUtenAnsvar = listOf(1.januar til 16.januar),
                 ferdigAvklart = true,
-            ), perioder.single()
+            ),
+            perioder.single(),
         )
     }
 
@@ -339,7 +353,8 @@ internal class UtbetalingstidslinjeBuilderTest {
                     omsluttendePeriode = 1.januar til 18.januar,
                     dagerUtenAnsvar = listOf(1.januar til 16.januar),
                     ferdigAvklart = true,
-                ), perioder.single()
+                ),
+                perioder.single(),
             )
         }
     }
@@ -369,7 +384,8 @@ internal class UtbetalingstidslinjeBuilderTest {
                     omsluttendePeriode = 1.januar til 22.januar,
                     dagerUtenAnsvar = listOf(1.januar til 16.januar),
                     ferdigAvklart = true,
-                ), perioder.single()
+                ),
+                perioder.single(),
             )
         }
     }
@@ -388,8 +404,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 22.januar,
                 dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -405,7 +422,8 @@ internal class UtbetalingstidslinjeBuilderTest {
                     omsluttendePeriode = 1.januar til 31.januar,
                     dagerUtenAnsvar = listOf(1.januar til 16.januar),
                     ferdigAvklart = true,
-                ), perioder.single()
+                ),
+                perioder.single(),
             )
         }
     }
@@ -421,8 +439,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 31.januar,
                 dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -437,8 +456,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 11.februar,
                 dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -456,8 +476,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 11.februar,
                 dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -476,7 +497,8 @@ internal class UtbetalingstidslinjeBuilderTest {
                     omsluttendePeriode = 1.januar til 11.februar,
                     dagerUtenAnsvar = listOf(1.januar til 16.januar),
                     ferdigAvklart = true,
-                ), perioder.single()
+                ),
+                perioder.single(),
             )
         }
     }
@@ -496,7 +518,8 @@ internal class UtbetalingstidslinjeBuilderTest {
                     omsluttendePeriode = 1.januar til 11.februar,
                     dagerUtenAnsvar = listOf(1.januar til 16.januar),
                     ferdigAvklart = true,
-                ), perioder.single()
+                ),
+                perioder.single(),
             )
         }
     }
@@ -513,8 +536,9 @@ internal class UtbetalingstidslinjeBuilderTest {
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 1.januar til 31.januar,
                     dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                    ferdigAvklart = true
-                ), perioder.single()
+                    ferdigAvklart = true,
+                ),
+                perioder.single(),
             )
         }
     }
@@ -531,15 +555,17 @@ internal class UtbetalingstidslinjeBuilderTest {
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 1.januar til 17.januar,
                     dagerUtenAnsvar = listOf(1.januar.somPeriode()),
-                    ferdigAvklart = false
-                ), perioder.first()
+                    ferdigAvklart = false,
+                ),
+                perioder.first(),
             )
             assertEquals(
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 18.januar til 2.februar,
                     dagerUtenAnsvar = listOf(18.januar til 2.februar),
-                    ferdigAvklart = true
-                ), perioder.last()
+                    ferdigAvklart = true,
+                ),
+                perioder.last(),
             )
         }
     }
@@ -558,8 +584,9 @@ internal class UtbetalingstidslinjeBuilderTest {
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 1.januar til 2.februar,
                     dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                    ferdigAvklart = true
-                ), perioder.single()
+                    ferdigAvklart = true,
+                ),
+                perioder.single(),
             )
         }
     }
@@ -576,15 +603,17 @@ internal class UtbetalingstidslinjeBuilderTest {
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 1.januar til 17.januar,
                     dagerUtenAnsvar = listOf(1.januar.somPeriode()),
-                    ferdigAvklart = false
-                ), perioder.first()
+                    ferdigAvklart = false,
+                ),
+                perioder.first(),
             )
             assertEquals(
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 18.januar til 2.februar,
                     dagerUtenAnsvar = listOf(18.januar til 2.februar),
-                    ferdigAvklart = true
-                ), perioder.last()
+                    ferdigAvklart = true,
+                ),
+                perioder.last(),
             )
         }
     }
@@ -601,15 +630,17 @@ internal class UtbetalingstidslinjeBuilderTest {
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 1.januar til 22.januar,
                     dagerUtenAnsvar = listOf(1.januar til 6.januar),
-                    ferdigAvklart = false
-                ), perioder.first()
+                    ferdigAvklart = false,
+                ),
+                perioder.first(),
             )
             assertEquals(
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 23.januar til 7.februar,
                     dagerUtenAnsvar = listOf(23.januar til 7.februar),
-                    ferdigAvklart = true
-                ), perioder.last()
+                    ferdigAvklart = true,
+                ),
+                perioder.last(),
             )
         }
     }
@@ -626,15 +657,17 @@ internal class UtbetalingstidslinjeBuilderTest {
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 1.januar til 21.januar,
                     dagerUtenAnsvar = listOf(1.januar til 5.januar),
-                    ferdigAvklart = false
-                ), perioder.first()
+                    ferdigAvklart = false,
+                ),
+                perioder.first(),
             )
             assertEquals(
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 22.januar til 6.februar,
                     dagerUtenAnsvar = listOf(22.januar til 6.februar),
-                    ferdigAvklart = true
-                ), perioder.last()
+                    ferdigAvklart = true,
+                ),
+                perioder.last(),
             )
         }
     }
@@ -653,8 +686,9 @@ internal class UtbetalingstidslinjeBuilderTest {
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 1.januar til 6.februar,
                     dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                    ferdigAvklart = true
-                ), perioder.single()
+                    ferdigAvklart = true,
+                ),
+                perioder.single(),
             )
         }
     }
@@ -670,8 +704,9 @@ internal class UtbetalingstidslinjeBuilderTest {
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 16.januar til 31.januar,
                     dagerUtenAnsvar = listOf(16.januar til 31.januar),
-                    ferdigAvklart = true
-                ), perioder.single()
+                    ferdigAvklart = true,
+                ),
+                perioder.single(),
             )
         }
     }
@@ -713,8 +748,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 29.januar,
                 dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -736,8 +772,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 16.januar,
                 dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -752,8 +789,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 19.januar,
                 dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -768,8 +806,9 @@ internal class UtbetalingstidslinjeBuilderTest {
                 PeriodeUtenNavAnsvar(
                     omsluttendePeriode = 1.januar til 26.januar,
                     dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                    ferdigAvklart = true
-                ), perioder.single()
+                    ferdigAvklart = true,
+                ),
+                perioder.single(),
             )
         }
     }
@@ -785,8 +824,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 18.januar,
                 dagerUtenAnsvar = listOf(1.januar til 12.januar, 17.januar til 18.januar),
-                ferdigAvklart = false
-            ), perioder.single()
+                ferdigAvklart = false,
+            ),
+            perioder.single(),
         )
     }
 
@@ -800,8 +840,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 17.januar,
                 dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -817,8 +858,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 4.januar til 20.januar,
                 dagerUtenAnsvar = listOf(4.januar til 19.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -833,8 +875,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 18.januar,
                 dagerUtenAnsvar = listOf(1.januar til 12.januar, 17.januar til 18.januar),
-                ferdigAvklart = false
-            ), perioder.single()
+                ferdigAvklart = false,
+            ),
+            perioder.single(),
         )
     }
 
@@ -851,8 +894,9 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 1.februar,
                 dagerUtenAnsvar = listOf(1.januar til 10.januar, 26.januar til 31.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -869,15 +913,17 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 26.januar,
                 dagerUtenAnsvar = listOf(1.januar til 10.januar),
-                ferdigAvklart = false
-            ), perioder.first()
+                ferdigAvklart = false,
+            ),
+            perioder.first(),
         )
         assertEquals(
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 27.januar til 2.februar,
                 dagerUtenAnsvar = listOf(27.januar til 2.februar),
-                ferdigAvklart = false
-            ), perioder.last()
+                ferdigAvklart = false,
+            ),
+            perioder.last(),
         )
     }
 
@@ -894,15 +940,17 @@ internal class UtbetalingstidslinjeBuilderTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 26.januar,
                 dagerUtenAnsvar = listOf(1.januar til 10.januar),
-                ferdigAvklart = false
-            ), perioder.first()
+                ferdigAvklart = false,
+            ),
+            perioder.first(),
         )
         assertEquals(
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 11.februar til 17.februar,
                 dagerUtenAnsvar = listOf(11.februar til 17.februar),
-                ferdigAvklart = false
-            ), perioder.last()
+                ferdigAvklart = false,
+            ),
+            perioder.last(),
         )
     }
 
@@ -952,24 +1000,35 @@ internal class UtbetalingstidslinjeBuilderTest {
     private lateinit var utbetalingstidslinje: Utbetalingstidslinje
     private val perioder: MutableList<PeriodeUtenNavAnsvar> = mutableListOf()
 
-    private fun undersøke(tidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode> = emptyList(), infotrygdFerieperioder: List<Periode> = emptyList(), dagerNavOvertarAnsvar: List<Periode> = emptyList(), avslagstidslinje: Avslagstidslinje = Avslagstidslinje()) {
+    private fun undersøke(
+        tidslinje: Sykdomstidslinje,
+        infotrygdBetalteDager: List<Periode> = emptyList(),
+        infotrygdFerieperioder: List<Periode> = emptyList(),
+        dagerNavOvertarAnsvar: List<Periode> = emptyList(),
+        avslagstidslinje: Avslagstidslinje = Avslagstidslinje(),
+    ) {
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
         val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat(tidslinje, infotrygdBetalteDager, infotrygdFerieperioder)
         perioder.addAll(arbeidsgiverperioder)
 
-        val builder = ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
-            arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.dagerUtenAnsvar }.grupperSammenhengendePerioder(),
-            dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
-            refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),
-            avslagstidslinje = avslagstidslinje
-        )
+        val builder =
+            ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
+                arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.dagerUtenAnsvar }.grupperSammenhengendePerioder(),
+                dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
+                refusjonstidslinje = tidslinje.periode()?.let { ARBEIDSGIVER.beløpstidslinje(it, 31000.månedlig) } ?: Beløpstidslinje(),
+                avslagstidslinje = avslagstidslinje,
+            )
 
         utbetalingstidslinje = builder.result(tidslinje, 31000.månedlig, Beløpstidslinje())
         inspektør = utbetalingstidslinje.inspektør
     }
 
     // undersøker forskjellige tidslinjer som skal ha samme funksjonelle betydning
-    private fun undersøkeLike(vararg tidslinje: () -> Sykdomstidslinje, dagerNavOvertarAnsvar: List<Periode> = emptyList(), assertBlock: () -> Unit) {
+    private fun undersøkeLike(
+        vararg tidslinje: () -> Sykdomstidslinje,
+        dagerNavOvertarAnsvar: List<Periode> = emptyList(),
+        assertBlock: () -> Unit,
+    ) {
         tidslinje.forEach {
             undersøke(resetSeed(tidslinjegenerator = it), dagerNavOvertarAnsvar = dagerNavOvertarAnsvar)
             assertBlock()

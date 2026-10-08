@@ -1,21 +1,13 @@
 package no.nav.helse.dsl
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
-import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.Varslersamler.AssertetVarsler
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.gjenopprettFraJSONtekst
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -42,6 +34,10 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Year
+import java.util.*
 
 @Tag("e2e")
 @ExtendWith(DeferredLogging::class)
@@ -66,35 +62,44 @@ internal abstract class AbstractDslTest {
     protected lateinit var observatør: TestObservatør
     internal lateinit var testperson: TestPerson
     private lateinit var deferredLog: DeferredLog
+
     protected fun Int.vedtaksperiode(orgnummer: String) = orgnummer { vedtaksperiode }
+
     protected val String.inspektør get() = inspektør(this)
 
     private val TestPerson.TestArbeidsgiver.testArbeidsgiverAsserter
-        get() = TestArbeidsgiverAssertions(
-            observatør = observatør,
-            inspektør = inspektør,
-            personInspektør = testperson.inspiser(personInspektør),
-            aktivitetsloggAsserts = AktivitetsloggAsserts(testperson.personlogg, assertetVarsler)
-        )
+        get() =
+            TestArbeidsgiverAssertions(
+                observatør = observatør,
+                inspektør = inspektør,
+                personInspektør = testperson.inspiser(personInspektør),
+                aktivitetsloggAsserts = AktivitetsloggAsserts(testperson.personlogg, assertetVarsler),
+            )
     private val testPersonAsserter get() = TestPersonAssertions(testperson.inspiser(personInspektør), jurist)
+
     protected fun <INSPEKTØR> inspiser(inspektør: (Person) -> INSPEKTØR) = testperson.inspiser(inspektør)
+
     internal fun inspektør(orgnummer: String) = inspiser(agInspektør(orgnummer))
+
     protected fun inspektør(vedtaksperiodeId: UUID) = inspiser(personInspektør).vedtaksperiode(vedtaksperiodeId).inspektør
+
     protected fun inspektørForkastet(vedtaksperiodeId: UUID) = inspiser(personInspektør).forkastetVedtaksperiode(vedtaksperiodeId).inspektør
-    protected operator fun <R> String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) =
-        testperson.arbeidsgiver(this, testblokk)
 
-    protected operator fun <R> List<String>.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) =
-        forEach { organisasjonsnummer -> organisasjonsnummer { testblokk() } }
+    protected operator fun <R> String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) = testperson.arbeidsgiver(this, testblokk)
 
-    protected fun List<String>.forlengVedtak(periode: Periode, grad: Prosentdel = 100.prosent) {
+    protected operator fun <R> List<String>.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) = forEach { organisasjonsnummer -> organisasjonsnummer { testblokk() } }
+
+    protected fun List<String>.forlengVedtak(
+        periode: Periode,
+        grad: Prosentdel = 100.prosent,
+    ) {
         forEach {
             it {
                 håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
                 håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad))
             }
         }
-        (first()){
+        (first()) {
             håndterYtelser(observatør.sisteVedtaksperiodeId(orgnummer))
             håndterSimulering(observatør.sisteVedtaksperiodeId(orgnummer))
             håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiodeId(orgnummer))
@@ -111,8 +116,10 @@ internal abstract class AbstractDslTest {
     }
 
     protected fun List<String>.nyeVedtak(
-        periode: Periode, grad: Prosentdel = 100.prosent, inntekt: Inntekt = 20000.månedlig,
-        ghosts: List<String> = emptyList()
+        periode: Periode,
+        grad: Prosentdel = 100.prosent,
+        inntekt: Inntekt = 20000.månedlig,
+        ghosts: List<String> = emptyList(),
     ) {
         forEach {
             it {
@@ -125,7 +132,7 @@ internal abstract class AbstractDslTest {
                 håndterArbeidsgiveropplysninger(listOf(periode.start til periode.start.plusDays(15)), beregnetInntekt = inntekt)
             }
         }
-        (first()){
+        (first()) {
             val arbeidsgivere = this@nyeVedtak + ghosts
             håndterVilkårsgrunnlagFlereArbeidsgivere(observatør.sisteVedtaksperiodeId(orgnummer), *arbeidsgivere.toTypedArray())
             håndterYtelser(observatør.sisteVedtaksperiodeId(orgnummer))
@@ -143,23 +150,36 @@ internal abstract class AbstractDslTest {
         }
     }
 
-    protected fun <R> assertSubsumsjoner(block: SubsumsjonInspektør.() -> R): R {
-        return testPersonAsserter.assertSubsumsjoner(block)
-    }
+    protected fun <R> assertSubsumsjoner(block: SubsumsjonInspektør.() -> R): R = testPersonAsserter.assertSubsumsjoner(block)
 
-    protected fun TestPerson.TestArbeidsgiver.assertTilstander(id: UUID, vararg tilstander: TilstandType) {
+    protected fun TestPerson.TestArbeidsgiver.assertTilstander(
+        id: UUID,
+        vararg tilstander: TilstandType,
+    ) {
         testArbeidsgiverAsserter.assertTilstander(id, *tilstander)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertTilstand(id: UUID, tilstand: TilstandType) {
+    protected fun TestPerson.TestArbeidsgiver.assertTilstand(
+        id: UUID,
+        tilstand: TilstandType,
+    ) {
         assertSisteTilstand(id, tilstand)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertSisteTilstand(id: UUID, tilstand: TilstandType, errortekst: () -> String? = { null }) {
+    protected fun TestPerson.TestArbeidsgiver.assertSisteTilstand(
+        id: UUID,
+        tilstand: TilstandType,
+        errortekst: () -> String? = { null },
+    ) {
         testArbeidsgiverAsserter.assertSisteTilstand(id, tilstand, errortekst)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertSkjæringstidspunktOgVenteperiode(id: UUID, forventetSkjæringstidspunkt: LocalDate, forventetVenteperiode: List<Periode>, forventetEgenmeldinger: List<Periode> = emptyList()) {
+    protected fun TestPerson.TestArbeidsgiver.assertSkjæringstidspunktOgVenteperiode(
+        id: UUID,
+        forventetSkjæringstidspunkt: LocalDate,
+        forventetVenteperiode: List<Periode>,
+        forventetEgenmeldinger: List<Periode> = emptyList(),
+    ) {
         testArbeidsgiverAsserter.assertSkjæringstidspunktOgVenteperiode(id, forventetSkjæringstidspunkt, forventetVenteperiode, forventetEgenmeldinger)
     }
 
@@ -168,20 +188,30 @@ internal abstract class AbstractDslTest {
         forventetArbeidsgiverbeløp: Int,
         forventetArbeidsgiverRefusjonsbeløp: Int,
         forventetPersonbeløp: Int = 0,
-        subset: Periode? = null
+        subset: Periode? = null,
     ) {
         testArbeidsgiverAsserter.assertUtbetalingsbeløp(vedtaksperiodeId, forventetArbeidsgiverbeløp, forventetArbeidsgiverRefusjonsbeløp, forventetPersonbeløp, subset)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertSisteForkastetTilstand(id: UUID, tilstand: TilstandType) {
+    protected fun TestPerson.TestArbeidsgiver.assertSisteForkastetTilstand(
+        id: UUID,
+        tilstand: TilstandType,
+    ) {
         testArbeidsgiverAsserter.assertSisteForkastetTilstand(id, tilstand)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertForkastetPeriodeTilstander(id: UUID, vararg tilstand: TilstandType, varselkode: Varselkode? = null) {
+    protected fun TestPerson.TestArbeidsgiver.assertForkastetPeriodeTilstander(
+        id: UUID,
+        vararg tilstand: TilstandType,
+        varselkode: Varselkode? = null,
+    ) {
         testArbeidsgiverAsserter.assertForkastetPeriodeTilstander(id, *tilstand, varselkode = varselkode)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertAntallOpptjeningsdager(forventet: Int, skjæringstidspunkt: LocalDate = 1.januar) {
+    protected fun TestPerson.TestArbeidsgiver.assertAntallOpptjeningsdager(
+        forventet: Int,
+        skjæringstidspunkt: LocalDate = 1.januar,
+    ) {
         testArbeidsgiverAsserter.assertAntallOpptjeningsdager(forventet, skjæringstidspunkt)
     }
 
@@ -197,67 +227,98 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertErIkkeOppfylt(skjæringstidspunkt)
     }
 
-    protected fun assertHarIkkeArbeidsforhold(skjæringstidspunkt: LocalDate, orgnummer: String) {
+    protected fun assertHarIkkeArbeidsforhold(
+        skjæringstidspunkt: LocalDate,
+        orgnummer: String,
+    ) {
         testPersonAsserter.assertHarIkkeArbeidsforhold(skjæringstidspunkt, orgnummer)
     }
 
-    protected fun assertHarArbeidsforhold(skjæringstidspunkt: LocalDate, orgnummer: String) {
+    protected fun assertHarArbeidsforhold(
+        skjæringstidspunkt: LocalDate,
+        orgnummer: String,
+    ) {
         testPersonAsserter.assertHarArbeidsforhold(skjæringstidspunkt, orgnummer)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.assertHarHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) =
-        testArbeidsgiverAsserter.assertHarHendelseIder(vedtaksperiodeId, *hendelseIder)
+    protected fun TestPerson.TestArbeidsgiver.assertHarHendelseIder(
+        vedtaksperiodeId: UUID,
+        vararg hendelseIder: UUID,
+    ) = testArbeidsgiverAsserter.assertHarHendelseIder(vedtaksperiodeId, *hendelseIder)
 
-    protected fun TestPerson.TestArbeidsgiver.assertHarIkkeHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) =
-        testArbeidsgiverAsserter.assertHarIkkeHendelseIder(vedtaksperiodeId, *hendelseIder)
+    protected fun TestPerson.TestArbeidsgiver.assertHarIkkeHendelseIder(
+        vedtaksperiodeId: UUID,
+        vararg hendelseIder: UUID,
+    ) = testArbeidsgiverAsserter.assertHarIkkeHendelseIder(vedtaksperiodeId, *hendelseIder)
 
-    protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) =
-        testArbeidsgiverAsserter.assertIngenFunksjonelleFeil(filter)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = testArbeidsgiverAsserter.assertIngenFunksjonelleFeil(filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonellFeil(kode: Varselkode, filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) =
-        testArbeidsgiverAsserter.assertIngenFunksjonellFeil(kode, filter)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonellFeil(
+        kode: Varselkode,
+        filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle,
+    ) = testArbeidsgiverAsserter.assertIngenFunksjonellFeil(kode, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.person()) =
-        testArbeidsgiverAsserter.assertFunksjonelleFeil(filter)
+    protected fun TestPerson.TestArbeidsgiver.assertFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.person()) = testArbeidsgiverAsserter.assertFunksjonelleFeil(filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(funksjonellFeil: String, filter: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil, filter)
+    protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(
+        funksjonellFeil: String,
+        filter: AktivitetsloggFilter,
+    ) = testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(funksjonellFeil: Varselkode, filter: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil.varseltekst, filter)
+    protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(
+        funksjonellFeil: Varselkode,
+        filter: AktivitetsloggFilter,
+    ) = testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil.varseltekst, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.ingenNyeFunksjonelleFeil(block: () -> Unit) =
-        testArbeidsgiverAsserter.ingenNyeFunksjonelleFeil(block)
+    protected fun TestPerson.TestArbeidsgiver.ingenNyeFunksjonelleFeil(block: () -> Unit) = testArbeidsgiverAsserter.ingenNyeFunksjonelleFeil(block)
 
-    protected fun TestPerson.TestArbeidsgiver.nyeFunksjonelleFeil(block: () -> Unit) =
-        testArbeidsgiverAsserter.nyeFunksjonelleFeil(block)
+    protected fun TestPerson.TestArbeidsgiver.nyeFunksjonelleFeil(block: () -> Unit) = testArbeidsgiverAsserter.nyeFunksjonelleFeil(block)
 
-    protected fun TestPerson.TestArbeidsgiver.assertVarsler(varsler: Collection<Varselkode>, filter: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertVarsler(varsler, filter)
+    protected fun TestPerson.TestArbeidsgiver.assertVarsler(
+        varsler: Collection<Varselkode>,
+        filter: AktivitetsloggFilter,
+    ) = testArbeidsgiverAsserter.assertVarsler(varsler, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertVarsler(vedtaksperiodeId: UUID, vararg varsler: Varselkode) =
-        testArbeidsgiverAsserter.assertVarsler(varsler.toSet(), vedtaksperiodeId.filter())
+    protected fun TestPerson.TestArbeidsgiver.assertVarsler(
+        vedtaksperiodeId: UUID,
+        vararg varsler: Varselkode,
+    ) = testArbeidsgiverAsserter.assertVarsler(varsler.toSet(), vedtaksperiodeId.filter())
 
-    protected fun TestPerson.TestArbeidsgiver.assertVarsel(warning: String, filter: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertVarsel(warning, filter)
+    protected fun TestPerson.TestArbeidsgiver.assertVarsel(
+        warning: String,
+        filter: AktivitetsloggFilter,
+    ) = testArbeidsgiverAsserter.assertVarsel(warning, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertVarsel(kode: Varselkode, filter: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertVarsel(kode, filter)
+    protected fun TestPerson.TestArbeidsgiver.assertVarsel(
+        kode: Varselkode,
+        filter: AktivitetsloggFilter,
+    ) = testArbeidsgiverAsserter.assertVarsel(kode, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertInfo(forventet: String, filter: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertInfo(forventet, filter)
+    protected fun TestPerson.TestArbeidsgiver.assertInfo(
+        forventet: String,
+        filter: AktivitetsloggFilter,
+    ) = testArbeidsgiverAsserter.assertInfo(forventet, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertInfo(forventet: String) =
-        testArbeidsgiverAsserter.assertInfo(forventet, AktivitetsloggFilter.Alle)
+    protected fun TestPerson.TestArbeidsgiver.assertInfo(forventet: String) = testArbeidsgiverAsserter.assertInfo(forventet, AktivitetsloggFilter.Alle)
 
-    protected fun TestPerson.TestArbeidsgiver.assertIngenInfo(forventet: String, filter: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertIngenInfo(forventet, filter)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenInfo(
+        forventet: String,
+        filter: AktivitetsloggFilter,
+    ) = testArbeidsgiverAsserter.assertIngenInfo(forventet, filter)
 
-    protected fun nyPeriode(periode: Periode, vararg orgnummer: String, grad: Prosentdel = 100.prosent) {
+    protected fun nyPeriode(
+        periode: Periode,
+        vararg orgnummer: String,
+        grad: Prosentdel = 100.prosent,
+    ) {
         testperson.nyPeriode(periode, *orgnummer, grad = grad)
     }
 
-    protected fun TestPerson.TestArbeidsgiver.nyPeriode(periode: Periode, grad: Prosentdel = 100.prosent, søknadId: UUID = UUID.randomUUID()): UUID {
+    protected fun TestPerson.TestArbeidsgiver.nyPeriode(
+        periode: Periode,
+        grad: Prosentdel = 100.prosent,
+        søknadId: UUID = UUID.randomUUID(),
+    ): UUID {
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
         return håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad), søknadId = søknadId)
             ?: error("Det ble ikke opprettet noen vedtaksperiode.")
@@ -265,16 +326,25 @@ internal abstract class AbstractDslTest {
 
     protected fun nullstillTilstandsendringer() = observatør.nullstillTilstandsendringer()
 
-    internal inline fun <reified R: Behovsoppsamler.Behovsdetaljer> behovSomOppstårSomFølgeAv(block: () -> Unit) = testperson.behovshåndterer.behovSomOppstårSomFølgeAv<R> { block() }
+    internal inline fun <reified R : Behovsoppsamler.Behovsdetaljer> behovSomOppstårSomFølgeAv(block: () -> Unit) = testperson.behovshåndterer.behovSomOppstårSomFølgeAv<R> { block() }
 
-    protected fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) =
-        testperson { håndterOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold) }
+    protected fun håndterOverstyrArbeidsforhold(
+        skjæringstidspunkt: LocalDate,
+        vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt,
+    ) = testperson { håndterOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold) }
 
-    protected fun håndterSkjønnsmessigFastsettelse(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID = UUID.randomUUID(), tidsstempel: LocalDateTime = LocalDateTime.now()) =
-        testperson { håndterSkjønnsmessigFastsettelse(skjæringstidspunkt, arbeidsgiveropplysninger, meldingsreferanseId, tidsstempel) }
+    protected fun håndterSkjønnsmessigFastsettelse(
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>,
+        meldingsreferanseId: UUID = UUID.randomUUID(),
+        tidsstempel: LocalDateTime = LocalDateTime.now(),
+    ) = testperson { håndterSkjønnsmessigFastsettelse(skjæringstidspunkt, arbeidsgiveropplysninger, meldingsreferanseId, tidsstempel) }
 
-    protected fun håndterOverstyrArbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID = UUID.randomUUID()) =
-        testperson { håndterOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, arbeidsgiveropplysninger, meldingsreferanseId) }
+    protected fun håndterOverstyrArbeidsgiveropplysninger(
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>,
+        meldingsreferanseId: UUID = UUID.randomUUID(),
+    ) = testperson { håndterOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, arbeidsgiveropplysninger, meldingsreferanseId) }
 
     protected fun assertActivities() {
         assertTrue(testperson.personlogg.aktiviteter.isNotEmpty()) { testperson.personlogg.toString() }
@@ -303,40 +373,53 @@ internal abstract class AbstractDslTest {
         utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(),
         feriepengehistorikk: List<UtbetalingshistorikkForFeriepenger.Feriepenger> = emptyList(),
         datoForSisteFeriepengekjøringIInfotrygd: LocalDate,
-        skalBeregnesManuelt: Boolean = false
+        skalBeregnesManuelt: Boolean = false,
     ) = testperson { håndterUtbetalingshistorikkForFeriepenger(opptjeningsår, utbetalinger, feriepengehistorikk, datoForSisteFeriepengekjøringIInfotrygd, skalBeregnesManuelt) }
 
     protected fun håndterFeriepengerUtbetalt(
         fagsystemId: String,
         orgnummer: String = a1,
-        status: Oppdragstatus = Oppdragstatus.AKSEPTERT
+        status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     ) = testperson { håndterFeriepengerUtbetalt(fagsystemId, orgnummer, status) }
 
     protected fun dto() = testperson.dto()
 
-    private fun regler(maksSykedager: Int, maksSykedagerOver67: Int = maksSykedager): MaksimumSykepengedagerregler = object : MaksimumSykepengedagerregler {
-        override fun maksSykepengedager() = maksSykedager
-        override fun maksSykepengedagerOver67() = maksSykedagerOver67
-    }
+    private fun regler(
+        maksSykedager: Int,
+        maksSykedagerOver67: Int = maksSykedager,
+    ): MaksimumSykepengedagerregler =
+        object : MaksimumSykepengedagerregler {
+            override fun maksSykepengedager() = maksSykedager
 
-    protected fun medJSONPerson(filsti: String, skjemaversjon: Int) {
+            override fun maksSykepengedagerOver67() = maksSykedagerOver67
+        }
+
+    protected fun medJSONPerson(
+        filsti: String,
+        skjemaversjon: Int,
+    ) {
         val person = gjenopprettFraJSON(filsti, skjemaversjon, jurist)
         observatør = TestObservatør(person)
-        testperson = TestPerson(
-            observatør = observatør,
-            person = person,
-            deferredLog = deferredLog
-        )
+        testperson =
+            TestPerson(
+                observatør = observatør,
+                person = person,
+                deferredLog = deferredLog,
+            )
     }
 
-    protected fun medJSONPersonTekst(json: String, skjemaversjon: Int) {
+    protected fun medJSONPersonTekst(
+        json: String,
+        skjemaversjon: Int,
+    ) {
         val person = gjenopprettFraJSONtekst(json, skjemaversjon, jurist)
         observatør = TestObservatør(person)
-        testperson = TestPerson(
-            observatør = observatør,
-            person = person,
-            deferredLog = deferredLog
-        )
+        testperson =
+            TestPerson(
+                observatør = observatør,
+                person = person,
+                deferredLog = deferredLog,
+            )
     }
 
     protected fun medFødselsdato(fødselsdato: LocalDate) {
@@ -347,7 +430,11 @@ internal abstract class AbstractDslTest {
         testperson = TestPerson(observatør = observatør, personidentifikator = personidentifikator, deferredLog = deferredLog, jurist = jurist)
     }
 
-    protected fun medMaksSykedager(maksSykedager: Int, maksSykedagerOver67: Int = maksSykedager, fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO) {
+    protected fun medMaksSykedager(
+        maksSykedager: Int,
+        maksSykedagerOver67: Int = maksSykedager,
+        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
+    ) {
         testperson = TestPerson(observatør = observatør, fødselsdato = fødselsdato, deferredLog = deferredLog, jurist = jurist, regler = regler(maksSykedager, maksSykedagerOver67))
     }
 

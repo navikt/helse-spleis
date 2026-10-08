@@ -1,39 +1,15 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.april
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.TestPerson
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyPeriode
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
-import no.nav.helse.fredag
+import no.nav.helse.*
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mai
-import no.nav.helse.mandag
-import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_31
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_33
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_37
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -41,7 +17,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractDslTest() {
-
     @Test
     fun `forlenger med forkastet periode hos annen arbeidsgiver`() {
         a1 { forkast(1.januar til 17.januar) }

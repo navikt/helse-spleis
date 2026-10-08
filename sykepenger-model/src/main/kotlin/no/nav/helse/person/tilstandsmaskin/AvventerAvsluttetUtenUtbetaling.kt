@@ -9,7 +9,12 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal data object AvventerAvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
     override val type: TilstandType = TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+
+    override fun entering(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         check(!vedtaksperiode.skalArbeidstakerBehandlesISpeil()) { "forventer ikke at en periode som skal behandles i speil, skal ende opp i $this" }
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
@@ -18,12 +23,17 @@ internal data object AvventerAvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         vedtaksperiode: Vedtaksperiode,
         eventBus: EventBus,
         hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg
+        aktivitetslogg: IAktivitetslogg,
     ) {
         vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvsluttetUtenUtbetaling)
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    override fun håndterPåminnelse(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        påminnelse: Påminnelse,
+        aktivitetslogg: IAktivitetslogg,
+    ): Revurderingseventyr? {
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
         return null
     }

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.ytelser
 
-import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -8,22 +7,12 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class InstitusjonsoppholdBehovTest : AbstractDslTest() {
-
     @Test
     fun `Periode for person der det ikke foreligger institusjonsopphold blir behandlet og sendt til godkjenning`() {
         a1 {
@@ -47,7 +36,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -69,7 +58,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                TIL_INFOTRYGD
+                TIL_INFOTRYGD,
             )
         }
     }
@@ -91,7 +80,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                TIL_INFOTRYGD
+                TIL_INFOTRYGD,
             )
         }
     }
@@ -113,7 +102,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                TIL_INFOTRYGD
+                TIL_INFOTRYGD,
             )
         }
     }
@@ -127,10 +116,11 @@ internal class InstitusjonsoppholdBehovTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(
                 1.vedtaksperiode,
-                institusjonsoppholdsperioder = listOf(
-                    1.desember(2017) til 31.desember(2017),
-                    1.februar til 28.februar
-                )
+                institusjonsoppholdsperioder =
+                    listOf(
+                        1.desember(2017) til 31.desember(2017),
+                        1.februar til 28.februar,
+                    ),
             )
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -147,7 +137,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -175,7 +165,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -197,7 +187,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                TIL_INFOTRYGD
+                TIL_INFOTRYGD,
             )
         }
     }
@@ -219,7 +209,7 @@ internal class InstitusjonsoppholdBehovTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                TIL_INFOTRYGD
+                TIL_INFOTRYGD,
             )
         }
     }

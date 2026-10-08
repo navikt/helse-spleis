@@ -1,6 +1,5 @@
 package no.nav.helse.dbscript
 
-import java.io.BufferedReader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.selects.select
 import no.nav.helse.dbscript.DbScript.ConnectionInfo
+import java.io.BufferedReader
 
 internal object AutomatiskOppkobling {
     fun start(block: (ConnectionInfo) -> Unit) {
@@ -25,9 +25,10 @@ internal object AutomatiskOppkobling {
         val proxyComplectionChannel = Channel<Int>(Channel.CONFLATED)
 
         runBlocking {
-            val streamJob = launch(Dispatchers.IO) {
-                lookForConnectionDetailsAndPrintOutput(stdoutChannel, stderrChannel, connectionInfoChannel, unauthenticatedChannel)
-            }
+            val streamJob =
+                launch(Dispatchers.IO) {
+                    lookForConnectionDetailsAndPrintOutput(stdoutChannel, stderrChannel, connectionInfoChannel, unauthenticatedChannel)
+                }
 
             println("Starter proxy")
 
@@ -69,7 +70,7 @@ internal object AutomatiskOppkobling {
         stdoutChannel: ReceiveChannel<String>,
         stderrChannel: ReceiveChannel<String>,
         connectionInfoChannel: SendChannel<ConnectionInfo>,
-        unauthenticatedChannel: SendChannel<Boolean>
+        unauthenticatedChannel: SendChannel<Boolean>,
     ) {
         val connectionStringRegex = "jdbc:\\S+".toRegex()
         val emailRegex = "user=(\\S+)".toRegex()
@@ -116,37 +117,38 @@ internal object AutomatiskOppkobling {
         stopSignal: ReceiveChannel<Boolean>,
         completionChannel: SendChannel<Int>,
         stdoutChannel: SendChannel<String>,
-        stderrChannel: SendChannel<String>
-    ): Job {
-        return async(Dispatchers.IO) {
+        stderrChannel: SendChannel<String>,
+    ): Job =
+        async(Dispatchers.IO) {
             try {
                 startProcessAndStreamOutput(arrayOf("nais", "postgres", "proxy", "--port", "$port", "spleis"), stopSignal, completionChannel, stdoutChannel, stderrChannel)
             } catch (err: Exception) {
                 println("Feil i dbproxyJob: ${err.message}")
             }
         }
-    }
 
     private suspend fun CoroutineScope.startProcessAndStreamOutput(
         cmd: Array<String>,
         stopSignal: ReceiveChannel<Boolean>,
         completionChannel: SendChannel<Int>,
         stdoutChannel: SendChannel<String>,
-        stderrChannel: SendChannel<String>
+        stderrChannel: SendChannel<String>,
     ) {
         val process = Runtime.getRuntime().exec(cmd)
 
         val stdoutJob = consumeReader(process.inputReader(), stdoutChannel)
         val stderrJob = consumeReader(process.errorReader(), stderrChannel)
 
-        val processJob = launch(Dispatchers.IO) {
-            completionChannel.send(process.waitFor())
-        }
-        val stopJob = launch(Dispatchers.IO) {
-            // Vent på stoppsignal
-            stopSignal.receive()
-            process.destroy()
-        }
+        val processJob =
+            launch(Dispatchers.IO) {
+                completionChannel.send(process.waitFor())
+            }
+        val stopJob =
+            launch(Dispatchers.IO) {
+                // Vent på stoppsignal
+                stopSignal.receive()
+                process.destroy()
+            }
 
         select {
             processJob.onJoin {
@@ -162,13 +164,15 @@ internal object AutomatiskOppkobling {
         }
     }
 
-    private fun CoroutineScope.consumeReader(reader: BufferedReader, output: SendChannel<String>): Job {
-        return launch(Dispatchers.IO) {
+    private fun CoroutineScope.consumeReader(
+        reader: BufferedReader,
+        output: SendChannel<String>,
+    ): Job =
+        launch(Dispatchers.IO) {
             reader.use { reader ->
                 reader.forEachLine { line ->
                     launch { output.send(line) }
                 }
             }
         }
-    }
 }

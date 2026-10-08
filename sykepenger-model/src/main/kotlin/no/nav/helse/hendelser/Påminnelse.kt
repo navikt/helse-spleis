@@ -1,10 +1,10 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.hendelser.Avsender.SYSTEM
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Påminnelse(
     meldingsreferanseId: MeldingsreferanseId,
@@ -16,15 +16,16 @@ class Påminnelse(
     val påminnelsestidspunkt: LocalDateTime,
     val nestePåminnelsestidspunkt: LocalDateTime,
     private val flagg: Set<String>,
-    opprettet: LocalDateTime
+    opprettet: LocalDateTime,
 ) : Hendelse {
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = SYSTEM,
-        innsendt = opprettet,
-        registrert = LocalDateTime.now(),
-        automatiskBehandling = true
-    )
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SYSTEM,
+            innsendt = opprettet,
+            registrert = LocalDateTime.now(),
+            automatiskBehandling = true,
+        )
 
     internal fun erRelevant(vedtaksperiodeId: UUID) = vedtaksperiodeId.toString() == this.vedtaksperiodeId
 
@@ -33,7 +34,10 @@ class Påminnelse(
         return predikat.all { it.evaluer(this) }
     }
 
-    internal fun gjelderTilstand(aktivitetslogg: IAktivitetslogg, tilstandType: TilstandType) = (tilstandType == tilstand).also {
+    internal fun gjelderTilstand(
+        aktivitetslogg: IAktivitetslogg,
+        tilstandType: TilstandType,
+    ) = (tilstandType == tilstand).also {
         if (!it) {
             aktivitetslogg.info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         }
@@ -41,8 +45,12 @@ class Påminnelse(
 
     internal sealed interface Predikat {
         fun evaluer(påminnelse: Påminnelse): Boolean
-        data class Flagg(private val flagg: String): Predikat {
+
+        data class Flagg(
+            private val flagg: String,
+        ) : Predikat {
             override fun evaluer(påminnelse: Påminnelse) = flagg in påminnelse.flagg
+
             override fun toString() = flagg
         }
     }

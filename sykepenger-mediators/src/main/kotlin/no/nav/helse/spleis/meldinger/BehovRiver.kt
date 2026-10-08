@@ -8,7 +8,7 @@ import no.nav.helse.spleis.IMessageMediator
 
 internal abstract class BehovRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("behov")
     protected abstract val behov: List<Behov.Behovstype>

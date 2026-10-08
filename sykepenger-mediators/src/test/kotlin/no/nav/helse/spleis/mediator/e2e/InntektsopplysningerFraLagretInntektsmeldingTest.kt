@@ -1,13 +1,12 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class InntektsopplysningerFraLagretInntektsmeldingTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `kan bruke inntektsopplysninger fra lagret navno-inntektsmelding`() {
         val (meldingsreferanseIdInntektsmelding, _) = sendNavNoInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeUtfisker = VedtaksperiodeUtfisker.Eksplisitt(UUID.randomUUID()))

@@ -4,7 +4,9 @@ import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning
 
 internal val SelvstendigInntektsopplysning.inspektør get() = SelvstendigInntektsopplysningInspektør(this)
 
-internal class SelvstendigInntektsopplysningInspektør(arbeidsgiverInntektsopplysning: SelvstendigInntektsopplysning) {
+internal class SelvstendigInntektsopplysningInspektør(
+    arbeidsgiverInntektsopplysning: SelvstendigInntektsopplysning,
+) {
     val faktaavklartInntekt = arbeidsgiverInntektsopplysning.faktaavklartInntekt
     val omregnetÅrsinntekt = faktaavklartInntekt.inntektsdata.beløp
     val fastsattÅrsinntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt

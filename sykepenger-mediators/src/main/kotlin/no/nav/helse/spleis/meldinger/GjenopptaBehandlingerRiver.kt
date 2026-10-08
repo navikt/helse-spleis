@@ -8,7 +8,7 @@ import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
 
 internal class GjenopptaBehandlingerRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("gjenoppta_behandling")
     override val riverName = "Gjenoppta behandling"
@@ -17,10 +17,12 @@ internal class GjenopptaBehandlingerRiver(
         message.requireKey("fødselsnummer")
     }
 
-    override fun createMessage(packet: JsonMessage) = GjenopptaBehandlingMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        GjenopptaBehandlingMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

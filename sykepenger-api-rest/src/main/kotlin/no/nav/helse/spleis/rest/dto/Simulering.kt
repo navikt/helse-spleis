@@ -15,7 +15,7 @@ data class ApiSimuleringsdetaljer(
     val klassekode: String,
     val klassekodeBeskrivelse: String,
     val utbetalingstype: String,
-    val refunderesOrgNr: String
+    val refunderesOrgNr: String,
 )
 
 data class ApiSimuleringsutbetaling(
@@ -23,16 +23,16 @@ data class ApiSimuleringsutbetaling(
     val utbetalesTilNavn: String,
     val forfall: LocalDate,
     val feilkonto: Boolean,
-    val detaljer: List<ApiSimuleringsdetaljer>
+    val detaljer: List<ApiSimuleringsdetaljer>,
 )
 
 data class ApiSimuleringsperiode(
     val fom: LocalDate,
     val tom: LocalDate,
-    val utbetalinger: List<ApiSimuleringsutbetaling>
+    val utbetalinger: List<ApiSimuleringsutbetaling>,
 )
 
 data class ApiSimulering(
     val totalbelop: Int,
-    val perioder: List<ApiSimuleringsperiode>
+    val perioder: List<ApiSimuleringsperiode>,
 )

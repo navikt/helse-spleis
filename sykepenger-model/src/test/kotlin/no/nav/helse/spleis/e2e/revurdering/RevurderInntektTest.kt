@@ -1,11 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDate
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Periode
@@ -14,21 +9,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING_TIL_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -38,23 +19,20 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class RevurderInntektTest : AbstractDslTest() {
-
     @Test
     fun `revurder inntekt happy case`() {
         a1 {
-
             nyttVedtak(januar, 100.prosent)
 
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 32000.månedlig,
-                refusjon = Refusjon(32000.månedlig, null, emptyList())
+                refusjon = Refusjon(32000.månedlig, null, emptyList()),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -100,7 +78,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 32000.månedlig,
-                refusjon = Refusjon(32000.månedlig, null, emptyList())
+                refusjon = Refusjon(32000.månedlig, null, emptyList()),
             )
 
             håndterYtelser(1.vedtaksperiode)
@@ -111,7 +89,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 31000.månedlig,
-                refusjon = Refusjon(31000.månedlig, null, emptyList())
+                refusjon = Refusjon(31000.månedlig, null, emptyList()),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
@@ -150,7 +128,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
                 TIL_UTBETALING,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_HISTORIKK_REVURDERING
+                AVVENTER_HISTORIKK_REVURDERING,
             )
 
             assertTilstander(
@@ -164,7 +142,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
                 AVSLUTTET,
-                AVVENTER_REVURDERING
+                AVVENTER_REVURDERING,
             )
 
             assertEquals(2, inspektør.antallUtbetalinger)
@@ -195,14 +173,19 @@ internal class RevurderInntektTest : AbstractDslTest() {
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING
+                AVVENTER_GODKJENNING_REVURDERING,
             )
 
             val utbetalingTilRevurdering = inspektør.sisteUtbetaling()
             assertEquals(2, inspektør.antallUtbetalinger)
             assertEquals(-15741, utbetalingTilRevurdering.arbeidsgiverOppdrag.nettoBeløp())
 
-            assertFalse(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.harUtbetalingsdager())
+            assertFalse(
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.utbetalingstidslinje
+                    .harUtbetalingsdager(),
+            )
         }
     }
 
@@ -310,7 +293,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(Periode(1.januar, 16.januar)),
-                refusjon = Refusjon(25000.månedlig, null, emptyList())
+                refusjon = Refusjon(25000.månedlig, null, emptyList()),
             )
             håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
             håndterYtelser(1.vedtaksperiode)
@@ -345,7 +328,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            //tilGodkjent(januar, 100.prosent)
+            // tilGodkjent(januar, 100.prosent)
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, INNTEKT * 1.05)
             håndterUtbetalt()
@@ -357,7 +340,6 @@ internal class RevurderInntektTest : AbstractDslTest() {
     @Test
     fun `revurdere mens en førstegangsbehandlingen er til utbetaling - utbetalingen feiler`() {
         a1 {
-
             nyPeriode(januar, a1)
             håndterArbeidsgiveropplysninger(emptyList())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -394,7 +376,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
                 AVSLUTTET,
-                AVVENTER_REVURDERING
+                AVVENTER_REVURDERING,
             )
 
             assertTilstander(
@@ -406,12 +388,15 @@ internal class RevurderInntektTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVVENTER_REVURDERING_TIL_UTBETALING
+                AVVENTER_REVURDERING_TIL_UTBETALING,
             )
         }
     }
 
-    private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "") {
+    private fun Oppdrag.skalHaEndringskode(
+        kode: Endringskode,
+        message: String = "",
+    ) {
         assertEquals(kode, endringskode, message)
     }
 
@@ -420,7 +405,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
         ønsketDelytelseId: Int,
         ønsketRefDelytelseId: Int? = null,
         ønsketRefFagsystemId: String? = null,
-        ønsketDatoStatusFom: LocalDate? = null
+        ønsketDatoStatusFom: LocalDate? = null,
     ) {
         assertEquals(ønsketEndringskode, endringskode)
         assertEquals(ønsketDelytelseId, delytelseId)

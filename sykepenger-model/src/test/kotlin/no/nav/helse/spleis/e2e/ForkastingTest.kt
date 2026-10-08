@@ -6,33 +6,15 @@ import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSi
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -41,13 +23,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class ForkastingTest : AbstractDslTest() {
-
     @Test
     fun `forlengelse av infotrygd uten inntektsopplysninger`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar))
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                    ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar)
+                ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar),
             )
             håndterSøknad(1.februar til 23.februar)
             assertEquals(0, inspektør.antallUtbetalinger)
@@ -69,23 +50,23 @@ internal class ForkastingTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, false)
             assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetalingtilstand(0))
             assertForkastetPeriodeTilstander(
-                    1.vedtaksperiode,
-                    START,
-                    AVVENTER_INFOTRYGDHISTORIKK,
-                    AVVENTER_INNTEKTSMELDING,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING,
-                    AVVENTER_GODKJENNING,
-                    TIL_INFOTRYGD
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_INFOTRYGD,
             )
             assertForkastetPeriodeTilstander(
-                    2.vedtaksperiode,
-                    START,
-                    AVVENTER_INNTEKTSMELDING,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    TIL_INFOTRYGD
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                TIL_INFOTRYGD,
             )
         }
     }
@@ -97,7 +78,7 @@ internal class ForkastingTest : AbstractDslTest() {
             håndterSøknad(3.januar til 26.januar)
             håndterArbeidsgiveropplysninger(
                 listOf(Periode(3.januar, 18.januar)),
-                    vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -125,23 +106,23 @@ internal class ForkastingTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, false) // går til TilInfotrygd
 
             assertForkastetPeriodeTilstander(
-                    1.vedtaksperiode,
-                    START,
-                    AVVENTER_INFOTRYGDHISTORIKK,
-                    AVVENTER_INNTEKTSMELDING,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING,
-                    AVVENTER_GODKJENNING,
-                    TIL_INFOTRYGD
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_INFOTRYGD,
             )
             assertForkastetPeriodeTilstander(
-                    2.vedtaksperiode,
-                    START,
-                    AVVENTER_INNTEKTSMELDING,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    TIL_INFOTRYGD
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                TIL_INFOTRYGD,
             )
         }
     }
@@ -151,13 +132,13 @@ internal class ForkastingTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(21.januar, 28.februar))
             håndterSøknad(
-                    Sykdom(1.februar, 28.februar, 100.prosent),
-                    Papirsykmelding(1.januar, 20.januar)
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                Papirsykmelding(1.januar, 20.januar),
             )
             assertForkastetPeriodeTilstander(
-                    1.vedtaksperiode,
-                    START,
-                    TIL_INFOTRYGD
+                1.vedtaksperiode,
+                START,
+                TIL_INFOTRYGD,
             )
         }
     }
@@ -168,21 +149,21 @@ internal class ForkastingTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterSøknad(3.januar til 26.januar)
             håndterArbeidsgiveropplysninger(
-                    listOf(Periode(3.januar, 18.januar)),
-                    refusjon = Refusjon(INNTEKT, 20.januar, emptyList()),
-                    vedtaksperiodeId = 1.vedtaksperiode,
+                listOf(Periode(3.januar, 18.januar)),
+                refusjon = Refusjon(INNTEKT, 20.januar, emptyList()),
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             assertTilstander(
-                    1.vedtaksperiode,
-                    START,
-                    AVVENTER_INFOTRYGDHISTORIKK,
-                    AVVENTER_INNTEKTSMELDING,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
             )
         }
     }
@@ -193,21 +174,21 @@ internal class ForkastingTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterSøknad(3.januar til 26.januar)
             håndterArbeidsgiveropplysninger(
-                    arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)),
-                    refusjon = Refusjon(INNTEKT, null, listOf(Refusjon.EndringIRefusjon(INNTEKT / 2, 14.januar))),
-                    vedtaksperiodeId = 1.vedtaksperiode,
+                arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)),
+                refusjon = Refusjon(INNTEKT, null, listOf(Refusjon.EndringIRefusjon(INNTEKT / 2, 14.januar))),
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             assertTilstander(
-                    1.vedtaksperiode,
-                    START,
-                    AVVENTER_INFOTRYGDHISTORIKK,
-                    AVVENTER_INNTEKTSMELDING,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
             )
         }
     }
@@ -227,17 +208,17 @@ internal class ForkastingTest : AbstractDslTest() {
 
             assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
             assertTilstander(
-                    1.vedtaksperiode,
-                    START,
-                    AVVENTER_INFOTRYGDHISTORIKK,
-                    AVVENTER_INNTEKTSMELDING,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING,
-                    AVVENTER_GODKJENNING,
-                    TIL_UTBETALING,
-                    AVSLUTTET
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
             )
         }
     }
@@ -256,16 +237,16 @@ internal class ForkastingTest : AbstractDslTest() {
 
             assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
             assertForkastetPeriodeTilstander(
-                    1.vedtaksperiode,
-                    START,
-                    AVVENTER_INFOTRYGDHISTORIKK,
-                    AVVENTER_INNTEKTSMELDING,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING,
-                    AVVENTER_GODKJENNING,
-                    TIL_INFOTRYGD
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_INFOTRYGD,
             )
         }
     }
@@ -276,9 +257,9 @@ internal class ForkastingTest : AbstractDslTest() {
             nyttVedtak(3.januar til 26.januar)
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(
-                    listOf(
-                            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-                    )
+                listOf(
+                    ManuellOverskrivingDag(26.januar, Dagtype.Feriedag),
+                ),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
@@ -295,9 +276,9 @@ internal class ForkastingTest : AbstractDslTest() {
             nyttVedtak(3.januar til 26.januar)
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(
-                    listOf(
-                            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-                    )
+                listOf(
+                    ManuellOverskrivingDag(26.januar, Dagtype.Feriedag),
+                ),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
@@ -315,9 +296,9 @@ internal class ForkastingTest : AbstractDslTest() {
             nyttVedtak(3.januar til 26.januar)
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(
-                    listOf(
-                            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-                    )
+                listOf(
+                    ManuellOverskrivingDag(26.januar, Dagtype.Feriedag),
+                ),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
@@ -336,9 +317,9 @@ internal class ForkastingTest : AbstractDslTest() {
             nyttVedtak(3.januar til 26.januar)
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(
-                    listOf(
-                            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
-                    )
+                listOf(
+                    ManuellOverskrivingDag(26.januar, Dagtype.Feriedag),
+                ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

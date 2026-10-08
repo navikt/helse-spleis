@@ -10,8 +10,9 @@ import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 
 internal class TidslinjeTest {
-
-    private class TestTidslinje(vararg perioder: Pair<Periode, Int>): Tidslinje<Int, TestTidslinje>(*perioder) {
+    private class TestTidslinje(
+        vararg perioder: Pair<Periode, Int>,
+    ) : Tidslinje<Int, TestTidslinje>(*perioder) {
         override fun opprett(vararg perioder: Pair<Periode, Int>) = TestTidslinje(*perioder)
     }
 
@@ -30,12 +31,12 @@ internal class TidslinjeTest {
         assertNull(tidslinje[2.februar])
 
         val enLikTidslinje =
-           TestTidslinje(2.januar til 2.januar to 1) + TestTidslinje(10.januar til 1.februar to 50)
+            TestTidslinje(2.januar til 2.januar to 1) + TestTidslinje(10.januar til 1.februar to 50)
 
         assertEquals(tidslinje, enLikTidslinje)
 
         val sammeDatoerMenAndreProsenter =
-           TestTidslinje(2.januar til 2.januar to 1) + TestTidslinje(10.januar til 1.februar to 51)
+            TestTidslinje(2.januar til 2.januar to 1) + TestTidslinje(10.januar til 1.februar to 51)
 
         Assertions.assertNotEquals(tidslinje, sammeDatoerMenAndreProsenter)
     }
@@ -49,9 +50,15 @@ internal class TidslinjeTest {
 
     @Test
     fun `plus med egne regler`() {
-        class PlussendeTalltidslinje(vararg perioder: Pair<Periode, Int>): Tidslinje<Int, PlussendeTalltidslinje>(*perioder) {
+        class PlussendeTalltidslinje(
+            vararg perioder: Pair<Periode, Int>,
+        ) : Tidslinje<Int, PlussendeTalltidslinje>(*perioder) {
             override fun opprett(vararg perioder: Pair<Periode, Int>) = PlussendeTalltidslinje(*perioder)
-            override fun pluss(eksisterendeVerdi: Int, nyVerdi: Int) = eksisterendeVerdi + nyVerdi
+
+            override fun pluss(
+                eksisterendeVerdi: Int,
+                nyVerdi: Int,
+            ) = eksisterendeVerdi + nyVerdi
         }
         val tidslinje1 = PlussendeTalltidslinje(februar to 100)
         val tidslinje2 = PlussendeTalltidslinje(31.januar til 1.mars to 12)
@@ -73,21 +80,29 @@ internal class TidslinjeTest {
             mapOf(
                 1.februar til 31.mars to 1,
                 30.mai til 1.juni to 2,
-                2.juni til 15.juni to 1
-            ), sammenslått.gruppér()
+                2.juni til 15.juni to 1,
+            ),
+            sammenslått.gruppér(),
         )
     }
 
     @Test
     fun `gruppér med egne regler`() {
-        class IngentallErLikeTalltidslinje(vararg perioder: Pair<Periode, Int>): Tidslinje<Int, IngentallErLikeTalltidslinje>(*perioder) {
+        class IngentallErLikeTalltidslinje(
+            vararg perioder: Pair<Periode, Int>,
+        ) : Tidslinje<Int, IngentallErLikeTalltidslinje>(*perioder) {
             override fun opprett(vararg perioder: Pair<Periode, Int>) = IngentallErLikeTalltidslinje(*perioder)
-            override fun erLike(a: Int, b: Int) = false
+
+            override fun erLike(
+                a: Int,
+                b: Int,
+            ) = false
         }
 
-        val februarTidslinje: IngentallErLikeTalltidslinje = februar.fold(IngentallErLikeTalltidslinje()) { sammenslått, dato ->
-            sammenslått + IngentallErLikeTalltidslinje(dato.somPeriode() to 1)
-        }
+        val februarTidslinje: IngentallErLikeTalltidslinje =
+            februar.fold(IngentallErLikeTalltidslinje()) { sammenslått, dato ->
+                sammenslått + IngentallErLikeTalltidslinje(dato.somPeriode() to 1)
+            }
         val marsTidslinje = IngentallErLikeTalltidslinje(mars to 1)
         val haleMaiSnuteJuniTidslinje = IngentallErLikeTalltidslinje(30.mai til 1.juni to 1)
         val juniTidslinje = IngentallErLikeTalltidslinje(2.juni til 15.juni to 1)
@@ -95,9 +110,9 @@ internal class TidslinjeTest {
         val sammenslått = februarTidslinje + marsTidslinje + haleMaiSnuteJuniTidslinje + juniTidslinje
         val forventet =
             februar.associate { it.somPeriode() to 1 } +
-            mars.associate { it.somPeriode() to 1 } +
-            (30.mai til 1.juni).associate { it.somPeriode() to 1 } +
-            (2.juni til 15.juni).associate { it.somPeriode() to 1 }
+                mars.associate { it.somPeriode() to 1 } +
+                (30.mai til 1.juni).associate { it.somPeriode() to 1 } +
+                (2.juni til 15.juni).associate { it.somPeriode() to 1 }
 
         assertEquals(forventet, sammenslått.gruppér())
     }
@@ -107,7 +122,7 @@ internal class TidslinjeTest {
         val tidslinje = TestTidslinje(februar to 4)
         assertEquals(
             TestTidslinje(5.februar til 25.februar to 4),
-            tidslinje.subset(5.februar til 25.februar)
+            tidslinje.subset(5.februar til 25.februar),
         )
         assertEquals(TestTidslinje(), tidslinje.subset(januar))
         assertEquals(TestTidslinje(), tidslinje.subset(april))
@@ -149,7 +164,7 @@ internal class TidslinjeTest {
 
         val beholdtSnuteOgHale =
             TestTidslinje((1.januar til 2.januar) to 1) +
-            TestTidslinje(31.januar.somPeriode() to 1)
+                TestTidslinje(31.januar.somPeriode() to 1)
 
         assertEquals(beholdtSnuteOgHale, tidslinje - (3.januar til 30.januar))
 

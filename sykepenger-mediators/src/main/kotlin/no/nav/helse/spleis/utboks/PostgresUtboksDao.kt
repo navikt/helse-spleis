@@ -6,16 +6,21 @@ import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.string
 import com.github.navikt.tbd_libs.sql_dsl.stringOrNull
 import com.github.navikt.tbd_libs.sql_dsl.transaction
+import no.nav.helse.Personidentifikator
+import org.intellij.lang.annotations.Language
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.UUID
 import javax.sql.DataSource
-import no.nav.helse.Personidentifikator
-import org.intellij.lang.annotations.Language
 
-internal class PostgresUtboksDao(private val dataSource: DataSource): UtboksDao {
-
-    override fun lagre(connection: Connection, meldinger: List<Utboksmelding>, forårsaketAv: UUID) {
+internal class PostgresUtboksDao(
+    private val dataSource: DataSource,
+) : UtboksDao {
+    override fun lagre(
+        connection: Connection,
+        meldinger: List<Utboksmelding>,
+        forårsaketAv: UUID,
+    ) {
         check(!connection.autoCommit) { "lagre må kalles innenfor transaksjonen som lagrer person" }
 
         @Language("PostgreSQL")
@@ -32,18 +37,22 @@ internal class PostgresUtboksDao(private val dataSource: DataSource): UtboksDao 
             );
         """
 
-        connection.prepareStatementWithNamedParameters(sql) {
-            withParameter("id", meldinger.map { it.utgåendeMelding.id })
-            withParameter("forarsaket_av", List(meldinger.size) { forårsaketAv })
-            withParameter("key", meldinger.map { it.utgåendeMelding.key })
-            withParameter("json", meldinger.map { it.utgåendeMelding.json.toString() })
-            withParameter("mottaker", meldinger.map { it.utgåendeMelding.mottaker.name })
-            withParameter("opprettet") { setArray(it, connection.createArrayOf("timestamptz", meldinger.map { melding -> melding.utgåendeMelding.opprettet }.toTypedArray())) }
-            withParameter("behold_etter_sending") { setArray(it, connection.createArrayOf("boolean", meldinger.map { melding -> melding is Utboksmelding.BeholdEtterSending }.toTypedArray())) }
-        }.use { it.execute() }
+        connection
+            .prepareStatementWithNamedParameters(sql) {
+                withParameter("id", meldinger.map { it.utgåendeMelding.id })
+                withParameter("forarsaket_av", List(meldinger.size) { forårsaketAv })
+                withParameter("key", meldinger.map { it.utgåendeMelding.key })
+                withParameter("json", meldinger.map { it.utgåendeMelding.json.toString() })
+                withParameter("mottaker", meldinger.map { it.utgåendeMelding.mottaker.name })
+                withParameter("opprettet") { setArray(it, connection.createArrayOf("timestamptz", meldinger.map { melding -> melding.utgåendeMelding.opprettet }.toTypedArray())) }
+                withParameter("behold_etter_sending") { setArray(it, connection.createArrayOf("boolean", meldinger.map { melding -> melding is Utboksmelding.BeholdEtterSending }.toTypedArray())) }
+            }.use { it.execute() }
     }
 
-    override fun usendte(personidentifikator: Personidentifikator, send: (meldinger: List<UtgåendeMelding>) -> Kvittering) {
+    override fun usendte(
+        personidentifikator: Personidentifikator,
+        send: (meldinger: List<UtgåendeMelding>) -> Kvittering,
+    ) {
         @Language("PostgreSQL")
         val sqlHentFraUtboks = """
             SELECT lopenummer, key, json, mottaker 
@@ -68,9 +77,10 @@ internal class PostgresUtboksDao(private val dataSource: DataSource): UtboksDao 
 
         dataSource.connection {
             transaction {
-                val usendteMeldinger = prepareStatementWithNamedParameters(sqlHentFraUtboks) {
-                    withParameter("key", personidentifikator.toString())
-                }.mapNotNull { row -> row.somUtgåendeMelding() }
+                val usendteMeldinger =
+                    prepareStatementWithNamedParameters(sqlHentFraUtboks) {
+                        withParameter("key", personidentifikator.toString())
+                    }.mapNotNull { row -> row.somUtgåendeMelding() }
                 val kvittering = send(usendteMeldinger)
                 if (kvittering.ok.isEmpty()) return@transaction
                 prepareStatementWithNamedParameters(sqlFlyttTilSendt) {
@@ -90,21 +100,24 @@ internal class PostgresUtboksDao(private val dataSource: DataSource): UtboksDao 
             LIMIT 1000
         """
         return dataSource.connection {
-            prepareStatement(sql).mapNotNull { row ->
-                Personidentifikator(row.string("key"))
-            }.toSet()
+            prepareStatement(sql)
+                .mapNotNull { row ->
+                    Personidentifikator(row.string("key"))
+                }.toSet()
         }
     }
 
     internal companion object {
-        internal fun ResultSet.somUtgåendeMelding() = UtgåendeMelding(
-            key = stringOrNull("key"),
-            json = string("json"),
-            mottaker = when (val mottaker = string("mottaker")) {
-                "RAPID" -> UtgåendeMelding.Mottaker.RAPID
-                "SUBSUMSJON" -> UtgåendeMelding.Mottaker.SUBSUMSJON
-                else -> error("Mottaker $mottaker har jeg aldri hørt om, den må du eventuelt legge inn.")
-            }
-        )
+        internal fun ResultSet.somUtgåendeMelding() =
+            UtgåendeMelding(
+                key = stringOrNull("key"),
+                json = string("json"),
+                mottaker =
+                    when (val mottaker = string("mottaker")) {
+                        "RAPID" -> UtgåendeMelding.Mottaker.RAPID
+                        "SUBSUMSJON" -> UtgåendeMelding.Mottaker.SUBSUMSJON
+                        else -> error("Mottaker $mottaker har jeg aldri hørt om, den må du eventuelt legge inn.")
+                    },
+            )
     }
 }

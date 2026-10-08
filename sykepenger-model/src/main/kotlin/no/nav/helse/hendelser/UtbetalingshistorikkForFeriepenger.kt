@@ -1,8 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
 import no.nav.helse.erHelg
 import no.nav.helse.feriepenger.Feriepengegrunnlagsdag.Kilde
 import no.nav.helse.feriepenger.Feriepengegrunnlagsdag.Mottaker
@@ -11,6 +8,9 @@ import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode.Companion.kodeForDato
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilPerson
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Year
 
 class UtbetalingshistorikkForFeriepenger(
     meldingsreferanseId: MeldingsreferanseId,
@@ -19,63 +19,70 @@ class UtbetalingshistorikkForFeriepenger(
     private val arbeidskategorikoder: Arbeidskategorikoder,
     internal val opptjeningsår: Year,
     internal val skalBeregnesManuelt: Boolean,
-    internal val datoForSisteFeriepengekjøringIInfotrygd: LocalDate
+    internal val datoForSisteFeriepengekjøringIInfotrygd: LocalDate,
 ) : Hendelse {
     override val behandlingsporing = Behandlingsporing.IngenYrkesaktivitet
-    override val metadata = LocalDateTime.now().let { nå ->
-        HendelseMetadata(
-            meldingsreferanseId = meldingsreferanseId,
-            avsender = SYSTEM,
-            innsendt = nå,
-            registrert = nå,
-            automatiskBehandling = true
-        )
-    }
+    override val metadata =
+        LocalDateTime.now().let { nå ->
+            HendelseMetadata(
+                meldingsreferanseId = meldingsreferanseId,
+                avsender = SYSTEM,
+                innsendt = nå,
+                registrert = nå,
+                automatiskBehandling = true,
+            )
+        }
 
-    internal fun utbetalteFeriepengerTilPerson() =
-        feriepengehistorikk.utbetalteFeriepengerTilPerson(opptjeningsår)
+    internal fun utbetalteFeriepengerTilPerson() = feriepengehistorikk.utbetalteFeriepengerTilPerson(opptjeningsår)
 
-    internal fun utbetalteFeriepengerTilArbeidsgiver(orgnummer: String) =
-        feriepengehistorikk.utbetalteFeriepengerTilArbeidsgiver(orgnummer, opptjeningsår)
+    internal fun utbetalteFeriepengerTilArbeidsgiver(orgnummer: String) = feriepengehistorikk.utbetalteFeriepengerTilArbeidsgiver(orgnummer, opptjeningsår)
 
-    internal fun harRettPåFeriepenger(dato: LocalDate, orgnummer: String) = arbeidskategorikoder.harRettPåFeriepenger(dato, orgnummer)
+    internal fun harRettPåFeriepenger(
+        dato: LocalDate,
+        orgnummer: String,
+    ) = arbeidskategorikoder.harRettPåFeriepenger(dato, orgnummer)
 
     internal fun sikreAtArbeidsgivereEksisterer(opprettManglendeArbeidsgiver: (String) -> Unit) {
         utbetalinger.forEach { it.sikreAtArbeidsgivereEksisterer(opprettManglendeArbeidsgiver) }
     }
 
-    private fun erUtbetaltEtterFeriepengekjøringIT(sisteKjøringIInfotrygd: LocalDate, utbetalt: LocalDate) = sisteKjøringIInfotrygd <= utbetalt
+    private fun erUtbetaltEtterFeriepengekjøringIT(
+        sisteKjøringIInfotrygd: LocalDate,
+        utbetalt: LocalDate,
+    ) = sisteKjøringIInfotrygd <= utbetalt
 
-    internal fun grunnlagForFeriepenger(sisteKjøringIInfotrygd: LocalDate): Feriepengegrunnlagstidslinje {
-        return Feriepengegrunnlagstidslinje.Builder().apply {
-            utbetalinger
-                .filterNot { dag -> erUtbetaltEtterFeriepengekjøringIT(sisteKjøringIInfotrygd, dag.utbetalt) }
-                .forEach { dag ->
-                    dag.periode
-                        .filterNot { it.erHelg() }
-                        .filter { harRettPåFeriepenger(it, dag.orgnr) }
-                        .forEach { dato ->
-                            when (dag) {
-                                is Utbetalingsperiode.Arbeidsgiverutbetalingsperiode -> leggTilUtbetaling(dato, dag.orgnr, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, dag.beløp)
-                                is Utbetalingsperiode.Personutbetalingsperiode -> leggTilUtbetaling(dato, dag.orgnr, Mottaker.PERSON, Kilde.INFOTRYGD, dag.beløp)
+    internal fun grunnlagForFeriepenger(sisteKjøringIInfotrygd: LocalDate): Feriepengegrunnlagstidslinje =
+        Feriepengegrunnlagstidslinje
+            .Builder()
+            .apply {
+                utbetalinger
+                    .filterNot { dag -> erUtbetaltEtterFeriepengekjøringIT(sisteKjøringIInfotrygd, dag.utbetalt) }
+                    .forEach { dag ->
+                        dag.periode
+                            .filterNot { it.erHelg() }
+                            .filter { harRettPåFeriepenger(it, dag.orgnr) }
+                            .forEach { dato ->
+                                when (dag) {
+                                    is Utbetalingsperiode.Arbeidsgiverutbetalingsperiode -> leggTilUtbetaling(dato, dag.orgnr, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, dag.beløp)
+                                    is Utbetalingsperiode.Personutbetalingsperiode -> leggTilUtbetaling(dato, dag.orgnr, Mottaker.PERSON, Kilde.INFOTRYGD, dag.beløp)
+                                }
                             }
-                        }
-                }
-        }.build()
-    }
+                    }
+            }.build()
 
     class Feriepenger(
         val orgnummer: String,
         val beløp: Int,
         val fom: LocalDate,
-        val tom: LocalDate
+        val tom: LocalDate,
     ) {
         internal companion object {
-            internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilPerson(opptjeningsår: Year) =
-                filter { it.orgnummer.all('0'::equals) }.filter { Year.from(it.fom) == opptjeningsår.plusYears(1) }.map { it.beløp }
+            internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilPerson(opptjeningsår: Year) = filter { it.orgnummer.all('0'::equals) }.filter { Year.from(it.fom) == opptjeningsår.plusYears(1) }.map { it.beløp }
 
-            internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilArbeidsgiver(orgnummer: String, opptjeningsår: Year) =
-                filter { it.orgnummer == orgnummer }.filter { Year.from(it.fom) == opptjeningsår.plusYears(1) }.map { it.beløp }
+            internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilArbeidsgiver(
+                orgnummer: String,
+                opptjeningsår: Year,
+            ) = filter { it.orgnummer == orgnummer }.filter { Year.from(it.fom) == opptjeningsår.plusYears(1) }.map { it.beløp }
         }
     }
 
@@ -84,7 +91,7 @@ class UtbetalingshistorikkForFeriepenger(
         fom: LocalDate,
         tom: LocalDate,
         val beløp: Int,
-        val utbetalt: LocalDate
+        val utbetalt: LocalDate,
     ) {
         val periode: Periode = fom til tom
 
@@ -97,7 +104,7 @@ class UtbetalingshistorikkForFeriepenger(
             fom: LocalDate,
             tom: LocalDate,
             beløp: Int,
-            utbetalt: LocalDate
+            utbetalt: LocalDate,
         ) : Utbetalingsperiode(orgnr, fom, tom, beløp, utbetalt)
 
         class Arbeidsgiverutbetalingsperiode(
@@ -105,26 +112,31 @@ class UtbetalingshistorikkForFeriepenger(
             fom: LocalDate,
             tom: LocalDate,
             beløp: Int,
-            utbetalt: LocalDate
+            utbetalt: LocalDate,
         ) : Utbetalingsperiode(orgnr, fom, tom, beløp, utbetalt)
     }
 
     class Arbeidskategorikoder(
-        private val arbeidskategorikoder: List<KodePeriode>
+        private val arbeidskategorikoder: List<KodePeriode>,
     ) {
-        internal fun harRettPåFeriepenger(dato: LocalDate, orgnummer: String) = arbeidskategorikoder.kodeForDato(dato).girRettTilFeriepenger(orgnummer)
+        internal fun harRettPåFeriepenger(
+            dato: LocalDate,
+            orgnummer: String,
+        ) = arbeidskategorikoder.kodeForDato(dato).girRettTilFeriepenger(orgnummer)
 
         class KodePeriode(
             private val periode: Periode,
-            private val arbeidskategorikode: Arbeidskategorikode
+            private val arbeidskategorikode: Arbeidskategorikode,
         ) {
             companion object {
-                internal fun List<KodePeriode>.kodeForDato(dato: LocalDate) =
-                    first { dato in it.periode }.arbeidskategorikode
+                internal fun List<KodePeriode>.kodeForDato(dato: LocalDate) = first { dato in it.periode }.arbeidskategorikode
             }
         }
 
-        enum class Arbeidskategorikode(private val kode: String, internal val girRettTilFeriepenger: (String) -> Boolean) {
+        enum class Arbeidskategorikode(
+            private val kode: String,
+            internal val girRettTilFeriepenger: (String) -> Boolean,
+        ) {
             Arbeidstaker("01", { true }),
             ArbeidstakerSelvstendig("03", { it != "0" }),
             Sjømenn("04", { true }),
@@ -156,7 +168,8 @@ class UtbetalingshistorikkForFeriepenger(
             SelvstendigDagmammaDagpappa("26", { false }),
 
             InntektsopplysningerMangler("99", { false }),
-            Tom("", { false });
+            Tom("", { false }),
+            ;
 
             companion object {
                 fun finn(kode: String) = entries.firstOrNull { it.kode.trim() == kode.trim() } ?: Tom

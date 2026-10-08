@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.selvstendig
 
-import java.time.Year
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.selvstendig
@@ -12,16 +11,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_TIL_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -31,16 +21,15 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.Year
 
 @Disabled
 internal class SelvstendigBarnepasserTest : AbstractDslTest() {
-
     @Test
     fun `Verifiserer sykdomstidslinje for selvstendig`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
-
         }
     }
 
@@ -58,8 +47,11 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
 
-            assertEquals(setOf(80), inspektør.sykdomstidslinje.inspektør.grader.values.toSet())
-
+            assertEquals(
+                setOf(80),
+                inspektør.sykdomstidslinje.inspektør.grader.values
+                    .toSet(),
+            )
         }
     }
 
@@ -78,7 +70,6 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
 
             assertEquals("VVVVVVV VVVVVVV VVNNNHH NNNXXXX XXX", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
-
         }
     }
 
@@ -96,7 +87,6 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
 
             assertEquals("XXXXXXX XXXXXXX XXXXXXX XXXXXXX XXX", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
-
         }
     }
 
@@ -106,7 +96,6 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
-
         }
     }
 
@@ -116,14 +105,14 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(
                 periode = januar,
                 arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER,
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
-                )
+                pensjonsgivendeInntekter =
+                    listOf(
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    ),
             )
             assertFunksjonellFeil(Varselkode.RV_IV_12, 1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
-
         }
     }
 
@@ -133,15 +122,15 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(
                 periode = januar,
                 arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER,
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = false),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
-                )
+                pensjonsgivendeInntekter =
+                    listOf(
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = false),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    ),
             )
             assertFunksjonellFeil(Varselkode.RV_IV_12, 1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
-
         }
     }
 
@@ -185,10 +174,9 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 SELVSTENDIG_AVVENTER_SIMULERING,
                 SELVSTENDIG_AVVENTER_GODKJENNING,
                 SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_AVSLUTTET
+                SELVSTENDIG_AVSLUTTET,
             )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
-
         }
     }
 
@@ -198,11 +186,12 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(
                 periode = januar,
                 arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER,
-                pensjonsgivendeInntekter = listOf( // TODO Inntekt for barnepasser er ikke vanlig næringsinntekt, men i næringsinntektFraFiskeFangstEllerFamiliebarnehage
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
-                )
+                pensjonsgivendeInntekter =
+                    listOf( // TODO Inntekt for barnepasser er ikke vanlig næringsinntekt, men i næringsinntektFraFiskeFangstEllerFamiliebarnehage
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    ),
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -238,10 +227,9 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 SELVSTENDIG_AVVENTER_SIMULERING,
                 SELVSTENDIG_AVVENTER_GODKJENNING,
                 SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_AVSLUTTET
+                SELVSTENDIG_AVSLUTTET,
             )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
-
         }
     }
 
@@ -255,7 +243,6 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.mars, listOf(1.mars til 16.mars))
-
         }
     }
 }

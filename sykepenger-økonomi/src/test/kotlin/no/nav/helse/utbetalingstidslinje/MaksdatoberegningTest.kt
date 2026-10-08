@@ -1,7 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
-import java.util.*
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -37,9 +35,10 @@ import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKEL
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.*
 
 internal class MaksdatoberegningTest {
     private companion object {
@@ -57,10 +56,16 @@ internal class MaksdatoberegningTest {
     @Test
     fun `vurderer maksdato med eget regelsett`() {
         val tidslinje = tidslinjeOf(16.AP, 10.NAV)
-        val avslåtteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, regler = object : MaksimumSykepengedagerregler {
-            override fun maksSykepengedager() = 5
-            override fun maksSykepengedagerOver67() = 5
-        })
+        val avslåtteDager =
+            tidslinje.utbetalingsavgrenser(
+                UNG_PERSON_FNR_2018,
+                regler =
+                    object : MaksimumSykepengedagerregler {
+                        override fun maksSykepengedager() = 5
+
+                        override fun maksSykepengedagerOver67() = 5
+                    },
+            )
         assertEquals((24.januar til 26.januar).utenHelg(), avslåtteDager)
         assertEquals(listOf(5), forbrukteDager)
         assertEquals(listOf(0), gjenståendeDager)
@@ -871,26 +876,27 @@ internal class MaksdatoberegningTest {
 
     @Test
     fun `248 dager nådd på 3 år med helg`() {
-        val tidslinje = tidslinjeOf(
-            48.NAVDAGER,
-            127.ARB,
-            48.NAVDAGER,
-            127.ARB,
-            48.NAVDAGER,
-            127.ARB,
-            19.NAVDAGER,
-            180.ARB,
-            2.HELG, // 2 helgedager pluss forrige 180 dager utgjør 182 dager gap => resett
-            48.NAVDAGER,
-            141.ARB,
-            6.NAVDAGER,
-            90.ARB, // 54 remaining days from here, outside 26 week gap
-            1.NAVDAGER,
-            3.ARB,
-            5.NAVDAGER,
-            (248 - 60).NAVDAGER,
-            1.NAVDAGER
-        )
+        val tidslinje =
+            tidslinjeOf(
+                48.NAVDAGER,
+                127.ARB,
+                48.NAVDAGER,
+                127.ARB,
+                48.NAVDAGER,
+                127.ARB,
+                19.NAVDAGER,
+                180.ARB,
+                2.HELG, // 2 helgedager pluss forrige 180 dager utgjør 182 dager gap => resett
+                48.NAVDAGER,
+                141.ARB,
+                6.NAVDAGER,
+                90.ARB, // 54 remaining days from here, outside 26 week gap
+                1.NAVDAGER,
+                3.ARB,
+                5.NAVDAGER,
+                (248 - 60).NAVDAGER,
+                1.NAVDAGER,
+            )
         val avslåtteDager = listOf(tidslinje).utbetalingsavgrenser(UNG_PERSON_FNR_2018)
         assertEquals(listOf(emptyList(), listOf(6.oktober(2021))), avslåtteDager)
         assertEquals(listOf(163, 248), forbrukteDager)
@@ -988,7 +994,7 @@ internal class MaksdatoberegningTest {
     @Nested
     inner class TreårsvinduKontekst {
         @Test
-        fun `tilbakevendende sykdom etterfulgt av AGP og én utbetalingsdag` () {
+        fun `tilbakevendende sykdom etterfulgt av AGP og én utbetalingsdag`() {
             val tidslinje = tilbakevendendeSykdom(16.AP, 1.NAVDAGER)
             val avslåtteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
 
@@ -999,7 +1005,7 @@ internal class MaksdatoberegningTest {
         }
 
         @Test
-        fun `tilbakevendende sykdom etterfulgt av seksten fridager og én utbetalingsdag` () {
+        fun `tilbakevendende sykdom etterfulgt av seksten fridager og én utbetalingsdag`() {
             val tidslinje = tilbakevendendeSykdom(16.FRI, 1.NAVDAGER)
             val avslåtteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
 
@@ -1010,7 +1016,7 @@ internal class MaksdatoberegningTest {
         }
 
         @Test
-        fun `tilbakevendende sykdom etterfulgt av AGP som Nav dekker og én utbetalingsdag` () {
+        fun `tilbakevendende sykdom etterfulgt av AGP som Nav dekker og én utbetalingsdag`() {
             val tidslinje = tilbakevendendeSykdom(16.NAP, 1.NAVDAGER)
             val avslåtteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
 
@@ -1068,19 +1074,63 @@ internal class MaksdatoberegningTest {
 
     @Test
     fun `ferie hos ag1 og arbeidsdag hos ag2 - treårsvindu forskyves ikke`() {
-        val ag1 = tidslinjeOf(
-            11.AP, 52.ARB, 12.NAV, 109.ARB, 8.NAV, 66.ARB, 1.FRI, 15.AP, 1.ARB, 13.NAV, 87.ARB,
-            16.AP, 34.NAV, 36.ARB, 1.FRI, 1.AP, 1.ARB, 1.AP, 7.ARB, 1.AP, 6.ARB, 13.AP, 13.NAV, 26.FRI, 51.NAV, 12.FRI, 30.NAV, startDato = 1.mars(2021)
-        )
+        val ag1 =
+            tidslinjeOf(
+                11.AP,
+                52.ARB,
+                12.NAV,
+                109.ARB,
+                8.NAV,
+                66.ARB,
+                1.FRI,
+                15.AP,
+                1.ARB,
+                13.NAV,
+                87.ARB,
+                16.AP,
+                34.NAV,
+                36.ARB,
+                1.FRI,
+                1.AP,
+                1.ARB,
+                1.AP,
+                7.ARB,
+                1.AP,
+                6.ARB,
+                13.AP,
+                13.NAV,
+                26.FRI,
+                51.NAV,
+                12.FRI,
+                30.NAV,
+                startDato = 1.mars(2021),
+            )
         // 3. oktober er fridag hos ag1; utfallet skal ikke være at vi teller dagen som Arbeidsdag, da det vil medføre at vi går inn i en
         // opphold-situasjon, som vi ville gått ut av 17. oktober (ved neste Nav-dag).
         // Når man går ut av en Opphold-situasjon så vil vi sette et nytt starttidspunkt for treårsvinduet, og da beregne
         // forbrukte dager annerledes.
         val ag2 = tidslinjeOf(20.ARB, startDato = 3.oktober(2022))
-        val infotrygd = tidslinjeOf(
-            6.NAV, 62.ARB, 124.NAV, 151.ARB, 21.NAV, 12.ARB, 3.NAV, 116.ARB, 19.NAV,
-            163.ARB, 14.NAV, 108.ARB, 8.NAV, 83.ARB, 13.NAV, 103.ARB, 34.NAV, startDato = 25.juni(2019)
-        )
+        val infotrygd =
+            tidslinjeOf(
+                6.NAV,
+                62.ARB,
+                124.NAV,
+                151.ARB,
+                21.NAV,
+                12.ARB,
+                3.NAV,
+                116.ARB,
+                19.NAV,
+                163.ARB,
+                14.NAV,
+                108.ARB,
+                8.NAV,
+                83.ARB,
+                13.NAV,
+                103.ARB,
+                34.NAV,
+                startDato = 25.juni(2019),
+            )
 
         val avslåtteDager = listOf(ag1, ag2).utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = infotrygd)
 
@@ -1216,8 +1266,8 @@ internal class MaksdatoberegningTest {
     }
 
     // No 26 week gap with base of 246 NAV days
-    private fun tilbakevendendeSykdom(vararg utbetalingsdager: Utbetalingsdager): Utbetalingstidslinje {
-        return tidslinjeOf(
+    private fun tilbakevendendeSykdom(vararg utbetalingsdager: Utbetalingsdager): Utbetalingstidslinje =
+        tidslinjeOf(
             48.NAVDAGER,
             140.ARB,
             48.NAVDAGER,
@@ -1230,13 +1280,12 @@ internal class MaksdatoberegningTest {
             140.ARB,
             6.NAVDAGER,
             52.ARB,
-            *utbetalingsdager
+            *utbetalingsdager,
         )
-    }
 
     // 26 week gap inside 3 year window of 246 days with 54 NAV days after the gap
-    private fun enAnnenSykdom(vararg utbetalingsdager: Utbetalingsdager): Utbetalingstidslinje {
-        return tidslinjeOf(
+    private fun enAnnenSykdom(vararg utbetalingsdager: Utbetalingsdager): Utbetalingstidslinje =
+        tidslinjeOf(
             48.NAVDAGER,
             127.ARB,
             48.NAVDAGER,
@@ -1249,65 +1298,68 @@ internal class MaksdatoberegningTest {
             141.ARB,
             6.NAVDAGER,
             90.ARB,
-            *utbetalingsdager
+            *utbetalingsdager,
         )
-    }
 
-    private fun begrunnelse(dato: LocalDate): Begrunnelse? {
-        return vurderinger.firstNotNullOfOrNull { it.begrunnelser[dato] }
-    }
+    private fun begrunnelse(dato: LocalDate): Begrunnelse? = vurderinger.firstNotNullOfOrNull { it.begrunnelser[dato] }
 
     private fun Periode.utenHelg() = filterNot { it.erHelg() }
+
     private fun Utbetalingstidslinje.utbetalingsavgrenser(
         fødselsdato: LocalDate,
         personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
         dødsdato: LocalDate? = null,
-        regler: MaksimumSykepengedagerregler = NormalArbeidstaker
-    ): List<LocalDate> {
-        return listOf(this).utbetalingsavgrenser(fødselsdato, personTidslinje, dødsdato, regler).single()
-    }
+        regler: MaksimumSykepengedagerregler = NormalArbeidstaker,
+    ): List<LocalDate> = listOf(this).utbetalingsavgrenser(fødselsdato, personTidslinje, dødsdato, regler).single()
 
     private fun List<Utbetalingstidslinje>.utbetalingsavgrenser(
         fødselsdato: LocalDate,
         personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
         dødsdato: LocalDate? = null,
-        regler: MaksimumSykepengedagerregler = NormalArbeidstaker
+        regler: MaksimumSykepengedagerregler = NormalArbeidstaker,
     ): List<List<LocalDate>> {
         val sekstisyvårsdagen = fødselsdato.plusYears(67)
         val syttiårsdagen = fødselsdato.plusYears(70)
 
-        val maksdatoberegning = Maksdatoberegning(
-            sekstisyvårsdagen = sekstisyvårsdagen,
-            syttiårsdagen = syttiårsdagen,
-            dødsdato = dødsdato,
-            regler = regler,
-            historisktidslinje = personTidslinje
-        )
-
-        val tidslinjer = this.mapIndexed { index, it ->
-            Arbeidsgiverberegning(
-                inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a${index+1}"),
-                vedtaksperioder = listOf(
-                    Vedtaksperiodeberegning(
-                        vedtaksperiodeId = UUID.randomUUID(),
-                        utbetalingstidslinje = it
-                    )
-                ),
-                ghostOgAndreInntektskilder = emptyList()
+        val maksdatoberegning =
+            Maksdatoberegning(
+                sekstisyvårsdagen = sekstisyvårsdagen,
+                syttiårsdagen = syttiårsdagen,
+                dødsdato = dødsdato,
+                regler = regler,
+                historisktidslinje = personTidslinje,
             )
-        }
+
+        val tidslinjer =
+            this.mapIndexed { index, it ->
+                Arbeidsgiverberegning(
+                    inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
+                    vedtaksperioder =
+                        listOf(
+                            Vedtaksperiodeberegning(
+                                vedtaksperiodeId = UUID.randomUUID(),
+                                utbetalingstidslinje = it,
+                            ),
+                        ),
+                    ghostOgAndreInntektskilder = emptyList(),
+                )
+            }
         vurderinger = maksdatoberegning.beregn(tidslinjer)
-        maksdatoresultater = vurderinger
-            .map { it.beregnMaksdato(syttiårsdagen, dødsdato) }
-        maksdatoer = maksdatoresultater.map {
-            it.maksdato
-        }
-        forbrukteDager = maksdatoresultater.map {
-            it.antallForbrukteDager
-        }
-        gjenståendeDager = maksdatoresultater.map {
-            it.gjenståendeDager
-        }
+        maksdatoresultater =
+            vurderinger
+                .map { it.beregnMaksdato(syttiårsdagen, dødsdato) }
+        maksdatoer =
+            maksdatoresultater.map {
+                it.maksdato
+            }
+        forbrukteDager =
+            maksdatoresultater.map {
+                it.antallForbrukteDager
+            }
+        gjenståendeDager =
+            maksdatoresultater.map {
+                it.gjenståendeDager
+            }
         return vurderinger.map { it.avslåtteDager.toList() }
     }
 }

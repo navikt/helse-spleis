@@ -11,5 +11,5 @@ data class InntektsgrunnlagUtDto(
     val sykepengegrunnlag: InntektDto,
     val totalOmregnetÅrsinntekt: InntektDto,
     val beregningsgrunnlag: InntektDto,
-    val er6GBegrenset: Boolean
+    val er6GBegrenset: Boolean,
 )

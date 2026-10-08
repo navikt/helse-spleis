@@ -1,13 +1,13 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.DayOfWeek.MONDAY
-import java.time.DayOfWeek.SATURDAY
-import java.time.DayOfWeek.SUNDAY
-import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.plus
 import no.nav.helse.ukedager
+import java.time.DayOfWeek.MONDAY
+import java.time.DayOfWeek.SATURDAY
+import java.time.DayOfWeek.SUNDAY
+import java.time.LocalDate
 
 internal data class Maksdatokontekst(
     val regler: MaksimumSykepengedagerregler,
@@ -18,21 +18,23 @@ internal data class Maksdatokontekst(
     val betalteDager: Set<LocalDate>,
     val oppholdsdager: Set<LocalDate>,
     val avslåtteDager: Set<LocalDate>,
-    val begrunnelser: Map<LocalDate, Begrunnelse>
+    val begrunnelser: Map<LocalDate, Begrunnelse>,
 ) {
     companion object {
-        fun tomKontekst(regler: MaksimumSykepengedagerregler, sekstisyvårsdagen: LocalDate) =
-            Maksdatokontekst(
-                regler = regler,
-                sekstisyvårsdagen = sekstisyvårsdagen,
-                vurdertTilOgMed = LocalDate.MIN,
-                startdatoSykepengerettighet = LocalDate.MIN,
-                startdatoTreårsvindu = LocalDate.MIN,
-                betalteDager = emptySet(),
-                oppholdsdager = emptySet(),
-                avslåtteDager = emptySet(),
-                begrunnelser = emptyMap()
-            )
+        fun tomKontekst(
+            regler: MaksimumSykepengedagerregler,
+            sekstisyvårsdagen: LocalDate,
+        ) = Maksdatokontekst(
+            regler = regler,
+            sekstisyvårsdagen = sekstisyvårsdagen,
+            vurdertTilOgMed = LocalDate.MIN,
+            startdatoSykepengerettighet = LocalDate.MIN,
+            startdatoTreårsvindu = LocalDate.MIN,
+            betalteDager = emptySet(),
+            oppholdsdager = emptySet(),
+            avslåtteDager = emptySet(),
+            begrunnelser = emptyMap(),
+        )
     }
 
     internal val oppholdsteller = oppholdsdager.size
@@ -47,13 +49,14 @@ internal data class Maksdatokontekst(
     internal val erDagerUnder67ÅrForbrukte = gjenståendeDagerUnder67År == 0
     internal val erDagerOver67ÅrForbrukte = gjenståendeDagerOver67År == 0
 
-    internal fun harNåddMaks(vedtaksperiode: Periode) =
-        avslåtteDager.any { it in vedtaksperiode }
+    internal fun harNåddMaks(vedtaksperiode: Periode) = avslåtteDager.any { it in vedtaksperiode }
 
-    internal fun datoForTilstrekkeligOppholdOppnådd(tilstrekkeligOpphold: Int) =
-        oppholdsdager.sorted().getOrNull(tilstrekkeligOpphold - 1)
+    internal fun datoForTilstrekkeligOppholdOppnådd(tilstrekkeligOpphold: Int) = oppholdsdager.sorted().getOrNull(tilstrekkeligOpphold - 1)
 
-    internal fun fremdelesSykEtterTilstrekkeligOpphold(vedtaksperiode: Periode, tilstrekkeligOpphold: Int): Boolean {
+    internal fun fremdelesSykEtterTilstrekkeligOpphold(
+        vedtaksperiode: Periode,
+        tilstrekkeligOpphold: Int,
+    ): Boolean {
         val datoForTilstrekkeligOpphold = datoForTilstrekkeligOppholdOppnådd(tilstrekkeligOpphold) ?: return false
         return avslåtteDager.any { it > datoForTilstrekkeligOpphold && it in vedtaksperiode }
     }
@@ -67,78 +70,96 @@ internal data class Maksdatokontekst(
         return vyFremover(vurderingTilOgMed) // 😏
     }
 
-    private fun spolTilbake(vurderingTilOgMed: LocalDate) = copy(
-        vurdertTilOgMed = vurderingTilOgMed,
-        betalteDager = betalteDager.filter { it <= vurderingTilOgMed }.toSet(),
-        oppholdsdager = oppholdsdager.filter { it <= vurderingTilOgMed }.toSet(),
-        avslåtteDager = avslåtteDager.filter { it <= vurderingTilOgMed }.toSet(),
-        begrunnelser = begrunnelser.filterKeys { it <= vurderingTilOgMed }
-    )
+    private fun spolTilbake(vurderingTilOgMed: LocalDate) =
+        copy(
+            vurdertTilOgMed = vurderingTilOgMed,
+            betalteDager = betalteDager.filter { it <= vurderingTilOgMed }.toSet(),
+            oppholdsdager = oppholdsdager.filter { it <= vurderingTilOgMed }.toSet(),
+            avslåtteDager = avslåtteDager.filter { it <= vurderingTilOgMed }.toSet(),
+            begrunnelser = begrunnelser.filterKeys { it <= vurderingTilOgMed },
+        )
 
-    private fun vyFremover(vurderingTilOgMed: LocalDate) = copy(
-        vurdertTilOgMed = vurderingTilOgMed
-    )
+    private fun vyFremover(vurderingTilOgMed: LocalDate) =
+        copy(
+            vurdertTilOgMed = vurderingTilOgMed,
+        )
 
-    internal fun tilbakestill() = copy(
-        vurdertTilOgMed = LocalDate.MIN,
-        startdatoSykepengerettighet = LocalDate.MIN,
-        startdatoTreårsvindu = LocalDate.MIN,
-        betalteDager = emptySet(),
-        oppholdsdager = emptySet(),
-        avslåtteDager = emptySet(),
-        begrunnelser = emptyMap()
-    )
+    internal fun tilbakestill() =
+        copy(
+            vurdertTilOgMed = LocalDate.MIN,
+            startdatoSykepengerettighet = LocalDate.MIN,
+            startdatoTreårsvindu = LocalDate.MIN,
+            betalteDager = emptySet(),
+            oppholdsdager = emptySet(),
+            avslåtteDager = emptySet(),
+            begrunnelser = emptyMap(),
+        )
 
-    internal fun nyMaksdatosak(dagen: LocalDate, startdatoTreårsvindu: LocalDate): Maksdatokontekst {
-        return this
+    internal fun nyMaksdatosak(
+        dagen: LocalDate,
+        startdatoTreårsvindu: LocalDate,
+    ): Maksdatokontekst =
+        this
             .copy(startdatoSykepengerettighet = dagen)
             .medNyStartdatoTreårsvindu(startdatoTreårsvindu)
             .inkrementer(dagen)
-    }
 
-    internal fun inkrementer(dato: LocalDate) = copy(
-        vurdertTilOgMed = dato,
-        betalteDager = betalteDager.plus(dato),
-        oppholdsdager = emptySet()
-    )
+    internal fun inkrementer(dato: LocalDate) =
+        copy(
+            vurdertTilOgMed = dato,
+            betalteDager = betalteDager.plus(dato),
+            oppholdsdager = emptySet(),
+        )
 
-    internal fun dekrementer(dato: LocalDate, nyStartdatoTreårsvindu: LocalDate) =
-        this
-            .medNyStartdatoTreårsvindu(nyStartdatoTreårsvindu)
-            .inkrementer(dato)
+    internal fun dekrementer(
+        dato: LocalDate,
+        nyStartdatoTreårsvindu: LocalDate,
+    ) = this
+        .medNyStartdatoTreårsvindu(nyStartdatoTreårsvindu)
+        .inkrementer(dato)
 
     // tilgir forbrukte dager som følge av at treårsvinduet forskyves
-    private fun medNyStartdatoTreårsvindu(nyStartdatoTreårsvindu: LocalDate) = copy(
-        startdatoTreårsvindu = nyStartdatoTreårsvindu,
-        betalteDager = betalteDager.filter { it >= nyStartdatoTreårsvindu }.toSet()
-    )
+    private fun medNyStartdatoTreårsvindu(nyStartdatoTreårsvindu: LocalDate) =
+        copy(
+            startdatoTreårsvindu = nyStartdatoTreårsvindu,
+            betalteDager = betalteDager.filter { it >= nyStartdatoTreårsvindu }.toSet(),
+        )
 
-    internal fun medOppholdsdag(dato: LocalDate) = copy(
-        vurdertTilOgMed = dato,
-        oppholdsdager = oppholdsdager + dato
-    )
+    internal fun medOppholdsdag(dato: LocalDate) =
+        copy(
+            vurdertTilOgMed = dato,
+            oppholdsdager = oppholdsdager + dato,
+        )
 
-    internal fun medAvslåttDag(dato: LocalDate, begrunnelse: Begrunnelse) = copy(
+    internal fun medAvslåttDag(
+        dato: LocalDate,
+        begrunnelse: Begrunnelse,
+    ) = copy(
         vurdertTilOgMed = dato,
         avslåtteDager = this.avslåtteDager + dato,
         oppholdsdager = oppholdsdager + dato,
-        begrunnelser = this.begrunnelser.plus(dato to begrunnelse)
+        begrunnelser = this.begrunnelser.plus(dato to begrunnelse),
     )
 
-    internal fun beregnMaksdato(syttiårsdagen: LocalDate, dødsdato: LocalDate?): BeregnetMaksdato {
-        fun LocalDate.forrigeVirkedagFør() = minusDays(
-            when (dayOfWeek) {
-                SUNDAY -> 2
-                MONDAY -> 3
-                else -> 1
-            }
-        )
+    internal fun beregnMaksdato(
+        syttiårsdagen: LocalDate,
+        dødsdato: LocalDate?,
+    ): BeregnetMaksdato {
+        fun LocalDate.forrigeVirkedagFør() =
+            minusDays(
+                when (dayOfWeek) {
+                    SUNDAY -> 2
+                    MONDAY -> 3
+                    else -> 1
+                },
+            )
 
-        fun LocalDate.sisteVirkedagInklusiv() = when (dayOfWeek) {
-            SATURDAY -> minusDays(1)
-            SUNDAY -> minusDays(2)
-            else -> this
-        }
+        fun LocalDate.sisteVirkedagInklusiv() =
+            when (dayOfWeek) {
+                SATURDAY -> minusDays(1)
+                SUNDAY -> minusDays(2)
+                else -> this
+            }
 
         val harNåddMaks = gjenståendeDagerOver67År == 0 || gjenståendeDagerUnder67År == 0
         val forrigeMaksdato = if (harNåddMaks) betalteDager.last() else null
@@ -181,7 +202,7 @@ internal data class Maksdatokontekst(
             oppholdsdager = oppholdsdager.grupperSammenhengendePerioder(),
             avslåtteDager = avslåtteDager.grupperSammenhengendePerioder(),
             maksdato = maksdato,
-            gjenståendeDager = gjenståendeDager
+            gjenståendeDager = gjenståendeDager,
         )
     }
 }

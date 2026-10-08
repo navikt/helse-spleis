@@ -12,7 +12,7 @@ import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 
 internal class InntektsmeldingerReplayRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("inntektsmeldinger_replay")
     override val riverName = "Inntektsmeldinger Replay"
@@ -29,15 +29,20 @@ internal class InntektsmeldingerReplayRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = InntektsmeldingerReplayMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        InntektsmeldingerReplayMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }
 
-internal fun standardInntektsmeldingvalidering(message: JsonMessage, pathPrefix: String? = null) {
+internal fun standardInntektsmeldingvalidering(
+    message: JsonMessage,
+    pathPrefix: String? = null,
+) {
     fun p(key: String) = pathPrefix?.let { "$pathPrefix.$key" } ?: key
     message.requireKey(p("arbeidstakerFnr"), p("virksomhetsnummer"), p("opphoerAvNaturalytelser"))
     message.requireArray(p("arbeidsgiverperioder")) {

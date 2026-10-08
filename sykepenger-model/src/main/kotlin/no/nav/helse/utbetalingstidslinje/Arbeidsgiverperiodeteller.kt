@@ -13,7 +13,7 @@ import no.nav.helse.Teller
  */
 internal class Arbeidsgiverperiodeteller private constructor(
     private val oppholdsteller: Teller,
-    private val sykedagteller: Teller
+    private val sykedagteller: Teller,
 ) {
     companion object {
         val NormalArbeidstaker get() = Arbeidsgiverperiodeteller(Teller(16), Teller(16))
@@ -34,6 +34,7 @@ internal class Arbeidsgiverperiodeteller private constructor(
     }
 
     fun inc() = sykedagteller.inc()
+
     fun dec() = oppholdsteller.inc()
 
     fun fullfør() {
@@ -75,15 +76,21 @@ internal class Arbeidsgiverperiodeteller private constructor(
         }
 
         fun arbeidsgiverperiodeFerdig() {}
+
         fun arbeidsgiverperiodeAvbrutt() {}
+
         fun arbeidsgiverperiodedag() {}
+
         fun sykedag() {}
     }
 
     private interface Tilstand {
         fun entering(teller: Arbeidsgiverperiodeteller) {}
+
         fun sykedag(teller: Arbeidsgiverperiodeteller) {}
+
         fun ferdig(teller: Arbeidsgiverperiodeteller) {}
+
         fun reset(teller: Arbeidsgiverperiodeteller) {
             teller.state(Initiell)
         }

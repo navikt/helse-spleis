@@ -1,12 +1,11 @@
 package no.nav.helse.person
 
-import java.util.*
 import no.nav.helse.hendelser.MeldingsreferanseId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class DokumentsporingTest {
-
     @Test
     fun `to like sporinger i et set`() {
         val søknad = MeldingsreferanseId(UUID.randomUUID())

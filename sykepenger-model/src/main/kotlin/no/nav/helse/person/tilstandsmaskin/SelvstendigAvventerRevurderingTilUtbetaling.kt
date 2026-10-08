@@ -10,11 +10,21 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 internal data object SelvstendigAvventerRevurderingTilUtbetaling : Vedtaksperiodetilstand {
     override val type = TilstandType.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING
 
-    override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+    override fun gjenopptaBehandling(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        hendelse: Hendelse,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    override fun håndterPåminnelse(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        påminnelse: Påminnelse,
+        aktivitetslogg: IAktivitetslogg,
+    ): Revurderingseventyr? {
         trengerUtbetaling(vedtaksperiode, eventBus, aktivitetslogg)
         return null
     }

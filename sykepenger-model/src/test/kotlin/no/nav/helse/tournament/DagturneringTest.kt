@@ -1,22 +1,17 @@
 package no.nav.helse.tournament
 
-import no.nav.helse.fredag
-import no.nav.helse.lørdag
-import no.nav.helse.mandag
-import no.nav.helse.onsdag
+import no.nav.helse.*
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.TestEvent.Companion.inntektsmelding
 import no.nav.helse.testhelpers.TestEvent.Companion.søknad
 import no.nav.helse.testhelpers.TestEvent.Inntektsmelding
-import no.nav.helse.torsdag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class DagturneringTest {
-
     @Test
     fun `kombinering av tidslinjer fører til at dagsturnering slår sammen dagene`() {
         val søknadSykedager = Sykdomstidslinje.sykedager(1.mandag, 1.fredag, 100.prosent, søknad)
@@ -25,11 +20,11 @@ internal class DagturneringTest {
         val tidslinje = søknadSykedager.merge(søknadArbeidsdager, Dagturnering.TURNERING::beste)
         assertTrue(
             tidslinje[1.onsdag] is Sykedag,
-            "Onsdag er fortsatt en sykedag etter kombinering av sykmelding og søknad"
+            "Onsdag er fortsatt en sykedag etter kombinering av sykmelding og søknad",
         )
         assertTrue(
             tidslinje[1.torsdag] is Arbeidsdag,
-            "Torsdag er en arbeidsdag etter kombinering av sykmelding og søknad"
+            "Torsdag er en arbeidsdag etter kombinering av sykmelding og søknad",
         )
     }
 
@@ -102,6 +97,4 @@ internal class DagturneringTest {
 
         assertTrue(tidslinje1[1.mandag].kommerFra(hendelse = Inntektsmelding::class))
     }
-
 }
-

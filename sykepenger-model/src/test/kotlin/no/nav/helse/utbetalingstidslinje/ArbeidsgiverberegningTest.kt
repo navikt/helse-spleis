@@ -1,22 +1,18 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.person.beløp.Beløpstidslinje
-import no.nav.helse.person.beløp.Kilde
-import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.UUID
-import kotlin.collections.filter
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.a3
 import no.nav.helse.erHelg
+import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
+import no.nav.helse.januar
 import no.nav.helse.person.Avslagstidslinje
+import no.nav.helse.person.beløp.Beløpstidslinje
+import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.resetSeed
@@ -26,19 +22,21 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
+import kotlin.collections.filter
 
 internal class ArbeidsgiverberegningTest {
-
-    private fun sykdomstidslinje(periode: Periode): Sykdomstidslinje {
-        return resetSeed(periode.start) { periode.count().S }
-    }
+    private fun sykdomstidslinje(periode: Periode): Sykdomstidslinje = resetSeed(periode.start) { periode.count().S }
 
     @Test
     fun `en arbeidsgiver - inngår i sykengegrunnlag`() {
-        val yrkesaktiviteter = ArbeidsgiverberegningBuilder(januar)
-            .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
-            .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(januar), arbeidstaker())
-            .build()
+        val yrkesaktiviteter =
+            ArbeidsgiverberegningBuilder(januar)
+                .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
+                .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(januar), arbeidstaker())
+                .build()
 
         assertEquals(1, yrkesaktiviteter.size)
         assertEquals(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), yrkesaktiviteter.single().inntektskilde)
@@ -53,9 +51,10 @@ internal class ArbeidsgiverberegningTest {
 
     @Test
     fun `en arbeidsgiver - inngår ikke i sykepengegrunnag`() {
-        val yrkesaktiviteter = ArbeidsgiverberegningBuilder(januar)
-            .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(januar), arbeidstaker())
-            .build()
+        val yrkesaktiviteter =
+            ArbeidsgiverberegningBuilder(januar)
+                .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(januar), arbeidstaker())
+                .build()
 
         assertEquals(1, yrkesaktiviteter.size)
         assertEquals(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), yrkesaktiviteter.single().inntektskilde)
@@ -70,16 +69,17 @@ internal class ArbeidsgiverberegningTest {
 
     @Test
     fun `flere arbeidsgiver - med ghostperioder og tilkommet inntekt`() {
-        val yrkesaktiviteter = ArbeidsgiverberegningBuilder(1.januar til 31.januar)
-            .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
-            .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a2), INNTEKT * 2)
-            .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a3), (10.januar til 14.januar) to 1500.daglig, (25.januar til 31.januar) to 1500.daglig)
-            .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
-            .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(21.januar til 25.januar), arbeidstaker())
-            .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(29.januar til 31.januar), arbeidstaker())
-            .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a2), UUID.randomUUID(), sykdomstidslinje(1.januar til 21.januar), arbeidstaker())
-            .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a2), UUID.randomUUID(), sykdomstidslinje(25.januar til 30.januar), arbeidstaker())
-            .build()
+        val yrkesaktiviteter =
+            ArbeidsgiverberegningBuilder(1.januar til 31.januar)
+                .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
+                .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a2), INNTEKT * 2)
+                .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a3), (10.januar til 14.januar) to 1500.daglig, (25.januar til 31.januar) to 1500.daglig)
+                .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
+                .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(21.januar til 25.januar), arbeidstaker())
+                .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(29.januar til 31.januar), arbeidstaker())
+                .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a2), UUID.randomUUID(), sykdomstidslinje(1.januar til 21.januar), arbeidstaker())
+                .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a2), UUID.randomUUID(), sykdomstidslinje(25.januar til 30.januar), arbeidstaker())
+                .build()
 
         assertEquals(3, yrkesaktiviteter.size)
         yrkesaktiviteter[0].also { yrkesaktivitet ->
@@ -154,11 +154,12 @@ internal class ArbeidsgiverberegningTest {
 
     @Test
     fun `tilkommet inntekt uten vedtaksperioder`() {
-        val yrkesaktiviteter = ArbeidsgiverberegningBuilder(1.januar til 20.januar)
-            .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
-            .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a3), (1.januar til 10.januar) to 1500.daglig, (15.januar til 20.januar) to 1500.daglig)
-            .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
-            .build()
+        val yrkesaktiviteter =
+            ArbeidsgiverberegningBuilder(1.januar til 20.januar)
+                .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
+                .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a3), (1.januar til 10.januar) to 1500.daglig, (15.januar til 20.januar) to 1500.daglig)
+                .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
+                .build()
 
         assertEquals(2, yrkesaktiviteter.size)
         yrkesaktiviteter[0].also { yrkesaktivitet ->
@@ -188,11 +189,12 @@ internal class ArbeidsgiverberegningTest {
 
     @Test
     fun `tilkommet inntekt med vedtaksperioder`() {
-        val yrkesaktiviteter = ArbeidsgiverberegningBuilder(1.januar til 20.januar)
-            .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
-            .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), (1.januar til 20.januar) to 1500.daglig)
-            .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
-            .build()
+        val yrkesaktiviteter =
+            ArbeidsgiverberegningBuilder(1.januar til 20.januar)
+                .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
+                .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), (1.januar til 20.januar) to 1500.daglig)
+                .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
+                .build()
 
         assertEquals(1, yrkesaktiviteter.size)
         yrkesaktiviteter[0].also { yrkesaktivitet ->
@@ -209,12 +211,13 @@ internal class ArbeidsgiverberegningTest {
 
     @Test
     fun `tilkommet inntekt med egne vedtaksperioder`() {
-        val yrkesaktiviteter = ArbeidsgiverberegningBuilder(1.januar til 20.januar)
-            .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
-            .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a3), (1.januar til 20.januar) to 1500.daglig)
-            .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
-            .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a3), UUID.randomUUID(), sykdomstidslinje(1.januar til 10.januar), arbeidstaker())
-            .build()
+        val yrkesaktiviteter =
+            ArbeidsgiverberegningBuilder(1.januar til 20.januar)
+                .fastsattÅrsinntekt(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), INNTEKT)
+                .inntektsjusteringer(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a3), (1.januar til 20.januar) to 1500.daglig)
+                .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a1), UUID.randomUUID(), sykdomstidslinje(1.januar til 20.januar), arbeidstaker())
+                .vedtaksperiode(Inntektskilde.Yrkesaktivitet.Arbeidstaker(a3), UUID.randomUUID(), sykdomstidslinje(1.januar til 10.januar), arbeidstaker())
+                .build()
 
         assertEquals(2, yrkesaktiviteter.size)
         yrkesaktiviteter[0].also { yrkesaktivitet ->
@@ -242,23 +245,28 @@ internal class ArbeidsgiverberegningTest {
         }
     }
 
-    private fun arbeidstaker(): UtbetalingstidslinjeBuilder {
-        return ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
+    private fun arbeidstaker(): UtbetalingstidslinjeBuilder =
+        ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
             arbeidsgiverperiode = listOf(1.januar til 16.januar),
             dagerNavOvertarAnsvar = emptyList(),
-            refusjonstidslinje = Beløpstidslinje.fra(
-                januar, INNTEKT,
-                Kilde(MeldingsreferanseId(UUID.randomUUID()), Avsender.ARBEIDSGIVER, LocalDateTime.now())
-            ),
-            avslagstidslinje = Avslagstidslinje()
+            refusjonstidslinje =
+                Beløpstidslinje.fra(
+                    januar,
+                    INNTEKT,
+                    Kilde(MeldingsreferanseId(UUID.randomUUID()), Avsender.ARBEIDSGIVER, LocalDateTime.now()),
+                ),
+            avslagstidslinje = Avslagstidslinje(),
         )
-    }
 
-    private fun ArbeidsgiverberegningBuilder.inntektsjusteringer(inntektskilde: Inntektskilde, vararg perioder: Pair<Periode, Inntekt>) = apply {
+    private fun ArbeidsgiverberegningBuilder.inntektsjusteringer(
+        inntektskilde: Inntektskilde,
+        vararg perioder: Pair<Periode, Inntekt>,
+    ) = apply {
         val kilde = Kilde(MeldingsreferanseId(UUID.randomUUID()), Avsender.SYSTEM, LocalDateTime.now())
-        val inntektskusteringer = perioder.fold(Beløpstidslinje()) { sammenslått, inntekt ->
-            sammenslått + Beløpstidslinje.fra(inntekt.first, inntekt.second, kilde)
-        }
+        val inntektskusteringer =
+            perioder.fold(Beløpstidslinje()) { sammenslått, inntekt ->
+                sammenslått + Beløpstidslinje.fra(inntekt.first, inntekt.second, kilde)
+            }
         inntektsjusteringer(inntektskilde, inntektskusteringer)
     }
 }

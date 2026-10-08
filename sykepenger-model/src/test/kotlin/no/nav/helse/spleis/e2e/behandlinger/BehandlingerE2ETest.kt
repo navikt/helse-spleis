@@ -1,79 +1,40 @@
 package no.nav.helse.spleis.e2e.behandlinger
 
-import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.april
-import no.nav.helse.august
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
+import no.nav.helse.*
+import no.nav.helse.dsl.*
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.mai
-import no.nav.helse.mars
 import no.nav.helse.person.Behandlinger.Behandling.Tilstand
-import no.nav.helse.person.Behandlinger.Behandling.Tilstand.AnnullertPeriode
-import no.nav.helse.person.Behandlinger.Behandling.Tilstand.AvsluttetUtenVedtak
-import no.nav.helse.person.Behandlinger.Behandling.Tilstand.RevurdertVedtakAvvist
-import no.nav.helse.person.Behandlinger.Behandling.Tilstand.UberegnetRevurdering
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.*
 import no.nav.helse.person.Behandlinger.Behandling.Tilstand.VedtakFattet
-import no.nav.helse.person.Behandlinger.Behandling.Tilstand.VedtakIverksatt
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.perioderMedBeløp
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_ANNULLERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.*
 
 internal class BehandlingerE2ETest : AbstractDslTest() {
-
     @Test
     fun `AI fjerner gammel IM - en inntektsmelding med merkelig første fraværsdag starter en revurdering uten endring - men ny håndtering av refusjon vil håndtere hen`() {
         a1 {
             nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 16.januar til 21.januar))
-            val korrigertIm = håndterKorrigerteArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(),
-                beregnetInntekt = INNTEKT * 1.1,
-                refusjon = Inntektsmelding.Refusjon(INGEN, null)
-            )
+            val korrigertIm =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    arbeidsgiverperioder = listOf(),
+                    beregnetInntekt = INNTEKT * 1.1,
+                    refusjon = Inntektsmelding.Refusjon(INGEN, null),
+                )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -134,11 +95,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             val mottatt = LocalDateTime.now()
-            val inntektsmeldingId = håndterKorrigerteArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT * 1.1,
-                mottatt = mottatt
-            )
+            val inntektsmeldingId =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    listOf(1.januar til 16.januar),
+                    beregnetInntekt = INNTEKT * 1.1,
+                    mottatt = mottatt,
+                )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
@@ -175,7 +137,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT * 1.1,
                 id = korrigerendeImA1,
-                mottatt = mottatt
+                mottatt = mottatt,
             )
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
@@ -301,8 +263,22 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 assertEquals(2, behandlinger.single().endringer().size)
-                assertEquals(3.januar til 17.januar, behandlinger.first().endringer().first().sykmeldingsperiode)
-                assertEquals(3.januar, behandlinger.last().endringer().last().skjæringstidspunkt)
+                assertEquals(
+                    3.januar til 17.januar,
+                    behandlinger
+                        .first()
+                        .endringer()
+                        .first()
+                        .sykmeldingsperiode,
+                )
+                assertEquals(
+                    3.januar,
+                    behandlinger
+                        .last()
+                        .endringer()
+                        .last()
+                        .skjæringstidspunkt,
+                )
             }
         }
     }
@@ -316,7 +292,14 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 assertEquals(3, behandlinger.single().endringer().size)
-                assertEquals(Dokumentsporing.søknad(søknad2), behandlinger.single().endringer().last().dokumentsporing)
+                assertEquals(
+                    Dokumentsporing.søknad(søknad2),
+                    behandlinger
+                        .single()
+                        .endringer()
+                        .last()
+                        .dokumentsporing,
+                )
             }
         }
     }
@@ -345,8 +328,9 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             val søknad1 = MeldingsreferanseId(UUID.randomUUID())
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknad1.id)
-            val im = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), INNTEKT)
-                .let { MeldingsreferanseId(it) }
+            val im =
+                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), INNTEKT)
+                    .let { MeldingsreferanseId(it) }
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -658,8 +642,8 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
             håndterUtbetalingshistorikkEtterInfotrygdendring(
                 listOf(
-                    ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar)
-                )
+                    ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar),
+                ),
             )
 
             nyttVedtak(mars)

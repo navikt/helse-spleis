@@ -1,7 +1,5 @@
 package no.nav.helse.inspectors
 
-import java.time.LocalDate
-import kotlin.reflect.KClass
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -18,11 +16,15 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.inspectors.inspektør
 import no.nav.helse.økonomi.Økonomi
+import java.time.LocalDate
+import kotlin.reflect.KClass
 
 val Utbetalingstidslinje.inspektør get() = UtbetalingstidslinjeInspektør(this)
 
 // Collects assertable statistics for an Utbetalingstidslinje
-class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalingstidslinje) {
+class UtbetalingstidslinjeInspektør(
+    private val utbetalingstidslinje: Utbetalingstidslinje,
+) {
     val førstedato = utbetalingstidslinje.firstOrNull()?.dato ?: LocalDate.MIN
     val sistedato = utbetalingstidslinje.lastOrNull()?.dato ?: LocalDate.MAX
 
@@ -158,20 +160,28 @@ class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: Utbetalin
     }
 
     fun grad(dag: LocalDate) = økonomi.getValue(dag).brukAvrundetGrad { grad -> grad }
+
     fun arbeidsgiverbeløp(dag: LocalDate) = økonomi.getValue(dag).inspektør.arbeidsgiverbeløp
+
     fun personbeløp(dag: LocalDate) = økonomi.getValue(dag).inspektør.personbeløp
+
     fun dekningsgrad(dag: LocalDate) = økonomi.getValue(dag).dekningsgrad
+
     fun utbetalingsgrad(dag: LocalDate) = økonomi.getValue(dag).utbetalingsgrad
+
     fun totalSykdomsgrad(dag: LocalDate) = økonomi.getValue(dag).totalSykdomsgrad
 
     fun totalUtbetaling() = totalUtbetaling
 
-    fun begrunnelse(dato: LocalDate) =
-        begrunnelser[dato] ?: emptyList()
+    fun begrunnelse(dato: LocalDate) = begrunnelser[dato] ?: emptyList()
 
     fun erNavdag(dato: LocalDate) = utbetalingstidslinje[dato] is NavDag
 
-    private fun collect(dag: Utbetalingsdag, dato: LocalDate, økonomi: Økonomi) {
+    private fun collect(
+        dag: Utbetalingsdag,
+        dato: LocalDate,
+        økonomi: Økonomi,
+    ) {
         this.økonomi[dato] = økonomi
         unikedager.add(dag::class)
     }

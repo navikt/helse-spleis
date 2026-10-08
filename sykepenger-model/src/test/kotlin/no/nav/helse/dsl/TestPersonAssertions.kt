@@ -1,28 +1,34 @@
 package no.nav.helse.dsl
 
-import java.time.LocalDate
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.testhelpers.assertNotNull
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
+import java.time.LocalDate
 
-internal class TestPersonAssertions(private val personInspektør: PersonInspektør, private val jurist: SubsumsjonsListLog) {
-
-    internal fun assertHarIkkeArbeidsforhold(skjæringstidspunkt: LocalDate, orgnummer: String) {
+internal class TestPersonAssertions(
+    private val personInspektør: PersonInspektør,
+    private val jurist: SubsumsjonsListLog,
+) {
+    internal fun assertHarIkkeArbeidsforhold(
+        skjæringstidspunkt: LocalDate,
+        orgnummer: String,
+    ) {
         val vilkårsgrunnlag = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt)
         assertNotNull(vilkårsgrunnlag)
         assertFalse((vilkårsgrunnlag.opptjening as ArbeidstakerOpptjening).arbeidsforhold.any { it.orgnummer == orgnummer })
     }
 
-    internal fun assertHarArbeidsforhold(skjæringstidspunkt: LocalDate, orgnummer: String) {
+    internal fun assertHarArbeidsforhold(
+        skjæringstidspunkt: LocalDate,
+        orgnummer: String,
+    ) {
         val vilkårsgrunnlag = personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt)
         assertNotNull(vilkårsgrunnlag)
         Assertions.assertTrue((vilkårsgrunnlag.opptjening as ArbeidstakerOpptjening).arbeidsforhold.any { it.orgnummer == orgnummer })
     }
 
-    internal fun <R> assertSubsumsjoner(block: SubsumsjonInspektør.() -> R): R {
-        return block(SubsumsjonInspektør(jurist))
-    }
+    internal fun <R> assertSubsumsjoner(block: SubsumsjonInspektør.() -> R): R = block(SubsumsjonInspektør(jurist))
 }

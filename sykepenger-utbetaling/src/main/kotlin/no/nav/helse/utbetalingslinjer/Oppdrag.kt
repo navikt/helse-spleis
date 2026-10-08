@@ -1,8 +1,5 @@
 package no.nav.helse.utbetalingslinjer
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.OppdragstatusDto
@@ -15,14 +12,13 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT_MED_FEIL
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.OVERFØRT
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.*
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kjedeSammenLinjer
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kobleTil
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.normaliserLinjer
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 class Oppdrag private constructor(
     val mottaker: String,
@@ -36,8 +32,9 @@ class Oppdrag private constructor(
     status: Oppdragstatus? = null,
     val tidsstempel: LocalDateTime,
     erSimulert: Boolean = false,
-    simuleringsResultat: SimuleringResultatDto? = null
-) : List<Utbetalingslinje> by linjer, Aktivitetskontekst {
+    simuleringsResultat: SimuleringResultatDto? = null,
+) : List<Utbetalingslinje> by linjer,
+    Aktivitetskontekst {
     var nettoBeløp: Int = nettoBeløp
         private set
     var overføringstidspunkt: LocalDateTime? = overføringstidspunkt
@@ -52,9 +49,7 @@ class Oppdrag private constructor(
         private set
 
     companion object {
-        fun stønadsdager(vararg oppdrag: Oppdrag): Int {
-            return Utbetalingslinje.stønadsdager(oppdrag.toList().flatten())
-        }
+        fun stønadsdager(vararg oppdrag: Oppdrag): Int = Utbetalingslinje.stønadsdager(oppdrag.toList().flatten())
 
         fun synkronisert(vararg oppdrag: Oppdrag): Boolean {
             val endrede = oppdrag.filter { it.harUtbetalinger() }
@@ -62,34 +57,36 @@ class Oppdrag private constructor(
         }
 
         fun ingenFeil(vararg oppdrag: Oppdrag) = oppdrag.none { it.status in listOf(AVVIST, FEIL) }
+
         fun harFeil(vararg oppdrag: Oppdrag) = oppdrag.any { it.status in listOf(AVVIST, FEIL) }
 
-        fun gjenopprett(dto: OppdragInnDto): Oppdrag {
-            return Oppdrag(
+        fun gjenopprett(dto: OppdragInnDto): Oppdrag =
+            Oppdrag(
                 mottaker = dto.mottaker,
-                fagområde = when (dto.fagområde) {
-                    FagområdeDto.SP -> Fagområde.Sykepenger
-                    FagområdeDto.SPREF -> Fagområde.SykepengerRefusjon
-                },
+                fagområde =
+                    when (dto.fagområde) {
+                        FagområdeDto.SP -> Fagområde.Sykepenger
+                        FagområdeDto.SPREF -> Fagområde.SykepengerRefusjon
+                    },
                 linjer = dto.linjer.map { Utbetalingslinje.gjenopprett(it) }.toMutableList(),
                 fagsystemId = dto.fagsystemId,
                 endringskode = Endringskode.gjenopprett(dto.endringskode),
                 nettoBeløp = dto.nettoBeløp,
                 overføringstidspunkt = dto.overføringstidspunkt,
                 avstemmingsnøkkel = dto.avstemmingsnøkkel,
-                status = when (dto.status) {
-                    OppdragstatusDto.AKSEPTERT -> AKSEPTERT
-                    OppdragstatusDto.AKSEPTERT_MED_FEIL -> AKSEPTERT_MED_FEIL
-                    OppdragstatusDto.AVVIST -> AVVIST
-                    OppdragstatusDto.FEIL -> FEIL
-                    OppdragstatusDto.OVERFØRT -> OVERFØRT
-                    null -> null
-                },
+                status =
+                    when (dto.status) {
+                        OppdragstatusDto.AKSEPTERT -> AKSEPTERT
+                        OppdragstatusDto.AKSEPTERT_MED_FEIL -> AKSEPTERT_MED_FEIL
+                        OppdragstatusDto.AVVIST -> AVVIST
+                        OppdragstatusDto.FEIL -> FEIL
+                        OppdragstatusDto.OVERFØRT -> OVERFØRT
+                        null -> null
+                    },
                 tidsstempel = dto.tidsstempel,
                 erSimulert = dto.erSimulert,
-                simuleringsResultat = dto.simuleringsResultat
+                simuleringsResultat = dto.simuleringsResultat,
             )
-        }
     }
 
     val linjeperiode get() = firstOrNull()?.let { (it.datoStatusFom ?: it.fom) til last().tom }
@@ -98,14 +95,14 @@ class Oppdrag private constructor(
         mottaker: String,
         fagområde: Fagområde,
         linjer: List<Utbetalingslinje> = listOf(),
-        fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())
+        fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()),
     ) : this(
         mottaker,
         fagområde,
         normaliserLinjer(fagsystemId, linjer).toMutableList(),
         fagsystemId,
         Endringskode.NY,
-        tidsstempel = LocalDateTime.now()
+        tidsstempel = LocalDateTime.now(),
     )
 
     fun detaljer(): OppdragDetaljer {
@@ -118,13 +115,14 @@ class Oppdrag private constructor(
             stønadsdager = stønadsdager(),
             fom = linjene.firstOrNull()?.fom ?: LocalDate.MIN,
             tom = linjene.lastOrNull()?.tom ?: LocalDate.MIN,
-            linjer = linjene
+            linjer = linjene,
         )
     }
 
     override fun toSpesifikkKontekst() = SpesifikkKontekst("Oppdrag", mapOf("fagsystemId" to fagsystemId))
 
     fun totalbeløp() = linjerUtenOpphør().sumOf { it.totalbeløp() }
+
     fun stønadsdager() = sumOf { it.stønadsdager() }
 
     fun nettoBeløp() = nettoBeløp
@@ -135,8 +133,10 @@ class Oppdrag private constructor(
 
     fun harUtbetalinger() = any(Utbetalingslinje::erForskjell)
 
-    fun erRelevant(fagsystemId: String, fagområde: Fagområde) =
-        this.fagsystemId == fagsystemId && this.fagområde == fagområde
+    fun erRelevant(
+        fagsystemId: String,
+        fagområde: Fagområde,
+    ) = this.fagsystemId == fagsystemId && this.fagområde == fagområde
 
     fun linjerMedEndring() = kopierMed(filter(Utbetalingslinje::erForskjell))
 
@@ -144,36 +144,41 @@ class Oppdrag private constructor(
 
     fun linjerUtenOpphør() = filter { !it.erOpphør() }
 
-    fun annuller(aktivitetslogg: IAktivitetslogg): Oppdrag {
-        return tomtOppdrag().minus(this, aktivitetslogg)
-    }
+    fun annuller(aktivitetslogg: IAktivitetslogg): Oppdrag = tomtOppdrag().minus(this, aktivitetslogg)
 
     private fun tomtOppdrag(): Oppdrag =
         Oppdrag(
             mottaker = mottaker,
             fagområde = fagområde,
-            fagsystemId = fagsystemId
+            fagsystemId = fagsystemId,
         )
 
     fun begrensFra(førsteDag: LocalDate): Oppdrag {
-        val (senereLinjer, tidligereLinjer) = this.linjer
-            .filterNot { it.erOpphør() }
-            .partition { it.fom >= førsteDag }
-        val delvisOverlappendeFørsteLinje = tidligereLinjer
-            .lastOrNull()
-            ?.takeIf { it.tom >= førsteDag }
-            ?.begrensFra(førsteDag)
+        val (senereLinjer, tidligereLinjer) =
+            this.linjer
+                .filterNot { it.erOpphør() }
+                .partition { it.fom >= førsteDag }
+        val delvisOverlappendeFørsteLinje =
+            tidligereLinjer
+                .lastOrNull()
+                ?.takeIf { it.tom >= førsteDag }
+                ?.begrensFra(førsteDag)
         return kopierMed(listOfNotNull(delvisOverlappendeFørsteLinje) + senereLinjer)
     }
 
-    fun begrensTil(sisteDato: LocalDate, other: Oppdrag? = null): Oppdrag {
-        val (tidligereLinjer, senereLinjer) = this.linjer
-            .filterNot { it.erOpphør() }
-            .partition { it.tom <= sisteDato }
-        val delvisOverlappendeSisteLinje = senereLinjer
-            .firstOrNull()
-            ?.takeIf { it.fom <= sisteDato }
-            ?.begrensTil(sisteDato)
+    fun begrensTil(
+        sisteDato: LocalDate,
+        other: Oppdrag? = null,
+    ): Oppdrag {
+        val (tidligereLinjer, senereLinjer) =
+            this.linjer
+                .filterNot { it.erOpphør() }
+                .partition { it.tom <= sisteDato }
+        val delvisOverlappendeSisteLinje =
+            senereLinjer
+                .firstOrNull()
+                ?.takeIf { it.fom <= sisteDato }
+                ?.begrensTil(sisteDato)
         other?.also { kobleTil(it) }
         return kopierMed(tidligereLinjer + listOfNotNull(delvisOverlappendeSisteLinje))
     }
@@ -195,7 +200,10 @@ class Oppdrag private constructor(
         return this.linjer.dropLast(1) + listOf(mellomlinje) + other.linjer.drop(1)
     }
 
-    fun minus(eldre: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
+    fun minus(
+        eldre: Oppdrag,
+        aktivitetslogg: IAktivitetslogg,
+    ): Oppdrag {
         // overtar fagsystemId fra tidligere Oppdrag uten utbetaling, gitt at det er samme arbeidsgiverperiode
         if (eldre.erTomt()) return medFagsystemId(eldre)
         return when {
@@ -229,16 +237,19 @@ class Oppdrag private constructor(
     // om det forrige oppdraget også var et opphør så kopieres siste linje for å bevare
     // delytelseId-rekkefølgen slik at det nye oppdraget kan bygges videre på
     private fun annulleringsoppdrag(tidligere: Oppdrag) =
-        if (tidligere.kopierUtenOpphørslinjer().erTomt()) kopierMed(
-            linjer = listOf(tidligere.last().markerUendret(tidligere.last())),
-            fagsystemId = tidligere.fagsystemId,
-            endringskode = Endringskode.UEND
-        )
-        else kopierMed(
-            linjer = listOf(tidligere.last().opphørslinje(tidligere.kopierUtenOpphørslinjer().first().fom)),
-            fagsystemId = tidligere.fagsystemId,
-            endringskode = Endringskode.ENDR
-        )
+        if (tidligere.kopierUtenOpphørslinjer().erTomt()) {
+            kopierMed(
+                linjer = listOf(tidligere.last().markerUendret(tidligere.last())),
+                fagsystemId = tidligere.fagsystemId,
+                endringskode = Endringskode.UEND,
+            )
+        } else {
+            kopierMed(
+                linjer = listOf(tidligere.last().opphørslinje(tidligere.kopierUtenOpphørslinjer().first().fom)),
+                fagsystemId = tidligere.fagsystemId,
+                endringskode = Endringskode.ENDR,
+            )
+        }
 
     // når man oppretter en NY linje med dato-intervall "(a, b)" vil oppdragsystemet
     // automatisk opphøre alle eventuelle linjer med fom > b.
@@ -253,9 +264,10 @@ class Oppdrag private constructor(
         return sammenkoblet.kopierMed(linjer)
     }
 
-
-    private fun endre(avtroppendeOppdrag: Oppdrag, aktivitetslogg: IAktivitetslogg) =
-        DifferanseBuilder(this).kalkulerDifferanse(avtroppendeOppdrag, aktivitetslogg)
+    private fun endre(
+        avtroppendeOppdrag: Oppdrag,
+        aktivitetslogg: IAktivitetslogg,
+    ) = DifferanseBuilder(this).kalkulerDifferanse(avtroppendeOppdrag, aktivitetslogg)
 
     // når man oppretter en NY linje vil Oppdragsystemet IKKE ta stilling til periodene FØR.
     // Man må derfor eksplisitt opphøre evt. perioder tidligere, som i praksis vil medføre at
@@ -266,13 +278,15 @@ class Oppdrag private constructor(
         return kjørtFrem.kopierMed(listOf(deletion) + kjørtFrem.linjer)
     }
 
-    private fun opphørOppdrag(tidligere: Oppdrag) =
-        tidligere.last().opphørslinje(tidligere.first().fom)
-
+    private fun opphørOppdrag(tidligere: Oppdrag) = tidligere.last().opphørslinje(tidligere.first().fom)
 
     private fun medFagsystemId(other: Oppdrag) = kopierMed(this.linjer, fagsystemId = other.fagsystemId)
 
-    private fun kopierMed(linjer: List<Utbetalingslinje>, fagsystemId: String = this.fagsystemId, endringskode: Endringskode = this.endringskode) = Oppdrag(
+    private fun kopierMed(
+        linjer: List<Utbetalingslinje>,
+        fagsystemId: String = this.fagsystemId,
+        endringskode: Endringskode = this.endringskode,
+    ) = Oppdrag(
         mottaker = mottaker,
         fagområde = fagområde,
         linjer = linjer.map { it.kopier() }.toMutableList(),
@@ -283,14 +297,15 @@ class Oppdrag private constructor(
         status = status,
         tidsstempel = tidsstempel,
         erSimulert = erSimulert,
-        simuleringsResultat = simuleringsResultat
+        simuleringsResultat = simuleringsResultat,
     )
 
-    private fun kobleTil(tidligere: Oppdrag) = kopierMed(
-        linjer.kobleTil(tidligere.fagsystemId),
-        tidligere.fagsystemId,
-        Endringskode.ENDR
-    )
+    private fun kobleTil(tidligere: Oppdrag) =
+        kopierMed(
+            linjer.kobleTil(tidligere.fagsystemId),
+            tidligere.fagsystemId,
+            Endringskode.ENDR,
+        )
 
     fun lagreOverføringsinformasjon(hendelse: UtbetalingmodulHendelse) {
         if (hendelse.fagsystemId != this.fagsystemId) return
@@ -308,7 +323,7 @@ class Oppdrag private constructor(
     fun erKlarForGodkjenning() = !harUtbetalinger() || erSimulert
 
     private class DifferanseBuilder(
-        private val påtroppendeOppdrag: Oppdrag
+        private val påtroppendeOppdrag: Oppdrag,
     ) {
         private lateinit var tilstand: Tilstand
         private lateinit var sisteLinjeITidligereOppdrag: Utbetalingslinje
@@ -320,7 +335,10 @@ class Oppdrag private constructor(
         // *) en linje kan endres dersom "tom"-dato eller grad er eneste forskjell
         //    ulik dagsats eller fom-dato medfører enten at linjen får status OPPH, eller at man overskriver
         //    ved å sende NY linjer
-        fun kalkulerDifferanse(avtroppendeOppdrag: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
+        fun kalkulerDifferanse(
+            avtroppendeOppdrag: Oppdrag,
+            aktivitetslogg: IAktivitetslogg,
+        ): Oppdrag {
             this.linkTo = avtroppendeOppdrag.last()
             val kobletTil = påtroppendeOppdrag.kobleTil(avtroppendeOppdrag)
             val medLinkeLinjer = kopierLikeLinjer(kobletTil, avtroppendeOppdrag, aktivitetslogg)
@@ -331,7 +349,7 @@ class Oppdrag private constructor(
         private fun opphørTidligereLinjeOgOpprettNy(
             nåværende: Utbetalingslinje,
             tidligere: Utbetalingslinje,
-            datoStatusFom: LocalDate = tidligere.fom
+            datoStatusFom: LocalDate = tidligere.fom,
         ): List<Utbetalingslinje> {
             linkTo = tidligere
             val opphørslinje = tidligere.opphørslinje(datoStatusFom)
@@ -341,7 +359,11 @@ class Oppdrag private constructor(
             return listOf(opphørslinje, linketTilForrige)
         }
 
-        private fun kopierLikeLinjer(nytt: Oppdrag, tidligere: Oppdrag, aktivitetslogg: IAktivitetslogg): Oppdrag {
+        private fun kopierLikeLinjer(
+            nytt: Oppdrag,
+            tidligere: Oppdrag,
+            aktivitetslogg: IAktivitetslogg,
+        ): Oppdrag {
             tilstand = if (tidligere.last().tom > nytt.last().tom) Slett(nytt.last()) else Identisk()
             sisteLinjeITidligereOppdrag = tidligere.last()
             val linjer = nytt.zip(tidligere).map { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }.flatten()
@@ -350,14 +372,16 @@ class Oppdrag private constructor(
             return nytt.kopierMed(linjer + kjedeSammenLinjer(nyeLinjer, linjer.last()))
         }
 
-        private fun håndterUlikhet(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje): List<Utbetalingslinje> {
-            return when {
+        private fun håndterUlikhet(
+            nåværende: Utbetalingslinje,
+            tidligere: Utbetalingslinje,
+        ): List<Utbetalingslinje> =
+            when {
                 nåværende.kanEndreEksisterendeLinje(tidligere, sisteLinjeITidligereOppdrag) -> listOf(nåværende.endreEksisterendeLinje(tidligere))
                 nåværende.skalOpphøreOgErstatte(tidligere, sisteLinjeITidligereOppdrag) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere)
                 nåværende.fom > tidligere.fom -> opphørTidligereLinjeOgOpprettNy(nåværende, sisteLinjeITidligereOppdrag, tidligere.fom)
                 else -> listOf(opprettNyLinje(nåværende))
             }
-        }
 
         private fun opprettNyLinje(nåværende: Utbetalingslinje): Utbetalingslinje {
             val nyLinje = nåværende.kobleTil(linkTo)
@@ -366,20 +390,33 @@ class Oppdrag private constructor(
             return nyLinje
         }
 
-
         private interface Tilstand {
-            fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje>
+            fun håndterForskjell(
+                nåværende: Utbetalingslinje,
+                tidligere: Utbetalingslinje,
+                aktivitetslogg: IAktivitetslogg,
+            ): List<Utbetalingslinje>
         }
 
         private inner class Identisk : Tilstand {
-            override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {
+            override fun håndterForskjell(
+                nåværende: Utbetalingslinje,
+                tidligere: Utbetalingslinje,
+                aktivitetslogg: IAktivitetslogg,
+            ): List<Utbetalingslinje> {
                 if (nåværende.funksjoneltLik(tidligere)) return listOf(nåværende.markerUendret(tidligere))
                 return håndterUlikhet(nåværende, tidligere)
             }
         }
 
-        private inner class Slett(private val sisteLinjeINyttOppdrag: Utbetalingslinje) : Tilstand {
-            override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {
+        private inner class Slett(
+            private val sisteLinjeINyttOppdrag: Utbetalingslinje,
+        ) : Tilstand {
+            override fun håndterForskjell(
+                nåværende: Utbetalingslinje,
+                tidligere: Utbetalingslinje,
+                aktivitetslogg: IAktivitetslogg,
+            ): List<Utbetalingslinje> {
                 if (nåværende.funksjoneltLik(tidligere)) {
                     if (nåværende.funksjoneltLik(sisteLinjeINyttOppdrag)) return listOf(nåværende.kobleTil(linkTo))
                     return listOf(nåværende.markerUendret(tidligere))
@@ -389,7 +426,11 @@ class Oppdrag private constructor(
         }
 
         private inner class Ny : Tilstand {
-            override fun håndterForskjell(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {
+            override fun håndterForskjell(
+                nåværende: Utbetalingslinje,
+                tidligere: Utbetalingslinje,
+                aktivitetslogg: IAktivitetslogg,
+            ): List<Utbetalingslinje> {
                 val nyLinje = nåværende.kobleTil(linkTo)
                 linkTo = nyLinje
                 return listOf(nyLinje)
@@ -397,36 +438,40 @@ class Oppdrag private constructor(
         }
     }
 
-    fun dto() = OppdragUtDto(
-        mottaker = mottaker,
-        fagområde = when (fagområde) {
-            Fagområde.SykepengerRefusjon -> FagområdeDto.SPREF
-            Fagområde.Sykepenger -> FagområdeDto.SP
-        },
-        linjer = linjer.map { it.dto() },
-        fagsystemId = fagsystemId,
-        endringskode = when (endringskode) {
-            Endringskode.NY -> EndringskodeDto.NY
-            Endringskode.UEND -> EndringskodeDto.UEND
-            Endringskode.ENDR -> EndringskodeDto.ENDR
-        },
-        nettoBeløp = nettoBeløp,
-        totalbeløp = this.totalbeløp(),
-        stønadsdager = this.stønadsdager(),
-        overføringstidspunkt = overføringstidspunkt,
-        avstemmingsnøkkel = avstemmingsnøkkel,
-        status = when (status) {
-            OVERFØRT -> OppdragstatusDto.OVERFØRT
-            AKSEPTERT -> OppdragstatusDto.AKSEPTERT
-            AKSEPTERT_MED_FEIL -> OppdragstatusDto.AKSEPTERT_MED_FEIL
-            AVVIST -> OppdragstatusDto.AVVIST
-            FEIL -> OppdragstatusDto.FEIL
-            null -> null
-        },
-        tidsstempel = tidsstempel,
-        erSimulert = erSimulert,
-        simuleringsResultat = simuleringsResultat
-    )
+    fun dto() =
+        OppdragUtDto(
+            mottaker = mottaker,
+            fagområde =
+                when (fagområde) {
+                    Fagområde.SykepengerRefusjon -> FagområdeDto.SPREF
+                    Fagområde.Sykepenger -> FagområdeDto.SP
+                },
+            linjer = linjer.map { it.dto() },
+            fagsystemId = fagsystemId,
+            endringskode =
+                when (endringskode) {
+                    Endringskode.NY -> EndringskodeDto.NY
+                    Endringskode.UEND -> EndringskodeDto.UEND
+                    Endringskode.ENDR -> EndringskodeDto.ENDR
+                },
+            nettoBeløp = nettoBeløp,
+            totalbeløp = this.totalbeløp(),
+            stønadsdager = this.stønadsdager(),
+            overføringstidspunkt = overføringstidspunkt,
+            avstemmingsnøkkel = avstemmingsnøkkel,
+            status =
+                when (status) {
+                    OVERFØRT -> OppdragstatusDto.OVERFØRT
+                    AKSEPTERT -> OppdragstatusDto.AKSEPTERT
+                    AKSEPTERT_MED_FEIL -> OppdragstatusDto.AKSEPTERT_MED_FEIL
+                    AVVIST -> OppdragstatusDto.AVVIST
+                    FEIL -> OppdragstatusDto.FEIL
+                    null -> null
+                },
+            tidsstempel = tidsstempel,
+            erSimulert = erSimulert,
+            simuleringsResultat = simuleringsResultat,
+        )
 }
 
 enum class Oppdragstatus { OVERFØRT, AKSEPTERT, AKSEPTERT_MED_FEIL, AVVIST, FEIL }

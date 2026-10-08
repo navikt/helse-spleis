@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.mediator
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
@@ -91,6 +89,8 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMes
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import java.time.LocalDate
+import java.util.UUID
 
 internal class TestHendelseMediator : IHendelseMediator {
     val lestNySøknad get() = lestNySøknadVerdi.get()
@@ -169,177 +169,402 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestAvbruttSøknadVerdi.remove()
     }
 
-    override fun behandle(message: HendelseMessage, context: BehandlingContext) {
+    override fun behandle(
+        message: HendelseMessage,
+        context: BehandlingContext,
+    ) {
         message.behandle(this, context)
     }
 
-    override fun behandle(personopplysninger: Personopplysninger, message: NySøknadMessage, sykmelding: Sykmelding, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: NySøknadMessage,
+        sykmelding: Sykmelding,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {
         lestNySøknadVerdi.set(true)
     }
 
-    override fun behandle(personopplysninger: Personopplysninger, message: NyFrilansSøknadMessage, sykmelding: Sykmelding, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {}
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: NyFrilansSøknadMessage,
+        sykmelding: Sykmelding,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {}
 
-    override fun behandle(personopplysninger: Personopplysninger, message: NySelvstendigSøknadMessage, sykmelding: Sykmelding, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {}
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: NySelvstendigSøknadMessage,
+        sykmelding: Sykmelding,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {}
 
-    override fun behandle(personopplysninger: Personopplysninger, message: NyArbeidsledigSøknadMessage, sykmelding: Sykmelding, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {}
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: NyArbeidsledigSøknadMessage,
+        sykmelding: Sykmelding,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {}
 
-    override fun behandle(personopplysninger: Personopplysninger, message: NyArbeidsledigTidligereArbeidstakerSøknadMessage, sykmelding: Sykmelding, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {}
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: NyArbeidsledigTidligereArbeidstakerSøknadMessage,
+        sykmelding: Sykmelding,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {}
 
-    override fun behandle(personopplysninger: Personopplysninger, message: SendtSøknadFrilansMessage, søknad: Søknad, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {}
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadFrilansMessage,
+        søknad: Søknad,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {}
 
-    override fun behandle(personopplysninger: Personopplysninger, message: SendtSøknadSelvstendigMessage, søknad: Søknad, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {}
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadSelvstendigMessage,
+        søknad: Søknad,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {}
 
-    override fun behandle(personopplysninger: Personopplysninger, message: SendtSøknadFiskerMessage, søknad: Søknad, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {}
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadFiskerMessage,
+        søknad: Søknad,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {}
 
-    override fun behandle(personopplysninger: Personopplysninger, message: SendtSøknadAnnetMessage, søknad: Søknad, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {}
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadAnnetMessage,
+        søknad: Søknad,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {}
 
-    override fun behandle(personopplysninger: Personopplysninger, message: SendtSøknadArbeidsledigMessage, søknad: Søknad, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {}
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadArbeidsledigMessage,
+        søknad: Søknad,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {}
 
-    override fun behandle(personopplysninger: Personopplysninger, message: SendtSøknadArbeidsledigTidligereArbeidstakerMessage, søknad: Søknad, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {}
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadArbeidsledigTidligereArbeidstakerMessage,
+        søknad: Søknad,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {}
 
-    override fun behandle(personopplysninger: Personopplysninger, message: SendtSøknadArbeidsgiverMessage, søknad: Søknad, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadArbeidsgiverMessage,
+        søknad: Søknad,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {
         lestSendtSøknadArbeidsgiverVerdi.set(true)
     }
 
-    override fun behandle(personopplysninger: Personopplysninger, message: SendtSøknadNavMessage, søknad: Søknad, context: BehandlingContext, historiskeFolkeregisteridenter: Set<Personidentifikator>) {
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadNavMessage,
+        søknad: Søknad,
+        context: BehandlingContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>,
+    ) {
         lestSendtSøknadVerdi.set(true)
     }
 
-    override fun behandle(message: InntektsopplysningerFraLagretInntektsmeldingMessage, inntektsmeldingMeldingsreferanseId: MeldingsreferanseId, context: BehandlingContext) {}
+    override fun behandle(
+        message: InntektsopplysningerFraLagretInntektsmeldingMessage,
+        inntektsmeldingMeldingsreferanseId: MeldingsreferanseId,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: NavNoSelvbestemtInntektsmeldingMessage, selvbestemteArbeidsgiveropplysninger: SelvbestemteArbeidsgiveropplysninger, context: BehandlingContext) {
+    override fun behandle(
+        message: NavNoSelvbestemtInntektsmeldingMessage,
+        selvbestemteArbeidsgiveropplysninger: SelvbestemteArbeidsgiveropplysninger,
+        context: BehandlingContext,
+    ) {
         lestNavNoSelvbestemtInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(message: NavNoInntektsmeldingMessage, arbeidsgiveropplysninger: Arbeidsgiveropplysninger, context: BehandlingContext) {
+    override fun behandle(
+        message: NavNoInntektsmeldingMessage,
+        arbeidsgiveropplysninger: Arbeidsgiveropplysninger,
+        context: BehandlingContext,
+    ) {
         lestNavNoInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(message: NavNoKorrigertInntektsmeldingMessage, korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger, context: BehandlingContext) {
+    override fun behandle(
+        message: NavNoKorrigertInntektsmeldingMessage,
+        korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger,
+        context: BehandlingContext,
+    ) {
         lestKorrigertNavNoInntektsmeldingVerdi.set(true)
     }
 
-    override fun behandle(message: InntektsmeldingerReplayMessage, replays: InntektsmeldingerReplay, context: BehandlingContext) {}
+    override fun behandle(
+        message: InntektsmeldingerReplayMessage,
+        replays: InntektsmeldingerReplay,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: BehandlingContext) {
+    override fun behandle(
+        message: DødsmeldingMessage,
+        dødsmelding: Dødsmelding,
+        context: BehandlingContext,
+    ) {
         lestDødsmeldingVerdi.set(true)
     }
 
-    override fun behandle(nyPersonidentifikator: Personidentifikator, message: IdentOpphørtMessage, identOpphørt: IdentOpphørt, gamleIdenter: Set<Personidentifikator>, context: BehandlingContext) {}
+    override fun behandle(
+        nyPersonidentifikator: Personidentifikator,
+        message: IdentOpphørtMessage,
+        identOpphørt: IdentOpphørt,
+        gamleIdenter: Set<Personidentifikator>,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse, context: BehandlingContext) {
+    override fun behandle(
+        message: PåminnelseMessage,
+        påminnelse: Påminnelse,
+        context: BehandlingContext,
+    ) {
         lestPåminnelseVerdi.set(true)
     }
 
-    override fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse, context: BehandlingContext) {
+    override fun behandle(
+        message: PersonPåminnelseMessage,
+        påminnelse: PersonPåminnelse,
+        context: BehandlingContext,
+    ) {
         lestPersonpåminnelseVerdi.set(true)
     }
 
-    override fun behandle(message: GjenopptaBehandlingMessage, gjenopptaBehandling: GjenopptaBehandling, context: BehandlingContext) {}
+    override fun behandle(
+        message: GjenopptaBehandlingMessage,
+        gjenopptaBehandling: GjenopptaBehandling,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: AnmodningOmForkastingMessage, anmodning: AnmodningOmForkasting, context: BehandlingContext) {
+    override fun behandle(
+        message: AnmodningOmForkastingMessage,
+        anmodning: AnmodningOmForkasting,
+        context: BehandlingContext,
+    ) {
         lestAnmodningOmForkastingVerdi.set(true)
     }
 
-    override fun behandle(message: UtbetalingshistorikkMessage, utbetalingshistorikk: Utbetalingshistorikk, context: BehandlingContext) {
+    override fun behandle(
+        message: UtbetalingshistorikkMessage,
+        utbetalingshistorikk: Utbetalingshistorikk,
+        context: BehandlingContext,
+    ) {
         lestUtbetalingshistorikkVerdi.set(true)
     }
 
-    override fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger, context: BehandlingContext) {}
+    override fun behandle(
+        message: UtbetalingshistorikkForFeriepengerMessage,
+        utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: YtelserMessage, ytelser: Ytelser, context: BehandlingContext) {
+    override fun behandle(
+        message: YtelserMessage,
+        ytelser: Ytelser,
+        context: BehandlingContext,
+    ) {
         lestYtelserVerdi.set(true)
     }
 
-    override fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag, context: BehandlingContext) {
+    override fun behandle(
+        message: VilkårsgrunnlagMessage,
+        vilkårsgrunnlag: Vilkårsgrunnlag,
+        context: BehandlingContext,
+    ) {
         lestVilkårsgrunnlagVerdi.set(true)
     }
 
-    override fun behandle(message: UtbetalingsgodkjenningMessage, utbetalingsgodkjenning: Utbetalingsgodkjenning, context: BehandlingContext) {
+    override fun behandle(
+        message: UtbetalingsgodkjenningMessage,
+        utbetalingsgodkjenning: Utbetalingsgodkjenning,
+        context: BehandlingContext,
+    ) {
         lestUtbetalingsgodkjenningVerdi.set(true)
     }
 
-    override fun behandle(message: FeriepengeutbetalingMessage, utbetaling: FeriepengeutbetalingHendelse, context: BehandlingContext) {}
+    override fun behandle(
+        message: FeriepengeutbetalingMessage,
+        utbetaling: FeriepengeutbetalingHendelse,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse, context: BehandlingContext) {
+    override fun behandle(
+        message: UtbetalingMessage,
+        utbetaling: UtbetalingHendelse,
+        context: BehandlingContext,
+    ) {
         lestUtbetalingVerdi.set(true)
     }
 
-    override fun behandle(message: SimuleringMessage, simulering: Simulering, context: BehandlingContext) {
+    override fun behandle(
+        message: SimuleringMessage,
+        simulering: Simulering,
+        context: BehandlingContext,
+    ) {
         lestSimuleringVerdi.set(true)
     }
 
-    override fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling, context: BehandlingContext) {
+    override fun behandle(
+        message: AnnulleringMessage,
+        annullerUtbetaling: AnnullerUtbetaling,
+        context: BehandlingContext,
+    ) {
         lestAnnullerUtbetalingVerdi.set(true)
     }
 
-    override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, context: BehandlingContext) {
+    override fun behandle(
+        message: AvstemmingMessage,
+        personidentifikator: Personidentifikator,
+        context: BehandlingContext,
+    ) {
         lestAvstemmingVerdi.set(true)
     }
 
-    override fun behandle(message: MigrateMessage, migrate: Migrate, context: BehandlingContext) {
+    override fun behandle(
+        message: MigrateMessage,
+        migrate: Migrate,
+        context: BehandlingContext,
+    ) {
         lestMigrateVerdi.set(true)
     }
 
-    override fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: BehandlingContext) {}
+    override fun behandle(
+        message: OverstyrTidslinjeMessage,
+        overstyrTidslinje: OverstyrTidslinje,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: OverstyrArbeidsgiveropplysningerMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: BehandlingContext) {}
+    override fun behandle(
+        message: OverstyrArbeidsgiveropplysningerMessage,
+        overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: BehandlingContext) {}
+    override fun behandle(
+        message: OverstyrArbeidsforholdMessage,
+        overstyrArbeidsforhold: OverstyrArbeidsforhold,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: GrunnbeløpsreguleringMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: BehandlingContext) {}
+    override fun behandle(
+        message: GrunnbeløpsreguleringMessage,
+        grunnbeløpsregulering: Grunnbeløpsregulering,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: InfotrygdendringMessage, infotrygdEndring: Infotrygdendring, context: BehandlingContext) {}
+    override fun behandle(
+        message: InfotrygdendringMessage,
+        infotrygdEndring: Infotrygdendring,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: UtbetalingshistorikkEtterInfotrygdendringMessage, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, context: BehandlingContext) {}
+    override fun behandle(
+        message: UtbetalingshistorikkEtterInfotrygdendringMessage,
+        utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: ForkastSykmeldingsperioderMessage, forkastSykmeldingsperioder: ForkastSykmeldingsperioder, context: BehandlingContext) {
+    override fun behandle(
+        message: ForkastSykmeldingsperioderMessage,
+        forkastSykmeldingsperioder: ForkastSykmeldingsperioder,
+        context: BehandlingContext,
+    ) {
         lestForkastSykmeldingsperioderMessageVerdi.set(true)
     }
 
     data class AvbruttSøknadData(
         val fom: LocalDate,
         val tom: LocalDate,
-        val behandlingsporing: Behandlingsporing
+        val behandlingsporing: Behandlingsporing,
     )
 
-    override fun behandle(message: AvbruttSøknadMessage, avbruttSøknad: AvbruttSøknad, context: BehandlingContext) {
-        lestAvbruttSøknadVerdi.set(AvbruttSøknadData(
-            fom = message.periode.start,
-            tom = message.periode.endInclusive,
-            behandlingsporing = message.behandlingsporing,
-        ))
+    override fun behandle(
+        message: AvbruttSøknadMessage,
+        avbruttSøknad: AvbruttSøknad,
+        context: BehandlingContext,
+    ) {
+        lestAvbruttSøknadVerdi.set(
+            AvbruttSøknadData(
+                fom = message.periode.start,
+                tom = message.periode.endInclusive,
+                behandlingsporing = message.behandlingsporing,
+            ),
+        )
     }
 
-    override fun behandle(message: SkjønnsmessigFastsettelseMessage, skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse, context: BehandlingContext) {}
+    override fun behandle(
+        message: SkjønnsmessigFastsettelseMessage,
+        skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse,
+        context: BehandlingContext,
+    ) {}
 
-    override fun behandle(message: MinimumSykdomsgradVurdertMessage, minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding, context: BehandlingContext) {}
+    override fun behandle(
+        message: MinimumSykdomsgradVurdertMessage,
+        minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding,
+        context: BehandlingContext,
+    ) {}
 
     data class EndretVurderingPåSkjæringstidspunktData(
         val skjæringstidspunkt: LocalDate,
         val vurderingId: UUID,
         val type: String,
-        val manuellVurdering: Boolean
+        val manuellVurdering: Boolean,
     )
 
-    override fun behandle(message: EndretVurderingPåSkjæringstidspunktMessage, endretVurderingPåSkjæringstidspunkt: EndretVurderingPåSkjæringstidspunkt, context: BehandlingContext) {
-        lestEndretVurderingPåSkjæringstidspunktVerdi.set(EndretVurderingPåSkjæringstidspunktData(
-            skjæringstidspunkt = message.skjæringstidspunkt,
-            vurderingId = message.vurdering.id,
-            type = message.vurdering::class.simpleName!!,
-            manuellVurdering = message.avsender == Avsender.SAKSBEHANDLER
-        ))
+    override fun behandle(
+        message: EndretVurderingPåSkjæringstidspunktMessage,
+        endretVurderingPåSkjæringstidspunkt: EndretVurderingPåSkjæringstidspunkt,
+        context: BehandlingContext,
+    ) {
+        lestEndretVurderingPåSkjæringstidspunktVerdi.set(
+            EndretVurderingPåSkjæringstidspunktData(
+                skjæringstidspunkt = message.skjæringstidspunkt,
+                vurderingId = message.vurdering.id,
+                type = message.vurdering::class.simpleName!!,
+                manuellVurdering = message.avsender == Avsender.SAKSBEHANDLER,
+            ),
+        )
     }
 
     data class EndretGrunnlagForBeregningData(
         val type: String,
-        val fom: LocalDate
+        val fom: LocalDate,
     )
 
-    override fun behandle(message: EndretGrunnlagForBeregningMessage, endretGrunnlagForBeregning: EndretGrunnlagForBeregning, context: BehandlingContext) {
-        lestEndretGrunnlagForBeregningVerdi.set(EndretGrunnlagForBeregningData(
-            type = message.endretGrunnlag::class.simpleName!!,
-            fom = message.fom
-        ))
+    override fun behandle(
+        message: EndretGrunnlagForBeregningMessage,
+        endretGrunnlagForBeregning: EndretGrunnlagForBeregning,
+        context: BehandlingContext,
+    ) {
+        lestEndretGrunnlagForBeregningVerdi.set(
+            EndretGrunnlagForBeregningData(
+                type = message.endretGrunnlag::class.simpleName!!,
+                fom = message.fom,
+            ),
+        )
     }
 }

@@ -2,8 +2,6 @@ package no.nav.helse.spleis.mediator
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import io.mockk.mockk
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -22,6 +20,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class DatadelingMediatorTest {
     private val fødselsnummer = "12345678910"
@@ -30,9 +30,13 @@ internal class DatadelingMediatorTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var datadelingMediator: DatadelingMediator
 
-    private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
-        it.requireKey("@event_name")
-    }, Meldingsporing(MeldingsreferanseId(UUID.randomUUID()), fødselsnummer))
+    private val eksempelmelding =
+        MigrateMessage(
+            JsonMessage.newMessage("testevent", emptyMap()).also {
+                it.requireKey("@event_name")
+            },
+            Meldingsporing(MeldingsreferanseId(UUID.randomUUID()), fødselsnummer),
+        )
 
     @BeforeEach
     fun beforeEach() {
@@ -94,7 +98,7 @@ internal class DatadelingMediatorTest {
 
     private class TestKontekst(
         private val type: String,
-        private val melding: String
+        private val melding: String,
     ) : Aktivitetskontekst {
         override fun toSpesifikkKontekst() = SpesifikkKontekst(type, mapOf(type to melding))
     }

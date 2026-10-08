@@ -13,8 +13,7 @@ import no.nav.helse.mars
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class ArbeidIkkeGjenopptattTest: AbstractDslTest() {
-
+internal class ArbeidIkkeGjenopptattTest : AbstractDslTest() {
     @Test
     fun `Ingen varsel om flere skjærsingstidspunkt ved ved aig-strekk uten gap mellom periodene`() {
         a1 {

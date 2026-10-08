@@ -1,3 +1,5 @@
 package no.nav.helse.dto.deserialisering
 
-data class ForkastetVedtaksperiodeInnDto(val vedtaksperiode: VedtaksperiodeInnDto)
+data class ForkastetVedtaksperiodeInnDto(
+    val vedtaksperiode: VedtaksperiodeInnDto,
+)

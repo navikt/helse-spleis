@@ -1,9 +1,6 @@
 package no.nav.helse.spleis.mediator.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import java.time.LocalDate
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
 import no.nav.helse.spleis.IMessageMediator
@@ -14,12 +11,18 @@ import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.O
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.YearMonth
+import java.util.UUID
 
 internal class VilkårsgrunnlagRiverTest : RiverTest() {
     // ren mapping-test, rører ikke databasen, så det er trygt med et fast fødselsnummer
     private val UNG_PERSON_FNR_2018 = "12029240045"
 
-    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+    override fun river(
+        rapidsConnection: RapidsConnection,
+        mediator: IMessageMediator,
+    ) {
         VilkårsgrunnlagRiver(rapidsConnection, mediator)
     }
 
@@ -32,25 +35,28 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                 vedtaksperiodeId = UUID.randomUUID(),
                 behandlingId = UUID.randomUUID(),
                 skjæringstidspunkt = 1.januar,
-                inntekterForSykepengegrunnlag = listOf(
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
-                        måned = YearMonth.of(2017, 12),
-                        inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, ORGNUMMER))
-                    )
-                ),
-                inntekterForOpptjeningsvurdering = listOf(
-                    TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
-                        måned = YearMonth.of(2017, 12),
-                        inntekter = listOf(TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0, ORGNUMMER))
-                    )
-                ),
-                arbeidsforhold = listOf(
-                    TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                    TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.FRILANSER)
-                ),
+                inntekterForSykepengegrunnlag =
+                    listOf(
+                        TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
+                            måned = YearMonth.of(2017, 12),
+                            inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, ORGNUMMER)),
+                        ),
+                    ),
+                inntekterForOpptjeningsvurdering =
+                    listOf(
+                        TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
+                            måned = YearMonth.of(2017, 12),
+                            inntekter = listOf(TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0, ORGNUMMER)),
+                        ),
+                    ),
+                arbeidsforhold =
+                    listOf(
+                        TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                        TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.FRILANSER),
+                    ),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 forsikringsvurderingId = null,
-            )
+            ),
         )
     }
 
@@ -61,27 +67,30 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                 vedtaksperiodeId = UUID.randomUUID(),
                 behandlingId = UUID.randomUUID(),
                 skjæringstidspunkt = 1.januar,
-                inntekterForSykepengegrunnlag = listOf(
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
-                        måned = YearMonth.of(2017, 12),
-                        inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, "987654322"))
-                    )
-                ),
-                inntekterForOpptjeningsvurdering = listOf(
-                    TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
-                        måned = YearMonth.of(2017, 12),
-                        inntekter = listOf(
-                            TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(
-                                32000.0,
-                                ORGNUMMER
-                            )
+                inntekterForSykepengegrunnlag =
+                    listOf(
+                        TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
+                            måned = YearMonth.of(2017, 12),
+                            inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, "987654322")),
                         ),
-                    )
-                ),
+                    ),
+                inntekterForOpptjeningsvurdering =
+                    listOf(
+                        TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
+                            måned = YearMonth.of(2017, 12),
+                            inntekter =
+                                listOf(
+                                    TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(
+                                        32000.0,
+                                        ORGNUMMER,
+                                    ),
+                                ),
+                        ),
+                    ),
                 arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 forsikringsvurderingId = null,
-            )
+            ),
         )
     }
 }

@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V340KonsekventNavngivningFaktaavklartInntekt : JsonMigration(340) {
     override val description = "Konsekvent navngivning på faktaavklart inntekt"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    ) {
         jsonNode.path("vilkårsgrunnlagHistorikk").forEach { historikkInnslag ->
             historikkInnslag.path("vilkårsgrunnlag").forEach { vilkårsgrunnlag ->
                 val inntektsgrunnlag = vilkårsgrunnlag.path("inntektsgrunnlag")
@@ -28,7 +31,6 @@ internal class V340KonsekventNavngivningFaktaavklartInntekt : JsonMigration(340)
                 migrerVedtaksperiode(forkastet.path("vedtaksperiode"))
             }
         }
-
     }
 
     private fun migrerVedtaksperiode(vedtaksperiode: JsonNode) {
@@ -39,7 +41,8 @@ internal class V340KonsekventNavngivningFaktaavklartInntekt : JsonMigration(340)
                     val type = faktaavklartInntekt.path("type").takeUnless { it.isMissingNode || it.isNull }?.asText()
                     when (type) {
                         "SELVSTENDIG_NÆRINGSDRIVENDE",
-                        null -> migrerSelvstendigFaktaavklartInntekt(faktaavklartInntekt)
+                        null,
+                        -> migrerSelvstendigFaktaavklartInntekt(faktaavklartInntekt)
                         else -> migrerArbeidstakerFaktaavklartInntekt(faktaavklartInntekt)
                     }
                 }
@@ -56,19 +59,22 @@ internal class V340KonsekventNavngivningFaktaavklartInntekt : JsonMigration(340)
     private fun migrerArbeidstakerFaktaavklartInntekt(arbeidstakerFaktaavklartInntekt: ObjectNode) {
         val type = arbeidstakerFaktaavklartInntekt.path("type").asText()
         val kilde = arbeidstakerFaktaavklartInntekt.path("kilde").asText()
-        val riktigKilde = when {
-            type == "ARBEIDSTAKER_ARBEIDSGIVER" -> "INNTEKTSMELDING"
-            type == "ARBEIDSTAKER_AORDNINGEN" -> "AORDNINGEN"
-            kilde == "SKATT_SYKEPENGEGRUNNLAG" -> "AORDNINGEN" // Fikser det sprø navnet SKATT_SYKEPENGEGRUNNLAG
-            else -> null // Allerede rett kilde
-        }
+        val riktigKilde =
+            when {
+                type == "ARBEIDSTAKER_ARBEIDSGIVER" -> "INNTEKTSMELDING"
+                type == "ARBEIDSTAKER_AORDNINGEN" -> "AORDNINGEN"
+                kilde == "SKATT_SYKEPENGEGRUNNLAG" -> "AORDNINGEN" // Fikser det sprø navnet SKATT_SYKEPENGEGRUNNLAG
+                else -> null // Allerede rett kilde
+            }
         riktigKilde?.let { arbeidstakerFaktaavklartInntekt.put("kilde", it) }
 
-        val riktigType = when (type) {
-            "ARBEIDSTAKER_ARBEIDSGIVER",
-            "ARBEIDSTAKER_AORDNINGEN" -> "ARBEIDSTAKER"
-            else -> null // Allerede rett type
-        }
+        val riktigType =
+            when (type) {
+                "ARBEIDSTAKER_ARBEIDSGIVER",
+                "ARBEIDSTAKER_AORDNINGEN",
+                -> "ARBEIDSTAKER"
+                else -> null // Allerede rett type
+            }
         riktigType?.let { arbeidstakerFaktaavklartInntekt.put("type", it) }
     }
 }

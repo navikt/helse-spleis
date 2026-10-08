@@ -1,15 +1,15 @@
 package no.nav.helse.sykdomstidslinje
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.SykdomshistorikkDto
 import no.nav.helse.dto.SykdomshistorikkElementDto
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.tournament.Dagturnering
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class Sykdomshistorikk private constructor(
-    private val elementer: MutableList<Element>
+    private val elementer: MutableList<Element>,
 ) {
     internal constructor() : this(mutableListOf())
 
@@ -23,7 +23,10 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
-    internal fun håndter(meldingsreferanseId: MeldingsreferanseId, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
+    internal fun håndter(
+        meldingsreferanseId: MeldingsreferanseId,
+        sykdomstidslinje: Sykdomstidslinje,
+    ): Sykdomstidslinje {
         elementer.add(0, Element.opprett(this, meldingsreferanseId, sykdomstidslinje))
         return sykdomstidslinje()
     }
@@ -41,9 +44,8 @@ internal class Sykdomshistorikk private constructor(
         val hendelseId: MeldingsreferanseId? = null,
         val tidsstempel: LocalDateTime = LocalDateTime.now(),
         val hendelseSykdomstidslinje: Sykdomstidslinje,
-        val beregnetSykdomstidslinje: Sykdomstidslinje
+        val beregnetSykdomstidslinje: Sykdomstidslinje,
     ) : Comparable<Element> {
-
         override fun compareTo(other: Element) = this.tidsstempel.compareTo(other.tidsstempel)
 
         override fun toString() = beregnetSykdomstidslinje.toString()
@@ -56,58 +58,59 @@ internal class Sykdomshistorikk private constructor(
             internal fun opprett(
                 sykdomshistorikk: Sykdomshistorikk,
                 meldingsreferanseId: MeldingsreferanseId,
-                hendelseSykdomstidslinje: Sykdomstidslinje
+                hendelseSykdomstidslinje: Sykdomstidslinje,
             ): Element {
-                val beregnetSykdomstidslinje = if (!sykdomshistorikk.isEmpty())
-                    sykdomshistorikk.sykdomstidslinje().merge(hendelseSykdomstidslinje, Dagturnering.TURNERING::beste)
-                else hendelseSykdomstidslinje
+                val beregnetSykdomstidslinje =
+                    if (!sykdomshistorikk.isEmpty()) {
+                        sykdomshistorikk.sykdomstidslinje().merge(hendelseSykdomstidslinje, Dagturnering.TURNERING::beste)
+                    } else {
+                        hendelseSykdomstidslinje
+                    }
                 return Element(
                     hendelseId = meldingsreferanseId,
                     hendelseSykdomstidslinje = hendelseSykdomstidslinje,
-                    beregnetSykdomstidslinje = beregnetSykdomstidslinje
+                    beregnetSykdomstidslinje = beregnetSykdomstidslinje,
                 )
             }
 
             internal fun opprettReset(
                 historikk: Sykdomshistorikk,
-                perioder: List<Periode>
-            ): Element {
-                return Element(
+                perioder: List<Periode>,
+            ): Element =
+                Element(
                     hendelseSykdomstidslinje = Sykdomstidslinje(),
-                    beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(perioder)
+                    beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(perioder),
                 )
-            }
 
-            internal fun gjenopprett(dto: SykdomshistorikkElementDto): Element {
-                return Element(
+            internal fun gjenopprett(dto: SykdomshistorikkElementDto): Element =
+                Element(
                     id = dto.id,
                     hendelseId = dto.hendelseId?.let { MeldingsreferanseId.gjenopprett(it) },
                     tidsstempel = dto.tidsstempel,
                     hendelseSykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.hendelseSykdomstidslinje),
-                    beregnetSykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.beregnetSykdomstidslinje)
+                    beregnetSykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.beregnetSykdomstidslinje),
                 )
-            }
         }
 
-        internal fun dto() = SykdomshistorikkElementDto(
-            id = id,
-            hendelseId = hendelseId?.dto(),
-            tidsstempel = tidsstempel,
-            hendelseSykdomstidslinje = hendelseSykdomstidslinje.dto(),
-            beregnetSykdomstidslinje = beregnetSykdomstidslinje.dto(),
-        )
+        internal fun dto() =
+            SykdomshistorikkElementDto(
+                id = id,
+                hendelseId = hendelseId?.dto(),
+                tidsstempel = tidsstempel,
+                hendelseSykdomstidslinje = hendelseSykdomstidslinje.dto(),
+                beregnetSykdomstidslinje = beregnetSykdomstidslinje.dto(),
+            )
     }
 
-    internal fun dto() = SykdomshistorikkDto(
-        elementer = elementer.map { it.dto() }
-    )
+    internal fun dto() =
+        SykdomshistorikkDto(
+            elementer = elementer.map { it.dto() },
+        )
 
     internal companion object {
-
-        internal fun gjenopprett(dto: SykdomshistorikkDto): Sykdomshistorikk {
-            return Sykdomshistorikk(
-                elementer = dto.elementer.map { Element.gjenopprett(it) }.toMutableList()
+        internal fun gjenopprett(dto: SykdomshistorikkDto): Sykdomshistorikk =
+            Sykdomshistorikk(
+                elementer = dto.elementer.map { Element.gjenopprett(it) }.toMutableList(),
             )
-        }
     }
 }

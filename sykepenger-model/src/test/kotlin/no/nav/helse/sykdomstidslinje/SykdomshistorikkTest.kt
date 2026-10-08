@@ -1,6 +1,5 @@
 package no.nav.helse.sykdomstidslinje
 
-import java.util.UUID
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.til
@@ -10,11 +9,10 @@ import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.TestHendelse
 import no.nav.helse.testhelpers.U
 import no.nav.helse.testhelpers.resetSeed
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class SykdomshistorikkTest {
     private lateinit var historikk: Sykdomshistorikk
@@ -42,8 +40,18 @@ internal class SykdomshistorikkTest {
         historikk.håndter(MeldingsreferanseId(UUID.randomUUID()), tidslinje)
         historikk.fjernDager(listOf(tidslinje.periode()!!))
         assertEquals(2, historikk.inspektør.elementer())
-        assertFalse(historikk.inspektør.tidslinje(0).iterator().hasNext())
-        assertTrue(historikk.inspektør.tidslinje(1).iterator().hasNext())
+        assertFalse(
+            historikk.inspektør
+                .tidslinje(0)
+                .iterator()
+                .hasNext(),
+        )
+        assertTrue(
+            historikk.inspektør
+                .tidslinje(1)
+                .iterator()
+                .hasNext(),
+        )
     }
 
     @Test

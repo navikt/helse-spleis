@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 
 internal class ValidationTest {
-
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
@@ -39,5 +38,6 @@ internal class ValidationTest {
     }
 
     private fun Validation.successBlock() = valider { true }
+
     private fun Validation.failureBlock() = valider { false }
 }

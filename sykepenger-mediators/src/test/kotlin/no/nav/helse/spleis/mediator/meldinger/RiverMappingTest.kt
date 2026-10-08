@@ -4,30 +4,40 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import kotlin.reflect.KClass
-import kotlin.reflect.safeCast
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import kotlin.reflect.KClass
+import kotlin.reflect.safeCast
 
-internal abstract class RiverMappingTest<H: HendelseMessage>(
+internal abstract class RiverMappingTest<H : HendelseMessage>(
     private val hendelse: KClass<H>,
-    registrer: (rapidsConnection: RapidsConnection, messageMediator: IMessageMediator) -> Unit
+    registrer: (rapidsConnection: RapidsConnection, messageMediator: IMessageMediator) -> Unit,
 ) {
-
     private var forrigeHendelseMessage: HendelseMessage? = null
 
-    private val testMessageMediator = object: IMessageMediator {
-        override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
-            forrigeHendelseMessage = message
-        }
-        override fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
-            forrigeHendelseMessage = null
-        }
-    }
+    private val testMessageMediator =
+        object : IMessageMediator {
+            override fun onRecognizedMessage(
+                message: HendelseMessage,
+                context: MessageContext,
+            ) {
+                forrigeHendelseMessage = message
+            }
 
-    private val rapid = TestRapid().apply {
-        registrer(this, testMessageMediator)
-    }
+            override fun onRiverError(
+                riverName: String,
+                problems: MessageProblems,
+                context: MessageContext,
+                metadata: MessageMetadata,
+            ) {
+                forrigeHendelseMessage = null
+            }
+        }
+
+    private val rapid =
+        TestRapid().apply {
+            registrer(this, testMessageMediator)
+        }
 
     protected fun sendJson(json: String): H {
         forrigeHendelseMessage = null

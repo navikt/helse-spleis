@@ -12,7 +12,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
 
 internal class UtbetalingsgodkjenningerRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Godkjenning)
     override val riverName = "Utbetalingsgodkjenning"
@@ -28,11 +28,13 @@ internal class UtbetalingsgodkjenningerRiver(
         message.requireKey("@løsning.${Godkjenning.utgåendeNavn}.automatiskBehandling")
     }
 
-    override fun createMessage(packet: JsonMessage) = UtbetalingsgodkjenningMessage(
-        packet = packet,
-        meldingsporing = Meldingsporing(
-            id = packet.meldingsreferanseId(),
-            fødselsnummer = packet["fødselsnummer"].asText()
+    override fun createMessage(packet: JsonMessage) =
+        UtbetalingsgodkjenningMessage(
+            packet = packet,
+            meldingsporing =
+                Meldingsporing(
+                    id = packet.meldingsreferanseId(),
+                    fødselsnummer = packet["fødselsnummer"].asText(),
+                ),
         )
-    )
 }

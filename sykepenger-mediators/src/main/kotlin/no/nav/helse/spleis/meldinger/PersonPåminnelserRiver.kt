@@ -8,7 +8,7 @@ import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
 
 internal class PersonPåminnelserRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("person_påminnelse")
     override val riverName = "Person påminnelse"
@@ -17,10 +17,12 @@ internal class PersonPåminnelserRiver(
         message.requireKey("fødselsnummer")
     }
 
-    override fun createMessage(packet: JsonMessage) = PersonPåminnelseMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        PersonPåminnelseMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

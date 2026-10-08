@@ -7,8 +7,6 @@ import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.localDateTime
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.single
-import java.math.BigDecimal
-import java.time.LocalDate
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -27,9 +25,10 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
+import java.time.LocalDate
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `kort periode`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 10.januar, sykmeldingsgrad = 100))
@@ -39,7 +38,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING",
             "AVVENTER_AVSLUTTET_UTEN_UTBETALING",
-            "AVSLUTTET_UTEN_UTBETALING"
+            "AVSLUTTET_UTEN_UTBETALING",
         )
     }
 
@@ -64,7 +63,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
             "TIL_UTBETALING",
-            "AVSLUTTET"
+            "AVSLUTTET",
         )
     }
 
@@ -73,7 +72,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE))
+            fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING")
@@ -84,7 +83,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.PERMISJON))
+            fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.PERMISJON)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING")
@@ -94,7 +93,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     fun `ikke godkjent utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
@@ -111,22 +110,23 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
-            "TIL_INFOTRYGD"
+            "TIL_INFOTRYGD",
         )
     }
 
     @Test
     fun `Korrigert søknad medfører foreldede dager og ingen utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        val søknadId = sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
-            sendtNav = 1.mai.atStartOfDay()
-        )
+        val søknadId =
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+                sendtNav = 1.mai.atStartOfDay(),
+            )
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             sendtNav = 2.mai.atStartOfDay(),
             korrigerer = søknadId,
-            opprinneligSendt = 1.mai.atStartOfDay()
+            opprinneligSendt = 1.mai.atStartOfDay(),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)))
         sendVilkårsgrunnlag(0)
@@ -137,7 +137,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_INNTEKTSMELDING",
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
-            "AVVENTER_HISTORIKK"
+            "AVVENTER_HISTORIKK",
         )
     }
 
@@ -145,7 +145,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     fun `perioder påvirket av annullering-event blir forkastet men forblir i Avsluttet`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
@@ -174,7 +174,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVSLUTTET",
             "AVVENTER_ANNULLERING",
             "TIL_ANNULLERING",
-            "TIL_INFOTRYGD"
+            "TIL_INFOTRYGD",
         )
     }
 
@@ -182,7 +182,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     fun `kan ikke utbetale på overstyrt utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
@@ -201,7 +201,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
             "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVVENTER_HISTORIKK"
+            "AVVENTER_HISTORIKK",
         )
     }
 
@@ -209,7 +209,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     fun `overstyring av tidslinje fra saksbehandler fører til tilstandsendring`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
@@ -234,7 +234,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
-            "TIL_UTBETALING"
+            "TIL_UTBETALING",
         )
     }
 
@@ -242,24 +242,25 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     fun `Inntektsmelding med opphør av naturalytelser blir kastet til infotrygd`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoInntektsmelding(
             arbeidsgiverperiode = listOf(Periode(fom = 1.januar, tom = 16.januar)),
-            opphørAvNaturalytelser = listOf(
-                OpphoerAvNaturalytelse(
-                    Naturalytelse.ELEKTRONISKKOMMUNIKASJON,
-                    2.januar,
-                    BigDecimal(600.0)
-                )
-            )
+            opphørAvNaturalytelser =
+                listOf(
+                    OpphoerAvNaturalytelse(
+                        Naturalytelse.ELEKTRONISKKOMMUNIKASJON,
+                        2.januar,
+                        BigDecimal(600.0),
+                    ),
+                ),
         )
 
         assertForkastedeTilstander(
             0,
             "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING",
-            "TIL_INFOTRYGD"
+            "TIL_INFOTRYGD",
         )
     }
 
@@ -267,7 +268,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     fun `ignorerer teknisk feil ved simuleringer`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
@@ -280,7 +281,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
-            "AVVENTER_SIMULERING"
+            "AVVENTER_SIMULERING",
         )
     }
 
@@ -288,15 +289,16 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     fun `Behandler ikke melding hvis den allerede er behandlet`() {
         val (meldingId, message) = meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100))
 
-        fun behandletTidspunkt(id: String) = dataSource.ds.connection {
-            prepareStatementWithNamedParameters("select behandlet_tidspunkt from melding WHERE melding_id = :id") {
-                withParameter("id", id)
-            }.use { stmt ->
-                stmt.executeQuery().use { rs ->
-                    rs.single { it.localDateTime(1) }
+        fun behandletTidspunkt(id: String) =
+            dataSource.ds.connection {
+                prepareStatementWithNamedParameters("select behandlet_tidspunkt from melding WHERE melding_id = :id") {
+                    withParameter("id", id)
+                }.use { stmt ->
+                    stmt.executeQuery().use { rs ->
+                        rs.single { it.localDateTime(1) }
+                    }
                 }
             }
-        }
 
         testRapid.sendTestMessage(message)
         assertTrue(hendelseRepository.erBehandlet(MeldingsreferanseId(meldingId.toUUID())))
@@ -316,9 +318,11 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertFalse(hendelseRepository.erBehandlet(meldingId))
         val (_, message) = meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100))
-        val medSammeId = (jacksonObjectMapper().readTree(message) as ObjectNode).also {
-            it.put("@id", meldingId.id.toString())
-        }.toString()
+        val medSammeId =
+            (jacksonObjectMapper().readTree(message) as ObjectNode)
+                .also {
+                    it.put("@id", meldingId.id.toString())
+                }.toString()
         testRapid.sendTestMessage(medSammeId)
         assertTrue(hendelseRepository.erBehandlet(meldingId))
     }
@@ -327,11 +331,11 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     fun `delvis refusjon`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoInntektsmelding(
             listOf(Periode(fom = 3.januar, tom = 18.januar)),
-            opphørsdatoForRefusjon = 20.januar
+            opphørsdatoForRefusjon = 20.januar,
         )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -350,7 +354,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
             "TIL_UTBETALING",
-            "AVSLUTTET"
+            "AVSLUTTET",
         )
     }
 

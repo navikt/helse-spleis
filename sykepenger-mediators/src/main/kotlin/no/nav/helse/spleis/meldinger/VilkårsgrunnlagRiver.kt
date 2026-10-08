@@ -17,14 +17,15 @@ import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 
 internal class VilkårsgrunnlagRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
-    override val behov = listOf(
-        InntekterForSykepengegrunnlag,
-        InntekterForOpptjeningsvurdering,
-        Arbeidsforhold,
-        Medlemskap
-    )
+    override val behov =
+        listOf(
+            InntekterForSykepengegrunnlag,
+            InntekterForOpptjeningsvurdering,
+            Arbeidsforhold,
+            Medlemskap,
+        )
 
     override val riverName = "Vilkårsgrunnlag"
 
@@ -64,11 +65,13 @@ internal class VilkårsgrunnlagRiver(
         message.interestedIn("@løsning.${Opptjeningsvurdering.utgåendeNavn}.id") // TODO ?
     }
 
-    override fun createMessage(packet: JsonMessage) = VilkårsgrunnlagMessage(
-        packet = packet,
-        meldingsporing = Meldingsporing(
-            id = packet.meldingsreferanseId(),
-            fødselsnummer = packet["fødselsnummer"].asText()
+    override fun createMessage(packet: JsonMessage) =
+        VilkårsgrunnlagMessage(
+            packet = packet,
+            meldingsporing =
+                Meldingsporing(
+                    id = packet.meldingsreferanseId(),
+                    fødselsnummer = packet["fødselsnummer"].asText(),
+                ),
         )
-    )
 }

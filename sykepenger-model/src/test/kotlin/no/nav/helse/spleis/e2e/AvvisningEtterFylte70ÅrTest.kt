@@ -1,25 +1,13 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.desember
+import no.nav.helse.*
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
-import no.nav.helse.erHelg
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -43,10 +31,26 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-            val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
-            val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
-            val navDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.NavDag }
-            val navHelgedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.NavHelgDag }
+            val avvisteDager =
+                observatør.utbetalingUtenUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+            val arbeidsgiverperiodedager =
+                observatør.utbetalingUtenUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
+            val navDager =
+                observatør.utbetalingUtenUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.NavDag }
+            val navHelgedager =
+                observatør.utbetalingUtenUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.NavHelgDag }
 
             assertEquals(11, avvisteDager.size)
             assertEquals(16, arbeidsgiverperiodedager.size)
@@ -61,7 +65,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractDslTest() {
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_GODKJENNING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -74,22 +78,39 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractDslTest() {
             håndterSøknad(februar)
 
             håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
+                arbeidsgiverperioder = listOf(1.februar til 16.februar),
+                vedtaksperiodeId = 1.vedtaksperiode,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
             )
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            //håndterSimulering(1.vedtaksperiode)
+            // håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            //håndterUtbetalt()
+            // håndterUtbetalt()
 
             assertTrue(observatør.utbetalingMedUtbetalingEventer.isEmpty())
 
-            val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
-            val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
-            val navDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.NavDag }
-            val navHelgedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.NavHelgDag }
+            val avvisteDager =
+                observatør.utbetalingUtenUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+            val arbeidsgiverperiodedager =
+                observatør.utbetalingUtenUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
+            val navDager =
+                observatør.utbetalingUtenUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.NavDag }
+            val navHelgedager =
+                observatør.utbetalingUtenUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.NavHelgDag }
 
             assertEquals(20, avvisteDager.size)
             avvisteDager.forEach {
@@ -111,7 +132,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractDslTest() {
             håndterSøknad(20.desember(2017) til 9.januar)
             håndterArbeidsgiveropplysninger(
                 listOf(20.desember(2017) til 4.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -123,14 +144,22 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractDslTest() {
             håndterSøknad(11.juli til 31.juli)
             håndterArbeidsgiveropplysninger(
                 listOf(11.juli til 26.juli),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-            val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
-            val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
+            val avvisteDager =
+                observatør.utbetalingUtenUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+            val arbeidsgiverperiodedager =
+                observatør.utbetalingUtenUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag }
 
             assertEquals(3, avvisteDager.size)
             assertEquals(16, arbeidsgiverperiodedager.size)
@@ -148,21 +177,29 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.februar til 16.februar),
                 beregnetInntekt = 10000.månedlig,
-                vedtaksperiodeId = 1.vedtaksperiode)
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-            val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+            val avvisteDager =
+                observatør.utbetalingUtenUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
 
             assertEquals(8, avvisteDager.size)
 
             val periodenEtterAGP = 17.februar til 28.februar
             periodenEtterAGP.filter { !it.erHelg() }.forEach { dato ->
-                assertEquals(listOf(
-                    EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumInntektOver67,
-                    EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.Over70
-                ), avvisteDager.first { it.dato == dato }.begrunnelser)
+                assertEquals(
+                    listOf(
+                        EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumInntektOver67,
+                        EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.Over70,
+                    ),
+                    avvisteDager.first { it.dato == dato }.begrunnelser,
+                )
             }
 
             assertVarsler(1.vedtaksperiode, Varselkode.RV_SV_1)
@@ -178,12 +215,17 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(15.desember(2017) til 30.desember(2017)),
                 beregnetInntekt = 10000.månedlig,
-                vedtaksperiodeId = 1.vedtaksperiode)
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-            val avvisteDager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
+            val avvisteDager =
+                observatør.utbetalingUtenUtbetalingEventer
+                    .first()
+                    .utbetalingsdager
+                    .filter { it.type == EventSubscription.Utbetalingsdag.Dagtype.AvvistDag }
 
             assertEquals(11, avvisteDager.size)
 
@@ -193,16 +235,22 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractDslTest() {
             avvisteDager.filter { it.dato in før70 }
 
             før70.filter { !it.erHelg() }.forEach { dato ->
-                assertEquals(listOf(
-                    EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumInntektOver67,
-                ), avvisteDager.first { it.dato == dato }.begrunnelser)
+                assertEquals(
+                    listOf(
+                        EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumInntektOver67,
+                    ),
+                    avvisteDager.first { it.dato == dato }.begrunnelser,
+                )
             }
 
             etter70.filter { !it.erHelg() }.forEach { dato ->
-                assertEquals(listOf(
-                    EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumInntektOver67,
-                    EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.Over70
-                ), avvisteDager.first { it.dato == dato }.begrunnelser)
+                assertEquals(
+                    listOf(
+                        EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumInntektOver67,
+                        EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.Over70,
+                    ),
+                    avvisteDager.first { it.dato == dato }.begrunnelser,
+                )
             }
 
             assertVarsler(1.vedtaksperiode, Varselkode.RV_SV_1)

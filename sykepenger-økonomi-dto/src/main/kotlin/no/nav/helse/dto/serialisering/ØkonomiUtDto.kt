@@ -14,5 +14,5 @@ data class ØkonomiUtDto(
     val arbeidsgiverbeløp: InntektDto?,
     val personbeløp: InntektDto?,
     val reservertArbeidsgiverbeløp: InntektDto?,
-    val reservertPersonbeløp: InntektDto?
+    val reservertPersonbeløp: InntektDto?,
 )

@@ -1,43 +1,23 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Grunnbeløp
-import no.nav.helse.april
-import no.nav.helse.august
-import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.TestPerson
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
+import no.nav.helse.*
+import no.nav.helse.dsl.*
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.*
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mai
-import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class MaksdatoE2ETest : AbstractDslTest() {
-
     @Test
     fun `utbetalt utover maks i Infotrygd - Spleis teller rett`() {
         a1 {
@@ -59,7 +39,7 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
 
             håndterUtbetalingshistorikkEtterInfotrygdendring(
                 ArbeidsgiverUtbetalingsperiode(a1, utbetaltTilMaksIInfotrygd.start, utbetaltTilMaksIInfotrygd.endInclusive),
-                ArbeidsgiverUtbetalingsperiode(a1, utbetaltUtoverMaksIInfotrygd.start, utbetaltUtoverMaksIInfotrygd.endInclusive)
+                ArbeidsgiverUtbetalingsperiode(a1, utbetaltUtoverMaksIInfotrygd.start, utbetaltUtoverMaksIInfotrygd.endInclusive),
             )
 
             // .. Så når vi får søknad for juli forventer saksbehandler at vi skal avslå perioden,
@@ -170,7 +150,6 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
                 assertEquals(215, it.gjenståendeDager)
                 assertEquals(25.januar(2019), it.maksdato)
             }
-
         }
     }
 
@@ -317,10 +296,11 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
         }
     }
 
-    private fun List<Periode>.utbetalingsdager() = grupperSammenhengendePerioder().fold(0) { sum, periode ->
-        // ukerdager() tar ikke med tom, så plusser på en dag for å få utbetalingsdager
-        sum + periode.oppdaterTom(periode.endInclusive.plusDays(1)).ukedager()
-    }
+    private fun List<Periode>.utbetalingsdager() =
+        grupperSammenhengendePerioder().fold(0) { sum, periode ->
+            // ukerdager() tar ikke med tom, så plusser på en dag for å få utbetalingsdager
+            sum + periode.oppdaterTom(periode.endInclusive.plusDays(1)).ukedager()
+        }
 
     private fun TestPerson.TestArbeidsgiver.forlengVedtakUtenUtbetaling(periode: Periode) {
         val vedtaksperiode = nyPeriode(periode)

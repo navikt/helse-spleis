@@ -15,27 +15,39 @@ import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.db.HendelseRepository
 import org.slf4j.Logger
 
-internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivitetskontekst {
+internal sealed class HendelseMessage(
+    private val packet: JsonMessage,
+) : Aktivitetskontekst {
     abstract val meldingsporing: Meldingsporing
     internal val navn = packet["@event_name"].asText()
     internal val opprettet = packet["@opprettet"].asLocalDateTime()
-    internal val behov = when (navn == "behov") {
-        true -> packet["@behov"].filterNot { it.isMissingOrNull() }.map { it.asText() }
-        false -> null
-    }
+    internal val behov =
+        when (navn == "behov") {
+            true -> packet["@behov"].filterNot { it.isMissingOrNull() }.map { it.asText() }
+            false -> null
+        }
 
-    internal abstract fun behandle(mediator: IHendelseMediator, context: BehandlingContext)
+    internal abstract fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    )
 
     final override fun toSpesifikkKontekst() =
-        SpesifikkKontekst(kontekstnavn, mapOf(
-            "meldingsreferanseId" to meldingsporing.id.id.toString()
-        ))
+        SpesifikkKontekst(
+            kontekstnavn,
+            mapOf(
+                "meldingsreferanseId" to meldingsporing.id.id.toString(),
+            ),
+        )
 
     internal fun lagreMelding(repository: HendelseRepository) {
         repository.lagreMelding(this, Personidentifikator(meldingsporing.fødselsnummer), meldingsporing.id, toJson())
     }
 
-    internal fun logRecognized(insecureLog: Logger, safeLog: Logger) {
+    internal fun logRecognized(
+        insecureLog: Logger,
+        safeLog: Logger,
+    ) {
         insecureLog.info("gjenkjente {} med id={}", this::class.simpleName, meldingsporing.id)
         safeLog.info("gjenkjente {} med id={} for fnr={}:\n{}", this::class.simpleName, meldingsporing.id, meldingsporing.fødselsnummer, toJson())
     }
@@ -44,9 +56,10 @@ internal sealed class HendelseMessage(private val packet: JsonMessage) : Aktivit
         logger.warn("Har mottatt duplikat {} med id={} for fnr={}", this::class.simpleName, meldingsporing.id, meldingsporing.fødselsnummer)
     }
 
-    internal fun secureDiagnosticinfo() = mapOf(
-        "fødselsnummer" to meldingsporing.fødselsnummer
-    )
+    internal fun secureDiagnosticinfo() =
+        mapOf(
+            "fødselsnummer" to meldingsporing.fødselsnummer,
+        )
 
     protected open fun additionalTracinginfo(packet: JsonMessage): Map<String, Any> = emptyMap()
 
@@ -60,57 +73,59 @@ internal fun asPeriode(jsonNode: JsonNode): Periode {
 }
 
 private val HendelseMessage.kontekstnavn
-    get() = when (this) {
-        is AnmodningOmForkastingMessage -> "AnmodningOmForkasting"
-        is AnnulleringMessage -> "AnnullerUtbetaling"
+    get() =
+        when (this) {
+            is AnmodningOmForkastingMessage -> "AnmodningOmForkasting"
+            is AnnulleringMessage -> "AnnullerUtbetaling"
 
-        is AvbruttSøknadMessage -> "AvbruttSøknad"
+            is AvbruttSøknadMessage -> "AvbruttSøknad"
 
-        is AvstemmingMessage -> "Avstemming"
-        is SimuleringMessage -> "Simulering"
-        is UtbetalingMessage -> "UtbetalingHendelse"
-        is FeriepengeutbetalingMessage -> "Feriepengeutbetaling"
-        is UtbetalingsgodkjenningMessage -> "Utbetalingsgodkjenning"
-        is UtbetalingshistorikkEtterInfotrygdendringMessage -> "UtbetalingshistorikkEtterInfotrygdendring"
-        is UtbetalingshistorikkForFeriepengerMessage -> "UtbetalingshistorikkForFeriepenger"
-        is UtbetalingshistorikkMessage -> "Utbetalingshistorikk"
-        is VilkårsgrunnlagMessage -> "Vilkårsgrunnlag"
-        is YtelserMessage -> "Ytelser"
-        is DødsmeldingMessage -> "Dødsmelding"
-        is ForkastSykmeldingsperioderMessage -> "ForkastSykmeldingsperioder"
-        is GrunnbeløpsreguleringMessage -> "Grunnbeløpsregulering"
-        is IdentOpphørtMessage -> "IdentOpphørt"
-        is InfotrygdendringMessage -> "Infotrygdendring"
-        is NavNoInntektsmeldingMessage -> "NavNoInntektsmelding"
-        is InntektsopplysningerFraLagretInntektsmeldingMessage -> "InntektsopplysningerFraLagretInntektsmelding"
-        is NavNoKorrigertInntektsmeldingMessage -> "NavNoKorrigertInntektsmelding"
-        is NavNoSelvbestemtInntektsmeldingMessage -> "NavNoSelvbestemtInntektsmelding"
-        is InntektsmeldingerReplayMessage -> "InntektsmeldingerReplay"
-        is MigrateMessage -> "Migrate"
-        is MinimumSykdomsgradVurdertMessage -> "MinimumSykdomsgradsvurderingMelding"
-        is OverstyrArbeidsforholdMessage -> "OverstyrArbeidsforhold"
-        is OverstyrArbeidsgiveropplysningerMessage -> "OverstyrArbeidsgiveropplysninger"
-        is OverstyrTidslinjeMessage -> "OverstyrTidslinje"
-        is PersonPåminnelseMessage -> "PersonPåminnelse"
-        is PåminnelseMessage -> "Påminnelse"
-        is SkjønnsmessigFastsettelseMessage -> "SkjønnsmessigFastsettelse"
-        is GjenopptaBehandlingMessage -> "GjenopptaBehandling"
-        is EndretVurderingPåSkjæringstidspunktMessage -> "EndretVurderingPåSkjæringstidspunkt"
-        is EndretGrunnlagForBeregningMessage -> "EndretGrunnlagForBeregning"
+            is AvstemmingMessage -> "Avstemming"
+            is SimuleringMessage -> "Simulering"
+            is UtbetalingMessage -> "UtbetalingHendelse"
+            is FeriepengeutbetalingMessage -> "Feriepengeutbetaling"
+            is UtbetalingsgodkjenningMessage -> "Utbetalingsgodkjenning"
+            is UtbetalingshistorikkEtterInfotrygdendringMessage -> "UtbetalingshistorikkEtterInfotrygdendring"
+            is UtbetalingshistorikkForFeriepengerMessage -> "UtbetalingshistorikkForFeriepenger"
+            is UtbetalingshistorikkMessage -> "Utbetalingshistorikk"
+            is VilkårsgrunnlagMessage -> "Vilkårsgrunnlag"
+            is YtelserMessage -> "Ytelser"
+            is DødsmeldingMessage -> "Dødsmelding"
+            is ForkastSykmeldingsperioderMessage -> "ForkastSykmeldingsperioder"
+            is GrunnbeløpsreguleringMessage -> "Grunnbeløpsregulering"
+            is IdentOpphørtMessage -> "IdentOpphørt"
+            is InfotrygdendringMessage -> "Infotrygdendring"
+            is NavNoInntektsmeldingMessage -> "NavNoInntektsmelding"
+            is InntektsopplysningerFraLagretInntektsmeldingMessage -> "InntektsopplysningerFraLagretInntektsmelding"
+            is NavNoKorrigertInntektsmeldingMessage -> "NavNoKorrigertInntektsmelding"
+            is NavNoSelvbestemtInntektsmeldingMessage -> "NavNoSelvbestemtInntektsmelding"
+            is InntektsmeldingerReplayMessage -> "InntektsmeldingerReplay"
+            is MigrateMessage -> "Migrate"
+            is MinimumSykdomsgradVurdertMessage -> "MinimumSykdomsgradsvurderingMelding"
+            is OverstyrArbeidsforholdMessage -> "OverstyrArbeidsforhold"
+            is OverstyrArbeidsgiveropplysningerMessage -> "OverstyrArbeidsgiveropplysninger"
+            is OverstyrTidslinjeMessage -> "OverstyrTidslinje"
+            is PersonPåminnelseMessage -> "PersonPåminnelse"
+            is PåminnelseMessage -> "Påminnelse"
+            is SkjønnsmessigFastsettelseMessage -> "SkjønnsmessigFastsettelse"
+            is GjenopptaBehandlingMessage -> "GjenopptaBehandling"
+            is EndretVurderingPåSkjæringstidspunktMessage -> "EndretVurderingPåSkjæringstidspunkt"
+            is EndretGrunnlagForBeregningMessage -> "EndretGrunnlagForBeregning"
 
-        is NyArbeidsledigSøknadMessage,
-        is NyArbeidsledigTidligereArbeidstakerSøknadMessage,
-        is NyFrilansSøknadMessage,
-        is NySelvstendigSøknadMessage,
-        is NySøknadMessage -> "Sykmelding"
+            is NyArbeidsledigSøknadMessage,
+            is NyArbeidsledigTidligereArbeidstakerSøknadMessage,
+            is NyFrilansSøknadMessage,
+            is NySelvstendigSøknadMessage,
+            is NySøknadMessage,
+            -> "Sykmelding"
 
-        is SendtSøknadArbeidsgiverMessage,
-        is SendtSøknadArbeidsledigMessage,
-        is SendtSøknadArbeidsledigTidligereArbeidstakerMessage,
-        is SendtSøknadFrilansMessage,
-        is SendtSøknadNavMessage,
-        is SendtSøknadFiskerMessage,
-        is SendtSøknadAnnetMessage,
-        is SendtSøknadSelvstendigMessage -> "Søknad"
-
-    }
+            is SendtSøknadArbeidsgiverMessage,
+            is SendtSøknadArbeidsledigMessage,
+            is SendtSøknadArbeidsledigTidligereArbeidstakerMessage,
+            is SendtSøknadFrilansMessage,
+            is SendtSøknadNavMessage,
+            is SendtSøknadFiskerMessage,
+            is SendtSøknadAnnetMessage,
+            is SendtSøknadSelvstendigMessage,
+            -> "Søknad"
+        }

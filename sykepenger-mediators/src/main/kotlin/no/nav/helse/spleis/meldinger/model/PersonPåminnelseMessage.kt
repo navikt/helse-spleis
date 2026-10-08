@@ -7,12 +7,17 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
 // Understands a JSON message representing a Påminnelse
-internal class PersonPåminnelseMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
-
+internal class PersonPåminnelseMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : HendelseMessage(packet) {
     private val påminnelse
         get() = PersonPåminnelse(meldingsreferanseId = meldingsporing.id)
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         mediator.behandle(this, påminnelse, context)
     }
 }

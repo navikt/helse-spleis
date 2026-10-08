@@ -1,49 +1,17 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDate
-import java.util.UUID
-import no.nav.helse.april
-import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.TestPerson
+import no.nav.helse.*
+import no.nav.helse.dsl.*
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
-import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mai
-import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING_TIL_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
@@ -53,18 +21,17 @@ import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.*
 
 internal class RevurderingV2E2ETest : AbstractDslTest() {
-
     @Test
     fun `påminne revurdering til utbetaling`() {
         a1 {
@@ -730,7 +697,7 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
             nyttVedtak(mars)
-            //forlengTilSimulering(april, 100.prosent)
+            // forlengTilSimulering(april, 100.prosent)
             nyPeriode(april, a1)
             håndterYtelser(3.vedtaksperiode)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
@@ -757,7 +724,7 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             assertDag<Sykedag, NavDag>(1.vedtaksperiode, 17.januar, 1431.0)
             nyttVedtak(mars)
-            //forlengTilGodkjenning(april, 100.prosent)
+            // forlengTilGodkjenning(april, 100.prosent)
             nyPeriode(april, a1)
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
@@ -1189,7 +1156,12 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
         }
     }
 
-    private inline fun <reified D : Dag, reified UD : Utbetalingsdag> TestPerson.TestArbeidsgiver.assertDag(vedtaksperiodeId: UUID, dato: LocalDate, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {
+    private inline fun <reified D : Dag, reified UD : Utbetalingsdag> TestPerson.TestArbeidsgiver.assertDag(
+        vedtaksperiodeId: UUID,
+        dato: LocalDate,
+        arbeidsgiverbeløp: Double?,
+        personbeløp: Double? = 0.0,
+    ) {
         inspektør.sykdomshistorikk.sykdomstidslinje()[dato].let {
             assertTrue(it is D) { "Forventet at $dato er ${D::class.simpleName} men var ${it::class.simpleName}" }
         }

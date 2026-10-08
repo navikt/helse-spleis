@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
-import java.util.UUID
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.BegrunnelseForReduksjonEllerIkkeUtbetalt.Companion.fraInnteksmelding
@@ -17,49 +16,69 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import java.util.UUID
 
 // Understands a JSON message representing an Inntektsmelding replay
-internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
+internal class InntektsmeldingerReplayMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : HendelseMessage(packet) {
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
 
     private val inntektsmeldinger = mutableListOf<Inntektsmelding>()
 
-    private val inntektsmeldingerReplay = InntektsmeldingerReplay(
-        meldingsreferanseId = meldingsporing.id,
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-            organisasjonsnummer = organisasjonsnummer
-        ),
-        vedtaksperiodeId = vedtaksperiodeId,
-        inntektsmeldinger = inntektsmeldinger
-    )
+    private val inntektsmeldingerReplay =
+        InntektsmeldingerReplay(
+            meldingsreferanseId = meldingsporing.id,
+            behandlingsporing =
+                Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                    organisasjonsnummer = organisasjonsnummer,
+                ),
+            vedtaksperiodeId = vedtaksperiodeId,
+            inntektsmeldinger = inntektsmeldinger,
+        )
 
     init {
         packet["inntektsmeldinger"].forEach { inntektsmelding ->
             inntektsmeldinger.add(
                 inntektsmeldingReplay(
                     MeldingsreferanseId(inntektsmelding.path("internDokumentId").asText().toUUID()),
-                    inntektsmelding.path("inntektsmelding")
-                )
+                    inntektsmelding.path("inntektsmelding"),
+                ),
             )
         }
     }
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         mediator.behandle(this, inntektsmeldingerReplay, context)
     }
 
-    private fun inntektsmeldingReplay(internDokumentId: MeldingsreferanseId, packet: JsonNode): Inntektsmelding {
-        val refusjon = Inntektsmelding.Refusjon(
-            beløp = packet.path("refusjon").path("beloepPrMnd").takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
-            opphørsdato = packet.path("refusjon").path("opphoersdato").asOptionalLocalDate(),
-            endringerIRefusjon = packet["endringIRefusjoner"].map {
-                Inntektsmelding.Refusjon.EndringIRefusjon(
-                    it.path("beloep").asDouble().månedlig,
-                    it.path("endringsdato").asLocalDate()
-                )
-            }
-        )
+    private fun inntektsmeldingReplay(
+        internDokumentId: MeldingsreferanseId,
+        packet: JsonNode,
+    ): Inntektsmelding {
+        val refusjon =
+            Inntektsmelding.Refusjon(
+                beløp =
+                    packet
+                        .path("refusjon")
+                        .path("beloepPrMnd")
+                        .takeUnless(JsonNode::isMissingOrNull)
+                        ?.asDouble()
+                        ?.månedlig,
+                opphørsdato = packet.path("refusjon").path("opphoersdato").asOptionalLocalDate(),
+                endringerIRefusjon =
+                    packet["endringIRefusjoner"].map {
+                        Inntektsmelding.Refusjon.EndringIRefusjon(
+                            it.path("beloep").asDouble().månedlig,
+                            it.path("endringsdato").asLocalDate(),
+                        )
+                    },
+            )
         val orgnummer = packet.path("virksomhetsnummer").asText()
         val mottatt = packet.path("mottattDato").asLocalDateTime()
         val førsteFraværsdag = packet.path("foersteFravaersdag").asOptionalLocalDate()
@@ -71,25 +90,25 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage, override val 
         return Inntektsmelding(
             meldingsreferanseId = internDokumentId,
             refusjon = refusjon,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                organisasjonsnummer = orgnummer
-            ),
+            behandlingsporing =
+                Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                    organisasjonsnummer = orgnummer,
+                ),
             beregnetInntekt = beregnetInntekt.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
             begrunnelseForReduksjonEllerIkkeUtbetalt = fraInnteksmelding(begrunnelseForReduksjonEllerIkkeUtbetalt),
             opphørAvNaturalytelser = opphørAvNaturalytelser,
             førsteFraværsdag = førsteFraværsdag,
-            mottatt = mottatt
+            mottatt = mottatt,
         )
     }
 }
 
-internal fun JsonNode.tilOpphørAvNaturalytelser(): List<Inntektsmelding.OpphørAvNaturalytelse> {
-    return map { naturalytelse ->
+internal fun JsonNode.tilOpphørAvNaturalytelser(): List<Inntektsmelding.OpphørAvNaturalytelse> =
+    map { naturalytelse ->
         Inntektsmelding.OpphørAvNaturalytelse(
             beløp = naturalytelse["beloepPrMnd"].asDouble().månedlig,
             fom = naturalytelse["fom"].asLocalDate(),
             naturalytelse = naturalytelse["naturalytelse"].asText(),
         )
     }
-}

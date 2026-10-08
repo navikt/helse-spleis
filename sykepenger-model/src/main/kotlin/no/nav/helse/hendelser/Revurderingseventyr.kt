@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Annullering
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsforhold
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiveropplysninger
@@ -21,43 +20,155 @@ import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Sykdomstidsl
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.VedtaksperiodeData
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import java.time.LocalDate
 
 class Revurderingseventyr private constructor(
     private val hvorfor: RevurderingÅrsak,
     private val skjæringstidspunkt: LocalDate,
     private val periodeForEndring: Periode,
-    val hendelse: Hendelse
+    val hendelse: Hendelse,
 ) {
-
     internal companion object {
-        fun nyPeriode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(NyPeriode, skjæringstidspunkt, periodeForEndring, hendelse)
-        fun forkasting(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Forkasting, skjæringstidspunkt, periodeForEndring, hendelse)
-        fun arbeidsforhold(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Arbeidsforhold, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
-        fun korrigertSøknad(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertSøknad, skjæringstidspunkt, periodeForEndring, hendelse)
-        fun reberegning(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Reberegning, skjæringstidspunkt, periodeForEndring, hendelse)
-        fun sykdomstidslinje(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Sykdomstidslinje, skjæringstidspunkt, periodeForEndring, hendelse)
-        fun arbeidsgiveropplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(Arbeidsgiveropplysninger, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
-        fun skjønnsmessigFastsettelse(hendelse: Hendelse, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(SkjønssmessigFastsettelse, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
-        fun arbeidsgiverperiode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Arbeidsgiverperiode, skjæringstidspunkt, periodeForEndring, hendelse)
-        fun infotrygdendring(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(RevurderingÅrsak.Infotrygdendring, skjæringstidspunkt, periodeForEndring, hendelse)
-        fun inntektsendringer(hendelse: Hendelse, inntektsendringFom: LocalDate) = Revurderingseventyr(RevurderingÅrsak.Inntektsendringer, inntektsendringFom, inntektsendringFom.somPeriode(), hendelse)
-        fun graderteAndreYtelserEndret(hendelse: Hendelse, graderteAndreYtelserEndringFom: LocalDate) = Revurderingseventyr(RevurderingÅrsak.GraderteAndreYtelserEndret, graderteAndreYtelserEndringFom, graderteAndreYtelserEndringFom.somPeriode(), hendelse)
-        fun korrigertInntektsmeldingInntektsopplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmeldingInntektsopplysninger, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
-        fun refusjonsopplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periode: Periode) = Revurderingseventyr(RevurderingÅrsak.Refusjonsopplysninger, skjæringstidspunkt, periode, hendelse)
-        fun inntekt(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(RevurderingÅrsak.Inntekt, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
-        fun grunnbeløpsregulering(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Grunnbeløpsregulering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
-        fun annullering(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(Annullering, periode.start, periode, hendelse)
-        fun minimumSykdomsgradVurdert(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(MinimumSykdomsgradVurdert, periode.start, periode, hendelse)
-        fun inntektsmeldingSomAldriKom(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(InntektsmeldingSomAldriKom, periode.start, periode, hendelse)
-        fun inntektFraInntektsmelding(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(InntektFraInntektsmelding, periode.start, periode, hendelse)
-        fun inntektsopplysningerFraLagretInntektsmelding(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(InntektsopplysningerFraLagretInntektsmelding, periode.start, periode, hendelse)
-        fun harFlereArbeidsforhold(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(HarFlereArbeidsforhold, periode.start, periode, hendelse)
-        fun søknaderSomAldriKom(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(RevurderingÅrsak.SøknaderSomAldriKom, periode.start, periode, hendelse)
-        fun endretForsikringsvurdering(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(RevurderingÅrsak.EndretForsikringsvurdering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
-        fun endretOpptjeningsvurdering(hendelse: Hendelse,skjæringstidspunkt: LocalDate) = Revurderingseventyr(RevurderingÅrsak.EndretOpptjenigsvurdering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
+        fun nyPeriode(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+            periodeForEndring: Periode,
+        ) = Revurderingseventyr(NyPeriode, skjæringstidspunkt, periodeForEndring, hendelse)
 
-        fun tidligsteEventyr(a: Revurderingseventyr?, b: Revurderingseventyr?) = when {
+        fun forkasting(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+            periodeForEndring: Periode,
+        ) = Revurderingseventyr(Forkasting, skjæringstidspunkt, periodeForEndring, hendelse)
+
+        fun arbeidsforhold(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+        ) = Revurderingseventyr(Arbeidsforhold, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
+
+        fun korrigertSøknad(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+            periodeForEndring: Periode,
+        ) = Revurderingseventyr(KorrigertSøknad, skjæringstidspunkt, periodeForEndring, hendelse)
+
+        fun reberegning(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+            periodeForEndring: Periode,
+        ) = Revurderingseventyr(Reberegning, skjæringstidspunkt, periodeForEndring, hendelse)
+
+        fun sykdomstidslinje(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+            periodeForEndring: Periode,
+        ) = Revurderingseventyr(Sykdomstidslinje, skjæringstidspunkt, periodeForEndring, hendelse)
+
+        fun arbeidsgiveropplysninger(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+            endringsdato: LocalDate,
+        ) = Revurderingseventyr(Arbeidsgiveropplysninger, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
+
+        fun skjønnsmessigFastsettelse(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+            endringsdato: LocalDate,
+        ) = Revurderingseventyr(SkjønssmessigFastsettelse, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
+
+        fun arbeidsgiverperiode(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+            periodeForEndring: Periode,
+        ) = Revurderingseventyr(Arbeidsgiverperiode, skjæringstidspunkt, periodeForEndring, hendelse)
+
+        fun infotrygdendring(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+            periodeForEndring: Periode,
+        ) = Revurderingseventyr(RevurderingÅrsak.Infotrygdendring, skjæringstidspunkt, periodeForEndring, hendelse)
+
+        fun inntektsendringer(
+            hendelse: Hendelse,
+            inntektsendringFom: LocalDate,
+        ) = Revurderingseventyr(RevurderingÅrsak.Inntektsendringer, inntektsendringFom, inntektsendringFom.somPeriode(), hendelse)
+
+        fun graderteAndreYtelserEndret(
+            hendelse: Hendelse,
+            graderteAndreYtelserEndringFom: LocalDate,
+        ) = Revurderingseventyr(RevurderingÅrsak.GraderteAndreYtelserEndret, graderteAndreYtelserEndringFom, graderteAndreYtelserEndringFom.somPeriode(), hendelse)
+
+        fun korrigertInntektsmeldingInntektsopplysninger(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+            endringsdato: LocalDate,
+        ) = Revurderingseventyr(KorrigertInntektsmeldingInntektsopplysninger, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
+
+        fun refusjonsopplysninger(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+            periode: Periode,
+        ) = Revurderingseventyr(RevurderingÅrsak.Refusjonsopplysninger, skjæringstidspunkt, periode, hendelse)
+
+        fun inntekt(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+        ) = Revurderingseventyr(RevurderingÅrsak.Inntekt, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
+
+        fun grunnbeløpsregulering(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+        ) = Revurderingseventyr(Grunnbeløpsregulering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
+
+        fun annullering(
+            hendelse: Hendelse,
+            periode: Periode,
+        ) = Revurderingseventyr(Annullering, periode.start, periode, hendelse)
+
+        fun minimumSykdomsgradVurdert(
+            hendelse: Hendelse,
+            periode: Periode,
+        ) = Revurderingseventyr(MinimumSykdomsgradVurdert, periode.start, periode, hendelse)
+
+        fun inntektsmeldingSomAldriKom(
+            hendelse: Hendelse,
+            periode: Periode,
+        ) = Revurderingseventyr(InntektsmeldingSomAldriKom, periode.start, periode, hendelse)
+
+        fun inntektFraInntektsmelding(
+            hendelse: Hendelse,
+            periode: Periode,
+        ) = Revurderingseventyr(InntektFraInntektsmelding, periode.start, periode, hendelse)
+
+        fun inntektsopplysningerFraLagretInntektsmelding(
+            hendelse: Hendelse,
+            periode: Periode,
+        ) = Revurderingseventyr(InntektsopplysningerFraLagretInntektsmelding, periode.start, periode, hendelse)
+
+        fun harFlereArbeidsforhold(
+            hendelse: Hendelse,
+            periode: Periode,
+        ) = Revurderingseventyr(HarFlereArbeidsforhold, periode.start, periode, hendelse)
+
+        fun søknaderSomAldriKom(
+            hendelse: Hendelse,
+            periode: Periode,
+        ) = Revurderingseventyr(RevurderingÅrsak.SøknaderSomAldriKom, periode.start, periode, hendelse)
+
+        fun endretForsikringsvurdering(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+        ) = Revurderingseventyr(RevurderingÅrsak.EndretForsikringsvurdering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
+
+        fun endretOpptjeningsvurdering(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+        ) = Revurderingseventyr(RevurderingÅrsak.EndretOpptjenigsvurdering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
+
+        fun tidligsteEventyr(
+            a: Revurderingseventyr?,
+            b: Revurderingseventyr?,
+        ) = when {
             b == null || (a != null && a.periodeForEndring.start <= b.periodeForEndring.start) -> a
             else -> b
         }
@@ -76,27 +187,29 @@ class Revurderingseventyr private constructor(
         vedtaksperioder.add(vedtaksperiode)
     }
 
-    internal fun erIkkeRelevantFor(vedtaksperiode: Periode): Boolean {
-        return periodeForEndring.starterEtter(vedtaksperiode)
-    }
+    internal fun erIkkeRelevantFor(vedtaksperiode: Periode): Boolean = periodeForEndring.starterEtter(vedtaksperiode)
 
     internal fun sendOverstyringIgangsattEvent(eventBus: EventBus) {
         if (vedtaksperioder.isEmpty()) return
         hvorfor.emitOverstyringIgangsattEvent(eventBus, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring, hendelse.metadata.meldingsreferanseId)
     }
 
-
     private sealed interface RevurderingÅrsak {
-
-        fun emitOverstyringIgangsattEvent(eventBus: EventBus, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode, meldingsreferanseId: MeldingsreferanseId) {
+        fun emitOverstyringIgangsattEvent(
+            eventBus: EventBus,
+            vedtaksperioder: List<VedtaksperiodeData>,
+            skjæringstidspunkt: LocalDate,
+            periodeForEndring: Periode,
+            meldingsreferanseId: MeldingsreferanseId,
+        ) {
             eventBus.emitOverstyringIgangsattEvent(
                 EventSubscription.OverstyringIgangsatt(
                     årsak = navn(),
                     berørtePerioder = vedtaksperioder,
                     skjæringstidspunkt = skjæringstidspunkt,
                     periodeForEndring = periodeForEndring,
-                    meldingsreferanseId = meldingsreferanseId.id
-                )
+                    meldingsreferanseId = meldingsreferanseId.id,
+                ),
             )
         }
 
@@ -180,8 +293,8 @@ class Revurderingseventyr private constructor(
                 vedtaksperioder: List<VedtaksperiodeData>,
                 skjæringstidspunkt: LocalDate,
                 periodeForEndring: Periode,
-                meldingsreferanseId: MeldingsreferanseId
-            ) { /* trenger ikke fortelle om en reberegning */
+                meldingsreferanseId: MeldingsreferanseId,
+            ) { // trenger ikke fortelle om en reberegning
             }
 
             override fun navn() = "REBEREGNING"

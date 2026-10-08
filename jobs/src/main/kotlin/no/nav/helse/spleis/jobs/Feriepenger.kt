@@ -8,13 +8,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Month
-import java.time.Year
-import java.util.UUID
-import kotlin.collections.component1
-import kotlin.collections.component2
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
@@ -22,13 +15,28 @@ import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.serde.SerialisertPerson
 import org.apache.kafka.clients.producer.ProducerRecord
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.Year
+import java.util.UUID
+import kotlin.collections.component1
+import kotlin.collections.component2
 
-private val objectMapper: ObjectMapper = jacksonObjectMapper()
-    .registerModule(JavaTimeModule())
-    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+private val objectMapper: ObjectMapper =
+    jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-fun startFeriepenger(factory: ConsumerProducerFactory, arbeidId: String, datoForSisteFeriepengekjøringIInfotrygd: LocalDate, opptjeningsår: Year, antallPersonerOmGangen: Int = 10, dryrun: Boolean = true) {
+fun startFeriepenger(
+    factory: ConsumerProducerFactory,
+    arbeidId: String,
+    datoForSisteFeriepengekjøringIInfotrygd: LocalDate,
+    opptjeningsår: Year,
+    antallPersonerOmGangen: Int = 10,
+    dryrun: Boolean = true,
+) {
     sikkerlogg.info("Feriepengejobb starter med arbeidId=$arbeidId, datoForSisteFeriepengekjøringIInfotrygd=$datoForSisteFeriepengekjøringIInfotrygd, opptjeningsår=${opptjeningsår.value} og dryrun=$dryrun")
     factory.createProducer().use { producer ->
         opprettOgUtførArbeid(arbeidId, size = antallPersonerOmGangen) { session, fnr ->
@@ -52,43 +60,38 @@ fun startFeriepenger(factory: ConsumerProducerFactory, arbeidId: String, datoFor
     sikkerlogg.info("Feriepengejobb ferdig med arbeidId=$arbeidId, datoForSisteFeriepengekjøringIInfotrygd=$datoForSisteFeriepengekjøringIInfotrygd, opptjeningsår=${opptjeningsår.value} og dryrun=$dryrun")
 }
 
-private fun PersonInnDto.potensiellFeriepengekjøring(opptjeningsår: Year): Boolean {
-    return arbeidsgivere.any { arbeidsgiver ->
+private fun PersonInnDto.potensiellFeriepengekjøring(opptjeningsår: Year): Boolean =
+    arbeidsgivere.any { arbeidsgiver ->
         arbeidsgiver.harAktivUtbetalingIOpptjeningsår(opptjeningsår) || arbeidsgiver.harBeregnetFeriepengerTidligere(opptjeningsår)
     }
-}
 
-private fun ArbeidsgiverInnDto.harAktivUtbetalingIOpptjeningsår(opptjeningsår: Year): Boolean {
-    return this.utbetalinger.aktive().any { utbetaling ->
+private fun ArbeidsgiverInnDto.harAktivUtbetalingIOpptjeningsår(opptjeningsår: Year): Boolean =
+    this.utbetalinger.aktive().any { utbetaling ->
         utbetaling.arbeidsgiverOppdrag.harUtbetalt(opptjeningsår) || utbetaling.personOppdrag.harUtbetalt(opptjeningsår)
     }
-}
 
-private fun ArbeidsgiverInnDto.harBeregnetFeriepengerTidligere(opptjeningsår: Year): Boolean {
-    return this.feriepengeutbetalinger.any { utbetaling ->
+private fun ArbeidsgiverInnDto.harBeregnetFeriepengerTidligere(opptjeningsår: Year): Boolean =
+    this.feriepengeutbetalinger.any { utbetaling ->
         utbetaling.feriepengeberegner.opptjeningsår == opptjeningsår
     }
-}
 
-private fun List<UtbetalingInnDto>.aktive(): List<UtbetalingInnDto> {
-    return this
+private fun List<UtbetalingInnDto>.aktive(): List<UtbetalingInnDto> =
+    this
         .filterNot { it.tilstand in setOf(UtbetalingTilstandDto.FORKASTET, UtbetalingTilstandDto.NY, UtbetalingTilstandDto.IKKE_GODKJENT, UtbetalingTilstandDto.IKKE_UTBETALT) }
         .groupBy { it.korrelasjonsId }
         .map { (_, utbetalinger) -> utbetalinger.maxBy { it.tidsstempel } }
         .filterNot { utbetaling -> utbetaling.tilstand == UtbetalingTilstandDto.ANNULLERT }
-}
 
-private fun OppdragInnDto.harUtbetalt(opptjeningsår: Year): Boolean {
-    return linjer.any { linje ->
+private fun OppdragInnDto.harUtbetalt(opptjeningsår: Year): Boolean =
+    linjer.any { linje ->
         linje.datoStatusFom == null && opptjeningsår.value in linje.fom.year..linje.tom.year
     }
-}
 
 @JsonIgnoreProperties(value = ["opptjeningsår", "datoForSisteFeriepengekjøringIInfotrygd"])
 data class SykepengehistorikkForFeriepenger(
     val fødselsnummer: String,
     val opptjeningsår: Year,
-    val datoForSisteFeriepengekjøringIInfotrygd: LocalDate
+    val datoForSisteFeriepengekjøringIInfotrygd: LocalDate,
 ) {
     @JsonProperty("@event_name")
     val eventName: String = "behov"
@@ -100,15 +103,15 @@ data class SykepengehistorikkForFeriepenger(
     val opprettet: LocalDateTime = LocalDateTime.now()
 
     @JsonProperty("@behov")
-    val behov=  listOf("SykepengehistorikkForFeriepenger")
+    val behov = listOf("SykepengehistorikkForFeriepenger")
 
     @JsonProperty("SykepengehistorikkForFeriepenger")
-    val behovdetaljer = mapOf(
-        "historikkFom" to opptjeningsår.atMonth(Month.JANUARY).atDay(1),
-        "historikkTom" to opptjeningsår.atMonth(Month.DECEMBER).atDay(31),
-        "datoForSisteFeriepengekjøringIInfotrygd" to datoForSisteFeriepengekjøringIInfotrygd
-    )
+    val behovdetaljer =
+        mapOf(
+            "historikkFom" to opptjeningsår.atMonth(Month.JANUARY).atDay(1),
+            "historikkTom" to opptjeningsår.atMonth(Month.DECEMBER).atDay(31),
+            "datoForSisteFeriepengekjøringIInfotrygd" to datoForSisteFeriepengekjøringIInfotrygd,
+        )
 }
 
-fun SykepengehistorikkForFeriepenger.tilJson() =
-    objectMapper.writeValueAsString(this)
+fun SykepengehistorikkForFeriepenger.tilJson() = objectMapper.writeValueAsString(this)

@@ -22,10 +22,11 @@ class DatabaseContainer(
     postgresVersjon: Int = 17,
     maxHikariPoolSize: Int = 8,
 ) {
-    private val postgres = PostgreSQLContainer("postgres:$postgresVersjon")
-        .withReuse(true)
-        .withLabel("app-navn", appnavn)
-        .apply { start() }
+    private val postgres =
+        PostgreSQLContainer("postgres:$postgresVersjon")
+            .withReuse(true)
+            .withLabel("app-navn", appnavn)
+            .apply { start() }
 
     private val dataSource: HikariDataSource by lazy {
         HikariDataSource(
@@ -35,14 +36,15 @@ class DatabaseContainer(
                 username = postgres.username
                 password = postgres.password
                 maximumPoolSize = maxHikariPoolSize
-            }
+            },
         )
     }
 
     private val delt by lazy { TestDataSource(dataSource) }
 
     init {
-        Flyway.configure()
+        Flyway
+            .configure()
             .dataSource(dataSource)
             .lockRetryCount(-1)
             .load()

@@ -9,7 +9,7 @@ import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 
 internal class OverstyrTidlinjeRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("overstyr_tidslinje")
     override val riverName = "Overstyr tidslinje"
@@ -25,10 +25,12 @@ internal class OverstyrTidlinjeRiver(
         message.interestedIn("yrkesaktivitetstype")
     }
 
-    override fun createMessage(packet: JsonMessage) = OverstyrTidslinjeMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        OverstyrTidslinjeMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

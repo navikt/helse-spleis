@@ -8,29 +8,35 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
-import java.time.LocalDateTime
 import no.nav.helse.spleis.utboks.Utboks.Companion.fireAndForget
 import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import java.time.LocalDateTime
 
 internal class MonitoreringRiver(
     rapidsConnection: RapidsConnection,
-    vararg sjekker: Sjekk
+    vararg sjekker: Sjekk,
 ) : River.PacketListener {
     private val sjekker = sjekker.toList()
 
     init {
-        River(rapidsConnection).apply {
-            precondition { it.requireValue("@event_name", "minutt") }
-            validate {
-                it.require("@opprettet") { node -> LocalDateTime.parse(node.asText()) }
-                it.requireKey("system_participating_services")
-            }
-        }.register(this)
+        River(rapidsConnection)
+            .apply {
+                precondition { it.requireValue("@event_name", "minutt") }
+                validate {
+                    it.require("@opprettet") { node -> LocalDateTime.parse(node.asText()) }
+                    it.requireKey("system_participating_services")
+                }
+            }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+        metadata: MessageMetadata,
+        meterRegistry: MeterRegistry,
+    ) {
         val nå = packet["@opprettet"].asLocalDateTime()
         val systemParticipatingServices = packet["system_participating_services"]
         try {
@@ -48,13 +54,19 @@ internal class MonitoreringRiver(
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        private fun slackmelding(melding: String, level: Level, systemParticipatingServices: JsonNode) = UtgåendeMelding.nyRapidmelding(
+
+        private fun slackmelding(
+            melding: String,
+            level: Level,
+            systemParticipatingServices: JsonNode,
+        ) = UtgåendeMelding.nyRapidmelding(
             eventName = "slackmelding",
-            innhold = mapOf(
-                "melding" to melding,
-                "level" to level,
-                "system_participating_services" to systemParticipatingServices
-            )
+            innhold =
+                mapOf(
+                    "melding" to melding,
+                    "level" to level,
+                    "system_participating_services" to systemParticipatingServices,
+                ),
         )
     }
 }

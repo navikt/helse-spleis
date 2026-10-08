@@ -3,19 +3,8 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
-import no.nav.helse.sykdomstidslinje.Dag.Feriedag
-import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
-import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.testhelpers.betalingTil
-import no.nav.helse.testhelpers.ferieTil
-import no.nav.helse.testhelpers.jobbTil
-import no.nav.helse.testhelpers.merge
-import no.nav.helse.testhelpers.sykTil
+import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -48,11 +37,12 @@ internal class OverlapMergeTest {
 
     @Test
     fun `inntektsmelding uten ferie`() {
-        val actual = listOf(
-            1.januar jobbTil 17.januar,
-            2.januar betalingTil 4.januar,
-            7.januar betalingTil 11.januar
-        ).merge(testBeste)
+        val actual =
+            listOf(
+                1.januar jobbTil 17.januar,
+                2.januar betalingTil 4.januar,
+                7.januar betalingTil 11.januar,
+            ).merge(testBeste)
 
         assertEquals(Periode(1.januar, 17.januar), actual.periode())
         assertEquals(3 + 4, actual.filterIsInstance<Arbeidsgiverdag>().size)
@@ -63,12 +53,13 @@ internal class OverlapMergeTest {
 
     @Test
     fun `inntektsmelding med ferie`() {
-        val actual = listOf(
-            1.januar jobbTil 17.januar,
-            2.januar betalingTil 4.januar,
-            7.januar betalingTil 11.januar,
-            1.januar ferieTil 3.januar
-        ).merge(testBeste)
+        val actual =
+            listOf(
+                1.januar jobbTil 17.januar,
+                2.januar betalingTil 4.januar,
+                7.januar betalingTil 11.januar,
+                1.januar ferieTil 3.januar,
+            ).merge(testBeste)
 
         assertEquals(Periode(1.januar, 17.januar), actual.periode())
         assertEquals(3 + 4, actual.filterIsInstance<Arbeidsgiverdag>().size)
@@ -80,12 +71,13 @@ internal class OverlapMergeTest {
 
     @Test
     fun `inntektsmelding med ferie i helg`() {
-        val actual = listOf(
-            1.januar jobbTil 17.januar,
-            2.januar betalingTil 4.januar,
-            7.januar betalingTil 11.januar,
-            5.januar ferieTil 8.januar
-        ).merge(testBeste)
+        val actual =
+            listOf(
+                1.januar jobbTil 17.januar,
+                2.januar betalingTil 4.januar,
+                7.januar betalingTil 11.januar,
+                5.januar ferieTil 8.januar,
+            ).merge(testBeste)
 
         assertEquals(Periode(1.januar, 17.januar), actual.periode())
         assertEquals(3 + 4, actual.filterIsInstance<Arbeidsgiverdag>().size)
@@ -97,10 +89,11 @@ internal class OverlapMergeTest {
 
     @Test
     fun `gradert sykedag med ferie`() {
-        tidslinje = listOf(
-            1.januar sykTil 1.januar grad 50,
-            5.januar ferieTil 8.januar
-        ).merge(testBeste)
+        tidslinje =
+            listOf(
+                1.januar sykTil 1.januar grad 50,
+                5.januar ferieTil 8.januar,
+            ).merge(testBeste)
 
         assertEquals(Periode(1.januar, 8.januar), tidslinje.periode())
         assertEquals(4, tidslinje.filterIsInstance<Feriedag>().size)

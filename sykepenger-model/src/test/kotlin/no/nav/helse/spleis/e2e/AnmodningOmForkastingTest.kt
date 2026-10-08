@@ -1,35 +1,24 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.*
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.mai
-import no.nav.helse.mars
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class AnmodningOmForkastingTest : AbstractDslTest() {
-
     @Test
     fun `kan forkaste auu når force-flagget er satt`() {
         a1 {
@@ -140,9 +129,11 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
     fun `forkasting uten force påvirker ikke vedtaksperioder som ikke kan forkastes`() {
         medJSONPerson("/personer/auu-med-utbetalt-vedtak-etter.json", 328)
         a1 {
-            håndterOverstyrTidslinje((1.januar til 16.januar).map {
-                ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100)
-            })
+            håndterOverstyrTidslinje(
+                (1.januar til 16.januar).map {
+                    ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100)
+                },
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
@@ -162,9 +153,11 @@ internal class AnmodningOmForkastingTest : AbstractDslTest() {
     fun `forkasting med force påvirker bare vedtaksperioden som forces`() {
         medJSONPerson("/personer/auu-med-utbetalt-vedtak-etter.json", 328)
         a1 {
-            håndterOverstyrTidslinje((1.januar til 16.januar).map {
-                ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100)
-            })
+            håndterOverstyrTidslinje(
+                (1.januar til 16.januar).map {
+                    ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100)
+                },
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -13,23 +12,15 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : AbstractDslTest() {
-
     @Test
     fun `AUU med infotrygdperiode rett før skal forkastes`() {
         a1 {
@@ -177,12 +168,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
 
             håndterUtbetalingshistorikkEtterInfotrygdendring(
                 ArbeidsgiverUtbetalingsperiode(a2, 1.mars, 5.mars),
-                ArbeidsgiverUtbetalingsperiode(a1, 1.mai, 5.mai)
+                ArbeidsgiverUtbetalingsperiode(a1, 1.mai, 5.mai),
             )
             assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
 
             assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
-
         }
         a2 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -190,7 +180,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         }
     }
 
-    private fun assertOverlappendeInfotrygdutbetalingIAUU(vedtaksperiodeId: UUID, tilstand: String) {
+    private fun assertOverlappendeInfotrygdutbetalingIAUU(
+        vedtaksperiodeId: UUID,
+        tilstand: String,
+    ) {
         a1 {
             val overlapp = observatør.overlappendeInfotrygdperioder.last()
             assertEquals(vedtaksperiodeId, overlapp.overlappendeInfotrygdperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }?.vedtaksperiodeId)

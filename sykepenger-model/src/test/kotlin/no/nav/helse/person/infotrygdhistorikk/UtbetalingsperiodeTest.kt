@@ -5,10 +5,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.TestEvent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingsperiodeTest {
@@ -41,12 +38,18 @@ internal class UtbetalingsperiodeTest {
         assertEquals(utbetalingAG1.hashCode(), utbetalingAG1.hashCode())
     }
 
-    private fun assertEquals(one: Infotrygdperiode, two: Infotrygdperiode) {
+    private fun assertEquals(
+        one: Infotrygdperiode,
+        two: Infotrygdperiode,
+    ) {
         assertTrue(one.funksjoneltLik(two))
         assertTrue(two.funksjoneltLik(one))
     }
 
-    private fun assertNotEquals(one: Infotrygdperiode, two: Infotrygdperiode) {
+    private fun assertNotEquals(
+        one: Infotrygdperiode,
+        two: Infotrygdperiode,
+    ) {
         assertFalse(one.funksjoneltLik(two))
         assertFalse(two.funksjoneltLik(one))
     }

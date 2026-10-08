@@ -5,17 +5,12 @@ import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.*
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Begrunnelse.LovligFravaer
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -23,16 +18,16 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
-
     @Test
     fun `mottar selvbestemte arbeidsgiveropplysninger når vi ikke trenger en`() {
         a1 {
             håndterSøknad(1.januar til 16.januar)
-            håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode,
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                1.vedtaksperiode,
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 RedusertUtbetaltBeløpIArbeidsgiverperioden(LovligFravaer),
                 OppgittInntekt(INNTEKT * 1.25),
-                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList(), refusjonskravGyldigFra = null)
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList(), refusjonskravGyldigFra = null),
             )
             assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_8)
         }
@@ -42,7 +37,7 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `selvbestemt inntektsmelding som kvitterer ut egenmeldingsdager`() {
         a1 {
             håndterSøknad(5.januar til 31.januar, egenmeldinger = listOf(1.januar til 4.januar))
-            //simulerer at det har gått 3 måneder og vi ikke har fått inntektsmelding
+            // simulerer at det har gått 3 måneder og vi ikke har fått inntektsmelding
             håndterPåminnelse(1.vedtaksperiode, tilstand = TilstandType.AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -55,7 +50,7 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(beløp = INNTEKT, endringer = emptyList(), refusjonskravGyldigFra = null)
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = INNTEKT, endringer = emptyList(), refusjonskravGyldigFra = null),
             )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar), emptyList())
             assertVarsler(1.vedtaksperiode, RV_AO_3, Varselkode.RV_IV_10)
@@ -71,16 +66,19 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittArbeidgiverperiode(
                     listOf(
                         5.januar til 18.januar,
-                        2.januar til 3.januar
-                    )
+                        2.januar til 3.januar,
+                    ),
                 ),
                 OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(beløp = INNTEKT, endringer = emptyList(), refusjonskravGyldigFra = null)
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = INNTEKT, endringer = emptyList(), refusjonskravGyldigFra = null),
             )
-            assertEquals(listOf(
-                2.januar til 3.januar,
-                5.januar til 16.januar
-            ), inspektør.venteperiode(1.vedtaksperiode))
+            assertEquals(
+                listOf(
+                    2.januar til 3.januar,
+                    5.januar til 16.januar,
+                ),
+                inspektør.venteperiode(1.vedtaksperiode),
+            )
 
             assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
         }
@@ -90,9 +88,10 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `mottar selvbestemte arbeidsgiveropplysninger som korrigerer eksisterende`() {
         a1 {
             nyttVedtak(januar)
-            håndterSelvbestemtArbeidsgiveropplysninger(1.vedtaksperiode,
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                1.vedtaksperiode,
                 OppgittInntekt(INNTEKT * 1.25),
-                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList(), refusjonskravGyldigFra = null)
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList(), refusjonskravGyldigFra = null),
             )
             assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_4)
         }
@@ -107,7 +106,7 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 OppgittInntekt(INNTEKT),
                 IkkeUtbetaltArbeidsgiverperiode(begrunnelse = Arbeidsgiveropplysning.Begrunnelse.ManglerOpptjening),
-                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList(), refusjonskravGyldigFra = null)
+                Arbeidsgiveropplysning.OppgittRefusjon(beløp = 0.månedlig, endringer = emptyList(), refusjonskravGyldigFra = null),
             )
             assertVarsler(1.vedtaksperiode, RV_AO_3, RV_IM_8)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING)

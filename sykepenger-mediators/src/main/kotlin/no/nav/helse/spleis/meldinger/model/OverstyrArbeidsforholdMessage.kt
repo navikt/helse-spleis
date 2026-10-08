@@ -7,29 +7,34 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
-internal class OverstyrArbeidsforholdMessage(val packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
-
+internal class OverstyrArbeidsforholdMessage(
+    val packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : HendelseMessage(packet) {
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
-    private val overstyrteArbeidsforhold = packet["overstyrteArbeidsforhold"]
-        .map {
-            OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
-                orgnummer = it["orgnummer"].asText(),
-                deaktivert = it["deaktivert"].asBoolean(),
-                forklaring = it["forklaring"].asText()
-            )
-        }
+    private val overstyrteArbeidsforhold =
+        packet["overstyrteArbeidsforhold"]
+            .map {
+                OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
+                    orgnummer = it["orgnummer"].asText(),
+                    deaktivert = it["deaktivert"].asBoolean(),
+                    forklaring = it["forklaring"].asText(),
+                )
+            }
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         mediator.behandle(
             this,
             OverstyrArbeidsforhold(
                 meldingsreferanseId = meldingsporing.id,
                 skjæringstidspunkt = skjæringstidspunkt,
                 overstyrteArbeidsforhold = overstyrteArbeidsforhold,
-                opprettet = opprettet
+                opprettet = opprettet,
             ),
-            context
+            context,
         )
     }
-
 }

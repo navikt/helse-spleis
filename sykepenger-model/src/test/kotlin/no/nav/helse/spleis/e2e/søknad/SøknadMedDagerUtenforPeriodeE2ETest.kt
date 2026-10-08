@@ -5,25 +5,13 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mars
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -31,11 +19,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SøknadMedDagerUtenforPeriodeE2ETest : AbstractDslTest() {
-
     @Test
     fun `eldgammel ferieperiode før sykdomsperioden klippes bort`() {
         a1 {
-
             håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars))
             håndterSøknad(
                 Sykdom(1.mars, 28.mars, 100.prosent),
@@ -62,7 +48,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
@@ -94,7 +80,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest : AbstractDslTest() {
                 Sykdom(1.februar, 28.februar, 100.prosent),
                 Ferie(1.januar, 16.januar),
                 Permisjon(17.januar, 25.januar),
-                Ferie(26.januar, 31.januar)
+                Ferie(26.januar, 31.januar),
             )
 
             assertEquals(februar, inspektør.periode(1.vedtaksperiode))
@@ -110,7 +96,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest : AbstractDslTest() {
                 Sykdom(1.februar, 28.februar, 100.prosent),
                 Ferie(1.januar, 16.januar),
                 Permisjon(17.januar, 25.januar),
-                Ferie(26.januar, 2.februar)
+                Ferie(26.januar, 2.februar),
             )
 
             assertEquals(februar, inspektør.periode(1.vedtaksperiode))

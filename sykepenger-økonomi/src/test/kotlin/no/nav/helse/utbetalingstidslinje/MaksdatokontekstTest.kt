@@ -1,7 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
-import java.time.LocalDate.EPOCH
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.forrigeDag
@@ -10,54 +8,67 @@ import no.nav.helse.september
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDate.EPOCH
 
 internal class MaksdatokontekstTest {
-
     @Test
     fun tilbakestill() {
         val kontekst = Maksdatokontekst.tomKontekst(NormalArbeidstaker, EPOCH)
-        assertEquals(kontekst, kontekst
-            .inkrementer(1.januar)
-            .medOppholdsdag(2.januar)
-            .medAvslåttDag(3.januar, Begrunnelse.SykepengedagerOppbrukt)
-            .tilbakestill())
+        assertEquals(
+            kontekst,
+            kontekst
+                .inkrementer(1.januar)
+                .medOppholdsdag(2.januar)
+                .medAvslåttDag(3.januar, Begrunnelse.SykepengedagerOppbrukt)
+                .tilbakestill(),
+        )
     }
 
     @Test
     fun inkrementer() {
         val kontekst = Maksdatokontekst.tomKontekst(NormalArbeidstaker, EPOCH)
-        val forventet = kontekst.copy(
-            vurdertTilOgMed = 3.januar,
-            betalteDager = setOf(1.januar, 3.januar)
+        val forventet =
+            kontekst.copy(
+                vurdertTilOgMed = 3.januar,
+                betalteDager = setOf(1.januar, 3.januar),
+            )
+        assertEquals(
+            forventet,
+            kontekst
+                .inkrementer(1.januar)
+                .medOppholdsdag(2.januar)
+                .inkrementer(3.januar),
         )
-        assertEquals(forventet, kontekst
-            .inkrementer(1.januar)
-            .medOppholdsdag(2.januar)
-            .inkrementer(3.januar))
     }
 
     @Test
     fun `forskyver treårsvindu`() {
         val kontekst = Maksdatokontekst.tomKontekst(NormalArbeidstaker, EPOCH)
-        val forventet = kontekst.copy(
-            vurdertTilOgMed = 3.januar,
-            betalteDager = setOf(2.januar, 3.januar),
-            startdatoTreårsvindu = 2.januar
+        val forventet =
+            kontekst.copy(
+                vurdertTilOgMed = 3.januar,
+                betalteDager = setOf(2.januar, 3.januar),
+                startdatoTreårsvindu = 2.januar,
+            )
+        assertEquals(
+            forventet,
+            kontekst
+                .inkrementer(1.januar)
+                .inkrementer(2.januar)
+                .dekrementer(3.januar, 2.januar),
         )
-        assertEquals(forventet, kontekst
-            .inkrementer(1.januar)
-            .inkrementer(2.januar)
-            .dekrementer(3.januar, 2.januar))
     }
 
     @Test
     fun `gjenstående dager`() {
         val sekstisyvårsdagen = 2.januar
-        val kontekst = Maksdatokontekst
-            .tomKontekst(NormalArbeidstaker, sekstisyvårsdagen)
-            .nyMaksdatosak(1.januar, EPOCH)
-            .inkrementer(2.januar)
-            .inkrementer(3.januar)
+        val kontekst =
+            Maksdatokontekst
+                .tomKontekst(NormalArbeidstaker, sekstisyvårsdagen)
+                .nyMaksdatosak(1.januar, EPOCH)
+                .inkrementer(2.januar)
+                .inkrementer(3.januar)
 
         assertEquals(245, kontekst.gjenståendeDagerUnder67År)
         assertEquals(59, kontekst.gjenståendeDagerOver67År)
@@ -111,23 +122,30 @@ internal class MaksdatokontekstTest {
         assertEquals(dødsdato, kontekst.beregnMaksdato(syttiårsdagen, dødsdato).maksdato)
     }
 
-    private fun medBetalteDager(antallBetalteDager: Int, sekstisyvårsdagen: LocalDate, sisteVurderteDag: LocalDate = 1.januar, sisteBetalteDag: LocalDate = sisteVurderteDag): Maksdatokontekst {
-        val tomKontekst = Maksdatokontekst
-            .tomKontekst(NormalArbeidstaker, sekstisyvårsdagen)
+    private fun medBetalteDager(
+        antallBetalteDager: Int,
+        sekstisyvårsdagen: LocalDate,
+        sisteVurderteDag: LocalDate = 1.januar,
+        sisteBetalteDag: LocalDate = sisteVurderteDag,
+    ): Maksdatokontekst {
+        val tomKontekst =
+            Maksdatokontekst
+                .tomKontekst(NormalArbeidstaker, sekstisyvårsdagen)
         if (antallBetalteDager == 0) return tomKontekst.copy(vurdertTilOgMed = sisteVurderteDag)
-        val betalteDager = buildList {
-            var dag = sisteBetalteDag
-            while (size < antallBetalteDager) {
-                if (!dag.erHelg()) add(0, dag)
-                dag = dag.forrigeDag
+        val betalteDager =
+            buildList {
+                var dag = sisteBetalteDag
+                while (size < antallBetalteDager) {
+                    if (!dag.erHelg()) add(0, dag)
+                    dag = dag.forrigeDag
+                }
             }
-        }
         return tomKontekst
             .copy(
                 vurdertTilOgMed = sisteVurderteDag,
                 startdatoSykepengerettighet = betalteDager.first(),
                 startdatoTreårsvindu = EPOCH,
-                betalteDager = betalteDager.toSet()
+                betalteDager = betalteDager.toSet(),
             )
     }
 }

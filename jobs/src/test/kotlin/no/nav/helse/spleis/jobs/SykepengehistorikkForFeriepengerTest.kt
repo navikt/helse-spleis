@@ -3,23 +3,23 @@ package no.nav.helse.spleis.jobs
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.util.*
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 
 class SykepengehistorikkForFeriepengerTest {
-
     @Test
     fun json() {
-        val event = SykepengehistorikkForFeriepenger(
-            fødselsnummer = "fnr",
-            opptjeningsår = Year.of(2020),
-            datoForSisteFeriepengekjøringIInfotrygd = LocalDate.of(2021, 5, 10)
-        )
+        val event =
+            SykepengehistorikkForFeriepenger(
+                fødselsnummer = "fnr",
+                opptjeningsår = Year.of(2020),
+                datoForSisteFeriepengekjøringIInfotrygd = LocalDate.of(2021, 5, 10),
+            )
         val result = event.tilJson()
         val node = jacksonObjectMapper().readTree(result)
 
@@ -33,7 +33,7 @@ class SykepengehistorikkForFeriepengerTest {
 
         assertEquals(
             setOf("fødselsnummer", "@event_name", "@id", "@opprettet", "@behov", "SykepengehistorikkForFeriepenger"),
-            (node as ObjectNode).fieldNames().asSequence().toSet()
+            (node as ObjectNode).fieldNames().asSequence().toSet(),
         )
     }
 }

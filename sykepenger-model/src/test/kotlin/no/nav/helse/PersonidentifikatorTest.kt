@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 class PersonidentifikatorTest {
-
     @Test
     fun `to instanser av det samme fødselsnummeret er like`() {
         listOf("01010112345", "01030154321", "10101012345", "31122199999").forEach {

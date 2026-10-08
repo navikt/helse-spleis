@@ -1,14 +1,17 @@
 package no.nav.helse.spleis.mediator.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import java.time.LocalDateTime
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.UtbetalingshistorikkForFeriepengerRiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 internal class UtbetalingshistorikkForFeriepengerRiverTest : RiverTest() {
-    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+    override fun river(
+        rapidsConnection: RapidsConnection,
+        mediator: IMessageMediator,
+    ) {
         UtbetalingshistorikkForFeriepengerRiver(rapidsConnection, mediator)
     }
 

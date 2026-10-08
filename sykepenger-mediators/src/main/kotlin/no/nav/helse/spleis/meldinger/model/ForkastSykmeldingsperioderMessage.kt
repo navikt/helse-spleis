@@ -9,21 +9,28 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
-internal class ForkastSykmeldingsperioderMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
-
+internal class ForkastSykmeldingsperioderMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : HendelseMessage(packet) {
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val periode = packet["fom"].asLocalDate() til packet["tom"].asLocalDate()
 
     private val forkastSykmeldingsperioder
-        get() = ForkastSykmeldingsperioder(
-            meldingsreferanseId = meldingsporing.id,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
-                organisasjonsnummer = organisasjonsnummer
-            ),
-            periode = periode
-        )
+        get() =
+            ForkastSykmeldingsperioder(
+                meldingsreferanseId = meldingsporing.id,
+                behandlingsporing =
+                    Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                        organisasjonsnummer = organisasjonsnummer,
+                    ),
+                periode = periode,
+            )
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         mediator.behandle(this, forkastSykmeldingsperioder, context)
     }
 }

@@ -9,7 +9,10 @@ import org.slf4j.LoggerFactory
 internal class V330EpochSomArbeidsgiverperiodeForInfotrygdsaker : JsonMigration(330) {
     override val description = "Legger til EPOCH som Arbeidsgiverperiode på siste behandling på alle Infotrygd-saker"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    ) {
         val fnr = jsonNode.path("fødselsnummer").asText()
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             if (arbeidsgiver.path("yrkesaktivitetstype").asText() == "ARBEIDSTAKER") {
@@ -20,14 +23,23 @@ internal class V330EpochSomArbeidsgiverperiodeForInfotrygdsaker : JsonMigration(
         }
     }
 
-    private fun migrerVedtaksperiode(vedtaksperiode: JsonNode, fnr: String) {
+    private fun migrerVedtaksperiode(
+        vedtaksperiode: JsonNode,
+        fnr: String,
+    ) {
         val vedtaksperiodeId = vedtaksperiode.path("id").asText()
-        val harVærtFattetVedtakPå = vedtaksperiode.path("behandlinger").any { behandling ->
-            behandling.path("tilstand").asText() == "VEDTAK_IVERKSATT"
-        }
-        val harAldriHattArbeidsgiverperiode = vedtaksperiode.path("behandlinger").none { behandling ->
-            behandling.path("endringer").last().path("arbeidsgiverperioder").size() > 0
-        }
+        val harVærtFattetVedtakPå =
+            vedtaksperiode.path("behandlinger").any { behandling ->
+                behandling.path("tilstand").asText() == "VEDTAK_IVERKSATT"
+            }
+        val harAldriHattArbeidsgiverperiode =
+            vedtaksperiode.path("behandlinger").none { behandling ->
+                behandling
+                    .path("endringer")
+                    .last()
+                    .path("arbeidsgiverperioder")
+                    .size() > 0
+            }
 
         val sisteBehandling = vedtaksperiode.path("behandlinger").last()
         val sisteEndring = sisteBehandling.path("endringer").last()

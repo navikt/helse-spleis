@@ -8,11 +8,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ToggleTest {
-
     private lateinit var toggle: Toggle
 
-    private fun prepareToggle(enabled: Boolean) =
-        fraEnv("FINNES_IKKE", enabled).also { this.toggle = it }
+    private fun prepareToggle(enabled: Boolean) = fraEnv("FINNES_IKKE", enabled).also { this.toggle = it }
 
     @Test
     fun `Initial toggle state cannot be removed`() {

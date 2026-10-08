@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.util.UUID
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.testhelpers.AVV
@@ -11,6 +10,7 @@ import no.nav.helse.utbetalingstidslinje.MinsteinntektfilterTest.Minsteinntekt.O
 import no.nav.helse.utbetalingstidslinje.MinsteinntektfilterTest.Minsteinntekt.OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class MinsteinntektfilterTest {
     private companion object {
@@ -51,44 +51,53 @@ class MinsteinntektfilterTest {
     private enum class Minsteinntekt {
         OPPFYLLER_KRAV_FØR_OG_ETTER_67,
         OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER,
-        OPPFYLLER_IKKE_KRAV_TIL_67
+        OPPFYLLER_IKKE_KRAV_TIL_67,
     }
 
     private fun avvisteDager(
         tidslinjer: List<Utbetalingstidslinje>,
-        minsteinntektsituasjon: Minsteinntekt
+        minsteinntektsituasjon: Minsteinntekt,
     ): List<Utbetalingsdag.AvvistDag> {
-        val erUnderMinsteinntektskravTilFylte67 = when (minsteinntektsituasjon) {
-            OPPFYLLER_KRAV_FØR_OG_ETTER_67,
-            OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER -> false
+        val erUnderMinsteinntektskravTilFylte67 =
+            when (minsteinntektsituasjon) {
+                OPPFYLLER_KRAV_FØR_OG_ETTER_67,
+                OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER,
+                -> false
 
-            OPPFYLLER_IKKE_KRAV_TIL_67 -> true
-        }
-        val erUnderMinsteinntektEtterFylte67 = when (minsteinntektsituasjon) {
-            OPPFYLLER_KRAV_FØR_OG_ETTER_67 -> false
-            OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER,
-            OPPFYLLER_IKKE_KRAV_TIL_67 -> true
-        }
-        val arbeidsgivere = tidslinjer.mapIndexed { index, it ->
-            Arbeidsgiverberegning(
-                inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
-                vedtaksperioder = listOf(
-                    Vedtaksperiodeberegning(
-                        vedtaksperiodeId = UUID.randomUUID(),
-                        utbetalingstidslinje = it
-                    )
-                ),
-                ghostOgAndreInntektskilder = emptyList()
+                OPPFYLLER_IKKE_KRAV_TIL_67 -> true
+            }
+        val erUnderMinsteinntektEtterFylte67 =
+            when (minsteinntektsituasjon) {
+                OPPFYLLER_KRAV_FØR_OG_ETTER_67 -> false
+                OPPFYLLER_KRAV_TIL_67_MEN_IKKE_ETTER,
+                OPPFYLLER_IKKE_KRAV_TIL_67,
+                -> true
+            }
+        val arbeidsgivere =
+            tidslinjer.mapIndexed { index, it ->
+                Arbeidsgiverberegning(
+                    inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
+                    vedtaksperioder =
+                        listOf(
+                            Vedtaksperiodeberegning(
+                                vedtaksperiodeId = UUID.randomUUID(),
+                                utbetalingstidslinje = it,
+                            ),
+                        ),
+                    ghostOgAndreInntektskilder = emptyList(),
+                )
+            }
+
+        val avviste =
+            arbeidsgivere.avvisMinsteinntekt(
+                sekstisyvårsdagen = sekstisyvårsdagen,
+                erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
+                erUnderMinsteinntektEtterFylte67 = erUnderMinsteinntektEtterFylte67,
             )
-        }
-
-        val avviste = arbeidsgivere.avvisMinsteinntekt(
-            sekstisyvårsdagen = sekstisyvårsdagen,
-            erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
-            erUnderMinsteinntektEtterFylte67 = erUnderMinsteinntektEtterFylte67
-        )
         return avviste.flatMap {
-            it.vedtaksperioder.single().utbetalingstidslinje.inspektør.avvistedager
+            it.vedtaksperioder
+                .single()
+                .utbetalingstidslinje.inspektør.avvistedager
         }
     }
 }

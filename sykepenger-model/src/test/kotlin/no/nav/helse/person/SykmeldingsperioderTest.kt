@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
@@ -11,20 +10,18 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class SykmeldingsperioderTest {
+    private val hendelsefabrikk =
+        ArbeidsgiverHendelsefabrikk(
+            organisasjonsnummer = "ORGNUMMER",
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
+        )
 
-    private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-        organisasjonsnummer = "ORGNUMMER",
-        behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER")
-    )
-
-    private fun Sykmeldingsperioder.lagre(periode: Periode) =
-        lagre(hendelsefabrikk.lagSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive)), Aktivitetslogg())
+    private fun Sykmeldingsperioder.lagre(periode: Periode) = lagre(hendelsefabrikk.lagSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive)), Aktivitetslogg())
 
     @Test
     fun `Kan lagre Sykmeldingsperioder`() {

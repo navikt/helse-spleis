@@ -1,44 +1,31 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.august
-import no.nav.helse.den
+import no.nav.helse.*
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
-import no.nav.helse.fredag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.mandag
-import no.nav.helse.mars
-import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.september
+import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.til
-import no.nav.helse.torsdag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
-
     @Test
     fun `korrigert søknad som dekker deler av perioden`() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(
                 Sykdom(20.januar, 20.januar, 100.prosent),
-                Arbeid(20.januar, 20.januar)
+                Arbeid(20.januar, 20.januar),
             )
             assertEquals(listOf(21.januar, 1.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
             assertVarsel(Varselkode.RV_IV_11, 1.vedtaksperiode.filter())
@@ -52,7 +39,7 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
             håndterSøknad(mandag den 22.januar til 15.februar)
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(torsdag den 4.januar til fredag den 19.januar),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
             assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(listOf(4.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
@@ -69,12 +56,24 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
             håndterSøknad(Sykdom(15.februar, 28.februar, 100.prosent), egenmeldinger = listOf(5.februar til 5.februar))
             observatør.vedtaksperiodeVenter.last().let {
                 assertEquals("INNTEKTSMELDING", it.venterPå.venteårsak.hva)
-                assertEquals("SSHH SSSSSHH SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+                assertEquals(
+                    "SSHH SSSSSHH SSS",
+                    inspektør
+                        .vedtaksperioder(2.vedtaksperiode)
+                        .inspektør.sykdomstidslinje
+                        .toShortString(),
+                )
             }
 
             håndterSøknad(5.februar til 5.februar)
 
-            assertEquals("S", inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+            assertEquals(
+                "S",
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .inspektør.sykdomstidslinje
+                    .toShortString(),
+            )
             assertTilstand(3.vedtaksperiode, TilstandType.AVVENTER_INNTEKTSMELDING)
         }
     }
@@ -86,7 +85,13 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
             håndterSelvbestemtArbeidsgiveropplysninger(listOf(2.januar til 17.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
 
             observatør.vedtaksperiodeVenter.last().let {
-                assertEquals("UUUUGG UUUUUGG UUU???? ??????? ??????? ??????? ??????? ??????? ??????? ????SHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+                assertEquals(
+                    "UUUUGG UUUUUGG UUU???? ??????? ??????? ??????? ??????? ??????? ??????? ????SHH SSS",
+                    inspektør
+                        .vedtaksperioder(1.vedtaksperiode)
+                        .inspektør.sykdomstidslinje
+                        .toShortString(),
+                )
                 assertEquals("VILKÅRSPRØVING", it.venterPå.venteårsak.hva)
                 assertNull(it.venterPå.venteårsak.hvorfor)
             }
@@ -125,12 +130,24 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
             håndterSøknad(17.september til 19.september)
 
             assertEquals(17.september til 19.september, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
-            assertEquals("SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+            assertEquals(
+                "SSS",
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.sykdomstidslinje
+                    .toShortString(),
+            )
 
             håndterArbeidsgiveropplysninger(listOf(20.august til 4.september))
 
             assertEquals(4.september til 19.september, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
-            assertEquals("U????? ??????? SSS", inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.sykdomstidslinje.toShortString())
+            assertEquals(
+                "U????? ??????? SSS",
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.sykdomstidslinje
+                    .toShortString(),
+            )
             assertEquals(17.september, inspektør.vedtaksperioder(2.vedtaksperiode).skjæringstidspunkt)
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)

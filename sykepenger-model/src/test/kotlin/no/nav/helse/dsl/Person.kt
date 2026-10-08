@@ -1,9 +1,9 @@
 package no.nav.helse.dsl
 
-import java.time.format.DateTimeFormatter
 import no.nav.helse.Personidentifikator
 import no.nav.helse.februar
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import java.time.format.DateTimeFormatter
 
 val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
 

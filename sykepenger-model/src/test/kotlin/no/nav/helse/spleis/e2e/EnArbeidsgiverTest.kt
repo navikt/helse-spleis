@@ -1,57 +1,29 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.UUID
-import no.nav.helse.august
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.inspectors.inspektør
-import no.nav.helse.dsl.TestPerson
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.*
+import no.nav.helse.dsl.*
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mars
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import java.util.*
 
 internal class EnArbeidsgiverTest : AbstractDslTest() {
-
     @Test
     fun `Periode med AGP i snuten, etterfulgt av så mange arbeidsdager at det er ny AGP mot halen`() {
         a1 {
             håndterSøknad(25.juni til 5.juli)
             håndterSøknad(31.juli til 18.august)
             håndterArbeidsgiveropplysninger(
-                listOf(25.juni til 5.juli, 8.juli til 12.juli)
+                listOf(25.juni til 5.juli, 8.juli til 12.juli),
             )
 
             assertEquals(6.juli til 18.august, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
@@ -61,7 +33,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
 
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(25.juni til 5.juli, 8.juli til 12.juli),
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
             )
 
             assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
@@ -88,11 +60,8 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
         }
     }
 
-
-
-
     @Test
-    fun `Arbeid gjenopptatt i minst 16 dager fører til at vi bygger videre på feil utbetaling`()  {
+    fun `Arbeid gjenopptatt i minst 16 dager fører til at vi bygger videre på feil utbetaling`() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(Sykdom(1.februar, 18.februar, 100.prosent), Arbeid(3.februar, 18.februar))
@@ -103,7 +72,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterSøknad(19.februar til 19.mars)
             håndterArbeidsgiveropplysninger(
                 listOf(19.februar til 6.mars),
-                vedtaksperiodeId = 3.vedtaksperiode
+                vedtaksperiodeId = 3.vedtaksperiode,
             )
 
             håndterVilkårsgrunnlag(3.vedtaksperiode)
@@ -144,7 +113,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
 
             utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode)
@@ -158,7 +127,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -186,7 +155,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -221,7 +190,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterSøknad(mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
 
             assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -229,7 +198,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
                 2.vedtaksperiode,
                 START,
                 AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE
+                AVVENTER_BLOKKERENDE_PERIODE,
             )
         }
     }
@@ -244,12 +213,12 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterSøknad(mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
 
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -287,7 +256,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
-                listOf(1.januar til 16.januar)
+                listOf(1.januar til 16.januar),
             )
             håndterSøknad(januar)
             assertTilstander(
@@ -296,7 +265,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_VILKÅRSPRØVING
+                AVVENTER_VILKÅRSPRØVING,
             )
         }
     }
@@ -333,7 +302,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
-                listOf(1.januar til 16.januar)
+                listOf(1.januar til 16.januar),
             )
 
             håndterSøknad(februar)
@@ -463,13 +432,13 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
     @Test
     fun `Kort periode med en tidligere kort periode som har lagret inntekt for første fraværsdag`() {
         a1 {
-            /* skal ikke gå videre til AVVENTER_HISTORIKK siden perioden ikke går forbi AGP */
+            // skal ikke gå videre til AVVENTER_HISTORIKK siden perioden ikke går forbi AGP
             håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar))
             håndterSykmelding(Sykmeldingsperiode(10.januar, 11.januar))
 
             håndterSøknad(1.januar til 2.januar)
             håndterSelvbestemtArbeidsgiveropplysninger(
-                listOf(1.januar til 2.januar, 10.januar til 23.januar)
+                listOf(1.januar til 2.januar, 10.januar til 23.januar),
             )
             assertEquals(listOf(1.januar til 2.januar), inspektør.venteperiode(1.vedtaksperiode))
             håndterSøknad(10.januar til 11.januar)
@@ -484,7 +453,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(11.januar, 26.januar))
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
-                listOf(1.januar til 16.januar)
+                listOf(1.januar til 16.januar),
             )
             håndterSøknad(11.januar til 26.januar)
             assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -567,10 +536,10 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             utbetalPeriode(1.vedtaksperiode)
 
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 10.februar))
+                utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 10.februar)),
             )
             håndterKorrigerteArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar)
+                listOf(1.januar til 16.januar),
             )
             håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
             håndterSøknad(20.februar til 28.februar)

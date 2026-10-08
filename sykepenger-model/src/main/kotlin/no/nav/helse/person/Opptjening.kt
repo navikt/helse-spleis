@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
@@ -21,44 +20,47 @@ import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnla
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiodeOrNull
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.startdatoFor
+import java.time.LocalDate
 
 private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
 
 internal class ArbeidstakerOpptjening private constructor(
     private val skjæringstidspunkt: LocalDate,
     internal val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>,
-    private val opptjeningsperiode: Periode
+    private val opptjeningsperiode: Periode,
 ) {
     internal val opptjeningsdager by lazy { opptjeningsperiode.count() }
-    internal val subsumsjon = `§ 8-2 ledd 1`(
-        oppfylt = harTilstrekkeligAntallOpptjeningsdager(),
-        skjæringstidspunkt = skjæringstidspunkt,
-        tilstrekkeligAntallOpptjeningsdager = TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER,
-        arbeidsforhold = arbeidsforhold.arbeidsforholdForJurist(),
-        antallOpptjeningsdager = opptjeningsdager
-    )
+    internal val subsumsjon =
+        `§ 8-2 ledd 1`(
+            oppfylt = harTilstrekkeligAntallOpptjeningsdager(),
+            skjæringstidspunkt = skjæringstidspunkt,
+            tilstrekkeligAntallOpptjeningsdager = TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER,
+            arbeidsforhold = arbeidsforhold.arbeidsforholdForJurist(),
+            antallOpptjeningsdager = opptjeningsdager,
+        )
 
-    internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
-        arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
+    internal fun ansattVedSkjæringstidspunkt(orgnummer: String) = arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
 
     internal fun harTilstrekkeligAntallOpptjeningsdager(): Boolean = opptjeningsdager >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
     internal fun erOppfylt(): Boolean = harTilstrekkeligAntallOpptjeningsdager()
 
     internal fun opptjeningFom() = opptjeningsperiode.start
+
     internal fun startdatoFor(orgnummer: String) = arbeidsforhold.startdatoFor(orgnummer, skjæringstidspunkt)
 
-    internal fun deaktiver(orgnummer: String): ArbeidstakerOpptjening {
-        return nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt)
-    }
+    internal fun deaktiver(orgnummer: String): ArbeidstakerOpptjening = nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt)
 
-    internal fun aktiver(orgnummer: String): ArbeidstakerOpptjening {
-        return nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt)
-    }
+    internal fun aktiver(orgnummer: String): ArbeidstakerOpptjening = nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt)
 
-    internal data class ArbeidsgiverOpptjeningsgrunnlag(val orgnummer: String, val ansattPerioder: List<Arbeidsforhold>) {
-        internal fun ansattVedSkjæringstidspunkt(orgnummer: String, skjæringstidspunkt: LocalDate) =
-            this.orgnummer == orgnummer && ansattPerioder.ansattVedSkjæringstidspunkt(skjæringstidspunkt)
+    internal data class ArbeidsgiverOpptjeningsgrunnlag(
+        val orgnummer: String,
+        val ansattPerioder: List<Arbeidsforhold>,
+    ) {
+        internal fun ansattVedSkjæringstidspunkt(
+            orgnummer: String,
+            skjæringstidspunkt: LocalDate,
+        ) = this.orgnummer == orgnummer && ansattPerioder.ansattVedSkjæringstidspunkt(skjæringstidspunkt)
 
         private fun aktiver(orgnummer: String): ArbeidsgiverOpptjeningsgrunnlag {
             if (orgnummer != this.orgnummer) return this
@@ -78,7 +80,7 @@ internal class ArbeidstakerOpptjening private constructor(
         internal data class Arbeidsforhold(
             val ansattFom: LocalDate,
             val ansattTom: LocalDate?,
-            val deaktivert: Boolean
+            val deaktivert: Boolean,
         ) {
             val ansettelseperiode = ansattFom til (ansattTom ?: LocalDate.MAX)
 
@@ -95,21 +97,22 @@ internal class ArbeidstakerOpptjening private constructor(
 
             internal fun aktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = false)
 
-            internal fun inngårIOpptjening(opptjeningsperiode: Periode): Boolean {
-                return deaktivert || this.ansettelseperiode.overlapperMed(opptjeningsperiode)
-            }
+            internal fun inngårIOpptjening(opptjeningsperiode: Periode): Boolean = deaktivert || this.ansettelseperiode.overlapperMed(opptjeningsperiode)
 
             companion object {
-
                 internal fun Collection<Arbeidsforhold>.opptjeningsperiodeOrNull(skjæringstidspunkt: LocalDate): Periode? {
-                    val grunnlag = this
-                        .mapNotNull { it.periode(skjæringstidspunkt) }
-                        .sortedByDescending { it.endInclusive }
+                    val grunnlag =
+                        this
+                            .mapNotNull { it.periode(skjæringstidspunkt) }
+                            .sortedByDescending { it.endInclusive }
                     val dagenFør = skjæringstidspunkt.forrigeDag.somPeriode()
                     if (grunnlag.firstOrNull()?.erRettFør(skjæringstidspunkt) != true) return null
                     return grunnlag.fold(dagenFør) { resultat, periode ->
-                        if (!resultat.overlapperMed(periode) && !periode.erRettFør(resultat)) resultat
-                        else resultat + periode
+                        if (!resultat.overlapperMed(periode) && !periode.erRettFør(resultat)) {
+                            resultat
+                        } else {
+                            resultat + periode
+                        }
                     }
                 }
 
@@ -120,77 +123,82 @@ internal class ArbeidstakerOpptjening private constructor(
 
                 internal fun Collection<Arbeidsforhold>.ansattVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = any { it.gjelder(skjæringstidspunkt) }
 
-                internal fun Iterable<Arbeidsforhold>.toEtterlevelseMap(orgnummer: String) = map {
-                    mapOf(
-                        "orgnummer" to orgnummer,
-                        "fom" to it.ansattFom,
-                        "tom" to it.ansattTom
-                    )
-                }
+                internal fun Iterable<Arbeidsforhold>.toEtterlevelseMap(orgnummer: String) =
+                    map {
+                        mapOf(
+                            "orgnummer" to orgnummer,
+                            "fom" to it.ansattFom,
+                            "tom" to it.ansattTom,
+                        )
+                    }
 
-                internal fun gjenopprett(dto: ArbeidsforholdDto): Arbeidsforhold {
-                    return Arbeidsforhold(
+                internal fun gjenopprett(dto: ArbeidsforholdDto): Arbeidsforhold =
+                    Arbeidsforhold(
                         ansattFom = dto.ansattFom,
                         ansattTom = dto.ansattTom,
-                        deaktivert = dto.deaktivert
+                        deaktivert = dto.deaktivert,
                     )
-                }
             }
 
-            internal fun dto() = ArbeidsforholdDto(
-                ansattFom = this.ansattFom,
-                ansattTom = this.ansattTom,
-                deaktivert = this.deaktivert
-            )
+            internal fun dto() =
+                ArbeidsforholdDto(
+                    ansattFom = this.ansattFom,
+                    ansattTom = this.ansattTom,
+                    deaktivert = this.deaktivert,
+                )
         }
 
         companion object {
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.aktiver(orgnummer: String) = map { it.aktiver(orgnummer) }
+
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.deaktiver(orgnummer: String) = map { it.deaktiver(orgnummer) }
 
-            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.startdatoFor(orgnummer: String, skjæringstidspunkt: LocalDate) = this
+            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.startdatoFor(
+                orgnummer: String,
+                skjæringstidspunkt: LocalDate,
+            ) = this
                 .singleOrNull { it.orgnummer == orgnummer }
                 ?.ansattPerioder
                 ?.opptjeningsperiode(skjæringstidspunkt)
                 ?.start
 
-            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.opptjeningsperiode(skjæringstidspunkt: LocalDate) =
-                flatMap { it.ansattPerioder }.opptjeningsperiode(skjæringstidspunkt)
+            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = flatMap { it.ansattPerioder }.opptjeningsperiode(skjæringstidspunkt)
 
-            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.opptjeningsperiodeOrNull(skjæringstidspunkt: LocalDate) =
-                flatMap { it.ansattPerioder }.opptjeningsperiodeOrNull(skjæringstidspunkt)
+            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.opptjeningsperiodeOrNull(skjæringstidspunkt: LocalDate) = flatMap { it.ansattPerioder }.opptjeningsperiodeOrNull(skjæringstidspunkt)
 
-            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.inngårIOpptjening(opptjeningsperiode: Periode) =
-                mapNotNull { it.inngårIOpptjening(opptjeningsperiode) }
+            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.inngårIOpptjening(opptjeningsperiode: Periode) = mapNotNull { it.inngårIOpptjening(opptjeningsperiode) }
 
-            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.arbeidsforholdForJurist() =
-                flatMap { it.ansattPerioder.toEtterlevelseMap(it.orgnummer) }
+            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.arbeidsforholdForJurist() = flatMap { it.ansattPerioder.toEtterlevelseMap(it.orgnummer) }
 
-            internal fun gjenopprett(dto: ArbeidsgiverOpptjeningsgrunnlagDto): ArbeidsgiverOpptjeningsgrunnlag {
-                return ArbeidsgiverOpptjeningsgrunnlag(
+            internal fun gjenopprett(dto: ArbeidsgiverOpptjeningsgrunnlagDto): ArbeidsgiverOpptjeningsgrunnlag =
+                ArbeidsgiverOpptjeningsgrunnlag(
                     orgnummer = dto.orgnummer,
-                    ansattPerioder = dto.ansattPerioder.map { Arbeidsforhold.gjenopprett(it) }
+                    ansattPerioder = dto.ansattPerioder.map { Arbeidsforhold.gjenopprett(it) },
                 )
-            }
         }
 
-        internal fun dto() = ArbeidsgiverOpptjeningsgrunnlagDto(
-            orgnummer = this.orgnummer,
-            ansattPerioder = this.ansattPerioder.map { it.dto() }
-        )
+        internal fun dto() =
+            ArbeidsgiverOpptjeningsgrunnlagDto(
+                orgnummer = this.orgnummer,
+                ansattPerioder = this.ansattPerioder.map { it.dto() },
+            )
     }
 
     companion object {
-
-        internal fun gjenopprett(skjæringstidspunkt: LocalDate, dto: OpptjeningInnDto): ArbeidstakerOpptjening {
-            return ArbeidstakerOpptjening(
+        internal fun gjenopprett(
+            skjæringstidspunkt: LocalDate,
+            dto: OpptjeningInnDto,
+        ): ArbeidstakerOpptjening =
+            ArbeidstakerOpptjening(
                 skjæringstidspunkt = skjæringstidspunkt,
                 dto.arbeidsforhold.map { ArbeidsgiverOpptjeningsgrunnlag.gjenopprett(it) },
-                opptjeningsperiode = Periode.gjenopprett(dto.opptjeningsperiode)
+                opptjeningsperiode = Periode.gjenopprett(dto.opptjeningsperiode),
             )
-        }
 
-        internal fun nyOpptjening(grunnlag: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate): ArbeidstakerOpptjening {
+        internal fun nyOpptjening(
+            grunnlag: List<ArbeidsgiverOpptjeningsgrunnlag>,
+            skjæringstidspunkt: LocalDate,
+        ): ArbeidstakerOpptjening {
             val opptjeningsperiode = grunnlag.opptjeningsperiode(skjæringstidspunkt)
             val arbeidsforhold = grunnlag.inngårIOpptjening(opptjeningsperiode)
             val opptjening = ArbeidstakerOpptjening(skjæringstidspunkt, arbeidsforhold, opptjeningsperiode)
@@ -198,11 +206,12 @@ internal class ArbeidstakerOpptjening private constructor(
         }
     }
 
-    fun dto(): OpptjeningUtDto = OpptjeningUtDto(
-        arbeidsforhold = this.arbeidsforhold.map { it.dto() },
-        opptjeningsperiode = this.opptjeningsperiode.dto(),
-        reellOpptjeningsperiode = this.arbeidsforhold.opptjeningsperiodeOrNull(skjæringstidspunkt)?.dto(),
-        opptjeningsdager = opptjeningsdager,
-        erOppfylt = erOppfylt()
-    )
+    fun dto(): OpptjeningUtDto =
+        OpptjeningUtDto(
+            arbeidsforhold = this.arbeidsforhold.map { it.dto() },
+            opptjeningsperiode = this.opptjeningsperiode.dto(),
+            reellOpptjeningsperiode = this.arbeidsforhold.opptjeningsperiodeOrNull(skjæringstidspunkt)?.dto(),
+            opptjeningsdager = opptjeningsdager,
+            erOppfylt = erOppfylt(),
+        )
 }

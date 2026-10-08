@@ -3,7 +3,9 @@ package no.nav.helse
 /**
  * Teller teller telleting
  */
-class Teller(private val grense: Int) {
+class Teller(
+    private val grense: Int,
+) {
     private var observer: Observer = Observer.nullObserver
     private var rest = grense
     private val initiell = if (grense == 0) Ferdig else Initiell
@@ -36,7 +38,9 @@ class Teller(private val grense: Int) {
 
     private interface Telletilstand {
         fun entering(teller: Teller) {}
+
         fun inc(teller: Teller)
+
         fun leaving(teller: Teller) {}
     }
 
@@ -68,7 +72,9 @@ class Teller(private val grense: Int) {
         }
 
         fun onInc() {}
+
         fun onGrense() {}
+
         fun onReset() {}
     }
 }

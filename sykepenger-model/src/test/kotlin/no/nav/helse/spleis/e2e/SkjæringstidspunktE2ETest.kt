@@ -1,34 +1,16 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.forlengelseTilGodkjenning
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.selvstendig
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -36,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
-
     @Test
     fun `selvstendig - oppdaterer skjæringstidspunkt på senere vedtak ved overstyring av tidligere vedtak`() {
         selvstendig {
@@ -167,7 +148,7 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 10.januar)
+                ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 10.januar),
             )
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 31.mars))
             assertEquals(1.mars, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -178,12 +159,10 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
     @Test
     fun `Finner skjæringstidspunkt for periode med arbeidsdager på slutten som overlapper med sykdom hos annen arbeidsgiver`() {
         a1 {
-
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars))
         }
         a2 {
-
             håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar))
         }
 
@@ -199,17 +178,16 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
                 beregnetInntekt = 15000.månedlig,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(25.januar til 9.februar),
                 beregnetInntekt = 16000.månedlig,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
-
 
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
@@ -221,7 +199,6 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
 
             assertEquals(1.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(24.februar, inspektør(a1).skjæringstidspunkt(2.vedtaksperiode))
-
         }
         a2 {
             assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
@@ -239,7 +216,7 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(24.februar til 11.mars),
                 beregnetInntekt = 17000.månedlig,
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
         }
 
@@ -273,7 +250,6 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSykmelding(Sykmeldingsperiode(23.februar, 24.mars))
-
         }
         a2 {
             håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar))
@@ -291,14 +267,14 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 15000.månedlig,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(25.januar til 9.februar),
                 beregnetInntekt = 16000.månedlig,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a1 {
@@ -312,7 +288,6 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             assertEquals(23.februar, inspektør(a1).skjæringstidspunkt(2.vedtaksperiode))
         }
 
-
         a2 {
             assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
             håndterYtelser(1.vedtaksperiode)
@@ -322,7 +297,6 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
         a1 {
             assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-
         }
         a2 {
             assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
@@ -333,7 +307,7 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(23.februar til 10.mars),
                 beregnetInntekt = 15000.månedlig,
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
         }
         a2 {

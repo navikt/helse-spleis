@@ -1,23 +1,15 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import org.junit.jupiter.api.Test
 
 internal class OverstyrTidslinjeFlereAGTest : AbstractDslTest() {
-
     @Test
     fun `kan ikke overstyre én AG hvis en annen AG har blitt godkjent`() {
         a1 {

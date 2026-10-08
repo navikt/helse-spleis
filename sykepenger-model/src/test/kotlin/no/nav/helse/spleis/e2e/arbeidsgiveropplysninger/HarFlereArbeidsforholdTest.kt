@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
-import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.a1
@@ -15,9 +14,9 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.InntektsmeldingId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.*
 
-internal class HarFlereArbeidsforholdTest: AbstractDslTest() {
-
+internal class HarFlereArbeidsforholdTest : AbstractDslTest() {
     @Test
     fun `Får ikke varsel om flere arbeidsforhold når det ikke er flere arbeidsforhold`() {
         a1 {

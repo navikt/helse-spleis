@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
@@ -13,9 +12,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class OpptjeningsvurderingIdTest : AbstractDslTest() {
-
     @Test
     fun `Overstyring av arbeidsforhold skal medføre ny opptjeningsvurderingId`() {
         a1 {
@@ -39,21 +38,27 @@ internal class OpptjeningsvurderingIdTest : AbstractDslTest() {
                 assertEquals(2, it.vilkårsgrunnlag.size)
                 it.vilkårsgrunnlag[0].also { grunnlag ->
                     assertEquals(1.januar, grunnlag.skjæringstidspunkt)
-                    assertEquals(UUID.nameUUIDFromBytes("${grunnlag.vilkårsgrunnlagId}:Opptjening".toByteArray()),
-                        (grunnlag as VilkårsgrunnlagUtDto.Spleis).opptjeningsvurderingId)
+                    assertEquals(
+                        UUID.nameUUIDFromBytes("${grunnlag.vilkårsgrunnlagId}:Opptjening".toByteArray()),
+                        (grunnlag as VilkårsgrunnlagUtDto.Spleis).opptjeningsvurderingId,
+                    )
                 }
                 it.vilkårsgrunnlag[1].also { grunnlag ->
                     assertEquals(1.mars, grunnlag.skjæringstidspunkt)
-                    assertNotEquals(UUID.nameUUIDFromBytes("${grunnlag.vilkårsgrunnlagId}:Opptjening".toByteArray()),
-                        (grunnlag as VilkårsgrunnlagUtDto.Spleis).opptjeningsvurderingId)
+                    assertNotEquals(
+                        UUID.nameUUIDFromBytes("${grunnlag.vilkårsgrunnlagId}:Opptjening".toByteArray()),
+                        (grunnlag as VilkårsgrunnlagUtDto.Spleis).opptjeningsvurderingId,
+                    )
                 }
             }
             historikk[1].also {
                 assertEquals(1, it.vilkårsgrunnlag.size)
                 it.vilkårsgrunnlag[0].also { grunnlag ->
                     assertEquals(1.januar, grunnlag.skjæringstidspunkt)
-                    assertEquals(UUID.nameUUIDFromBytes("${grunnlag.vilkårsgrunnlagId}:Opptjening".toByteArray()),
-                        (grunnlag as VilkårsgrunnlagUtDto.Spleis).opptjeningsvurderingId)
+                    assertEquals(
+                        UUID.nameUUIDFromBytes("${grunnlag.vilkårsgrunnlagId}:Opptjening".toByteArray()),
+                        (grunnlag as VilkårsgrunnlagUtDto.Spleis).opptjeningsvurderingId,
+                    )
                 }
             }
         }
@@ -74,13 +79,17 @@ internal class OpptjeningsvurderingIdTest : AbstractDslTest() {
                 it.vilkårsgrunnlag[0].also { grunnlag ->
                     assertTrue(grunnlag is VilkårsgrunnlagUtDto.Infotrygd)
                     assertEquals(1.januar, grunnlag.skjæringstidspunkt)
-                    assertEquals(UUID.nameUUIDFromBytes("${grunnlag.vilkårsgrunnlagId}:Opptjening".toByteArray()),
-                        (grunnlag as VilkårsgrunnlagUtDto.Infotrygd).opptjeningsvurderingId)
+                    assertEquals(
+                        UUID.nameUUIDFromBytes("${grunnlag.vilkårsgrunnlagId}:Opptjening".toByteArray()),
+                        (grunnlag as VilkårsgrunnlagUtDto.Infotrygd).opptjeningsvurderingId,
+                    )
                 }
                 it.vilkårsgrunnlag[1].also { grunnlag ->
                     assertEquals(1.april, grunnlag.skjæringstidspunkt)
-                    assertNotEquals(UUID.nameUUIDFromBytes("${grunnlag.vilkårsgrunnlagId}:Opptjening".toByteArray()),
-                        (grunnlag as VilkårsgrunnlagUtDto.Spleis).opptjeningsvurderingId)
+                    assertNotEquals(
+                        UUID.nameUUIDFromBytes("${grunnlag.vilkårsgrunnlagId}:Opptjening".toByteArray()),
+                        (grunnlag as VilkårsgrunnlagUtDto.Spleis).opptjeningsvurderingId,
+                    )
                 }
             }
             historikk[1].also {
@@ -101,5 +110,4 @@ internal class OpptjeningsvurderingIdTest : AbstractDslTest() {
 
         assertGjenoppbygget(dto())
     }
-
 }

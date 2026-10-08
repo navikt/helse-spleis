@@ -11,7 +11,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
@@ -19,8 +18,12 @@ import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.withMDC
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
-internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, private val messageMediator: IMessageMediator) : River.PacketValidation {
+internal abstract class HendelseRiver(
+    rapidsConnection: RapidsConnection,
+    private val messageMediator: IMessageMediator,
+) : River.PacketValidation {
     protected val river = River(rapidsConnection)
     protected abstract val eventNames: Set<String>
     protected abstract val riverName: String
@@ -30,9 +33,12 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
     }
 
     protected open fun precondition(packet: JsonMessage) {}
+
     protected abstract fun createMessage(packet: JsonMessage): HendelseMessage
 
-    private inner class RiverImpl(river: River) : River.PacketListener {
+    private inner class RiverImpl(
+        river: River,
+    ) : River.PacketListener {
         init {
             river.precondition { it.requireAny("@event_name", eventNames.toList()) }
             river.validate { packet ->
@@ -46,16 +52,20 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
 
         override fun name() = this@HendelseRiver::class.simpleName ?: "ukjent"
 
-        override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
+        override fun onPacket(
+            packet: JsonMessage,
+            context: MessageContext,
+            metadata: MessageMetadata,
+            meterRegistry: MeterRegistry,
+        ) {
             val eventName = packet["@event_name"].asText()
             withMDC(
                 mapOf(
                     "river_name" to riverName,
                     "melding_type" to eventName,
-                    "melding_id" to packet["@id"].asText()
-                )
+                    "melding_id" to packet["@id"].asText(),
+                ),
             ) {
-
                 val timer = Timer.start(meterRegistry)
 
                 try {
@@ -65,17 +75,22 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
                     throw e
                 } finally {
                     timer.stop(
-                        Timer.builder("behandlingstid_seconds")
+                        Timer
+                            .builder("behandlingstid_seconds")
                             .description("hvor lang tid spleis bruker på behandling av en melding")
                             .tag("river_name", riverName)
                             .tag("event_name", eventName)
-                            .register(meterRegistry)
+                            .register(meterRegistry),
                     )
                 }
             }
         }
 
-        override fun onError(problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
+        override fun onError(
+            problems: MessageProblems,
+            context: MessageContext,
+            metadata: MessageMetadata,
+        ) {
             messageMediator.onRiverError(riverName, problems, context, metadata)
         }
     }
@@ -84,16 +99,18 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
 private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
 internal fun JsonMessage.meldingsreferanseId() = MeldingsreferanseId(this["@id"].asText().toUUID())
-internal val JsonMessage.yrkesaktivitetssporing
-    get() = when (this["yrkesaktivitetstype"].asText("arbeidstaker_default").lowercase()) {
-        "arbeidstaker" -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(this["organisasjonsnummer"].asText())
-        "frilans" -> Behandlingsporing.Yrkesaktivitet.Frilans
-        "selvstendig" -> Behandlingsporing.Yrkesaktivitet.Selvstendig
-        "arbeidsledig" -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-        "arbeidstaker_default" -> {
-            sikkerLogg.info("Yrkesaktivitetstype er ikke spesifisert, default til arbeidstaker, vi gleder oss til at vi slipper å gjøre det her igjen", kv("meldingsreferanseId", meldingsreferanseId()))
-            Behandlingsporing.Yrkesaktivitet.Arbeidstaker(this["organisasjonsnummer"].asText())
-        }
 
-        else -> error("Kan ikke gjenkjenne yrkesaktivitetstype ${this["yrkesaktivitetstype"].asText()}")
-    }
+internal val JsonMessage.yrkesaktivitetssporing
+    get() =
+        when (this["yrkesaktivitetstype"].asText("arbeidstaker_default").lowercase()) {
+            "arbeidstaker" -> Behandlingsporing.Yrkesaktivitet.Arbeidstaker(this["organisasjonsnummer"].asText())
+            "frilans" -> Behandlingsporing.Yrkesaktivitet.Frilans
+            "selvstendig" -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+            "arbeidsledig" -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+            "arbeidstaker_default" -> {
+                sikkerLogg.info("Yrkesaktivitetstype er ikke spesifisert, default til arbeidstaker, vi gleder oss til at vi slipper å gjøre det her igjen", kv("meldingsreferanseId", meldingsreferanseId()))
+                Behandlingsporing.Yrkesaktivitet.Arbeidstaker(this["organisasjonsnummer"].asText())
+            }
+
+            else -> error("Kan ikke gjenkjenne yrkesaktivitetstype ${this["yrkesaktivitetstype"].asText()}")
+        }

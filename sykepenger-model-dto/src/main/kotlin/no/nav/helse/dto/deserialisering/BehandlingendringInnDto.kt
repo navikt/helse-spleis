@@ -1,8 +1,5 @@
 package no.nav.helse.dto.deserialisering
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.AvslagstidslinjeDto
 import no.nav.helse.dto.BeløpstidslinjeDto
@@ -11,6 +8,9 @@ import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.InntektskildeDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.SykdomstidslinjeDto
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 data class BehandlingendringInnDto(
     val id: UUID,
@@ -34,5 +34,5 @@ data class BehandlingendringInnDto(
     val inntektjusteringer: Map<InntektskildeDto, BeløpstidslinjeDto>,
     val faktaavklartInntekt: FaktaavklartInntektInnDto?,
     val korrigertInntekt: SaksbehandlerInnDto?,
-    val beregningId: UUID
+    val beregningId: UUID,
 )

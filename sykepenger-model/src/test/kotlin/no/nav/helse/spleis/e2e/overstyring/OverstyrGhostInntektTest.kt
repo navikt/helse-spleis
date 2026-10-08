@@ -1,22 +1,12 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import java.time.LocalDate
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Arbeidstakerkilde
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.TestPerson
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.assertInntektsgrunnlag
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -24,17 +14,16 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class OverstyrGhostInntektTest : AbstractDslTest() {
     @Test
     fun `Overstyrer ghost-inntekt -- happy case`() {
-
         a1 {
             tilOverstyring()
         }
         a2 {
             håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, inntekt = 500.månedlig)
-
         }
 
         a1 {
@@ -60,10 +49,11 @@ internal class OverstyrGhostInntektTest : AbstractDslTest() {
             håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, inntekt = INGEN)
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
-                arbeidsgiveropplysninger = listOf(
-                    OverstyrtArbeidsgiveropplysning(a1, 3750.månedlig),
-                    OverstyrtArbeidsgiveropplysning(a2, INGEN)
-                )
+                arbeidsgiveropplysninger =
+                    listOf(
+                        OverstyrtArbeidsgiveropplysning(a1, 3750.månedlig),
+                        OverstyrtArbeidsgiveropplysning(a2, INGEN),
+                    ),
             )
 
             håndterYtelser(1.vedtaksperiode)
@@ -99,16 +89,18 @@ internal class OverstyrGhostInntektTest : AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
-
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.tilOverstyring(fom: LocalDate = 1.januar, tom: LocalDate = 31.januar) {
+    private fun TestPerson.TestArbeidsgiver.tilOverstyring(
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+    ) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent))
         håndterArbeidsgiveropplysninger(
             listOf(fom til fom.plusDays(15)),
-            vedtaksperiodeId = 1.vedtaksperiode
+            vedtaksperiodeId = 1.vedtaksperiode,
         )
         håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
         håndterYtelser(1.vedtaksperiode)

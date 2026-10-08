@@ -5,5 +5,5 @@ import no.nav.helse.dto.PeriodeDto
 
 data class OpptjeningInnDto(
     val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagDto>,
-    val opptjeningsperiode: PeriodeDto
+    val opptjeningsperiode: PeriodeDto,
 )

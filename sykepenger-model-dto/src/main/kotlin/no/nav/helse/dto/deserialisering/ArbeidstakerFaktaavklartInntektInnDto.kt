@@ -5,5 +5,5 @@ import java.util.UUID
 data class ArbeidstakerFaktaavklartInntektInnDto(
     override val id: UUID,
     override val inntektsdata: InntektsdataInnDto,
-    val inntektsopplysningskilde: ArbeidstakerinntektskildeInnDto
+    val inntektsopplysningskilde: ArbeidstakerinntektskildeInnDto,
 ) : FaktaavklartInntektInnDto

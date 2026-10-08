@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
-
     @Test
     fun `annullere tidligere utbetaling på samme arbeidsgiver`() {
         a1 {
@@ -38,9 +37,10 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
             nyttVedtak(januar)
             nyttVedtak(mars)
             håndterAnnullering(1.vedtaksperiode)
-            val err = assertThrows<IllegalStateException> {
-                håndterSøknad(januar)
-            }
+            val err =
+                assertThrows<IllegalStateException> {
+                    håndterSøknad(januar)
+                }
             assertEquals("Kan ikke håndtere søknad mens perioden er i TilAnnullering", err.message)
         }
     }

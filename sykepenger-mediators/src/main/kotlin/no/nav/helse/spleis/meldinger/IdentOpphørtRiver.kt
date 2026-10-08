@@ -8,12 +8,10 @@ import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 
 internal class IdentOpphørtRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-
     override val eventNames = setOf("ident_opphørt")
     override val riverName = "Ident opphørt"
-
 
     override fun validate(message: JsonMessage) {
         message.requireKey("fødselsnummer", "nye_identer.fødselsnummer")
@@ -23,10 +21,12 @@ internal class IdentOpphørtRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = IdentOpphørtMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        IdentOpphørtMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

@@ -13,7 +13,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 
 internal class UtbetalingerRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Utbetaling)
     override val riverName = "Utbetaling"
@@ -36,10 +36,12 @@ internal class UtbetalingerRiver(
         message.require("@løsning.${Utbetaling.utgåendeNavn}.overføringstidspunkt", JsonNode::asLocalDateTime)
     }
 
-    override fun createMessage(packet: JsonMessage) = UtbetalingMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        UtbetalingMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

@@ -1,34 +1,12 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.Year
-import java.util.UUID
-import no.nav.helse.assertForventetFeil
-import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Arbeidstakerkilde
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.TestPerson
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.selvstendig
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Arbeidsgiveropplysning
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
+import no.nav.helse.*
+import no.nav.helse.dsl.*
+import no.nav.helse.hendelser.*
 import no.nav.helse.inspectors.beløp
 import no.nav.helse.inspectors.hendelseId
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.person.tilstandsmaskin.TilstandType.*
@@ -39,9 +17,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
+import java.time.Year
+import java.util.*
 
 internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
-
     @Test
     fun `AI fjerner gammel IM - Velger RIKTIG inntekt når en AUU først har fått lagret faktaavkalrt inntekt på behandlignen sin`() {
         a1 {
@@ -150,20 +129,20 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
     fun `korrigert inntekt blir med når skjæringstidspunktet flyttes`() {
         a1 {
             nyttVedtak(2.januar til 31.januar)
-            håndterOverstyrArbeidsgiveropplysninger(2.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = "a1", inntekt = INNTEKT*1.1)))
+            håndterOverstyrArbeidsgiveropplysninger(2.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = "a1", inntekt = INNTEKT * 1.1)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
             assertEquals(INNTEKT, faktaavvklartArbeidstakerBeløp(1.vedtaksperiode))
-            assertEquals(INNTEKT*1.1, korrigertInntektBeløp(1.vedtaksperiode))
+            assertEquals(INNTEKT * 1.1, korrigertInntektBeløp(1.vedtaksperiode))
             assertInntektsgrunnlag(2.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(
                     orgnummer = a1,
                     forventetFaktaavklartInntekt = INNTEKT,
-                    forventetOmregnetÅrsinntekt = INNTEKT*1.1,
-                    forventetKorrigertInntekt = INNTEKT*1.1
+                    forventetOmregnetÅrsinntekt = INNTEKT * 1.1,
+                    forventetKorrigertInntekt = INNTEKT * 1.1,
                 )
             }
 
@@ -175,13 +154,13 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertEquals(INNTEKT, faktaavvklartArbeidstakerBeløp(1.vedtaksperiode))
-            assertEquals(INNTEKT*1.1, korrigertInntektBeløp(1.vedtaksperiode))
+            assertEquals(INNTEKT * 1.1, korrigertInntektBeløp(1.vedtaksperiode))
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(
                     orgnummer = a1,
                     forventetFaktaavklartInntekt = INNTEKT,
-                    forventetOmregnetÅrsinntekt = INNTEKT*1.1,
-                    forventetKorrigertInntekt = INNTEKT*1.1
+                    forventetOmregnetÅrsinntekt = INNTEKT * 1.1,
+                    forventetKorrigertInntekt = INNTEKT * 1.1,
                 )
             }
             assertVarsler(1.vedtaksperiode, RV_IV_7)
@@ -195,12 +174,21 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             forlengVedtak(21.januar til 31.januar)
             forlengVedtak(februar)
             forlengVedtak(mars)
-            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(),
-                beregnetInntekt = INNTEKT * 1.20, vedtaksperiodeId = 1.vedtaksperiode)
-            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(),
-                beregnetInntekt = INNTEKT * 1.10, vedtaksperiodeId = 1.vedtaksperiode)
-            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList(),
-                beregnetInntekt = INNTEKT * 1.15, vedtaksperiodeId = 1.vedtaksperiode)
+            håndterKorrigerteArbeidsgiveropplysninger(
+                arbeidsgiverperioder = emptyList(),
+                beregnetInntekt = INNTEKT * 1.20,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+            håndterKorrigerteArbeidsgiveropplysninger(
+                arbeidsgiverperioder = emptyList(),
+                beregnetInntekt = INNTEKT * 1.10,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+            håndterKorrigerteArbeidsgiveropplysninger(
+                arbeidsgiverperioder = emptyList(),
+                beregnetInntekt = INNTEKT * 1.15,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
 
             assertEquals(INNTEKT * 1.15, faktaavvklartArbeidstakerBeløp(1.vedtaksperiode))
             assertEquals(INNTEKT * 1.05, faktaavvklartArbeidstakerBeløp(2.vedtaksperiode))
@@ -263,11 +251,12 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(
                 periode = januar,
                 søknadId = korrigerendeSøknadId,
-                pensjonsgivendeInntekter = listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 500000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
-                )
+                pensjonsgivendeInntekter =
+                    listOf(
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 500000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    ),
             )
 
             (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? SelvstendigFaktaavklartInntekt).also { faktaavklartInntekt ->
@@ -282,7 +271,7 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                     ønsket = {
                         assertEquals(477319.årlig, faktaavklartInntekt.beløp)
                         assertEquals(korrigerendeSøknadId, faktaavklartInntekt.hendelseId)
-                    }
+                    },
                 )
             }
         }
@@ -449,7 +438,10 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
     }
 
     private fun TestPerson.TestArbeidsgiver.faktaavvklartArbeidstakerInntekt(vedtaksperiodeId: UUID) = inspektør.faktaavklartInntekt(vedtaksperiodeId) as? ArbeidstakerFaktaavklartInntekt
+
     private fun TestPerson.TestArbeidsgiver.faktaavvklartArbeidstakerBeløp(vedtaksperiodeId: UUID) = (faktaavvklartArbeidstakerInntekt(vedtaksperiodeId))?.beløp
+
     private fun TestPerson.TestArbeidsgiver.korrigertInntekt(vedtaksperiodeId: UUID) = inspektør.korrigertInntekt(vedtaksperiodeId)
+
     private fun TestPerson.TestArbeidsgiver.korrigertInntektBeløp(vedtaksperiodeId: UUID) = korrigertInntekt(vedtaksperiodeId)?.inntektsdata?.beløp
 }

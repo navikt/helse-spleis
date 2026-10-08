@@ -29,7 +29,7 @@ enum class ApiHendelsetype {
     JsonSubTypes.Type(value = ApiSoknadFrilans::class, name = "SendtSoknadFrilans"),
     JsonSubTypes.Type(value = ApiSoknadSelvstendig::class, name = "SendtSoknadSelvstendig"),
     JsonSubTypes.Type(value = ApiSoknadArbeidsledig::class, name = "SendtSoknadArbeidsledig"),
-    JsonSubTypes.Type(value = ApiSykmelding::class, name = "NySoknad")
+    JsonSubTypes.Type(value = ApiSykmelding::class, name = "NySoknad"),
 )
 sealed interface ApiHendelse {
     val id: String
@@ -41,7 +41,7 @@ data class ApiInntektsmelding(
     override val id: String,
     override val eksternDokumentId: String,
     val mottattDato: LocalDateTime,
-    val beregnetInntekt: Double
+    val beregnetInntekt: Double,
 ) : ApiHendelse {
     override val type = ApiHendelsetype.Inntektsmelding
 }
@@ -49,7 +49,7 @@ data class ApiInntektsmelding(
 data class ApiInntektFraAOrdningen(
     override val id: String,
     override val eksternDokumentId: String,
-    val mottattDato: LocalDateTime
+    val mottattDato: LocalDateTime,
 ) : ApiHendelse {
     override val type = ApiHendelsetype.InntektFraAOrdningen
 }
@@ -60,7 +60,7 @@ data class ApiSoknadNav(
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertDato: LocalDateTime,
-    val sendtNav: LocalDateTime
+    val sendtNav: LocalDateTime,
 ) : ApiHendelse {
     override val type = ApiHendelsetype.SendtSoknadNav
 }
@@ -71,7 +71,7 @@ data class ApiSoknadFrilans(
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertDato: LocalDateTime,
-    val sendtNav: LocalDateTime
+    val sendtNav: LocalDateTime,
 ) : ApiHendelse {
     override val type = ApiHendelsetype.SendtSoknadFrilans
 }
@@ -82,7 +82,7 @@ data class ApiSoknadSelvstendig(
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertDato: LocalDateTime,
-    val sendtNav: LocalDateTime
+    val sendtNav: LocalDateTime,
 ) : ApiHendelse {
     override val type = ApiHendelsetype.SendtSoknadSelvstendig
 }
@@ -93,7 +93,7 @@ data class ApiSoknadArbeidsledig(
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertDato: LocalDateTime,
-    val sendtNav: LocalDateTime
+    val sendtNav: LocalDateTime,
 ) : ApiHendelse {
     override val type = ApiHendelsetype.SendtSoknadArbeidsledig
 }
@@ -104,7 +104,7 @@ data class ApiSoknadArbeidsgiver(
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertDato: LocalDateTime,
-    val sendtArbeidsgiver: LocalDateTime
+    val sendtArbeidsgiver: LocalDateTime,
 ) : ApiHendelse {
     override val type = ApiHendelsetype.SendtSoknadArbeidsgiver
 }
@@ -114,7 +114,7 @@ data class ApiSykmelding(
     override val eksternDokumentId: String,
     val fom: LocalDate,
     val tom: LocalDate,
-    val rapportertDato: LocalDateTime
+    val rapportertDato: LocalDateTime,
 ) : ApiHendelse {
     override val type = ApiHendelsetype.NySoknad
 }

@@ -4,34 +4,20 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdKorrigererE2ETest : AbstractDslTest() {
-
     @Test
     fun `skjæringstidspunkt endres som følge av infotrygdperiode`() {
         a1 {
@@ -40,7 +26,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(3.januar til 18.januar),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -101,9 +87,10 @@ internal class InfotrygdKorrigererE2ETest : AbstractDslTest() {
 
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                utbetalinger = listOf(
-                    Friperiode(fom = 1.februar, tom = 28.februar)
-                )
+                utbetalinger =
+                    listOf(
+                        Friperiode(fom = 1.februar, tom = 28.februar),
+                    ),
             )
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
@@ -114,13 +101,10 @@ internal class InfotrygdKorrigererE2ETest : AbstractDslTest() {
 
             assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
-
         }
     }
 
-    private fun createDobbelutbetalingPerson() =
-        medJSONPerson("/personer/dobbelutbetaling.json", 334)
+    private fun createDobbelutbetalingPerson() = medJSONPerson("/personer/dobbelutbetaling.json", 334)
 
-    private fun createAuuBlirMedIRevureringPerson() =
-        medJSONPerson("/personer/auu-blir-med-i-revurdering.json", 334)
+    private fun createAuuBlirMedIRevureringPerson() = medJSONPerson("/personer/auu-blir-med-i-revurdering.json", 334)
 }

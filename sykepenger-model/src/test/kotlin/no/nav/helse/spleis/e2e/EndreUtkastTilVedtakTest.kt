@@ -1,10 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -14,7 +10,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class EndreUtkastTilVedtakTest : AbstractDslTest() {
-
     @Test
     fun `endrer inntekten etter at periodene er beregnet`() {
         a1 {
@@ -25,17 +20,21 @@ internal class EndreUtkastTilVedtakTest : AbstractDslTest() {
         }
         a1 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+            )
         }
         a2 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+            )
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
@@ -70,17 +69,21 @@ internal class EndreUtkastTilVedtakTest : AbstractDslTest() {
         }
         a1 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+            )
         }
         a2 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+            )
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
@@ -91,7 +94,6 @@ internal class EndreUtkastTilVedtakTest : AbstractDslTest() {
             val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
             assertEquals(setOf(100.0), utbetalingstidslinje.map { it.økonomi.sykdomsgrad.toDouble() }.toSet())
             assertEquals(setOf(100.0), utbetalingstidslinje.map { it.økonomi.totalSykdomsgrad.toDouble() }.toSet())
-
         }
         a2 {
             assertUtbetalingsbeløp(1.vedtaksperiode, 1080, 1431, 0, subset = 17.januar til 31.januar)
@@ -119,7 +121,6 @@ internal class EndreUtkastTilVedtakTest : AbstractDslTest() {
             val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
             assertEquals(setOf(100.0), utbetalingstidslinje.map { it.økonomi.sykdomsgrad.toDouble() }.toSet())
             assertEquals(setOf(100.0, 50.0), utbetalingstidslinje.map { it.økonomi.totalSykdomsgrad.toDouble() }.toSet())
-
         }
     }
 
@@ -133,17 +134,21 @@ internal class EndreUtkastTilVedtakTest : AbstractDslTest() {
         }
         a1 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+            )
         }
         a2 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode,
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+            )
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
@@ -154,7 +159,6 @@ internal class EndreUtkastTilVedtakTest : AbstractDslTest() {
             val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
             assertEquals(setOf(100.0), utbetalingstidslinje.map { it.økonomi.sykdomsgrad.toDouble() }.toSet())
             assertEquals(setOf(100.0), utbetalingstidslinje.map { it.økonomi.totalSykdomsgrad.toDouble() }.toSet())
-
         }
         a2 {
             assertUtbetalingsbeløp(1.vedtaksperiode, 1080, 1431, 0, subset = 17.januar til 31.januar)
@@ -181,7 +185,6 @@ internal class EndreUtkastTilVedtakTest : AbstractDslTest() {
             val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
             assertEquals(setOf(100.0, 0.0), utbetalingstidslinje.map { it.økonomi.sykdomsgrad.toDouble() }.toSet())
             assertEquals(setOf(100.0, 50.0), utbetalingstidslinje.map { it.økonomi.totalSykdomsgrad.toDouble() }.toSet())
-
         }
     }
 }

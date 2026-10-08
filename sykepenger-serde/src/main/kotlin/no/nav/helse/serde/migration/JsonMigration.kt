@@ -2,11 +2,11 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.serde.serdeObjectMapper
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.serde.serdeObjectMapper
-import org.slf4j.LoggerFactory
 
 fun interface MeldingerSupplier {
     companion object {
@@ -16,23 +16,30 @@ fun interface MeldingerSupplier {
     fun hentMeldinger(): Map<UUID, Hendelse>
 }
 
-data class Hendelse(val meldingsreferanseId: UUID, val meldingstype: String, val lestDato: LocalDateTime)
+data class Hendelse(
+    val meldingsreferanseId: UUID,
+    val meldingstype: String,
+    val lestDato: LocalDateTime,
+)
 
 internal fun List<JsonMigration>.migrate(
     skjemaVersjon: Int,
     unmigratedJson: String,
-    meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty
-) =
-    JsonMigration.migrate(this, skjemaVersjon, unmigratedJson, MemoizedMeldingerSupplier(meldingerSupplier))
+    meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty,
+) = JsonMigration.migrate(this, skjemaVersjon, unmigratedJson, MemoizedMeldingerSupplier(meldingerSupplier))
 
-private class MemoizedMeldingerSupplier(private val supplier: MeldingerSupplier) : MeldingerSupplier {
+private class MemoizedMeldingerSupplier(
+    private val supplier: MeldingerSupplier,
+) : MeldingerSupplier {
     private val meldinger: Map<UUID, Hendelse> by lazy { supplier.hentMeldinger() }
 
     override fun hentMeldinger(): Map<UUID, Hendelse> = meldinger
 }
 
 // Implements GoF Command Pattern to perform migration
-internal abstract class JsonMigration(private val version: Int) {
+internal abstract class JsonMigration(
+    private val version: Int,
+) {
     internal companion object {
         private val log = LoggerFactory.getLogger(JsonMigration::class.java)
         private const val SkjemaversjonKey = "skjemaVersjon"
@@ -45,7 +52,7 @@ internal abstract class JsonMigration(private val version: Int) {
             migrations: List<JsonMigration>,
             skjemaVersjon: Int,
             unmigratedJson: String,
-            supplier: MeldingerSupplier
+            supplier: MeldingerSupplier,
         ): Pair<Int, String> {
             val sortedMigrations = migrations.sortedBy { it.version }
             require(sortedMigrations.windowed(2).none { (a, b) -> a.version == b.version }) { "Versjoner må være unike" }
@@ -54,11 +61,9 @@ internal abstract class JsonMigration(private val version: Int) {
             }
         }
 
-        internal fun skjemaVersjon(jsonNode: JsonNode) =
-            jsonNode.path(SkjemaversjonKey).asInt(InitialVersion)
+        internal fun skjemaVersjon(jsonNode: JsonNode) = jsonNode.path(SkjemaversjonKey).asInt(InitialVersion)
 
-        internal fun gjeldendeVersjon(migrations: List<JsonMigration>) =
-            migrations.maxOfOrNull { it.version } ?: InitialVersion
+        internal fun gjeldendeVersjon(migrations: List<JsonMigration>) = migrations.maxOfOrNull { it.version } ?: InitialVersion
     }
 
     init {
@@ -67,7 +72,11 @@ internal abstract class JsonMigration(private val version: Int) {
 
     protected abstract val description: String
 
-    private fun migrate(skjemaVersjon: Int, unmigratedJson: String, meldingerSupplier: MeldingerSupplier): Pair<Int, String> {
+    private fun migrate(
+        skjemaVersjon: Int,
+        unmigratedJson: String,
+        meldingerSupplier: MeldingerSupplier,
+    ): Pair<Int, String> {
         if (!shouldMigrate(skjemaVersjon)) return (skjemaVersjon to unmigratedJson)
         val jsonNode = serdeObjectMapper.readTree(unmigratedJson)
         require(jsonNode is ObjectNode) { "Kan kun migrere ObjectNodes" }
@@ -77,8 +86,10 @@ internal abstract class JsonMigration(private val version: Int) {
         return version to migratedJson
     }
 
-    protected abstract fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier)
+    protected abstract fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    )
 
-    protected open fun shouldMigrate(skjemaVersjon: Int) =
-        skjemaVersjon < version
+    protected open fun shouldMigrate(skjemaVersjon: Int) = skjemaVersjon < version
 }

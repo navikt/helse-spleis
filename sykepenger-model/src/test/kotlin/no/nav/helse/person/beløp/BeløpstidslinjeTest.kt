@@ -1,10 +1,6 @@
 package no.nav.helse.person.beløp
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.Tidslinjedag
-import no.nav.helse.april
+import no.nav.helse.*
 import no.nav.helse.dsl.BeløpstidslinjeDsl.Arbeidsgiver
 import no.nav.helse.dsl.BeløpstidslinjeDsl.Saksbehandler
 import no.nav.helse.dsl.BeløpstidslinjeDsl.Sykmeldt
@@ -16,19 +12,9 @@ import no.nav.helse.dsl.BeløpstidslinjeDsl.og
 import no.nav.helse.dsl.BeløpstidslinjeDsl.oppgir
 import no.nav.helse.dsl.BeløpstidslinjeDsl.til
 import no.nav.helse.dto.BeløpstidslinjeDto
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
-import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
-import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Avsender.*
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.mapWithNext
-import no.nav.helse.mars
 import no.nav.helse.person.refusjon.Refusjonsdag
 import no.nav.helse.person.refusjon.Refusjonstidslinje
 import no.nav.helse.person.refusjon.Refusjonstidslinje.Companion.somArray
@@ -43,9 +29,11 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import org.opentest4j.AssertionFailedError
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 internal class BeløpstidslinjeTest {
-
     @Test
     fun `trekke fra en beløpstidslinje`() {
         val (fraInntektsmelding, fraInntektsmeldingRefusjonstidslinje) =
@@ -184,9 +172,11 @@ internal class BeløpstidslinjeTest {
         val (nyTidslinje, nyRefusjonstidslinje) = ((Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars)).fremOgTilbakeViaRefusjonstidslinje()
 
         val (forventetTidslinje, forventetRefusjonstidslinje) =
-            ((Arbeidsgiver oppgir 31000.månedlig fra 1.januar til 19.januar) og
-            (Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars) og
-            (Arbeidsgiver oppgir 0.daglig fra 11.mars til 31.mars)).fremOgTilbakeViaRefusjonstidslinje()
+            (
+                (Arbeidsgiver oppgir 31000.månedlig fra 1.januar til 19.januar) og
+                    (Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars) og
+                    (Arbeidsgiver oppgir 0.daglig fra 11.mars til 31.mars)
+            ).fremOgTilbakeViaRefusjonstidslinje()
 
         assertEquals(forventetTidslinje, gammelTidslinje og nyTidslinje)
         assertRefusjonstidslinje(forventetRefusjonstidslinje, gammelRefusjonstidslinje + nyRefusjonstidslinje)
@@ -293,10 +283,13 @@ internal class BeløpstidslinjeTest {
 
     @Test
     fun `beholder kun dager med beløp (annet enn 0 kroner)`() {
-        val (beløpstidslinje, refusjonstidslinje) = Beløpstidslinje((1.januar til 31.januar).map {
-            val beløp = if (it.dayOfMonth % 2 == 0) it.dayOfMonth.daglig else INGEN
-            Beløpsdag(it, beløp, UUID.randomUUID().arbeidsgiver)
-        }).fremOgTilbakeViaRefusjonstidslinje()
+        val (beløpstidslinje, refusjonstidslinje) =
+            Beløpstidslinje(
+                (1.januar til 31.januar).map {
+                    val beløp = if (it.dayOfMonth % 2 == 0) it.dayOfMonth.daglig else INGEN
+                    Beløpsdag(it, beløp, UUID.randomUUID().arbeidsgiver)
+                },
+            ).fremOgTilbakeViaRefusjonstidslinje()
 
         assertEquals(31, beløpstidslinje.size)
         assertEquals(31, refusjonstidslinje.size)
@@ -305,11 +298,11 @@ internal class BeløpstidslinjeTest {
 
         val medBeløp = beløpstidslinje.medBeløp()
         assertEquals(15, medBeløp.size)
-        assertEquals(listOf(2,4,6,8,10,12,14,16,18,20,22,24,26,28,30).map { it.januar.somPeriode() }, medBeløp.perioderMedBeløp)
+        assertEquals(listOf(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30).map { it.januar.somPeriode() }, medBeløp.perioderMedBeløp)
 
         val medBeløpRefusjonstidslinje = refusjonstidslinje.medBeløp()
         assertEquals(15, medBeløpRefusjonstidslinje.size)
-        assertEquals(listOf(2,4,6,8,10,12,14,16,18,20,22,24,26,28,30).map { it.januar.somPeriode() }, medBeløpRefusjonstidslinje.perioderMedBeløp)
+        assertEquals(listOf(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30).map { it.januar.somPeriode() }, medBeløpRefusjonstidslinje.perioderMedBeløp)
 
         val gjenopprettet = Beløpstidslinje.gjenopprett(medBeløp.dto()) // TODO: dto/gjenopprett
         assertEquals(medBeløp, gjenopprettet)
@@ -318,34 +311,37 @@ internal class BeløpstidslinjeTest {
     @Test
     fun dto() {
         // TODO: dto/gjenopprett
-        val tidslinje = (Arbeidsgiver oppgir 500.daglig kun 1.februar) og
-            (Arbeidsgiver oppgir 250.daglig fra 2.februar til 10.februar) og
-            (Arbeidsgiver oppgir 500.daglig fra 11.februar til 12.februar)
+        val tidslinje =
+            (Arbeidsgiver oppgir 500.daglig kun 1.februar) og
+                (Arbeidsgiver oppgir 250.daglig fra 2.februar til 10.februar) og
+                (Arbeidsgiver oppgir 500.daglig fra 11.februar til 12.februar)
 
         val kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(Arbeidsgiver.meldingsreferanseId.dto(), Arbeidsgiver.avsender.dto(), Arbeidsgiver.tidsstempel)
         assertEquals(
             BeløpstidslinjeDto(
-                perioder = listOf(
-                    BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                        fom = 1.februar,
-                        tom = 1.februar,
-                        dagligBeløp = 500.0,
-                        kilde = kilde
+                perioder =
+                    listOf(
+                        BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                            fom = 1.februar,
+                            tom = 1.februar,
+                            dagligBeløp = 500.0,
+                            kilde = kilde,
+                        ),
+                        BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                            fom = 2.februar,
+                            tom = 10.februar,
+                            dagligBeløp = 250.0,
+                            kilde = kilde,
+                        ),
+                        BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
+                            fom = 11.februar,
+                            tom = 12.februar,
+                            dagligBeløp = 500.0,
+                            kilde = kilde,
+                        ),
                     ),
-                    BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                        fom = 2.februar,
-                        tom = 10.februar,
-                        dagligBeløp = 250.0,
-                        kilde = kilde
-                    ),
-                    BeløpstidslinjeDto.BeløpstidslinjeperiodeDto(
-                        fom = 11.februar,
-                        tom = 12.februar,
-                        dagligBeløp = 500.0,
-                        kilde = kilde
-                    )
-                )
-            ), tidslinje.dto()
+            ),
+            tidslinje.dto(),
         )
     }
 
@@ -354,16 +350,30 @@ internal class BeløpstidslinjeTest {
         internal val Refusjonstidslinje.perioderMedBeløp get() = gruppér().keys.toList().grupperSammenhengendePerioder()
         internal val UUID.arbeidsgiver get() = Kilde(MeldingsreferanseId(this), ARBEIDSGIVER, LocalDateTime.now())
         internal val UUID.saksbehandler get() = Kilde(MeldingsreferanseId(this), SAKSBEHANDLER, LocalDateTime.now())
-        internal fun Avsender.beløpstidslinje(periode: Periode, beløp: Inntekt) = Beløpstidslinje.fra(periode, beløp, Kilde(MeldingsreferanseId(UUID.randomUUID()), this, LocalDateTime.now()))
 
-        internal fun assertBeløpstidslinje(actual: Beløpstidslinje, periode: Periode, beløp: Inntekt, meldingsreferanseId: UUID? = null) {
+        internal fun Avsender.beløpstidslinje(
+            periode: Periode,
+            beløp: Inntekt,
+        ) = Beløpstidslinje.fra(periode, beløp, Kilde(MeldingsreferanseId(UUID.randomUUID()), this, LocalDateTime.now()))
+
+        internal fun assertBeløpstidslinje(
+            actual: Beløpstidslinje,
+            periode: Periode,
+            beløp: Inntekt,
+            meldingsreferanseId: UUID? = null,
+        ) {
             val ignoreMeldingsreferanseId = meldingsreferanseId == null
             val kilde = Kilde(MeldingsreferanseId(meldingsreferanseId ?: UUID.randomUUID()), SYSTEM, LocalDate.EPOCH.atStartOfDay())
             val expected = Beløpstidslinje.fra(periode, beløp, kilde)
             assertBeløpstidslinje(expected, actual, ignoreMeldingsreferanseId = ignoreMeldingsreferanseId, ignoreAvsender = true)
         }
 
-        internal fun assertBeløpstidslinje(expected: Beløpstidslinje, actual: Beløpstidslinje, ignoreMeldingsreferanseId: Boolean = false, ignoreAvsender: Boolean = false) {
+        internal fun assertBeløpstidslinje(
+            expected: Beløpstidslinje,
+            actual: Beløpstidslinje,
+            ignoreMeldingsreferanseId: Boolean = false,
+            ignoreAvsender: Boolean = false,
+        ) {
             val tøyseteMeldingsreferanseId = UUID.randomUUID()
             val meldingsreferanseId: (ekte: UUID) -> UUID = if (ignoreMeldingsreferanseId) { _ -> tøyseteMeldingsreferanseId } else { ekte -> ekte }
             val avsender: (ekte: Avsender) -> Avsender = if (ignoreAvsender) { _ -> SYSTEM } else { ekte -> ekte }
@@ -372,32 +382,41 @@ internal class BeløpstidslinjeTest {
 
         private fun Beløpstidslinje.besudlet(
             meldingsreferanseId: (ekte: UUID) -> UUID,
-            avsender: (ekte: Avsender) -> Avsender
+            avsender: (ekte: Avsender) -> Avsender,
         ): Beløpstidslinje {
-            val beløpsdager = filterIsInstance<Beløpsdag>().map {
-                it.copy(
-                    kilde = it.kilde.copy(
-                        avsender = avsender(it.kilde.avsender),
-                        tidsstempel = LocalDate.EPOCH.atStartOfDay(),
-                        meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId(it.kilde.meldingsreferanseId.id))
+            val beløpsdager =
+                filterIsInstance<Beløpsdag>().map {
+                    it.copy(
+                        kilde =
+                            it.kilde.copy(
+                                avsender = avsender(it.kilde.avsender),
+                                tidsstempel = LocalDate.EPOCH.atStartOfDay(),
+                                meldingsreferanseId = MeldingsreferanseId(meldingsreferanseId(it.kilde.meldingsreferanseId.id)),
+                            ),
                     )
-                )
-            }
+                }
             return Beløpstidslinje(beløpsdager)
         }
 
         private fun fraBeløpstidslinje(beløpstidslinje: Beløpstidslinje): Refusjonstidslinje {
-            val tidslinjedager = beløpstidslinje.filterIsInstance<Beløpsdag>().map { beløpsdag ->
-                Tidslinjedag(beløpsdag.dato, Refusjonsdag(beløpsdag.beløp, beløpsdag.kilde))
-            }.somArray
+            val tidslinjedager =
+                beløpstidslinje
+                    .filterIsInstance<Beløpsdag>()
+                    .map { beløpsdag ->
+                        Tidslinjedag(beløpsdag.dato, Refusjonsdag(beløpsdag.beløp, beløpsdag.kilde))
+                    }.somArray
             return Refusjonstidslinje(*tidslinjedager)
         }
 
         private fun tilBeløpstidslinje(refusjonstidslinje: Refusjonstidslinje): Beløpstidslinje {
-            val beløpsdager = refusjonstidslinje.mapNotNull { refusjonsdag -> when (refusjonsdag.verdi) {
-                null -> null
-                else -> Beløpsdag(refusjonsdag.dato, refusjonsdag.verdi.beløp, refusjonsdag.verdi.kilde)
-            }}.toTypedArray()
+            val beløpsdager =
+                refusjonstidslinje
+                    .mapNotNull { refusjonsdag ->
+                        when (refusjonsdag.verdi) {
+                            null -> null
+                            else -> Beløpsdag(refusjonsdag.dato, refusjonsdag.verdi.beløp, refusjonsdag.verdi.kilde)
+                        }
+                    }.toTypedArray()
             return Beløpstidslinje(*beløpsdager)
         }
 
@@ -417,7 +436,7 @@ internal class BeløpstidslinjeTest {
                     appendLine("| ${denne.key}  | ${denne.value.beløp.dagligInt.toString().padStart(5, ' ')} |")
                     if (neste == null) return@mapWithNext
                     Periode.mellom(denne.key, neste.key)?.let { gap ->
-                        appendLine("| ${gap}  |  n/a  |")
+                        appendLine("| $gap  |  n/a  |")
                     }
                 }
                 appendLine("|------------------------------------|")
@@ -425,7 +444,10 @@ internal class BeløpstidslinjeTest {
             }
         }
 
-        private fun assertRefusjonstidslinje(expected: Refusjonstidslinje, actual: Refusjonstidslinje) {
+        private fun assertRefusjonstidslinje(
+            expected: Refusjonstidslinje,
+            actual: Refusjonstidslinje,
+        ) {
             try {
                 assertEquals(expected, actual)
             } catch (error: AssertionFailedError) {

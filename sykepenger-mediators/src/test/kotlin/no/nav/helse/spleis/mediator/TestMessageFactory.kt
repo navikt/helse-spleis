@@ -6,10 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
@@ -32,7 +28,6 @@ import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.Periode as HendelsePeriode
 import no.nav.helse.januar
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.Behov
@@ -47,20 +42,28 @@ import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
+import no.nav.helse.hendelser.Periode as HendelsePeriode
 
 internal class TestMessageFactory(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val inntekt: Double,
-    private val fødselsdato: LocalDate
+    private val fødselsdato: LocalDate,
 ) {
-
     private companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        private val objectMapper =
+            jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private fun SykepengesoknadDTO.toMapMedFelterFraSpedisjon(fødselsdato: LocalDate, historiskeFolkeregisteridenter: List<String>): Map<String, Any> =
+        private fun SykepengesoknadDTO.toMapMedFelterFraSpedisjon(
+            fødselsdato: LocalDate,
+            historiskeFolkeregisteridenter: List<String>,
+        ): Map<String, Any> =
             objectMapper
                 .convertValue<Map<String, Any>>(this)
                 .plus("fødselsdato" to "$fødselsdato")
@@ -77,26 +80,27 @@ internal class TestMessageFactory(
         opprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
         orgnummer: String = organisasjonsnummer,
         historiskeFolkeregisteridenter: List<String> = emptyList(),
-        fnr: String = fødselsnummer
+        fnr: String = fødselsnummer,
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }!!
-        val nySøknad = SykepengesoknadDTO(
-            status = SoknadsstatusDTO.NY,
-            id = UUID.randomUUID().toString(),
-            sykmeldingId = UUID.randomUUID().toString(),
-            fnr = fnr,
-            arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnummer),
-            fom = fom,
-            tom = perioder.maxOfOrNull { it.tom!! },
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            startSyketilfelle = LocalDate.now(),
-            sendtNav = null,
-            egenmeldinger = emptyList(),
-            fravar = emptyList(),
-            soknadsperioder = perioder.toList(),
-            opprettet = opprettet,
-            sykmeldingSkrevet = fom.atStartOfDay()
-        )
+        val nySøknad =
+            SykepengesoknadDTO(
+                status = SoknadsstatusDTO.NY,
+                id = UUID.randomUUID().toString(),
+                sykmeldingId = UUID.randomUUID().toString(),
+                fnr = fnr,
+                arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnummer),
+                fom = fom,
+                tom = perioder.maxOfOrNull { it.tom!! },
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
+                startSyketilfelle = LocalDate.now(),
+                sendtNav = null,
+                egenmeldinger = emptyList(),
+                fravar = emptyList(),
+                soknadsperioder = perioder.toList(),
+                opprettet = opprettet,
+                sykmeldingSkrevet = fom.atStartOfDay(),
+            )
         return nyHendelse("ny_søknad", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, historiskeFolkeregisteridenter))
     }
 
@@ -104,32 +108,34 @@ internal class TestMessageFactory(
         vararg perioder: SoknadsperiodeDTO,
         opprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
         historiskeFolkeregisteridenter: List<String> = emptyList(),
-        fnr: String = fødselsnummer
+        fnr: String = fødselsnummer,
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }!!
-        val nySøknad = SykepengesoknadDTO(
-            status = SoknadsstatusDTO.NY,
-            id = UUID.randomUUID().toString(),
-            sykmeldingId = UUID.randomUUID().toString(),
-            fnr = fnr,
-            arbeidsgiver = null,
-            fom = fom,
-            tom = perioder.maxOfOrNull { it.tom!! },
-            type = SoknadstypeDTO.SELVSTENDIGE_OG_FRILANSERE,
-            arbeidssituasjon = ArbeidssituasjonDTO.FRILANSER,
-            startSyketilfelle = LocalDate.now(),
-            sendtNav = null,
-            egenmeldinger = null,
-            fravar = null,
-            soknadsperioder = perioder.toList(),
-            opprettet = opprettet,
-            sykmeldingSkrevet = fom.atStartOfDay()
-        )
+        val nySøknad =
+            SykepengesoknadDTO(
+                status = SoknadsstatusDTO.NY,
+                id = UUID.randomUUID().toString(),
+                sykmeldingId = UUID.randomUUID().toString(),
+                fnr = fnr,
+                arbeidsgiver = null,
+                fom = fom,
+                tom = perioder.maxOfOrNull { it.tom!! },
+                type = SoknadstypeDTO.SELVSTENDIGE_OG_FRILANSERE,
+                arbeidssituasjon = ArbeidssituasjonDTO.FRILANSER,
+                startSyketilfelle = LocalDate.now(),
+                sendtNav = null,
+                egenmeldinger = null,
+                fravar = null,
+                soknadsperioder = perioder.toList(),
+                opprettet = opprettet,
+                sykmeldingSkrevet = fom.atStartOfDay(),
+            )
         return nyHendelse(
-            "ny_søknad_frilans", nySøknad.toMapMedFelterFraSpedisjon(
-            fødselsdato,
-            historiskeFolkeregisteridenter
-        )
+            "ny_søknad_frilans",
+            nySøknad.toMapMedFelterFraSpedisjon(
+                fødselsdato,
+                historiskeFolkeregisteridenter,
+            ),
         )
     }
 
@@ -138,32 +144,34 @@ internal class TestMessageFactory(
         arbeidssituasjon: ArbeidssituasjonDTO,
         opprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
         historiskeFolkeregisteridenter: List<String> = emptyList(),
-        fnr: String = fødselsnummer
+        fnr: String = fødselsnummer,
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }!!
-        val nySøknad = SykepengesoknadDTO(
-            status = SoknadsstatusDTO.NY,
-            id = UUID.randomUUID().toString(),
-            sykmeldingId = UUID.randomUUID().toString(),
-            fnr = fnr,
-            arbeidsgiver = null,
-            fom = fom,
-            tom = perioder.maxOfOrNull { it.tom!! },
-            type = SoknadstypeDTO.SELVSTENDIGE_OG_FRILANSERE,
-            arbeidssituasjon = arbeidssituasjon,
-            startSyketilfelle = LocalDate.now(),
-            sendtNav = null,
-            egenmeldinger = null,
-            fravar = null,
-            soknadsperioder = perioder.toList(),
-            opprettet = opprettet,
-            sykmeldingSkrevet = fom.atStartOfDay()
-        )
+        val nySøknad =
+            SykepengesoknadDTO(
+                status = SoknadsstatusDTO.NY,
+                id = UUID.randomUUID().toString(),
+                sykmeldingId = UUID.randomUUID().toString(),
+                fnr = fnr,
+                arbeidsgiver = null,
+                fom = fom,
+                tom = perioder.maxOfOrNull { it.tom!! },
+                type = SoknadstypeDTO.SELVSTENDIGE_OG_FRILANSERE,
+                arbeidssituasjon = arbeidssituasjon,
+                startSyketilfelle = LocalDate.now(),
+                sendtNav = null,
+                egenmeldinger = null,
+                fravar = null,
+                soknadsperioder = perioder.toList(),
+                opprettet = opprettet,
+                sykmeldingSkrevet = fom.atStartOfDay(),
+            )
         return nyHendelse(
-            "ny_søknad_selvstendig", nySøknad.toMapMedFelterFraSpedisjon(
-            fødselsdato,
-            historiskeFolkeregisteridenter
-        )
+            "ny_søknad_selvstendig",
+            nySøknad.toMapMedFelterFraSpedisjon(
+                fødselsdato,
+                historiskeFolkeregisteridenter,
+            ),
         )
     }
 
@@ -172,64 +180,68 @@ internal class TestMessageFactory(
         opprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         fnr: String = fødselsnummer,
-        tidligereArbeidsgiverOrgnummer: String? = null
+        tidligereArbeidsgiverOrgnummer: String? = null,
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }!!
-        val nySøknad = SykepengesoknadDTO(
-            status = SoknadsstatusDTO.NY,
-            id = UUID.randomUUID().toString(),
-            sykmeldingId = UUID.randomUUID().toString(),
-            fnr = fnr,
-            arbeidsgiver = null,
-            tidligereArbeidsgiverOrgnummer = tidligereArbeidsgiverOrgnummer,
-            fom = fom,
-            tom = perioder.maxOfOrNull { it.tom!! },
-            type = SoknadstypeDTO.ARBEIDSLEDIG,
-            arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSLEDIG,
-            startSyketilfelle = LocalDate.now(),
-            sendtNav = null,
-            egenmeldinger = null,
-            fravar = null,
-            soknadsperioder = perioder.toList(),
-            opprettet = opprettet,
-            sykmeldingSkrevet = fom.atStartOfDay()
-        )
+        val nySøknad =
+            SykepengesoknadDTO(
+                status = SoknadsstatusDTO.NY,
+                id = UUID.randomUUID().toString(),
+                sykmeldingId = UUID.randomUUID().toString(),
+                fnr = fnr,
+                arbeidsgiver = null,
+                tidligereArbeidsgiverOrgnummer = tidligereArbeidsgiverOrgnummer,
+                fom = fom,
+                tom = perioder.maxOfOrNull { it.tom!! },
+                type = SoknadstypeDTO.ARBEIDSLEDIG,
+                arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSLEDIG,
+                startSyketilfelle = LocalDate.now(),
+                sendtNav = null,
+                egenmeldinger = null,
+                fravar = null,
+                soknadsperioder = perioder.toList(),
+                opprettet = opprettet,
+                sykmeldingSkrevet = fom.atStartOfDay(),
+            )
         return nyHendelse(
-            "ny_søknad_arbeidsledig", nySøknad.toMapMedFelterFraSpedisjon(
-            fødselsdato,
-            historiskeFolkeregisteridenter
-        )
+            "ny_søknad_arbeidsledig",
+            nySøknad.toMapMedFelterFraSpedisjon(
+                fødselsdato,
+                historiskeFolkeregisteridenter,
+            ),
         )
     }
 
     fun lagSøknadArbeidsgiver(
         perioder: List<SoknadsperiodeDTO>,
-        historiskeFolkeregisteridenter: List<String> = emptyList()
+        historiskeFolkeregisteridenter: List<String> = emptyList(),
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }!!
-        val sendtSøknad = SykepengesoknadDTO(
-            status = SoknadsstatusDTO.SENDT,
-            id = UUID.randomUUID().toString(),
-            fnr = fødselsnummer,
-            arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
-            fom = fom,
-            tom = perioder.maxOfOrNull { it.tom!! },
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
-            startSyketilfelle = LocalDate.now(),
-            sendtArbeidsgiver = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
-            papirsykmeldinger = emptyList(),
-            egenmeldinger = emptyList(),
-            fravar = emptyList(),
-            soknadsperioder = perioder.toList(),
-            opprettet = LocalDateTime.now(),
-            sykmeldingSkrevet = fom.atStartOfDay()
-        )
+        val sendtSøknad =
+            SykepengesoknadDTO(
+                status = SoknadsstatusDTO.SENDT,
+                id = UUID.randomUUID().toString(),
+                fnr = fødselsnummer,
+                arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
+                fom = fom,
+                tom = perioder.maxOfOrNull { it.tom!! },
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
+                arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
+                startSyketilfelle = LocalDate.now(),
+                sendtArbeidsgiver = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
+                papirsykmeldinger = emptyList(),
+                egenmeldinger = emptyList(),
+                fravar = emptyList(),
+                soknadsperioder = perioder.toList(),
+                opprettet = LocalDateTime.now(),
+                sykmeldingSkrevet = fom.atStartOfDay(),
+            )
         return nyHendelse(
-            "sendt_søknad_arbeidsgiver", sendtSøknad.toMapMedFelterFraSpedisjon(
-            fødselsdato,
-            historiskeFolkeregisteridenter
-        )
+            "sendt_søknad_arbeidsgiver",
+            sendtSøknad.toMapMedFelterFraSpedisjon(
+                fødselsdato,
+                historiskeFolkeregisteridenter,
+            ),
         )
     }
 
@@ -246,43 +258,46 @@ internal class TestMessageFactory(
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         sendTilGosys: Boolean? = false,
         egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
-        inntektFraNyttArbeidsforhold: List<InntektFraNyttArbeidsforholdDTO> = emptyList()
+        inntektFraNyttArbeidsforhold: List<InntektFraNyttArbeidsforholdDTO> = emptyList(),
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
-        val sendtSøknad = SykepengesoknadDTO(
-            status = SoknadsstatusDTO.SENDT,
-            id = UUID.randomUUID().toString(),
-            fnr = fnr,
-            arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnummer),
-            fom = fom,
-            tom = perioder.maxOfOrNull { it.tom!! },
-            type = SoknadstypeDTO.ARBEIDSTAKERE,
-            arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
-            startSyketilfelle = LocalDate.now(),
-            sendtNav = sendtNav,
-            papirsykmeldinger = emptyList(),
-            sporsmal = lagSpørsmål(ikkeJobbetIDetSisteFraAnnetArbeidsforhold),
-            egenmeldinger = emptyList(),
-            fravar = fravær,
-            korrigerer = korrigerer?.toString(),
-            opprinneligSendt = opprinneligSendt,
-            andreInntektskilder = andreInntektskilder,
-            soknadsperioder = perioder.toList(),
-            opprettet = LocalDateTime.now(),
-            sykmeldingSkrevet = fom!!.atStartOfDay(),
-            merknaderFraSykmelding = listOf(
-                MerknadDTO("EN_MERKNADSTYPE", null),
-                MerknadDTO("EN_ANNEN_MERKNADSTYPE", "tekstlig begrunnelse")
-            ),
-            sendTilGosys = sendTilGosys,
-            egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding,
-            inntektFraNyttArbeidsforhold = inntektFraNyttArbeidsforhold
-        )
+        val sendtSøknad =
+            SykepengesoknadDTO(
+                status = SoknadsstatusDTO.SENDT,
+                id = UUID.randomUUID().toString(),
+                fnr = fnr,
+                arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnummer),
+                fom = fom,
+                tom = perioder.maxOfOrNull { it.tom!! },
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
+                arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
+                startSyketilfelle = LocalDate.now(),
+                sendtNav = sendtNav,
+                papirsykmeldinger = emptyList(),
+                sporsmal = lagSpørsmål(ikkeJobbetIDetSisteFraAnnetArbeidsforhold),
+                egenmeldinger = emptyList(),
+                fravar = fravær,
+                korrigerer = korrigerer?.toString(),
+                opprinneligSendt = opprinneligSendt,
+                andreInntektskilder = andreInntektskilder,
+                soknadsperioder = perioder.toList(),
+                opprettet = LocalDateTime.now(),
+                sykmeldingSkrevet = fom!!.atStartOfDay(),
+                merknaderFraSykmelding =
+                    listOf(
+                        MerknadDTO("EN_MERKNADSTYPE", null),
+                        MerknadDTO("EN_ANNEN_MERKNADSTYPE", "tekstlig begrunnelse"),
+                    ),
+                sendTilGosys = sendTilGosys,
+                egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding,
+                inntektFraNyttArbeidsforhold = inntektFraNyttArbeidsforhold,
+            )
         return nyHendelse(
-            "sendt_søknad_nav", sendtSøknad.toMapMedFelterFraSpedisjon(
-            fødselsdato,
-            historiskeFolkeregisteridenter
-        )
+            "sendt_søknad_nav",
+            sendtSøknad.toMapMedFelterFraSpedisjon(
+                fødselsdato,
+                historiskeFolkeregisteridenter,
+            ),
         )
     }
 
@@ -290,19 +305,22 @@ internal class TestMessageFactory(
         if (!ikkeJobbetIDetSisteFraAnnetArbeidsforhold) return null
         return listOf(
             SporsmalDTO(
-                undersporsmal = listOf(
-                    SporsmalDTO(
-                        undersporsmal = listOf(
-                            SporsmalDTO(
-                                tag = "INNTEKTSKILDE_ANDRE_ARBEIDSFORHOLD_JOBBET_I_DET_SISTE",
-                                svar = listOf(
-                                    SvarDTO(verdi = "NEI")
-                                )
-                            )
-                        )
-                    )
-                )
-            )
+                undersporsmal =
+                    listOf(
+                        SporsmalDTO(
+                            undersporsmal =
+                                listOf(
+                                    SporsmalDTO(
+                                        tag = "INNTEKTSKILDE_ANDRE_ARBEIDSFORHOLD_JOBBET_I_DET_SISTE",
+                                        svar =
+                                            listOf(
+                                                SvarDTO(verdi = "NEI"),
+                                            ),
+                                    ),
+                                ),
+                        ),
+                    ),
+            ),
         )
     }
 
@@ -315,42 +333,45 @@ internal class TestMessageFactory(
         opprinneligSendt: LocalDateTime? = null,
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         sendTilGosys: Boolean? = false,
-        egenmeldingerFraSykmelding: List<LocalDate> = emptyList()
+        egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
-        val sendtSøknad = SykepengesoknadDTO(
-            status = SoknadsstatusDTO.SENDT,
-            id = UUID.randomUUID().toString(),
-            fnr = fnr,
-            arbeidsgiver = null,
-            fom = fom,
-            tom = perioder.maxOfOrNull { it.tom!! },
-            type = SoknadstypeDTO.SELVSTENDIGE_OG_FRILANSERE,
-            arbeidssituasjon = ArbeidssituasjonDTO.FRILANSER,
-            startSyketilfelle = LocalDate.now(),
-            sendtNav = sendtNav,
-            sendtArbeidsgiver = null,
-            papirsykmeldinger = null,
-            egenmeldinger = null,
-            fravar = null,
-            korrigerer = korrigerer?.toString(),
-            opprinneligSendt = opprinneligSendt,
-            andreInntektskilder = andreInntektskilder,
-            soknadsperioder = perioder.toList(),
-            opprettet = LocalDateTime.now(),
-            sykmeldingSkrevet = fom!!.atStartOfDay(),
-            merknaderFraSykmelding = listOf(
-                MerknadDTO("EN_MERKNADSTYPE", null),
-                MerknadDTO("EN_ANNEN_MERKNADSTYPE", "tekstlig begrunnelse")
-            ),
-            sendTilGosys = sendTilGosys,
-            egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding
-        )
+        val sendtSøknad =
+            SykepengesoknadDTO(
+                status = SoknadsstatusDTO.SENDT,
+                id = UUID.randomUUID().toString(),
+                fnr = fnr,
+                arbeidsgiver = null,
+                fom = fom,
+                tom = perioder.maxOfOrNull { it.tom!! },
+                type = SoknadstypeDTO.SELVSTENDIGE_OG_FRILANSERE,
+                arbeidssituasjon = ArbeidssituasjonDTO.FRILANSER,
+                startSyketilfelle = LocalDate.now(),
+                sendtNav = sendtNav,
+                sendtArbeidsgiver = null,
+                papirsykmeldinger = null,
+                egenmeldinger = null,
+                fravar = null,
+                korrigerer = korrigerer?.toString(),
+                opprinneligSendt = opprinneligSendt,
+                andreInntektskilder = andreInntektskilder,
+                soknadsperioder = perioder.toList(),
+                opprettet = LocalDateTime.now(),
+                sykmeldingSkrevet = fom!!.atStartOfDay(),
+                merknaderFraSykmelding =
+                    listOf(
+                        MerknadDTO("EN_MERKNADSTYPE", null),
+                        MerknadDTO("EN_ANNEN_MERKNADSTYPE", "tekstlig begrunnelse"),
+                    ),
+                sendTilGosys = sendTilGosys,
+                egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding,
+            )
         return nyHendelse(
-            "sendt_søknad_frilans", sendtSøknad.toMapMedFelterFraSpedisjon(
-            fødselsdato,
-            historiskeFolkeregisteridenter
-        )
+            "sendt_søknad_frilans",
+            sendtSøknad.toMapMedFelterFraSpedisjon(
+                fødselsdato,
+                historiskeFolkeregisteridenter,
+            ),
         )
     }
 
@@ -369,88 +390,97 @@ internal class TestMessageFactory(
         harOppgittForsikring: Boolean? = null,
         selvstendigHovedspørsmål: Map<String, Boolean> = emptyMap(),
         selvstendigNaringsdrivende: SelvstendigNaringsdrivendeDTO? = selvstendigNæringsdrivende(ventetid, selvstendigHovedspørsmål, harOppgittForsikring),
-        meldingTilNavDager: List<PeriodeDTO>? = null
+        meldingTilNavDager: List<PeriodeDTO>? = null,
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
-        val sendtSøknad = SykepengesoknadDTO(
-            status = SoknadsstatusDTO.SENDT,
-            id = UUID.randomUUID().toString(),
-            fnr = fnr,
-            arbeidsgiver = null,
-            fom = fom,
-            tom = perioder.maxOfOrNull { it.tom!! },
-            type = SoknadstypeDTO.SELVSTENDIGE_OG_FRILANSERE,
-            arbeidssituasjon = arbeidssituasjon,
-            startSyketilfelle = LocalDate.now(),
-            sendtNav = sendtNav,
-            sendtArbeidsgiver = null,
-            papirsykmeldinger = null,
-            egenmeldinger = null,
-            fravar = null,
-            korrigerer = korrigerer?.toString(),
-            opprinneligSendt = opprinneligSendt,
-            andreInntektskilder = andreInntektskilder,
-            soknadsperioder = perioder.toList(),
-            opprettet = LocalDateTime.now(),
-            sykmeldingSkrevet = fom!!.atStartOfDay(),
-            merknaderFraSykmelding = listOf(
-                MerknadDTO("EN_MERKNADSTYPE", null),
-                MerknadDTO("EN_ANNEN_MERKNADSTYPE", "tekstlig begrunnelse")
-            ),
-            sendTilGosys = sendTilGosys,
-            egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding,
-            selvstendigNaringsdrivende = selvstendigNaringsdrivende,
-            meldingTilNavDagerFraSykmelding = meldingTilNavDager
-        )
+        val sendtSøknad =
+            SykepengesoknadDTO(
+                status = SoknadsstatusDTO.SENDT,
+                id = UUID.randomUUID().toString(),
+                fnr = fnr,
+                arbeidsgiver = null,
+                fom = fom,
+                tom = perioder.maxOfOrNull { it.tom!! },
+                type = SoknadstypeDTO.SELVSTENDIGE_OG_FRILANSERE,
+                arbeidssituasjon = arbeidssituasjon,
+                startSyketilfelle = LocalDate.now(),
+                sendtNav = sendtNav,
+                sendtArbeidsgiver = null,
+                papirsykmeldinger = null,
+                egenmeldinger = null,
+                fravar = null,
+                korrigerer = korrigerer?.toString(),
+                opprinneligSendt = opprinneligSendt,
+                andreInntektskilder = andreInntektskilder,
+                soknadsperioder = perioder.toList(),
+                opprettet = LocalDateTime.now(),
+                sykmeldingSkrevet = fom!!.atStartOfDay(),
+                merknaderFraSykmelding =
+                    listOf(
+                        MerknadDTO("EN_MERKNADSTYPE", null),
+                        MerknadDTO("EN_ANNEN_MERKNADSTYPE", "tekstlig begrunnelse"),
+                    ),
+                sendTilGosys = sendTilGosys,
+                egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding,
+                selvstendigNaringsdrivende = selvstendigNaringsdrivende,
+                meldingTilNavDagerFraSykmelding = meldingTilNavDager,
+            )
         return nyHendelse(
-            "sendt_søknad_selvstendig", sendtSøknad.toMapMedFelterFraSpedisjon(
-            fødselsdato,
-            historiskeFolkeregisteridenter
-        )
+            "sendt_søknad_selvstendig",
+            sendtSøknad.toMapMedFelterFraSpedisjon(
+                fødselsdato,
+                historiskeFolkeregisteridenter,
+            ),
         )
     }
 
     private fun selvstendigNæringsdrivende(
         ventetid: HendelsePeriode,
         selvstendigHovedspørsmål: Map<String, Boolean>,
-        harOppgittForsikring: Boolean?
-    ): SelvstendigNaringsdrivendeDTO = SelvstendigNaringsdrivendeDTO(
-        roller = emptyList(),
-        inntekt = InntektDTO(
-            norskPersonidentifikator = "12345678912",
-            inntektsAar = listOf(
-                InntektsAarDTO(
-                    aar = "2017",
-                    pensjonsgivendeInntekt = PensjonsgivendeInntektDTO(
-                        pensjonsgivendeInntektAvLoennsinntekt = 0,
-                        pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
-                        pensjonsgivendeInntektAvNaeringsinntekt = 400_000,
-                        pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0
-                    )
+        harOppgittForsikring: Boolean?,
+    ): SelvstendigNaringsdrivendeDTO =
+        SelvstendigNaringsdrivendeDTO(
+            roller = emptyList(),
+            inntekt =
+                InntektDTO(
+                    norskPersonidentifikator = "12345678912",
+                    inntektsAar =
+                        listOf(
+                            InntektsAarDTO(
+                                aar = "2017",
+                                pensjonsgivendeInntekt =
+                                    PensjonsgivendeInntektDTO(
+                                        pensjonsgivendeInntektAvLoennsinntekt = 0,
+                                        pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
+                                        pensjonsgivendeInntektAvNaeringsinntekt = 400_000,
+                                        pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0,
+                                    ),
+                            ),
+                            InntektsAarDTO(
+                                aar = "2016",
+                                pensjonsgivendeInntekt =
+                                    PensjonsgivendeInntektDTO(
+                                        pensjonsgivendeInntektAvLoennsinntekt = 0,
+                                        pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
+                                        pensjonsgivendeInntektAvNaeringsinntekt = 800_000,
+                                        pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0,
+                                    ),
+                            ),
+                            InntektsAarDTO(
+                                aar = "2015",
+                                pensjonsgivendeInntekt =
+                                    PensjonsgivendeInntektDTO(
+                                        pensjonsgivendeInntektAvLoennsinntekt = 0,
+                                        pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
+                                        pensjonsgivendeInntektAvNaeringsinntekt = 800_000,
+                                        pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0,
+                                    ),
+                            ),
+                        ),
                 ),
-                InntektsAarDTO(
-                    aar = "2016",
-                    pensjonsgivendeInntekt = PensjonsgivendeInntektDTO(
-                        pensjonsgivendeInntektAvLoennsinntekt = 0,
-                        pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
-                        pensjonsgivendeInntektAvNaeringsinntekt = 800_000,
-                        pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0
-                    )
-                ),
-                InntektsAarDTO(
-                    aar = "2015",
-                    pensjonsgivendeInntekt = PensjonsgivendeInntektDTO(
-                        pensjonsgivendeInntektAvLoennsinntekt = 0,
-                        pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
-                        pensjonsgivendeInntektAvNaeringsinntekt = 800_000,
-                        pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0
-                    )
-                )
-            )
-        ),
-        hovedSporsmalSvar = selvstendigHovedspørsmål,
-        brukerHarOppgittForsikring = harOppgittForsikring ?: false
-    )
+            hovedSporsmalSvar = selvstendigHovedspørsmål,
+            brukerHarOppgittForsikring = harOppgittForsikring ?: false,
+        )
 
     fun lagSøknadArbeidsledig(
         fnr: String = fødselsnummer,
@@ -462,43 +492,46 @@ internal class TestMessageFactory(
         opprinneligSendt: LocalDateTime? = null,
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         sendTilGosys: Boolean? = false,
-        egenmeldingerFraSykmelding: List<LocalDate> = emptyList()
+        egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
-        val sendtSøknad = SykepengesoknadDTO(
-            status = SoknadsstatusDTO.SENDT,
-            id = UUID.randomUUID().toString(),
-            fnr = fnr,
-            tidligereArbeidsgiverOrgnummer = tidligereArbeidsgiverOrgnummer,
-            arbeidsgiver = null,
-            fom = fom,
-            tom = perioder.maxOfOrNull { it.tom!! },
-            type = SoknadstypeDTO.ARBEIDSLEDIG,
-            arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSLEDIG,
-            startSyketilfelle = LocalDate.now(),
-            sendtNav = sendtNav,
-            sendtArbeidsgiver = null,
-            papirsykmeldinger = null,
-            egenmeldinger = null,
-            fravar = null,
-            korrigerer = korrigerer?.toString(),
-            opprinneligSendt = opprinneligSendt,
-            andreInntektskilder = andreInntektskilder,
-            soknadsperioder = perioder.toList(),
-            opprettet = LocalDateTime.now(),
-            sykmeldingSkrevet = fom!!.atStartOfDay(),
-            merknaderFraSykmelding = listOf(
-                MerknadDTO("EN_MERKNADSTYPE", null),
-                MerknadDTO("EN_ANNEN_MERKNADSTYPE", "tekstlig begrunnelse")
-            ),
-            sendTilGosys = sendTilGosys,
-            egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding
-        )
+        val sendtSøknad =
+            SykepengesoknadDTO(
+                status = SoknadsstatusDTO.SENDT,
+                id = UUID.randomUUID().toString(),
+                fnr = fnr,
+                tidligereArbeidsgiverOrgnummer = tidligereArbeidsgiverOrgnummer,
+                arbeidsgiver = null,
+                fom = fom,
+                tom = perioder.maxOfOrNull { it.tom!! },
+                type = SoknadstypeDTO.ARBEIDSLEDIG,
+                arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSLEDIG,
+                startSyketilfelle = LocalDate.now(),
+                sendtNav = sendtNav,
+                sendtArbeidsgiver = null,
+                papirsykmeldinger = null,
+                egenmeldinger = null,
+                fravar = null,
+                korrigerer = korrigerer?.toString(),
+                opprinneligSendt = opprinneligSendt,
+                andreInntektskilder = andreInntektskilder,
+                soknadsperioder = perioder.toList(),
+                opprettet = LocalDateTime.now(),
+                sykmeldingSkrevet = fom!!.atStartOfDay(),
+                merknaderFraSykmelding =
+                    listOf(
+                        MerknadDTO("EN_MERKNADSTYPE", null),
+                        MerknadDTO("EN_ANNEN_MERKNADSTYPE", "tekstlig begrunnelse"),
+                    ),
+                sendTilGosys = sendTilGosys,
+                egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding,
+            )
         return nyHendelse(
-            "sendt_søknad_arbeidsledig", sendtSøknad.toMapMedFelterFraSpedisjon(
-            fødselsdato,
-            historiskeFolkeregisteridenter
-        )
+            "sendt_søknad_arbeidsledig",
+            sendtSøknad.toMapMedFelterFraSpedisjon(
+                fødselsdato,
+                historiskeFolkeregisteridenter,
+            ),
         )
     }
 
@@ -506,16 +539,17 @@ internal class TestMessageFactory(
         vedtaksperiodeId: UUID,
         organisasjonsnummer: String,
         fnr: String = fødselsnummer,
-        inntektsmeldingMeldingsreferanseId: UUID
+        inntektsmeldingMeldingsreferanseId: UUID,
     ) = nyHendelse(
         navn = "inntektsopplysninger_fra_lagret_inntektsmelding",
-        hendelse = mapOf(
-            "yrkesaktivitetstype" to "ARBEIDSTAKER",
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "fødselsnummer" to fnr,
-            "inntektsmeldingMeldingsreferanseId" to inntektsmeldingMeldingsreferanseId
-        )
+        hendelse =
+            mapOf(
+                "yrkesaktivitetstype" to "ARBEIDSTAKER",
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "fødselsnummer" to fnr,
+                "inntektsmeldingMeldingsreferanseId" to inntektsmeldingMeldingsreferanseId,
+            ),
     )
 
     private fun lagInntektsmelding(
@@ -528,7 +562,7 @@ internal class TestMessageFactory(
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         avsenderSystem: AvsenderSystem?,
         vedtaksperiodeId: UUID? = null,
-        årsakTilInnsending: String = "Ny"
+        årsakTilInnsending: String = "Ny",
     ) = Inntektsmelding(
         inntektsmeldingId = UUID.randomUUID().toString(),
         arbeidstakerFnr = fødselsnummer,
@@ -556,7 +590,7 @@ internal class TestMessageFactory(
         innsenderFulltNavn = "SPLEIS MEDIATOR",
         inntektsdato = null,
         vedtaksperiodeId = vedtaksperiodeId,
-        arsakTilInnsending = ArsakTilInnsending.valueOf(årsakTilInnsending)
+        arsakTilInnsending = ArsakTilInnsending.valueOf(årsakTilInnsending),
     )
 
     fun lagNavNoInntektsmelding(
@@ -566,20 +600,21 @@ internal class TestMessageFactory(
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = organisasjonsnummer,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        vedtaksperiodeId: UUID
+        vedtaksperiodeId: UUID,
     ) = nyHendelse(
-        "arbeidsgiveropplysninger", lagInntektsmelding(
-        arbeidsgiverperiode,
-        null,
-        opphørAvNaturalytelser,
-        beregnetInntekt,
-        orgnummer,
-        opphørsdatoForRefusjon,
-        begrunnelseForReduksjonEllerIkkeUtbetalt,
-        AvsenderSystem("NAV_NO", "V1.0"),
-        vedtaksperiodeId,
-        "Ny"
-    ).toMapMedFelterFraSpedisjon(fødselsdato)
+        "arbeidsgiveropplysninger",
+        lagInntektsmelding(
+            arbeidsgiverperiode,
+            null,
+            opphørAvNaturalytelser,
+            beregnetInntekt,
+            orgnummer,
+            opphørsdatoForRefusjon,
+            begrunnelseForReduksjonEllerIkkeUtbetalt,
+            AvsenderSystem("NAV_NO", "V1.0"),
+            vedtaksperiodeId,
+            "Ny",
+        ).toMapMedFelterFraSpedisjon(fødselsdato),
     )
 
     fun lagKorrigertNavNoInntektsmelding(
@@ -589,20 +624,21 @@ internal class TestMessageFactory(
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = organisasjonsnummer,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        vedtaksperiodeId: UUID
+        vedtaksperiodeId: UUID,
     ) = nyHendelse(
-        "korrigerte_arbeidsgiveropplysninger", lagInntektsmelding(
-        arbeidsgiverperiode,
-        null,
-        opphørAvNaturalytelser,
-        beregnetInntekt,
-        orgnummer,
-        opphørsdatoForRefusjon,
-        begrunnelseForReduksjonEllerIkkeUtbetalt,
-        AvsenderSystem("NAV_NO", "V1.0"),
-        vedtaksperiodeId,
-        "Endring"
-    ).toMapMedFelterFraSpedisjon(fødselsdato)
+        "korrigerte_arbeidsgiveropplysninger",
+        lagInntektsmelding(
+            arbeidsgiverperiode,
+            null,
+            opphørAvNaturalytelser,
+            beregnetInntekt,
+            orgnummer,
+            opphørsdatoForRefusjon,
+            begrunnelseForReduksjonEllerIkkeUtbetalt,
+            AvsenderSystem("NAV_NO", "V1.0"),
+            vedtaksperiodeId,
+            "Endring",
+        ).toMapMedFelterFraSpedisjon(fødselsdato),
     )
 
     fun lagNavNoSelvbestemtInntektsmelding(
@@ -612,114 +648,122 @@ internal class TestMessageFactory(
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = organisasjonsnummer,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        vedtaksperiodeId: UUID
+        vedtaksperiodeId: UUID,
     ) = nyHendelse(
-        "selvbestemte_arbeidsgiveropplysninger", lagInntektsmelding(
-        arbeidsgiverperiode,
-        null,
-        opphørAvNaturalytelser,
-        beregnetInntekt,
-        orgnummer,
-        opphørsdatoForRefusjon,
-        begrunnelseForReduksjonEllerIkkeUtbetalt,
-        AvsenderSystem("NAV_NO_SELVBESTEMT", "V1.0"),
-        vedtaksperiodeId
-    ).toMapMedFelterFraSpedisjon(fødselsdato)
+        "selvbestemte_arbeidsgiveropplysninger",
+        lagInntektsmelding(
+            arbeidsgiverperiode,
+            null,
+            opphørAvNaturalytelser,
+            beregnetInntekt,
+            orgnummer,
+            opphørsdatoForRefusjon,
+            begrunnelseForReduksjonEllerIkkeUtbetalt,
+            AvsenderSystem("NAV_NO_SELVBESTEMT", "V1.0"),
+            vedtaksperiodeId,
+        ).toMapMedFelterFraSpedisjon(fødselsdato),
     )
 
     fun lagInntektsmeldingReplay(
         vedtaksperiodeId: UUID,
-        inntektsmelding: String
-    ) = objectMapper.readTree(inntektsmelding).also {
-        (it as ObjectNode).put("@event_name", "inntektsmelding_replay")
-        it.put("vedtaksperiodeId", "$vedtaksperiodeId")
-    }.let { node ->
-        UUID.fromString(node.path("@id").asText()) to node.toString()
-    }
+        inntektsmelding: String,
+    ) = objectMapper
+        .readTree(inntektsmelding)
+        .also {
+            (it as ObjectNode).put("@event_name", "inntektsmelding_replay")
+            it.put("vedtaksperiodeId", "$vedtaksperiodeId")
+        }.let { node ->
+            UUID.fromString(node.path("@id").asText()) to node.toString()
+        }
 
     fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
         yrkesaktivitetstype: String = "ARBEIDSTAKER",
         sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(),
         orgnummer: String? = null,
-        besvart: LocalDateTime = LocalDateTime.now()
-    ): Pair<String, String> {
-        return lagBehovMedLøsning(
+        besvart: LocalDateTime = LocalDateTime.now(),
+    ): Pair<String, String> =
+        lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = null,
             yrkesaktivitetstype = yrkesaktivitetstype,
             behov = listOf("Sykepengehistorikk"),
             løsninger = sykepengehistorikk.toJson(),
             orgnummer = orgnummer ?: organisasjonsnummer,
-            besvart = besvart
+            besvart = besvart,
         )
-    }
 
-    fun lagUtbetalingshistorikkEtterInfotrygdendring(sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()): Pair<String, String> {
-        return nyHendelse(
-            "behov", mutableMapOf(
-            "@behov" to listOf("Sykepengehistorikk"),
-            "fødselsnummer" to fødselsnummer,
-            "@løsning" to sykepengehistorikk.toJson(),
-            "@final" to true,
-            "@besvart" to LocalDateTime.now()
+    fun lagUtbetalingshistorikkEtterInfotrygdendring(sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()): Pair<String, String> =
+        nyHendelse(
+            "behov",
+            mutableMapOf(
+                "@behov" to listOf("Sykepengehistorikk"),
+                "fødselsnummer" to fødselsnummer,
+                "@løsning" to sykepengehistorikk.toJson(),
+                "@final" to true,
+                "@besvart" to LocalDateTime.now(),
+            ),
         )
-        )
-    }
 
     fun lagUtbetalingshistorikkForFeriepenger(testdata: UtbetalingshistorikkForFeriepengerTestdata) =
         lagBehovMedLøsning(
             vedtaksperiodeId = null,
             behandlingId = null,
             behov = listOf("SykepengehistorikkForFeriepenger"),
-            ekstraFelter = mapOf(
-                "SykepengehistorikkForFeriepenger" to mapOf(
-                    "historikkFom" to testdata.fom.toString(),
-                    "historikkTom" to testdata.tom.toString(),
-                    "datoForSisteFeriepengekjøringIInfotrygd" to "2025-05-10"
-                )
-            ),
-            løsninger = mapOf(
-                "SykepengehistorikkForFeriepenger" to mapOf(
-                    "feriepengerSkalBeregnesManuelt" to testdata.feriepengerSkalBeregnesManuelt,
-                    "utbetalinger" to testdata.utbetalinger.map {
+            ekstraFelter =
+                mapOf(
+                    "SykepengehistorikkForFeriepenger" to
                         mapOf(
-                            "fom" to it.fom,
-                            "tom" to it.tom,
-                            "utbetalt" to it.utbetalt,
-                            "dagsats" to it.dagsats,
-                            "typeKode" to it.typekode,
-                            "utbetalingsGrad" to it.utbetalingsgrad,
-                            "orgnummer" to it.organisasjonsnummer
-                        )
-                    },
-                    "feriepengehistorikk" to testdata.feriepengehistorikk.map {
+                            "historikkFom" to testdata.fom.toString(),
+                            "historikkTom" to testdata.tom.toString(),
+                            "datoForSisteFeriepengekjøringIInfotrygd" to "2025-05-10",
+                        ),
+                ),
+            løsninger =
+                mapOf(
+                    "SykepengehistorikkForFeriepenger" to
                         mapOf(
-                            "orgnummer" to it.orgnummer,
-                            "beløp" to it.beløp,
-                            "fom" to it.fom,
-                            "tom" to it.tom
-                        )
-                    },
-                    "arbeidskategorikoder" to testdata.arbeidskategorikoder.map {
-                        mapOf(
-                            "kode" to it.kode,
-                            "fom" to it.fom,
-                            "tom" to it.tom
-                        )
-                    }
-                )
-            )
+                            "feriepengerSkalBeregnesManuelt" to testdata.feriepengerSkalBeregnesManuelt,
+                            "utbetalinger" to
+                                testdata.utbetalinger.map {
+                                    mapOf(
+                                        "fom" to it.fom,
+                                        "tom" to it.tom,
+                                        "utbetalt" to it.utbetalt,
+                                        "dagsats" to it.dagsats,
+                                        "typeKode" to it.typekode,
+                                        "utbetalingsGrad" to it.utbetalingsgrad,
+                                        "orgnummer" to it.organisasjonsnummer,
+                                    )
+                                },
+                            "feriepengehistorikk" to
+                                testdata.feriepengehistorikk.map {
+                                    mapOf(
+                                        "orgnummer" to it.orgnummer,
+                                        "beløp" to it.beløp,
+                                        "fom" to it.fom,
+                                        "tom" to it.tom,
+                                    )
+                                },
+                            "arbeidskategorikoder" to
+                                testdata.arbeidskategorikoder.map {
+                                    mapOf(
+                                        "kode" to it.kode,
+                                        "fom" to it.fom,
+                                        "tom" to it.tom,
+                                    )
+                                },
+                        ),
+                ),
         )
 
     class UtbetalingshistorikkForFeriepengerTestdata(
-
         val fom: LocalDate,
         val tom: LocalDate,
         val feriepengerSkalBeregnesManuelt: Boolean = false,
         val utbetalinger: List<Utbetaling> = emptyList(),
         val feriepengehistorikk: List<Feriepenger> = emptyList(),
-        val arbeidskategorikoder: List<Arbeidskategori> = emptyList()
+        val arbeidskategorikoder: List<Arbeidskategori> = emptyList(),
     ) {
         class Utbetaling(
             val fom: LocalDate,
@@ -728,20 +772,20 @@ internal class TestMessageFactory(
             val dagsats: Double,
             val typekode: String,
             val utbetalingsgrad: String,
-            val organisasjonsnummer: String
+            val organisasjonsnummer: String,
         )
 
         class Feriepenger(
             val orgnummer: String,
             val beløp: Int,
             val fom: LocalDate,
-            val tom: LocalDate
+            val tom: LocalDate,
         )
 
         class Arbeidskategori(
             val kode: String,
             val fom: LocalDate,
-            val tom: LocalDate
+            val tom: LocalDate,
         )
     }
 
@@ -751,7 +795,7 @@ internal class TestMessageFactory(
         val arbeidskategorikode: String,
         val utbetalteSykeperioder: List<UtbetaltSykeperiode> = emptyList(),
         val inntektsopplysninger: List<Inntektsopplysninger> = emptyList(),
-        val statslønn: Boolean = false
+        val statslønn: Boolean = false,
     ) {
         class UtbetaltSykeperiode(
             val fom: LocalDate,
@@ -759,7 +803,7 @@ internal class TestMessageFactory(
             val dagsats: Double,
             val typekode: String,
             val utbetalingsgrad: String,
-            val organisasjonsnummer: String
+            val organisasjonsnummer: String,
         )
 
         class Inntektsopplysninger(
@@ -767,151 +811,165 @@ internal class TestMessageFactory(
             val inntekt: Double,
             val organisasjonsnummer: String,
             val refusjonTilArbeidsgiver: Boolean,
-            val refusjonTom: LocalDate? = null
+            val refusjonTom: LocalDate? = null,
         )
 
-        private fun toJson() = mapOf(
-            "statslønn" to statslønn,
-            "inntektsopplysninger" to inntektsopplysninger.map {
-                mapOf(
-                    "sykepengerFom" to it.sykepengerFom,
-                    "inntekt" to it.inntekt,
-                    "orgnummer" to it.organisasjonsnummer,
-                    "refusjonTilArbeidsgiver" to it.refusjonTilArbeidsgiver,
-                    "refusjonTom" to it.refusjonTom
-                )
-            },
-            "utbetalteSykeperioder" to utbetalteSykeperioder.map {
-                mapOf(
-                    "fom" to it.fom,
-                    "tom" to it.tom,
-                    "dagsats" to it.dagsats,
-                    "utbetalingsGrad" to it.utbetalingsgrad,
-                    "orgnummer" to it.organisasjonsnummer,
-                    "typeKode" to it.typekode
-                )
-            },
-            "arbeidsKategoriKode" to arbeidskategorikode
-        )
+        private fun toJson() =
+            mapOf(
+                "statslønn" to statslønn,
+                "inntektsopplysninger" to
+                    inntektsopplysninger.map {
+                        mapOf(
+                            "sykepengerFom" to it.sykepengerFom,
+                            "inntekt" to it.inntekt,
+                            "orgnummer" to it.organisasjonsnummer,
+                            "refusjonTilArbeidsgiver" to it.refusjonTilArbeidsgiver,
+                            "refusjonTom" to it.refusjonTom,
+                        )
+                    },
+                "utbetalteSykeperioder" to
+                    utbetalteSykeperioder.map {
+                        mapOf(
+                            "fom" to it.fom,
+                            "tom" to it.tom,
+                            "dagsats" to it.dagsats,
+                            "utbetalingsGrad" to it.utbetalingsgrad,
+                            "orgnummer" to it.organisasjonsnummer,
+                            "typeKode" to it.typekode,
+                        )
+                    },
+                "arbeidsKategoriKode" to arbeidskategorikode,
+            )
 
         companion object {
-            fun List<UtbetalingshistorikkTestdata>.toJson() = mapOf(
-                "Sykepengehistorikk" to map { data ->
-                    data.toJson()
-                }
-            )
+            fun List<UtbetalingshistorikkTestdata>.toJson() =
+                mapOf(
+                    "Sykepengehistorikk" to
+                        map { data ->
+                            data.toJson()
+                        },
+                )
         }
     }
 
     class PleiepengerTestdata(
         val fom: LocalDate,
         val tom: LocalDate,
-        val grad: Int
+        val grad: Int,
     )
 
     class ForeldrepengerTestdata(
         val fom: LocalDate,
         val tom: LocalDate,
-        val grad: Int
+        val grad: Int,
     )
 
     class SvangerskapspengerTestdata(
         val fom: LocalDate,
         val tom: LocalDate,
-        val grad: Int
+        val grad: Int,
     )
 
     class OmsorgspengerTestdata(
         val fom: LocalDate,
         val tom: LocalDate,
-        val grad: Int
+        val grad: Int,
     )
 
     class OpplæringspengerTestdata(
         val fom: LocalDate,
         val tom: LocalDate,
-        val grad: Int
+        val grad: Int,
     )
 
     class InstitusjonsoppholdTestdata(
         val startdato: LocalDate,
         val faktiskSluttdato: LocalDate?,
         val institusjonstype: String,
-        val kategori: String
+        val kategori: String,
     )
 
-    data class InntektsperiodeTestData(val inntektskilde: String, val fom: LocalDate, val tom: LocalDate, val daglig: Double?, val måndelig: Double?, val årlig: Double?) {}
+    data class InntektsperiodeTestData(
+        val inntektskilde: String,
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val daglig: Double?,
+        val måndelig: Double?,
+        val årlig: Double?,
+    )
 
     data class Arbeidsforhold(
         val orgnummer: String,
         val ansattSiden: LocalDate,
         val ansattTil: LocalDate?,
-        val type: Arbeidsforholdtype
+        val type: Arbeidsforholdtype,
     ) {
         enum class Arbeidsforholdtype {
             FORENKLET_OPPGJØRSORDNING,
             FRILANSER,
             MARITIMT,
-            ORDINÆRT
+            ORDINÆRT,
         }
     }
 
     data class ArbeidsforholdOverstyrt(
         val orgnummer: String,
         val deaktivert: Boolean,
-        val forklaring: String?
+        val forklaring: String?,
     )
 
     data class InntekterForSykepengegrunnlagFraLøsning(
         val måned: YearMonth,
-        val inntekter: List<Inntekt>
+        val inntekter: List<Inntekt>,
     ) {
         data class Inntekt(
             val beløp: Double,
-            val orgnummer: String
+            val orgnummer: String,
         )
     }
 
     data class InntekterForOpptjeningsvurderingFraLøsning(
         val måned: YearMonth,
-        val inntekter: List<Inntekt>
+        val inntekter: List<Inntekt>,
     ) {
         data class Inntekt(
             val beløp: Double,
-            val orgnummer: String
+            val orgnummer: String,
         )
     }
 
     class Subsumsjon(
         paragraf: String?,
         ledd: String?,
-        bokstav: String?
+        bokstav: String?,
     ) {
-        val toMap = mutableMapOf(
-            "paragraf" to paragraf,
-        ).apply {
-            ledd?.let {
-                this["ledd"] = ledd
-            }
-            bokstav?.let {
-                this["bokstav"] = bokstav
-            }
-        }.toMap()
+        val toMap =
+            mutableMapOf(
+                "paragraf" to paragraf,
+            ).apply {
+                ledd?.let {
+                    this["ledd"] = ledd
+                }
+                bokstav?.let {
+                    this["bokstav"] = bokstav
+                }
+            }.toMap()
     }
 
     class Refusjonsopplysning(
         fom: LocalDate,
         tom: LocalDate?,
-        beløp: Double
+        beløp: Double,
     ) {
-        val toMap = mutableMapOf(
-            "fom" to fom,
-            "beløp" to beløp
-        ).apply {
-            tom?.let {
-                this["tom"] = it
-            }
-        }.toMap()
+        val toMap =
+            mutableMapOf(
+                "fom" to fom,
+                "beløp" to beløp,
+            ).apply {
+                tom?.let {
+                    this["tom"] = it
+                }
+            }.toMap()
     }
 
     data class Arbeidsgiveropplysning(
@@ -919,7 +977,7 @@ internal class TestMessageFactory(
         val månedligInntekt: Double?,
         val forklaring: String? = null,
         val subsumsjon: Subsumsjon? = null,
-        val refusjonsopplysninger: List<Refusjonsopplysning>? = null
+        val refusjonsopplysninger: List<Refusjonsopplysning>? = null,
     )
 
     data class SkjønnsmessigFastsatt(
@@ -944,18 +1002,19 @@ internal class TestMessageFactory(
         yrkesaktivitetstype: String = "ARBEIDSTAKER",
         opptjeningsvurderingResultatOk: Boolean = true,
     ): Pair<String, String> {
-        val behovliste = mutableListOf(
-            "Foreldrepenger",
-            "Pleiepenger",
-            "Omsorgspenger",
-            "Opplæringspenger",
-            "Institusjonsopphold",
-            "ArbeidsavklaringspengerV2",
-            "InntekterForBeregning",
-            "DagpengerV2",
-            "GraderteAndreYtelserForBeregning",
-            "OpptjeningsvurderingResultat",
-        )
+        val behovliste =
+            mutableListOf(
+                "Foreldrepenger",
+                "Pleiepenger",
+                "Omsorgspenger",
+                "Opplæringspenger",
+                "Institusjonsopphold",
+                "ArbeidsavklaringspengerV2",
+                "InntekterForBeregning",
+                "DagpengerV2",
+                "GraderteAndreYtelserForBeregning",
+                "OpptjeningsvurderingResultat",
+            )
 
         if (forsikringsvurderingResultat != null) {
             behovliste.add("ForsikringsvurderingResultat")
@@ -967,110 +1026,131 @@ internal class TestMessageFactory(
             orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
             behov = behovliste,
-            løsninger = mapOf(
-                "Foreldrepenger" to mapOf(
-                    "Foreldrepengeytelse" to mapOf(
-                        "perioder" to foreldrepenger.map { data ->
+            løsninger =
+                mapOf(
+                    "Foreldrepenger" to
+                        mapOf(
+                            "Foreldrepengeytelse" to
+                                mapOf(
+                                    "perioder" to
+                                        foreldrepenger.map { data ->
+                                            mapOf(
+                                                "fom" to data.fom,
+                                                "tom" to data.tom,
+                                                "grad" to data.grad,
+                                            )
+                                        },
+                                ),
+                            "Svangerskapsytelse" to
+                                mapOf(
+                                    "perioder" to
+                                        svangerskapspenger.map { data ->
+                                            mapOf(
+                                                "fom" to data.fom,
+                                                "tom" to data.tom,
+                                                "grad" to data.grad,
+                                            )
+                                        },
+                                ),
+                        ),
+                    "Pleiepenger" to
+                        pleiepenger.map { data ->
                             mapOf(
                                 "fom" to data.fom,
                                 "tom" to data.tom,
-                                "grad" to data.grad
+                                "grad" to data.grad,
                             )
-                        }
-                    ),
-                    "Svangerskapsytelse" to mapOf(
-                        "perioder" to svangerskapspenger.map { data ->
+                        },
+                    "Omsorgspenger" to
+                        omsorgspenger.map { data ->
                             mapOf(
                                 "fom" to data.fom,
                                 "tom" to data.tom,
-                                "grad" to data.grad
+                                "grad" to data.grad,
                             )
-                        }
-                    )
-                ),
-                "Pleiepenger" to pleiepenger.map { data ->
-                    mapOf(
-                        "fom" to data.fom,
-                        "tom" to data.tom,
-                        "grad" to data.grad
-                    )
-                },
-                "Omsorgspenger" to omsorgspenger.map { data ->
-                    mapOf(
-                        "fom" to data.fom,
-                        "tom" to data.tom,
-                        "grad" to data.grad
-                    )
-                },
-                "Opplæringspenger" to opplæringspenger.map { data ->
-                    mapOf(
-                        "fom" to data.fom,
-                        "tom" to data.tom,
-                        "grad" to data.grad
-                    )
-                },
-                "Institusjonsopphold" to institusjonsoppholdsperioder.map { data ->
-                    mapOf(
-                        "startdato" to data.startdato,
-                        "faktiskSluttdato" to data.faktiskSluttdato,
-                        "institusjonstype" to data.institusjonstype,
-                        "kategori" to data.kategori
-                    )
-                },
-                Behov.Behovstype.Arbeidsavklaringspenger.utgåendeNavn to mapOf(
-                    "utbetalingsperioder" to arbeidsavklaringspengerV2.perioder.map { periode ->
+                        },
+                    "Opplæringspenger" to
+                        opplæringspenger.map { data ->
+                            mapOf(
+                                "fom" to data.fom,
+                                "tom" to data.tom,
+                                "grad" to data.grad,
+                            )
+                        },
+                    "Institusjonsopphold" to
+                        institusjonsoppholdsperioder.map { data ->
+                            mapOf(
+                                "startdato" to data.startdato,
+                                "faktiskSluttdato" to data.faktiskSluttdato,
+                                "institusjonstype" to data.institusjonstype,
+                                "kategori" to data.kategori,
+                            )
+                        },
+                    Behov.Behovstype.Arbeidsavklaringspenger.utgåendeNavn to
                         mapOf(
-                            "fom" to periode.start,
-                            "tom" to periode.endInclusive
-                        )
-                    }
-                ),
-                Behov.Behovstype.InntekterForBeregning.utgåendeNavn to mapOf(
-                    "inntekter" to inntekterForBeregning.map { data ->
+                            "utbetalingsperioder" to
+                                arbeidsavklaringspengerV2.perioder.map { periode ->
+                                    mapOf(
+                                        "fom" to periode.start,
+                                        "tom" to periode.endInclusive,
+                                    )
+                                },
+                        ),
+                    Behov.Behovstype.InntekterForBeregning.utgåendeNavn to
                         mapOf(
-                            "fom" to data.fom,
-                            "tom" to data.tom,
-                            "inntektskilde" to data.inntektskilde,
-                            "daglig" to data.daglig,
-                            "måndelig" to data.måndelig,
-                            "årlig" to data.årlig
-                        )
-
-                    }
-                ),
-                Behov.Behovstype.OpptjeningsvurderingResultat.utgåendeNavn to mapOf(
-                    "ok" to opptjeningsvurderingResultatOk
-                ),
-                Behov.Behovstype.Dagpenger.utgåendeNavn to mapOf(
-                    "meldekortperioder" to dagpengerV2.perioder.map { data ->
+                            "inntekter" to
+                                inntekterForBeregning.map { data ->
+                                    mapOf(
+                                        "fom" to data.fom,
+                                        "tom" to data.tom,
+                                        "inntektskilde" to data.inntektskilde,
+                                        "daglig" to data.daglig,
+                                        "måndelig" to data.måndelig,
+                                        "årlig" to data.årlig,
+                                    )
+                                },
+                        ),
+                    Behov.Behovstype.OpptjeningsvurderingResultat.utgåendeNavn to
                         mapOf(
-                            "fom" to data.start,
-                            "tom" to data.endInclusive
-                        )
-                    }
-                ))
-                .plus(forsikringsvurderingResultat(forsikringsvurderingResultat, yrkesaktivitetstype))
+                            "ok" to opptjeningsvurderingResultatOk,
+                        ),
+                    Behov.Behovstype.Dagpenger.utgåendeNavn to
+                        mapOf(
+                            "meldekortperioder" to
+                                dagpengerV2.perioder.map { data ->
+                                    mapOf(
+                                        "fom" to data.start,
+                                        "tom" to data.endInclusive,
+                                    )
+                                },
+                        ),
+                ).plus(forsikringsvurderingResultat(forsikringsvurderingResultat, yrkesaktivitetstype)),
         )
     }
 
-    fun forsikringsvurderingResultat(forsikringsvurderingResultat: ForsikringsvurderingResultat?, yrkesaktivitetstype: String): Map<String, Any> {
+    fun forsikringsvurderingResultat(
+        forsikringsvurderingResultat: ForsikringsvurderingResultat?,
+        yrkesaktivitetstype: String,
+    ): Map<String, Any> {
         if (forsikringsvurderingResultat == null || yrkesaktivitetstype != "SELVSTENDIG") return emptyMap()
         return mapOf(
-            Behov.Behovstype.ForsikringsvurderingResultat.utgåendeNavn to forsikringsvurderingResultat.let { forsikringsvurdering ->
-                mapOf(
-                    "forsikringsvurderingId" to forsikringsvurdering.forsikringsvurderingId.toString(),
-                    "villeHattForsikringOmDenVarBetalt" to forsikringsvurdering.villeHattForsikringOmDenVarBetalt,
-                    "harForsikringSomIkkePasserMedSøknadstype" to forsikringsvurdering.harForsikringSomIkkePasserMedSøknadstype,
-                    "dekning" to forsikringsvurdering.dekning?.let { dekning ->
-                        mapOf(
-                            "grad" to dekning.grad,
-                            "iVentetid" to dekning.iVentetid
-                        )
-                    },
-                    "opphørsdato" to forsikringsvurdering.opphørsdato,
-                    "harIndividuellForsikring" to forsikringsvurdering.harIndividuellForsikring
-                )
-            }
+            Behov.Behovstype.ForsikringsvurderingResultat.utgåendeNavn to
+                forsikringsvurderingResultat.let { forsikringsvurdering ->
+                    mapOf(
+                        "forsikringsvurderingId" to forsikringsvurdering.forsikringsvurderingId.toString(),
+                        "villeHattForsikringOmDenVarBetalt" to forsikringsvurdering.villeHattForsikringOmDenVarBetalt,
+                        "harForsikringSomIkkePasserMedSøknadstype" to forsikringsvurdering.harForsikringSomIkkePasserMedSøknadstype,
+                        "dekning" to
+                            forsikringsvurdering.dekning?.let { dekning ->
+                                mapOf(
+                                    "grad" to dekning.grad,
+                                    "iVentetid" to dekning.iVentetid,
+                                )
+                            },
+                        "opphørsdato" to forsikringsvurdering.opphørsdato,
+                        "harIndividuellForsikring" to forsikringsvurdering.harIndividuellForsikring,
+                    )
+                },
         )
     }
 
@@ -1085,89 +1165,108 @@ internal class TestMessageFactory(
         orgnummer: String = organisasjonsnummer,
         yrkesaktivitetstype: String = "ARBEIDSTAKER",
         forsikringsvurderingId: UUID?,
-    ): Pair<String, String> {
-        return lagBehovMedLøsning(
-            behov = listOfNotNull(
-                Behov.Behovstype.Medlemskap.utgåendeNavn,
-                Behov.Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn,
-                Behov.Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn,
-                Behov.Behovstype.Arbeidsforhold.utgåendeNavn,
-                Behov.Behovstype.Forsikringsvurdering.utgåendeNavn.takeIf { forsikringsvurderingId != null }
-            ),
+    ): Pair<String, String> =
+        lagBehovMedLøsning(
+            behov =
+                listOfNotNull(
+                    Behov.Behovstype.Medlemskap.utgåendeNavn,
+                    Behov.Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn,
+                    Behov.Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn,
+                    Behov.Behovstype.Arbeidsforhold.utgåendeNavn,
+                    Behov.Behovstype.Forsikringsvurdering.utgåendeNavn
+                        .takeIf { forsikringsvurderingId != null },
+                ),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
-            løsninger = mapOf(
-                Behov.Behovstype.Medlemskap.utgåendeNavn to mapOf<String, Any>(
-                    "resultat" to mapOf<String, Any>(
-                        "svar" to when (medlemskapstatus) {
-                            Medlemskapsvurdering.Medlemskapstatus.Ja -> "JA"
-                            Medlemskapsvurdering.Medlemskapstatus.Nei -> "NEI"
-                            Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> "UAVKLART_MED_BRUKERSPORSMAAL"
-                            else -> "UAVKLART"
-                        }
-                    )
-                ),
-                Behov.Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn to inntekterForSykepengegrunnlag
-                    .map {
-                        mapOf(
-                            "årMåned" to it.måned,
-                            "inntektsliste" to it.inntekter.map { inntekt ->
+            løsninger =
+                mapOf(
+                    Behov.Behovstype.Medlemskap.utgåendeNavn to
+                        mapOf<String, Any>(
+                            "resultat" to
+                                mapOf<String, Any>(
+                                    "svar" to
+                                        when (medlemskapstatus) {
+                                            Medlemskapsvurdering.Medlemskapstatus.Ja -> "JA"
+                                            Medlemskapsvurdering.Medlemskapstatus.Nei -> "NEI"
+                                            Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> "UAVKLART_MED_BRUKERSPORSMAAL"
+                                            else -> "UAVKLART"
+                                        },
+                                ),
+                        ),
+                    Behov.Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn to
+                        inntekterForSykepengegrunnlag
+                            .map {
                                 mapOf(
-                                    "beløp" to inntekt.beløp,
-                                    "inntektstype" to "LOENNSINNTEKT",
-                                    "orgnummer" to inntekt.orgnummer,
-                                    "fordel" to "kontantytelse",
-                                    "beskrivelse" to "fastloenn"
+                                    "årMåned" to it.måned,
+                                    "inntektsliste" to
+                                        it.inntekter.map { inntekt ->
+                                            mapOf(
+                                                "beløp" to inntekt.beløp,
+                                                "inntektstype" to "LOENNSINNTEKT",
+                                                "orgnummer" to inntekt.orgnummer,
+                                                "fordel" to "kontantytelse",
+                                                "beskrivelse" to "fastloenn",
+                                            )
+                                        },
                                 )
-                            }
-                        )
-                    },
-                Behov.Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn to inntekterForOpptjeningsvurdering
-                    .map {
-                        mapOf(
-                            "årMåned" to it.måned,
-                            "inntektsliste" to it.inntekter.map { inntekt ->
+                            },
+                    Behov.Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn to
+                        inntekterForOpptjeningsvurdering
+                            .map {
                                 mapOf(
-                                    "beløp" to inntekt.beløp,
-                                    "inntektstype" to "LOENNSINNTEKT",
-                                    "orgnummer" to inntekt.orgnummer,
-                                    "fordel" to "kontantytelse",
-                                    "beskrivelse" to "fastloenn"
+                                    "årMåned" to it.måned,
+                                    "inntektsliste" to
+                                        it.inntekter.map { inntekt ->
+                                            mapOf(
+                                                "beløp" to inntekt.beløp,
+                                                "inntektstype" to "LOENNSINNTEKT",
+                                                "orgnummer" to inntekt.orgnummer,
+                                                "fordel" to "kontantytelse",
+                                                "beskrivelse" to "fastloenn",
+                                            )
+                                        },
                                 )
-                            }
+                            },
+                    Behov.Behovstype.Arbeidsforhold.utgåendeNavn to
+                        arbeidsforhold.map {
+                            mapOf(
+                                "orgnummer" to it.orgnummer,
+                                "ansattSiden" to it.ansattSiden,
+                                "ansattTil" to it.ansattTil,
+                                "type" to it.type,
+                            )
+                        },
+                ).plus(
+                    if (forsikringsvurderingId != null) {
+                        mapOf(
+                            Behov.Behovstype.Forsikringsvurdering.utgåendeNavn to mapOf("forsikringsvurderingId" to forsikringsvurderingId),
                         )
+                    } else {
+                        emptyMap()
                     },
-                Behov.Behovstype.Arbeidsforhold.utgåendeNavn to arbeidsforhold.map {
-                    mapOf(
-                        "orgnummer" to it.orgnummer,
-                        "ansattSiden" to it.ansattSiden,
-                        "ansattTil" to it.ansattTil,
-                        "type" to it.type
-                    )
-                },
-            ).plus(
-                if (forsikringsvurderingId != null) mapOf(
-                    Behov.Behovstype.Forsikringsvurdering.utgåendeNavn to mapOf("forsikringsvurderingId" to forsikringsvurderingId,)
-                ) else emptyMap()
-            ),
-            ekstraFelter = mapOf(
-                Behov.Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn to mapOf(
-                    "skjæringstidspunkt" to skjæringstidspunkt
                 ),
-                Behov.Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn to mapOf(
-                    "skjæringstidspunkt" to skjæringstidspunkt
+            ekstraFelter =
+                mapOf(
+                    Behov.Behovstype.InntekterForSykepengegrunnlag.utgåendeNavn to
+                        mapOf(
+                            "skjæringstidspunkt" to skjæringstidspunkt,
+                        ),
+                    Behov.Behovstype.InntekterForOpptjeningsvurdering.utgåendeNavn to
+                        mapOf(
+                            "skjæringstidspunkt" to skjæringstidspunkt,
+                        ),
+                    Behov.Behovstype.Arbeidsforhold.utgåendeNavn to
+                        mapOf(
+                            "skjæringstidspunkt" to skjæringstidspunkt,
+                        ),
+                    Behov.Behovstype.Medlemskap.utgåendeNavn to
+                        mapOf(
+                            "skjæringstidspunkt" to skjæringstidspunkt,
+                        ),
                 ),
-                Behov.Behovstype.Arbeidsforhold.utgåendeNavn to mapOf(
-                    "skjæringstidspunkt" to skjæringstidspunkt
-                ),
-                Behov.Behovstype.Medlemskap.utgåendeNavn to mapOf(
-                    "skjæringstidspunkt" to skjæringstidspunkt
-                ),
-            )
         )
-    }
 
     fun lagSimulering(
         vedtaksperiodeId: UUID,
@@ -1177,102 +1276,114 @@ internal class TestMessageFactory(
         fagsystemId: String = "fagsystemid",
         fagområde: String = "SPREF",
         orgnummer: String = organisasjonsnummer,
-        yrkesaktivitetstype: String = "ARBEIDSTAKER"
-    ): Pair<String, String> {
-        return lagBehovMedLøsning(
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
+    ): Pair<String, String> =
+        lagBehovMedLøsning(
             behov = listOf("Simulering"),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
-            løsninger = mapOf(
-                "Simulering" to mapOf(
-                    "fagsystemId" to fagsystemId,
-                    "fagområde" to fagområde,
-                    "status" to status.name,
-                    "feilmelding" to if (status == SimuleringMessage.Simuleringstatus.OK) null else "FEIL I SIMULERING",
-                    "simulering" to if (status != SimuleringMessage.Simuleringstatus.OK) null else mapOf(
-                        "gjelderId" to fødselsnummer,
-                        "gjelderNavn" to "Korona",
-                        "datoBeregnet" to "2020-01-01",
-                        "totalBelop" to 9999,
-                        "periodeList" to listOf(
-                            mapOf(
-                                "fom" to "2020-01-01",
-                                "tom" to "2020-01-02",
-                                "utbetaling" to listOf(
+            løsninger =
+                mapOf(
+                    "Simulering" to
+                        mapOf(
+                            "fagsystemId" to fagsystemId,
+                            "fagområde" to fagområde,
+                            "status" to status.name,
+                            "feilmelding" to if (status == SimuleringMessage.Simuleringstatus.OK) null else "FEIL I SIMULERING",
+                            "simulering" to
+                                if (status != SimuleringMessage.Simuleringstatus.OK) {
+                                    null
+                                } else {
                                     mapOf(
-                                        "fagSystemId" to "1231203123123",
-                                        "utbetalesTilId" to orgnummer,
-                                        "utbetalesTilNavn" to "Koronavirus",
-                                        "forfall" to "2020-01-03",
-                                        "feilkonto" to true,
-                                        "detaljer" to listOf(
-                                            mapOf(
-                                                "faktiskFom" to "2020-01-01",
-                                                "faktiskTom" to "2020-01-02",
-                                                "konto" to "12345678910og1112",
-                                                "belop" to 9999,
-                                                "tilbakeforing" to false,
-                                                "sats" to 1000.5,
-                                                "typeSats" to "DAG",
-                                                "antallSats" to 9,
-                                                "uforegrad" to 100,
-                                                "klassekode" to "SPREFAG-IOP",
-                                                "klassekodeBeskrivelse" to "Sykepenger, Refusjon arbeidsgiver",
-                                                "utbetalingsType" to "YTEL",
-                                                "refunderesOrgNr" to orgnummer
-                                            )
-                                        )
+                                        "gjelderId" to fødselsnummer,
+                                        "gjelderNavn" to "Korona",
+                                        "datoBeregnet" to "2020-01-01",
+                                        "totalBelop" to 9999,
+                                        "periodeList" to
+                                            listOf(
+                                                mapOf(
+                                                    "fom" to "2020-01-01",
+                                                    "tom" to "2020-01-02",
+                                                    "utbetaling" to
+                                                        listOf(
+                                                            mapOf(
+                                                                "fagSystemId" to "1231203123123",
+                                                                "utbetalesTilId" to orgnummer,
+                                                                "utbetalesTilNavn" to "Koronavirus",
+                                                                "forfall" to "2020-01-03",
+                                                                "feilkonto" to true,
+                                                                "detaljer" to
+                                                                    listOf(
+                                                                        mapOf(
+                                                                            "faktiskFom" to "2020-01-01",
+                                                                            "faktiskTom" to "2020-01-02",
+                                                                            "konto" to "12345678910og1112",
+                                                                            "belop" to 9999,
+                                                                            "tilbakeforing" to false,
+                                                                            "sats" to 1000.5,
+                                                                            "typeSats" to "DAG",
+                                                                            "antallSats" to 9,
+                                                                            "uforegrad" to 100,
+                                                                            "klassekode" to "SPREFAG-IOP",
+                                                                            "klassekodeBeskrivelse" to "Sykepenger, Refusjon arbeidsgiver",
+                                                                            "utbetalingsType" to "YTEL",
+                                                                            "refunderesOrgNr" to orgnummer,
+                                                                        ),
+                                                                    ),
+                                                            ),
+                                                        ),
+                                                ),
+                                            ),
                                     )
-                                )
-                            )
-                        )
-                    )
-                )
-            ),
-            ekstraFelter = mapOf(
-                "utbetalingId" to "$utbetalingId",
-                "Simulering" to mapOf(
-                    "fagsystemId" to fagsystemId,
-                    "fagområde" to fagområde
-                )
-            )
+                                },
+                        ),
+                ),
+            ekstraFelter =
+                mapOf(
+                    "utbetalingId" to "$utbetalingId",
+                    "Simulering" to
+                        mapOf(
+                            "fagsystemId" to fagsystemId,
+                            "fagområde" to fagområde,
+                        ),
+                ),
         )
-    }
 
     fun lagEtterbetaling(
         fagsystemId: String,
-        gyldighetsdato: LocalDate
-    ): Pair<String, String> {
-        return nyHendelse(
+        gyldighetsdato: LocalDate,
+    ): Pair<String, String> =
+        nyHendelse(
             navn = "Etterbetalingskandidat_v1",
-            hendelse = mapOf(
-                "fagsystemId" to fagsystemId,
-                "gyldighetsdato" to gyldighetsdato,
-                "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to organisasjonsnummer,
-            ),
+            hendelse =
+                mapOf(
+                    "fagsystemId" to fagsystemId,
+                    "gyldighetsdato" to gyldighetsdato,
+                    "fødselsnummer" to fødselsnummer,
+                    "organisasjonsnummer" to organisasjonsnummer,
+                ),
         )
-    }
 
     fun lagEtterbetalingMedHistorikk(
         fagsystemId: String,
-        gyldighetsdato: LocalDate
-    ): Pair<String, String> {
-        return lagBehovMedLøsning(
+        gyldighetsdato: LocalDate,
+    ): Pair<String, String> =
+        lagBehovMedLøsning(
             behov = listOf("Sykepengehistorikk"),
-            løsninger = mapOf(
-                "Sykepengehistorikk" to emptyList<Any>()
-            ),
-            ekstraFelter = mapOf(
-                "fagsystemId" to fagsystemId,
-                "gyldighetsdato" to gyldighetsdato,
-            ),
+            løsninger =
+                mapOf(
+                    "Sykepengehistorikk" to emptyList<Any>(),
+                ),
+            ekstraFelter =
+                mapOf(
+                    "fagsystemId" to fagsystemId,
+                    "gyldighetsdato" to gyldighetsdato,
+                ),
             vedtaksperiodeId = null,
-            behandlingId = null
+            behandlingId = null,
         )
-    }
 
     fun lagUtbetalingsgodkjenning(
         vedtaksperiodeId: UUID,
@@ -1285,29 +1396,31 @@ internal class TestMessageFactory(
         makstidOppnådd: Boolean,
         godkjenttidspunkt: LocalDateTime,
         orgnummer: String = organisasjonsnummer,
-        yrkesaktivitetstype: String = "ARBEIDSTAKER"
-    ): Pair<String, String> {
-        return lagBehovMedLøsning(
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
+    ): Pair<String, String> =
+        lagBehovMedLøsning(
             behov = listOf("Godkjenning"),
             orgnummer = orgnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
-            løsninger = mapOf(
-                "Godkjenning" to mapOf(
-                    "godkjent" to utbetalingGodkjent,
-                    "saksbehandlerIdent" to saksbehandlerIdent,
-                    "saksbehandlerEpost" to saksbehandlerEpost,
-                    "automatiskBehandling" to automatiskBehandling,
-                    "godkjenttidspunkt" to godkjenttidspunkt,
-                    "makstidOppnådd" to makstidOppnådd
-                )
-            ),
-            ekstraFelter = mapOf(
-                "utbetalingId" to utbetalingId
-            )
+            løsninger =
+                mapOf(
+                    "Godkjenning" to
+                        mapOf(
+                            "godkjent" to utbetalingGodkjent,
+                            "saksbehandlerIdent" to saksbehandlerIdent,
+                            "saksbehandlerEpost" to saksbehandlerEpost,
+                            "automatiskBehandling" to automatiskBehandling,
+                            "godkjenttidspunkt" to godkjenttidspunkt,
+                            "makstidOppnådd" to makstidOppnådd,
+                        ),
+                ),
+            ekstraFelter =
+                mapOf(
+                    "utbetalingId" to utbetalingId,
+                ),
         )
-    }
 
     fun lagPåminnelse(
         vedtaksperiodeId: UUID,
@@ -1315,66 +1428,69 @@ internal class TestMessageFactory(
         orgnummer: String = organisasjonsnummer,
         yrkesaktivitetstype: String = "ARBEIDSTAKER",
         flagg: Set<String> = emptySet(),
-        tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
-    ): Pair<String, String> {
-        return nyHendelse(
-            "påminnelse", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to orgnummer,
-            "yrkesaktivitetstype" to yrkesaktivitetstype,
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "tilstand" to tilstand.name,
-            "antallGangerPåminnet" to 0,
-            "tilstandsendringstidspunkt" to tilstandsendringstidspunkt,
-            "påminnelsestidspunkt" to LocalDateTime.now(),
-            "nestePåminnelsestidspunkt" to LocalDateTime.now(),
-            "flagg" to flagg
+        tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now(),
+    ): Pair<String, String> =
+        nyHendelse(
+            "påminnelse",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to orgnummer,
+                "yrkesaktivitetstype" to yrkesaktivitetstype,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "tilstand" to tilstand.name,
+                "antallGangerPåminnet" to 0,
+                "tilstandsendringstidspunkt" to tilstandsendringstidspunkt,
+                "påminnelsestidspunkt" to LocalDateTime.now(),
+                "nestePåminnelsestidspunkt" to LocalDateTime.now(),
+                "flagg" to flagg,
+            ),
         )
-        )
-    }
 
     fun lagForkastSykmeldingsperioder(
         orgnummer: String = organisasjonsnummer,
         fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar
-    ): Pair<String, String> {
-        return nyHendelse(
-            "forkast_sykmeldingsperioder", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to orgnummer,
-            "fom" to fom.toString(),
-            "tom" to tom.toString()
+        tom: LocalDate = 31.januar,
+    ): Pair<String, String> =
+        nyHendelse(
+            "forkast_sykmeldingsperioder",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to orgnummer,
+                "fom" to fom.toString(),
+                "tom" to tom.toString(),
+            ),
         )
-        )
-    }
 
-    fun lagDødsmelding(dødsdato: LocalDate): Pair<String, String> {
-        return nyHendelse(
-            "dødsmelding", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "dødsdato" to "$dødsdato"
+    fun lagDødsmelding(dødsdato: LocalDate): Pair<String, String> =
+        nyHendelse(
+            "dødsmelding",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "dødsdato" to "$dødsdato",
+            ),
         )
-        )
-    }
 
-    fun lagPersonPåminnelse(): Pair<String, String> {
-        return nyHendelse(
-            "person_påminnelse", mapOf(
-            "fødselsnummer" to fødselsnummer
+    fun lagPersonPåminnelse(): Pair<String, String> =
+        nyHendelse(
+            "person_påminnelse",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+            ),
         )
-        )
-    }
 
-    fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID = UUID.randomUUID(), yrkesaktivitetstype: String = "ARBEIDSTAKER"): Pair<String, String> {
-        return nyHendelse(
-            "anmodning_om_forkasting", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "yrkesaktivitetstype" to yrkesaktivitetstype,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "vedtaksperiodeId" to vedtaksperiodeId
+    fun lagAnmodningOmForkasting(
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
+    ): Pair<String, String> =
+        nyHendelse(
+            "anmodning_om_forkasting",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "yrkesaktivitetstype" to yrkesaktivitetstype,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+            ),
         )
-        )
-    }
 
     fun lagUtbetaling(
         fagsystemId: String,
@@ -1384,251 +1500,294 @@ internal class TestMessageFactory(
         utbetalingOK: Boolean = true,
         avstemmingsnøkkel: Long = 123456L,
         overføringstidspunkt: LocalDateTime = LocalDateTime.now(),
-        yrkesaktivitetstype: String = "ARBEIDSTAKER"
-    ): Pair<String, String> {
-        return lagBehovMedLøsning(
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
+    ): Pair<String, String> =
+        lagBehovMedLøsning(
             behov = listOf("Utbetaling"),
             yrkesaktivitetstype = yrkesaktivitetstype,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
-            løsninger = mapOf(
-                "Utbetaling" to mapOf(
-                    "status" to if (utbetalingOK) Oppdragstatus.AKSEPTERT.name else Oppdragstatus.AVVIST.name,
-                    "beskrivelse" to if (!utbetalingOK) "FEIL fra Spenn" else "",
-                    "avstemmingsnøkkel" to avstemmingsnøkkel,
-                    "overføringstidspunkt" to overføringstidspunkt
-                )
-            ),
-            ekstraFelter = mapOf(
-                "Utbetaling" to mapOf("fagsystemId" to fagsystemId),
-                "utbetalingId" to utbetalingId
-            )
+            løsninger =
+                mapOf(
+                    "Utbetaling" to
+                        mapOf(
+                            "status" to if (utbetalingOK) Oppdragstatus.AKSEPTERT.name else Oppdragstatus.AVVIST.name,
+                            "beskrivelse" to if (!utbetalingOK) "FEIL fra Spenn" else "",
+                            "avstemmingsnøkkel" to avstemmingsnøkkel,
+                            "overføringstidspunkt" to overføringstidspunkt,
+                        ),
+                ),
+            ekstraFelter =
+                mapOf(
+                    "Utbetaling" to mapOf("fagsystemId" to fagsystemId),
+                    "utbetalingId" to utbetalingId,
+                ),
         )
-    }
 
-    fun lagAnnulleringSelvstendig(vedtaksperiodeId: UUID): Pair<String, String> {
-        return nyHendelse(
+    fun lagAnnulleringSelvstendig(vedtaksperiodeId: UUID): Pair<String, String> =
+        nyHendelse(
             "annullering",
             mapOf(
                 "fødselsnummer" to fødselsnummer,
                 "yrkesaktivitetstype" to "selvstendig",
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "saksbehandler" to mapOf(
-                    "navn" to "Siri Saksbhandler",
-                    "epostaddresse" to "siri.saksbehandler@nav.no",
-                    "oid" to "${UUID.randomUUID()}",
-                    "ident" to "S1234567",
-                ),
-                "begrunnelser" to listOf("Annet")
-            )
+                "saksbehandler" to
+                    mapOf(
+                        "navn" to "Siri Saksbhandler",
+                        "epostaddresse" to "siri.saksbehandler@nav.no",
+                        "oid" to "${UUID.randomUUID()}",
+                        "ident" to "S1234567",
+                    ),
+                "begrunnelser" to listOf("Annet"),
+            ),
         )
-    }
 
-    fun lagAnnullering(vedtaksperiodeId: UUID): Pair<String, String> {
-        return nyHendelse(
+    fun lagAnnullering(vedtaksperiodeId: UUID): Pair<String, String> =
+        nyHendelse(
             "annullering",
             mapOf(
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "saksbehandler" to mapOf(
-                    "navn" to "Siri Saksbhandler",
-                    "epostaddresse" to "siri.saksbehandler@nav.no",
-                    "oid" to "${UUID.randomUUID()}",
-                    "ident" to "S1234567",
-                ),
-                "begrunnelser" to listOf("Annet")
-            )
+                "saksbehandler" to
+                    mapOf(
+                        "navn" to "Siri Saksbhandler",
+                        "epostaddresse" to "siri.saksbehandler@nav.no",
+                        "oid" to "${UUID.randomUUID()}",
+                        "ident" to "S1234567",
+                    ),
+                "begrunnelser" to listOf("Annet"),
+            ),
         )
-    }
 
-    fun lagAvstemming() = nyHendelse(
-        "person_avstemming", mapOf(
-        "fødselsnummer" to fødselsnummer,
-    )
-    )
+    fun lagAvstemming() =
+        nyHendelse(
+            "person_avstemming",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+            ),
+        )
 
-    fun lagMigrate() = nyHendelse(
-        "json_migrate", mapOf(
-        "fødselsnummer" to fødselsnummer,
-    )
-    )
+    fun lagMigrate() =
+        nyHendelse(
+            "json_migrate",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+            ),
+        )
 
-    fun lagOverstyringTidslinje(dager: List<ManuellOverskrivingDag>): Pair<String, String> {
-        return nyHendelse(
-            "overstyr_tidslinje", mutableMapOf(
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "dager" to dager.map {
-                mapOf(
-                    "dato" to it.dato,
-                    "type" to it.type,
-                    "grad" to it.grad
-                )
-            }
-        ))
-    }
+    fun lagOverstyringTidslinje(dager: List<ManuellOverskrivingDag>): Pair<String, String> =
+        nyHendelse(
+            "overstyr_tidslinje",
+            mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "dager" to
+                    dager.map {
+                        mapOf(
+                            "dato" to it.dato,
+                            "type" to it.type,
+                            "grad" to it.grad,
+                        )
+                    },
+            ),
+        )
 
-    fun lagOverstyringTidslinjeSelvstendig(dager: List<ManuellOverskrivingDag>, orgnummer: String): Pair<String, String> {
-        return nyHendelse(
-            "overstyr_tidslinje", mutableMapOf(
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to orgnummer,
-            "yrkesaktivitetstype" to orgnummer,
-            "dager" to dager.map {
-                mapOf(
-                    "dato" to it.dato,
-                    "type" to it.type,
-                    "grad" to it.grad
-                )
-            }
-        ))
-    }
+    fun lagOverstyringTidslinjeSelvstendig(
+        dager: List<ManuellOverskrivingDag>,
+        orgnummer: String,
+    ): Pair<String, String> =
+        nyHendelse(
+            "overstyr_tidslinje",
+            mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to orgnummer,
+                "yrkesaktivitetstype" to orgnummer,
+                "dager" to
+                    dager.map {
+                        mapOf(
+                            "dato" to it.dato,
+                            "type" to it.type,
+                            "grad" to it.grad,
+                        )
+                    },
+            ),
+        )
 
     fun lagOverstyrArbeidsforhold(
         skjæringstidspunkt: LocalDate,
-        overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
-    ): Pair<String, String> {
-        return nyHendelse(
-            "overstyr_arbeidsforhold", mutableMapOf(
-            "fødselsnummer" to fødselsnummer,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "overstyrteArbeidsforhold" to overstyrteArbeidsforhold.map {
-                mutableMapOf<String, Any>(
-                    "orgnummer" to it.orgnummer,
-                    "deaktivert" to it.deaktivert
-                ).apply {
-                    it.forklaring?.let { forklaring ->
-                        this["forklaring"] = forklaring
-                    }
-                }
-            })
+        overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>,
+    ): Pair<String, String> =
+        nyHendelse(
+            "overstyr_arbeidsforhold",
+            mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "overstyrteArbeidsforhold" to
+                    overstyrteArbeidsforhold.map {
+                        mutableMapOf<String, Any>(
+                            "orgnummer" to it.orgnummer,
+                            "deaktivert" to it.deaktivert,
+                        ).apply {
+                            it.forklaring?.let { forklaring ->
+                                this["forklaring"] = forklaring
+                            }
+                        }
+                    },
+            ),
         )
-    }
 
     fun lagOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt: LocalDate,
-        arbeidsgiveropplysninger: List<Arbeidsgiveropplysning>
+        arbeidsgiveropplysninger: List<Arbeidsgiveropplysning>,
     ) = nyHendelse(
-        "overstyr_inntekt_og_refusjon", mutableMapOf(
-        "fødselsnummer" to fødselsnummer,
-        "skjæringstidspunkt" to skjæringstidspunkt,
-        "arbeidsgivere" to arbeidsgiveropplysninger.map { arbeidgiver ->
-            mutableMapOf(
-                "organisasjonsnummer" to arbeidgiver.organisasjonsnummer,
-                "månedligInntekt" to arbeidgiver.månedligInntekt,
-                "forklaring" to arbeidgiver.forklaring,
-                "refusjonsopplysninger" to arbeidgiver.refusjonsopplysninger?.map { it.toMap }
-            ).apply {
-                arbeidgiver.subsumsjon?.let {
-                    this["subsumsjon"] = it.toMap
-                }
-            }
-        }
-    )
+        "overstyr_inntekt_og_refusjon",
+        mutableMapOf(
+            "fødselsnummer" to fødselsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "arbeidsgivere" to
+                arbeidsgiveropplysninger.map { arbeidgiver ->
+                    mutableMapOf(
+                        "organisasjonsnummer" to arbeidgiver.organisasjonsnummer,
+                        "månedligInntekt" to arbeidgiver.månedligInntekt,
+                        "forklaring" to arbeidgiver.forklaring,
+                        "refusjonsopplysninger" to arbeidgiver.refusjonsopplysninger?.map { it.toMap },
+                    ).apply {
+                        arbeidgiver.subsumsjon?.let {
+                            this["subsumsjon"] = it.toMap
+                        }
+                    }
+                },
+        ),
     )
 
     fun lagMinimumSykdomsgradVurdert(
         perioderMedMinimumSykdomsgradVurdertOK: List<Pair<LocalDate, LocalDate>>,
-        perioderMedMinimumSykdomsgradVurdertIkkeOK: List<Pair<LocalDate, LocalDate>>
+        perioderMedMinimumSykdomsgradVurdertIkkeOK: List<Pair<LocalDate, LocalDate>>,
     ) = nyHendelse(
-        "minimum_sykdomsgrad_vurdert", mutableMapOf(
-        "fødselsnummer" to fødselsnummer,
-        "perioderMedMinimumSykdomsgradVurdertOk" to perioderMedMinimumSykdomsgradVurdertOK.map {
-            mutableMapOf(
-                "fom" to it.first,
-                "tom" to it.second
-            )
-        },
-        "perioderMedMinimumSykdomsgradVurdertIkkeOk" to perioderMedMinimumSykdomsgradVurdertIkkeOK.map {
-            mutableMapOf(
-                "fom" to it.first,
-                "tom" to it.second
-            )
-        }
-    )
+        "minimum_sykdomsgrad_vurdert",
+        mutableMapOf(
+            "fødselsnummer" to fødselsnummer,
+            "perioderMedMinimumSykdomsgradVurdertOk" to
+                perioderMedMinimumSykdomsgradVurdertOK.map {
+                    mutableMapOf(
+                        "fom" to it.first,
+                        "tom" to it.second,
+                    )
+                },
+            "perioderMedMinimumSykdomsgradVurdertIkkeOk" to
+                perioderMedMinimumSykdomsgradVurdertIkkeOK.map {
+                    mutableMapOf(
+                        "fom" to it.first,
+                        "tom" to it.second,
+                    )
+                },
+        ),
     )
 
     fun lagSkjønnsmessigFastsettelse(
         skjæringstidspunkt: LocalDate,
-        skjønnsmessigFastsatt: List<SkjønnsmessigFastsatt>
+        skjønnsmessigFastsatt: List<SkjønnsmessigFastsatt>,
     ) = nyHendelse(
-        "skjønnsmessig_fastsettelse", mutableMapOf(
-        "fødselsnummer" to fødselsnummer,
-        "skjæringstidspunkt" to skjæringstidspunkt,
-        "arbeidsgivere" to skjønnsmessigFastsatt.map { arbeidgiver ->
-            mutableMapOf(
-                "organisasjonsnummer" to arbeidgiver.organisasjonsnummer,
-                "årlig" to arbeidgiver.årlig
-            )
-        }
-    )
+        "skjønnsmessig_fastsettelse",
+        mutableMapOf(
+            "fødselsnummer" to fødselsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "arbeidsgivere" to
+                skjønnsmessigFastsatt.map { arbeidgiver ->
+                    mutableMapOf(
+                        "organisasjonsnummer" to arbeidgiver.organisasjonsnummer,
+                        "årlig" to arbeidgiver.årlig,
+                    )
+                },
+        ),
     )
 
-    internal fun lagInfotrygdendringer(endringsmeldingId: String = "1234567") = nyHendelse(
-        "infotrygdendring", mutableMapOf(
-        "fødselsnummer" to fødselsnummer,
-        "endringsmeldingId" to endringsmeldingId
-    )
-    )
+    internal fun lagInfotrygdendringer(endringsmeldingId: String = "1234567") =
+        nyHendelse(
+            "infotrygdendring",
+            mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "endringsmeldingId" to endringsmeldingId,
+            ),
+        )
 
     internal fun lagGraderteAndreYtelserEndret(
-        graderteAndreYtelserEndretFom: LocalDate = LocalDate.now().minusDays(1)
+        graderteAndreYtelserEndretFom: LocalDate = LocalDate.now().minusDays(1),
     ) = nyHendelse(
-        "graderte_andre_ytelser_endret", mutableMapOf(
-        "fødselsnummer" to fødselsnummer,
-        "fom" to graderteAndreYtelserEndretFom
-    )
+        "graderte_andre_ytelser_endret",
+        mutableMapOf(
+            "fødselsnummer" to fødselsnummer,
+            "fom" to graderteAndreYtelserEndretFom,
+        ),
     )
 
-    internal fun lagEndretForsikringsvurdering(skjæringstidspunkt: LocalDate, forsikringsvurderingId: UUID) = nyHendelse(
-        "endret_forsikringsvurdering", mapOf(
+    internal fun lagEndretForsikringsvurdering(
+        skjæringstidspunkt: LocalDate,
+        forsikringsvurderingId: UUID,
+    ) = nyHendelse(
+        "endret_forsikringsvurdering",
+        mapOf(
             "fødselsnummer" to fødselsnummer,
             "skjæringstidspunkt" to skjæringstidspunkt.toString(),
-            "forsikringsvurderingId" to forsikringsvurderingId.toString()
-        )
+            "forsikringsvurderingId" to forsikringsvurderingId.toString(),
+        ),
     )
 
-    internal fun lagEndretOpptjeningsvurdering(skjæringstidspunkt: LocalDate, opptjeningsvurderingId: UUID, manuellVurdering: Boolean) = nyHendelse(
-        "endret_opptjeningsvurdering", mapOf(
+    internal fun lagEndretOpptjeningsvurdering(
+        skjæringstidspunkt: LocalDate,
+        opptjeningsvurderingId: UUID,
+        manuellVurdering: Boolean,
+    ) = nyHendelse(
+        "endret_opptjeningsvurdering",
+        mapOf(
             "fødselsnummer" to fødselsnummer,
             "skjæringstidspunkt" to skjæringstidspunkt.toString(),
             "opptjeningsvurderingId" to opptjeningsvurderingId.toString(),
-            "manuellVurdering" to manuellVurdering
-        )
+            "manuellVurdering" to manuellVurdering,
+        ),
     )
 
-    internal fun lagInntektsendringer(fom: LocalDate) = nyHendelse(
-            "inntektsendringer", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "inntektsendringFom" to fom.toString()
+    internal fun lagInntektsendringer(fom: LocalDate) =
+        nyHendelse(
+            "inntektsendringer",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "inntektsendringFom" to fom.toString(),
+            ),
         )
-    )
 
     internal fun lagEndretGrunnlagForBeregningUtenEventName(
-        fom: LocalDate = LocalDate.now().minusDays(1)
+        fom: LocalDate = LocalDate.now().minusDays(1),
     ) = nyHendelse(
-        "graderte_andre_ytelser_endret", mapOf(
-        "fødselsnummer" to fødselsnummer,
-        "fom" to fom.toString()
-    )
+        "graderte_andre_ytelser_endret",
+        mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "fom" to fom.toString(),
+        ),
     ).let { (id, json) ->
-        id to objectMapper.readTree(json).also {
-            (it as ObjectNode).remove("@event_name")
-        }.toString()
+        id to
+            objectMapper
+                .readTree(json)
+                .also {
+                    (it as ObjectNode).remove("@event_name")
+                }.toString()
     }
 
     internal fun lagEndretGrunnlagForBeregningMedUkjentEventName(
-        fom: LocalDate = LocalDate.now().minusDays(1)
+        fom: LocalDate = LocalDate.now().minusDays(1),
     ) = nyHendelse(
-        "ukjent_endret_grunnlag", mapOf(
-        "fødselsnummer" to fødselsnummer,
-        "fom" to fom.toString()
-    )
+        "ukjent_endret_grunnlag",
+        mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "fom" to fom.toString(),
+        ),
     )
 
-    private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =
-        JsonMessage.newMessage(navn, hendelse).let { it.id to it.toJson() }
+    private fun nyHendelse(
+        navn: String,
+        hendelse: Map<String, Any>,
+    ) = JsonMessage.newMessage(navn, hendelse).let { it.id to it.toJson() }
 
     private fun lagBehovMedLøsning(
         behov: List<String> = listOf(),
@@ -1638,74 +1797,124 @@ internal class TestMessageFactory(
         løsninger: Map<String, Any> = emptyMap(),
         ekstraFelter: Map<String, Any> = emptyMap(),
         besvart: LocalDateTime = LocalDateTime.now(),
-        yrkesaktivitetstype: String = "ARBEIDSTAKER"
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
     ) = nyHendelse(
-        "behov", ekstraFelter + mutableMapOf(
-        "@behov" to behov,
-        "fødselsnummer" to fødselsnummer,
-        "@løsning" to løsninger,
-        "@final" to true,
-        "@besvart" to besvart
-    ).apply {
-        vedtaksperiodeId?.let { this["vedtaksperiodeId"] = vedtaksperiodeId.toString() }
-        behandlingId?.let { this["behandlingId"] = behandlingId.toString() }
-        yrkesaktivitetstype?.let { this["yrkesaktivitetstype"] = yrkesaktivitetstype }
-        orgnummer?.let { this["organisasjonsnummer"] = orgnummer }
-    })
+        "behov",
+        ekstraFelter +
+            mutableMapOf(
+                "@behov" to behov,
+                "fødselsnummer" to fødselsnummer,
+                "@løsning" to løsninger,
+                "@final" to true,
+                "@besvart" to besvart,
+            ).apply {
+                vedtaksperiodeId?.let { this["vedtaksperiodeId"] = vedtaksperiodeId.toString() }
+                behandlingId?.let { this["behandlingId"] = behandlingId.toString() }
+                yrkesaktivitetstype?.let { this["yrkesaktivitetstype"] = yrkesaktivitetstype }
+                orgnummer?.let { this["organisasjonsnummer"] = orgnummer }
+            },
+    )
 
-    fun lagIdentOpphørt(fnr: String, nyttFnr: String) = nyHendelse(
-        "ident_opphørt", mapOf(
-        "fødselsnummer" to fnr,
-        "nye_identer" to mapOf(
-            "fødselsnummer" to nyttFnr,
-            "aktørId" to "aktørId",
-            "npid" to null
+    fun lagIdentOpphørt(
+        fnr: String,
+        nyttFnr: String,
+    ) = nyHendelse(
+        "ident_opphørt",
+        mapOf(
+            "fødselsnummer" to fnr,
+            "nye_identer" to
+                mapOf(
+                    "fødselsnummer" to nyttFnr,
+                    "aktørId" to "aktørId",
+                    "npid" to null,
+                ),
+            "gamle_identer" to
+                listOf(
+                    mapOf("ident" to fnr, "type" to "FØDSELSNUMMER"),
+                ),
         ),
-        "gamle_identer" to listOf(
-            mapOf("ident" to fnr, "type" to "FØDSELSNUMMER")
-        )
-    )
     )
 
-    fun lagAvbruttFiskerSøknad(fom: LocalDate, tom: LocalDate) = nyHendelse("avbrutt_fisker_søknad", mapOf(
-        "fnr" to fødselsnummer,
-        "fom" to fom.toString(),
-        "tom" to tom.toString()
-    ))
+    fun lagAvbruttFiskerSøknad(
+        fom: LocalDate,
+        tom: LocalDate,
+    ) = nyHendelse(
+        "avbrutt_fisker_søknad",
+        mapOf(
+            "fnr" to fødselsnummer,
+            "fom" to fom.toString(),
+            "tom" to tom.toString(),
+        ),
+    )
 
-    fun lagAvbruttFrilanserSøknad(fom: LocalDate, tom: LocalDate) = nyHendelse("avbrutt_frilanser_søknad", mapOf(
-        "fnr" to fødselsnummer,
-        "fom" to fom.toString(),
-        "tom" to tom.toString()
-    ))
+    fun lagAvbruttFrilanserSøknad(
+        fom: LocalDate,
+        tom: LocalDate,
+    ) = nyHendelse(
+        "avbrutt_frilanser_søknad",
+        mapOf(
+            "fnr" to fødselsnummer,
+            "fom" to fom.toString(),
+            "tom" to tom.toString(),
+        ),
+    )
 
-    fun lagAvbruttJordbrukerSøknad(fom: LocalDate, tom: LocalDate) = nyHendelse("avbrutt_jordbruker_søknad", mapOf(
-        "fnr" to fødselsnummer,
-        "fom" to fom.toString(),
-        "tom" to tom.toString()
-    ))
+    fun lagAvbruttJordbrukerSøknad(
+        fom: LocalDate,
+        tom: LocalDate,
+    ) = nyHendelse(
+        "avbrutt_jordbruker_søknad",
+        mapOf(
+            "fnr" to fødselsnummer,
+            "fom" to fom.toString(),
+            "tom" to tom.toString(),
+        ),
+    )
 
-    fun lagAvbruttSelvstendigSøknad(fom: LocalDate, tom: LocalDate) = nyHendelse("avbrutt_selvstendig_søknad", mapOf(
-        "fnr" to fødselsnummer,
-        "fom" to fom.toString(),
-        "tom" to tom.toString()
-    ))
+    fun lagAvbruttSelvstendigSøknad(
+        fom: LocalDate,
+        tom: LocalDate,
+    ) = nyHendelse(
+        "avbrutt_selvstendig_søknad",
+        mapOf(
+            "fnr" to fødselsnummer,
+            "fom" to fom.toString(),
+            "tom" to tom.toString(),
+        ),
+    )
 
-    fun lagAvbruttArbeidstakerSøknad(fom: LocalDate, tom: LocalDate, organisasjonsnummer: String) = nyHendelse("avbrutt_søknad", mapOf(
-        "fnr" to fødselsnummer,
-        "fom" to fom.toString(),
-        "tom" to tom.toString(),
-        "arbeidsgiver" to mapOf(
-            "orgnummer" to organisasjonsnummer
-        )
-    ))
+    fun lagAvbruttArbeidstakerSøknad(
+        fom: LocalDate,
+        tom: LocalDate,
+        organisasjonsnummer: String,
+    ) = nyHendelse(
+        "avbrutt_søknad",
+        mapOf(
+            "fnr" to fødselsnummer,
+            "fom" to fom.toString(),
+            "tom" to tom.toString(),
+            "arbeidsgiver" to
+                mapOf(
+                    "orgnummer" to organisasjonsnummer,
+                ),
+        ),
+    )
 
-    fun lagAvbruttArbeidsledigSøknad(fom: LocalDate, tom: LocalDate, tidligereArbeidsgiverOrgnummer : String?) = nyHendelse("avbrutt_arbeidsledig_søknad", mapOf(
-        "fnr" to fødselsnummer,
-        "fom" to fom.toString(),
-        "tom" to tom.toString()
-    ).let { when (tidligereArbeidsgiverOrgnummer) {
-        null -> it
-        else -> it + mapOf("tidligereArbeidsgiverOrgnummer" to tidligereArbeidsgiverOrgnummer)
-    } })
+    fun lagAvbruttArbeidsledigSøknad(
+        fom: LocalDate,
+        tom: LocalDate,
+        tidligereArbeidsgiverOrgnummer: String?,
+    ) = nyHendelse(
+        "avbrutt_arbeidsledig_søknad",
+        mapOf(
+            "fnr" to fødselsnummer,
+            "fom" to fom.toString(),
+            "tom" to tom.toString(),
+        ).let {
+            when (tidligereArbeidsgiverOrgnummer) {
+                null -> it
+                else -> it + mapOf("tidligereArbeidsgiverOrgnummer" to tidligereArbeidsgiverOrgnummer)
+            }
+        },
+    )
 }

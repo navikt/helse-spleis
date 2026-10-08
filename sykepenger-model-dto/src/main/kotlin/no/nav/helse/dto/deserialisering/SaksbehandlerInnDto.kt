@@ -4,5 +4,5 @@ import java.util.UUID
 
 data class SaksbehandlerInnDto(
     val id: UUID,
-    val inntektsdata: InntektsdataInnDto
+    val inntektsdata: InntektsdataInnDto,
 )

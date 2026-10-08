@@ -6,9 +6,8 @@ private val regex = "^$varselkodeformat$".toRegex()
 
 enum class Varselkode(
     val varseltekst: String,
-    val avviklet: Boolean = false
+    val avviklet: Boolean = false,
 ) {
-
     // SY: Sykmelding
     RV_SY_1("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden", avviklet = true),
     RV_SY_2("Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer", avviklet = true),
@@ -293,7 +292,7 @@ enum class Varselkode(
 
     RV_AG_1("Finner ikke arbeidsgiver", true),
 
-    //AN: Annet
+    // AN: Annet
     RV_AN_1("Avslutter perioden på grunn av tilbakestilling", avviklet = true),
     RV_AN_2("Feil i vilkårsgrunnlag i AVVENTER_VILKÅRSPRØVING_ARBEIDSGIVERSØKNAD", avviklet = true),
     RV_AN_3("Feil i vilkårsgrunnlag i AVVENTER_VILKÅRSPRØVING_GAP", avviklet = true),
@@ -305,18 +304,16 @@ enum class Varselkode(
     RV_AN_9("Bruker har en forsikring som opphører i perioden"),
 
     // YS: Yrkesskade
-    RV_YS_1("Yrkesskade oppgitt i søknaden")
+    RV_YS_1("Yrkesskade oppgitt i søknaden"),
     ;
 
     init {
         require(this.name.matches(regex)) { "Ugyldig varselkode-format: ${this.name}" }
     }
 
-    internal fun varsel(kontekster: List<SpesifikkKontekst>): Aktivitet.Varsel =
-        Aktivitet.Varsel.opprett(kontekster, this, varseltekst)
+    internal fun varsel(kontekster: List<SpesifikkKontekst>): Aktivitet.Varsel = Aktivitet.Varsel.opprett(kontekster, this, varseltekst)
 
-    internal fun funksjonellFeil(kontekster: List<SpesifikkKontekst>): Aktivitet.FunksjonellFeil =
-        Aktivitet.FunksjonellFeil.opprett(kontekster, this, varseltekst)
+    internal fun funksjonellFeil(kontekster: List<SpesifikkKontekst>): Aktivitet.FunksjonellFeil = Aktivitet.FunksjonellFeil.opprett(kontekster, this, varseltekst)
 
     override fun toString() = "${this.name}: $varseltekst"
 
@@ -331,7 +328,6 @@ enum class Varselkode(
         val `Overlapper med svangerskapspenger` = RV_AY_11
         val `Forlenger foreldrepenger med mer enn 14 dager` = RV_AY_12
 
-
         val `Støtter ikke søknadstypen` = RV_SØ_39
         val `Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader` = RV_SØ_42
         val `Arbeidsledigsøknad er lagt til grunn` = RV_SØ_43
@@ -340,15 +336,19 @@ enum class Varselkode(
         val `Arbeidsgiveropplysninger for forkastet periode` = RV_AO_1
         val `Arbeidsgiveropplysninger for periode som allerede har opplysninger` = RV_AO_2
 
-        fun IAktivitetslogg.varsel(varselkode: Varselkode, detaljer: String) {
+        fun IAktivitetslogg.varsel(
+            varselkode: Varselkode,
+            detaljer: String,
+        ) {
             varsel(varselkode)
             info("${varselkode.name} detaljer: $detaljer")
         }
     }
+
     object TilkommenInntekt {
-        val `Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere`  = RV_SV_5
-        val `Opplyst i søknaden om at hen er arbeidstaker hos annen arbeidsgiver, men ikke jobbet der de siste 14 dagene før hen ble sykmeldt`= RV_SØ_44
+        val `Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere` = RV_SV_5
+        val `Opplyst i søknaden om at hen er arbeidstaker hos annen arbeidsgiver, men ikke jobbet der de siste 14 dagene før hen ble sykmeldt` = RV_SØ_44
         val `Opplyst i søknaden om at hen har andre inntekskilder` = RV_SØ_10
-        val `Søknad fra arbeidsgiver som ikke er i sykepengegrunnlaget`= RV_SV_2
+        val `Søknad fra arbeidsgiver som ikke er i sykepengegrunnlaget` = RV_SV_2
     }
 }

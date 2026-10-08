@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -28,9 +26,10 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.*
 
 internal class TimeoutTest : AbstractDslTest() {
-
     @Test
     fun `avventer inntektsmelding går først videre etter 90 dager`() {
         a1 {
@@ -96,12 +95,12 @@ internal class TimeoutTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 listOf(1.mai til 16.mai),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterPåminnelse(
                 1.vedtaksperiode,
                 tilstand = AVVENTER_INNTEKTSMELDING,
-                tilstandsendringstidspunkt = 5.februar.atStartOfDay()
+                tilstandsendringstidspunkt = 5.februar.atStartOfDay(),
             )
 
             assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -248,10 +247,12 @@ internal class TimeoutTest : AbstractDslTest() {
         }
     }
 
-    private fun venterTil(vedtaksperiodeId: UUID) =
-        observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == vedtaksperiodeId }.venterTil
+    private fun venterTil(vedtaksperiodeId: UUID) = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == vedtaksperiodeId }.venterTil
 
-    private fun assertTimeoutTidspunkt(vedtaksperiodeId: UUID, assertionBlock: (venterTil: LocalDateTime, gikkInnITilstand: LocalDateTime) -> Unit) {
+    private fun assertTimeoutTidspunkt(
+        vedtaksperiodeId: UUID,
+        assertionBlock: (venterTil: LocalDateTime, gikkInnITilstand: LocalDateTime) -> Unit,
+    ) {
         val venterTil = venterTil(vedtaksperiodeId)
         val gikkInnITilstand = inspektør(vedtaksperiodeId).oppdatert
         assertionBlock(venterTil, gikkInnITilstand)

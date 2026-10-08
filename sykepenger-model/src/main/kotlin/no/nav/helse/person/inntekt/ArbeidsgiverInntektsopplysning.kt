@@ -1,7 +1,5 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
-import java.util.*
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -16,12 +14,14 @@ import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import java.time.LocalDate
+import java.util.*
 
 internal data class ArbeidsgiverInntektsopplysning(
     val orgnummer: String,
     val faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
     val korrigertInntekt: Saksbehandler?,
-    val skjønnsmessigFastsatt: SkjønnsmessigFastsatt?
+    val skjønnsmessigFastsatt: SkjønnsmessigFastsatt?,
 ) {
     val omregnetÅrsinntekt = korrigertInntekt?.inntektsdata ?: faktaavklartInntekt.inntektsdata
     private val fastsattÅrsinntektInntektsdata = skjønnsmessigFastsatt?.inntektsdata ?: omregnetÅrsinntekt
@@ -29,7 +29,12 @@ internal data class ArbeidsgiverInntektsopplysning(
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
-    private fun håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer: String, førsteFraværsdag: LocalDate, skjæringstidspunkt: LocalDate, arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt): Utfall {
+    private fun håndterArbeidstakerFaktaavklartInntekt(
+        organisasjonsnummer: String,
+        førsteFraværsdag: LocalDate,
+        skjæringstidspunkt: LocalDate,
+        arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
+    ): Utfall {
         check(arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) { "Hva holder du på med? Du skal ikke sende inntekter med kilde ${arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class.simpleName} hit!" }
 
         if (this.orgnummer != organisasjonsnummer) return Utfall.Uendret(this)
@@ -43,50 +48,61 @@ internal data class ArbeidsgiverInntektsopplysning(
         if (førsteFraværsdag.yearMonth != skjæringstidspunkt.yearMonth && liggerSkattTilGrunnNå) return Utfall.Uendret(this)
 
         // Samme beløp som vi allerede har, men nå går fra å ha lagt skatt til grunn til å ha lagt arbeidsgivers inntekt til grunn
-        if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp && liggerSkattTilGrunnNå) return Utfall.EndretKilde(copy(
-            faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
-            korrigertInntekt = null
-        ))
+        if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp && liggerSkattTilGrunnNå) {
+            return Utfall.EndretKilde(
+                copy(
+                    faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
+                    korrigertInntekt = null,
+                ),
+            )
+        }
 
         // En ny arbeidstakerFaktaavklartInntekt som sier det samme som før
         if (omregnetÅrsinntekt.beløp == arbeidstakerFaktaavklartInntekt.inntektsdata.beløp) return Utfall.Uendret(this)
 
-        return Utfall.EndretBeløp(copy(
-            faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
-            korrigertInntekt = null,
-            skjønnsmessigFastsatt = null
-        ))
+        return Utfall.EndretBeløp(
+            copy(
+                faktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
+                korrigertInntekt = null,
+                skjønnsmessigFastsatt = null,
+            ),
+        )
     }
 
     private fun håndterKorrigerteInntekter(korrigerteInntekter: List<KorrigertArbeidsgiverInntektsopplysning>): Utfall {
         val korrigertInntekt = korrigerteInntekter.singleOrNull { it.organisasjonsnummer == this.orgnummer }?.korrigertInntekt ?: return Utfall.Uendret(this)
         // bare sett inn ny inntekt hvis beløp er ulikt (speil sender inntekt- og refusjonoverstyring i samme melding)
         if (korrigertInntekt.inntektsdata.beløp == omregnetÅrsinntekt.beløp) return Utfall.Uendret(this)
-        return Utfall.EndretBeløp(copy(
-            korrigertInntekt = korrigertInntekt,
-            skjønnsmessigFastsatt = null
-        ))
+        return Utfall.EndretBeløp(
+            copy(
+                korrigertInntekt = korrigertInntekt,
+                skjønnsmessigFastsatt = null,
+            ),
+        )
     }
 
     private fun skjønnsfastsett(fastsettelser: List<SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt>): ArbeidsgiverInntektsopplysning {
         val fastsettelse = fastsettelser.single { it.orgnummer == this.orgnummer }
         return copy(
-            skjønnsmessigFastsatt = SkjønnsmessigFastsatt(
-                id = UUID.randomUUID(),
-                inntektsdata = fastsettelse.inntektsdata
-            )
+            skjønnsmessigFastsatt =
+                SkjønnsmessigFastsatt(
+                    id = UUID.randomUUID(),
+                    inntektsdata = fastsettelse.inntektsdata,
+                ),
         )
     }
 
     private fun deaktiver(
         forklaring: String,
         oppfylt: Boolean,
-        subsumsjonslogg: Subsumsjonslogg
+        subsumsjonslogg: Subsumsjonslogg,
     ): ArbeidsgiverInntektsopplysning {
-        val inntekterSisteTreMåneder = when (faktaavklartInntekt.inntektsopplysningskilde) {
-            is Arbeidstakerinntektskilde.AOrdningen -> faktaavklartInntekt.inntektsopplysningskilde.inntektsopplysninger
+        val inntekterSisteTreMåneder =
+            when (faktaavklartInntekt.inntektsopplysningskilde) {
+                is Arbeidstakerinntektskilde.AOrdningen -> faktaavklartInntekt.inntektsopplysningskilde.inntektsopplysninger
                 Arbeidstakerinntektskilde.Arbeidsgiver,
-                Arbeidstakerinntektskilde.Infotrygd -> emptyList()
+                Arbeidstakerinntektskilde.Infotrygd,
+                -> emptyList()
             }
 
         subsumsjonslogg.logg(
@@ -95,16 +111,15 @@ internal data class ArbeidsgiverInntektsopplysning(
                 organisasjonsnummer = orgnummer,
                 inntekterSisteTreMåneder = if (korrigertInntekt == null) inntekterSisteTreMåneder.subsumsjonsformat() else emptyList(),
                 forklaring = forklaring,
-                oppfylt = oppfylt
-            )
+                oppfylt = oppfylt,
+            ),
         )
 
         return this
     }
 
     internal companion object {
-        internal fun List<ArbeidsgiverInntektsopplysning>.rullTilbakeEventuellSkjønnsmessigFastsettelse() =
-            map { it.copy(skjønnsmessigFastsatt = null) }
+        internal fun List<ArbeidsgiverInntektsopplysning>.rullTilbakeEventuellSkjønnsmessigFastsettelse() = map { it.copy(skjønnsmessigFastsatt = null) }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.validerSkjønnsmessigAltEllerIntet() {
             check(all { it.skjønnsmessigFastsatt == null } || all { it.skjønnsmessigFastsatt != null }) { "Enten så må alle inntektsopplysninger var skjønnsmessig fastsatt, eller så må ingen være det" }
@@ -114,7 +129,7 @@ internal data class ArbeidsgiverInntektsopplysning(
             deaktiverte: List<ArbeidsgiverInntektsopplysning>,
             orgnummer: String,
             forklaring: String,
-            subsumsjonslogg: Subsumsjonslogg
+            subsumsjonslogg: Subsumsjonslogg,
         ): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
             // Om inntektene i sykepengegrunnlaget var skjønnsmessig fastsatt før _deaktivering_ må vi først
             // rulle tilbake eventuell skjønnsmessig fastsettelse ettersom en skjønnsmessig fastsettelse blir gjort
@@ -127,7 +142,7 @@ internal data class ArbeidsgiverInntektsopplysning(
             aktiveres: List<ArbeidsgiverInntektsopplysning>,
             orgnummer: String,
             forklaring: String,
-            subsumsjonslogg: Subsumsjonslogg
+            subsumsjonslogg: Subsumsjonslogg,
         ): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
             // Om inntektene i sykepengegrunnlaget var skjønnsmessig fastsatt før _aktivering_ må vi først
             // rulle tilbake eventuell skjønnsmessig fastsettelse ettersom en skjønnsmessig fastsettelse blir gjort
@@ -143,11 +158,12 @@ internal data class ArbeidsgiverInntektsopplysning(
             orgnummer: String,
             forklaring: String,
             oppfylt: Boolean,
-            subsumsjonslogg: Subsumsjonslogg
+            subsumsjonslogg: Subsumsjonslogg,
         ): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
-            val inntektsopplysning = checkNotNull(this.singleOrNull { it.orgnummer == orgnummer }) {
-                "Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til"
-            }.deaktiver(forklaring, oppfylt, subsumsjonslogg)
+            val inntektsopplysning =
+                checkNotNull(this.singleOrNull { it.orgnummer == orgnummer }) {
+                    "Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til"
+                }.deaktiver(forklaring, oppfylt, subsumsjonslogg)
             val aktive = this.filterNot { it === inntektsopplysning }
             return aktive to (deaktiverte + listOfNotNull(inntektsopplysning))
         }
@@ -156,17 +172,18 @@ internal data class ArbeidsgiverInntektsopplysning(
             organisasjonsnummer: String,
             førsteFraværsdag: LocalDate,
             skjæringstidspunkt: LocalDate,
-            arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
-        ) = this.map { arbeidsgiverInntektsopplysning -> arbeidsgiverInntektsopplysning.håndterArbeidstakerFaktaavklartInntekt(
-            organisasjonsnummer = organisasjonsnummer,
-            førsteFraværsdag = førsteFraværsdag,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklartInntekt
-        ) }
-
+            arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
+        ) = this.map { arbeidsgiverInntektsopplysning ->
+            arbeidsgiverInntektsopplysning.håndterArbeidstakerFaktaavklartInntekt(
+                organisasjonsnummer = organisasjonsnummer,
+                førsteFraværsdag = førsteFraværsdag,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
+            )
+        }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.håndterKorrigerteInntekter(
-            korrigerteInntekter: List<KorrigertArbeidsgiverInntektsopplysning>
+            korrigerteInntekter: List<KorrigertArbeidsgiverInntektsopplysning>,
         ) = this.map { arbeidsgiverInntektsopplysning -> arbeidsgiverInntektsopplysning.håndterKorrigerteInntekter(korrigerteInntekter) }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.skjønnsfastsett(other: List<SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt>): List<ArbeidsgiverInntektsopplysning> {
@@ -177,13 +194,14 @@ internal data class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.vurderArbeidsgivere(
             aktivitetslogg: IAktivitetslogg,
             opptjening: ArbeidstakerOpptjening,
-            orgnummer: String
+            orgnummer: String,
         ) {
             if (!harInntekt(orgnummer)) return aktivitetslogg.varsel(Varselkode.TilkommenInntekt.`Søknad fra arbeidsgiver som ikke er i sykepengegrunnlaget`)
             vurderSkifteAvArbeidsgiver(aktivitetslogg, opptjening, orgnummer)
         }
 
         // Denne funksjonen skjønner jeg ingenting av, ikke spør meg om den, hilsen Maxi
+
         /**
          * Denne ser ut til å prøve å finne ut av om bruker sin opptjening bare tilhører
          * andre arbeidsgivere enn den som kommer inn i @param orgnummer
@@ -200,7 +218,7 @@ internal data class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.vurderSkifteAvArbeidsgiver(
             aktivitetslogg: IAktivitetslogg,
             opptjening: ArbeidstakerOpptjening,
-            orgnummer: String
+            orgnummer: String,
         ) {
             // om orgnummer i funksjonskallet ikke finnes i opplysningene i opptjeningen
             // så gjetter vi på at det er snakk om bytte av arbeidsgiver og varsler saksbehandler,
@@ -211,60 +229,68 @@ internal data class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.måHaRegistrertOpptjeningForArbeidsgivere(
             aktivitetslogg: IAktivitetslogg,
-            opptjening: ArbeidstakerOpptjening
+            opptjening: ArbeidstakerOpptjening,
         ) {
             if (none { opptjening.startdatoFor(it.orgnummer) == null }) return
             aktivitetslogg.varsel(Varselkode.RV_VV_1)
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.berik(builder: UtkastTilVedtakBuilder) = this
-            .forEach { arbeidsgiver ->
-                builder.arbeidsgiverinntekt(
-                    arbeidsgiver = arbeidsgiver.orgnummer,
-                    omregnedeÅrsinntekt = arbeidsgiver.omregnetÅrsinntekt.beløp,
-                    skjønnsfastsatt = arbeidsgiver.skjønnsmessigFastsatt?.inntektsdata?.beløp,
-                    inntektskilde =
-                        if (arbeidsgiver.skjønnsmessigFastsatt != null || arbeidsgiver.korrigertInntekt != null) {
-                            Inntektskilde.Saksbehandler
-                        } else when (arbeidsgiver.faktaavklartInntekt.inntektsopplysningskilde) {
-                            is Arbeidstakerinntektskilde.AOrdningen -> Inntektskilde.AOrdningen
-                            Arbeidstakerinntektskilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
-                            Arbeidstakerinntektskilde.Infotrygd -> Inntektskilde.Arbeidsgiver
-                        }
-                )
-            }
+        internal fun List<ArbeidsgiverInntektsopplysning>.berik(builder: UtkastTilVedtakBuilder) =
+            this
+                .forEach { arbeidsgiver ->
+                    builder.arbeidsgiverinntekt(
+                        arbeidsgiver = arbeidsgiver.orgnummer,
+                        omregnedeÅrsinntekt = arbeidsgiver.omregnetÅrsinntekt.beløp,
+                        skjønnsfastsatt = arbeidsgiver.skjønnsmessigFastsatt?.inntektsdata?.beløp,
+                        inntektskilde =
+                            if (arbeidsgiver.skjønnsmessigFastsatt != null || arbeidsgiver.korrigertInntekt != null) {
+                                Inntektskilde.Saksbehandler
+                            } else {
+                                when (arbeidsgiver.faktaavklartInntekt.inntektsopplysningskilde) {
+                                    is Arbeidstakerinntektskilde.AOrdningen -> Inntektskilde.AOrdningen
+                                    Arbeidstakerinntektskilde.Arbeidsgiver -> Inntektskilde.Arbeidsgiver
+                                    Arbeidstakerinntektskilde.Infotrygd -> Inntektskilde.Arbeidsgiver
+                                }
+                            },
+                    )
+                }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.harInntekt(organisasjonsnummer: String) =
-            singleOrNull { it.orgnummer == organisasjonsnummer } != null
+        internal fun List<ArbeidsgiverInntektsopplysning>.harInntekt(organisasjonsnummer: String) = singleOrNull { it.orgnummer == organisasjonsnummer } != null
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.fastsattÅrsinntekt() =
-            fold(INGEN) { acc, item -> acc + item.fastsattÅrsinntekt }
+        internal fun List<ArbeidsgiverInntektsopplysning>.fastsattÅrsinntekt() = fold(INGEN) { acc, item -> acc + item.fastsattÅrsinntekt }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.totalOmregnetÅrsinntekt() =
-            fold(INGEN) { acc, item -> acc + item.omregnetÅrsinntekt.beløp }
+        internal fun List<ArbeidsgiverInntektsopplysning>.totalOmregnetÅrsinntekt() = fold(INGEN) { acc, item -> acc + item.omregnetÅrsinntekt.beløp }
 
-        internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningInnDto): ArbeidsgiverInntektsopplysning {
-            return ArbeidsgiverInntektsopplysning(
+        internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningInnDto): ArbeidsgiverInntektsopplysning =
+            ArbeidsgiverInntektsopplysning(
                 orgnummer = dto.orgnummer,
                 faktaavklartInntekt = ArbeidstakerFaktaavklartInntekt.gjenopprett(dto.faktaavklartInntekt),
                 korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) },
-                skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let { SkjønnsmessigFastsatt.gjenopprett(it) }
+                skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let { SkjønnsmessigFastsatt.gjenopprett(it) },
             )
-        }
     }
 
-    internal fun dto() = ArbeidsgiverInntektsopplysningUtDto(
-        orgnummer = this.orgnummer,
-        faktaavklartInntekt = this.faktaavklartInntekt.dto(),
-        korrigertInntekt = this.korrigertInntekt?.dto(),
-        skjønnsmessigFastsatt = skjønnsmessigFastsatt?.dto()
-    )
+    internal fun dto() =
+        ArbeidsgiverInntektsopplysningUtDto(
+            orgnummer = this.orgnummer,
+            faktaavklartInntekt = this.faktaavklartInntekt.dto(),
+            korrigertInntekt = this.korrigertInntekt?.dto(),
+            skjønnsmessigFastsatt = skjønnsmessigFastsatt?.dto(),
+        )
 
     internal sealed interface Utfall {
         val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning
-        data class Uendret(override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): Utfall
-        data class EndretBeløp(override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): Utfall
-        data class EndretKilde(override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): Utfall
+
+        data class Uendret(
+            override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning,
+        ) : Utfall
+
+        data class EndretBeløp(
+            override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning,
+        ) : Utfall
+
+        data class EndretKilde(
+            override val arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning,
+        ) : Utfall
     }
 }
-

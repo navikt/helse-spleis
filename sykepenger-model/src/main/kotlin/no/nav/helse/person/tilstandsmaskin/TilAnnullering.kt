@@ -10,20 +10,36 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 internal data object TilAnnullering : Vedtaksperiodetilstand {
     override val type = TilstandType.TIL_ANNULLERING
 
-    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+    override fun entering(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         trengerAnnullering(vedtaksperiode, eventBus, aktivitetslogg)
     }
 
-    override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg) {
+    override fun gjenopptaBehandling(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        hendelse: Hendelse,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående annullering")
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    override fun håndterPåminnelse(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        påminnelse: Påminnelse,
+        aktivitetslogg: IAktivitetslogg,
+    ): Revurderingseventyr? {
         trengerAnnullering(vedtaksperiode, eventBus, aktivitetslogg)
         return null
     }
 }
 
-private fun trengerAnnullering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
-    return trengerUtbetaling(vedtaksperiode, eventBus, aktivitetslogg, medMaksdato = false)
-}
+private fun trengerAnnullering(
+    vedtaksperiode: Vedtaksperiode,
+    eventBus: EventBus,
+    aktivitetslogg: IAktivitetslogg,
+) = trengerUtbetaling(vedtaksperiode, eventBus, aktivitetslogg, medMaksdato = false)

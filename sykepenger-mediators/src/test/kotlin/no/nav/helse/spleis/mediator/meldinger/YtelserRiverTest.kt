@@ -1,14 +1,17 @@
 package no.nav.helse.spleis.mediator.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import java.util.UUID
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class YtelserRiverTest : RiverTest() {
-    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+    override fun river(
+        rapidsConnection: RapidsConnection,
+        mediator: IMessageMediator,
+    ) {
         YtelserRiver(rapidsConnection, mediator)
     }
 
@@ -716,7 +719,6 @@ private val utenInstitusjonsopphold = """
     }
 """
 
-
 @Language("JSON")
 private val utenArbeidsavklaringspenger = """
   {
@@ -913,4 +915,3 @@ private val utenDagpenger = """
       "@besvart": "2020-01-24T11:25:00"
     }
 """
-

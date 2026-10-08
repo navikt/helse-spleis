@@ -8,17 +8,19 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class OppdragBuilderTest {
+    private fun refusjonBuilder() =
+        OppdragBuilder(
+            mottaker = "orgnr",
+            fagområde = Fagområde.SykepengerRefusjon,
+            klassekode = Klassekode.RefusjonIkkeOpplysningspliktig,
+        )
 
-    private fun refusjonBuilder() = OppdragBuilder(
-        mottaker = "orgnr",
-        fagområde = Fagområde.SykepengerRefusjon,
-        klassekode = Klassekode.RefusjonIkkeOpplysningspliktig
-    )
-    private fun personBuilder() = OppdragBuilder(
-        mottaker = "fnr",
-        fagområde = Fagområde.Sykepenger,
-        klassekode = Klassekode.SykepengerArbeidstakerOrdinær
-    )
+    private fun personBuilder() =
+        OppdragBuilder(
+            mottaker = "fnr",
+            fagområde = Fagområde.Sykepenger,
+            klassekode = Klassekode.SykepengerArbeidstakerOrdinær,
+        )
 
     @Test
     fun `kan starte oppdrag på helg`() {

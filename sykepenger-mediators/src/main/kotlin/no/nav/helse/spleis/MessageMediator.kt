@@ -1,124 +1,27 @@
 package no.nav.helse.spleis
 
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.FailedMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.SentMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.*
 import io.micrometer.core.instrument.MeterRegistry
-import java.sql.SQLException
-import kotlin.time.DurationUnit
-import kotlin.time.measureTime
 import no.nav.helse.serde.DeserializationException
 import no.nav.helse.serde.migration.JsonMigrationException
 import no.nav.helse.spleis.db.HendelseRepository
-import no.nav.helse.spleis.meldinger.AnmodningOmForkastingRiver
-import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
-import no.nav.helse.spleis.meldinger.AvbruttSøknadRiver
-import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
-import no.nav.helse.spleis.meldinger.EndretGrunnlagForBeregningRiver
-import no.nav.helse.spleis.meldinger.EndretVurderingPåSkjæringstidspunktRiver
-import no.nav.helse.spleis.meldinger.FeriepengeutbetalingerRiver
-import no.nav.helse.spleis.meldinger.ForkastSykmeldingsperioderRiver
-import no.nav.helse.spleis.meldinger.GjenopptaBehandlingerRiver
-import no.nav.helse.spleis.meldinger.GrunnbeløpsreguleringRiver
-import no.nav.helse.spleis.meldinger.IdentOpphørtRiver
-import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
-import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
-import no.nav.helse.spleis.meldinger.InntektsopplysningerFraLagretInntektsmeldingRiver
-import no.nav.helse.spleis.meldinger.MigrateRiver
-import no.nav.helse.spleis.meldinger.MinimumSykdomsgradVurdertRiver
-import no.nav.helse.spleis.meldinger.NavNoInntektsmeldingerRiver
-import no.nav.helse.spleis.meldinger.NavNoKorrigerteInntektsmeldingerRiver
-import no.nav.helse.spleis.meldinger.NavNoSelvbestemtInntektsmeldingerRiver
-import no.nav.helse.spleis.meldinger.NyeArbeidsledigSøknaderRiver
-import no.nav.helse.spleis.meldinger.NyeFrilansSøknaderRiver
-import no.nav.helse.spleis.meldinger.NyeSelvstendigSøknaderRiver
-import no.nav.helse.spleis.meldinger.NyeSøknaderRiver
-import no.nav.helse.spleis.meldinger.OverstyrArbeidsforholdRiver
-import no.nav.helse.spleis.meldinger.OverstyrArbeidsgiveropplysningerRiver
-import no.nav.helse.spleis.meldinger.OverstyrTidlinjeRiver
-import no.nav.helse.spleis.meldinger.PersonAvstemmingRiver
-import no.nav.helse.spleis.meldinger.PersonPåminnelserRiver
-import no.nav.helse.spleis.meldinger.PåminnelserRiver
-import no.nav.helse.spleis.meldinger.SendtAnnetSøknaderRiver
-import no.nav.helse.spleis.meldinger.SendtArbeidsgiverSøknaderRiver
-import no.nav.helse.spleis.meldinger.SendtArbeidsledigSøknaderRiver
-import no.nav.helse.spleis.meldinger.SendtFiskerSøknaderRiver
-import no.nav.helse.spleis.meldinger.SendtFrilansSøknaderRiver
-import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
-import no.nav.helse.spleis.meldinger.SendtSelvstendigSøknaderRiver
-import no.nav.helse.spleis.meldinger.SimuleringerRiver
-import no.nav.helse.spleis.meldinger.SkjønnsmessigFastsettelseRiver
-import no.nav.helse.spleis.meldinger.UtbetalingerRiver
-import no.nav.helse.spleis.meldinger.UtbetalingsgodkjenningerRiver
-import no.nav.helse.spleis.meldinger.UtbetalingshistorikkEtterInfotrygdendringRiver
-import no.nav.helse.spleis.meldinger.UtbetalingshistorikkForFeriepengerRiver
-import no.nav.helse.spleis.meldinger.UtbetalingshistorikkRiver
-import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
-import no.nav.helse.spleis.meldinger.YtelserRiver
-import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
-import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
-import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
-import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
-import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.EndretGrunnlagForBeregningMessage
-import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
-import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
-import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
-import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
-import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
-import no.nav.helse.spleis.meldinger.model.HendelseMessage
-import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
-import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
-import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.MigrateMessage
-import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
-import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NyArbeidsledigTidligereArbeidstakerSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NySøknadMessage
-import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
-import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessage
-import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
-import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
-import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadAnnetMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadFiskerMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
-import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
-import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
-import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import no.nav.helse.spleis.meldinger.*
+import no.nav.helse.spleis.meldinger.model.*
 import no.nav.helse.spleis.utboks.Utboks.Companion.fireAndForget
 import no.nav.helse.spleis.utboks.UtboksDao
 import no.nav.helse.spleis.utboks.UtgåendeMelding
 import no.nav.helse.spleis.utboks.Utsender
 import org.slf4j.LoggerFactory
+import java.sql.SQLException
+import kotlin.time.DurationUnit
+import kotlin.time.measureTime
 
 internal class MessageMediator(
     rapidsConnection: RapidsConnection,
     private val hendelseMediator: IHendelseMediator,
     private val hendelseRepository: HendelseRepository,
     private val utsender: Utsender,
-    private val utboksDao: UtboksDao
+    private val utboksDao: UtboksDao,
 ) : IMessageMediator {
     private companion object {
         private val log = LoggerFactory.getLogger(MessageMediator::class.java)
@@ -183,7 +86,10 @@ internal class MessageMediator(
         riverErrors.clear()
     }
 
-    override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
+    override fun onRecognizedMessage(
+        message: HendelseMessage,
+        context: MessageContext,
+    ) {
         try {
             measureTime {
                 val behandlingContext = BehandlingContext(message, utsender, utboksDao)
@@ -197,88 +103,103 @@ internal class MessageMediator(
                 behandlingContext.sendMeldingerIUtboks()
             }.also { result ->
                 val antallSekunder = result.toDouble(DurationUnit.SECONDS)
-                val label = when {
-                    antallSekunder < 1.0 -> "under ett sekund"
-                    antallSekunder <= 2.0 -> "mer enn ett sekund"
-                    antallSekunder <= 5.0 -> "mer enn to sekunder"
-                    antallSekunder <= 10.0 -> "mer enn fem sekunder"
-                    else -> "mer enn 10 sekunder"
-                }
+                val label =
+                    when {
+                        antallSekunder < 1.0 -> "under ett sekund"
+                        antallSekunder <= 2.0 -> "mer enn ett sekund"
+                        antallSekunder <= 5.0 -> "mer enn to sekunder"
+                        antallSekunder <= 10.0 -> "mer enn fem sekunder"
+                        else -> "mer enn 10 sekunder"
+                    }
                 sikkerLogg.info("brukte $label ($antallSekunder s) på å prosessere meldingen")
             }
         } catch (err: Exception) {
-            if (kritiskFeilSomSkalMedføreAtPoddenDør(err, message)) severeErrorHandler(err, message, context)
-            else errorHandler(err, message)
+            if (kritiskFeilSomSkalMedføreAtPoddenDør(err, message)) {
+                severeErrorHandler(err, message, context)
+            } else {
+                errorHandler(err, message)
+            }
         }
     }
 
-    private fun kritiskFeilSomSkalMedføreAtPoddenDør(err: Exception, message: HendelseMessage): Boolean {
-        return err.kritiskFeil || message.måMeldingResendesVedFeil
-    }
+    private fun kritiskFeilSomSkalMedføreAtPoddenDør(
+        err: Exception,
+        message: HendelseMessage,
+    ): Boolean = err.kritiskFeil || message.måMeldingResendesVedFeil
 
-    private val Exception.kritiskFeil get() = when (this) {
-        is DeserializationException,
-        is JsonMigrationException,
-        is SQLException -> true
-        else -> false
-    }
+    private val Exception.kritiskFeil get() =
+        when (this) {
+            is DeserializationException,
+            is JsonMigrationException,
+            is SQLException,
+            -> true
+            else -> false
+        }
 
-    private val HendelseMessage.måMeldingResendesVedFeil get() = when (this) {
-        // meldinger som fint kan ignoreres/blir sendt på nytt får en
-        // avslappet feilhåndtering
-        is AnmodningOmForkastingMessage,
-        is AnnulleringMessage,
-        is AvstemmingMessage,
-        is SimuleringMessage,
-        is UtbetalingMessage,
-        is FeriepengeutbetalingMessage,
-        is UtbetalingsgodkjenningMessage,
-        is UtbetalingshistorikkForFeriepengerMessage,
-        is UtbetalingshistorikkMessage,
-        is VilkårsgrunnlagMessage,
-        is YtelserMessage,
-        is ForkastSykmeldingsperioderMessage,
-        is GrunnbeløpsreguleringMessage,
-        is InntektsmeldingerReplayMessage,
-        is MigrateMessage,
-        is MinimumSykdomsgradVurdertMessage,
-        is OverstyrArbeidsforholdMessage,
-        is OverstyrArbeidsgiveropplysningerMessage,
-        is OverstyrTidslinjeMessage,
-        is PersonPåminnelseMessage,
-        is PåminnelseMessage,
-        is SkjønnsmessigFastsettelseMessage,
-        is GjenopptaBehandlingMessage,
-        is EndretVurderingPåSkjæringstidspunktMessage,
-        is EndretGrunnlagForBeregningMessage,
-        is InntektsopplysningerFraLagretInntektsmeldingMessage -> false
+    private val HendelseMessage.måMeldingResendesVedFeil get() =
+        when (this) {
+            // meldinger som fint kan ignoreres/blir sendt på nytt får en
+            // avslappet feilhåndtering
+            is AnmodningOmForkastingMessage,
+            is AnnulleringMessage,
+            is AvstemmingMessage,
+            is SimuleringMessage,
+            is UtbetalingMessage,
+            is FeriepengeutbetalingMessage,
+            is UtbetalingsgodkjenningMessage,
+            is UtbetalingshistorikkForFeriepengerMessage,
+            is UtbetalingshistorikkMessage,
+            is VilkårsgrunnlagMessage,
+            is YtelserMessage,
+            is ForkastSykmeldingsperioderMessage,
+            is GrunnbeløpsreguleringMessage,
+            is InntektsmeldingerReplayMessage,
+            is MigrateMessage,
+            is MinimumSykdomsgradVurdertMessage,
+            is OverstyrArbeidsforholdMessage,
+            is OverstyrArbeidsgiveropplysningerMessage,
+            is OverstyrTidslinjeMessage,
+            is PersonPåminnelseMessage,
+            is PåminnelseMessage,
+            is SkjønnsmessigFastsettelseMessage,
+            is GjenopptaBehandlingMessage,
+            is EndretVurderingPåSkjæringstidspunktMessage,
+            is EndretGrunnlagForBeregningMessage,
+            is InntektsopplysningerFraLagretInntektsmeldingMessage,
+            -> false
 
-        // meldinger som må replayes/sendes på nytt ved feil får
-        // en feilhåndtering som medfører at podden går ned
-        is UtbetalingshistorikkEtterInfotrygdendringMessage,
-        is AvbruttSøknadMessage,
-        is DødsmeldingMessage,
-        is IdentOpphørtMessage,
-        is InfotrygdendringMessage,
-        is NavNoInntektsmeldingMessage,
-        is NavNoKorrigertInntektsmeldingMessage,
-        is NavNoSelvbestemtInntektsmeldingMessage,
-        is NyArbeidsledigSøknadMessage,
-        is NyArbeidsledigTidligereArbeidstakerSøknadMessage,
-        is NyFrilansSøknadMessage,
-        is NySelvstendigSøknadMessage,
-        is NySøknadMessage,
-        is SendtSøknadArbeidsgiverMessage,
-        is SendtSøknadArbeidsledigMessage,
-        is SendtSøknadArbeidsledigTidligereArbeidstakerMessage,
-        is SendtSøknadFrilansMessage,
-        is SendtSøknadNavMessage,
-        is SendtSøknadFiskerMessage,
-        is SendtSøknadAnnetMessage,
-        is SendtSøknadSelvstendigMessage -> true
-    }
+            // meldinger som må replayes/sendes på nytt ved feil får
+            // en feilhåndtering som medfører at podden går ned
+            is UtbetalingshistorikkEtterInfotrygdendringMessage,
+            is AvbruttSøknadMessage,
+            is DødsmeldingMessage,
+            is IdentOpphørtMessage,
+            is InfotrygdendringMessage,
+            is NavNoInntektsmeldingMessage,
+            is NavNoKorrigertInntektsmeldingMessage,
+            is NavNoSelvbestemtInntektsmeldingMessage,
+            is NyArbeidsledigSøknadMessage,
+            is NyArbeidsledigTidligereArbeidstakerSøknadMessage,
+            is NyFrilansSøknadMessage,
+            is NySelvstendigSøknadMessage,
+            is NySøknadMessage,
+            is SendtSøknadArbeidsgiverMessage,
+            is SendtSøknadArbeidsledigMessage,
+            is SendtSøknadArbeidsledigTidligereArbeidstakerMessage,
+            is SendtSøknadFrilansMessage,
+            is SendtSøknadNavMessage,
+            is SendtSøknadFiskerMessage,
+            is SendtSøknadAnnetMessage,
+            is SendtSøknadSelvstendigMessage,
+            -> true
+        }
 
-    override fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext, metadata: MessageMetadata) {
+    override fun onRiverError(
+        riverName: String,
+        problems: MessageProblems,
+        context: MessageContext,
+        metadata: MessageMetadata,
+    ) {
         riverErrors.add(riverName to problems)
     }
 
@@ -290,39 +211,59 @@ internal class MessageMediator(
     private fun MessageContext.sendPåSlack(message: HendelseMessage) {
         val googleUrl = "<https://console.cloud.google.com/logs/query;query=resource.labels.container_name:%22spleis%22%0AjsonPayload.message:%22${message.meldingsporing.id.id}%22;duration=P1D?project=tbd-prod-eacd|${message.navn}>"
         val melding = "\n\nEn $googleUrl får Spleis til å gå ned!!"
-        fireAndForget(UtgåendeMelding.nyRapidmelding(
-            eventName = "slackmelding",
-            innhold = mapOf(
-                "melding" to "$melding\n\n - Deres erbødig SPleis :spleis-realistisk:",
-                "level" to "ERROR"
-            )
-        ))
+        fireAndForget(
+            UtgåendeMelding.nyRapidmelding(
+                eventName = "slackmelding",
+                innhold =
+                    mapOf(
+                        "melding" to "$melding\n\n - Deres erbødig SPleis :spleis-realistisk:",
+                        "level" to "ERROR",
+                    ),
+            ),
+        )
     }
 
-    private fun severeErrorHandler(err: Exception, message: HendelseMessage, context: MessageContext) {
+    private fun severeErrorHandler(
+        err: Exception,
+        message: HendelseMessage,
+        context: MessageContext,
+    ) {
         errorHandler("kritisk feil (podden dør!!)", err, message.toJson(), message.secureDiagnosticinfo())
         context.sendPåSlack(message)
         throw err
     }
 
-    private fun errorHandler(err: Exception, message: HendelseMessage) {
+    private fun errorHandler(
+        err: Exception,
+        message: HendelseMessage,
+    ) {
         errorHandler("alvorlig feil", err, message.toJson(), message.secureDiagnosticinfo())
     }
 
-    private fun errorHandler(prefix: String, err: Exception, message: String, context: Map<String, String> = emptyMap()) {
+    private fun errorHandler(
+        prefix: String,
+        err: Exception,
+        message: String,
+        context: Map<String, String> = emptyMap(),
+    ) {
         log.error("$prefix: ${err.message} (se sikkerlogg for melding)", err)
         withMDC(context) { sikkerLogg.error("$prefix: ${err.message}\n\t$message", err) }
     }
 
     private inner class DelegatedRapid(
-        private val rapidsConnection: RapidsConnection
-    ) : RapidsConnection(), RapidsConnection.MessageListener {
-
+        private val rapidsConnection: RapidsConnection,
+    ) : RapidsConnection(),
+        RapidsConnection.MessageListener {
         init {
             rapidsConnection.register(this)
         }
 
-        override fun onMessage(message: String, context: MessageContext, metadata: MessageMetadata, metrics: MeterRegistry) {
+        override fun onMessage(
+            message: String,
+            context: MessageContext,
+            metadata: MessageMetadata,
+            metrics: MeterRegistry,
+        ) {
             beforeRiverHandling()
             notifyMessage(message, context, metadata, metrics)
             afterRiverHandling(message)
@@ -332,22 +273,33 @@ internal class MessageMediator(
             rapidsConnection.publish(message)
         }
 
-        override fun publish(key: String, message: String) {
+        override fun publish(
+            key: String,
+            message: String,
+        ) {
             rapidsConnection.publish(key, message)
         }
 
-        override fun publish(messages: List<OutgoingMessage>): Pair<List<SentMessage>, List<FailedMessage>> {
-            return rapidsConnection.publish(messages)
-        }
+        override fun publish(messages: List<OutgoingMessage>): Pair<List<SentMessage>, List<FailedMessage>> = rapidsConnection.publish(messages)
 
         override fun rapidName() = rapidsConnection.rapidName()
 
         override fun start() = throw IllegalStateException()
+
         override fun stop() = throw IllegalStateException()
     }
 }
 
 internal interface IMessageMediator {
-    fun onRecognizedMessage(message: HendelseMessage, context: MessageContext)
-    fun onRiverError(riverName: String, problems: MessageProblems, context: MessageContext, metadata: MessageMetadata)
+    fun onRecognizedMessage(
+        message: HendelseMessage,
+        context: MessageContext,
+    )
+
+    fun onRiverError(
+        riverName: String,
+        problems: MessageProblems,
+        context: MessageContext,
+        metadata: MessageMetadata,
+    )
 }

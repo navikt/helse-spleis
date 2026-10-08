@@ -7,8 +7,6 @@ import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
 import io.mockk.mockk
-import java.net.URI
-import java.util.UUID
 import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 2`
@@ -26,6 +24,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
+import java.net.URI
+import java.util.UUID
 
 internal class SubsumsjonsmeldingTest {
     private val fnr = "12029240045"
@@ -43,15 +43,21 @@ internal class SubsumsjonsmeldingTest {
 
     @Test
     fun `en melding på gyldig format`() {
-        val subsumsjonen = `§ 8-17 ledd 2`(
-            listOf(1.januar(2018).somPeriode()),
-            MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) }
-        )
+        val subsumsjonen =
+            `§ 8-17 ledd 2`(
+                listOf(1.januar(2018).somPeriode()),
+                MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) },
+            )
         subsumsjonMediator.logg(Regelverksporing(fnr, "orgnr", UUID.randomUUID(), UUID.randomUUID(), subsumsjonen))
 
         subsumsjonMediator.ferdigstill()
 
-        assertSubsumsjonsmelding(utsender.ok.single { it.mottaker == UtgåendeMelding.Mottaker.SUBSUMSJON }.json.path("subsumsjon"))
+        assertSubsumsjonsmelding(
+            utsender.ok
+                .single { it.mottaker == UtgåendeMelding.Mottaker.SUBSUMSJON }
+                .json
+                .path("subsumsjon"),
+        )
     }
 
     private val schema by lazy {
@@ -68,9 +74,13 @@ internal class SubsumsjonsmeldingTest {
         }
     }
 
-    private val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", emptyMap()).also {
-        it.requireKey("@event_name")
-    }, Meldingsporing(MeldingsreferanseId(UUID.randomUUID()), fnr))
+    private val eksempelmelding =
+        MigrateMessage(
+            JsonMessage.newMessage("testevent", emptyMap()).also {
+                it.requireKey("@event_name")
+            },
+            Meldingsporing(MeldingsreferanseId(UUID.randomUUID()), fnr),
+        )
 
     private fun SubsumsjonMediator.ferdigstill() {
         val behandlingContext = BehandlingContext(eksempelmelding, utsender, InMemoryUtboksDao())

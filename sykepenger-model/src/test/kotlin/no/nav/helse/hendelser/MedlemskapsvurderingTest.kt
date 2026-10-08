@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class MedlemskapsvurderingTest {
-
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach

@@ -14,5 +14,5 @@ data class ØkonomiInnDto(
     val arbeidsgiverbeløp: InntektbeløpDto.DagligDouble?,
     val personbeløp: InntektbeløpDto.DagligDouble?,
     val reservertArbeidsgiverbeløp: InntektbeløpDto.DagligDouble?,
-    val reservertPersonbeløp: InntektbeløpDto.DagligDouble?
+    val reservertPersonbeløp: InntektbeløpDto.DagligDouble?,
 )

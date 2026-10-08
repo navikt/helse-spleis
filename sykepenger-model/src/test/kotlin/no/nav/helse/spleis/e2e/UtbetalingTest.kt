@@ -1,30 +1,14 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.desember
+import no.nav.helse.*
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.november
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING_TIL_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.somOrganisasjonsnummer
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -55,7 +39,7 @@ internal class UtbetalingTest : AbstractDslTest() {
     fun `Utbetaling endret får rett organisasjonsnummer ved overlappende sykemelding`() {
         ANNET_ORGNUMMER {
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                ArbeidsgiverUtbetalingsperiode(this.orgnummer, 1.januar(2016), 31.januar(2016))
+                ArbeidsgiverUtbetalingsperiode(this.orgnummer, 1.januar(2016), 31.januar(2016)),
             )
         }
         a1 {
@@ -71,7 +55,12 @@ internal class UtbetalingTest : AbstractDslTest() {
             håndterSøknad(2.februar til 28.februar)
             håndterSøknad(februar)
 
-            assertEquals(a1, observatør.utbetaltEndretEventer.last().yrkesaktivitetssporing.somOrganisasjonsnummer)
+            assertEquals(
+                a1,
+                observatør.utbetaltEndretEventer
+                    .last()
+                    .yrkesaktivitetssporing.somOrganisasjonsnummer,
+            )
         }
     }
 
@@ -87,7 +76,6 @@ internal class UtbetalingTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(20, inspektør.utbetaling(0).arbeidsgiverOppdrag[0].grad)
-
         }
     }
 
@@ -119,7 +107,6 @@ internal class UtbetalingTest : AbstractDslTest() {
             assertEquals(2, inspektør.antallUtbetalinger)
             assertEquals(1, inspektør.utbetalinger(1.vedtaksperiode).size)
             assertEquals(1, inspektør.utbetalinger(2.vedtaksperiode).size)
-
         }
     }
 
@@ -132,7 +119,7 @@ internal class UtbetalingTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 listOf(13.november til 14.november, 1.desember til 14.desember),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -147,7 +134,6 @@ internal class UtbetalingTest : AbstractDslTest() {
             assertEquals(1.januar til 31.januar, inspektør(a1).utbetaling(0).periode)
             assertEquals(13.november til 31.desember, inspektør(a1).utbetaling(1).periode)
             assertNotEquals(inspektør(a1).utbetaling(0).korrelasjonsId, inspektør(a1).utbetaling(1).korrelasjonsId)
-
         }
     }
 }

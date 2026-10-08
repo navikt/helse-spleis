@@ -14,7 +14,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMes
  */
 internal class UtbetalingshistorikkForFeriepengerRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : BehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(SykepengehistorikkForFeriepenger)
     override val riverName = "UtbetalingshistorikkForFeriepenger"
@@ -23,13 +23,15 @@ internal class UtbetalingshistorikkForFeriepengerRiver(
         validerSykepengehistorikk(message)
     }
 
-    override fun createMessage(packet: JsonMessage) = UtbetalingshistorikkForFeriepengerMessage(
-        packet = packet,
-        meldingsporing = Meldingsporing(
-            id = packet.meldingsreferanseId(),
-            fødselsnummer = packet["fødselsnummer"].asText()
+    override fun createMessage(packet: JsonMessage) =
+        UtbetalingshistorikkForFeriepengerMessage(
+            packet = packet,
+            meldingsporing =
+                Meldingsporing(
+                    id = packet.meldingsreferanseId(),
+                    fødselsnummer = packet["fødselsnummer"].asText(),
+                ),
         )
-    )
 
     internal companion object {
         fun validerSykepengehistorikk(message: JsonMessage) {

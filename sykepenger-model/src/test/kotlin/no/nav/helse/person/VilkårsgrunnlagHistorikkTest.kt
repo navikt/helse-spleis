@@ -1,31 +1,20 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
-import java.util.UUID
-import no.nav.helse.desember
+import no.nav.helse.*
 import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.til
-import no.nav.helse.inntektsgrunnlag
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.Vilkårgrunnlagsinspektør
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.juni
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -33,6 +22,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.*
 
 internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
@@ -43,9 +34,10 @@ internal class VilkårsgrunnlagHistorikkTest {
     companion object {
         private const val ORGNR = "123456789"
         private val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.desember(2017), type = Arbeidsforholdtype.ORDINÆRT))
-        private val arbeidsforholdFraHistorikk = listOf(
-            ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(ORGNR, listOf(Arbeidsforhold(1.desember(2017), null, false)))
-        )
+        private val arbeidsforholdFraHistorikk =
+            listOf(
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(ORGNR, listOf(Arbeidsforhold(1.desember(2017), null, false))),
+            )
     }
 
     @BeforeEach
@@ -96,7 +88,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 forsikringsvurderingId = null,
                 opptjeningsvurderingId = UUID.randomUUID(),
-            )
+            ),
         )
 
         assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller.size)
@@ -111,22 +103,23 @@ internal class VilkårsgrunnlagHistorikkTest {
 
     @Test
     fun `korrekt antall innslag i vilkårsgrunnlagshistorikken ved én vilkårsprøving`() {
-        val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            skjæringstidspunkt = 1.januar,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold,
-            forsikringsvurderingId = null,
-            opptjeningsvurderingId = null,
-        )
+        val vilkårsgrunnlag =
+            Vilkårsgrunnlag(
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                skjæringstidspunkt = 1.januar,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
+                inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+                arbeidsforhold = arbeidsforhold,
+                forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
+            )
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            subsumsjonslogg
+            subsumsjonslogg,
         )
         historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
@@ -138,23 +131,24 @@ internal class VilkårsgrunnlagHistorikkTest {
 
     @Test
     fun `Registrerer subsumsjoner ved validering av vilkårsgrunnlag`() {
-        val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            skjæringstidspunkt = 1.januar,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold,
-            forsikringsvurderingId = null,
-            opptjeningsvurderingId = null,
-        )
+        val vilkårsgrunnlag =
+            Vilkårsgrunnlag(
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                skjæringstidspunkt = 1.januar,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
+                inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+                arbeidsforhold = arbeidsforhold,
+                forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
+            )
 
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            subsumsjonslogg
+            subsumsjonslogg,
         )
         SubsumsjonInspektør(regelverkslogg).assertVurdert(paragraf = PARAGRAF_8_2, ledd = 1.ledd, versjon = 12.juni(2020))
     }
@@ -162,44 +156,46 @@ internal class VilkårsgrunnlagHistorikkTest {
     @Test
     fun `ny vilkårsprøving på samme skjæringstidspunkt overskriver gammel vilkårsprøving - medfører nytt innslag`() {
         val arbeidsforhold = arbeidsforhold
-        val vilkårsgrunnlag1 = Vilkårsgrunnlag(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            skjæringstidspunkt = 1.januar,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold,
-            forsikringsvurderingId = null,
-            opptjeningsvurderingId = null,
-        )
-        val vilkårsgrunnlag2 = Vilkårsgrunnlag(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            skjæringstidspunkt = 1.januar,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold,
-            forsikringsvurderingId = null,
-            opptjeningsvurderingId = null,
-        )
+        val vilkårsgrunnlag1 =
+            Vilkårsgrunnlag(
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                skjæringstidspunkt = 1.januar,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
+                inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+                arbeidsforhold = arbeidsforhold,
+                forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
+            )
+        val vilkårsgrunnlag2 =
+            Vilkårsgrunnlag(
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                skjæringstidspunkt = 1.januar,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
+                inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+                arbeidsforhold = arbeidsforhold,
+                forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
+            )
         vilkårsgrunnlag1.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            subsumsjonslogg
+            subsumsjonslogg,
         )
         vilkårsgrunnlag2.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            subsumsjonslogg
+            subsumsjonslogg,
         )
 
         historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
-        val grunnlagsdataInspektør1 =  historikk.inspektør.grunnlagsdata(1.januar)
+        val grunnlagsdataInspektør1 = historikk.inspektør.grunnlagsdata(1.januar)
         assertEquals(Medlemskapsvurdering.Medlemskapstatus.Ja, grunnlagsdataInspektør1.medlemskapstatus)
 
         historikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
@@ -213,40 +209,42 @@ internal class VilkårsgrunnlagHistorikkTest {
 
     @Test
     fun `vilkårsprøving på to ulike skjæringstidspunkt medfører to innslag der siste innslag har vilkårsprøving for begge skjæringstidspunktene`() {
-        val vilkårsgrunnlag1 = Vilkårsgrunnlag(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            skjæringstidspunkt = 1.januar,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold,
-            forsikringsvurderingId = null,
-            opptjeningsvurderingId = null,
-        )
-        val vilkårsgrunnlag2 = Vilkårsgrunnlag(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            skjæringstidspunkt = 2.januar,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold,
-            forsikringsvurderingId = null,
-            opptjeningsvurderingId = null,
-        )
+        val vilkårsgrunnlag1 =
+            Vilkårsgrunnlag(
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                skjæringstidspunkt = 1.januar,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
+                inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+                arbeidsforhold = arbeidsforhold,
+                forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
+            )
+        val vilkårsgrunnlag2 =
+            Vilkårsgrunnlag(
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                skjæringstidspunkt = 2.januar,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
+                inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+                arbeidsforhold = arbeidsforhold,
+                forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
+            )
 
         vilkårsgrunnlag1.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            subsumsjonslogg
+            subsumsjonslogg,
         )
         vilkårsgrunnlag2.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            subsumsjonslogg
+            subsumsjonslogg,
         )
         historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         historikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
@@ -257,22 +255,23 @@ internal class VilkårsgrunnlagHistorikkTest {
     @Test
     fun `Finner vilkårsgrunnlag for skjæringstidspunkt - ok`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            skjæringstidspunkt = 1.januar,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold,
-            forsikringsvurderingId = null,
-            opptjeningsvurderingId = null,
-        )
+        val vilkårsgrunnlag =
+            Vilkårsgrunnlag(
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                skjæringstidspunkt = 1.januar,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
+                inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+                arbeidsforhold = arbeidsforhold,
+                forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
+            )
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            subsumsjonslogg
+            subsumsjonslogg,
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
@@ -283,22 +282,23 @@ internal class VilkårsgrunnlagHistorikkTest {
     @Test
     fun `Finner vilkårsgrunnlag for skjæringstidspunkt - ikke ok`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            skjæringstidspunkt = 1.januar,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
-            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
-            arbeidsforhold = arbeidsforhold,
-            forsikringsvurderingId = null,
-            opptjeningsvurderingId = null,
-        )
+        val vilkårsgrunnlag =
+            Vilkårsgrunnlag(
+                meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                skjæringstidspunkt = 1.januar,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(emptyList(), 1.januar),
+                inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
+                arbeidsforhold = arbeidsforhold,
+                forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
+            )
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
             10000.månedlig.sykepengegrunnlag,
-            subsumsjonslogg
+            subsumsjonslogg,
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))

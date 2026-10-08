@@ -4,30 +4,30 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class IkkeUtbetaltDagDokumentTypeTest {
-
     @Test
     fun `spre-gosys og Flex skal kjenne til alle begrunnelser for avvist dag`() {
-        val begrunnelserSomSpreGosysKjennerTil = listOf(
-            "SykepengedagerOppbrukt",
-            "MinimumInntekt",
-            "SykepengedagerOppbruktOver67",
-            "MinimumInntektOver67",
-            "EgenmeldingUtenforArbeidsgiverperiode",
-            "MinimumSykdomsgrad",
-            "ManglerOpptjening",
-            "ManglerMedlemskap",
-            "EtterDødsdato",
-            "Over70",
-            "AndreYtelserAap",
-            "AndreYtelserDagpenger",
-            "AndreYtelserForeldrepenger",
-            "AndreYtelserOmsorgspenger",
-            "AndreYtelserOpplaringspenger",
-            "AndreYtelserPleiepenger",
-            "AndreYtelserSvangerskapspenger",
-            "AvslåttMeldingTilNavDag",
-            "MeldingTilNavDagUtenforVentetid"
-        )
+        val begrunnelserSomSpreGosysKjennerTil =
+            listOf(
+                "SykepengedagerOppbrukt",
+                "MinimumInntekt",
+                "SykepengedagerOppbruktOver67",
+                "MinimumInntektOver67",
+                "EgenmeldingUtenforArbeidsgiverperiode",
+                "MinimumSykdomsgrad",
+                "ManglerOpptjening",
+                "ManglerMedlemskap",
+                "EtterDødsdato",
+                "Over70",
+                "AndreYtelserAap",
+                "AndreYtelserDagpenger",
+                "AndreYtelserForeldrepenger",
+                "AndreYtelserOmsorgspenger",
+                "AndreYtelserOpplaringspenger",
+                "AndreYtelserPleiepenger",
+                "AndreYtelserSvangerskapspenger",
+                "AvslåttMeldingTilNavDag",
+                "MeldingTilNavDagUtenforVentetid",
+            )
         EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.entries.forEach { begrunnelse ->
             assertTrue(begrunnelserSomSpreGosysKjennerTil.contains(begrunnelse.name)) {
                 """

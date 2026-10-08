@@ -2,8 +2,6 @@ package no.nav.helse.spleis.mediator.db
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.nyttFødselsnummer
@@ -18,6 +16,8 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.UUID
 
 internal class HendelseRepositoryTest {
     // unikt per testinstans - trygt å dele database med andre tester uten kollisjon
@@ -55,7 +55,10 @@ private object TestMessages {
             validate(packet)
         }
 
-    fun overstyrArbeidsgiveropplysninger(id: MeldingsreferanseId, fnr: Personidentifikator): OverstyrArbeidsgiveropplysningerMessage {
+    fun overstyrArbeidsgiveropplysninger(
+        id: MeldingsreferanseId,
+        fnr: Personidentifikator,
+    ): OverstyrArbeidsgiveropplysningerMessage {
         val now = LocalDateTime.now()
 
         @Language("JSON")
@@ -70,10 +73,11 @@ private object TestMessages {
         }
         """
 
-        val packet = json.somPacket { packet ->
-            packet.requireKey("@id", "@event_name", "@opprettet", "fødselsnummer", "skjæringstidspunkt")
-            packet.requireArbeidsgiveropplysninger()
-        }
+        val packet =
+            json.somPacket { packet ->
+                packet.requireKey("@id", "@event_name", "@opprettet", "fødselsnummer", "skjæringstidspunkt")
+                packet.requireArbeidsgiveropplysninger()
+            }
 
         return OverstyrArbeidsgiveropplysningerMessage(packet, Meldingsporing(id, fnr.toString()))
     }

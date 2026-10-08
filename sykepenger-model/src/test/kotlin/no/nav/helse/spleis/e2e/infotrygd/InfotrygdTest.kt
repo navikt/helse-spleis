@@ -1,62 +1,27 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import java.util.UUID
-import no.nav.helse.april
-import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.*
+import no.nav.helse.dsl.*
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mai
-import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription.VedtaksperiodeVenterEvent
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_37
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.enesteGodkjenningsbehovSomFølgeAv
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class InfotrygdTest : AbstractDslTest() {
-
     @Test
     fun `Saksbehandler legger til en utbetaling i forkant av en periode som er lagt til grunn ved infotrygdovergang`() {
         medJSONPerson("/personer/infotrygdforlengelse.json", 334)
@@ -72,7 +37,12 @@ internal class InfotrygdTest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(eksisterendeUtbetaling, nyUtbetaling)
 
             assertEquals(20.desember(2017), inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertEquals("VILKÅRSPRØVING", observatør.vedtaksperiodeVenter.single().venterPå.venteårsak.hva)
+            assertEquals(
+                "VILKÅRSPRØVING",
+                observatør.vedtaksperiodeVenter
+                    .single()
+                    .venterPå.venteårsak.hva,
+            )
             nullstillTilstandsendringer()
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -91,19 +61,20 @@ internal class InfotrygdTest : AbstractDslTest() {
             assertEquals(1, observatør.utkastTilVedtakEventer.size)
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
             håndterYtelser(1.vedtaksperiode)
-            val behov1 = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
-                håndterSimulering(1.vedtaksperiode)
-            }
+            val behov1 =
+                enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
+                    håndterSimulering(1.vedtaksperiode)
+                }
             assertTrue("OverlapperMedInfotrygd" in behov1.event.tags)
 
             assertVarsler(listOf(RV_IT_3), 1.vedtaksperiode.filter())
             assertEquals(2, observatør.utkastTilVedtakEventer.size)
 
-
             håndterUtbetalingshistorikkEtterInfotrygdendring()
-            val behov2 = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
-                håndterYtelser(1.vedtaksperiode)
-            }
+            val behov2 =
+                enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
+                    håndterYtelser(1.vedtaksperiode)
+                }
             assertFalse("OverlapperMedInfotrygd" in behov2.event.tags)
         }
     }
@@ -130,7 +101,7 @@ internal class InfotrygdTest : AbstractDslTest() {
                 arbeidsgiverperioder = emptyList(),
                 beregnetInntekt = INNTEKT,
                 vedtaksperiodeId = 2.vedtaksperiode,
-                refusjon = Inntektsmelding.Refusjon(INNTEKT, null)
+                refusjon = Inntektsmelding.Refusjon(INNTEKT, null),
             )
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 10.mars, emptyList())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -158,7 +129,15 @@ internal class InfotrygdTest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
             nyttVedtak(mars)
             nyttVedtak(mai)
-            val korrelasjonsIdMars = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
+            val korrelasjonsIdMars =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling!!
+                    .inspektør.korrelasjonsId
 
             håndterSøknad(juli)
             håndterArbeidsgiveropplysninger(listOf(1.juli til 16.juli), vedtaksperiodeId = 3.vedtaksperiode)
@@ -175,7 +154,15 @@ internal class InfotrygdTest : AbstractDslTest() {
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-            val korrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
+            val korrelasjonsIdJuli =
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling!!
+                    .inspektør.korrelasjonsId
             håndterUtbetalt()
 
             assertNotEquals(korrelasjonsIdMars, korrelasjonsIdJuli)
@@ -186,7 +173,15 @@ internal class InfotrygdTest : AbstractDslTest() {
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
 
-            val nyKorrelasjonsIdJuli = inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
+            val nyKorrelasjonsIdJuli =
+                inspektør
+                    .vedtaksperioder(3.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer()
+                    .last()
+                    .utbetaling!!
+                    .inspektør.korrelasjonsId
             assertNotEquals(korrelasjonsIdMars, nyKorrelasjonsIdJuli)
             assertEquals(listOf(1.juli til 16.juli), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
             assertVarsler(listOf(RV_UT_23, RV_IT_3), 3.vedtaksperiode.filter())
@@ -199,9 +194,15 @@ internal class InfotrygdTest : AbstractDslTest() {
             nyttVedtak(1.januar(2017) til 31.januar(2017))
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.mars(2017), 10.mars(2017)))
             nyttVedtak(februar)
-            inspektør.utbetalinger(2.vedtaksperiode).last().inspektør.korrelasjonsId
+            inspektør
+                .utbetalinger(2.vedtaksperiode)
+                .last()
+                .inspektør.korrelasjonsId
             nyttVedtak(april)
-            inspektør.utbetalinger(3.vedtaksperiode).last().inspektør.korrelasjonsId
+            inspektør
+                .utbetalinger(3.vedtaksperiode)
+                .last()
+                .inspektør.korrelasjonsId
 
             håndterSøknad(4.juni til 6.juni)
             assertSisteTilstand(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -223,7 +224,13 @@ internal class InfotrygdTest : AbstractDslTest() {
             nyttVedtak(januar)
             nyttVedtak(10.februar til 28.februar)
             håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 9.februar))
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().first().vilkårsgrunnlag.size)
+            assertEquals(
+                1,
+                inspektør
+                    .vilkårsgrunnlagHistorikkInnslag()
+                    .first()
+                    .vilkårsgrunnlag.size,
+            )
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
@@ -269,9 +276,10 @@ internal class InfotrygdTest : AbstractDslTest() {
             val antallInnslagFør = inspektør(a1).vilkårsgrunnlagHistorikkInnslag().size
 
             håndterOverstyrArbeidsgiveropplysninger(
-                1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig, emptyList())
-            )
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(a1, 15000.månedlig, emptyList()),
+                ),
             )
             assertEquals(antallInnslagFør, inspektør(a1).vilkårsgrunnlagHistorikkInnslag().size)
 
@@ -291,13 +299,15 @@ internal class InfotrygdTest : AbstractDslTest() {
             val meldingsreferanse = UUID.randomUUID()
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
-                arbeidsgiveropplysninger = listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        a1, 15000.månedlig,
-                        listOf(Triple(1.januar, null, 15000.månedlig))
-                    )
-                ),
-                meldingsreferanseId = meldingsreferanse
+                arbeidsgiveropplysninger =
+                    listOf(
+                        OverstyrtArbeidsgiveropplysning(
+                            a1,
+                            15000.månedlig,
+                            listOf(Triple(1.januar, null, 15000.månedlig)),
+                        ),
+                    ),
+                meldingsreferanseId = meldingsreferanse,
             )
             assertEquals(antallInnslagFør, inspektør(a1).vilkårsgrunnlagHistorikkInnslag().size)
 
@@ -310,5 +320,12 @@ internal class InfotrygdTest : AbstractDslTest() {
     }
 
     private fun gjeldendeKorrelasjonsId(vedtaksperiodeId: UUID) =
-        inspektør(a1).vedtaksperioder(vedtaksperiodeId).inspektør.behandlinger.last().endringer().last().utbetaling!!.inspektør.korrelasjonsId
+        inspektør(a1)
+            .vedtaksperioder(vedtaksperiodeId)
+            .inspektør.behandlinger
+            .last()
+            .endringer()
+            .last()
+            .utbetaling!!
+            .inspektør.korrelasjonsId
 }

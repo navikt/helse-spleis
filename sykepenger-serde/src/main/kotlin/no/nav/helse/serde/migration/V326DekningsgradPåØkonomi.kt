@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V326DekningsgradPåØkonomi : JsonMigration(326) {
     override val description = "setter dekningsgrad på alle økonomiobjekter"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("utbetalinger").onEach { migrerUtbetaling(it) }
             arbeidsgiver.path("vedtaksperioder").forEach { migrerVedtaksperiode(it) }

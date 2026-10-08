@@ -11,25 +11,15 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
-
     @Test
     fun `endre arbeidsgiverperiode til å starte tidligere`() {
         a1 {
@@ -37,8 +27,8 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(
                     17.januar til 31.januar,
-                    2.februar til 2.februar
-                )
+                    2.februar til 2.februar,
+                ),
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -53,8 +43,8 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
             håndterOverstyrTidslinje(
                 listOf(
                     ManuellOverskrivingDag(15.januar, Dagtype.Sykedag, 100),
-                    ManuellOverskrivingDag(16.januar, Dagtype.Sykedag, 100)
-                )
+                    ManuellOverskrivingDag(16.januar, Dagtype.Sykedag, 100),
+                ),
             )
             assertVarsel(Varselkode.RV_IV_11, 1.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
@@ -95,7 +85,7 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
                 listOf(
                     ManuellOverskrivingDag(1.april, Dagtype.Arbeidsdag),
                     ManuellOverskrivingDag(2.april, Dagtype.Arbeidsdag),
-                )
+                ),
             )
             assertEquals(listOf(3.april til 18.april), inspektør.venteperiode(3.vedtaksperiode))
 

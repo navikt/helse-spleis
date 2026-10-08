@@ -10,7 +10,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdend
 
 internal class UtbetalingshistorikkEtterInfotrygdendringRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : BehovRiver(rapidsConnection, messageMediator) {
     override val behov = listOf(Sykepengehistorikk)
     override val riverName = "Utbetalingshistorikk etter infotrygdendring"
@@ -26,10 +26,12 @@ internal class UtbetalingshistorikkEtterInfotrygdendringRiver(
         validerSykepengehistorikk(message)
     }
 
-    override fun createMessage(packet: JsonMessage) = UtbetalingshistorikkEtterInfotrygdendringMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        UtbetalingshistorikkEtterInfotrygdendringMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

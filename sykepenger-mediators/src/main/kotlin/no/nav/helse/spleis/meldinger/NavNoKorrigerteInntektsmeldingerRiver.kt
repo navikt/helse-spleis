@@ -8,7 +8,7 @@ import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
 
 internal class NavNoKorrigerteInntektsmeldingerRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("korrigerte_arbeidsgiveropplysninger")
     override val riverName = "Korrigerte Arbeidsgiveropplysninger"
@@ -20,13 +20,14 @@ internal class NavNoKorrigerteInntektsmeldingerRiver(
     }
 
     override fun createMessage(packet: JsonMessage): NavNoKorrigertInntektsmeldingMessage {
-        val meldingsporing = Meldingsporing(
-            id = packet.meldingsreferanseId(),
-            fødselsnummer = packet["arbeidstakerFnr"].asText()
-        )
+        val meldingsporing =
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["arbeidstakerFnr"].asText(),
+            )
         return NavNoKorrigertInntektsmeldingMessage(
             packet = packet,
-            meldingsporing = meldingsporing
+            meldingsporing = meldingsporing,
         )
     }
 }

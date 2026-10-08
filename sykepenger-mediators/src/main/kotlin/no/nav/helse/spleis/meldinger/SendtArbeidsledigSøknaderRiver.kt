@@ -13,7 +13,7 @@ import no.nav.helse.spleis.meldinger.model.SøknadMessage
 
 internal class SendtArbeidsledigSøknaderRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : SøknadRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("sendt_søknad_arbeidsledig")
     override val riverName = "Sendt søknad Arbeidsledig"
@@ -27,13 +27,15 @@ internal class SendtArbeidsledigSøknaderRiver(
     }
 
     override fun createMessage(packet: JsonMessage): SøknadMessage {
-        val meldingsporing = Meldingsporing(
-            id = packet.meldingsreferanseId(),
-            fødselsnummer = packet["fnr"].asText()
-        )
-        val tidligereArbeidsgiver = packet["tidligereArbeidsgiverOrgnummer"]
-            .takeIf(JsonNode::isTextual)
-            ?.asText() ?: return SendtSøknadArbeidsledigMessage(packet, meldingsporing)
+        val meldingsporing =
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fnr"].asText(),
+            )
+        val tidligereArbeidsgiver =
+            packet["tidligereArbeidsgiverOrgnummer"]
+                .takeIf(JsonNode::isTextual)
+                ?.asText() ?: return SendtSøknadArbeidsledigMessage(packet, meldingsporing)
         return SendtSøknadArbeidsledigTidligereArbeidstakerMessage(packet, tidligereArbeidsgiver, meldingsporing)
     }
 }

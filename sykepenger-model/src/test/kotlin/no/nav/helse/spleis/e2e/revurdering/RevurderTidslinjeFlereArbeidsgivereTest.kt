@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import java.time.LocalDate
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -15,16 +14,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Inntekt
@@ -35,9 +25,9 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractDslTest() {
-
     @Test
     fun `revurdering for periode som start samme dag som en førstegangsvurdering`() {
         a2 {
@@ -217,7 +207,12 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractDslTest() {
         assertPeriode(17.januar til 31.januar, a2, 1080.daglig)
     }
 
-    private fun assertDag(dato: LocalDate, orgnummer: String, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
+    private fun assertDag(
+        dato: LocalDate,
+        orgnummer: String,
+        arbeidsgiverbeløp: Inntekt,
+        personbeløp: Inntekt,
+    ) {
         val vedtaksperiodeId = orgnummer { 1.vedtaksperiode }
         inspektør(orgnummer).utbetalingstidslinjer(vedtaksperiodeId)[dato].let {
             if (it is NavHelgDag) return
@@ -226,6 +221,10 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractDslTest() {
         }
     }
 
-    private fun assertPeriode(periode: Periode, orgnummer: String, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN) =
-        periode.forEach { assertDag(it, orgnummer, arbeidsgiverbeløp, personbeløp) }
+    private fun assertPeriode(
+        periode: Periode,
+        orgnummer: String,
+        arbeidsgiverbeløp: Inntekt,
+        personbeløp: Inntekt = INGEN,
+    ) = periode.forEach { assertDag(it, orgnummer, arbeidsgiverbeløp, personbeløp) }
 }

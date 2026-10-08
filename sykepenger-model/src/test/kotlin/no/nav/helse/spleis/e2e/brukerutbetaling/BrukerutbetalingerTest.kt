@@ -13,7 +13,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Test
 
 internal class BrukerutbetalingerTest : AbstractDslTest() {
-
     @Test
     fun `utbetaling med 0 refusjon til arbeidsgiver`() {
         a1 {

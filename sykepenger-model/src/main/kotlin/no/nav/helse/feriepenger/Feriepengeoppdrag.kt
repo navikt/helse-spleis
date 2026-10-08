@@ -1,7 +1,5 @@
 package no.nav.helse.feriepenger
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.FeriepengerendringskodeDto
 import no.nav.helse.dto.FeriepengerfagområdeDto
 import no.nav.helse.dto.deserialisering.FeriepengeoppdragInnDto
@@ -12,6 +10,8 @@ import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import java.time.LocalDateTime
+import java.util.UUID
 
 data class Feriepengeoppdrag(
     val mottaker: String,
@@ -21,35 +21,40 @@ data class Feriepengeoppdrag(
     val endringskode: Feriepengerendringskode,
     val tidsstempel: LocalDateTime,
 ) : Aktivitetskontekst {
-
     companion object {
-        fun gjenopprett(dto: FeriepengeoppdragInnDto): Feriepengeoppdrag {
-            return Feriepengeoppdrag(
+        fun gjenopprett(dto: FeriepengeoppdragInnDto): Feriepengeoppdrag =
+            Feriepengeoppdrag(
                 mottaker = dto.mottaker,
-                fagområde = when (dto.fagområde) {
-                    FeriepengerfagområdeDto.SP -> Feriepengerfagområde.Sykepenger
-                    FeriepengerfagområdeDto.SPREF -> Feriepengerfagområde.SykepengerRefusjon
-                },
+                fagområde =
+                    when (dto.fagområde) {
+                        FeriepengerfagområdeDto.SP -> Feriepengerfagområde.Sykepenger
+                        FeriepengerfagområdeDto.SPREF -> Feriepengerfagområde.SykepengerRefusjon
+                    },
                 linje = dto.linjer.map { Feriepengeutbetalingslinje.gjenopprett(it) }.singleOrNull(),
                 fagsystemId = dto.fagsystemId,
                 endringskode = Feriepengerendringskode.gjenopprett(dto.endringskode),
-                tidsstempel = dto.tidsstempel
+                tidsstempel = dto.tidsstempel,
             )
-        }
     }
 
     val totalbeløp: Int = if (linje == null || linje.datoStatusFom != null) 0 else linje.beløp
     val skalSendeOppdrag = linje?.endringskode?.let { it != Feriepengerendringskode.UEND } ?: false
 
-    fun overfør(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, arbeidstaker: Arbeidstaker, utbetalingId: UUID) {
+    fun overfør(
+        aktivitetslogg: IAktivitetslogg,
+        eventBus: EventBus,
+        arbeidstaker: Arbeidstaker,
+        utbetalingId: UUID,
+    ) {
         val aktivitetsloggMedOppdragkontekst = aktivitetslogg.kontekst(this)
         if (!skalSendeOppdrag) return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
         check(endringskode != Feriepengerendringskode.UEND)
 
-        val mottaker = when (fagområde) {
-            Feriepengerfagområde.SykepengerRefusjon -> "arbeidsgiver"
-            Feriepengerfagområde.Sykepenger -> "sykmeldt"
-        }
+        val mottaker =
+            when (fagområde) {
+                Feriepengerfagområde.SykepengerRefusjon -> "arbeidsgiver"
+                Feriepengerfagområde.Sykepenger -> "sykmeldt"
+            }
         aktivitetsloggMedOppdragkontekst.info("Sender ut event om at det skal utbetales feriepenger til $mottaker for organisasjonsnummer ${arbeidstaker.organisasjonsnummer}")
         eventBus.utbetalFeriepenger(utbetalFeriepengerEvent(arbeidstaker, utbetalingId))
     }
@@ -66,13 +71,14 @@ data class Feriepengeoppdrag(
         if (linje.datoStatusFom != null) return this.utenEndring()
         return copy(
             endringskode = Feriepengerendringskode.ENDR,
-            linje = linje.copy(
-                endringskode = Feriepengerendringskode.ENDR,
-                refFagsystemId = null,
-                refDelytelseId = null,
-                datoStatusFom = linje.fom
-            ),
-            tidsstempel = LocalDateTime.now()
+            linje =
+                linje.copy(
+                    endringskode = Feriepengerendringskode.ENDR,
+                    refFagsystemId = null,
+                    refDelytelseId = null,
+                    datoStatusFom = linje.fom,
+                ),
+            tidsstempel = LocalDateTime.now(),
         )
     }
 
@@ -81,7 +87,7 @@ data class Feriepengeoppdrag(
         return this.copy(
             endringskode = Feriepengerendringskode.UEND,
             linje = this.linje.copy(endringskode = Feriepengerendringskode.UEND),
-            tidsstempel = LocalDateTime.now()
+            tidsstempel = LocalDateTime.now(),
         )
     }
 
@@ -89,51 +95,61 @@ data class Feriepengeoppdrag(
         checkNotNull(linje) { "forventer at oppdraget har en linje" }
         return this.copy(
             endringskode = Feriepengerendringskode.ENDR,
-            linje = this.linje.copy(
-                endringskode = Feriepengerendringskode.NY,
-                beløp = beløp,
-                delytelseId = this.linje.delytelseId + 1,
-                refDelytelseId = this.linje.delytelseId,
-                refFagsystemId = this.fagsystemId,
-                datoStatusFom = null
-            ),
-            tidsstempel = LocalDateTime.now()
+            linje =
+                this.linje.copy(
+                    endringskode = Feriepengerendringskode.NY,
+                    beløp = beløp,
+                    delytelseId = this.linje.delytelseId + 1,
+                    refDelytelseId = this.linje.delytelseId,
+                    refFagsystemId = this.fagsystemId,
+                    datoStatusFom = null,
+                ),
+            tidsstempel = LocalDateTime.now(),
         )
     }
 
     override fun toSpesifikkKontekst() = SpesifikkKontekst("Feriepengeoppdrag", mapOf("fagsystemId" to fagsystemId))
 
-    private fun utbetalFeriepengerEvent(arbeidstaker: Arbeidstaker, utbetalingId: UUID) = EventSubscription.UtbetalFeriepengerEvent(
+    private fun utbetalFeriepengerEvent(
+        arbeidstaker: Arbeidstaker,
+        utbetalingId: UUID,
+    ) = EventSubscription.UtbetalFeriepengerEvent(
         mottaker = mottaker,
         fagområde = "$fagområde",
         fagsystemId = fagsystemId,
         endringskode = "$endringskode",
         organisasjonsnummer = arbeidstaker.organisasjonsnummer,
         utbetalingId = utbetalingId,
-        linje = checkNotNull(linje) { "forventer at oppdraget har en linje" }.utbetalFeriepengerEventLinje()
+        linje = checkNotNull(linje) { "forventer at oppdraget har en linje" }.utbetalFeriepengerEventLinje(),
     )
 
-    fun dto() = FeriepengeoppdragUtDto(
-        mottaker = mottaker,
-        fagområde = when (fagområde) {
-            Feriepengerfagområde.SykepengerRefusjon -> FeriepengerfagområdeDto.SPREF
-            Feriepengerfagområde.Sykepenger -> FeriepengerfagområdeDto.SP
-        },
-        linjer = listOfNotNull(linje?.dto()),
-        fagsystemId = fagsystemId,
-        endringskode = when (endringskode) {
-            Feriepengerendringskode.NY -> FeriepengerendringskodeDto.NY
-            Feriepengerendringskode.UEND -> FeriepengerendringskodeDto.UEND
-            Feriepengerendringskode.ENDR -> FeriepengerendringskodeDto.ENDR
-        },
-         tidsstempel = tidsstempel,
-        totalbeløp = totalbeløp
-    )
+    fun dto() =
+        FeriepengeoppdragUtDto(
+            mottaker = mottaker,
+            fagområde =
+                when (fagområde) {
+                    Feriepengerfagområde.SykepengerRefusjon -> FeriepengerfagområdeDto.SPREF
+                    Feriepengerfagområde.Sykepenger -> FeriepengerfagområdeDto.SP
+                },
+            linjer = listOfNotNull(linje?.dto()),
+            fagsystemId = fagsystemId,
+            endringskode =
+                when (endringskode) {
+                    Feriepengerendringskode.NY -> FeriepengerendringskodeDto.NY
+                    Feriepengerendringskode.UEND -> FeriepengerendringskodeDto.UEND
+                    Feriepengerendringskode.ENDR -> FeriepengerendringskodeDto.ENDR
+                },
+            tidsstempel = tidsstempel,
+            totalbeløp = totalbeløp,
+        )
 }
 
-enum class Feriepengerfagområde(val verdi: String) {
+enum class Feriepengerfagområde(
+    val verdi: String,
+) {
     SykepengerRefusjon("SPREF"),
-    Sykepenger("SP");
+    Sykepenger("SP"),
+    ;
 
     override fun toString() = verdi
 }

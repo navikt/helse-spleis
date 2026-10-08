@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
@@ -13,9 +12,9 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
-internal class EndretVurderingPåSkjæringstidspunktTest: AbstractDslTest() {
-
+internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
     @Test
     fun `ny opptjeningsvurdering`() {
         a1 {

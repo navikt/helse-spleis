@@ -9,14 +9,14 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Varselkode.*
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VarselOmFlereInntektsmeldingerTest : AbstractDslTest() {
-
     @Test
     fun `Prodbug - Feilaktig varsel om flere inntektsmeldinger`() {
         a1 {
@@ -32,7 +32,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractDslTest() {
             håndterSøknad(Sykdom(6.april(2021), 16.april(2021), 50.prosent))
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(22.mars(2021) til 6.april(2021)),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
 
             håndterVilkårsgrunnlag(3.vedtaksperiode)
@@ -40,9 +40,11 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractDslTest() {
             håndterSimulering(3.vedtaksperiode)
 
             håndterSykmelding(Sykmeldingsperiode(17.april(2021), 30.april(2021)))
-            assertTrue(testperson.personlogg.varsel.none { w ->
-                w.toString().contains("Mottatt flere inntektsmeldinger")
-            })
+            assertTrue(
+                testperson.personlogg.varsel.none { w ->
+                    w.toString().contains("Mottatt flere inntektsmeldinger")
+                },
+            )
         }
     }
 
@@ -53,7 +55,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractDslTest() {
             håndterSøknad(februar)
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.februar til 16.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -65,7 +67,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.mars, 20.mars, 50.prosent))
             håndterSelvbestemtArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.mars til 16.mars),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
 
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())

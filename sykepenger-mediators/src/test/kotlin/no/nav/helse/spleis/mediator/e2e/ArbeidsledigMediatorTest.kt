@@ -6,12 +6,11 @@ import no.nav.helse.januar
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsledigMediatorTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun arbeidsledigsøknad() {
         sendNySøknadArbeidsledig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendArbeidsledigsøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         assertTilstander(0, "TIL_INFOTRYGD")
     }
@@ -22,7 +21,7 @@ internal class ArbeidsledigMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknadArbeidsledig(SoknadsperiodeDTO(fom = 1.februar, tom = 26.februar, sykmeldingsgrad = 100), tidligereArbeidsgiverOrgnummer = ORGNUMMER)
         sendArbeidsledigsøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 26.februar, sykmeldingsgrad = 100)),
-            tidligereArbeidsgiverOrgnummer = ORGNUMMER
+            tidligereArbeidsgiverOrgnummer = ORGNUMMER,
         )
         assertTilstander(1, "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_HISTORIKK")
     }

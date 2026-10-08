@@ -2,8 +2,6 @@ package no.nav.helse.spleis.mediator.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -21,15 +19,16 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
+import java.time.LocalDate
+import java.util.UUID
 
 internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved en enkel førstegangsbehandling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100)),
-            egenmeldingerFraSykmelding = listOf(1.januar)
+            egenmeldingerFraSykmelding = listOf(1.januar),
         )
         Assertions.assertEquals(1, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
         val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
@@ -62,7 +61,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100), orgnummer = a2)
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)),
-            orgnummer = a2
+            orgnummer = a2,
         )
 
         val meldinger = testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver")
@@ -79,10 +78,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100)),
-            egenmeldingerFraSykmelding = listOf(1.januar)
+            egenmeldingerFraSykmelding = listOf(1.januar),
         )
         sendNavNoInntektsmelding(
-            listOf(Periode(1.januar, 16.januar))
+            listOf(Periode(1.januar, 16.januar)),
         )
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -93,10 +92,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)),
-            egenmeldingerFraSykmelding = emptyList()
+            egenmeldingerFraSykmelding = emptyList(),
         )
         sendNavNoInntektsmelding(
-            listOf(Periode(1.mars, 16.mars))
+            listOf(Periode(1.mars, 16.mars)),
         )
         sendVilkårsgrunnlag(1)
         sendYtelser(1)
@@ -115,7 +114,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
     fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved førstegangsbehandling med kort gap til forrige`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)))
         sendVilkårsgrunnlag(0)
@@ -126,7 +125,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknad(SoknadsperiodeDTO(fom = 10.februar, tom = 10.mars, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 10.februar, tom = 10.mars, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 10.februar, tom = 10.mars, sykmeldingsgrad = 100)),
         )
 
         val meldinger = testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver")
@@ -144,13 +143,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
         sendNavNoInntektsmelding(
             arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar)),
-            opphørsdatoForRefusjon = 1.april
+            opphørsdatoForRefusjon = 1.april,
         )
         sendVilkårsgrunnlag(0)
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)),
         )
 
         Assertions.assertEquals(2, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
@@ -359,7 +358,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100), orgnummer = a1)
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)),
-            orgnummer = a1
+            orgnummer = a1,
         )
         sendYtelser(0, orgnummer = a1)
         sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
@@ -367,41 +366,47 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
     }
 
-    private fun nyeVedtakForJanuar(a1: String, a2: String) {
+    private fun nyeVedtakForJanuar(
+        a1: String,
+        a2: String,
+    ) {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
-            orgnummer = a1
+            orgnummer = a1,
         )
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a2)
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
-            orgnummer = a2
+            orgnummer = a2,
         )
 
         sendNavNoInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
-            orgnummer = a1
+            orgnummer = a1,
         )
         sendNavNoInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
-            orgnummer = a2
+            orgnummer = a2,
         )
         sendVilkårsgrunnlag(
             vedtaksperiodeIndeks = 0,
             skjæringstidspunkt = 1.januar,
             orgnummer = a1,
-            arbeidsforhold = listOf(
-                TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                TestMessageFactory.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            ),
-            inntekterForSykepengegrunnlag = sykepengegrunnlag(
-                1.januar, listOf(
-                TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a1),
-                TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a2),
-            )
-            )
+            arbeidsforhold =
+                listOf(
+                    TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    TestMessageFactory.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                ),
+            inntekterForSykepengegrunnlag =
+                sykepengegrunnlag(
+                    1.januar,
+                    listOf(
+                        TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a1),
+                        TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a2),
+                    ),
+                ),
         )
         sendYtelser(0, orgnummer = a1)
         sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
@@ -416,14 +421,16 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
 
     private companion object {
         private fun JsonNode.json(vararg dropp: String) = (this as ObjectNode).remove(DefaultDrop.plus(dropp)).toString()
-        private val DefaultDrop = setOf(
-            "@id",
-            "@opprettet",
-            "@opprettetUTC",
-            "system_read_count",
-            "system_participating_services",
-            "@forårsaket_av",
-            "@sendt"
-        )
+
+        private val DefaultDrop =
+            setOf(
+                "@id",
+                "@opprettet",
+                "@opprettetUTC",
+                "system_read_count",
+                "system_participating_services",
+                "@forårsaket_av",
+                "@sendt",
+            )
     }
 }

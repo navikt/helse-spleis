@@ -12,8 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-internal class BeregningIdTest: AbstractDslTest() {
-
+internal class BeregningIdTest : AbstractDslTest() {
     @Test
     fun `beholder samme beregningId helt frem til ny beregning av utbetalingstidslinje`() {
         a1 {
@@ -89,12 +88,17 @@ internal class BeregningIdTest: AbstractDslTest() {
         }
     }
 
-    private fun Behandlinger.Behandling.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null)  = endringer().assertLikBeregningId(forventetSisteUtbetalingstatus)
+    private fun Behandlinger.Behandling.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null) = endringer().assertLikBeregningId(forventetSisteUtbetalingstatus)
 
     private fun List<Behandlinger.Behandling.Endring>.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null) {
         val første = first().beregningId
         forEach { endring -> assertEquals(første, endring.beregningId) }
-        val sisteUtbetalingStatus = last().utbetaling?.inspektør?.tilstand?.name
+        val sisteUtbetalingStatus =
+            last()
+                .utbetaling
+                ?.inspektør
+                ?.tilstand
+                ?.name
         assertEquals(forventetSisteUtbetalingstatus, sisteUtbetalingStatus)
     }
 }

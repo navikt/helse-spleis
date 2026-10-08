@@ -10,25 +10,32 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 
-internal class AnnulleringMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
+internal class AnnulleringMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : HendelseMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().toUUID()
     private val saksbehandler = Saksbehandler.fraJson(packet["saksbehandler"])
     private val årsaker = packet["begrunnelser"].map { it.asText() }
     private val begrunnelse = packet["kommentar"].takeUnless { it.isMissingOrNull() }?.asText() ?: ""
     private val behandlingsporing = packet.yrkesaktivitetssporing
     private val annullerUtbetaling
-        get() = AnnullerUtbetaling(
-            meldingsporing.id,
-            behandlingsporing,
-            vedtaksperiodeId,
-            saksbehandler.ident,
-            saksbehandler.epostadresse,
-            opprettet,
-            årsaker,
-            begrunnelse
-        )
+        get() =
+            AnnullerUtbetaling(
+                meldingsporing.id,
+                behandlingsporing,
+                vedtaksperiodeId,
+                saksbehandler.ident,
+                saksbehandler.epostadresse,
+                opprettet,
+                årsaker,
+                begrunnelse,
+            )
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         mediator.behandle(this, annullerUtbetaling, context)
     }
 
@@ -37,10 +44,11 @@ internal class AnnulleringMessage(packet: JsonMessage, override val meldingspori
         val ident: String,
     ) {
         companion object {
-            fun fraJson(jsonNode: JsonNode) = Saksbehandler(
-                epostadresse = jsonNode["epostaddresse"].asText(),
-                ident = jsonNode["ident"].asText()
-            )
+            fun fraJson(jsonNode: JsonNode) =
+                Saksbehandler(
+                    epostadresse = jsonNode["epostaddresse"].asText(),
+                    ident = jsonNode["ident"].asText(),
+                )
         }
     }
 }

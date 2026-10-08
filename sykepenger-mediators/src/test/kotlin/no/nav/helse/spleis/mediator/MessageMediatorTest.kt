@@ -1,10 +1,6 @@
 package no.nav.helse.spleis.mediator
 
 import io.mockk.mockk
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -31,9 +27,12 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
 
 internal class MessageMediatorTest {
-
     @Test
     fun søknader() {
         testRapid.sendTestMessage(meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(LocalDate.now(), LocalDate.now(), 100)))
@@ -51,8 +50,8 @@ internal class MessageMediatorTest {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagNavNoInntektsmelding(
                 arbeidsgiverperiode = listOf(Periode(LocalDate.now(), LocalDate.now())),
-                vedtaksperiodeId = UUID.randomUUID()
-            )
+                vedtaksperiodeId = UUID.randomUUID(),
+            ),
         )
         assertTrue(hendelseMediator.lestNavNoInntektsmelding)
     }
@@ -62,8 +61,8 @@ internal class MessageMediatorTest {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagKorrigertNavNoInntektsmelding(
                 arbeidsgiverperiode = listOf(Periode(LocalDate.now(), LocalDate.now())),
-                vedtaksperiodeId = UUID.randomUUID()
-            )
+                vedtaksperiodeId = UUID.randomUUID(),
+            ),
         )
         assertTrue(hendelseMediator.lestKorrigertNavNoInntektsmelding)
     }
@@ -73,8 +72,8 @@ internal class MessageMediatorTest {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagNavNoSelvbestemtInntektsmelding(
                 arbeidsgiverperiode = listOf(Periode(LocalDate.now(), LocalDate.now())),
-                vedtaksperiodeId = UUID.randomUUID()
-            )
+                vedtaksperiodeId = UUID.randomUUID(),
+            ),
         )
         assertTrue(hendelseMediator.lestNavNoSelvbestemtInntektsmelding)
     }
@@ -145,21 +144,23 @@ internal class MessageMediatorTest {
                 behandlingId = UUID.randomUUID(),
                 skjæringstidspunkt = 1.januar,
                 inntekterForSykepengegrunnlag = emptyList(),
-                inntekterForOpptjeningsvurdering = listOf(
-                    TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
-                        måned = YearMonth.of(2017, 12),
-                        inntekter = listOf(
-                            TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(
-                                32000.0,
-                                AbstractEndToEndMediatorTest.ORGNUMMER
-                            )
-                        )
-                    )
-                ),
+                inntekterForOpptjeningsvurdering =
+                    listOf(
+                        TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
+                            måned = YearMonth.of(2017, 12),
+                            inntekter =
+                                listOf(
+                                    TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(
+                                        32000.0,
+                                        AbstractEndToEndMediatorTest.ORGNUMMER,
+                                    ),
+                                ),
+                        ),
+                    ),
                 arbeidsforhold = emptyList(),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 forsikringsvurderingId = null,
-            )
+            ),
         )
         assertTrue(hendelseMediator.lestVilkårsgrunnlag)
     }
@@ -182,8 +183,8 @@ internal class MessageMediatorTest {
                 saksbehandlerEpost = "en_saksbehandler@ikke.no",
                 automatiskBehandling = false,
                 makstidOppnådd = false,
-                godkjenttidspunkt = LocalDateTime.now()
-            )
+                godkjenttidspunkt = LocalDateTime.now(),
+            ),
         )
         assertTrue(hendelseMediator.lestUtbetalingsgodkjenning)
     }
@@ -196,8 +197,8 @@ internal class MessageMediatorTest {
                 utbetalingId = UUID.randomUUID().toString(),
                 vedtaksperiodeId = UUID.randomUUID(),
                 behandlingId = UUID.randomUUID(),
-                utbetalingOK = true
-            )
+                utbetalingOK = true,
+            ),
         )
         assertTrue(hendelseMediator.lestUtbetaling)
     }
@@ -223,20 +224,22 @@ internal class MessageMediatorTest {
     @Test
     fun `graderte andre ytelser endret`() {
         testRapid.sendTestMessage(meldingsfabrikk.lagGraderteAndreYtelserEndret(5.januar))
-        val forventet = TestHendelseMediator.EndretGrunnlagForBeregningData(
-            type = "GraderteAndreYtelser",
-            fom = 5.januar,
-        )
+        val forventet =
+            TestHendelseMediator.EndretGrunnlagForBeregningData(
+                type = "GraderteAndreYtelser",
+                fom = 5.januar,
+            )
         assertEquals(forventet, hendelseMediator.lestEndretGrunnlagForBeregning)
     }
 
     @Test
     fun inntektsendringer() {
         testRapid.sendTestMessage(meldingsfabrikk.lagInntektsendringer(7.januar))
-        val forventet = TestHendelseMediator.EndretGrunnlagForBeregningData(
-            type = "Inntektsendringer",
-            fom = 7.januar,
-        )
+        val forventet =
+            TestHendelseMediator.EndretGrunnlagForBeregningData(
+                type = "Inntektsendringer",
+                fom = 7.januar,
+            )
         assertEquals(forventet, hendelseMediator.lestEndretGrunnlagForBeregning)
     }
 
@@ -258,16 +261,19 @@ internal class MessageMediatorTest {
     fun `endret forsikringsvurdering`() {
         val forsikringsvurderingId = UUID.randomUUID()
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagEndretForsikringsvurdering(
-            skjæringstidspunkt = 1.januar,
-            forsikringsvurderingId = forsikringsvurderingId,
-        ))
-        val forventet = TestHendelseMediator.EndretVurderingPåSkjæringstidspunktData(
-            skjæringstidspunkt = 1.januar,
-            vurderingId = forsikringsvurderingId,
-            type = "Forsikringsvurdering",
-            manuellVurdering = false
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagEndretForsikringsvurdering(
+                skjæringstidspunkt = 1.januar,
+                forsikringsvurderingId = forsikringsvurderingId,
+            ),
         )
+        val forventet =
+            TestHendelseMediator.EndretVurderingPåSkjæringstidspunktData(
+                skjæringstidspunkt = 1.januar,
+                vurderingId = forsikringsvurderingId,
+                type = "Forsikringsvurdering",
+                manuellVurdering = false,
+            )
         assertEquals(forventet, hendelseMediator.lestEndretVurderingPåSkjæringstidspunkt)
     }
 
@@ -275,65 +281,68 @@ internal class MessageMediatorTest {
     fun `endret opptjeningsvurdering`() {
         val opptjeningsvurderingId = UUID.randomUUID()
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagEndretOpptjeningsvurdering(
-            skjæringstidspunkt = 2.januar,
-            opptjeningsvurderingId = opptjeningsvurderingId,
-            manuellVurdering = true
-        ))
-        val forventet = TestHendelseMediator.EndretVurderingPåSkjæringstidspunktData(
-            skjæringstidspunkt = 2.januar,
-            vurderingId = opptjeningsvurderingId,
-            type = "Opptjeningsvurdering",
-            manuellVurdering = true
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagEndretOpptjeningsvurdering(
+                skjæringstidspunkt = 2.januar,
+                opptjeningsvurderingId = opptjeningsvurderingId,
+                manuellVurdering = true,
+            ),
         )
+        val forventet =
+            TestHendelseMediator.EndretVurderingPåSkjæringstidspunktData(
+                skjæringstidspunkt = 2.januar,
+                vurderingId = opptjeningsvurderingId,
+                type = "Opptjeningsvurdering",
+                manuellVurdering = true,
+            )
         assertEquals(forventet, hendelseMediator.lestEndretVurderingPåSkjæringstidspunkt)
     }
 
     @Test
     fun `avbrutt fisker søknad`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttFiskerSøknad(1.januar,  31.januar))
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttFiskerSøknad(1.januar, 31.januar))
         val forventet = TestHendelseMediator.AvbruttSøknadData(1.januar, 31.januar, Behandlingsporing.Yrkesaktivitet.Selvstendig)
         assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
     }
 
     @Test
     fun `avbrutt frilanser søknad`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttFrilanserSøknad(1.februar,  28.februar))
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttFrilanserSøknad(1.februar, 28.februar))
         val forventet = TestHendelseMediator.AvbruttSøknadData(1.februar, 28.februar, Behandlingsporing.Yrkesaktivitet.Frilans)
         assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
     }
 
     @Test
     fun `avbrutt jordbruker søknad`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttJordbrukerSøknad(1.mars,  31.mars))
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttJordbrukerSøknad(1.mars, 31.mars))
         val forventet = TestHendelseMediator.AvbruttSøknadData(1.mars, 31.mars, Behandlingsporing.Yrkesaktivitet.Selvstendig)
         assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
     }
 
     @Test
     fun `avbrutt selvstendig søknad`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttSelvstendigSøknad(1.april,  30.april))
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttSelvstendigSøknad(1.april, 30.april))
         val forventet = TestHendelseMediator.AvbruttSøknadData(1.april, 30.april, Behandlingsporing.Yrkesaktivitet.Selvstendig)
         assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
     }
 
     @Test
     fun `avbrutt arbeidstaker søknad`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttArbeidstakerSøknad(1.mai,  31.mai, "testOrgNr"))
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttArbeidstakerSøknad(1.mai, 31.mai, "testOrgNr"))
         val forventet = TestHendelseMediator.AvbruttSøknadData(1.mai, 31.mai, Behandlingsporing.Yrkesaktivitet.Arbeidstaker("testOrgNr"))
         assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
     }
 
     @Test
     fun `avbrutt arbeidsledig søknad uten tidligere arbeidsgiver`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttArbeidsledigSøknad(1.juni,  30.juni, null))
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttArbeidsledigSøknad(1.juni, 30.juni, null))
         val forventet = TestHendelseMediator.AvbruttSøknadData(1.juni, 30.juni, Behandlingsporing.Yrkesaktivitet.Arbeidsledig)
         assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
     }
 
     @Test
     fun `avbrutt arbeidsledig søknad med tidligere arbeidsgiver`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttArbeidsledigSøknad(1.juli,  31.juli, "tidligereOrgNr"))
+        testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttArbeidsledigSøknad(1.juli, 31.juli, "tidligereOrgNr"))
         val forventet = TestHendelseMediator.AvbruttSøknadData(1.juli, 31.juli, Behandlingsporing.Yrkesaktivitet.Arbeidstaker("tidligereOrgNr"))
         assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
     }
@@ -355,7 +364,7 @@ internal class MessageMediatorTest {
                 hendelseRepository = mockk(relaxed = true),
                 hendelseMediator = hendelseMediator,
                 utsender = TestUtsender(),
-                utboksDao = InMemoryUtboksDao()
+                utboksDao = InMemoryUtboksDao(),
             )
         }
     }

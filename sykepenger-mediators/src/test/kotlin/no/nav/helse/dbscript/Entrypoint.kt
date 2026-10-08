@@ -5,10 +5,11 @@ fun main() {
 }
 
 internal object Entrypoint {
-    private val tilgjengeligseScript = mapOf(
-        1 to Personeditor,
-        2 to HoppOverMelding
-    )
+    private val tilgjengeligseScript =
+        mapOf(
+            1 to Personeditor,
+            2 to HoppOverMelding,
+        )
 
     fun start() {
         println("## Velkommen til spleis sine DbScripts!")
@@ -21,11 +22,12 @@ internal object Entrypoint {
         val valgtConnectionmåte = Input.ventPåInput("1") { it.toIntOrNull() in setOf(1, 2) }.toInt()
         println()
 
-        val scriptWrapper = when (valgtConnectionmåte) {
-            1 -> AutomatiskOppkobling::start
-            2 -> ManuellOppkobling::start
-            else -> error("Hvordan kom vi hit?")
-        }
+        val scriptWrapper =
+            when (valgtConnectionmåte) {
+                1 -> AutomatiskOppkobling::start
+                2 -> ManuellOppkobling::start
+                else -> error("Hvordan kom vi hit?")
+            }
 
         println("Her er de tilgjengelige scriptene. Velg det du vil kjøre.")
         tilgjengeligseScript.forEach { (valg, script) ->

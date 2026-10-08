@@ -1,6 +1,5 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Behandlingsporing
@@ -16,19 +15,20 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class InntektshistorikkTest {
-
     private lateinit var historikk: Inntektshistorikk
     private val inspektør get() = InntektshistorikkInspektør(historikk)
 
     private companion object {
         const val ORGNUMMER = "987654321"
         val INNTEKT = 31000.00.månedlig
-        val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            organisasjonsnummer = ORGNUMMER,
-            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER")
-        )
+        val hendelsefabrikk =
+            ArbeidsgiverHendelsefabrikk(
+                organisasjonsnummer = ORGNUMMER,
+                behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
+            )
     }
 
     @BeforeEach
@@ -65,7 +65,7 @@ internal class InntektshistorikkTest {
     fun `Inntekt for annen dato og samme kilde erstatter ikke eksisterende`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk)
         inntektsmelding(førsteFraværsdag = 2.januar, arbeidsgiverperioder = listOf(2.januar til 17.januar)).addInntekt(
-            historikk
+            historikk,
         )
         assertEquals(2, inspektør.size)
     }
@@ -77,12 +77,12 @@ internal class InntektshistorikkTest {
     private fun inntektsmelding(
         beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = 1.januar,
-        arbeidsgiverperioder: List<Periode> = listOf(1.januar til 16.januar)
+        arbeidsgiverperioder: List<Periode> = listOf(1.januar til 16.januar),
     ) = hendelsefabrikk.lagInntektsmelding(
         arbeidsgiverperioder = arbeidsgiverperioder,
         beregnetInntekt = beregnetInntekt,
         førsteFraværsdag = førsteFraværsdag,
         refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null
+        begrunnelseForReduksjonEllerIkkeUtbetalt = null,
     )
 }

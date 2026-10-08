@@ -5,7 +5,9 @@ import no.nav.helse.økonomi.Inntekt
 
 internal val Inntektsgrunnlag.inspektør get() = InntektsgrunnlagInspektør(this)
 
-internal class InntektsgrunnlagInspektør(inntektsgrunnlag: Inntektsgrunnlag) {
+internal class InntektsgrunnlagInspektør(
+    inntektsgrunnlag: Inntektsgrunnlag,
+) {
     val sykepengegrunnlag: Inntekt = inntektsgrunnlag.sykepengegrunnlag
     val beregningsgrunnlag = inntektsgrunnlag.beregningsgrunnlag
     val omregnetÅrsinntekt = inntektsgrunnlag.omregnetÅrsinntekt

@@ -1,11 +1,11 @@
 package no.nav.helse.dto.serialisering
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.VedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 data class VedtaksperiodeUtDto(
     val id: UUID,
@@ -19,5 +19,5 @@ data class VedtaksperiodeUtDto(
     val venteårsak: VedtaksperiodeVenterDto?,
     val opprettet: LocalDateTime,
     val oppdatert: LocalDateTime,
-    val annulleringskandidater: List<AnnulleringskandidatDto>
+    val annulleringskandidater: List<AnnulleringskandidatDto>,
 )

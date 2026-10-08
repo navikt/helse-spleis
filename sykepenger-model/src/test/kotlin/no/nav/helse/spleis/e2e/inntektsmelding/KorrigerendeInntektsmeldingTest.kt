@@ -1,12 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
@@ -16,19 +10,9 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -36,13 +20,10 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.inspectors.inspektør
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
-
     @Test
     fun `AI fjerner gammel IM - Avsluttet vedtaksperiode skal ikke få varsel ved korrigerende inntektsmelding med endring i agp`() {
         a1 {
@@ -71,9 +52,11 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
-            assertTrue(utbetalingstidslinje.subset(1.januar til 16.januar).all {
-                it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
-            })
+            assertTrue(
+                utbetalingstidslinje.subset(1.januar til 16.januar).all {
+                    it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
+                },
+            )
             assertEquals(0.månedlig, utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp)
 
             assertEquals(2.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
@@ -97,9 +80,11 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
-            assertTrue(utbetalingstidslinje.subset(1.januar til 16.januar).all {
-                it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
-            })
+            assertTrue(
+                utbetalingstidslinje.subset(1.januar til 16.januar).all {
+                    it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
+                },
+            )
             assertEquals(1431.daglig, utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
@@ -121,9 +106,11 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             val utbetalingstidslinje = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje
             assertEquals(Utbetalingsdag.ArbeidsgiverperiodeDag::class, utbetalingstidslinje[1.januar]::class)
             assertEquals(0.daglig, utbetalingstidslinje[1.januar].økonomi.inspektør.arbeidsgiverbeløp)
-            assertTrue(utbetalingstidslinje.subset(1.januar til 16.januar).all {
-                it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
-            })
+            assertTrue(
+                utbetalingstidslinje.subset(1.januar til 16.januar).all {
+                    it.økonomi.inspektør.arbeidsgiverbeløp == INGEN && it is Utbetalingsdag.ArbeidsgiverperiodeDag
+                },
+            )
             assertEquals(1431.daglig, utbetalingstidslinje[18.januar].økonomi.inspektør.arbeidsgiverbeløp)
 
             assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
@@ -213,7 +200,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
             håndterKorrigerteArbeidsgiveropplysninger(
-                listOf(1.februar til 16.februar)
+                listOf(1.februar til 16.februar),
             )
 
             assertVarsler(listOf(RV_IM_4, RV_IM_24), 2.vedtaksperiode.filter())
@@ -232,9 +219,10 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-            val inntektsmeldingId = håndterKorrigerteArbeidsgiveropplysninger(
-                listOf(10.februar til 25.februar)
-            )
+            val inntektsmeldingId =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    listOf(10.februar til 25.februar),
+                )
 
             assertEquals("SSSHH SSSSSHH SSSSSHH S?????? ?????HH SSSSSHH SSSSSHH S", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -304,7 +292,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(15.januar til 30.januar),
-                beregnetInntekt = INNTEKT * 1.1
+                beregnetInntekt = INNTEKT * 1.1,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -326,7 +314,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT * 1.1
+                beregnetInntekt = INNTEKT * 1.1,
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -349,7 +337,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
 
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(12.januar til 27.januar),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
 
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 10.januar, listOf(1.januar til 5.januar, 10.januar til 20.januar))
@@ -367,7 +355,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterKorrigerteArbeidsgiveropplysninger(
-                listOf(1.januar til 15.januar, 20.januar.somPeriode())
+                listOf(1.januar til 15.januar, 20.januar.somPeriode()),
             )
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
@@ -380,7 +368,7 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 20.januar))
             håndterKorrigerteArbeidsgiveropplysninger(
-                listOf(1.januar til 8.januar, 13.januar til 20.januar)
+                listOf(1.januar til 8.januar, 13.januar til 20.januar),
             )
             assertEquals("SSSSSHH SSSAARR SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())

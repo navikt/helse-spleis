@@ -14,23 +14,23 @@ import no.nav.helse.spleis.speil.serializePersonForSpeil
 internal object ApiMetrikker {
     fun målDatabase(
         meterRegistry: MeterRegistry,
-        block: () -> SerialisertPerson?
+        block: () -> SerialisertPerson?,
     ): SerialisertPerson? = mål(meterRegistry, "hent_person", block)
 
     fun målDeserialisering(
         meterRegistry: MeterRegistry,
-        block: () -> Person
+        block: () -> Person,
     ): Person = mål(meterRegistry, "deserialiser_person", block)
 
     fun målByggSnapshot(
         meterRegistry: MeterRegistry,
-        block: () -> PersonDTO
+        block: () -> PersonDTO,
     ): PersonDTO = mål(meterRegistry, "bygg_snapshot", block)
 
     private fun <R> mål(
         meterRegistry: MeterRegistry,
         operasjon: String,
-        block: () -> R
+        block: () -> R,
     ): R {
         val timer = Timer.start(meterRegistry)
         return block().also {
@@ -39,7 +39,7 @@ internal object ApiMetrikker {
                     .builder("person_snapshot_api")
                     .description("Metrikker for henting av speil-snapshot")
                     .tag("operasjon", operasjon)
-                    .register(meterRegistry)
+                    .register(meterRegistry),
             )
         }
     }
@@ -47,7 +47,7 @@ internal object ApiMetrikker {
 
 internal data class PersonSnapshot(
     val person: PersonDTO,
-    val hendelser: List<HendelseDTO>
+    val hendelser: List<HendelseDTO>,
 )
 
 /**
@@ -59,7 +59,7 @@ internal fun hentPersonSnapshot(
     hendelseDao: HendelseDao,
     fnr: String,
     callId: String,
-    meterRegistry: MeterRegistry
+    meterRegistry: MeterRegistry,
 ): PersonSnapshot? {
     val serialisertPerson =
         ApiMetrikker.målDatabase(meterRegistry) {

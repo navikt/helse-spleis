@@ -2,7 +2,6 @@ package no.nav.helse.spleis.mediator.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import java.time.LocalDate
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -11,18 +10,19 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class SpreOppgaverKontraktTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `Sender ut inntektsmeldingHåndtertEvent når en vedtaksperiode har håndtert en inntektsmelding`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
         )
-        val (inntektsmeldingId, _) = sendNavNoInntektsmelding(
-            listOf(Periode(fom = 1.januar, tom = 16.januar))
-        )
+        val (inntektsmeldingId, _) =
+            sendNavNoInntektsmelding(
+                listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            )
         val vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(0)
 
         val meldinger = testRapid.inspektør.meldinger("inntektsmelding_håndtert")
@@ -49,11 +49,8 @@ internal class SpreOppgaverKontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("organisasjonsnummer").asText().isNotEmpty())
     }
 
-
     private fun assertDato(tekst: String) {
         assertTrue(tekst.isNotEmpty())
         assertDoesNotThrow { LocalDate.parse(tekst) }
     }
 }
-
-

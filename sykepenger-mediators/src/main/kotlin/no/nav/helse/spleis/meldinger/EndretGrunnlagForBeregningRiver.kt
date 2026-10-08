@@ -12,13 +12,13 @@ import no.nav.helse.spleis.meldinger.model.EndretGrunnlagForBeregningMessage.Gru
 
 internal class EndretGrunnlagForBeregningRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-
-    private val grunnlag = setOf(
-        GraderteAndreYtelser,
-        Inntektsendringer
-    )
+    private val grunnlag =
+        setOf(
+            GraderteAndreYtelser,
+            Inntektsendringer,
+        )
 
     override val eventNames = grunnlag.map { it.eventName }.toSet()
 
@@ -34,19 +34,21 @@ internal class EndretGrunnlagForBeregningRiver(
         packet.grunnlagsformatOrNull?.precondition(packet)
     }
 
-    override fun createMessage(packet: JsonMessage) = EndretGrunnlagForBeregningMessage(
-        packet = packet,
-        meldingsporing = Meldingsporing(
-            id = packet.meldingsreferanseId(),
-            fødselsnummer = packet["fødselsnummer"].asText()
-        ),
-        grunnlagsformat = packet.grunnlagsformat
-    )
+    override fun createMessage(packet: JsonMessage) =
+        EndretGrunnlagForBeregningMessage(
+            packet = packet,
+            meldingsporing =
+                Meldingsporing(
+                    id = packet.meldingsreferanseId(),
+                    fødselsnummer = packet["fødselsnummer"].asText(),
+                ),
+            grunnlagsformat = packet.grunnlagsformat,
+        )
 
-    private val JsonMessage.grunnlagsformatOrNull get() = interestedIn("@event_name").let {
-        grunnlag.singleOrNull { it.eventName == get("@event_name").asText() }
-    }
+    private val JsonMessage.grunnlagsformatOrNull get() =
+        interestedIn("@event_name").let {
+            grunnlag.singleOrNull { it.eventName == get("@event_name").asText() }
+        }
 
-    private val JsonMessage.grunnlagsformat get() = grunnlagsformatOrNull?: error("Ukjent grunnlag for eventName ${get("@event_name").asText()}")
-
+    private val JsonMessage.grunnlagsformat get() = grunnlagsformatOrNull ?: error("Ukjent grunnlag for eventName ${get("@event_name").asText()}")
 }

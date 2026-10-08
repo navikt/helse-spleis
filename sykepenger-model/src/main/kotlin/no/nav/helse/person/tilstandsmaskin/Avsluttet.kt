@@ -8,12 +8,20 @@ internal data object Avsluttet : Vedtaksperiodetilstand {
     override val type = TilstandType.AVSLUTTET
 
     override val erFerdigBehandlet = true
-    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+
+    override fun entering(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         vedtaksperiode.behandlinger.bekreftAvsluttetBehandlingMedVedtak(vedtaksperiode.yrkesaktivitet)
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 
-    override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+    override fun leaving(
+        vedtaksperiode: Vedtaksperiode,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         vedtaksperiode.behandlinger.bekreftÅpenBehandling(vedtaksperiode.yrkesaktivitet)
     }
 }

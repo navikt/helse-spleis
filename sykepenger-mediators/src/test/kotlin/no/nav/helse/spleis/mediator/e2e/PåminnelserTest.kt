@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `påminnelse når person ikke finnes`() {
         val (_, påminnelseId) = sendNyPåminnelse()
@@ -24,7 +23,7 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     fun `påminnelse for feil tilstand`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         sendNyPåminnelse(0)
         val vedtaksperiodeIkkePåminnet = testRapid.inspektør.meldinger("vedtaksperiode_ikke_påminnet").single()
@@ -37,7 +36,7 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     fun `påminnelse for riktig tilstand`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         sendNyPåminnelse(0, tilstandType = TilstandType.AVVENTER_INNTEKTSMELDING)
         val vedtaksperiodePåminnet = testRapid.inspektør.meldinger("vedtaksperiode_påminnet").single()
@@ -50,7 +49,7 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     fun utbetalingpåminnelse() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)
@@ -59,7 +58,17 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(0)
         sendNyPåminnelse(0, TilstandType.TIL_UTBETALING)
         assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "OVERFØRT")
-        assertEquals(2, (0 until testRapid.inspektør.antall()).filter { "Utbetaling" in testRapid.inspektør.melding(it).path("@behov").map(JsonNode::asText) }.size)
+        assertEquals(
+            2,
+            (0 until testRapid.inspektør.antall())
+                .filter {
+                    "Utbetaling" in
+                        testRapid.inspektør
+                            .melding(it)
+                            .path("@behov")
+                            .map(JsonNode::asText)
+                }.size,
+        )
     }
 
     @Test
@@ -67,7 +76,7 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         sendNySøknadFrilanser(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
 
@@ -75,7 +84,7 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
             0,
             "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING",
-            "AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE"
+            "AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE",
         )
 
         sendNyPåminnelse(0, TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, flagg = setOf("forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"))
@@ -86,9 +95,8 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_INNTEKTSMELDING",
             "AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE",
             "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVVENTER_VILKÅRSPRØVING"
+            "AVVENTER_VILKÅRSPRØVING",
         )
-
     }
 
     private fun assertVedtaksperiodePåminnet(melding: JsonNode) {
@@ -115,5 +123,3 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("vedtaksperiodeId").asText().isNotEmpty())
     }
 }
-
-

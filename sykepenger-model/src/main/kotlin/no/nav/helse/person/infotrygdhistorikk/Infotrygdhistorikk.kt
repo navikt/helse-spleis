@@ -1,7 +1,5 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkUtDto
 import no.nav.helse.hendelser.Behandlingsporing
@@ -12,9 +10,11 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import java.time.LocalDate
+import java.util.UUID
 
 internal class Infotrygdhistorikk private constructor(
-    private val _elementer: MutableList<InfotrygdhistorikkElement>
+    private val _elementer: MutableList<InfotrygdhistorikkElement>,
 ) {
     val elementer get() = _elementer.toList()
     val siste get() = _elementer.first()
@@ -22,16 +22,15 @@ internal class Infotrygdhistorikk private constructor(
     constructor() : this(mutableListOf())
 
     internal companion object {
-        internal fun gjenopprett(dto: InfotrygdhistorikkInnDto): Infotrygdhistorikk {
-            return Infotrygdhistorikk(
-                _elementer = dto.elementer.map { InfotrygdhistorikkElement.gjenopprett(it) }.toMutableList()
+        internal fun gjenopprett(dto: InfotrygdhistorikkInnDto): Infotrygdhistorikk =
+            Infotrygdhistorikk(
+                _elementer = dto.elementer.map { InfotrygdhistorikkElement.gjenopprett(it) }.toMutableList(),
             )
-        }
     }
 
     internal fun validerMedFunksjonellFeil(
         aktivitetslogg: IAktivitetslogg,
-        periode: Periode
+        periode: Periode,
     ): Boolean {
         if (!harHistorikk()) return true
         return siste.validerMedFunksjonellFeil(aktivitetslogg, periode)
@@ -39,7 +38,7 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun validerMedVarsel(
         aktivitetslogg: IAktivitetslogg,
-        periode: Periode
+        periode: Periode,
     ) {
         if (!harHistorikk()) return
         siste.validerMedVarsel(aktivitetslogg, periode)
@@ -47,19 +46,29 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun validerNyereOpplysninger(
         aktivitetslogg: IAktivitetslogg,
-        periode: Periode
+        periode: Periode,
     ) {
         if (!harHistorikk()) return
         siste.validerNyereOpplysninger(aktivitetslogg, periode)
     }
 
-    internal fun initiell(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, tidligsteDato: LocalDate, vedtaksperiodeId: UUID, yrkesaktivitetsporing: Behandlingsporing.Yrkesaktivitet) {
+    internal fun initiell(
+        aktivitetslogg: IAktivitetslogg,
+        eventBus: EventBus,
+        tidligsteDato: LocalDate,
+        vedtaksperiodeId: UUID,
+        yrkesaktivitetsporing: Behandlingsporing.Yrkesaktivitet,
+    ) {
         val oppfriskningsperiode = oppfriskningsperiode(tidligsteDato)
         eventBus.trengerInitiellHistorikkFraInfotrygd(oppfriskningsperiode, vedtaksperiodeId, yrkesaktivitetsporing)
         aktivitetslogg.info("Sender ut event om at vi trenger initiell historikk fra Infotrygd")
     }
 
-    internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, tidligsteDato: LocalDate) {
+    internal fun oppfrisk(
+        aktivitetslogg: IAktivitetslogg,
+        eventBus: EventBus,
+        tidligsteDato: LocalDate,
+    ) {
         val oppfriskningsperiode = oppfriskningsperiode(tidligsteDato)
         eventBus.trengerOppdatertHistorikkFraInfotrygd(oppfriskningsperiode)
         aktivitetslogg.info("Sender ut event om at vi trenger oppdatert historikk fra Infotrygd")
@@ -67,7 +76,15 @@ internal class Infotrygdhistorikk private constructor(
 
     private fun oppfriskningsperiode(tidligsteDato: LocalDate): Periode {
         val fireÅrFørSpleisdag = tidligsteDato.minusYears(4)
-        val førsteInfotrygddag = if (harHistorikk()) siste.perioder.firstOrNull()?.periode?.start else null
+        val førsteInfotrygddag =
+            if (harHistorikk()) {
+                siste.perioder
+                    .firstOrNull()
+                    ?.periode
+                    ?.start
+            } else {
+                null
+            }
         val fom = førsteInfotrygddag?.let { minOf(fireÅrFørSpleisdag, førsteInfotrygddag) } ?: fireÅrFørSpleisdag
         return fom til LocalDate.now()
     }
@@ -77,9 +94,7 @@ internal class Infotrygdhistorikk private constructor(
         return siste.utbetalingstidslinje()
     }
 
-    internal fun skjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>): Skjæringstidspunkter {
-        return Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinjer + listOf(sykdomstidslinje()))
-    }
+    internal fun skjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>): Skjæringstidspunkter = Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinjer + listOf(sykdomstidslinje()))
 
     private fun sykdomstidslinje(): Sykdomstidslinje {
         if (!harHistorikk()) return Sykdomstidslinje()
@@ -100,13 +115,12 @@ internal class Infotrygdhistorikk private constructor(
         _elementer.add(nyeste)
     }
 
-    internal fun betaltePerioder(orgnummer: String? = null) =
-        if (!harHistorikk()) emptyList() else siste.betaltePerioder(orgnummer)
+    internal fun betaltePerioder(orgnummer: String? = null) = if (!harHistorikk()) emptyList() else siste.betaltePerioder(orgnummer)
 
-    internal fun friperioder() =
-        if (!harHistorikk()) emptyList() else siste.friperioder()
+    internal fun friperioder() = if (!harHistorikk()) emptyList() else siste.friperioder()
 
     internal fun harHistorikk() = _elementer.isNotEmpty()
+
     internal fun harUtbetaltI(periode: Periode): Boolean {
         if (!harHistorikk()) return false
         return siste.harUtbetaltI(periode)
@@ -117,7 +131,8 @@ internal class Infotrygdhistorikk private constructor(
         return siste.harFerieI(periode)
     }
 
-    internal fun dto() = InfotrygdhistorikkUtDto(
-        elementer = this._elementer.map { it.dto() }
-    )
+    internal fun dto() =
+        InfotrygdhistorikkUtDto(
+            elementer = this._elementer.map { it.dto() },
+        )
 }

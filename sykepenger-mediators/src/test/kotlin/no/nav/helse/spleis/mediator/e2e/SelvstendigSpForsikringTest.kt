@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -8,9 +7,9 @@ import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `Selvstendig med forsikringsvurdering går videre`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
@@ -19,15 +18,16 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
         sendYtelser(
             vedtaksperiodeIndeks = 0,
-            forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                forsikringsvurderingId = forsikringsvurderingId,
-                dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
-                opphørsdato = null,
-                harIndividuellForsikring = true,
-                villeHattForsikringOmDenVarBetalt = false,
-                harForsikringSomIkkePasserMedSøknadstype = false,
-            ),
-            orgnummer = "SELVSTENDIG"
+            forsikringsvurderingResultat =
+                ForsikringsvurderingResultat(
+                    forsikringsvurderingId = forsikringsvurderingId,
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = true),
+                    opphørsdato = null,
+                    harIndividuellForsikring = true,
+                    villeHattForsikringOmDenVarBetalt = false,
+                    harForsikringSomIkkePasserMedSøknadstype = false,
+                ),
+            orgnummer = "SELVSTENDIG",
         )
         sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
         assertTilstander(
@@ -37,37 +37,39 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
             "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
             "SELVSTENDIG_AVVENTER_HISTORIKK",
             "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING"
+            "SELVSTENDIG_AVVENTER_GODKJENNING",
         )
     }
 
     @Test
-    fun `Jordbruker med kollektiv forsikring går videre når Jordbruker-toggle er enabled`() = Toggle.Jordbruker.enable {
-        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
-        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
-        val forsikringsvurderingId = UUID.randomUUID()
-        sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-        sendYtelser(
-            vedtaksperiodeIndeks = 0,
-            forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                forsikringsvurderingId = forsikringsvurderingId,
-                dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
-                opphørsdato = null,
-                harIndividuellForsikring = false,
-                villeHattForsikringOmDenVarBetalt = false,
-                harForsikringSomIkkePasserMedSøknadstype = false,
-            ),
-            orgnummer = "SELVSTENDIG"
-        )
-        sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
-        assertTilstander(
-            0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING"
-        )
-    }
+    fun `Jordbruker med kollektiv forsikring går videre når Jordbruker-toggle er enabled`() =
+        Toggle.Jordbruker.enable {
+            sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
+            sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
+            val forsikringsvurderingId = UUID.randomUUID()
+            sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
+            sendYtelser(
+                vedtaksperiodeIndeks = 0,
+                forsikringsvurderingResultat =
+                    ForsikringsvurderingResultat(
+                        forsikringsvurderingId = forsikringsvurderingId,
+                        dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
+                        opphørsdato = null,
+                        harIndividuellForsikring = false,
+                        villeHattForsikringOmDenVarBetalt = false,
+                        harForsikringSomIkkePasserMedSøknadstype = false,
+                    ),
+                orgnummer = "SELVSTENDIG",
+            )
+            sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
+            assertTilstander(
+                0,
+                "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
+                "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
+                "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
+                "SELVSTENDIG_AVVENTER_HISTORIKK",
+                "SELVSTENDIG_AVVENTER_SIMULERING",
+                "SELVSTENDIG_AVVENTER_GODKJENNING",
+            )
+        }
 }

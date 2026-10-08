@@ -1,46 +1,16 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import no.nav.helse.april
-import no.nav.helse.desember
-import no.nav.helse.februar
+import no.nav.helse.*
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.mai
-import no.nav.helse.mars
-import no.nav.helse.november
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING_TIL_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.september
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Dag.Feriedag
-import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
-import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.FORKASTET
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -48,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class KorrigertSøknadTest : AbstractDslTest() {
-
     @Test
     fun `Avventer inntektsmelding når korrigerende søknad flytter skjæringstidspunkt - brukt inntekter fra a-ordningen`() {
         a1 {
@@ -61,7 +30,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 4.vedtaksperiode,
                 AVVENTER_INNTEKTSMELDING,
                 tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
-                nåtidspunkt = 10.februar(2025).atStartOfDay()
+                nåtidspunkt = 10.februar(2025).atStartOfDay(),
             )
             håndterVilkårsgrunnlag(4.vedtaksperiode)
             håndterYtelser(4.vedtaksperiode)
@@ -138,7 +107,13 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
         nullstillTilstandsendringer()
         a1 {
             håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
-            assertEquals(FORKASTET, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
+            assertEquals(
+                FORKASTET,
+                inspektør
+                    .utbetalinger(1.vedtaksperiode)
+                    .single()
+                    .inspektør.tilstand,
+            )
             assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
     }
@@ -174,7 +149,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
-                TIL_INFOTRYGD
+                TIL_INFOTRYGD,
             )
         }
     }
@@ -240,7 +215,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
@@ -369,11 +344,10 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar))
             val søknadId = håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar)
+                listOf(1.januar til 16.januar),
             )
             håndterVilkårsgrunnlag(3.vedtaksperiode)
             håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
-
 
             inspektør.sykdomstidslinje.inspektør.also {
                 assertTrue(it[31.januar] is Feriedag)
@@ -423,7 +397,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_VILKÅRSPRØVING
+                AVVENTER_VILKÅRSPRØVING,
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
@@ -450,7 +424,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_VILKÅRSPRØVING
+                AVVENTER_VILKÅRSPRØVING,
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
@@ -475,7 +449,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_VILKÅRSPRØVING
+                AVVENTER_VILKÅRSPRØVING,
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
@@ -502,7 +476,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
@@ -531,7 +505,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
@@ -562,7 +536,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
         }
@@ -573,9 +547,21 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 31.januar)
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.sykdomshistorikk
+                    .sykdomstidslinje()
+                    .toShortString()
+                    .trim(),
+            )
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), sendtTilNAVEllerArbeidsgiver = 30.september, korrigerer = søknadId, opprinneligSendt = 31.januar)
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSF",
+                inspektør.sykdomshistorikk
+                    .sykdomstidslinje()
+                    .toShortString()
+                    .trim(),
+            )
         }
     }
 
@@ -584,9 +570,21 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-            assertEquals("KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKK", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+            assertEquals(
+                "KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKK",
+                inspektør.sykdomshistorikk
+                    .sykdomstidslinje()
+                    .toShortString()
+                    .trim(),
+            )
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), sendtTilNAVEllerArbeidsgiver = 2.mai, korrigerer = søknadId, opprinneligSendt = 1.mai)
-            assertEquals("KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKF", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+            assertEquals(
+                "KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKF",
+                inspektør.sykdomshistorikk
+                    .sykdomstidslinje()
+                    .toShortString()
+                    .trim(),
+            )
             assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
         }
     }

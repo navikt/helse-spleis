@@ -5,6 +5,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
+import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.MeldingsreferanseId
+import no.nav.helse.spleis.Behov
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -14,14 +17,11 @@ import kotlin.collections.associate
 import kotlin.collections.plus
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.spleis.Behov
 
 data class UtgåendeMelding(
     val key: String?,
     val json: ObjectNode,
-    val mottaker: Mottaker
+    val mottaker: Mottaker,
 ) {
     val id = UUID.fromString(json.path("@id").asText())
     val eventName = json.path("@event_name").asText()
@@ -45,37 +45,57 @@ data class UtgåendeMelding(
         @OptIn(ExperimentalUuidApi::class)
         private fun nyUuidv7() = Uuid.generateV7().toString()
 
-        private class Tidsstempler() {
+        private class Tidsstempler {
             val oslo: LocalDateTime = LocalDateTime.now(ZoneId.systemDefault())
             val zoned = oslo.atZone(ZoneId.systemDefault())
             val utc = zoned.toInstant()
         }
 
-        private fun standardfelter(personidentifikator: Personidentifikator?, tidsstempler: Tidsstempler = Tidsstempler()): Map<String, Any> {
-            val tidsstempler = mapOf(
-                "@opprettet" to "${tidsstempler.oslo}",
-                "@opprettetUTC" to "${tidsstempler.utc}"
-            )
+        private fun standardfelter(
+            personidentifikator: Personidentifikator?,
+            tidsstempler: Tidsstempler = Tidsstempler(),
+        ): Map<String, Any> {
+            val tidsstempler =
+                mapOf(
+                    "@opprettet" to "${tidsstempler.oslo}",
+                    "@opprettetUTC" to "${tidsstempler.utc}",
+                )
             return when (personidentifikator) {
                 null -> tidsstempler
                 else -> tidsstempler + ("fødselsnummer" to personidentifikator.toString())
             }
         }
 
-        private fun ny(personidentifikator: Personidentifikator?, eventName: String, innhold: Map<String, Any>, mottaker: Mottaker): UtgåendeMelding {
+        private fun ny(
+            personidentifikator: Personidentifikator?,
+            eventName: String,
+            innhold: Map<String, Any>,
+            mottaker: Mottaker,
+        ): UtgåendeMelding {
             val innholdMedStandardfelter = innhold + standardfelter(personidentifikator)
             val json = JsonMessage.newMessage(eventName, innholdMedStandardfelter) { nyUuidv7() }.toJson()
             return UtgåendeMelding(
                 key = personidentifikator?.toString(),
                 json = json,
-                mottaker = mottaker
+                mottaker = mottaker,
             )
         }
 
-        fun nyRapidmelding(personidentifikator: Personidentifikator, eventName: String, innhold: Map<String, Any>) = ny(personidentifikator, eventName, innhold, Mottaker.RAPID)
-        fun nyRapidmelding(eventName: String, innhold: Map<String, Any>) = ny(null, eventName, innhold, Mottaker.RAPID)
+        fun nyRapidmelding(
+            personidentifikator: Personidentifikator,
+            eventName: String,
+            innhold: Map<String, Any>,
+        ) = ny(personidentifikator, eventName, innhold, Mottaker.RAPID)
 
-        fun nySubsumsjonsmelding(personidentifikator: Personidentifikator, innhold: (id: String, tidsstempel: ZonedDateTime) -> Map<String, Any>): UtgåendeMelding {
+        fun nyRapidmelding(
+            eventName: String,
+            innhold: Map<String, Any>,
+        ) = ny(null, eventName, innhold, Mottaker.RAPID)
+
+        fun nySubsumsjonsmelding(
+            personidentifikator: Personidentifikator,
+            innhold: (id: String, tidsstempel: ZonedDateTime) -> Map<String, Any>,
+        ): UtgåendeMelding {
             val id = nyUuidv7()
             val tidsstempler = Tidsstempler()
             val innholdMedStandardfelter = innhold(id, tidsstempler.zoned) + standardfelter(personidentifikator, tidsstempler)
@@ -83,7 +103,7 @@ data class UtgåendeMelding(
             return UtgåendeMelding(
                 key = personidentifikator.toString(),
                 json = json,
-                mottaker = Mottaker.SUBSUMSJON
+                mottaker = Mottaker.SUBSUMSJON,
             )
         }
 
@@ -91,19 +111,21 @@ data class UtgåendeMelding(
             personidentifikator: Personidentifikator,
             meldingsreferanseId: MeldingsreferanseId, // TODO: Dette feltet er sendt på alle behov, men tror ingen sparkel-apper bruker det, må sjekkes opp i!
             behov: List<Behov>,
-            extra: Map<String, Any> = emptyMap()
+            extra: Map<String, Any> = emptyMap(),
         ): UtgåendeMelding {
             val extraMedStandardfelter = extra + standardfelter(personidentifikator) + ("meldingsreferanseId" to meldingsreferanseId.id)
-            val json = JsonMessage.newNeed(
-                behov = behov.map { it.type.utgåendeNavn },
-                map = behov.associate { it.type.utgåendeNavn to it.input } + extraMedStandardfelter,
-                randomIdGenerator = { nyUuidv7() }
-            ).toJson()
+            val json =
+                JsonMessage
+                    .newNeed(
+                        behov = behov.map { it.type.utgåendeNavn },
+                        map = behov.associate { it.type.utgåendeNavn to it.input } + extraMedStandardfelter,
+                        randomIdGenerator = { nyUuidv7() },
+                    ).toJson()
 
             return UtgåendeMelding(
                 key = personidentifikator.toString(),
                 json = json,
-                mottaker = Mottaker.RAPID
+                mottaker = Mottaker.RAPID,
             )
         }
     }

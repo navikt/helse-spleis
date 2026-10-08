@@ -8,5 +8,5 @@ enum class ArbeidssituasjonDto {
     BARNEPASSER,
     JORDBRUKER,
     FISKER,
-    ANNET
+    ANNET,
 }

@@ -7,26 +7,24 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 
 internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `revurdering ved inntektsmelding for korte perioder`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 5.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 5.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 5.januar, sykmeldingsgrad = 100)),
         )
         sendNySøknad(SoknadsperiodeDTO(fom = 6.januar, tom = 10.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 6.januar, tom = 10.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 6.januar, tom = 10.januar, sykmeldingsgrad = 100)),
         )
         sendNySøknad(SoknadsperiodeDTO(fom = 11.januar, tom = 17.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 17.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 17.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoSelvbestemtInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeUtfisker = VedtaksperiodeUtfisker.IndexForArbeidsgiver(ORGNUMMER, 0))
         sendVilkårsgrunnlag(2)
@@ -42,21 +40,21 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
     fun `revurdering ved inntektsmelding for korte perioder - endring av skjæringstidspunkt`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 8.januar, tom = 10.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 8.januar, tom = 10.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 8.januar, tom = 10.januar, sykmeldingsgrad = 100)),
         )
         sendNySøknad(SoknadsperiodeDTO(fom = 11.januar, tom = 22.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 22.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 22.januar, sykmeldingsgrad = 100)),
         )
         sendNySøknad(SoknadsperiodeDTO(fom = 23.januar, tom = 23.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 23.januar, tom = 23.januar, sykmeldingsgrad = 100))
+            perioder = listOf(SoknadsperiodeDTO(fom = 23.januar, tom = 23.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoSelvbestemtInntektsmelding(
             listOf(
                 1.januar til 6.januar,
-                11.januar til 20.januar
-            )
+                11.januar til 20.januar,
+            ),
         )
         sendVilkårsgrunnlag(1)
         sendYtelser(1)
@@ -69,16 +67,22 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
 
     private val logCollector = LogCollector()
 
-    private fun catchErrors(vararg filter: String, block: () -> Any): List<ILoggingEvent> {
+    private fun catchErrors(
+        vararg filter: String,
+        block: () -> Any,
+    ): List<ILoggingEvent> {
         val logger = (LoggerFactory.getLogger("tjenestekall") as Logger)
         logger.addAppender(logCollector)
         logCollector.start()
         block()
         logger.detachAppender(logCollector)
         logCollector.stop()
-        return logCollector.iterator().asSequence().filter { event ->
-            filter.toList().any { filterText -> event.formattedMessage.contains(filterText) }
-        }.toList()
+        return logCollector
+            .iterator()
+            .asSequence()
+            .filter { event ->
+                filter.toList().any { filterText -> event.formattedMessage.contains(filterText) }
+            }.toList()
     }
 
     @AfterEach
@@ -87,7 +91,10 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         logger.detachAndStopAllAppenders()
     }
 
-    private class LogCollector private constructor(private val messages: MutableList<ILoggingEvent>) : AppenderBase<ILoggingEvent>(), Iterable<ILoggingEvent> by (messages) {
+    private class LogCollector private constructor(
+        private val messages: MutableList<ILoggingEvent>,
+    ) : AppenderBase<ILoggingEvent>(),
+        Iterable<ILoggingEvent> by (messages) {
         constructor() : this(mutableListOf())
 
         override fun append(eventObject: ILoggingEvent) {

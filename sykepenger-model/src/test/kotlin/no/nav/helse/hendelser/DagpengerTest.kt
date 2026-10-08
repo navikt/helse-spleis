@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class DagpengerTest {
-
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     private companion object {
@@ -27,9 +26,9 @@ class DagpengerTest {
             undersøke(
                 Periode(
                     fom = førsteFraværsdag.minusMonths(8),
-                    tom = førsteFraværsdag.minusWeeks(4).minusDays(1)
-                )
-            )
+                    tom = førsteFraværsdag.minusWeeks(4).minusDays(1),
+                ),
+            ),
         )
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
@@ -40,9 +39,9 @@ class DagpengerTest {
             undersøke(
                 Periode(
                     fom = førsteFraværsdag.minusMonths(8),
-                    tom = førsteFraværsdag.minusWeeks(4)
-                )
-            )
+                    tom = førsteFraværsdag.minusWeeks(4),
+                ),
+            ),
         )
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }

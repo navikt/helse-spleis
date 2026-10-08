@@ -7,29 +7,28 @@ import com.github.navikt.tbd_libs.naisful.postgres.ConnectionConfigFactory
 import com.github.navikt.tbd_libs.naisful.postgres.jdbcUrlWithGoogleSocketFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.server.auth.jwt.JWTAuthenticationProvider
-import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.jwt.*
 import io.micrometer.core.instrument.MeterRegistry
-import java.net.URI
 import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.objectMapper
+import java.net.URI
 
 internal class ApplicationConfiguration(
     meterRegistry: MeterRegistry,
-    env: Map<String, String> = System.getenv()
+    env: Map<String, String> = System.getenv(),
 ) {
     internal val azureConfig =
         AzureAdAppConfig(
             clientId = env.getValue("AZURE_APP_CLIENT_ID"),
             issuer = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
-            jwkProvider = JwkProviderBuilder(URI(env.getValue("AZURE_OPENID_CONFIG_JWKS_URI")).toURL()).build()
+            jwkProvider = JwkProviderBuilder(URI(env.getValue("AZURE_OPENID_CONFIG_JWKS_URI")).toURL()).build(),
         )
 
     internal val spekematClient =
         SpekematClient(
             tokenProvider = createAzureTokenClientFromEnvironment(env),
             objectMapper = objectMapper,
-            scope = env.getValue("SPEKEMAT_SCOPE")
+            scope = env.getValue("SPEKEMAT_SCOPE"),
         )
 
     private val hikariConfig =
@@ -37,7 +36,7 @@ internal class ApplicationConfiguration(
             jdbcUrl =
                 jdbcUrlWithGoogleSocketFactory(
                     databaseInstance = env.getValue("DATABASE_INSTANCE"),
-                    metode = ConnectionConfigFactory.MountPath("/var/run/secrets/spleis_sql")
+                    metode = ConnectionConfigFactory.MountPath("/var/run/secrets/spleis_sql"),
                 )
             poolName = "app"
             maximumPoolSize = 5
@@ -52,7 +51,7 @@ internal class ApplicationConfiguration(
 internal class AzureAdAppConfig(
     private val clientId: String,
     private val issuer: String,
-    private val jwkProvider: JwkProvider
+    private val jwkProvider: JwkProvider,
 ) {
     fun configureVerification(configuration: JWTAuthenticationProvider.Config) {
         configuration.verifier(jwkProvider, issuer) {

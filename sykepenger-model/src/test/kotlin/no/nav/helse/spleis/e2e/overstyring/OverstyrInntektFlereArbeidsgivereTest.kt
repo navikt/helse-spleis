@@ -1,32 +1,21 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import java.time.LocalDate
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Arbeidstakerkilde
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyPeriode
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class OverstyrInntektFlereArbeidsgivereTest : AbstractDslTest() {
-
     @Test
     fun `overstyr inntekt med flere AG -- happy case`() {
         tilGodkjenningFlereAG()
@@ -102,10 +91,10 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertTilstander(
-                    1.vedtaksperiode,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING,
-                    AVVENTER_GODKJENNING
+                1.vedtaksperiode,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
             )
         }
     }
@@ -173,7 +162,10 @@ internal class OverstyrInntektFlereArbeidsgivereTest : AbstractDslTest() {
         }
     }
 
-    private fun tilOverstyring(fom: LocalDate = 1.januar, tom: LocalDate = 31.januar) {
+    private fun tilOverstyring(
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+    ) {
         a1 {
             nyPeriode(fom til tom)
             håndterArbeidsgiveropplysninger(listOf(fom til fom.plusDays(15)))

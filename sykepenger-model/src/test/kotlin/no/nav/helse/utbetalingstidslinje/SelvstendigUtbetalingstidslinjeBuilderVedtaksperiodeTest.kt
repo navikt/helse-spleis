@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.util.UUID
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
@@ -23,21 +22,22 @@ import no.nav.helse.økonomi.Prosentdel.Companion.riktigProsent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
-
     @Test
     fun `melding til nav dager`() {
         undersøke(
             tidslinje = 16.M + 15.S,
-            forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                forsikringsvurderingId = UUID.randomUUID(),
-                dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
-                opphørsdato = null,
-                harIndividuellForsikring = true,
-                villeHattForsikringOmDenVarBetalt = false,
-                harForsikringSomIkkePasserMedSøknadstype = false,
-            )
+            forsikringsvurderingResultat =
+                ForsikringsvurderingResultat(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = 80, iVentetid = true),
+                    opphørsdato = null,
+                    harIndividuellForsikring = true,
+                    villeHattForsikringOmDenVarBetalt = false,
+                    harForsikringSomIkkePasserMedSøknadstype = false,
+                ),
         )
         assertEquals(31, inspektør.size)
         assertEquals(16, inspektør.ventetidDagTeller)
@@ -46,8 +46,9 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 31.januar,
                 dagerUtenAnsvar = listOf(1.januar til 16.januar),
-                ferdigAvklart = true
-            ), perioder.single()
+                ferdigAvklart = true,
+            ),
+            perioder.single(),
         )
     }
 
@@ -62,15 +63,17 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 1.januar til 4.januar,
                 dagerUtenAnsvar = listOf(1.januar til 4.januar),
-                ferdigAvklart = false
-            ), perioder[0]
+                ferdigAvklart = false,
+            ),
+            perioder[0],
         )
         assertEquals(
             PeriodeUtenNavAnsvar(
                 omsluttendePeriode = 7.januar til 31.januar,
                 dagerUtenAnsvar = listOf(7.januar til 22.januar),
-                ferdigAvklart = true
-            ), perioder[1]
+                ferdigAvklart = true,
+            ),
+            perioder[1],
         )
     }
 
@@ -91,14 +94,15 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
         val dekningsgradIForsikring = 100
         undersøke(
             tidslinje = 16.M + 14.S,
-            forsikringsvurderingResultat = ForsikringsvurderingResultat(
-                forsikringsvurderingId = UUID.randomUUID(),
-                dekning = ForsikringsvurderingResultat.Dekning(grad = dekningsgradIForsikring, iVentetid = true),
-                opphørsdato = opphørsdato,
-                harIndividuellForsikring = true,
-                villeHattForsikringOmDenVarBetalt = false,
-                harForsikringSomIkkePasserMedSøknadstype = false,
-            )
+            forsikringsvurderingResultat =
+                ForsikringsvurderingResultat(
+                    forsikringsvurderingId = UUID.randomUUID(),
+                    dekning = ForsikringsvurderingResultat.Dekning(grad = dekningsgradIForsikring, iVentetid = true),
+                    opphørsdato = opphørsdato,
+                    harIndividuellForsikring = true,
+                    villeHattForsikringOmDenVarBetalt = false,
+                    harForsikringSomIkkePasserMedSøknadstype = false,
+                ),
         )
         assertEquals(30, utbetalingstidslinje.size)
         for (dato in (14.januar til opphørsdato)) {
@@ -120,25 +124,27 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
 
     private fun undersøke(
         tidslinje: Sykdomstidslinje,
-        forsikringsvurderingResultat: ForsikringsvurderingResultat = ForsikringsvurderingResultat(
-            forsikringsvurderingId = UUID.randomUUID(),
-            dekning = null,
-            opphørsdato = null,
-            harIndividuellForsikring = false,
-            villeHattForsikringOmDenVarBetalt = false,
-            harForsikringSomIkkePasserMedSøknadstype = false,
-        ),
-        avslagstidslinje: Avslagstidslinje = Avslagstidslinje()
+        forsikringsvurderingResultat: ForsikringsvurderingResultat =
+            ForsikringsvurderingResultat(
+                forsikringsvurderingId = UUID.randomUUID(),
+                dekning = null,
+                opphørsdato = null,
+                harIndividuellForsikring = false,
+                villeHattForsikringOmDenVarBetalt = false,
+                harForsikringSomIkkePasserMedSøknadstype = false,
+            ),
+        avslagstidslinje: Avslagstidslinje = Avslagstidslinje(),
     ) {
         val ventetidberegner = Ventetidberegner()
         val ventetider = ventetidberegner.result(tidslinje)
         perioder.addAll(ventetider)
 
-        val builder = SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
-            forsikringsvurderingResultat = forsikringsvurderingResultat,
-            dagerUtenNavAnsvar = DagerUtenNavAnsvaravklaring(true, ventetider.lastOrNull()?.dagerUtenAnsvar.orEmpty()),
-            avslagstidslinje = avslagstidslinje
-        )
+        val builder =
+            SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
+                forsikringsvurderingResultat = forsikringsvurderingResultat,
+                dagerUtenNavAnsvar = DagerUtenNavAnsvaravklaring(true, ventetider.lastOrNull()?.dagerUtenAnsvar.orEmpty()),
+                avslagstidslinje = avslagstidslinje,
+            )
 
         utbetalingstidslinje = builder.result(tidslinje, 31000.månedlig, Beløpstidslinje())
         inspektør = utbetalingstidslinje.inspektør

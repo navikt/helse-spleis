@@ -13,14 +13,10 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.onsdag
-import no.nav.helse.person.Behandlinger.Behandling.Tilstand.AvsluttetUtenVedtak
-import no.nav.helse.person.Behandlinger.Behandling.Tilstand.RevurdertVedtakAvvist
-import no.nav.helse.person.Behandlinger.Behandling.Tilstand.TilInfotrygd
-import no.nav.helse.person.Behandlinger.Behandling.Tilstand.VedtakFattet
-import no.nav.helse.person.Behandlinger.Behandling.Tilstand.VedtakIverksatt
+import no.nav.helse.person.Behandlinger.Behandling.Tilstand.*
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.søndag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -28,7 +24,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class BehandlingLukketEventTest : AbstractDslTest() {
-
     @Test
     fun `behandling lukkes når vedtak fattes`() {
         a1 {
@@ -37,11 +32,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.single()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                EventSubscription.BehandlingLukketEvent(
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_UTBETALING)
             assertEquals(VedtakFattet, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -93,11 +89,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.single()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                EventSubscription.BehandlingLukketEvent(
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
             assertEquals(VedtakIverksatt, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -111,11 +108,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.single()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                EventSubscription.BehandlingLukketEvent(
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
             assertEquals(AvsluttetUtenVedtak, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -135,11 +133,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                EventSubscription.BehandlingLukketEvent(
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_UTBETALING)
             assertEquals(VedtakFattet, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -161,11 +160,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                EventSubscription.BehandlingLukketEvent(
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING_REVURDERING)
             assertEquals(RevurdertVedtakAvvist, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -185,11 +185,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                EventSubscription.BehandlingLukketEvent(
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
             assertEquals(VedtakIverksatt, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -210,11 +211,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                EventSubscription.BehandlingLukketEvent(
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
             assertEquals(VedtakIverksatt, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)
@@ -238,11 +240,12 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
             val behandlingLukketEvent = observatør.behandlingLukketEventer.last()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
-            val forventetBehandlingEvent = EventSubscription.BehandlingLukketEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = forventetBehandlingId
-            )
+            val forventetBehandlingEvent =
+                EventSubscription.BehandlingLukketEvent(
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = forventetBehandlingId,
+                )
             assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
             assertEquals(VedtakIverksatt, sisteBehandling.tilstand)
             assertEquals(forventetBehandlingEvent, behandlingLukketEvent)

@@ -1,6 +1,5 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import java.time.LocalDate
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -9,14 +8,23 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import java.time.LocalDate
 
-sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
+sealed class Infotrygdperiode(
+    fom: LocalDate,
+    tom: LocalDate,
+) {
     val periode = fom til tom
 
     internal open fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje = Sykdomstidslinje()
+
     internal open fun utbetalingstidslinje(): Utbetalingstidslinje = Utbetalingstidslinje()
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, strategi: IAktivitetslogg.(Varselkode) -> Unit) {
+    internal fun valider(
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode,
+        strategi: IAktivitetslogg.(Varselkode) -> Unit,
+    ) {
         if (harBetaltTidligere(periode)) aktivitetslogg.strategi(Varselkode.RV_IT_37)
         if (harBetaltRettFør(periode)) aktivitetslogg.strategi(Varselkode.RV_IT_14)
         if (harOverlapp(aktivitetslogg, periode)) aktivitetslogg.varsel(Varselkode.RV_IT_3)
@@ -27,17 +35,21 @@ sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
         return periodeMellom.count() < Vedtaksperiode.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
     }
 
-    private fun harBetaltRettFør(other: Periode): Boolean {
-        return this.periode.erRettFør(other)
-    }
+    private fun harBetaltRettFør(other: Periode): Boolean = this.periode.erRettFør(other)
 
-    private fun harOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode): Boolean {
+    private fun harOverlapp(
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode,
+    ): Boolean {
         if (!this.periode.overlapperMed(periode)) return false
         aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", this.periode.start, this.periode.endInclusive)
         return true
     }
 
-    internal fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+    internal fun validerNyereOpplysninger(
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode,
+    ) {
         if (this.periode.start <= periode.endInclusive) return
         val periodeMellom = periode.endInclusive.datesUntil(this.periode.start).count()
         if (periodeMellom > MINIMALT_TILLAT_AVSTAND_NYERE_OPPLYSNINGER) return
@@ -56,12 +68,12 @@ sealed class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
     internal companion object {
         private const val MINIMALT_TILLAT_AVSTAND_NYERE_OPPLYSNINGER = 182
 
-        internal fun sorter(perioder: List<Infotrygdperiode>) =
-            perioder.sortedWith(compareBy({ it.periode.start }, { it.periode.endInclusive }, { it::class.simpleName }))
+        internal fun sorter(perioder: List<Infotrygdperiode>) = perioder.sortedWith(compareBy({ it.periode.start }, { it.periode.endInclusive }, { it::class.simpleName }))
 
-        internal fun List<Infotrygdperiode>.utbetalingsperioder(organisasjonsnummer: String? = null) = this
-            .filterIsInstance<Utbetalingsperiode>()
-            .filter { organisasjonsnummer == null || it.gjelder(organisasjonsnummer) }
-            .map { it.periode }
+        internal fun List<Infotrygdperiode>.utbetalingsperioder(organisasjonsnummer: String? = null) =
+            this
+                .filterIsInstance<Utbetalingsperiode>()
+                .filter { organisasjonsnummer == null || it.gjelder(organisasjonsnummer) }
+                .map { it.periode }
     }
 }

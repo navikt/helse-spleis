@@ -11,7 +11,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.micrometer.core.instrument.MeterRegistry
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.IOException
@@ -22,6 +21,7 @@ import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.hentPersonSnapshot
 import no.nav.helse.spleis.rest.dto.ApiPerson
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 private val logger = LoggerFactory.getLogger("no.nav.helse.spleis.rest.PersonApi")
 private val sikkerlogger = LoggerFactory.getLogger("tjenestekall")
@@ -34,7 +34,7 @@ internal fun Application.personApi(
     spekematClient: SpekematClient,
     hendelseDao: HendelseDao,
     personDao: PersonDao,
-    meterRegistry: MeterRegistry
+    meterRegistry: MeterRegistry,
 ) {
     routing {
         authenticate {
@@ -53,7 +53,7 @@ internal fun Application.personApi(
                                 hendelseDao = hendelseDao,
                                 ident = ident,
                                 callId = callId,
-                                meterRegistry = meterRegistry
+                                meterRegistry = meterRegistry,
                             )
                         call.respond(person)
                     } catch (err: IOException) {
@@ -61,7 +61,7 @@ internal fun Application.personApi(
                         sikkerlogger.warn(
                             "callId=$callId {} Kunne ikke bygge personsnapshot: ${err.javaClass.simpleName} - ${err.message}",
                             keyValue("fødselsnummer", ident),
-                            err
+                            err,
                         )
                         call.respond(HttpStatusCode.InternalServerError)
                     } catch (err: Exception) {
@@ -69,7 +69,7 @@ internal fun Application.personApi(
                         sikkerlogger.error(
                             "callId=$callId {} Kunne ikke bygge personsnapshot: ${err.javaClass.simpleName} - ${err.message}",
                             keyValue("fødselsnummer", ident),
-                            err
+                            err,
                         )
                         throw err
                     }
@@ -85,7 +85,7 @@ private fun hentPerson(
     hendelseDao: HendelseDao,
     ident: String,
     callId: String,
-    meterRegistry: MeterRegistry
+    meterRegistry: MeterRegistry,
 ): ApiPerson {
     val snapshot =
         hentPersonSnapshot(
@@ -94,18 +94,18 @@ private fun hentPerson(
             hendelseDao = hendelseDao,
             fnr = ident,
             callId = callId,
-            meterRegistry = meterRegistry
+            meterRegistry = meterRegistry,
         )
             ?: return ApiPerson(
                 fodselsnummer = ident,
                 arbeidsgivere = emptyList(),
                 dodsdato = null,
-                vilkarsgrunnlag = emptyList()
+                vilkarsgrunnlag = emptyList(),
             )
     return mapTilPerson(person = snapshot.person, fnr = ident, hendelser = snapshot.hendelser)
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private data class PersonRequest(
-    val fødselsnummer: String?
+    val fødselsnummer: String?,
 )

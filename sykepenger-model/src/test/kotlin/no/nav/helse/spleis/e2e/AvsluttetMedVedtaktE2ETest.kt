@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class AvsluttetMedVedtaktE2ETest : AbstractDslTest() {
-
     @Test
     fun `sender vedtak fattet med sykepengegrunnlag fastsatt i Infotrygd`() {
         medJSONPerson("/personer/infotrygdforlengelse.json", 334)

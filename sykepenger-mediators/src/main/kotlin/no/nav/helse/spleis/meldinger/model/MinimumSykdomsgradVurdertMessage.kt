@@ -6,21 +6,25 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
-internal class MinimumSykdomsgradVurdertMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
+internal class MinimumSykdomsgradVurdertMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : HendelseMessage(packet) {
     private val perioderMedMinimumSykdomsgradVurdertOK = packet["perioderMedMinimumSykdomsgradVurdertOk"].map(::asPeriode)
     private val perioderMedMinimumSykdomsgradVurdertIkkeOK = packet["perioderMedMinimumSykdomsgradVurdertIkkeOk"].map(::asPeriode)
 
-
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         mediator.behandle(
             this,
             MinimumSykdomsgradsvurderingMelding(
                 perioderMedMinimumSykdomsgradVurdertOK = perioderMedMinimumSykdomsgradVurdertOK.toSet(),
                 perioderMedMinimumSykdomsgradVurdertIkkeOK = perioderMedMinimumSykdomsgradVurdertIkkeOK.toSet(),
-                meldingsreferanseId = meldingsporing.id
+                meldingsreferanseId = meldingsporing.id,
             ),
-            context
+            context,
         )
     }
-
 }

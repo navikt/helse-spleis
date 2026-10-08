@@ -1,11 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
 import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
 import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
+import java.time.LocalDate
 
 data class Maksdatoresultat(
     val vurdertTilOgMed: LocalDate,
@@ -16,7 +16,7 @@ data class Maksdatoresultat(
     val oppholdsdager: List<Periode>,
     val avslåtteDager: List<Periode>,
     val maksdato: LocalDate,
-    val gjenståendeDager: Int
+    val gjenståendeDager: Int,
 ) {
     val antallForbrukteDager = forbrukteDager.sumOf { it.count() }
 
@@ -24,69 +24,76 @@ data class Maksdatoresultat(
     val fremdelesSykEtterTilstrekkeligOpphold = sisteNødvendigeOppholdsdag != null && oppholdsdager.isNotEmpty() && avslåtteDager.any { it.endInclusive > sisteNødvendigeOppholdsdag }
 
     enum class Bestemmelse { IKKE_VURDERT, ORDINÆR_RETT, BEGRENSET_RETT, SYTTI_ÅR }
-    companion object {
-        val IkkeVurdert = Maksdatoresultat(
-            vurdertTilOgMed = LocalDate.MIN,
-            bestemmelse = Bestemmelse.IKKE_VURDERT,
-            startdatoSykepengerettighet = null,
-            startdatoTreårsvindu = LocalDate.MIN,
-            forbrukteDager = emptyList(),
-            oppholdsdager = emptyList(),
-            avslåtteDager = emptyList(),
-            maksdato = LocalDate.MIN,
-            gjenståendeDager = 0
-        )
 
-        fun gjenopprett(dto: MaksdatoresultatInnDto) = Maksdatoresultat(
-            vurdertTilOgMed = dto.vurdertTilOgMed,
-            bestemmelse = when (dto.bestemmelse) {
-                MaksdatobestemmelseDto.IKKE_VURDERT -> Bestemmelse.IKKE_VURDERT
-                MaksdatobestemmelseDto.ORDINÆR_RETT -> Bestemmelse.ORDINÆR_RETT
-                MaksdatobestemmelseDto.BEGRENSET_RETT -> Bestemmelse.BEGRENSET_RETT
-                MaksdatobestemmelseDto.SYTTI_ÅR -> Bestemmelse.SYTTI_ÅR
-            },
-            startdatoSykepengerettighet = dto.startdatoSykepengerettighet,
-            startdatoTreårsvindu = dto.startdatoTreårsvindu,
-            forbrukteDager = dto.forbrukteDager.map { Periode.gjenopprett(it) },
-            oppholdsdager = dto.oppholdsdager.map { Periode.gjenopprett(it) },
-            avslåtteDager = dto.avslåtteDager.map { Periode.gjenopprett(it) },
-            maksdato = dto.maksdato,
-            gjenståendeDager = dto.gjenståendeDager
-        )
+    companion object {
+        val IkkeVurdert =
+            Maksdatoresultat(
+                vurdertTilOgMed = LocalDate.MIN,
+                bestemmelse = Bestemmelse.IKKE_VURDERT,
+                startdatoSykepengerettighet = null,
+                startdatoTreårsvindu = LocalDate.MIN,
+                forbrukteDager = emptyList(),
+                oppholdsdager = emptyList(),
+                avslåtteDager = emptyList(),
+                maksdato = LocalDate.MIN,
+                gjenståendeDager = 0,
+            )
+
+        fun gjenopprett(dto: MaksdatoresultatInnDto) =
+            Maksdatoresultat(
+                vurdertTilOgMed = dto.vurdertTilOgMed,
+                bestemmelse =
+                    when (dto.bestemmelse) {
+                        MaksdatobestemmelseDto.IKKE_VURDERT -> Bestemmelse.IKKE_VURDERT
+                        MaksdatobestemmelseDto.ORDINÆR_RETT -> Bestemmelse.ORDINÆR_RETT
+                        MaksdatobestemmelseDto.BEGRENSET_RETT -> Bestemmelse.BEGRENSET_RETT
+                        MaksdatobestemmelseDto.SYTTI_ÅR -> Bestemmelse.SYTTI_ÅR
+                    },
+                startdatoSykepengerettighet = dto.startdatoSykepengerettighet,
+                startdatoTreårsvindu = dto.startdatoTreårsvindu,
+                forbrukteDager = dto.forbrukteDager.map { Periode.gjenopprett(it) },
+                oppholdsdager = dto.oppholdsdager.map { Periode.gjenopprett(it) },
+                avslåtteDager = dto.avslåtteDager.map { Periode.gjenopprett(it) },
+                maksdato = dto.maksdato,
+                gjenståendeDager = dto.gjenståendeDager,
+            )
 
         fun oversettFra(maksdatoresultat: BeregnetMaksdato) =
             Maksdatoresultat(
                 vurdertTilOgMed = maksdatoresultat.vurdertTilOgMed,
-                bestemmelse = when (maksdatoresultat.bestemmelse) {
-                    BeregnetMaksdato.Bestemmelse.IKKE_VURDERT -> Bestemmelse.IKKE_VURDERT
-                    BeregnetMaksdato.Bestemmelse.ORDINÆR_RETT -> Bestemmelse.ORDINÆR_RETT
-                    BeregnetMaksdato.Bestemmelse.BEGRENSET_RETT -> Bestemmelse.BEGRENSET_RETT
-                    BeregnetMaksdato.Bestemmelse.SYTTI_ÅR -> Bestemmelse.SYTTI_ÅR
-                },
+                bestemmelse =
+                    when (maksdatoresultat.bestemmelse) {
+                        BeregnetMaksdato.Bestemmelse.IKKE_VURDERT -> Bestemmelse.IKKE_VURDERT
+                        BeregnetMaksdato.Bestemmelse.ORDINÆR_RETT -> Bestemmelse.ORDINÆR_RETT
+                        BeregnetMaksdato.Bestemmelse.BEGRENSET_RETT -> Bestemmelse.BEGRENSET_RETT
+                        BeregnetMaksdato.Bestemmelse.SYTTI_ÅR -> Bestemmelse.SYTTI_ÅR
+                    },
                 startdatoTreårsvindu = maksdatoresultat.startdatoTreårsvindu,
                 startdatoSykepengerettighet = maksdatoresultat.startdatoSykepengerettighet,
                 forbrukteDager = maksdatoresultat.forbrukteDager,
                 oppholdsdager = maksdatoresultat.oppholdsdager,
                 avslåtteDager = maksdatoresultat.avslåtteDager,
                 maksdato = maksdatoresultat.maksdato,
-                gjenståendeDager = maksdatoresultat.gjenståendeDager
+                gjenståendeDager = maksdatoresultat.gjenståendeDager,
             )
     }
 
-    fun dto() = MaksdatoresultatUtDto(
-        vurdertTilOgMed = vurdertTilOgMed,
-        bestemmelse = when (bestemmelse) {
-            Bestemmelse.IKKE_VURDERT -> MaksdatobestemmelseDto.IKKE_VURDERT
-            Bestemmelse.ORDINÆR_RETT -> MaksdatobestemmelseDto.ORDINÆR_RETT
-            Bestemmelse.BEGRENSET_RETT -> MaksdatobestemmelseDto.BEGRENSET_RETT
-            Bestemmelse.SYTTI_ÅR -> MaksdatobestemmelseDto.SYTTI_ÅR
-        },
-        startdatoSykepengerettighet = startdatoSykepengerettighet,
-        startdatoTreårsvindu = startdatoTreårsvindu,
-        forbrukteDager = forbrukteDager.map { it.dto() },
-        oppholdsdager = oppholdsdager.map { it.dto() },
-        avslåtteDager = avslåtteDager.map { it.dto() },
-        maksdato = maksdato,
-        gjenståendeDager = gjenståendeDager
-    )
+    fun dto() =
+        MaksdatoresultatUtDto(
+            vurdertTilOgMed = vurdertTilOgMed,
+            bestemmelse =
+                when (bestemmelse) {
+                    Bestemmelse.IKKE_VURDERT -> MaksdatobestemmelseDto.IKKE_VURDERT
+                    Bestemmelse.ORDINÆR_RETT -> MaksdatobestemmelseDto.ORDINÆR_RETT
+                    Bestemmelse.BEGRENSET_RETT -> MaksdatobestemmelseDto.BEGRENSET_RETT
+                    Bestemmelse.SYTTI_ÅR -> MaksdatobestemmelseDto.SYTTI_ÅR
+                },
+            startdatoSykepengerettighet = startdatoSykepengerettighet,
+            startdatoTreårsvindu = startdatoTreårsvindu,
+            forbrukteDager = forbrukteDager.map { it.dto() },
+            oppholdsdager = oppholdsdager.map { it.dto() },
+            avslåtteDager = avslåtteDager.map { it.dto() },
+            maksdato = maksdato,
+            gjenståendeDager = gjenståendeDager,
+        )
 }

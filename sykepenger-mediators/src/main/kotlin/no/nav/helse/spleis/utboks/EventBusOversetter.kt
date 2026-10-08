@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.utboks
 
-import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Behandlingsporing
@@ -19,127 +18,130 @@ import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterS
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattIInfotrygd
 import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import java.util.UUID
 
-internal class EventBusOversetter(private val eventBus: EventBus, private val message: HendelseMessage) {
+internal class EventBusOversetter(
+    private val eventBus: EventBus,
+    private val message: HendelseMessage,
+) {
     private val personidentifikator = Personidentifikator(message.meldingsporing.fødselsnummer)
 
     internal fun utboksmeldinger() =
         eventBus.events
-        .map { event ->
-            // ✅ Sier om det er ryddet opp i meldingen når det gjelder å kun sende "organisasjonsnummer" ut for Arbeidstaker
-            when (event) {
-                is EventSubscription.AnalytiskDatapakkeEvent -> mapAnalytiskDatapakke(event) // ✅ Meldingen inneholder ikke organisasjonsnummer
-                is EventSubscription.AvsluttetMedVedtakEvent -> mapAvsluttetMedVedtak(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                is EventSubscription.AvsluttetUtenVedtakEvent -> mapAvsluttetUtenVedtak(event) // ✅ Foreløpig (før Flex sender søknader i venteperioden) er denne arbeidstaker-spesifikk
-                is EventSubscription.BehandlingForkastetEvent -> mapBehandlingForkastet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                is EventSubscription.BehandlingLukketEvent -> mapBehandlingLukket(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                is EventSubscription.BehandlingOpprettetEvent -> mapBehandlingOpprettet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                is EventSubscription.FeriepengerUtbetaltEvent -> mapFeriepengerUtbetalt(event) // ✅ Er arbeidstaker-spesifikk
-                is EventSubscription.InntektsmeldingFørSøknadEvent -> mapInntektsmeldingFørSøknad(event) // ✅ Er arbeidstaker-spesifikk
-                is EventSubscription.InntektsmeldingHåndtertEvent -> mapInntektsmeldingHåndtert(event) // ✅ Er arbeidstaker-spesifikk
-                is EventSubscription.InntektsmeldingIkkeHåndtertEvent -> mapInntektsmeldingIkkeHåndtert(event) // ✅ Er arbeidstaker-spesifikk
-                is EventSubscription.OverlappendeInfotrygdperioder -> mapOverlappendeInfotrygdperioder(event)
-                is EventSubscription.OverstyringIgangsatt -> mapOverstyringIgangsatt(event)
-                is EventSubscription.PlanlagtAnnulleringEvent -> mapPlanlagtAnnullering(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                is EventSubscription.SkatteinntekterLagtTilGrunnEvent -> mapSkatteinntekterLagtTilGrunn(event) // ✅ Er arbeidstaker-spesifikk
-                is EventSubscription.SykefraværstilfelleIkkeFunnet -> mapSykefraværstilfelleIkkeFunnet(event) // ✅ Meldingen er på person-nivå, så den er grei
-                is EventSubscription.SøknadHåndtertEvent -> mapSøknadHåndtert(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                is EventSubscription.TrengerArbeidsgiveropplysningerEvent -> mapTrengerArbeidsgiveropplysninger(event) // ✅ Er arbeidstaker-spesifikk
-                is EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent -> mapTrengerIkkeArbeidsgiveropplysninger(event) // ✅ Er arbeidstaker-spesifikk
-                is EventSubscription.TrengerInntektsmeldingReplayEvent -> mapTrengerInntektsmeldingReplay(event) // ✅ Er arbeidstaker-spesifikk
-                is EventSubscription.UtbetalingAnnullertEvent -> mapUtbetalingAnnullert(event)
-                is EventSubscription.UtbetalingEndretEvent -> mapUtbetalingEndret(event)
-                is EventSubscription.UtbetalingUtbetaltEvent -> mapUtbetalingUtbetalt(event)
-                is EventSubscription.UtbetalingUtenUtbetalingEvent -> mapUtbetalingUtenUtbetaling(event)
-                is EventSubscription.UtkastTilVedtakEvent -> mapUtkastTilVedtak(event)
-                is EventSubscription.VedtaksperiodeAnnullertEvent -> mapVedtaksperiodeAnnullert(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                is EventSubscription.VedtaksperiodeEndretEvent -> mapVedtaksperiodeEndret(event)
-                is EventSubscription.VedtaksperiodeForkastetEvent -> mapVedtaksperiodeForkastet(event)
-                is EventSubscription.VedtaksperiodeIkkePåminnetEvent -> mapVedtaksperiodeIkkePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                is EventSubscription.VedtaksperiodeNyUtbetalingEvent -> mapVedtaksperiodeNyUtbetaling(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                is EventSubscription.VedtaksperiodeOpprettet -> mapVedtaksperiodeOpprettet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                is EventSubscription.VedtaksperiodePåminnetEvent -> mapVedtaksperiodePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
-                is EventSubscription.VedtaksperioderVenterEvent -> mapVedtaksperioderVenter(event)
-                is EventSubscription.SelvstendigIngenDagerIgjenEvent -> mapSelvstendigIngenDagerIgjen(event) // ✅ Er selvstendig-spesifikk, så den er grei
-                is EventSubscription.SelvstendigUtbetaltEtterVentetidEvent -> mapSelvstendigUtbetaltEtterVentetid(event) // ✅ Er selvstendig-spesifikk, så den er grei
-                is EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent -> mapTrengerInformasjonTilVilkårsprøving(event)
-                is EventSubscription.TrengerInformasjonTilBeregningEvent -> mapTrengerInformasjonTilBeregning(event)
-                is EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent -> mapTrengerInitiellHistorikkFraInfotrygd(event)
-                is EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent -> mapTrengerOppdatertHistorikkFraInfotrygd(event) // ✅ Meldingen er på person-nivå, så den er grei
-                is EventSubscription.UtbetalFeriepengerEvent -> mapUtbetalFeriepenger(event) // ✅ Er arbeidstaker-spesifikk
-                is EventSubscription.SimuleringEvent -> mapSimulering(event)
-                is EventSubscription.UtbetalingEvent -> mapUtbetaling(event)
-                is EventSubscription.GodkjenningEvent -> mapGodkjenning(event)
-                is EventSubscription.NyInformasjonIInfotrygdEvent -> mapNyInformasjonIInfotrygdEvent(event)
+            .map { event ->
+                // ✅ Sier om det er ryddet opp i meldingen når det gjelder å kun sende "organisasjonsnummer" ut for Arbeidstaker
+                when (event) {
+                    is EventSubscription.AnalytiskDatapakkeEvent -> mapAnalytiskDatapakke(event) // ✅ Meldingen inneholder ikke organisasjonsnummer
+                    is EventSubscription.AvsluttetMedVedtakEvent -> mapAvsluttetMedVedtak(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.AvsluttetUtenVedtakEvent -> mapAvsluttetUtenVedtak(event) // ✅ Foreløpig (før Flex sender søknader i venteperioden) er denne arbeidstaker-spesifikk
+                    is EventSubscription.BehandlingForkastetEvent -> mapBehandlingForkastet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.BehandlingLukketEvent -> mapBehandlingLukket(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.BehandlingOpprettetEvent -> mapBehandlingOpprettet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.FeriepengerUtbetaltEvent -> mapFeriepengerUtbetalt(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.InntektsmeldingFørSøknadEvent -> mapInntektsmeldingFørSøknad(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.InntektsmeldingHåndtertEvent -> mapInntektsmeldingHåndtert(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.InntektsmeldingIkkeHåndtertEvent -> mapInntektsmeldingIkkeHåndtert(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.OverlappendeInfotrygdperioder -> mapOverlappendeInfotrygdperioder(event)
+                    is EventSubscription.OverstyringIgangsatt -> mapOverstyringIgangsatt(event)
+                    is EventSubscription.PlanlagtAnnulleringEvent -> mapPlanlagtAnnullering(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.SkatteinntekterLagtTilGrunnEvent -> mapSkatteinntekterLagtTilGrunn(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.SykefraværstilfelleIkkeFunnet -> mapSykefraværstilfelleIkkeFunnet(event) // ✅ Meldingen er på person-nivå, så den er grei
+                    is EventSubscription.SøknadHåndtertEvent -> mapSøknadHåndtert(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.TrengerArbeidsgiveropplysningerEvent -> mapTrengerArbeidsgiveropplysninger(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent -> mapTrengerIkkeArbeidsgiveropplysninger(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.TrengerInntektsmeldingReplayEvent -> mapTrengerInntektsmeldingReplay(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.UtbetalingAnnullertEvent -> mapUtbetalingAnnullert(event)
+                    is EventSubscription.UtbetalingEndretEvent -> mapUtbetalingEndret(event)
+                    is EventSubscription.UtbetalingUtbetaltEvent -> mapUtbetalingUtbetalt(event)
+                    is EventSubscription.UtbetalingUtenUtbetalingEvent -> mapUtbetalingUtenUtbetaling(event)
+                    is EventSubscription.UtkastTilVedtakEvent -> mapUtkastTilVedtak(event)
+                    is EventSubscription.VedtaksperiodeAnnullertEvent -> mapVedtaksperiodeAnnullert(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.VedtaksperiodeEndretEvent -> mapVedtaksperiodeEndret(event)
+                    is EventSubscription.VedtaksperiodeForkastetEvent -> mapVedtaksperiodeForkastet(event)
+                    is EventSubscription.VedtaksperiodeIkkePåminnetEvent -> mapVedtaksperiodeIkkePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.VedtaksperiodeNyUtbetalingEvent -> mapVedtaksperiodeNyUtbetaling(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.VedtaksperiodeOpprettet -> mapVedtaksperiodeOpprettet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.VedtaksperiodePåminnetEvent -> mapVedtaksperiodePåminnet(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
+                    is EventSubscription.VedtaksperioderVenterEvent -> mapVedtaksperioderVenter(event)
+                    is EventSubscription.SelvstendigIngenDagerIgjenEvent -> mapSelvstendigIngenDagerIgjen(event) // ✅ Er selvstendig-spesifikk, så den er grei
+                    is EventSubscription.SelvstendigUtbetaltEtterVentetidEvent -> mapSelvstendigUtbetaltEtterVentetid(event) // ✅ Er selvstendig-spesifikk, så den er grei
+                    is EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent -> mapTrengerInformasjonTilVilkårsprøving(event)
+                    is EventSubscription.TrengerInformasjonTilBeregningEvent -> mapTrengerInformasjonTilBeregning(event)
+                    is EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent -> mapTrengerInitiellHistorikkFraInfotrygd(event)
+                    is EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent -> mapTrengerOppdatertHistorikkFraInfotrygd(event) // ✅ Meldingen er på person-nivå, så den er grei
+                    is EventSubscription.UtbetalFeriepengerEvent -> mapUtbetalFeriepenger(event) // ✅ Er arbeidstaker-spesifikk
+                    is EventSubscription.SimuleringEvent -> mapSimulering(event)
+                    is EventSubscription.UtbetalingEvent -> mapUtbetaling(event)
+                    is EventSubscription.GodkjenningEvent -> mapGodkjenning(event)
+                    is EventSubscription.NyInformasjonIInfotrygdEvent -> mapNyInformasjonIInfotrygdEvent(event)
+                }
             }
-        }
 
     private val Behandlingsporing.Yrkesaktivitet.somOrganisasjonsnummer
-        get() = when (this) {
-            Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
-            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> organisasjonsnummer
-            Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
-        }
+        get() =
+            when (this) {
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
+                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> organisasjonsnummer
+                Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+            }
 
     private val Behandlingsporing.Yrkesaktivitet.somYrkesaktivitetstype
-        get() = when (this) {
-            Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
-            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> "ARBEIDSTAKER"
-            Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
-        }
+        get() =
+            when (this) {
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "ARBEIDSLEDIG"
+                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> "ARBEIDSTAKER"
+                Behandlingsporing.Yrkesaktivitet.Frilans -> "FRILANS"
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
+            }
 
-    private fun mapInntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapInntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "inntektsmelding_før_søknad",
             mapOf(
                 "inntektsmeldingId" to event.inntektsmeldingId,
                 "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
-                "yrkesaktivitetstype" to "ARBEIDSTAKER"
-            )
+                "yrkesaktivitetstype" to "ARBEIDSTAKER",
+            ),
         )
-    }
 
-    private fun mapInntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapInntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "inntektsmelding_ikke_håndtert",
             mapOf(
                 "inntektsmeldingId" to event.meldingsreferanseId,
                 "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
                 "yrkesaktivitetstype" to "ARBEIDSTAKER",
-                "speilrelatert" to event.speilrelatert
-            )
+                "speilrelatert" to event.speilrelatert,
+            ),
         )
-    }
 
-    private fun mapInntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
-            "inntektsmelding_håndtert", mapOf(
-            "inntektsmeldingId" to event.meldingsreferanseId,
-            "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
-            "yrkesaktivitetstype" to "ARBEIDSTAKER",
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "vedtaksperioderMedSammeFørsteFraværsdag" to event.vedtaksperioderMedSammeFørsteFraværsdag.map { it }
+    private fun mapInntektsmeldingHåndtert(event: EventSubscription.InntektsmeldingHåndtertEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
+            "inntektsmelding_håndtert",
+            mapOf(
+                "inntektsmeldingId" to event.meldingsreferanseId,
+                "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
+                "yrkesaktivitetstype" to "ARBEIDSTAKER",
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "vedtaksperioderMedSammeFørsteFraværsdag" to event.vedtaksperioderMedSammeFørsteFraværsdag.map { it },
+            ),
         )
-        )
-    }
 
-    private fun mapSøknadHåndtert(event: EventSubscription.SøknadHåndtertEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapSøknadHåndtert(event: EventSubscription.SøknadHåndtertEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "søknad_håndtert",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
                 mapOf(
                     "søknadId" to event.meldingsreferanseId,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId
-                )
-            )
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                ),
+            ),
         )
-    }
 
-    private fun mapVedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapVedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: EventSubscription.VedtaksperiodeAnnullertEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "vedtaksperiode_annullert",
             byggMedYrkesaktivitet(
                 vedtaksperiodeAnnullertEvent.yrkesaktivitetssporing,
@@ -148,41 +150,41 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                     "tom" to vedtaksperiodeAnnullertEvent.tom,
                     "vedtaksperiodeId" to vedtaksperiodeAnnullertEvent.vedtaksperiodeId,
                     "behandlingId" to vedtaksperiodeAnnullertEvent.behandlingId,
-                )
-            )
+                ),
+            ),
         )
-    }
 
-    private fun mapOverlappendeInfotrygdperioder(event: EventSubscription.OverlappendeInfotrygdperioder): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapOverlappendeInfotrygdperioder(event: EventSubscription.OverlappendeInfotrygdperioder): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "overlappende_infotrygdperioder",
             mapOf(
                 "infotrygdhistorikkHendelseId" to event.infotrygdhistorikkHendelseId,
-                "vedtaksperioder" to event.overlappendeInfotrygdperioder.map {
-                    mapOf(
-                        "organisasjonsnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                        "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                        "vedtaksperiodeId" to it.vedtaksperiodeId,
-                        "vedtaksperiodeFom" to it.vedtaksperiodeFom,
-                        "vedtaksperiodeTom" to it.vedtaksperiodeTom,
-                        "vedtaksperiodetilstand" to it.vedtaksperiodetilstand,
-                        "kanForkastes" to it.kanForkastes,
-                        "infotrygdperioder" to it.infotrygdperioder.map { infotrygdperiode ->
-                            mapOf(
-                                "fom" to infotrygdperiode.fom,
-                                "tom" to infotrygdperiode.tom,
-                                "type" to infotrygdperiode.type,
-                                "organisasjonsnummer" to infotrygdperiode.orgnummer
-                            )
-                        }
-                    )
-                }
-            )
+                "vedtaksperioder" to
+                    event.overlappendeInfotrygdperioder.map {
+                        mapOf(
+                            "organisasjonsnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                            "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                            "vedtaksperiodeId" to it.vedtaksperiodeId,
+                            "vedtaksperiodeFom" to it.vedtaksperiodeFom,
+                            "vedtaksperiodeTom" to it.vedtaksperiodeTom,
+                            "vedtaksperiodetilstand" to it.vedtaksperiodetilstand,
+                            "kanForkastes" to it.kanForkastes,
+                            "infotrygdperioder" to
+                                it.infotrygdperioder.map { infotrygdperiode ->
+                                    mapOf(
+                                        "fom" to infotrygdperiode.fom,
+                                        "tom" to infotrygdperiode.tom,
+                                        "type" to infotrygdperiode.type,
+                                        "organisasjonsnummer" to infotrygdperiode.orgnummer,
+                                    )
+                                },
+                        )
+                    },
+            ),
         )
-    }
 
-    private fun mapVedtaksperiodePåminnet(event: EventSubscription.VedtaksperiodePåminnetEvent): Utboksmelding {
-        return utgåendeSomForkastesEtterSending(
+    private fun mapVedtaksperiodePåminnet(event: EventSubscription.VedtaksperiodePåminnetEvent): Utboksmelding =
+        utgåendeSomForkastesEtterSending(
             "vedtaksperiode_påminnet",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
@@ -192,27 +194,25 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                     "antallGangerPåminnet" to event.antallGangerPåminnet,
                     "tilstandsendringstidspunkt" to event.tilstandsendringstidspunkt,
                     "påminnelsestidspunkt" to event.påminnelsestidspunkt,
-                    "nestePåminnelsestidspunkt" to event.nestePåminnelsestidspunkt
-                )
-            )
+                    "nestePåminnelsestidspunkt" to event.nestePåminnelsestidspunkt,
+                ),
+            ),
         )
-    }
 
-    private fun mapVedtaksperiodeIkkePåminnet(event: EventSubscription.VedtaksperiodeIkkePåminnetEvent): Utboksmelding {
-        return utgåendeSomForkastesEtterSending(
+    private fun mapVedtaksperiodeIkkePåminnet(event: EventSubscription.VedtaksperiodeIkkePåminnetEvent): Utboksmelding =
+        utgåendeSomForkastesEtterSending(
             "vedtaksperiode_ikke_påminnet",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
                 mapOf(
                     "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "tilstand" to event.nåværendeTilstand
-                )
-            )
+                    "tilstand" to event.nåværendeTilstand,
+                ),
+            ),
         )
-    }
 
-    private fun mapUtbetalingAnnullert(event: EventSubscription.UtbetalingAnnullertEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapUtbetalingAnnullert(event: EventSubscription.UtbetalingAnnullertEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "utbetaling_annullert",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
@@ -225,13 +225,12 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 "epost" to event.saksbehandlerEpost,
                 "ident" to event.saksbehandlerIdent,
                 "arbeidsgiverFagsystemId" to event.arbeidsgiverFagsystemId,
-                "personFagsystemId" to event.personFagsystemId
-            )
+                "personFagsystemId" to event.personFagsystemId,
+            ),
         )
-    }
 
-    private fun mapPlanlagtAnnullering(event: EventSubscription.PlanlagtAnnulleringEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapPlanlagtAnnullering(event: EventSubscription.PlanlagtAnnulleringEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "planlagt_annullering",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
@@ -241,14 +240,13 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                     "tom" to event.tom,
                     "ident" to event.saksbehandlerIdent,
                     "årsaker" to event.årsaker,
-                    "begrunnelse" to event.begrunnelse
-                )
-            )
+                    "begrunnelse" to event.begrunnelse,
+                ),
+            ),
         )
-    }
 
-    private fun mapUtbetalingEndret(event: EventSubscription.UtbetalingEndretEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapUtbetalingEndret(event: EventSubscription.UtbetalingEndretEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "utbetaling_endret",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
@@ -259,43 +257,42 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 "gjeldendeStatus" to event.gjeldendeStatus,
                 "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
                 "personOppdrag" to event.personOppdrag.tilJsonMap(),
-                "korrelasjonsId" to event.korrelasjonsId
-            )
+                "korrelasjonsId" to event.korrelasjonsId,
+            ),
         )
-    }
 
     private fun EventSubscription.UtbetalingEndretEvent.OppdragEventDetaljer.tilJsonMap() =
         mapOf(
             "fagsystemId" to this.fagsystemId,
             "mottaker" to this.mottaker,
             "nettoBeløp" to this.nettoBeløp,
-            "linjer" to this.linjer.map {
-                it.tilJsonMap()
-            }
+            "linjer" to
+                this.linjer.map {
+                    it.tilJsonMap()
+                },
         )
 
     private fun EventSubscription.UtbetalingEndretEvent.OppdragEventDetaljer.OppdragEventLinjeDetaljer.tilJsonMap() =
         mapOf(
             "fom" to this.fom,
             "tom" to this.tom,
-            "totalbeløp" to this.totalbeløp
+            "totalbeløp" to this.totalbeløp,
         )
 
-    private fun mapVedtaksperiodeNyUtbetaling(event: EventSubscription.VedtaksperiodeNyUtbetalingEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapVedtaksperiodeNyUtbetaling(event: EventSubscription.VedtaksperiodeNyUtbetalingEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "vedtaksperiode_ny_utbetaling",
             byggMedYrkesaktivitet(
                 event.yrkesaktivitetssporing,
                 mapOf(
                     "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "utbetalingId" to event.utbetalingId
-                )
-            )
+                    "utbetalingId" to event.utbetalingId,
+                ),
+            ),
         )
-    }
 
-    private fun mapOverstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapOverstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "overstyring_igangsatt",
             mapOf(
                 "revurderingId" to UUID.randomUUID(),
@@ -305,22 +302,23 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 "periodeForEndringTom" to event.periodeForEndring.endInclusive,
                 "årsak" to event.årsak,
                 "typeEndring" to event.typeEndring,
-                "berørtePerioder" to event.berørtePerioder.map {
-                    mapOf(
-                        "vedtaksperiodeId" to it.vedtaksperiodeId,
-                        "skjæringstidspunkt" to it.skjæringstidspunkt,
-                        "periodeFom" to it.periode.start,
-                        "periodeTom" to it.periode.endInclusive,
-                        "orgnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                        "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                        "typeEndring" to it.typeEndring,
-                    )
-                }
-            ))
-    }
+                "berørtePerioder" to
+                    event.berørtePerioder.map {
+                        mapOf(
+                            "vedtaksperiodeId" to it.vedtaksperiodeId,
+                            "skjæringstidspunkt" to it.skjæringstidspunkt,
+                            "periodeFom" to it.periode.start,
+                            "periodeTom" to it.periode.endInclusive,
+                            "orgnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                            "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                            "typeEndring" to it.typeEndring,
+                        )
+                    },
+            ),
+        )
 
-    private fun mapUtbetalingUtbetalt(event: EventSubscription.UtbetalingUtbetaltEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapUtbetalingUtbetalt(event: EventSubscription.UtbetalingUtbetaltEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "utbetaling_utbetalt",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
@@ -340,15 +338,15 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 "automatiskBehandling" to event.automatiskBehandling,
                 "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
                 "personOppdrag" to event.personOppdrag.tilJsonMap(),
-                "utbetalingsdager" to event.utbetalingsdager.map {
-                    it.tilJsonMap()
-                }
-            )
+                "utbetalingsdager" to
+                    event.utbetalingsdager.map {
+                        it.tilJsonMap()
+                    },
+            ),
         )
-    }
 
-    private fun mapUtbetalingUtenUtbetaling(event: EventSubscription.UtbetalingUtenUtbetalingEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapUtbetalingUtenUtbetaling(event: EventSubscription.UtbetalingUtenUtbetalingEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "utbetaling_uten_utbetaling",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
@@ -368,12 +366,12 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 "automatiskBehandling" to event.automatiskBehandling,
                 "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
                 "personOppdrag" to event.personOppdrag.tilJsonMap(),
-                "utbetalingsdager" to event.utbetalingsdager.map {
-                    it.tilJsonMap()
-                }
-            )
+                "utbetalingsdager" to
+                    event.utbetalingsdager.map {
+                        it.tilJsonMap()
+                    },
+            ),
         )
-    }
 
     private fun EventSubscription.OppdragEventDetaljer.OppdragEventLinjeDetaljer.tilJsonMap() =
         mapOf(
@@ -395,445 +393,17 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
             "stønadsdager" to this.stønadsdager,
             "fom" to this.fom,
             "tom" to this.tom,
-            "linjer" to this.linjer.map {
-                it.tilJsonMap()
-            }
+            "linjer" to
+                this.linjer.map {
+                    it.tilJsonMap()
+                },
         )
 
     private fun EventSubscription.Utbetalingsdag.tilJsonMap() =
         mapOf(
             "dato" to this.dato,
-            "type" to when (this.type) {
-                Dagtype.ArbeidsgiverperiodeDag -> "ArbeidsgiverperiodeDag"
-                Dagtype.NavDag -> "NavDag"
-                Dagtype.NavHelgDag -> "NavHelgDag"
-                Dagtype.Arbeidsdag -> "Arbeidsdag"
-                Dagtype.Fridag -> "Fridag"
-                Dagtype.AvvistDag -> "AvvistDag"
-                Dagtype.UkjentDag -> "UkjentDag"
-                Dagtype.ForeldetDag -> "ForeldetDag"
-                Dagtype.Permisjonsdag -> "Permisjonsdag"
-                Dagtype.Feriedag -> "Feriedag"
-                Dagtype.ArbeidIkkeGjenopptattDag -> "ArbeidIkkeGjenopptattDag"
-                Dagtype.AndreYtelser -> "AndreYtelser"
-                Dagtype.Ventetidsdag -> "Ventetidsdag"
-            },
-            "beløpTilArbeidsgiver" to this.beløpTilArbeidsgiver,
-            "beløpTilBruker" to this.beløpTilBruker,
-            "sykdomsgrad" to this.sykdomsgrad,
-            "begrunnelser" to this.begrunnelser?.map {
-                when (it) {
-                    EksternBegrunnelseDTO.SykepengedagerOppbrukt -> "SykepengedagerOppbrukt"
-                    EksternBegrunnelseDTO.SykepengedagerOppbruktOver67 -> "SykepengedagerOppbruktOver67"
-                    EksternBegrunnelseDTO.MinimumInntekt -> "MinimumInntekt"
-                    EksternBegrunnelseDTO.MinimumInntektOver67 -> "MinimumInntektOver67"
-                    EksternBegrunnelseDTO.EgenmeldingUtenforArbeidsgiverperiode -> "EgenmeldingUtenforArbeidsgiverperiode"
-                    EksternBegrunnelseDTO.AndreYtelserAap -> "AndreYtelserAap"
-                    EksternBegrunnelseDTO.AndreYtelserDagpenger -> "AndreYtelserDagpenger"
-                    EksternBegrunnelseDTO.AndreYtelserForeldrepenger -> "AndreYtelserForeldrepenger"
-                    EksternBegrunnelseDTO.AndreYtelserOmsorgspenger -> "AndreYtelserOmsorgspenger"
-                    EksternBegrunnelseDTO.AndreYtelserOpplaringspenger -> "AndreYtelserOpplaringspenger"
-                    EksternBegrunnelseDTO.AndreYtelserPleiepenger -> "AndreYtelserPleiepenger"
-                    EksternBegrunnelseDTO.AndreYtelserSvangerskapspenger -> "AndreYtelserSvangerskapspenger"
-                    EksternBegrunnelseDTO.MinimumSykdomsgrad -> "MinimumSykdomsgrad"
-                    EksternBegrunnelseDTO.EtterDødsdato -> "EtterDødsdato"
-                    EksternBegrunnelseDTO.ManglerMedlemskap -> "ManglerMedlemskap"
-                    EksternBegrunnelseDTO.ManglerOpptjening -> "ManglerOpptjening"
-                    EksternBegrunnelseDTO.Over70 -> "Over70"
-                    EksternBegrunnelseDTO.MeldingTilNavDagUtenforVentetid -> "MeldingTilNavDagUtenforVentetid"
-                    EksternBegrunnelseDTO.AvslåttMeldingTilNavDag -> "AvslåttMeldingTilNavDag"
-                }
-            }
-        )
-
-    private fun mapFeriepengerUtbetalt(event: EventSubscription.FeriepengerUtbetaltEvent): Utboksmelding =
-        utgåendeSomBeholdesEtterSending(
-            "feriepenger_utbetalt",
-            mapOf(
-                "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
-                "yrkesaktivitetstype" to "ARBEIDSTAKER",
-                "fom" to event.fom,
-                "tom" to event.tom,
-                "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
-                "personOppdrag" to event.personOppdrag.tilJsonMap()
-            )
-        )
-
-    private fun EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.tilJsonMap() =
-        mapOf(
-            "fagsystemId" to this.fagsystemId,
-            "mottaker" to this.mottaker,
-            "totalbeløp" to this.totalbeløp
-        )
-
-    private fun mapVedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
-            "vedtaksperiode_endret",
-            mapOf(
-                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "behandlingId" to event.behandlingId,
-                "gjeldendeTilstand" to event.gjeldendeTilstand,
-                "forrigeTilstand" to event.forrigeTilstand,
-                "hendelser" to event.hendelser,
-                "makstid" to event.makstid,
-                "fom" to event.fom,
-                "tom" to event.tom,
-                "skjæringstidspunkt" to event.skjæringstidspunkt
-            )
-        )
-    }
-
-    private fun mapVedtaksperioderVenter(event: EventSubscription.VedtaksperioderVenterEvent): Utboksmelding {
-        return utgåendeSomForkastesEtterSending(
-            "vedtaksperioder_venter", mapOf(
-            "vedtaksperioder" to event.vedtaksperioder.map { event ->
-                mapOf(
-                    "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                    "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId,
-                    "skjæringstidspunkt" to event.skjæringstidspunkt,
-                    "hendelser" to event.hendelser,
-                    "ventetSiden" to event.ventetSiden,
-                    "venterTil" to event.venterTil,
-                    "venterPå" to mapOf(
-                        "vedtaksperiodeId" to event.venterPå.vedtaksperiodeId,
-                        "skjæringstidspunkt" to event.venterPå.skjæringstidspunkt,
-                        "organisasjonsnummer" to event.venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                        "yrkesaktivitetstype" to event.venterPå.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                        "venteårsak" to mapOf(
-                            "hva" to event.venterPå.venteårsak.hva,
-                            "hvorfor" to event.venterPå.venteårsak.hvorfor
-                        )
-                    )
-                )
-            }
-        ))
-    }
-
-    private fun mapVedtaksperiodeOpprettet(event: EventSubscription.VedtaksperiodeOpprettet): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
-            "vedtaksperiode_opprettet",
-            byggMedYrkesaktivitet(
-                event.yrkesaktivitetssporing,
-                mapOf(
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "skjæringstidspunkt" to event.skjæringstidspunkt,
-                    "fom" to event.periode.start,
-                    "tom" to event.periode.endInclusive
-                )
-            )
-        )
-    }
-
-    private fun mapVedtaksperiodeForkastet(event: EventSubscription.VedtaksperiodeForkastetEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
-            "vedtaksperiode_forkastet",
-            mapOf(
-                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                "vedtaksperiodeId" to event.vedtaksperiodeId,
-                "tilstand" to event.gjeldendeTilstand,
-                "hendelser" to event.hendelser,
-                "fom" to event.fom,
-                "tom" to event.tom,
-                "trengerArbeidsgiveropplysninger" to event.trengerArbeidsgiveropplysninger,
-                "speilrelatert" to event.speilrelatert,
-                "sykmeldingsperioder" to event.sykmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                }
-            ))
-    }
-
-    private fun mapBehandlingOpprettet(event: EventSubscription.BehandlingOpprettetEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
-            "behandling_opprettet",
-            byggMedYrkesaktivitet(
-                event.yrkesaktivitetssporing,
-                mapOf(
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId,
-                    "søknadIder" to event.søknadIder,
-                    "type" to event.type,
-                    "fom" to event.fom,
-                    "tom" to event.tom,
-                    "kilde" to mapOf(
-                        "meldingsreferanseId" to event.kilde.meldingsreferanseId,
-                        "innsendt" to event.kilde.innsendt,
-                        "registrert" to event.kilde.registert,
-                        "avsender" to event.kilde.avsender
-                    )
-                )
-            )
-        )
-    }
-
-    private fun mapBehandlingForkastet(event: EventSubscription.BehandlingForkastetEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
-            "behandling_forkastet",
-            byggMedYrkesaktivitet(
-                event.yrkesaktivitetssporing,
-                mapOf(
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId,
-                    "automatiskBehandling" to event.automatiskBehandling
-                )
-            )
-        )
-    }
-
-    private fun mapBehandlingLukket(event: EventSubscription.BehandlingLukketEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
-            "behandling_lukket",
-            byggMedYrkesaktivitet(
-                event.yrkesaktivitetssporing,
-                mapOf(
-                    "vedtaksperiodeId" to event.vedtaksperiodeId,
-                    "behandlingId" to event.behandlingId
-                )
-            )
-        )
-    }
-
-    private fun mapTrengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent): Utboksmelding {
-        val behov = listOfNotNull(
-            Behov(Behov.Behovstype.InntekterForSykepengegrunnlag, mapOf(
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "beregningStart" to event.beregningsperiodeForSykepengegrunnlagsvurdering.start,
-                "beregningSlutt" to event.beregningsperiodeForSykepengegrunnlagsvurdering.slutt
-            )),
-            Behov(Behov.Behovstype.InntekterForOpptjeningsvurdering, mapOf(
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "beregningStart" to event.beregningsperiodeForOpptjeningsvurdering.start,
-                "beregningSlutt" to event.beregningsperiodeForOpptjeningsvurdering.slutt
-            )),
-            Behov(Behov.Behovstype.Arbeidsforhold, mapOf(
-                "skjæringstidspunkt" to event.skjæringstidspunkt
-            )),
-            Behov(Behov.Behovstype.Medlemskap, mapOf(
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "medlemskapPeriodeFom" to event.periodeForMedlemskapsvurdering.start,
-                "medlemskapPeriodeTom" to event.periodeForMedlemskapsvurdering.endInclusive
-            )
-            ),
-            Behov(
-                Behov.Behovstype.Forsikringsvurdering, mapOf(
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "spesielleYrkesgrupper" to event.spesielleYrkesgrupper
-            )
-            ).takeIf { event.yrkesaktivitetssporing.somYrkesaktivitetstype == "SELVSTENDIG" },
-            Behov(
-                Behov.Behovstype.Opptjeningsvurdering, mapOf(
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "arbeidssituasjon" to when (event.yrkesaktivitetssporing) {
-                    Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "Arbeidsledig"
-                    is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> "Arbeidstaker"
-                    Behandlingsporing.Yrkesaktivitet.Frilans -> "Frilans"
-                    Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SelvstendigNæringsdrivende"
-                }
-            )
-            )
-        )
-
-        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
-        return behov.utgåendeBehov(message.meldingsporing.id,mapOf(
-            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "behandlingId" to event.behandlingId
-        ))
-    }
-
-    private fun mapTrengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent): Utboksmelding {
-        val behov = listOfNotNull(
-            Behov(Behov.Behovstype.Foreldrepenger, mapOf(
-                "foreldrepengerFom" to event.periodeForForeldrepenger.start,
-                "foreldrepengerTom" to event.periodeForForeldrepenger.endInclusive
-            )),
-            Behov(Behov.Behovstype.Pleiepenger, mapOf(
-                "pleiepengerFom" to event.periodeForPleiepenger.start,
-                "pleiepengerTom" to event.periodeForPleiepenger.endInclusive
-            )),
-            Behov(Behov.Behovstype.Omsorgspenger, mapOf(
-                "omsorgspengerFom" to event.periodeForOmsorgspenger.start,
-                "omsorgspengerTom" to event.periodeForOmsorgspenger.endInclusive
-            )),
-            Behov(Behov.Behovstype.Opplæringspenger, mapOf(
-                "opplæringspengerFom" to event.periodeForOpplæringspenger.start,
-                "opplæringspengerTom" to event.periodeForOpplæringspenger.endInclusive
-            )),
-            Behov(Behov.Behovstype.Institusjonsopphold, mapOf(
-                "institusjonsoppholdFom" to event.periodeForInstitusjonsopphold.start,
-                "institusjonsoppholdTom" to event.periodeForInstitusjonsopphold.endInclusive
-            )),
-            Behov(Behov.Behovstype.Arbeidsavklaringspenger, mapOf(
-                "periodeFom" to event.periodeForArbeidsavklaringspenger.start,
-                "periodeTom" to event.periodeForArbeidsavklaringspenger.endInclusive
-            )),
-            Behov(Behov.Behovstype.Dagpenger, mapOf(
-                "periodeFom" to event.periodeForDagpenger.start,
-                "periodeTom" to event.periodeForDagpenger.endInclusive
-            )),
-            Behov(Behov.Behovstype.InntekterForBeregning, mapOf(
-                "fom" to event.beregningsperiode.start,
-                "tom" to event.beregningsperiode.endInclusive
-            )),
-            if (Toggle.GraderteAndreYtelser.enabled) {
-                Behov(
-                    Behov.Behovstype.GraderteAndreYtelserForBeregning, mapOf(
-                    "fom" to event.beregningsperiode.start,
-                    "tom" to event.beregningsperiode.endInclusive
-                )
-                )
-            } else null,
-            Behov(
-                Behov.Behovstype.OpptjeningsvurderingResultat, mapOf(
-                    "opptjeningsvurderingId" to event.opptjeningsvurderingId
-                )
-            ),
-            event.forsikringsvurderingId?.let { forsikringsvurderingId ->
-                Behov(Behov.Behovstype.ForsikringsvurderingResultat, mapOf(
-                    "forsikringsvurderingId" to forsikringsvurderingId,
-                ))
-            },
-        )
-
-        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
-        return behov.utgåendeBehov(message.meldingsporing.id,mapOf(
-            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "behandlingId" to event.behandlingId
-        ))
-    }
-
-    private fun mapTrengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent): Utboksmelding {
-        return listOf(Behov(Behov.Behovstype.Sykepengehistorikk, mapOf(
-            "historikkFom" to event.periode.start,
-            "historikkTom" to event.periode.endInclusive,
-        ))).utgåendeBehov(message.meldingsporing.id, mapOf(
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype
-        ))
-    }
-
-    private fun mapTrengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent): Utboksmelding {
-        return listOf(Behov(Behov.Behovstype.Sykepengehistorikk, mapOf(
-            "historikkFom" to event.periode.start,
-            "historikkTom" to event.periode.endInclusive
-        ))).utgåendeBehov(message.meldingsporing.id)
-    }
-
-    private fun mapUtbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent): Utboksmelding {
-        return listOf(Behov(Behov.Behovstype.Feriepengeutbetaling, mapOf(
-            "mottaker" to event.mottaker,
-            "fagområde" to event.fagområde,
-            "linjer" to listOf(mapOf(
-                "fom" to "${event.linje.periode.start}",
-                "tom" to "${event.linje.periode.endInclusive}",
-                "satstype" to event.linje.satstype,
-                "sats" to event.linje.sats,
-                "endringskode" to event.linje.endringskode,
-                "delytelseId" to event.linje.delytelseId,
-                "refDelytelseId" to event.linje.refDelytelseId,
-                "refFagsystemId" to event.linje.refFagsystemId,
-                "statuskode" to event.linje.statuskode,
-                "datoStatusFom" to event.linje.datoStatusFom?.toString(),
-                "klassekode" to event.linje.klassekode
-            )),
-            "fagsystemId" to event.fagsystemId,
-            "endringskode" to event.endringskode,
-            "saksbehandler" to event.saksbehandler
-        ))).utgåendeBehov(message.meldingsporing.id,mapOf(
-            "yrkesaktivitetstype" to "ARBEIDSTAKER",
-            "organisasjonsnummer" to event.organisasjonsnummer,
-            "utbetalingId" to event.utbetalingId,
-            "fagsystemId" to event.fagsystemId
-        ))
-    }
-
-    private fun EventSubscription.Oppdragsdetaljer.somMap(saksbehandler: String): Map<String, Any> = mapOf(
-        "mottaker" to mottaker,
-        "fagområde" to fagområde,
-        "linjer" to linjer.map { linje -> mapOf(
-            "fom" to linje.periode.start,
-            "tom" to linje.periode.endInclusive,
-            "satstype" to linje.satstype,
-            "sats" to linje.sats,
-            "grad" to linje.grad.toDouble(), // backwards-compatibility mot andre systemer som forventer double: må gjennomgås
-            "stønadsdager" to linje.stønadsdager,
-            "totalbeløp" to linje.totalbeløp,
-            "endringskode" to linje.endringskode,
-            "delytelseId" to linje.delytelseId,
-            "refDelytelseId" to linje.refDelytelseId,
-            "refFagsystemId" to linje.refFagsystemId,
-            "statuskode" to linje.statuskode,
-            "datoStatusFom" to linje.datoStatusFom,
-            "klassekode" to linje.klassekode,
-            "datoKlassifikFom" to linje.datoKlassifikFom
-        ) },
-        "fagsystemId" to fagsystemId,
-        "endringskode" to endringskode,
-        "saksbehandler" to saksbehandler
-    ).let { when (val maksdatoen = maksdato) {
-        null -> it
-        else -> it.plus("maksdato" to maksdatoen)
-    } }
-
-    private fun mapUtbetaling(event: EventSubscription.UtbetalingEvent): Utboksmelding {
-        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
-        return listOf(Behov(Behov.Behovstype.Utbetaling, event.oppdragsdetaljer.somMap(event.saksbehandler))).utgåendeBehov(message.meldingsporing.id,mapOf(
-            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "behandlingId" to event.behandlingId,
-            "utbetalingId" to event.utbetalingId,
-            "fagsystemId" to event.oppdragsdetaljer.fagsystemId
-        ))
-    }
-
-    private fun mapSimulering(event: EventSubscription.SimuleringEvent): Utboksmelding {
-        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
-        return listOf(Behov(Behov.Behovstype.Simulering, event.oppdragsdetaljer.somMap(event.saksbehandler))).utgåendeBehov(message.meldingsporing.id,mapOf(
-            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "behandlingId" to event.behandlingId,
-            "utbetalingId" to event.utbetalingId,
-            "fagsystemId" to event.oppdragsdetaljer.fagsystemId
-        ))
-    }
-
-    private fun mapGodkjenning(event: EventSubscription.GodkjenningEvent): Utboksmelding {
-        fun Behandlingsporing.Yrkesaktivitet.tilBehovMap(): Map<String, String> {
-            return when (this) {
-                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> {
-                    mapOf(
-                        "yrkesaktivitetstype" to this.somYrkesaktivitetstype,
-                        "organisasjonsnummer" to this.organisasjonsnummer
-                    )
-                }
-
-                Behandlingsporing.Yrkesaktivitet.Selvstendig,
-                Behandlingsporing.Yrkesaktivitet.Frilans,
-                Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> {
-                    mapOf(
-                        "yrkesaktivitetstype" to this.somYrkesaktivitetstype,
-                    )
-                }
-            }
-        }
-
-        fun Utbetalingsdag.tilBehovMap() =
-            mapOf(
-                "dato" to "${this.dato}",
-                "type" to when (this.type) {
+            "type" to
+                when (this.type) {
                     Dagtype.ArbeidsgiverperiodeDag -> "ArbeidsgiverperiodeDag"
                     Dagtype.NavDag -> "NavDag"
                     Dagtype.NavHelgDag -> "NavHelgDag"
@@ -848,11 +418,11 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                     Dagtype.AndreYtelser -> "AndreYtelser"
                     Dagtype.Ventetidsdag -> "Ventetidsdag"
                 },
-                "beløpTilArbeidsgiver" to this.beløpTilArbeidsgiver,
-                "beløpTilBruker" to this.beløpTilBruker,
-                "sykdomsgrad" to this.sykdomsgrad,
-                "dekningsgrad" to this.dekningsgrad,
-                "begrunnelser" to (this.begrunnelser?.map {
+            "beløpTilArbeidsgiver" to this.beløpTilArbeidsgiver,
+            "beløpTilBruker" to this.beløpTilBruker,
+            "sykdomsgrad" to this.sykdomsgrad,
+            "begrunnelser" to
+                this.begrunnelser?.map {
                     when (it) {
                         EksternBegrunnelseDTO.SykepengedagerOppbrukt -> "SykepengedagerOppbrukt"
                         EksternBegrunnelseDTO.SykepengedagerOppbruktOver67 -> "SykepengedagerOppbruktOver67"
@@ -874,105 +444,639 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                         EksternBegrunnelseDTO.MeldingTilNavDagUtenforVentetid -> "MeldingTilNavDagUtenforVentetid"
                         EksternBegrunnelseDTO.AvslåttMeldingTilNavDag -> "AvslåttMeldingTilNavDag"
                     }
-                } ?: emptyList())
+                },
+        )
+
+    private fun mapFeriepengerUtbetalt(event: EventSubscription.FeriepengerUtbetaltEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
+            "feriepenger_utbetalt",
+            mapOf(
+                "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
+                "yrkesaktivitetstype" to "ARBEIDSTAKER",
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag.tilJsonMap(),
+                "personOppdrag" to event.personOppdrag.tilJsonMap(),
+            ),
+        )
+
+    private fun EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.tilJsonMap() =
+        mapOf(
+            "fagsystemId" to this.fagsystemId,
+            "mottaker" to this.mottaker,
+            "totalbeløp" to this.totalbeløp,
+        )
+
+    private fun mapVedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
+            "vedtaksperiode_endret",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "gjeldendeTilstand" to event.gjeldendeTilstand,
+                "forrigeTilstand" to event.forrigeTilstand,
+                "hendelser" to event.hendelser,
+                "makstid" to event.makstid,
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+            ),
+        )
+
+    private fun mapVedtaksperioderVenter(event: EventSubscription.VedtaksperioderVenterEvent): Utboksmelding =
+        utgåendeSomForkastesEtterSending(
+            "vedtaksperioder_venter",
+            mapOf(
+                "vedtaksperioder" to
+                    event.vedtaksperioder.map { event ->
+                        mapOf(
+                            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                            "vedtaksperiodeId" to event.vedtaksperiodeId,
+                            "behandlingId" to event.behandlingId,
+                            "skjæringstidspunkt" to event.skjæringstidspunkt,
+                            "hendelser" to event.hendelser,
+                            "ventetSiden" to event.ventetSiden,
+                            "venterTil" to event.venterTil,
+                            "venterPå" to
+                                mapOf(
+                                    "vedtaksperiodeId" to event.venterPå.vedtaksperiodeId,
+                                    "skjæringstidspunkt" to event.venterPå.skjæringstidspunkt,
+                                    "organisasjonsnummer" to event.venterPå.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                                    "yrkesaktivitetstype" to event.venterPå.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                                    "venteårsak" to
+                                        mapOf(
+                                            "hva" to event.venterPå.venteårsak.hva,
+                                            "hvorfor" to event.venterPå.venteårsak.hvorfor,
+                                        ),
+                                ),
+                        )
+                    },
+            ),
+        )
+
+    private fun mapVedtaksperiodeOpprettet(event: EventSubscription.VedtaksperiodeOpprettet): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
+            "vedtaksperiode_opprettet",
+            byggMedYrkesaktivitet(
+                event.yrkesaktivitetssporing,
+                mapOf(
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "skjæringstidspunkt" to event.skjæringstidspunkt,
+                    "fom" to event.periode.start,
+                    "tom" to event.periode.endInclusive,
+                ),
+            ),
+        )
+
+    private fun mapVedtaksperiodeForkastet(event: EventSubscription.VedtaksperiodeForkastetEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
+            "vedtaksperiode_forkastet",
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "tilstand" to event.gjeldendeTilstand,
+                "hendelser" to event.hendelser,
+                "fom" to event.fom,
+                "tom" to event.tom,
+                "trengerArbeidsgiveropplysninger" to event.trengerArbeidsgiveropplysninger,
+                "speilrelatert" to event.speilrelatert,
+                "sykmeldingsperioder" to
+                    event.sykmeldingsperioder.map {
+                        mapOf(
+                            "fom" to it.start,
+                            "tom" to it.endInclusive,
+                        )
+                    },
+            ),
+        )
+
+    private fun mapBehandlingOpprettet(event: EventSubscription.BehandlingOpprettetEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
+            "behandling_opprettet",
+            byggMedYrkesaktivitet(
+                event.yrkesaktivitetssporing,
+                mapOf(
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                    "søknadIder" to event.søknadIder,
+                    "type" to event.type,
+                    "fom" to event.fom,
+                    "tom" to event.tom,
+                    "kilde" to
+                        mapOf(
+                            "meldingsreferanseId" to event.kilde.meldingsreferanseId,
+                            "innsendt" to event.kilde.innsendt,
+                            "registrert" to event.kilde.registert,
+                            "avsender" to event.kilde.avsender,
+                        ),
+                ),
+            ),
+        )
+
+    private fun mapBehandlingForkastet(event: EventSubscription.BehandlingForkastetEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
+            "behandling_forkastet",
+            byggMedYrkesaktivitet(
+                event.yrkesaktivitetssporing,
+                mapOf(
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                    "automatiskBehandling" to event.automatiskBehandling,
+                ),
+            ),
+        )
+
+    private fun mapBehandlingLukket(event: EventSubscription.BehandlingLukketEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
+            "behandling_lukket",
+            byggMedYrkesaktivitet(
+                event.yrkesaktivitetssporing,
+                mapOf(
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                ),
+            ),
+        )
+
+    private fun mapTrengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent): Utboksmelding {
+        val behov =
+            listOfNotNull(
+                Behov(
+                    Behov.Behovstype.InntekterForSykepengegrunnlag,
+                    mapOf(
+                        "skjæringstidspunkt" to event.skjæringstidspunkt,
+                        "beregningStart" to event.beregningsperiodeForSykepengegrunnlagsvurdering.start,
+                        "beregningSlutt" to event.beregningsperiodeForSykepengegrunnlagsvurdering.slutt,
+                    ),
+                ),
+                Behov(
+                    Behov.Behovstype.InntekterForOpptjeningsvurdering,
+                    mapOf(
+                        "skjæringstidspunkt" to event.skjæringstidspunkt,
+                        "beregningStart" to event.beregningsperiodeForOpptjeningsvurdering.start,
+                        "beregningSlutt" to event.beregningsperiodeForOpptjeningsvurdering.slutt,
+                    ),
+                ),
+                Behov(
+                    Behov.Behovstype.Arbeidsforhold,
+                    mapOf(
+                        "skjæringstidspunkt" to event.skjæringstidspunkt,
+                    ),
+                ),
+                Behov(
+                    Behov.Behovstype.Medlemskap,
+                    mapOf(
+                        "skjæringstidspunkt" to event.skjæringstidspunkt,
+                        "medlemskapPeriodeFom" to event.periodeForMedlemskapsvurdering.start,
+                        "medlemskapPeriodeTom" to event.periodeForMedlemskapsvurdering.endInclusive,
+                    ),
+                ),
+                Behov(
+                    Behov.Behovstype.Forsikringsvurdering,
+                    mapOf(
+                        "skjæringstidspunkt" to event.skjæringstidspunkt,
+                        "spesielleYrkesgrupper" to event.spesielleYrkesgrupper,
+                    ),
+                ).takeIf { event.yrkesaktivitetssporing.somYrkesaktivitetstype == "SELVSTENDIG" },
+                Behov(
+                    Behov.Behovstype.Opptjeningsvurdering,
+                    mapOf(
+                        "skjæringstidspunkt" to event.skjæringstidspunkt,
+                        "arbeidssituasjon" to
+                            when (event.yrkesaktivitetssporing) {
+                                Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "Arbeidsledig"
+                                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> "Arbeidstaker"
+                                Behandlingsporing.Yrkesaktivitet.Frilans -> "Frilans"
+                                Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SelvstendigNæringsdrivende"
+                            },
+                    ),
+                ),
             )
 
-        val behovInput = listOfNotNull(
-            "periodeFom" to "${event.periode.start}",
-            "periodeTom" to "${event.periode.endInclusive}",
-            "skjæringstidspunkt" to "${event.skjæringstidspunkt}",
-            "vilkårsgrunnlagId" to "${event.vilkårsgrunnlagId}",
-            event.forsikringsvurderingId?.let { "forsikringsvurderingId" to "$it" },
-            "periodetype" to event.periodetype,
-            "førstegangsbehandling" to event.førstegangsbehandling,
-            "utbetalingtype" to event.utbetalingtype,
-            "inntektskilde" to event.inntektskilde,
-            "orgnummereMedRelevanteArbeidsforhold" to event.orgnummereMedRelevanteArbeidsforhold,
-            "tags" to event.tags,
-            "kanAvvises" to event.kanAvvises,
-            "behandlingId" to "${event.behandlingId}",
-            "relevanteSøknader" to event.relevanteSøknader,
-            "perioderMedSammeSkjæringstidspunkt" to event.perioderMedSammeSkjæringstidspunkt.map {
-                mapOf(
-                    "vedtaksperiodeId" to "${it.vedtaksperiodeId}",
-                    "behandlingId" to "${it.behandlingId}",
-                    "fom" to "${it.periode.start}",
-                    "tom" to "${it.periode.endInclusive}",
-                    "yrkesaktivitet" to it.yrkesaktivitet.tilBehovMap(),
-                )
-            },
-            "forbrukteSykedager" to event.forbrukteSykedager,
-            "gjenståendeSykedager" to event.gjenståendeSykedager,
-            "foreløpigBeregnetSluttPåSykepenger" to "${event.foreløpigBeregnetSluttPåSykepenger}",
-            "utbetalingsdager" to event.utbetalingsdager.map { it.tilBehovMap() },
-            "sykepengegrunnlagsfakta" to when (val fakta = event.sykepengegrunnlagsfakta) {
-                is Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel -> mapOf(
-                    "sykepengegrunnlag" to fakta.sykepengegrunnlag,
-                    "6G" to fakta.seksG,
-                    "fastsatt" to "EtterHovedregel",
-                    "arbeidsgivere" to fakta.arbeidsgivere.map {
-                        mapOf(
-                            "arbeidsgiver" to it.arbeidsgiver,
-                            "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                            "inntektskilde" to it.inntektskilde
-                        )
-                    },
-                    "selvstendig" to null
-                )
-                is Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn -> mapOf(
-                    "sykepengegrunnlag" to fakta.sykepengegrunnlag,
-                    "6G" to fakta.seksG,
-                    "fastsatt" to "EtterSkjønn",
-                    "arbeidsgivere" to fakta.arbeidsgivere.map {
-                        mapOf(
-                            "arbeidsgiver" to it.arbeidsgiver,
-                            "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                            "skjønnsfastsatt" to it.skjønnsfastsatt,
-                            "inntektskilde" to "Saksbehandler",
-                        )
-                    },
-                    "selvstendig" to null
-                )
-                is Sykepengegrunnlagsfakta.ArbeidstakerFraInfotrygd -> mapOf(
-                    "sykepengegrunnlag" to fakta.sykepengegrunnlag,
-                    "6G" to fakta.seksG,
-                    "fastsatt" to "IInfotrygd",
-                    "selvstendig" to null
-                )
-                is Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel -> mapOf(
-                    "sykepengegrunnlag" to fakta.sykepengegrunnlag,
-                    "6G" to fakta.seksG,
-                    "fastsatt" to "EtterHovedregel",
-                    "selvstendig" to mapOf(
-                        "pensjonsgivendeInntekter" to fakta.pensjonsgivendeInntekter.map {
-                            mapOf(
-                                "årstall" to it.årstall.value,
-                                "beløp" to it.beløp
-                            )
-                        },
-                        "beregningsgrunnlag" to fakta.beregningsgrunnlag,
-                    ),
-                    "arbeidsgivere" to emptyList<Map<String, Any>>(), // Selvstendig har ingen arbeidsgivere i sykepengegrunnlaget
-                )
-            },
-            "arbeidssituasjon" to event.arbeidssituasjon
-        ).toMap()
-
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
-        return listOf(Behov(Behov.Behovstype.Godkjenning, behovInput)).utgåendeBehov(message.meldingsporing.id,mapOf(
-            "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
-            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "behandlingId" to event.behandlingId,
-            "utbetalingId" to event.utbetalingId
-        ))
+        return behov.utgåendeBehov(
+            message.meldingsporing.id,
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+            ),
+        )
     }
 
-    private fun mapNyInformasjonIInfotrygdEvent(event: EventSubscription.NyInformasjonIInfotrygdEvent) =
-        utgåendeSomBeholdesEtterSending("ny_informasjon_i_infotrygd", mapOf("fom" to event.fraOgMed))
+    private fun mapTrengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent): Utboksmelding {
+        val behov =
+            listOfNotNull(
+                Behov(
+                    Behov.Behovstype.Foreldrepenger,
+                    mapOf(
+                        "foreldrepengerFom" to event.periodeForForeldrepenger.start,
+                        "foreldrepengerTom" to event.periodeForForeldrepenger.endInclusive,
+                    ),
+                ),
+                Behov(
+                    Behov.Behovstype.Pleiepenger,
+                    mapOf(
+                        "pleiepengerFom" to event.periodeForPleiepenger.start,
+                        "pleiepengerTom" to event.periodeForPleiepenger.endInclusive,
+                    ),
+                ),
+                Behov(
+                    Behov.Behovstype.Omsorgspenger,
+                    mapOf(
+                        "omsorgspengerFom" to event.periodeForOmsorgspenger.start,
+                        "omsorgspengerTom" to event.periodeForOmsorgspenger.endInclusive,
+                    ),
+                ),
+                Behov(
+                    Behov.Behovstype.Opplæringspenger,
+                    mapOf(
+                        "opplæringspengerFom" to event.periodeForOpplæringspenger.start,
+                        "opplæringspengerTom" to event.periodeForOpplæringspenger.endInclusive,
+                    ),
+                ),
+                Behov(
+                    Behov.Behovstype.Institusjonsopphold,
+                    mapOf(
+                        "institusjonsoppholdFom" to event.periodeForInstitusjonsopphold.start,
+                        "institusjonsoppholdTom" to event.periodeForInstitusjonsopphold.endInclusive,
+                    ),
+                ),
+                Behov(
+                    Behov.Behovstype.Arbeidsavklaringspenger,
+                    mapOf(
+                        "periodeFom" to event.periodeForArbeidsavklaringspenger.start,
+                        "periodeTom" to event.periodeForArbeidsavklaringspenger.endInclusive,
+                    ),
+                ),
+                Behov(
+                    Behov.Behovstype.Dagpenger,
+                    mapOf(
+                        "periodeFom" to event.periodeForDagpenger.start,
+                        "periodeTom" to event.periodeForDagpenger.endInclusive,
+                    ),
+                ),
+                Behov(
+                    Behov.Behovstype.InntekterForBeregning,
+                    mapOf(
+                        "fom" to event.beregningsperiode.start,
+                        "tom" to event.beregningsperiode.endInclusive,
+                    ),
+                ),
+                if (Toggle.GraderteAndreYtelser.enabled) {
+                    Behov(
+                        Behov.Behovstype.GraderteAndreYtelserForBeregning,
+                        mapOf(
+                            "fom" to event.beregningsperiode.start,
+                            "tom" to event.beregningsperiode.endInclusive,
+                        ),
+                    )
+                } else {
+                    null
+                },
+                Behov(
+                    Behov.Behovstype.OpptjeningsvurderingResultat,
+                    mapOf(
+                        "opptjeningsvurderingId" to event.opptjeningsvurderingId,
+                    ),
+                ),
+                event.forsikringsvurderingId?.let { forsikringsvurderingId ->
+                    Behov(
+                        Behov.Behovstype.ForsikringsvurderingResultat,
+                        mapOf(
+                            "forsikringsvurderingId" to forsikringsvurderingId,
+                        ),
+                    )
+                },
+            )
 
-    private fun mapAvsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
+        return behov.utgåendeBehov(
+            message.meldingsporing.id,
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+            ),
+        )
+    }
+
+    private fun mapTrengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent): Utboksmelding =
+        listOf(
+            Behov(
+                Behov.Behovstype.Sykepengehistorikk,
+                mapOf(
+                    "historikkFom" to event.periode.start,
+                    "historikkTom" to event.periode.endInclusive,
+                ),
+            ),
+        ).utgåendeBehov(
+            message.meldingsporing.id,
+            mapOf(
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+            ),
+        )
+
+    private fun mapTrengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent): Utboksmelding =
+        listOf(
+            Behov(
+                Behov.Behovstype.Sykepengehistorikk,
+                mapOf(
+                    "historikkFom" to event.periode.start,
+                    "historikkTom" to event.periode.endInclusive,
+                ),
+            ),
+        ).utgåendeBehov(message.meldingsporing.id)
+
+    private fun mapUtbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent): Utboksmelding =
+        listOf(
+            Behov(
+                Behov.Behovstype.Feriepengeutbetaling,
+                mapOf(
+                    "mottaker" to event.mottaker,
+                    "fagområde" to event.fagområde,
+                    "linjer" to
+                        listOf(
+                            mapOf(
+                                "fom" to "${event.linje.periode.start}",
+                                "tom" to "${event.linje.periode.endInclusive}",
+                                "satstype" to event.linje.satstype,
+                                "sats" to event.linje.sats,
+                                "endringskode" to event.linje.endringskode,
+                                "delytelseId" to event.linje.delytelseId,
+                                "refDelytelseId" to event.linje.refDelytelseId,
+                                "refFagsystemId" to event.linje.refFagsystemId,
+                                "statuskode" to event.linje.statuskode,
+                                "datoStatusFom" to event.linje.datoStatusFom?.toString(),
+                                "klassekode" to event.linje.klassekode,
+                            ),
+                        ),
+                    "fagsystemId" to event.fagsystemId,
+                    "endringskode" to event.endringskode,
+                    "saksbehandler" to event.saksbehandler,
+                ),
+            ),
+        ).utgåendeBehov(
+            message.meldingsporing.id,
+            mapOf(
+                "yrkesaktivitetstype" to "ARBEIDSTAKER",
+                "organisasjonsnummer" to event.organisasjonsnummer,
+                "utbetalingId" to event.utbetalingId,
+                "fagsystemId" to event.fagsystemId,
+            ),
+        )
+
+    private fun EventSubscription.Oppdragsdetaljer.somMap(saksbehandler: String): Map<String, Any> =
+        mapOf(
+            "mottaker" to mottaker,
+            "fagområde" to fagområde,
+            "linjer" to
+                linjer.map { linje ->
+                    mapOf(
+                        "fom" to linje.periode.start,
+                        "tom" to linje.periode.endInclusive,
+                        "satstype" to linje.satstype,
+                        "sats" to linje.sats,
+                        "grad" to linje.grad.toDouble(), // backwards-compatibility mot andre systemer som forventer double: må gjennomgås
+                        "stønadsdager" to linje.stønadsdager,
+                        "totalbeløp" to linje.totalbeløp,
+                        "endringskode" to linje.endringskode,
+                        "delytelseId" to linje.delytelseId,
+                        "refDelytelseId" to linje.refDelytelseId,
+                        "refFagsystemId" to linje.refFagsystemId,
+                        "statuskode" to linje.statuskode,
+                        "datoStatusFom" to linje.datoStatusFom,
+                        "klassekode" to linje.klassekode,
+                        "datoKlassifikFom" to linje.datoKlassifikFom,
+                    )
+                },
+            "fagsystemId" to fagsystemId,
+            "endringskode" to endringskode,
+            "saksbehandler" to saksbehandler,
+        ).let {
+            when (val maksdatoen = maksdato) {
+                null -> it
+                else -> it.plus("maksdato" to maksdatoen)
+            }
+        }
+
+    private fun mapUtbetaling(event: EventSubscription.UtbetalingEvent): Utboksmelding {
+        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
+        return listOf(Behov(Behov.Behovstype.Utbetaling, event.oppdragsdetaljer.somMap(event.saksbehandler))).utgåendeBehov(
+            message.meldingsporing.id,
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "utbetalingId" to event.utbetalingId,
+                "fagsystemId" to event.oppdragsdetaljer.fagsystemId,
+            ),
+        )
+    }
+
+    private fun mapSimulering(event: EventSubscription.SimuleringEvent): Utboksmelding {
+        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
+        return listOf(Behov(Behov.Behovstype.Simulering, event.oppdragsdetaljer.somMap(event.saksbehandler))).utgåendeBehov(
+            message.meldingsporing.id,
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "utbetalingId" to event.utbetalingId,
+                "fagsystemId" to event.oppdragsdetaljer.fagsystemId,
+            ),
+        )
+    }
+
+    private fun mapGodkjenning(event: EventSubscription.GodkjenningEvent): Utboksmelding {
+        fun Behandlingsporing.Yrkesaktivitet.tilBehovMap(): Map<String, String> =
+            when (this) {
+                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> {
+                    mapOf(
+                        "yrkesaktivitetstype" to this.somYrkesaktivitetstype,
+                        "organisasjonsnummer" to this.organisasjonsnummer,
+                    )
+                }
+
+                Behandlingsporing.Yrkesaktivitet.Selvstendig,
+                Behandlingsporing.Yrkesaktivitet.Frilans,
+                Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                -> {
+                    mapOf(
+                        "yrkesaktivitetstype" to this.somYrkesaktivitetstype,
+                    )
+                }
+            }
+
+        fun Utbetalingsdag.tilBehovMap() =
+            mapOf(
+                "dato" to "${this.dato}",
+                "type" to
+                    when (this.type) {
+                        Dagtype.ArbeidsgiverperiodeDag -> "ArbeidsgiverperiodeDag"
+                        Dagtype.NavDag -> "NavDag"
+                        Dagtype.NavHelgDag -> "NavHelgDag"
+                        Dagtype.Arbeidsdag -> "Arbeidsdag"
+                        Dagtype.Fridag -> "Fridag"
+                        Dagtype.AvvistDag -> "AvvistDag"
+                        Dagtype.UkjentDag -> "UkjentDag"
+                        Dagtype.ForeldetDag -> "ForeldetDag"
+                        Dagtype.Permisjonsdag -> "Permisjonsdag"
+                        Dagtype.Feriedag -> "Feriedag"
+                        Dagtype.ArbeidIkkeGjenopptattDag -> "ArbeidIkkeGjenopptattDag"
+                        Dagtype.AndreYtelser -> "AndreYtelser"
+                        Dagtype.Ventetidsdag -> "Ventetidsdag"
+                    },
+                "beløpTilArbeidsgiver" to this.beløpTilArbeidsgiver,
+                "beløpTilBruker" to this.beløpTilBruker,
+                "sykdomsgrad" to this.sykdomsgrad,
+                "dekningsgrad" to this.dekningsgrad,
+                "begrunnelser" to (
+                    this.begrunnelser?.map {
+                        when (it) {
+                            EksternBegrunnelseDTO.SykepengedagerOppbrukt -> "SykepengedagerOppbrukt"
+                            EksternBegrunnelseDTO.SykepengedagerOppbruktOver67 -> "SykepengedagerOppbruktOver67"
+                            EksternBegrunnelseDTO.MinimumInntekt -> "MinimumInntekt"
+                            EksternBegrunnelseDTO.MinimumInntektOver67 -> "MinimumInntektOver67"
+                            EksternBegrunnelseDTO.EgenmeldingUtenforArbeidsgiverperiode -> "EgenmeldingUtenforArbeidsgiverperiode"
+                            EksternBegrunnelseDTO.AndreYtelserAap -> "AndreYtelserAap"
+                            EksternBegrunnelseDTO.AndreYtelserDagpenger -> "AndreYtelserDagpenger"
+                            EksternBegrunnelseDTO.AndreYtelserForeldrepenger -> "AndreYtelserForeldrepenger"
+                            EksternBegrunnelseDTO.AndreYtelserOmsorgspenger -> "AndreYtelserOmsorgspenger"
+                            EksternBegrunnelseDTO.AndreYtelserOpplaringspenger -> "AndreYtelserOpplaringspenger"
+                            EksternBegrunnelseDTO.AndreYtelserPleiepenger -> "AndreYtelserPleiepenger"
+                            EksternBegrunnelseDTO.AndreYtelserSvangerskapspenger -> "AndreYtelserSvangerskapspenger"
+                            EksternBegrunnelseDTO.MinimumSykdomsgrad -> "MinimumSykdomsgrad"
+                            EksternBegrunnelseDTO.EtterDødsdato -> "EtterDødsdato"
+                            EksternBegrunnelseDTO.ManglerMedlemskap -> "ManglerMedlemskap"
+                            EksternBegrunnelseDTO.ManglerOpptjening -> "ManglerOpptjening"
+                            EksternBegrunnelseDTO.Over70 -> "Over70"
+                            EksternBegrunnelseDTO.MeldingTilNavDagUtenforVentetid -> "MeldingTilNavDagUtenforVentetid"
+                            EksternBegrunnelseDTO.AvslåttMeldingTilNavDag -> "AvslåttMeldingTilNavDag"
+                        }
+                    } ?: emptyList()
+                ),
+            )
+
+        val behovInput =
+            listOfNotNull(
+                "periodeFom" to "${event.periode.start}",
+                "periodeTom" to "${event.periode.endInclusive}",
+                "skjæringstidspunkt" to "${event.skjæringstidspunkt}",
+                "vilkårsgrunnlagId" to "${event.vilkårsgrunnlagId}",
+                event.forsikringsvurderingId?.let { "forsikringsvurderingId" to "$it" },
+                "periodetype" to event.periodetype,
+                "førstegangsbehandling" to event.førstegangsbehandling,
+                "utbetalingtype" to event.utbetalingtype,
+                "inntektskilde" to event.inntektskilde,
+                "orgnummereMedRelevanteArbeidsforhold" to event.orgnummereMedRelevanteArbeidsforhold,
+                "tags" to event.tags,
+                "kanAvvises" to event.kanAvvises,
+                "behandlingId" to "${event.behandlingId}",
+                "relevanteSøknader" to event.relevanteSøknader,
+                "perioderMedSammeSkjæringstidspunkt" to
+                    event.perioderMedSammeSkjæringstidspunkt.map {
+                        mapOf(
+                            "vedtaksperiodeId" to "${it.vedtaksperiodeId}",
+                            "behandlingId" to "${it.behandlingId}",
+                            "fom" to "${it.periode.start}",
+                            "tom" to "${it.periode.endInclusive}",
+                            "yrkesaktivitet" to it.yrkesaktivitet.tilBehovMap(),
+                        )
+                    },
+                "forbrukteSykedager" to event.forbrukteSykedager,
+                "gjenståendeSykedager" to event.gjenståendeSykedager,
+                "foreløpigBeregnetSluttPåSykepenger" to "${event.foreløpigBeregnetSluttPåSykepenger}",
+                "utbetalingsdager" to event.utbetalingsdager.map { it.tilBehovMap() },
+                "sykepengegrunnlagsfakta" to
+                    when (val fakta = event.sykepengegrunnlagsfakta) {
+                        is Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel ->
+                            mapOf(
+                                "sykepengegrunnlag" to fakta.sykepengegrunnlag,
+                                "6G" to fakta.seksG,
+                                "fastsatt" to "EtterHovedregel",
+                                "arbeidsgivere" to
+                                    fakta.arbeidsgivere.map {
+                                        mapOf(
+                                            "arbeidsgiver" to it.arbeidsgiver,
+                                            "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                                            "inntektskilde" to it.inntektskilde,
+                                        )
+                                    },
+                                "selvstendig" to null,
+                            )
+                        is Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn ->
+                            mapOf(
+                                "sykepengegrunnlag" to fakta.sykepengegrunnlag,
+                                "6G" to fakta.seksG,
+                                "fastsatt" to "EtterSkjønn",
+                                "arbeidsgivere" to
+                                    fakta.arbeidsgivere.map {
+                                        mapOf(
+                                            "arbeidsgiver" to it.arbeidsgiver,
+                                            "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                                            "skjønnsfastsatt" to it.skjønnsfastsatt,
+                                            "inntektskilde" to "Saksbehandler",
+                                        )
+                                    },
+                                "selvstendig" to null,
+                            )
+                        is Sykepengegrunnlagsfakta.ArbeidstakerFraInfotrygd ->
+                            mapOf(
+                                "sykepengegrunnlag" to fakta.sykepengegrunnlag,
+                                "6G" to fakta.seksG,
+                                "fastsatt" to "IInfotrygd",
+                                "selvstendig" to null,
+                            )
+                        is Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel ->
+                            mapOf(
+                                "sykepengegrunnlag" to fakta.sykepengegrunnlag,
+                                "6G" to fakta.seksG,
+                                "fastsatt" to "EtterHovedregel",
+                                "selvstendig" to
+                                    mapOf(
+                                        "pensjonsgivendeInntekter" to
+                                            fakta.pensjonsgivendeInntekter.map {
+                                                mapOf(
+                                                    "årstall" to it.årstall.value,
+                                                    "beløp" to it.beløp,
+                                                )
+                                            },
+                                        "beregningsgrunnlag" to fakta.beregningsgrunnlag,
+                                    ),
+                                "arbeidsgivere" to emptyList<Map<String, Any>>(), // Selvstendig har ingen arbeidsgivere i sykepengegrunnlaget
+                            )
+                    },
+                "arbeidssituasjon" to event.arbeidssituasjon,
+            ).toMap()
+
+        // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer
+        return listOf(Behov(Behov.Behovstype.Godkjenning, behovInput)).utgåendeBehov(
+            message.meldingsporing.id,
+            mapOf(
+                "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "utbetalingId" to event.utbetalingId,
+            ),
+        )
+    }
+
+    private fun mapNyInformasjonIInfotrygdEvent(event: EventSubscription.NyInformasjonIInfotrygdEvent) = utgåendeSomBeholdesEtterSending("ny_informasjon_i_infotrygd", mapOf("fom" to event.fraOgMed))
+
+    private fun mapAvsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "avsluttet_uten_vedtak",
             mapOf(
                 "organisasjonsnummer" to event.yrkesaktivitetssporing.somOrganisasjonsnummer,
@@ -983,13 +1087,12 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 "tom" to event.periode.endInclusive,
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
                 "hendelser" to event.hendelseIder,
-                "avsluttetTidspunkt" to event.avsluttetTidspunkt
-            )
+                "avsluttetTidspunkt" to event.avsluttetTidspunkt,
+            ),
         )
-    }
 
-    private fun mapAvsluttetMedVedtak(event: EventSubscription.AvsluttetMedVedtakEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapAvsluttetMedVedtak(event: EventSubscription.AvsluttetMedVedtakEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "avsluttet_med_vedtak",
             mapOf(
                 "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
@@ -1001,97 +1104,98 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
                 "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt,
                 "utbetalingId" to event.utbetalingId,
-                "sykepengegrunnlagsfakta" to mapOf(
-                    "sykepengegrunnlag" to event.sykepengegrunnlag,
-                    "6G" to event.`6G`
-                ).plus(
-                    when (event.yrkesaktivitetssporing) {
-                        Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
-                        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> when (val fakta = event.sykepengegrunnlagsfakta) {
-                            is FastsattIInfotrygd -> arbeidstakerInfotrygdMap(fakta)
-                            is FastsattEtterHovedregel -> arbeidstakerHovedregelMap(fakta)
-                            is FastsattEtterSkjønn -> arbeidstakerEtterSkjønnMap(fakta)
-                        }.plus(
-                            "selvstendig" to null
-                        )
+                "sykepengegrunnlagsfakta" to
+                    mapOf(
+                        "sykepengegrunnlag" to event.sykepengegrunnlag,
+                        "6G" to event.`6G`,
+                    ).plus(
+                        when (event.yrkesaktivitetssporing) {
+                            Behandlingsporing.Yrkesaktivitet.Arbeidsledig,
+                            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
+                            ->
+                                when (val fakta = event.sykepengegrunnlagsfakta) {
+                                    is FastsattIInfotrygd -> arbeidstakerInfotrygdMap(fakta)
+                                    is FastsattEtterHovedregel -> arbeidstakerHovedregelMap(fakta)
+                                    is FastsattEtterSkjønn -> arbeidstakerEtterSkjønnMap(fakta)
+                                }.plus(
+                                    "selvstendig" to null,
+                                )
 
-                        Behandlingsporing.Yrkesaktivitet.Selvstendig ->
-                            mapOf(
-                                "selvstendig" to mapOf(
-                                    "beregningsgrunnlag" to event.beregningsgrunnlag,
-                                ),
-                                "fastsatt" to "EtterHovedregel",
-                                "arbeidsgivere" to emptyList<Map<String, Any>>()
-
-                            )
-                        Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("avsluttet_med_vedtak for frilanser er ikke implementert, og vi burde aldri komme hit.")
-                    }
-                )
+                            Behandlingsporing.Yrkesaktivitet.Selvstendig ->
+                                mapOf(
+                                    "selvstendig" to
+                                        mapOf(
+                                            "beregningsgrunnlag" to event.beregningsgrunnlag,
+                                        ),
+                                    "fastsatt" to "EtterHovedregel",
+                                    "arbeidsgivere" to emptyList<Map<String, Any>>(),
+                                )
+                            Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("avsluttet_med_vedtak for frilanser er ikke implementert, og vi burde aldri komme hit.")
+                        },
+                    ),
             ),
         )
-    }
 
-    private fun mapSelvstendigUtbetaltEtterVentetid(event: EventSubscription.SelvstendigUtbetaltEtterVentetidEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapSelvstendigUtbetaltEtterVentetid(event: EventSubscription.SelvstendigUtbetaltEtterVentetidEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "selvstendig_utbetalt_etter_ventetid",
             buildMap {
                 put("yrkesaktivitetstype", Behandlingsporing.Yrkesaktivitet.Selvstendig.somYrkesaktivitetstype)
                 put("behandlingId", event.behandlingId)
                 put("skjæringstidspunkt", event.skjæringstidspunkt)
                 event.forsikringsvurderingId?.let { put("forsikringsvurderingId", it) }
-            }
+            },
         )
-    }
 
-    private fun mapSelvstendigIngenDagerIgjen(event: EventSubscription.SelvstendigIngenDagerIgjenEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapSelvstendigIngenDagerIgjen(event: EventSubscription.SelvstendigIngenDagerIgjenEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "selvstendig_ingen_dager_igjen",
             buildMap {
                 put("yrkesaktivitetstype", Behandlingsporing.Yrkesaktivitet.Selvstendig.somYrkesaktivitetstype)
                 put("behandlingId", event.behandlingId)
                 put("skjæringstidspunkt", event.skjæringstidspunkt)
                 event.forsikringsvurderingId?.let { put("forsikringsvurderingId", it) }
-            }
+            },
         )
-    }
 
-    private fun mapAnalytiskDatapakke(event: EventSubscription.AnalytiskDatapakkeEvent): Utboksmelding {
-        return utgåendeSomForkastesEtterSending(
+    private fun mapAnalytiskDatapakke(event: EventSubscription.AnalytiskDatapakkeEvent): Utboksmelding =
+        utgåendeSomForkastesEtterSending(
             "analytisk_datapakke",
             mapOf(
                 "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
                 "vedtaksperiodeId" to event.vedtaksperiodeId,
                 "behandlingId" to event.behandlingId,
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "beløpTilBruker" to mapOf(
-                    "totalBeløp" to event.beløpTilBruker.totalBeløp,
-                    "nettoBeløp" to event.beløpTilBruker.nettoBeløp
-                ),
+                "beløpTilBruker" to
+                    mapOf(
+                        "totalBeløp" to event.beløpTilBruker.totalBeløp,
+                        "nettoBeløp" to event.beløpTilBruker.nettoBeløp,
+                    ),
                 "beløpTilArbeidsgiver" to event.beløpTilArbeidsgiver,
                 "fom" to event.fom,
                 "tom" to event.tom,
-                "antallForbrukteSykedagerEtterPeriode" to mapOf(
-                    "antallDager" to event.antallForbrukteSykedagerEtterPeriode.antallDager,
-                    "nettoDager" to event.antallForbrukteSykedagerEtterPeriode.nettoDager
-                ),
-                "antallGjenståendeSykedagerEtterPeriode" to mapOf(
-                    "antallDager" to event.antallGjenståendeSykedagerEtterPeriode.antallDager,
-                    "nettoDager" to event.antallGjenståendeSykedagerEtterPeriode.nettoDager
-                ),
-                "harAndreInntekterIBeregning" to event.harAndreInntekterIBeregning
-            )
+                "antallForbrukteSykedagerEtterPeriode" to
+                    mapOf(
+                        "antallDager" to event.antallForbrukteSykedagerEtterPeriode.antallDager,
+                        "nettoDager" to event.antallForbrukteSykedagerEtterPeriode.nettoDager,
+                    ),
+                "antallGjenståendeSykedagerEtterPeriode" to
+                    mapOf(
+                        "antallDager" to event.antallGjenståendeSykedagerEtterPeriode.antallDager,
+                        "nettoDager" to event.antallGjenståendeSykedagerEtterPeriode.nettoDager,
+                    ),
+                "harAndreInntekterIBeregning" to event.harAndreInntekterIBeregning,
+            ),
         )
-    }
 
-    private fun mapSykefraværstilfelleIkkeFunnet(event: EventSubscription.SykefraværstilfelleIkkeFunnet): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapSykefraværstilfelleIkkeFunnet(event: EventSubscription.SykefraværstilfelleIkkeFunnet): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "sykefraværstilfelle_ikke_funnet",
-            mapOf("skjæringstidspunkt" to event.skjæringstidspunkt)
+            mapOf("skjæringstidspunkt" to event.skjæringstidspunkt),
         )
-    }
 
-    private fun mapSkatteinntekterLagtTilGrunn(event: EventSubscription.SkatteinntekterLagtTilGrunnEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapSkatteinntekterLagtTilGrunn(event: EventSubscription.SkatteinntekterLagtTilGrunnEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "skatteinntekter_lagt_til_grunn",
             mapOf(
                 "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
@@ -1100,126 +1204,144 @@ internal class EventBusOversetter(private val eventBus: EventBus, private val me
                 "behandlingId" to event.behandlingId,
                 "skjæringstidspunkt" to event.skjæringstidspunkt,
                 "omregnetÅrsinntekt" to event.omregnetÅrsinntekt,
-                "skatteinntekter" to event.skatteinntekter.map {
-                    mapOf<String, Any>(
-                        "måned" to it.måned,
-                        "beløp" to it.beløp
-                    )
-                }
-            ))
-    }
+                "skatteinntekter" to
+                    event.skatteinntekter.map {
+                        mapOf<String, Any>(
+                            "måned" to it.måned,
+                            "beløp" to it.beløp,
+                        )
+                    },
+            ),
+        )
 
-    private fun mapTrengerInntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending("trenger_inntektsmelding_replay", event.opplysninger.tilJsonMap())
-    }
+    private fun mapTrengerInntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent): Utboksmelding = utgåendeSomBeholdesEtterSending("trenger_inntektsmelding_replay", event.opplysninger.tilJsonMap())
 
-    private fun mapTrengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending("trenger_opplysninger_fra_arbeidsgiver", event.opplysninger.tilJsonMap())
-    }
+    private fun mapTrengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent): Utboksmelding = utgåendeSomBeholdesEtterSending("trenger_opplysninger_fra_arbeidsgiver", event.opplysninger.tilJsonMap())
 
-    private fun EventSubscription.TrengerArbeidsgiveropplysninger.tilJsonMap(): Map<String, Any> {
-        return mapOf(
+    private fun EventSubscription.TrengerArbeidsgiveropplysninger.tilJsonMap(): Map<String, Any> =
+        mapOf(
             "organisasjonsnummer" to this.arbeidstaker.organisasjonsnummer,
             "yrkesaktivitetstype" to "ARBEIDSTAKER",
             "vedtaksperiodeId" to this.vedtaksperiodeId,
             "skjæringstidspunkt" to this.skjæringstidspunkt,
-            "sykmeldingsperioder" to this.sykmeldingsperioder.map {
-                mapOf(
-                    "fom" to it.start,
-                    "tom" to it.endInclusive
-                )
-            },
-            "egenmeldingsperioder" to this.egenmeldingsperioder.map {
-                mapOf(
-                    "fom" to it.start,
-                    "tom" to it.endInclusive
-                )
-            },
-            "førsteFraværsdager" to this.førsteFraværsdager.map {
-                mapOf<String, Any>(
-                    "organisasjonsnummer" to it.arbeidstaker.organisasjonsnummer,
-                    "yrkesaktivitetstype" to "ARBEIDSTAKER",
-                    "førsteFraværsdag" to it.førsteFraværsdag
-                )
-            },
-            "forespurteOpplysninger" to this.forespurteOpplysninger.map { forespurtOpplysning ->
-                mapOf(
-                    "opplysningstype" to when (forespurtOpplysning) {
-                        Arbeidsgiverperiode -> "Arbeidsgiverperiode"
-                        Inntekt -> "Inntekt"
-                        Refusjon -> "Refusjon"
-                    }
-                )
-            }
+            "sykmeldingsperioder" to
+                this.sykmeldingsperioder.map {
+                    mapOf(
+                        "fom" to it.start,
+                        "tom" to it.endInclusive,
+                    )
+                },
+            "egenmeldingsperioder" to
+                this.egenmeldingsperioder.map {
+                    mapOf(
+                        "fom" to it.start,
+                        "tom" to it.endInclusive,
+                    )
+                },
+            "førsteFraværsdager" to
+                this.førsteFraværsdager.map {
+                    mapOf<String, Any>(
+                        "organisasjonsnummer" to it.arbeidstaker.organisasjonsnummer,
+                        "yrkesaktivitetstype" to "ARBEIDSTAKER",
+                        "førsteFraværsdag" to it.førsteFraværsdag,
+                    )
+                },
+            "forespurteOpplysninger" to
+                this.forespurteOpplysninger.map { forespurtOpplysning ->
+                    mapOf(
+                        "opplysningstype" to
+                            when (forespurtOpplysning) {
+                                Arbeidsgiverperiode -> "Arbeidsgiverperiode"
+                                Inntekt -> "Inntekt"
+                                Refusjon -> "Refusjon"
+                            },
+                    )
+                },
         )
-    }
 
-    private fun mapTrengerIkkeArbeidsgiveropplysninger(event: EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent): Utboksmelding {
-        return utgåendeSomBeholdesEtterSending(
+    private fun mapTrengerIkkeArbeidsgiveropplysninger(event: EventSubscription.TrengerIkkeArbeidsgiveropplysningerEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending(
             "trenger_ikke_opplysninger_fra_arbeidsgiver",
             mapOf<String, Any>(
                 "organisasjonsnummer" to event.arbeidstaker.organisasjonsnummer,
                 "yrkesaktivitetstype" to "ARBEIDSTAKER",
-                "vedtaksperiodeId" to event.vedtaksperiodeId
-            )
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+            ),
         )
-    }
 
     private fun mapUtkastTilVedtak(event: EventSubscription.UtkastTilVedtakEvent): Utboksmelding {
-        val utkastTilVedtak = mutableMapOf(
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "behandlingId" to event.behandlingId,
-            "skjæringstidspunkt" to event.skjæringstidspunkt,
-            "tags" to event.tags,
-            "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
-        )
+        val utkastTilVedtak =
+            mutableMapOf(
+                "vedtaksperiodeId" to event.vedtaksperiodeId,
+                "behandlingId" to event.behandlingId,
+                "skjæringstidspunkt" to event.skjæringstidspunkt,
+                "tags" to event.tags,
+                "yrkesaktivitetstype" to event.yrkesaktivitetssporing.somYrkesaktivitetstype,
+            )
         if (event.`6G` != null) utkastTilVedtak["sykepengegrunnlagsfakta"] = mapOf("6G" to event.`6G`)
         return utgåendeSomBeholdesEtterSending("utkast_til_vedtak", utkastTilVedtak.toMap())
     }
 
     /** Legger alltid til yrkesaktivitetstype, men legger kun til organisasjonsnummer for Arbeidstaker **/
-    private fun byggMedYrkesaktivitet(yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet, innhold: Map<String, Any>) =
-        buildMap {
-            put("yrkesaktivitetstype", yrkesaktivitetssporing.somYrkesaktivitetstype)
-            compute("organisasjonsnummer") { _, _ ->
-                (yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer
-            }
-            putAll(innhold)
+    private fun byggMedYrkesaktivitet(
+        yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        innhold: Map<String, Any>,
+    ) = buildMap {
+        put("yrkesaktivitetstype", yrkesaktivitetssporing.somYrkesaktivitetstype)
+        compute("organisasjonsnummer") { _, _ ->
+            (yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer
         }
+        putAll(innhold)
+    }
 
-    private fun arbeidstakerEtterSkjønnMap(sykepengegrunnlagsfakta: FastsattEtterSkjønn): Map<String, Any> = mapOf(
-        "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
-        "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
-        "skjønnsfastsatt" to sykepengegrunnlagsfakta.skjønnsfastsatt,
-        "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map { arbeidsgiver ->
-            mapOf(
-                "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
-                "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
-                "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt,
-                "inntektskilde" to arbeidsgiver.inntektskilde
-            )
-        }
-    )
+    private fun arbeidstakerEtterSkjønnMap(sykepengegrunnlagsfakta: FastsattEtterSkjønn): Map<String, Any> =
+        mapOf(
+            "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
+            "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
+            "skjønnsfastsatt" to sykepengegrunnlagsfakta.skjønnsfastsatt,
+            "arbeidsgivere" to
+                sykepengegrunnlagsfakta.arbeidsgivere.map { arbeidsgiver ->
+                    mapOf(
+                        "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
+                        "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
+                        "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt,
+                        "inntektskilde" to arbeidsgiver.inntektskilde,
+                    )
+                },
+        )
 
-    private fun arbeidstakerHovedregelMap(sykepengegrunnlagsfakta: FastsattEtterHovedregel): Map<String, Any> = mapOf(
-        "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
-        "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
-        "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map { arbeidsgiver ->
-            mapOf(
-                "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
-                "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
-                "inntektskilde" to arbeidsgiver.inntektskilde
-            )
-        }
-    )
+    private fun arbeidstakerHovedregelMap(sykepengegrunnlagsfakta: FastsattEtterHovedregel): Map<String, Any> =
+        mapOf(
+            "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
+            "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
+            "arbeidsgivere" to
+                sykepengegrunnlagsfakta.arbeidsgivere.map { arbeidsgiver ->
+                    mapOf(
+                        "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
+                        "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
+                        "inntektskilde" to arbeidsgiver.inntektskilde,
+                    )
+                },
+        )
 
-    private fun arbeidstakerInfotrygdMap(sykepengegrunnlagsfakta: FastsattIInfotrygd): Map<String, Any> = mapOf(
-        "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
-        "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt
-    )
+    private fun arbeidstakerInfotrygdMap(sykepengegrunnlagsfakta: FastsattIInfotrygd): Map<String, Any> =
+        mapOf(
+            "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
+            "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
+        )
 
-    private fun utgåendeSomBeholdesEtterSending(eventName: String, innhold: Map<String, Any>) = Utboksmelding.BeholdEtterSending(UtgåendeMelding.nyRapidmelding(personidentifikator, eventName, innhold))
-    private fun utgåendeSomForkastesEtterSending(eventName: String, innhold: Map<String, Any>) = Utboksmelding.ForkastEtterSending(UtgåendeMelding.nyRapidmelding(personidentifikator, eventName, innhold))
+    private fun utgåendeSomBeholdesEtterSending(
+        eventName: String,
+        innhold: Map<String, Any>,
+    ) = Utboksmelding.BeholdEtterSending(UtgåendeMelding.nyRapidmelding(personidentifikator, eventName, innhold))
 
-    private fun List<Behov>.utgåendeBehov(meldingsreferanseId: MeldingsreferanseId, extra: Map<String, Any> = emptyMap()) = Utboksmelding.ForkastEtterSending(UtgåendeMelding.nyttBehov(personidentifikator, meldingsreferanseId, this, extra))
+    private fun utgåendeSomForkastesEtterSending(
+        eventName: String,
+        innhold: Map<String, Any>,
+    ) = Utboksmelding.ForkastEtterSending(UtgåendeMelding.nyRapidmelding(personidentifikator, eventName, innhold))
+
+    private fun List<Behov>.utgåendeBehov(
+        meldingsreferanseId: MeldingsreferanseId,
+        extra: Map<String, Any> = emptyMap(),
+    ) = Utboksmelding.ForkastEtterSending(UtgåendeMelding.nyttBehov(personidentifikator, meldingsreferanseId, this, extra))
 }

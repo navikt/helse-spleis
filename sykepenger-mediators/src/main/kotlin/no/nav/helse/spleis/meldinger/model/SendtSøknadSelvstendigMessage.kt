@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
-import java.time.Year
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.spleis.BehandlingContext
@@ -13,21 +12,32 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import java.time.Year
 
-internal class SendtSøknadSelvstendigMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: SendtSøknadBuilder = SendtSøknadBuilder(packet["arbeidssituasjon"].asText())) : SøknadMessage(packet, builder.selvstendig()) {
-    override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: BehandlingContext) {
+internal class SendtSøknadSelvstendigMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+    private val builder: SendtSøknadBuilder = SendtSøknadBuilder(packet["arbeidssituasjon"].asText()),
+) : SøknadMessage(packet, builder.selvstendig()) {
+    override fun _behandle(
+        mediator: IHendelseMediator,
+        personopplysninger: Personopplysninger,
+        packet: JsonMessage,
+        context: BehandlingContext,
+    ) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
-        val pensjonsgivendeInntekter = packet["selvstendigNaringsdrivende.inntekt.inntektsAar"].map {
-            val pensjonsgivendeInntekt = it.path("pensjonsgivendeInntekt")
-            Søknad.PensjonsgivendeInntekt(
-                inntektsår = Year.parse(it.path("aar").asText()),
-                næringsinntekt = pensjonsgivendeInntekt.path("pensjonsgivendeInntektAvNaeringsinntekt").asInt().årlig,
-                lønnsinntekt = pensjonsgivendeInntekt.path("pensjonsgivendeInntektAvLoennsinntekt").asInt().årlig,
-                lønnsinntektBarePensjonsdel = pensjonsgivendeInntekt.path("pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel").asInt().årlig,
-                næringsinntektFraFiskeFangstEllerFamiliebarnehage = pensjonsgivendeInntekt.path("pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage").asInt().årlig,
-                erFerdigLignet = it.path("erFerdigLignet").asBoolean(true)
-            )
-        }
+        val pensjonsgivendeInntekter =
+            packet["selvstendigNaringsdrivende.inntekt.inntektsAar"].map {
+                val pensjonsgivendeInntekt = it.path("pensjonsgivendeInntekt")
+                Søknad.PensjonsgivendeInntekt(
+                    inntektsår = Year.parse(it.path("aar").asText()),
+                    næringsinntekt = pensjonsgivendeInntekt.path("pensjonsgivendeInntektAvNaeringsinntekt").asInt().årlig,
+                    lønnsinntekt = pensjonsgivendeInntekt.path("pensjonsgivendeInntektAvLoennsinntekt").asInt().årlig,
+                    lønnsinntektBarePensjonsdel = pensjonsgivendeInntekt.path("pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel").asInt().årlig,
+                    næringsinntektFraFiskeFangstEllerFamiliebarnehage = pensjonsgivendeInntekt.path("pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage").asInt().årlig,
+                    erFerdigLignet = it.path("erFerdigLignet").asBoolean(true),
+                )
+            }
         builder.pensjonsgivendeInntekter(pensjonsgivendeInntekter)
 
         val harOppgittNyIArbedislivetPåGamleMåten = packet["selvstendigNaringsdrivende.hovedSporsmalSvar"].path("INNTEKTSOPPLYSNINGER_NY_I_ARBEIDSLIVET").takeUnless { it.isMissingOrNull() }?.asBoolean()

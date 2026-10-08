@@ -1,64 +1,28 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import java.time.LocalDate
-import kotlin.reflect.KClass
-import no.nav.helse.august
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.TestPerson
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
-import no.nav.helse.februar
-import no.nav.helse.hendelser.Arbeidsgiveropplysning
-import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.*
+import no.nav.helse.dsl.*
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Sykedag
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Melding
-import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mars
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.AndreYtelser
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.NavDag
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.NavHelgDag
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.*
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import kotlin.reflect.KClass
 
 internal class OverstyrTidslinjeTest : AbstractDslTest() {
-
     @Test
     fun `Overstyring av hele perioden til andre ytelser`() {
         a1 {
@@ -85,14 +49,16 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSøknad(mars)
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2))
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)),
             )
             val overstyringIgangsatt = observatør.overstyringIgangsatt.last()
             assertEquals(
                 listOf(
                     1.vedtaksperiode,
-                    2.vedtaksperiode
-                ), overstyringIgangsatt.berørtePerioder.map { it.vedtaksperiodeId })
+                    2.vedtaksperiode,
+                ),
+                overstyringIgangsatt.berørtePerioder.map { it.vedtaksperiodeId },
+            )
         }
     }
 
@@ -104,7 +70,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSøknad(Sykdom(13.mars, 31.mars, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(6.mars til 21.mars),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -112,7 +78,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterSelvbestemtArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(2.februar til 17.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
 
@@ -149,8 +115,8 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterOverstyrTidslinje(
                 listOf(
                     ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag),
-                    ManuellOverskrivingDag(2.januar, Dagtype.Arbeidsdag)
-                )
+                    ManuellOverskrivingDag(2.januar, Dagtype.Arbeidsdag),
+                ),
             )
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
@@ -163,7 +129,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
 
             håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -211,7 +177,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
                 listOf(
                     ManuellOverskrivingDag(5.februar, Sykedag, 100),
                     ManuellOverskrivingDag(6.februar, Sykedag, 100),
-                )
+                ),
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -230,7 +196,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterOverstyrTidslinje(
-                (17.januar til 31.januar).map { dagen -> ManuellOverskrivingDag(dagen, Sykedag, 100) }
+                (17.januar til 31.januar).map { dagen -> ManuellOverskrivingDag(dagen, Sykedag, 100) },
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -261,7 +227,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.august, 31.august, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.juni til 16.juni),
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
             )
             assertVarsler(listOf(RV_IM_3, Varselkode.RV_IM_25), 2.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -305,8 +271,8 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(
                 listOf(
-                    ManuellOverskrivingDag(9.januar, Dagtype.Arbeidsdag)
-                )
+                    ManuellOverskrivingDag(9.januar, Dagtype.Arbeidsdag),
+                ),
             )
 
             val dagen = inspektør.sykdomstidslinje[9.januar]
@@ -330,7 +296,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
                 2.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(10.januar til 25.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null)
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -340,8 +306,8 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             assertEquals(4, inspektør.sykdomshistorikk.elementer())
             håndterOverstyrTidslinje(
                 listOf(
-                    ManuellOverskrivingDag(9.januar, Dagtype.Arbeidsdag)
-                )
+                    ManuellOverskrivingDag(9.januar, Dagtype.Arbeidsdag),
+                ),
             )
             assertEquals(5, inspektør.sykdomshistorikk.elementer())
             val dagen = inspektør.sykdomstidslinje[9.januar]
@@ -370,8 +336,8 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(
                 listOf(
-                    ManuellOverskrivingDag(9.januar, Sykedag, 100)
-                )
+                    ManuellOverskrivingDag(9.januar, Sykedag, 100),
+                ),
             )
             håndterYtelser(2.vedtaksperiode)
 
@@ -401,8 +367,8 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterOverstyrTidslinje(
                 listOf(
                     ManuellOverskrivingDag(9.januar, Sykedag, 100),
-                    ManuellOverskrivingDag(10.januar, Dagtype.Feriedag)
-                )
+                    ManuellOverskrivingDag(10.januar, Dagtype.Feriedag),
+                ),
             )
             assertEquals(6, inspektør.sykdomshistorikk.elementer())
             håndterYtelser(2.vedtaksperiode)
@@ -424,7 +390,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(2.januar, 17.januar)),
-                førsteFraværsdag = 2.januar
+                førsteFraværsdag = 2.januar,
             )
             håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -434,12 +400,13 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
                 listOf(
                     ManuellOverskrivingDag(2.januar, Sykedag, 100),
                     ManuellOverskrivingDag(24.januar, Dagtype.Egenmeldingsdag),
-                    ManuellOverskrivingDag(25.januar, Dagtype.Feriedag)
-                )
+                    ManuellOverskrivingDag(25.januar, Dagtype.Feriedag),
+                ),
             )
-            val feil = assertThrows<AssertionError> {
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-            }
+            val feil =
+                assertThrows<AssertionError> {
+                    håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+                }
             assertEquals("Forventet at det skulle være forspurt nøyaktig én godkjenning. Fant 0", feil.message)
             assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
         }
@@ -451,7 +418,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar))
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(2.januar, 17.januar)),
-                førsteFraværsdag = 2.januar
+                førsteFraværsdag = 2.januar,
             )
             håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -477,7 +444,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar))
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(2.januar, 17.januar)),
-                førsteFraværsdag = 2.januar
+                førsteFraværsdag = 2.januar,
             )
             håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -503,7 +470,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(2.januar, 25.januar))
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 listOf(Periode(2.januar, 17.januar)),
-                førsteFraværsdag = 2.januar
+                førsteFraværsdag = 2.januar,
             )
             håndterSøknad(Sykdom(2.januar, 25.januar, 100.prosent))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -527,7 +494,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
-                listOf(1.januar til 16.januar)
+                listOf(1.januar til 16.januar),
             )
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(20.januar, 21.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -536,8 +503,8 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterOverstyrTidslinje(
                 listOf(
                     ManuellOverskrivingDag(20.januar, Sykedag, 100),
-                    ManuellOverskrivingDag(21.januar, Sykedag, 100)
-                )
+                    ManuellOverskrivingDag(21.januar, Sykedag, 100),
+                ),
             )
 
             håndterYtelser(1.vedtaksperiode)
@@ -596,11 +563,11 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             nyttVedtak(januar)
             håndterSøknad(
                 Sykdom(10.februar, 28.februar, 100.prosent),
-                Arbeid(20.februar, 28.februar)
+                Arbeid(20.februar, 28.februar),
             )
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(10.februar til 25.februar),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -648,11 +615,19 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: Melding) {
+    private fun TestPerson.TestArbeidsgiver.assertSykdomstidslinjedag(
+        dato: LocalDate,
+        dagtype: KClass<out Dag>,
+        kommerFra: Melding,
+    ) {
         assertSykdomstidslinjedag(dato, dagtype, kommerFra.simpleName!!)
     }
 
-    private fun TestPerson.TestArbeidsgiver.assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: String) {
+    private fun TestPerson.TestArbeidsgiver.assertSykdomstidslinjedag(
+        dato: LocalDate,
+        dagtype: KClass<out Dag>,
+        kommerFra: String,
+    ) {
         val dagen = inspektør.sykdomstidslinje[dato]
         assertEquals(dagtype, dagen::class)
         assertTrue(dagen.kommerFra(kommerFra))

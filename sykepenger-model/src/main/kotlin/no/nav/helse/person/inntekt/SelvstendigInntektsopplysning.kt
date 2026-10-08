@@ -8,15 +8,16 @@ import no.nav.helse.økonomi.Inntekt
 
 internal data class SelvstendigInntektsopplysning(
     val faktaavklartInntekt: SelvstendigFaktaavklartInntekt,
-    val skjønnsmessigFastsatt: SkjønnsmessigFastsatt?
+    val skjønnsmessigFastsatt: SkjønnsmessigFastsatt?,
 ) {
     val fastsattÅrsinntekt = faktaavklartInntekt.normalinntekt
     val beregningsgrunnlag = faktaavklartInntekt.beregningsgrunnlag
 
-    internal fun medAnvendtGrunnbeløp(grunnbeløp: Inntekt) = SelvstendigInntektsopplysning(
-        faktaavklartInntekt = faktaavklartInntekt.medAnvendtGrunnbeløp(grunnbeløp),
-        skjønnsmessigFastsatt = skjønnsmessigFastsatt
-    )
+    internal fun medAnvendtGrunnbeløp(grunnbeløp: Inntekt) =
+        SelvstendigInntektsopplysning(
+            faktaavklartInntekt = faktaavklartInntekt.medAnvendtGrunnbeløp(grunnbeløp),
+            skjønnsmessigFastsatt = skjønnsmessigFastsatt,
+        )
 
     internal companion object {
         internal fun SelvstendigInntektsopplysning.berik(builder: UtkastTilVedtakBuilder) =
@@ -24,19 +25,19 @@ internal data class SelvstendigInntektsopplysning(
                 arbeidsgiver = "SELVSTENDIG",
                 omregnedeÅrsinntekt = this.fastsattÅrsinntekt,
                 skjønnsfastsatt = this.skjønnsmessigFastsatt?.inntektsdata?.beløp,
-                inntektskilde = if (this.skjønnsmessigFastsatt != null) Inntektskilde.Saksbehandler else Inntektskilde.Sigrun
+                inntektskilde = if (this.skjønnsmessigFastsatt != null) Inntektskilde.Saksbehandler else Inntektskilde.Sigrun,
             )
 
-        internal fun gjenopprett(dto: SelvstendigInntektsopplysningInnDto): SelvstendigInntektsopplysning {
-            return SelvstendigInntektsopplysning(
+        internal fun gjenopprett(dto: SelvstendigInntektsopplysningInnDto): SelvstendigInntektsopplysning =
+            SelvstendigInntektsopplysning(
                 faktaavklartInntekt = SelvstendigFaktaavklartInntekt.gjenopprett(dto.faktaavklartInntekt),
-                skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let { SkjønnsmessigFastsatt.gjenopprett(it) }
+                skjønnsmessigFastsatt = dto.skjønnsmessigFastsatt?.let { SkjønnsmessigFastsatt.gjenopprett(it) },
             )
-        }
     }
 
-    internal fun dto() = SelvstendigInntektsopplysningUtDto(
-        faktaavklartInntekt = this.faktaavklartInntekt.dto(),
-        skjønnsmessigFastsatt = skjønnsmessigFastsatt?.dto()
-    )
+    internal fun dto() =
+        SelvstendigInntektsopplysningUtDto(
+            faktaavklartInntekt = this.faktaavklartInntekt.dto(),
+            skjønnsmessigFastsatt = skjønnsmessigFastsatt?.dto(),
+        )
 }

@@ -1,8 +1,5 @@
 package no.nav.helse.spleis.speil
 
-import java.time.LocalDate.EPOCH
-import java.time.Month
-import java.time.YearMonth
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.fredag
@@ -29,9 +26,11 @@ import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate.EPOCH
+import java.time.Month
+import java.time.YearMonth
 
 internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
-
     @Test
     fun `lager ikke hvit pølse i helg`() {
         håndterSøknad(1.januar til 19.januar)
@@ -56,7 +55,7 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT, a2 to INNTEKT),
-            arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH)
+            arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH),
         )
         håndterYtelserTilGodkjenning()
 
@@ -80,21 +79,28 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         val speilJson = speilApi()
         assertEquals(
             emptyList<GhostPeriodeDTO>(),
-            speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
+            speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder,
         )
 
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
-        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagId =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .first()
+                .vilkårsgrunnlag
+                .single { it.skjæringstidspunkt == 1.januar }
+                .vilkårsgrunnlagId
         assertEquals(1, perioder.size)
         val actual = perioder.first()
-        val expected = GhostPeriodeDTO(
-            id = actual.id,
-            fom = 1.januar,
-            tom = 20.januar,
-            skjæringstidspunkt = 1.januar,
-            vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-            deaktivert = false
-        )
+        val expected =
+            GhostPeriodeDTO(
+                id = actual.id,
+                fom = 1.januar,
+                tom = 20.januar,
+                skjæringstidspunkt = 1.januar,
+                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                deaktivert = false,
+            )
         assertEquals(expected, actual)
     }
 
@@ -108,24 +114,31 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
-            arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH)
+            arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH),
         )
         håndterYtelserTilGodkjenning()
 
         val speilJson1 = speilApi()
-        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagId =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .first()
+                .vilkårsgrunnlag
+                .single { it.skjæringstidspunkt == 1.januar }
+                .vilkårsgrunnlagId
 
         speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder.also { ghostPerioder ->
             assertEquals(1, ghostPerioder.size)
             ghostPerioder[0].also { actual ->
-                val expected = GhostPeriodeDTO(
-                    id = actual.id,
-                    fom = 21.januar,
-                    tom = 31.januar,
-                    skjæringstidspunkt = 1.januar,
-                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-                    deaktivert = false
-                )
+                val expected =
+                    GhostPeriodeDTO(
+                        id = actual.id,
+                        fom = 21.januar,
+                        tom = 31.januar,
+                        skjæringstidspunkt = 1.januar,
+                        vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                        deaktivert = false,
+                    )
                 assertEquals(expected, actual)
             }
         }
@@ -133,14 +146,15 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder.also { ghostPerioder ->
             assertEquals(1, ghostPerioder.size)
             ghostPerioder[0].also { actual ->
-                val expected = GhostPeriodeDTO(
-                    id = actual.id,
-                    fom = 1.januar,
-                    tom = 3.januar,
-                    skjæringstidspunkt = 1.januar,
-                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-                    deaktivert = false
-                )
+                val expected =
+                    GhostPeriodeDTO(
+                        id = actual.id,
+                        fom = 1.januar,
+                        tom = 3.januar,
+                        skjæringstidspunkt = 1.januar,
+                        vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                        deaktivert = false,
+                    )
                 assertEquals(expected, actual)
             }
         }
@@ -148,14 +162,15 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a3 }.ghostPerioder.also { perioder ->
             assertEquals(1, perioder.size)
             val actual = perioder.first()
-            val expected = GhostPeriodeDTO(
-                id = actual.id,
-                fom = 1.januar,
-                tom = 31.januar,
-                skjæringstidspunkt = 1.januar,
-                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-                deaktivert = false
-            )
+            val expected =
+                GhostPeriodeDTO(
+                    id = actual.id,
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    skjæringstidspunkt = 1.januar,
+                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                    deaktivert = false,
+                )
             assertEquals(expected, actual)
         }
     }
@@ -172,7 +187,7 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
-            arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH)
+            arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH),
         )
         håndterYtelserTilGodkjenning()
         håndterUtbetalingsgodkjenning()
@@ -184,13 +199,19 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
-            arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH)
+            arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH),
         )
         håndterYtelserTilGodkjenning()
         håndterUtbetalingsgodkjenning()
 
         val speilJson1 = speilApi()
-        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagId =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .first()
+                .vilkårsgrunnlag
+                .single { it.skjæringstidspunkt == 1.januar }
+                .vilkårsgrunnlagId
 
         speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder.also { ghostPerioder ->
             assertEquals(0, ghostPerioder.size)
@@ -199,14 +220,15 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder.also { ghostPerioder ->
             assertEquals(1, ghostPerioder.size)
             ghostPerioder[0].also { actual ->
-                val expected = GhostPeriodeDTO(
-                    id = actual.id,
-                    fom = 25.januar,
-                    tom = 28.januar,
-                    skjæringstidspunkt = 1.januar,
-                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-                    deaktivert = false
-                )
+                val expected =
+                    GhostPeriodeDTO(
+                        id = actual.id,
+                        fom = 25.januar,
+                        tom = 28.januar,
+                        skjæringstidspunkt = 1.januar,
+                        vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                        deaktivert = false,
+                    )
                 assertEquals(expected, actual)
             }
         }
@@ -226,18 +248,25 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
         val speilJson = speilApi()
         assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder)
-        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.februar }.vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagId =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .first()
+                .vilkårsgrunnlag
+                .single { it.skjæringstidspunkt == 1.februar }
+                .vilkårsgrunnlagId
         val perioder = speilJson.arbeidsgivere.find { it.organisasjonsnummer == a2 }?.ghostPerioder
         assertEquals(1, perioder?.size)
         val actual = perioder!!.first()
-        val expected = GhostPeriodeDTO(
-            id = actual.id,
-            fom = 1.februar,
-            tom = 20.februar,
-            skjæringstidspunkt = 1.februar,
-            vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-            deaktivert = false
-        )
+        val expected =
+            GhostPeriodeDTO(
+                id = actual.id,
+                fom = 1.februar,
+                tom = 20.februar,
+                skjæringstidspunkt = 1.februar,
+                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                deaktivert = false,
+            )
 
         assertEquals(expected, actual)
     }
@@ -256,18 +285,25 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
         val speilJson = speilApi()
         assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder)
-        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagId =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .first()
+                .vilkårsgrunnlag
+                .single { it.skjæringstidspunkt == 1.januar }
+                .vilkårsgrunnlagId
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
         assertEquals(1, perioder.size)
         val actual = perioder.first()
-        val expected = GhostPeriodeDTO(
-            id = actual.id,
-            fom = 1.januar,
-            tom = 20.januar,
-            skjæringstidspunkt = 1.januar,
-            vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-            deaktivert = false
-        )
+        val expected =
+            GhostPeriodeDTO(
+                id = actual.id,
+                fom = 1.januar,
+                tom = 20.januar,
+                skjæringstidspunkt = 1.januar,
+                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                deaktivert = false,
+            )
 
         assertEquals(expected, actual)
         assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a3 }.ghostPerioder)
@@ -282,22 +318,29 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         val speilJson = speilApi()
         assertEquals(
             emptyList<GhostPeriodeDTO>(),
-            speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
+            speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder,
         )
 
         val perioder = speilJson.arbeidsgivere.find { it.organisasjonsnummer == a2 }?.ghostPerioder
-        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 3.januar }.vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagId =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .first()
+                .vilkårsgrunnlag
+                .single { it.skjæringstidspunkt == 3.januar }
+                .vilkårsgrunnlagId
         assertEquals(1, perioder?.size)
 
         val actual = perioder!!.first()
-        val expected = GhostPeriodeDTO(
-            id = actual.id,
-            fom = 3.januar,
-            tom = 31.januar,
-            skjæringstidspunkt = 3.januar,
-            vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-            deaktivert = false
-        )
+        val expected =
+            GhostPeriodeDTO(
+                id = actual.id,
+                fom = 3.januar,
+                tom = 31.januar,
+                skjæringstidspunkt = 3.januar,
+                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                deaktivert = false,
+            )
         assertEquals(expected, actual)
     }
 
@@ -307,7 +350,7 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT),
-            arbeidsforhold = listOf(a1 to EPOCH, a2 to EPOCH)
+            arbeidsforhold = listOf(a1 to EPOCH, a2 to EPOCH),
         )
         håndterYtelserTilGodkjenning()
         val personDto = speilApi()
@@ -326,26 +369,36 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         håndterYtelserTilGodkjenning()
 
         val personDto = speilApi()
-        val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val vilkårsgrunnlagId =
+            (
+                personDto.arbeidsgivere
+                    .first()
+                    .generasjoner
+                    .first()
+                    .perioder
+                    .first() as BeregnetPeriode
+            ).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
 
         assertEquals(listOf(a1, a2), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
         assertEquals(
             Arbeidsgiverinntekt(
                 organisasjonsnummer = a2,
-                omregnetÅrsinntekt = Inntekt(
-                    kilde = Inntektkilde.AOrdningen,
-                    beløp = 12000.0,
-                    månedsbeløp = 1000.0,
-                    inntekterFraAOrdningen = listOf(
-                        InntekterFraAOrdningen(YearMonth.of(2017, Month.OCTOBER), 1000.0),
-                        InntekterFraAOrdningen(YearMonth.of(2017, Month.NOVEMBER), 1000.0),
-                        InntekterFraAOrdningen(YearMonth.of(2017, Month.DECEMBER), 1000.0)
-                    )
-                ),
-                deaktivert = true
+                omregnetÅrsinntekt =
+                    Inntekt(
+                        kilde = Inntektkilde.AOrdningen,
+                        beløp = 12000.0,
+                        månedsbeløp = 1000.0,
+                        inntekterFraAOrdningen =
+                            listOf(
+                                InntekterFraAOrdningen(YearMonth.of(2017, Month.OCTOBER), 1000.0),
+                                InntekterFraAOrdningen(YearMonth.of(2017, Month.NOVEMBER), 1000.0),
+                                InntekterFraAOrdningen(YearMonth.of(2017, Month.DECEMBER), 1000.0),
+                            ),
+                    ),
+                deaktivert = true,
             ),
-            vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 }
+            vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 },
         )
     }
 
@@ -355,7 +408,7 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT),
-            arbeidsforhold = listOf(a1 to EPOCH, a2 to 1.desember(2017))
+            arbeidsforhold = listOf(a1 to EPOCH, a2 to 1.desember(2017)),
         )
         håndterYtelserTilGodkjenning()
 
@@ -363,11 +416,24 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         håndterYtelserTilGodkjenning()
 
         val personDto = speilApi()
-        val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val vilkårsgrunnlagId =
+            (
+                personDto.arbeidsgivere
+                    .first()
+                    .generasjoner
+                    .first()
+                    .perioder
+                    .first() as BeregnetPeriode
+            ).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
 
         assertEquals(listOf(a1, a2), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
-        assertTrue(personDto.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder.isNotEmpty())
+        assertTrue(
+            personDto.arbeidsgivere
+                .single { it.organisasjonsnummer == a2 }
+                .ghostPerioder
+                .isNotEmpty(),
+        )
     }
 
     @Test
@@ -375,7 +441,7 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(
-            arbeidsforhold = listOf(a1 to EPOCH, a2 to 1.desember(2017))
+            arbeidsforhold = listOf(a1 to EPOCH, a2 to 1.desember(2017)),
         )
         håndterYtelserTilGodkjenning()
         val skjæringstidspunkt = 1.januar
@@ -383,31 +449,42 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         håndterYtelserTilGodkjenning()
 
         val personDto = speilApi()
-        val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val vilkårsgrunnlagId =
+            (
+                personDto.arbeidsgivere
+                    .first()
+                    .generasjoner
+                    .first()
+                    .perioder
+                    .first() as BeregnetPeriode
+            ).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
 
-        val forventet = listOf(
-            Arbeidsgiverinntekt(
-                organisasjonsnummer = a1,
-                omregnetÅrsinntekt = Inntekt(
-                    kilde = Inntektkilde.Inntektsmelding,
-                    beløp = 576000.0,
-                    månedsbeløp = 48000.0,
-                    inntekterFraAOrdningen = null
+        val forventet =
+            listOf(
+                Arbeidsgiverinntekt(
+                    organisasjonsnummer = a1,
+                    omregnetÅrsinntekt =
+                        Inntekt(
+                            kilde = Inntektkilde.Inntektsmelding,
+                            beløp = 576000.0,
+                            månedsbeløp = 48000.0,
+                            inntekterFraAOrdningen = null,
+                        ),
+                    deaktivert = false,
                 ),
-                deaktivert = false
-            ),
-            Arbeidsgiverinntekt(
-                organisasjonsnummer = a2,
-                omregnetÅrsinntekt = Inntekt(
-                    kilde = Inntektkilde.IkkeRapportert,
-                    beløp = 0.0,
-                    månedsbeløp = 0.0,
-                    inntekterFraAOrdningen = emptyList()
+                Arbeidsgiverinntekt(
+                    organisasjonsnummer = a2,
+                    omregnetÅrsinntekt =
+                        Inntekt(
+                            kilde = Inntektkilde.IkkeRapportert,
+                            beløp = 0.0,
+                            månedsbeløp = 0.0,
+                            inntekterFraAOrdningen = emptyList(),
+                        ),
+                    deaktivert = true,
                 ),
-                deaktivert = true
             )
-        )
         assertEquals(forventet, vilkårsgrunnlag?.inntekter)
     }
 
@@ -422,7 +499,14 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
         val personDto = speilApi()
         val vilkårsgrunnlagId =
-            (personDto.arbeidsgivere.find { it.organisasjonsnummer == a1 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+            (
+                personDto.arbeidsgivere
+                    .find { it.organisasjonsnummer == a1 }!!
+                    .generasjoner
+                    .first()
+                    .perioder
+                    .first() as BeregnetPeriode
+            ).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
         assertEquals(listOf(a1), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
         assertEquals(listOf(a2, a1), personDto.arbeidsgivere.map { it.organisasjonsnummer })
@@ -439,17 +523,24 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
         val speilJson = speilApi()
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
-        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagId =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .first()
+                .vilkårsgrunnlag
+                .single { it.skjæringstidspunkt == 1.januar }
+                .vilkårsgrunnlagId
         assertEquals(1, perioder.size)
         val actual = perioder.first()
-        val expected = GhostPeriodeDTO(
-            id = actual.id,
-            fom = 1.januar,
-            tom = 20.januar,
-            skjæringstidspunkt = 1.januar,
-            vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-            deaktivert = false
-        )
+        val expected =
+            GhostPeriodeDTO(
+                id = actual.id,
+                fom = 1.januar,
+                tom = 20.januar,
+                skjæringstidspunkt = 1.januar,
+                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                deaktivert = false,
+            )
         assertEquals(expected, actual)
     }
 
@@ -466,10 +557,28 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
         val arbeidsgiverA1 = speilJson.arbeidsgivere.singleOrNull { it.organisasjonsnummer == a1 }
         assertEquals(1, arbeidsgiverA1?.generasjoner?.size)
-        assertEquals(1, arbeidsgiverA1?.generasjoner?.single()?.perioder?.size)
-        val beregnetPeriode = arbeidsgiverA1?.generasjoner?.single()?.perioder?.single()
+        assertEquals(
+            1,
+            arbeidsgiverA1
+                ?.generasjoner
+                ?.single()
+                ?.perioder
+                ?.size,
+        )
+        val beregnetPeriode =
+            arbeidsgiverA1
+                ?.generasjoner
+                ?.single()
+                ?.perioder
+                ?.single()
         assertInstanceOf(BeregnetPeriode::class.java, beregnetPeriode)
-        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagId =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .first()
+                .vilkårsgrunnlag
+                .single { it.skjæringstidspunkt == 1.januar }
+                .vilkårsgrunnlagId
         val arbeidsgiverA2 = speilJson.arbeidsgivere.singleOrNull { it.organisasjonsnummer == a2 }
         assertEquals(0, arbeidsgiverA2?.generasjoner?.size)
         val perioder = arbeidsgiverA2?.ghostPerioder
@@ -481,9 +590,9 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
                 tom = 20.januar,
                 skjæringstidspunkt = 1.januar,
                 vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-                deaktivert = false
+                deaktivert = false,
             ),
-            actual
+            actual,
         )
     }
 
@@ -515,17 +624,24 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
         val speilJson = speilApi()
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
-        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagId =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .first()
+                .vilkårsgrunnlag
+                .single { it.skjæringstidspunkt == 1.januar }
+                .vilkårsgrunnlagId
         assertEquals(1, perioder.size)
         val actual = perioder.first()
-        val expected = GhostPeriodeDTO(
-            id = actual.id,
-            fom = 1.januar,
-            tom = 20.januar,
-            skjæringstidspunkt = 1.januar,
-            vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-            deaktivert = false
-        )
+        val expected =
+            GhostPeriodeDTO(
+                id = actual.id,
+                fom = 1.januar,
+                tom = 20.januar,
+                skjæringstidspunkt = 1.januar,
+                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                deaktivert = false,
+            )
         assertEquals(expected, actual)
     }
 
@@ -548,27 +664,35 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
 
         assertEquals(2, perioder.size)
         val skjæringstidspunkt = 1.januar
-        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagId =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .first()
+                .vilkårsgrunnlag
+                .single { it.skjæringstidspunkt == 1.januar }
+                .vilkårsgrunnlagId
         perioder[0].also { actual ->
-            val expected = GhostPeriodeDTO(
-                id = actual.id,
-                fom = 1.januar,
-                tom = 31.januar,
-                skjæringstidspunkt = skjæringstidspunkt,
-                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-                deaktivert = false
-            )
+            val expected =
+                GhostPeriodeDTO(
+                    id = actual.id,
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                    deaktivert = false,
+                )
             assertEquals(expected, actual)
         }
         perioder[1].also { actual ->
-            val expected = GhostPeriodeDTO(
-                id = actual.id,
-                fom = 1.mars,
-                tom = 31.mars,
-                skjæringstidspunkt = skjæringstidspunkt,
-                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-                deaktivert = false
-            )
+            val expected =
+                GhostPeriodeDTO(
+                    id = actual.id,
+                    fom = 1.mars,
+                    tom = 31.mars,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                    deaktivert = false,
+                )
             assertEquals(expected, actual)
         }
     }
@@ -578,8 +702,24 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         nyeVedtak(1.januar, 31.januar, a1 to 1, a2 to 1)
 
         val personDto = speilApi()
-        val speilVilkårsgrunnlagIdForAG1 = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val speilVilkårsgrunnlagIdForAG2 = (personDto.arbeidsgivere.last().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val speilVilkårsgrunnlagIdForAG1 =
+            (
+                personDto.arbeidsgivere
+                    .first()
+                    .generasjoner
+                    .first()
+                    .perioder
+                    .first() as BeregnetPeriode
+            ).vilkårsgrunnlagId
+        val speilVilkårsgrunnlagIdForAG2 =
+            (
+                personDto.arbeidsgivere
+                    .last()
+                    .generasjoner
+                    .first()
+                    .perioder
+                    .first() as BeregnetPeriode
+            ).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagIdForAG1] as? SpleisVilkårsgrunnlag
         val vilkårsgrunnlag2 = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagIdForAG2] as? SpleisVilkårsgrunnlag
         assertEquals(vilkårsgrunnlag, vilkårsgrunnlag2)
@@ -613,11 +753,43 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         val personDto = speilApi()
         assertEquals(1, personDto.vilkårsgrunnlag.size)
 
-        val januarVilkårsgrunnlagIdForAG1 = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a1 }!!.generasjoner.last().perioder.last() as BeregnetPeriode).vilkårsgrunnlagId
-        val februarVilkårsgrunnlagIdForAG1 = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a1 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val januarVilkårsgrunnlagIdForAG1 =
+            (
+                personDto.arbeidsgivere
+                    .find { it.organisasjonsnummer == a1 }!!
+                    .generasjoner
+                    .last()
+                    .perioder
+                    .last() as BeregnetPeriode
+            ).vilkårsgrunnlagId
+        val februarVilkårsgrunnlagIdForAG1 =
+            (
+                personDto.arbeidsgivere
+                    .find { it.organisasjonsnummer == a1 }!!
+                    .generasjoner
+                    .first()
+                    .perioder
+                    .first() as BeregnetPeriode
+            ).vilkårsgrunnlagId
 
-        val januarVilkårsgrunnlagIdForAG2 = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a2 }!!.generasjoner.last().perioder.last() as BeregnetPeriode).vilkårsgrunnlagId
-        val februarVilkårsgrunnlagIdForAG2 = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a2 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val januarVilkårsgrunnlagIdForAG2 =
+            (
+                personDto.arbeidsgivere
+                    .find { it.organisasjonsnummer == a2 }!!
+                    .generasjoner
+                    .last()
+                    .perioder
+                    .last() as BeregnetPeriode
+            ).vilkårsgrunnlagId
+        val februarVilkårsgrunnlagIdForAG2 =
+            (
+                personDto.arbeidsgivere
+                    .find { it.organisasjonsnummer == a2 }!!
+                    .generasjoner
+                    .first()
+                    .perioder
+                    .first() as BeregnetPeriode
+            ).vilkårsgrunnlagId
 
         assertEquals(januarVilkårsgrunnlagIdForAG1, januarVilkårsgrunnlagIdForAG2)
         assertEquals(februarVilkårsgrunnlagIdForAG1, februarVilkårsgrunnlagIdForAG2)
@@ -668,31 +840,39 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         håndterYtelserTilGodkjenning()
 
         val speilJson = speilApi()
-        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagId =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .first()
+                .vilkårsgrunnlag
+                .single { it.skjæringstidspunkt == 1.januar }
+                .vilkårsgrunnlagId
 
         speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder.also { perioder ->
             assertEquals(2, perioder.size)
 
             perioder[0].also { actual ->
-                val expected = GhostPeriodeDTO(
-                    id = actual.id,
-                    fom = 1.februar,
-                    tom = 11.februar,
-                    skjæringstidspunkt = 1.januar,
-                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-                    deaktivert = false
-                )
+                val expected =
+                    GhostPeriodeDTO(
+                        id = actual.id,
+                        fom = 1.februar,
+                        tom = 11.februar,
+                        skjæringstidspunkt = 1.januar,
+                        vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                        deaktivert = false,
+                    )
                 assertEquals(expected, actual)
             }
             perioder[1].also { actual ->
-                val expected = GhostPeriodeDTO(
-                    id = actual.id,
-                    fom = 13.mars,
-                    tom = 31.mars,
-                    skjæringstidspunkt = 1.januar,
-                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-                    deaktivert = false
-                )
+                val expected =
+                    GhostPeriodeDTO(
+                        id = actual.id,
+                        fom = 13.mars,
+                        tom = 31.mars,
+                        skjæringstidspunkt = 1.januar,
+                        vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                        deaktivert = false,
+                    )
                 assertEquals(expected, actual)
             }
         }
@@ -700,28 +880,29 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
             assertEquals(2, perioder.size)
 
             perioder[0].also { actual ->
-                val expected = GhostPeriodeDTO(
-                    id = actual.id,
-                    fom = 1.januar,
-                    tom = 16.januar,
-                    skjæringstidspunkt = 1.januar,
-                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-                    deaktivert = false
-                )
+                val expected =
+                    GhostPeriodeDTO(
+                        id = actual.id,
+                        fom = 1.januar,
+                        tom = 16.januar,
+                        skjæringstidspunkt = 1.januar,
+                        vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                        deaktivert = false,
+                    )
                 assertEquals(expected, actual)
             }
             perioder[1].also { actual ->
-                val expected = GhostPeriodeDTO(
-                    id = actual.id,
-                    fom = 1.mars,
-                    tom = 12.mars,
-                    skjæringstidspunkt = 1.januar,
-                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
-                    deaktivert = false
-                )
+                val expected =
+                    GhostPeriodeDTO(
+                        id = actual.id,
+                        fom = 1.mars,
+                        tom = 12.mars,
+                        skjæringstidspunkt = 1.januar,
+                        vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                        deaktivert = false,
+                    )
                 assertEquals(expected, actual)
             }
         }
     }
 }
-

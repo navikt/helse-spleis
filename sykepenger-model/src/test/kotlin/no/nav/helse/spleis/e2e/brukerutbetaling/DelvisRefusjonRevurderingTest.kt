@@ -1,21 +1,13 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.a2
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -23,7 +15,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class DelvisRefusjonRevurderingTest : AbstractDslTest() {
-
     @Test
     fun `korrigerende inntektsmelding med halvering av inntekt setter riktig refusjonsbeløp fra nyeste inntektsmelding`() {
         a1 {
@@ -34,7 +25,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractDslTest() {
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT / 2,
-                refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
+                refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList()),
             )
 
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
@@ -139,13 +130,13 @@ internal class DelvisRefusjonRevurderingTest : AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 2308,
-                subset = 1.januar til 16.januar
+                subset = 1.januar til 16.januar,
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 2161,
                 forventetArbeidsgiverRefusjonsbeløp = 2308,
-                subset = 17.januar til 31.januar
+                subset = 17.januar til 31.januar,
             )
         }
         a2 {
@@ -153,24 +144,24 @@ internal class DelvisRefusjonRevurderingTest : AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 0,
-                subset = 1.januar til 16.januar
+                subset = 1.januar til 16.januar,
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 0,
-                subset = 17.januar til 31.januar
+                subset = 17.januar til 31.januar,
             )
         }
         a1 {
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = a1Inntekt / 2,
-                refusjon = Inntektsmelding.Refusjon(a1Inntekt / 2, null, emptyList())
+                refusjon = Inntektsmelding.Refusjon(a1Inntekt / 2, null, emptyList()),
             )
             håndterOverstyrInntekt(
                 skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
-                inntekt = a1Inntekt / 2
+                inntekt = a1Inntekt / 2,
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())

@@ -1,13 +1,6 @@
 package no.nav.helse.spleis.e2e.tilkommen_arbeidsgiver
 
-import java.time.LocalDate
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Arbeidstakerkilde
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntekterForBeregning
@@ -23,14 +16,14 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import no.nav.helse.økonomi.inspectors.inspektør
-import org.junit.jupiter.api.Assertions.assertTrue
+import java.time.LocalDate
 
 internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
-
     @Test
     fun `Ny arbeidsgiver underveis`() {
         a1 {
@@ -41,7 +34,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar))
             håndterYtelser(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertVarsler(1.vedtaksperiode,Varselkode.TilkommenInntekt.`Søknad fra arbeidsgiver som ikke er i sykepengegrunnlaget`, Varselkode.RV_VV_4)
+            assertVarsler(1.vedtaksperiode, Varselkode.TilkommenInntekt.`Søknad fra arbeidsgiver som ikke er i sykepengegrunnlaget`, Varselkode.RV_VV_4)
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.let { avvisteDager ->
                 assertEquals(8, avvisteDager.size)
                 assertTrue(avvisteDager.all { it.begrunnelser.single() == Begrunnelse.MinimumSykdomsgrad })
@@ -159,18 +152,23 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, 1.januar, null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, 1.januar, null),
+                    ),
             )
             assertVarsler(listOf(Varselkode.RV_VV_1), 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, deaktivert = true, forklaring = "skal ikke inngå i sykepengegrunnlaget"))
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(
-                InntekterForBeregning.Inntektsperiode(a2, 10.januar til 31.januar, beløp = 5000.månedlig)
-            ))
+            håndterYtelser(
+                1.vedtaksperiode,
+                inntekterForBeregning =
+                    listOf(
+                        InntekterForBeregning.Inntektsperiode(a2, 10.januar til 31.januar, beløp = 5000.månedlig),
+                    ),
+            )
             håndterSimulering(1.vedtaksperiode)
 
             inspektør.utbetalingstidslinjer(1.vedtaksperiode)[1.januar].also { dag ->

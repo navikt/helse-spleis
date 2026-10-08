@@ -1,22 +1,11 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import java.time.LocalDate
-import no.nav.helse.april
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Arbeidstakerkilde
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.februar
+import no.nav.helse.*
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.mai
-import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
@@ -28,9 +17,9 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class FlereArbeidsgivereArbeidsforholdTest : AbstractDslTest() {
-
     @Test
     fun `Filtrerer ut irrelevante arbeidsforhold per arbeidsgiver`() {
         a1 {
@@ -51,8 +40,20 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractDslTest() {
             val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.mars)
             assertNotNull(vilkårsgrunnlag)
 
-            assertEquals(1, vilkårsgrunnlag.inspektør.opptjening!!.arbeidsforhold.single { it.orgnummer == a1 }.ansattPerioder.size)
-            assertEquals(1, vilkårsgrunnlag.inspektør.opptjening!!.arbeidsforhold.single { it.orgnummer == a2 }.ansattPerioder.size)
+            assertEquals(
+                1,
+                vilkårsgrunnlag.inspektør.opptjening!!
+                    .arbeidsforhold
+                    .single { it.orgnummer == a1 }
+                    .ansattPerioder.size,
+            )
+            assertEquals(
+                1,
+                vilkårsgrunnlag.inspektør.opptjening!!
+                    .arbeidsforhold
+                    .single { it.orgnummer == a2 }
+                    .ansattPerioder.size,
+            )
         }
     }
 
@@ -97,10 +98,11 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to 30000.månedlig),
-                arbeidsforhold = listOf(
-                    Triple(a1, 2.januar(2020), null),
-                    Triple(a2, 1.mai(2019), null)
-                ),
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, 2.januar(2020), null),
+                        Triple(a2, 1.mai(2019), null),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -113,9 +115,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractDslTest() {
     @Test
     fun `Syk for a1, slutter i a1, syk for a2, a1 finnes ikke i Aa-reg lenger - ingen warning for manglende arbeidsforhold`() {
         /*
-        * Siden vi ikke vet om arbeidsforhold for tidligere utbetalte perioder må vi passe på at ikke lar de periodene føre til advarsel på nye helt uavhengie vedtaksperioder
-        * Sjekker kun arbeidsforhold for gjelende skjæringstidspunkt, derfor vil ikke mangel av arbeidsforhold for a1 skape problemer
-        * */
+         * Siden vi ikke vet om arbeidsforhold for tidligere utbetalte perioder må vi passe på at ikke lar de periodene føre til advarsel på nye helt uavhengie vedtaksperioder
+         * Sjekker kun arbeidsforhold for gjelende skjæringstidspunkt, derfor vil ikke mangel av arbeidsforhold for a1 skape problemer
+         * */
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.mars(2017), 31.mars(2017)))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars(2017), 31.mars(2017), 50.prosent))
@@ -147,7 +149,11 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractDslTest() {
 
             assertEquals(
                 692.0,
-                inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje[19.mars].økonomi.inspektør.arbeidsgiverbeløp?.daglig
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.utbetalingstidslinje[19.mars]
+                    .økonomi.inspektør.arbeidsgiverbeløp
+                    ?.daglig,
             )
             val a2Linje = inspektør.utbetaling(0).arbeidsgiverOppdrag.last()
             assertEquals(17.mars, a2Linje.fom)
@@ -172,17 +178,24 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to 10000.månedlig),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, 1.januar),
-                    Triple(a1, 1.januar, null), // Skal gjelde
-                    Triple(a1, 28.februar, 1.mars), // Skal gjelde
-                    Triple(a1, 1.mars, 31.mars), // Skal ikke gjelde fordi ansettelsetidspunktet er på skjæringstidspunktet
-                    Triple(a1, 1.februar, 28.februar),
-                    Triple(a1, 2.mars, 31.mars) // Gjelder ikke etter endring
-                ),
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, 1.januar),
+                        Triple(a1, 1.januar, null), // Skal gjelde
+                        Triple(a1, 28.februar, 1.mars), // Skal gjelde
+                        Triple(a1, 1.mars, 31.mars), // Skal ikke gjelde fordi ansettelsetidspunktet er på skjæringstidspunktet
+                        Triple(a1, 1.februar, 28.februar),
+                        Triple(a1, 2.mars, 31.mars), // Gjelder ikke etter endring
+                    ),
             )
             val grunnlagsdata = inspektør.vilkårsgrunnlag(1.mars)!!
-            assertEquals(4, grunnlagsdata.inspektør.opptjening!!.arbeidsforhold.single { it.orgnummer == a1 }.ansattPerioder.size)
+            assertEquals(
+                4,
+                grunnlagsdata.inspektør.opptjening!!
+                    .arbeidsforhold
+                    .single { it.orgnummer == a1 }
+                    .ansattPerioder.size,
+            )
         }
     }
 
@@ -218,11 +231,12 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to 11400.månedlig, a2 to 45000.månedlig),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, 31.januar),
-                    Triple(a1, 1.mars, null),
-                    Triple(a2, LocalDate.EPOCH, null)
-                ),
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, 31.januar),
+                        Triple(a1, 1.mars, null),
+                        Triple(a2, LocalDate.EPOCH, null),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -241,11 +255,12 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 2.vedtaksperiode,
                 skatteinntekter = listOf(a1 to 11400.månedlig, a2 to 45000.månedlig),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, 31.januar),
-                    Triple(a1, 1.mars, null),
-                    Triple(a2, LocalDate.EPOCH, null)
-                ),
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, 31.januar),
+                        Triple(a1, 1.mars, null),
+                        Triple(a2, LocalDate.EPOCH, null),
+                    ),
             )
             assertVarsel(RV_VV_2, 2.vedtaksperiode.filter())
             håndterYtelser(2.vedtaksperiode)
@@ -258,10 +273,17 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractDslTest() {
         a2 {
             val utbetaling = inspektør.utbetaling(0)
             val linje = utbetaling.arbeidsgiverOppdrag.linjerUtenOpphør().single()
-            assertEquals(100, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje[20.februar].økonomi.brukTotalGrad { totalGrad -> totalGrad })
+            assertEquals(
+                100,
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .inspektør.utbetalingstidslinje[20.februar]
+                    .økonomi
+                    .brukTotalGrad { totalGrad -> totalGrad },
+            )
             assertEquals(
                 2077,
-                linje.beløp
+                linje.beløp,
             ) // Ikke cappet på 6G, siden personen ikke jobber hos a1 ved dette skjæringstidspunktet
             assertEquals(18.februar, linje.fom)
             assertEquals(20.februar, linje.tom)
@@ -304,9 +326,10 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = emptyList(),
-                arbeidsforhold = listOf(
-                    Triple(a2, 1.januar(2017), null)
-                ),
+                arbeidsforhold =
+                    listOf(
+                        Triple(a2, 1.januar(2017), null),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

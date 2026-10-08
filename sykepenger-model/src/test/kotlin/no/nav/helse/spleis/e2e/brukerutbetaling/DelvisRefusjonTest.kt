@@ -1,11 +1,6 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.assertInntektsgrunnlag
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
@@ -20,17 +15,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -40,7 +25,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class DelvisRefusjonTest : AbstractDslTest() {
-
     @Test
     fun `Full refusjon til en arbeidsgiver med RefusjonPerDag på`() {
         a1 {
@@ -70,7 +54,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING
+                AVVENTER_GODKJENNING,
             )
             assertTrue(inspektør.sisteUtbetaling().arbeidsgiverOppdrag.isNotEmpty())
             inspektør.sisteUtbetaling().arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
@@ -102,7 +86,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
+                AVVENTER_SIMULERING,
             )
         }
     }
@@ -128,7 +112,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
+                AVVENTER_SIMULERING,
             )
         }
     }
@@ -159,14 +143,14 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
 
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterSøknad(mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
@@ -177,9 +161,8 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
+                AVVENTER_SIMULERING,
             )
-
 
             assertTrue(inspektør.sisteUtbetaling().arbeidsgiverOppdrag.isNotEmpty())
             inspektør.sisteUtbetaling().arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
@@ -209,7 +192,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
+                AVVENTER_SIMULERING,
             )
         }
     }
@@ -234,7 +217,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
+                AVVENTER_SIMULERING,
             )
         }
     }
@@ -259,7 +242,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
+                AVVENTER_SIMULERING,
             )
             assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
@@ -286,7 +269,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
+                AVVENTER_SIMULERING,
             )
 
             assertTrue(inspektør.sisteUtbetaling().arbeidsgiverOppdrag.isNotEmpty())
@@ -316,7 +299,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
@@ -325,7 +308,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(21.januar til 5.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
 
@@ -363,19 +346,18 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
                 subset = 1.januar til 16.januar,
-
-                )
+            )
             assertUtbetalingsbeløp(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 1080,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 17.januar til 31.januar
+                subset = 17.januar til 31.januar,
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 1.februar til 10.februar
+                subset = 1.februar til 10.februar,
             )
         }
         a2 {
@@ -383,22 +365,20 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 0,
-                subset = 1.januar til 20.januar
+                subset = 1.januar til 20.januar,
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
                 subset = 21.januar til 5.februar,
-
-                )
+            )
             assertUtbetalingsbeløp(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 1080,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
                 subset = 6.februar til 10.februar,
-
-                )
+            )
         }
     }
 
@@ -419,7 +399,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
@@ -428,7 +408,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(21.januar til 5.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a1 {
@@ -460,24 +440,23 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         }
         a1 {
-
             assertUtbetalingsbeløp(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 1.januar til 16.januar
+                subset = 1.januar til 16.januar,
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 1080,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 17.januar til 5.februar
+                subset = 17.januar til 5.februar,
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 1080,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 6.februar til 10.februar
+                subset = 6.februar til 10.februar,
             )
         }
         a2 {
@@ -485,19 +464,19 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 0,
-                subset = 1.januar til 20.januar
+                subset = 1.januar til 20.januar,
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 21.januar til 5.februar
+                subset = 21.januar til 5.februar,
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeId = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 1080,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 6.februar til 10.februar
+                subset = 6.februar til 10.februar,
             )
         }
     }
@@ -519,7 +498,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
@@ -528,7 +507,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(21.januar til 5.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
@@ -625,7 +604,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
+                AVVENTER_SIMULERING,
             )
         }
     }
@@ -640,11 +619,12 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-            val im2 = håndterKorrigerteArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT + 100.månedlig,
-                refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
-            )
+            val im2 =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    listOf(1.januar til 16.januar),
+                    beregnetInntekt = INNTEKT + 100.månedlig,
+                    refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList()),
+                )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
@@ -658,7 +638,7 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
+                AVVENTER_SIMULERING,
             )
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT + 100.månedlig)
@@ -685,15 +665,17 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                refusjon = Inntektsmelding.Refusjon(
-                    INNTEKT, 20.januar
-                ),
+                refusjon =
+                    Inntektsmelding.Refusjon(
+                        INNTEKT,
+                        20.januar,
+                    ),
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
@@ -750,10 +732,10 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             håndterSøknad(januar)
-            val inntektsmeldingId = håndterArbeidsgiveropplysninger(
-                listOf()
-            )
-
+            val inntektsmeldingId =
+                håndterArbeidsgiveropplysninger(
+                    listOf(),
+                )
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -824,15 +806,18 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                refusjon = Inntektsmelding.Refusjon(
-                    INNTEKT, 15.januar, emptyList()
-                ),
+                refusjon =
+                    Inntektsmelding.Refusjon(
+                        INNTEKT,
+                        15.januar,
+                        emptyList(),
+                    ),
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
@@ -866,7 +851,6 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
                 assertTrue(utbetaling.arbeidsgiverOppdrag.isEmpty())
             }
-
         }
     }
 }

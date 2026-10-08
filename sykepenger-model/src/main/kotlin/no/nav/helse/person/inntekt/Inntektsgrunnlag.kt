@@ -1,6 +1,5 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
@@ -33,6 +32,7 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRE
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning.Companion.berik
 import no.nav.helse.økonomi.Inntekt
+import java.time.LocalDate
 
 internal class Inntektsgrunnlag(
     private val skjæringstidspunkt: LocalDate,
@@ -40,17 +40,17 @@ internal class Inntektsgrunnlag(
     selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
     val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
     internal val vurdertInfotrygd: Boolean,
-    `6G`: Inntekt? = null
+    `6G`: Inntekt? = null,
 ) : Comparable<Inntekt> {
-
     init {
         arbeidsgiverInntektsopplysninger.validerSkjønnsmessigAltEllerIntet()
     }
 
-    val selvstendigInntektsopplysning: SelvstendigInntektsopplysning? = when (`6G`) {
-        null -> selvstendigInntektsopplysning?.medAnvendtGrunnbeløp(Grunnbeløp.`1G`.beløp(skjæringstidspunkt, LocalDate.now()))
-        else -> selvstendigInntektsopplysning
-    }
+    val selvstendigInntektsopplysning: SelvstendigInntektsopplysning? =
+        when (`6G`) {
+            null -> selvstendigInntektsopplysning?.medAnvendtGrunnbeløp(Grunnbeløp.`1G`.beløp(skjæringstidspunkt, LocalDate.now()))
+            else -> selvstendigInntektsopplysning
+        }
 
     internal val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
 
@@ -60,7 +60,14 @@ internal class Inntektsgrunnlag(
     // summen av alle inntekter
     val beregningsgrunnlag = this.selvstendigInntektsopplysning?.beregningsgrunnlag ?: arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt()
     val sykepengegrunnlag = beregningsgrunnlag.coerceAtMost(this.`6G`)
-    internal val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (beregningsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
+    internal val begrensning =
+        if (vurdertInfotrygd) {
+            VURDERT_I_INFOTRYGD
+        } else if (beregningsgrunnlag > this.`6G`) {
+            ER_6G_BEGRENSET
+        } else {
+            ER_IKKE_6G_BEGRENSET
+        }
 
     internal constructor(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
@@ -68,7 +75,7 @@ internal class Inntektsgrunnlag(
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
         skjæringstidspunkt: LocalDate,
         subsumsjonslogg: Subsumsjonslogg,
-        vurdertInfotrygd: Boolean = false
+        vurdertInfotrygd: Boolean = false,
     ) : this(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, selvstendigInntektsopplysning, deaktiverteArbeidsforhold, vurdertInfotrygd) {
         subsumsjonslogg.apply {
             logg(
@@ -76,8 +83,8 @@ internal class Inntektsgrunnlag(
                     erBegrenset = begrensning == ER_6G_BEGRENSET,
                     maksimaltSykepengegrunnlagÅrlig = `6G`.årlig,
                     skjæringstidspunkt = skjæringstidspunkt,
-                    beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig
-                )
+                    beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
+                ),
             )
         }
 
@@ -85,34 +92,32 @@ internal class Inntektsgrunnlag(
             subsumsjonslogg.apply {
                 logg(
                     `§ 8-35 ledd 2`(
-                        pensjonsgivendeInntekter = selvstendigInntektsopplysning.faktaavklartInntekt.pensjonsgivendeInntekter.map {
-                            PensjonsgivendeInntektSubsumsjon(
-                                årstall = it.årstall,
-                                pensjonsgivendeInntekt = it.beløp.årlig,
-                                gjennomsnittligG = it.snitt.årlig
-                            )
-                        },
+                        pensjonsgivendeInntekter =
+                            selvstendigInntektsopplysning.faktaavklartInntekt.pensjonsgivendeInntekter.map {
+                                PensjonsgivendeInntektSubsumsjon(
+                                    årstall = it.årstall,
+                                    pensjonsgivendeInntekt = it.beløp.årlig,
+                                    gjennomsnittligG = it.snitt.årlig,
+                                )
+                            },
                         nåværendeGrunnbeløp = selvstendigInntektsopplysning.faktaavklartInntekt.anvendtGrunnbeløp.årlig,
                         skjæringstidspunkt = skjæringstidspunkt,
-                        sykepengegrunnlag = sykepengegrunnlag.årlig
-                    )
+                        sykepengegrunnlag = sykepengegrunnlag.årlig,
+                    ),
                 )
             }
         }
     }
 
     internal companion object {
-
-        internal fun List<Inntektsgrunnlag>.harUlikeGrunnbeløp(): Boolean {
-            return map { it.`6G` }.distinct().size > 1
-        }
+        internal fun List<Inntektsgrunnlag>.harUlikeGrunnbeløp(): Boolean = map { it.`6G` }.distinct().size > 1
 
         fun opprett(
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
             deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
-            subsumsjonslogg: Subsumsjonslogg
+            subsumsjonslogg: Subsumsjonslogg,
         ): Inntektsgrunnlag {
             val alleInntekter = arbeidsgiverInntektsopplysninger + deaktiverteArbeidsforhold
             check(alleInntekter.distinctBy { it.orgnummer }.size == alleInntekter.size) {
@@ -123,93 +128,115 @@ internal class Inntektsgrunnlag(
                 selvstendigInntektsopplysning = selvstendigInntektsopplysning,
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
                 skjæringstidspunkt = skjæringstidspunkt,
-                subsumsjonslogg = subsumsjonslogg
+                subsumsjonslogg = subsumsjonslogg,
             )
         }
 
-        fun gjenopprett(skjæringstidspunkt: LocalDate, dto: InntektsgrunnlagInnDto): Inntektsgrunnlag {
-            return Inntektsgrunnlag(
+        fun gjenopprett(
+            skjæringstidspunkt: LocalDate,
+            dto: InntektsgrunnlagInnDto,
+        ): Inntektsgrunnlag =
+            Inntektsgrunnlag(
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverInntektsopplysninger = dto.arbeidsgiverInntektsopplysninger.map { ArbeidsgiverInntektsopplysning.gjenopprett(it) },
                 selvstendigInntektsopplysning = dto.selvstendigInntektsopplysning?.let { SelvstendigInntektsopplysning.gjenopprett(it) },
                 deaktiverteArbeidsforhold = dto.deaktiverteArbeidsforhold.map { ArbeidsgiverInntektsopplysning.gjenopprett(it) },
                 vurdertInfotrygd = dto.vurdertInfotrygd,
-                `6G` = Inntekt.gjenopprett(dto.`6G`)
+                `6G` = Inntekt.gjenopprett(dto.`6G`),
             )
-        }
     }
 
-    internal fun vurderArbeidsgivere(aktivitetslogg: IAktivitetslogg, opptjening: ArbeidstakerOpptjening?, orgnummer: String) {
+    internal fun vurderArbeidsgivere(
+        aktivitetslogg: IAktivitetslogg,
+        opptjening: ArbeidstakerOpptjening?,
+        orgnummer: String,
+    ) {
         if (opptjening != null) arbeidsgiverInntektsopplysninger.vurderArbeidsgivere(aktivitetslogg, opptjening, orgnummer)
     }
 
-    internal fun måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg: IAktivitetslogg, opptjening: ArbeidstakerOpptjening) {
+    internal fun måHaRegistrertOpptjeningForArbeidsgivere(
+        aktivitetslogg: IAktivitetslogg,
+        opptjening: ArbeidstakerOpptjening,
+    ) {
         arbeidsgiverInntektsopplysninger.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
     }
 
-    internal fun aktiver(orgnummer: String, forklaring: String, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
+    internal fun aktiver(
+        orgnummer: String,
+        forklaring: String,
+        subsumsjonslogg: Subsumsjonslogg,
+    ): Inntektsgrunnlag {
         if (arbeidsgiverInntektsopplysninger.any { it.gjelder(orgnummer) }) return this // Unngår å aktivere om det allerede er aktivt ettersom det ruller tilbake eventuell skjønnsmessig fastsettelse
-        return deaktiverteArbeidsforhold.aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonslogg)
+        return deaktiverteArbeidsforhold
+            .aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonslogg)
             .let { (deaktiverte, aktiverte) ->
                 kopierInntektsgrunnlag(
                     arbeidsgiverInntektsopplysninger = aktiverte,
                     selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
-                    deaktiverteArbeidsforhold = deaktiverte
+                    deaktiverteArbeidsforhold = deaktiverte,
                 )
             }
     }
 
-    internal fun deaktiver(orgnummer: String, forklaring: String, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
+    internal fun deaktiver(
+        orgnummer: String,
+        forklaring: String,
+        subsumsjonslogg: Subsumsjonslogg,
+    ): Inntektsgrunnlag {
         if (deaktiverteArbeidsforhold.any { it.gjelder(orgnummer) }) return this // Unngår å deaktivere om det allerede er deaktivert ettersom det ruller tilbake eventuell skjønnsmessig fastsettelse
-        return arbeidsgiverInntektsopplysninger.deaktiver(deaktiverteArbeidsforhold, orgnummer, forklaring, subsumsjonslogg)
+        return arbeidsgiverInntektsopplysninger
+            .deaktiver(deaktiverteArbeidsforhold, orgnummer, forklaring, subsumsjonslogg)
             .let { (aktiverte, deaktiverte) ->
                 kopierInntektsgrunnlag(
                     arbeidsgiverInntektsopplysninger = aktiverte,
                     selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
-                    deaktiverteArbeidsforhold = deaktiverte
+                    deaktiverteArbeidsforhold = deaktiverte,
                 )
             }
     }
 
-    internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
-        return hendelse.overstyr(this, subsumsjonslogg)
-    }
+    internal fun overstyrArbeidsforhold(
+        hendelse: OverstyrArbeidsforhold,
+        subsumsjonslogg: Subsumsjonslogg,
+    ): Inntektsgrunnlag = hendelse.overstyr(this, subsumsjonslogg)
 
-    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse) = kopierInntektsgrunnlag(
-        arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.skjønnsfastsett(hendelse.arbeidsgiveropplysninger),
-        selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
-        deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
-    )
+    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse) =
+        kopierInntektsgrunnlag(
+            arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.skjønnsfastsett(hendelse.arbeidsgiveropplysninger),
+            selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
+            deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold,
+        )
 
     internal fun håndterArbeidstakerFaktaavklartInntekt(
         organisasjonsnummer: String,
         førsteFraværsdag: LocalDate,
-        arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
+        arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
     ): Utfall {
-        val arbeidsgiverInntektsopplysningerUtfall = arbeidsgiverInntektsopplysninger.håndterArbeidstakerFaktaavklartInntekt(
-            organisasjonsnummer = organisasjonsnummer,
-            førsteFraværsdag = førsteFraværsdag,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklartInntekt
-        )
+        val arbeidsgiverInntektsopplysningerUtfall =
+            arbeidsgiverInntektsopplysninger.håndterArbeidstakerFaktaavklartInntekt(
+                organisasjonsnummer = organisasjonsnummer,
+                førsteFraværsdag = førsteFraværsdag,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidstakerFaktaavklartInntekt = arbeidstakerFaktaavklartInntekt,
+            )
         return Utfall.bestem(arbeidsgiverInntektsopplysningerUtfall) { nyeArbeidsgiverInntektsopplysninger ->
             kopierInntektsgrunnlag(
                 arbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger,
                 selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
-                deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
+                deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold,
             )
         }
     }
 
     internal fun håndterKorrigerteInntekter(
-        hendelse: OverstyrArbeidsgiveropplysninger
+        hendelse: OverstyrArbeidsgiveropplysninger,
     ): Utfall {
         val arbeidsgiverInntektsopplysningerUtfall = arbeidsgiverInntektsopplysninger.håndterKorrigerteInntekter(hendelse.arbeidsgiveropplysninger)
         return Utfall.bestem(arbeidsgiverInntektsopplysningerUtfall) { nyeArbeidsgiverInntektsopplysninger ->
             kopierInntektsgrunnlag(
                 arbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger,
                 selvstendigInntektsopplysning = this.selvstendigInntektsopplysning,
-                deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold
+                deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold,
             )
         }
     }
@@ -218,14 +245,14 @@ internal class Inntektsgrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         selvstendigInntektsopplysning: SelvstendigInntektsopplysning?,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
-        nyttSkjæringstidspunkt: LocalDate = skjæringstidspunkt
+        nyttSkjæringstidspunkt: LocalDate = skjæringstidspunkt,
     ) = Inntektsgrunnlag(
         skjæringstidspunkt = nyttSkjæringstidspunkt,
         arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
         selvstendigInntektsopplysning = selvstendigInntektsopplysning,
         deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
         vurdertInfotrygd = vurdertInfotrygd,
-        `6G` = null
+        `6G` = null,
     )
 
     internal fun grunnbeløpsregulering(): Inntektsgrunnlag? {
@@ -234,15 +261,15 @@ internal class Inntektsgrunnlag(
         return nyttInntektsgrunnlag
     }
 
-    internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) =
-        arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) }
+    internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) }
 
-    internal fun inneholderInntekterFor(yrkesaktivitet: Yrkesaktivitet) = when (yrkesaktivitet.yrkesaktivitetstype) {
-        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> erArbeidsgiverRelevant(yrkesaktivitet.organisasjonsnummer)
-        Behandlingsporing.Yrkesaktivitet.Selvstendig -> selvstendigInntektsopplysning != null
-        Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> false
-        Behandlingsporing.Yrkesaktivitet.Frilans -> false
-    }
+    internal fun inneholderInntekterFor(yrkesaktivitet: Yrkesaktivitet) =
+        when (yrkesaktivitet.yrkesaktivitetstype) {
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> erArbeidsgiverRelevant(yrkesaktivitet.organisasjonsnummer)
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> selvstendigInntektsopplysning != null
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> false
+            Behandlingsporing.Yrkesaktivitet.Frilans -> false
+        }
 
     internal fun berik(builder: UtkastTilVedtakBuilder) {
         builder.sykepengegrunnlag(
@@ -250,44 +277,56 @@ internal class Inntektsgrunnlag(
             beregningsgrunnlag = beregningsgrunnlag,
             totalOmregnetÅrsinntekt = omregnetÅrsinntekt,
             seksG = `6G`,
-            inngangsvilkårFraInfotrygd = vurdertInfotrygd
+            inngangsvilkårFraInfotrygd = vurdertInfotrygd,
         )
         arbeidsgiverInntektsopplysninger.berik(builder)
         selvstendigInntektsopplysning?.berik(builder)
     }
 
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
+
     internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
 
     enum class Begrensning {
-        ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD
+        ER_6G_BEGRENSET,
+        ER_IKKE_6G_BEGRENSET,
+        VURDERT_I_INFOTRYGD,
     }
 
-    internal fun dto() = InntektsgrunnlagUtDto(
-        arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() },
-        selvstendigInntektsopplysning = this.selvstendigInntektsopplysning?.dto(),
-        deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.dto() },
-        vurdertInfotrygd = this.vurdertInfotrygd,
-        `6G` = this.`6G`.dto(),
-        sykepengegrunnlag = this.sykepengegrunnlag.dto(),
-        totalOmregnetÅrsinntekt = this.omregnetÅrsinntekt.dto(),
-        beregningsgrunnlag = this.beregningsgrunnlag.dto(),
-        er6GBegrenset = beregningsgrunnlag > this.`6G`
-    )
+    internal fun dto() =
+        InntektsgrunnlagUtDto(
+            arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() },
+            selvstendigInntektsopplysning = this.selvstendigInntektsopplysning?.dto(),
+            deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.dto() },
+            vurdertInfotrygd = this.vurdertInfotrygd,
+            `6G` = this.`6G`.dto(),
+            sykepengegrunnlag = this.sykepengegrunnlag.dto(),
+            totalOmregnetÅrsinntekt = this.omregnetÅrsinntekt.dto(),
+            beregningsgrunnlag = this.beregningsgrunnlag.dto(),
+            er6GBegrenset = beregningsgrunnlag > this.`6G`,
+        )
 
     internal sealed interface Utfall {
-        data object Uendret: Utfall
-        data class Endret(val arbeidsgivereMedEndretBeløp: List<String>, val nyttInntektsgrunnlag: Inntektsgrunnlag): Utfall
+        data object Uendret : Utfall
+
+        data class Endret(
+            val arbeidsgivereMedEndretBeløp: List<String>,
+            val nyttInntektsgrunnlag: Inntektsgrunnlag,
+        ) : Utfall
 
         companion object {
-            fun bestem(arbeidsgiverInntektsopplysningerUtfall: List<ArbeidsgiverInntektsopplysning.Utfall>, lagNyttInnteksgrunnlag: (arbeidsgiverInntektsopplysning: List<ArbeidsgiverInntektsopplysning>) -> Inntektsgrunnlag) = when {
+            fun bestem(
+                arbeidsgiverInntektsopplysningerUtfall: List<ArbeidsgiverInntektsopplysning.Utfall>,
+                lagNyttInnteksgrunnlag: (arbeidsgiverInntektsopplysning: List<ArbeidsgiverInntektsopplysning>) -> Inntektsgrunnlag,
+            ) = when {
                 // Alt er som før
                 arbeidsgiverInntektsopplysningerUtfall.all { it is ArbeidsgiverInntektsopplysning.Utfall.Uendret } -> Uendret
                 // Kun endret kilde til beløpet
-                arbeidsgiverInntektsopplysningerUtfall.none { it is ArbeidsgiverInntektsopplysning.Utfall.EndretBeløp } -> Endret(
-                    arbeidsgivereMedEndretBeløp = emptyList(),
-                    nyttInntektsgrunnlag = lagNyttInnteksgrunnlag(arbeidsgiverInntektsopplysningerUtfall.map { it.arbeidsgiverInntektsopplysning })
-                )
+                arbeidsgiverInntektsopplysningerUtfall.none { it is ArbeidsgiverInntektsopplysning.Utfall.EndretBeløp } ->
+                    Endret(
+                        arbeidsgivereMedEndretBeløp = emptyList(),
+                        nyttInntektsgrunnlag = lagNyttInnteksgrunnlag(arbeidsgiverInntektsopplysningerUtfall.map { it.arbeidsgiverInntektsopplysning }),
+                    )
                 // Reel endring i beløp hos minst én arbeidsgiver
                 else -> {
                     val arbeidsgivereMedEndretBeløp = arbeidsgiverInntektsopplysningerUtfall.filter { it is ArbeidsgiverInntektsopplysning.Utfall.EndretBeløp }.map { it.arbeidsgiverInntektsopplysning.orgnummer }
@@ -296,7 +335,7 @@ internal class Inntektsgrunnlag(
                     val nyeArbeidsgiveropplysninger = arbeidsgiverInntektsopplysningerUtfall.map { it.arbeidsgiverInntektsopplysning }.rullTilbakeEventuellSkjønnsmessigFastsettelse()
                     Endret(
                         arbeidsgivereMedEndretBeløp = arbeidsgivereMedEndretBeløp,
-                        nyttInntektsgrunnlag = lagNyttInnteksgrunnlag(nyeArbeidsgiveropplysninger)
+                        nyttInntektsgrunnlag = lagNyttInnteksgrunnlag(nyeArbeidsgiveropplysninger),
                     )
                 }
             }

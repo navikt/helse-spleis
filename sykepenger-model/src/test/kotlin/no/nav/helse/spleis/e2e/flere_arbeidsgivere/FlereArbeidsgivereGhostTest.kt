@@ -1,32 +1,10 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import java.time.LocalDate
-import java.util.UUID
-import no.nav.helse.april
-import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Arbeidstakerkilde
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.tilGodkjenning
-import no.nav.helse.februar
-import no.nav.helse.fredag
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.*
+import no.nav.helse.dsl.*
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.lørdag
-import no.nav.helse.mandag
-import no.nav.helse.mars
-import no.nav.helse.november
-import no.nav.helse.oktober
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Venteårsak.Companion.VILKÅRSPRØVING
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -35,19 +13,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpstidslinje
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.spleis.e2e.enesteGodkjenningsbehovSomFølgeAv
@@ -59,9 +25,10 @@ import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.*
 
 internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
-
     @Test
     fun `bruker avbryter søknad for én arbeidsgiver`() {
         a1 {
@@ -74,7 +41,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
         }
@@ -93,7 +60,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
@@ -127,7 +94,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, fredag den 26.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 2.vedtaksperiode.filter())
@@ -138,7 +105,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         }
         a2 {
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
-                listOf(mandag den 29.januar til 13.februar)
+                listOf(mandag den 29.januar til 13.februar),
             )
         }
         // IM replayes, og ettersom 27. og 28 blir friskedager pga. IM beregnes skjæringstidspunktet til 29.januar. Når A1 sin søknad kommer dekker den "hullet" med sykdom slik at skjæringstidspunktet blir 1.januar
@@ -170,7 +137,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                beregnetInntekt = 31000.månedlig
+                beregnetInntekt = 31000.månedlig,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(2.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 2.vedtaksperiode.filter())
@@ -186,13 +153,14 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         }
         // Inntektsmelding fra Ghost vi egentlig ikke trenger, men de sender den allikevel og opplyser om IkkeFravaer...
         // denne vinner over skatt i inntektsturnering
-        val ghostIM = ghost {
-            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                beregnetInntekt = 33000.månedlig,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer"
-            ).let { MeldingsreferanseId(it) }
-        }
+        val ghostIM =
+            ghost {
+                håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
+                    arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                    beregnetInntekt = 33000.månedlig,
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer",
+                ).let { MeldingsreferanseId(it) }
+            }
         a1 {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
@@ -244,22 +212,25 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         ghost {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, januar, 33000.månedlig, ghostIM.id)
-            assertEquals(setOf(
-                Dokumentsporing.søknad(MeldingsreferanseId(ghostSøknad)),
-                Dokumentsporing.inntektsmeldingDager(ghostIM),
-                Dokumentsporing.inntektsmeldingRefusjon(ghostIM),
-                Dokumentsporing.inntektsmeldingInntekt(ghostIM),
-            ), inspektør.hendelser(1.vedtaksperiode))
+            assertEquals(
+                setOf(
+                    Dokumentsporing.søknad(MeldingsreferanseId(ghostSøknad)),
+                    Dokumentsporing.inntektsmeldingDager(ghostIM),
+                    Dokumentsporing.inntektsmeldingRefusjon(ghostIM),
+                    Dokumentsporing.inntektsmeldingInntekt(ghostIM),
+                ),
+                inspektør.hendelser(1.vedtaksperiode),
+            )
         }
     }
 
     @Test
-    fun `blir syk fra ghost`()  {
+    fun `blir syk fra ghost`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter())
@@ -276,7 +247,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a1 {
@@ -303,7 +274,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
@@ -319,7 +290,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
@@ -331,7 +302,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         nullstillTilstandsendringer()
         a2 {
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
-                listOf(1.februar til 16.februar)
+                listOf(1.februar til 16.februar),
             )
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         }
@@ -349,57 +320,12 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(
                 1.vedtaksperiode,
-                a1, a2
-            )
-            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1)))
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
-                assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, INNTEKT, INNTEKT * 1.1, forventetKorrigertInntekt = INNTEKT * 1.1, forventetkilde = Arbeidstakerkilde.AOrdningen)
-            }
-        }
-        a2 {
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-            håndterArbeidsgiveropplysninger(
-                listOf(1.februar til 16.februar),
-                beregnetInntekt = INNTEKT
-            )
-        }
-        a1 {
-            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
-                assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, INNTEKT, INNTEKT * 1.1, forventetKorrigertInntekt = INNTEKT * 1.1, forventetkilde = Arbeidstakerkilde.AOrdningen)
-            }
-        }
-        a2 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-        }
-    }
-
-    @Test
-    fun `blir syk fra ghost annen måned enn skjæringstidspunkt etter at saksbehandler har overstyrt inntekten etter 8-28, 3 ledd bokstav b -- Ghost svarer på etterspurte arbeidsgiveropplysninger`()  {
-        a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
-            )
-            håndterVilkårsgrunnlagFlereArbeidsgivere(
-                1.vedtaksperiode,
-                a1, a2
+                a1,
+                a2,
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -419,7 +345,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
                 beregnetInntekt = INNTEKT,
-                vedtaksperiodeId = 1.vedtaksperiode
             )
         }
         a1 {
@@ -437,7 +362,55 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
     }
 
     @Test
-    fun `AI fjerner gammel IM - Korrigerende refusjonsopplysninger på arbeidsgiver med skatteinntekt i sykepengegrunnlaget`()  {
+    fun `blir syk fra ghost annen måned enn skjæringstidspunkt etter at saksbehandler har overstyrt inntekten etter 8-28, 3 ledd bokstav b -- Ghost svarer på etterspurte arbeidsgiveropplysninger`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+            håndterVilkårsgrunnlagFlereArbeidsgivere(
+                1.vedtaksperiode,
+                a1,
+                a2,
+            )
+            assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INNTEKT, INNTEKT * 1.1, forventetKorrigertInntekt = INNTEKT * 1.1, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            }
+        }
+        a2 {
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterArbeidsgiveropplysninger(
+                listOf(1.februar til 16.februar),
+                beregnetInntekt = INNTEKT,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a1 {
+            assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
+                assertInntektsgrunnlag(a1, INNTEKT)
+                assertInntektsgrunnlag(a2, INNTEKT, INNTEKT * 1.1, forventetKorrigertInntekt = INNTEKT * 1.1, forventetkilde = Arbeidstakerkilde.AOrdningen)
+            }
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+    }
+
+    @Test
+    fun `AI fjerner gammel IM - Korrigerende refusjonsopplysninger på arbeidsgiver med skatteinntekt i sykepengegrunnlaget`() {
         utbetalPeriodeMedGhost()
         a1 {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
@@ -448,12 +421,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         a2 {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         }
-        val inntektsmelding = a2 {
-            håndterArbeidsgiveropplysninger(
-                listOf(1.februar til 16.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
-            )
-        }
+        val inntektsmelding =
+            a2 {
+                håndterArbeidsgiveropplysninger(
+                    listOf(1.februar til 16.februar),
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                )
+            }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
@@ -473,11 +447,12 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         a2 {
             assertBeløpstidslinje(Beløpstidslinje.fra(februar, INNTEKT, inntektsmelding.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
         }
-        val korrigerendeInntektsmelding = a2 {
-            håndterKorrigerteArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(1.februar til 16.februar)
-            )
-        }
+        val korrigerendeInntektsmelding =
+            a2 {
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    arbeidsgiverperioder = listOf(1.februar til 16.februar),
+                )
+            }
         a1 {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
@@ -488,7 +463,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertBeløpstidslinje(
                 Beløpstidslinje.fra(1.februar til 28.februar, INNTEKT, korrigerendeInntektsmelding.arbeidsgiver),
-                inspektør.refusjon(1.vedtaksperiode)
+                inspektør.refusjon(1.vedtaksperiode),
             )
         }
     }
@@ -515,7 +490,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -548,15 +523,16 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, 2.januar, null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, 2.januar, null),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -579,19 +555,21 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                månedligeInntekter = mapOf(
-                    oktober(2017) to listOf(a1 to INNTEKT),
-                    november(2017) to listOf(a1 to INNTEKT),
-                    desember(2017) to listOf(a1 to INNTEKT, a2 to INNTEKT)
-                ),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, 1.desember(2017), 31.desember(2017))
-                )
+                månedligeInntekter =
+                    mapOf(
+                        oktober(2017) to listOf(a1 to INNTEKT),
+                        november(2017) to listOf(a1 to INNTEKT),
+                        desember(2017) to listOf(a1 to INNTEKT, a2 to INNTEKT),
+                    ),
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, 1.desember(2017), 31.desember(2017)),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -614,15 +592,16 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, 31.desember(2017), null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, 31.desember(2017), null),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             assertInntektsgrunnlag(1.mars, forventetAntallArbeidsgivere = 1) {
@@ -638,15 +617,16 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, 2.januar, null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, 2.januar, null),
+                    ),
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -664,15 +644,16 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                månedligeInntekter = mapOf(
-                    desember(2017) to listOf(a1 to INNTEKT, a2 to INNTEKT),
-                    januar(2018) to listOf(a1 to INNTEKT),
-                    februar(2018) to listOf(a1 to INNTEKT),
-                )
+                månedligeInntekter =
+                    mapOf(
+                        desember(2017) to listOf(a1 to INNTEKT, a2 to INNTEKT),
+                        januar(2018) to listOf(a1 to INNTEKT),
+                        februar(2018) to listOf(a1 to INNTEKT),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             assertInntektsgrunnlag(1.mars, forventetAntallArbeidsgivere = 1) {
@@ -687,7 +668,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterSøknad(
                 Sykdom(1.mars, 31.mars, 100.prosent),
-                andreInntektskilder = true
+                andreInntektskilder = true,
             )
             assertFunksjonellFeil(RV_SØ_10, 1.vedtaksperiode.filter())
         }
@@ -701,7 +682,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 30000.månedlig,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
@@ -724,15 +705,16 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 30000.månedlig,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, 1.november(2017), null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, 1.november(2017), null),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -754,7 +736,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 30000.månedlig,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
@@ -787,7 +769,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(18.januar, 10.februar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(18.januar til 2.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
         }
@@ -849,7 +831,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
             håndterArbeidsgiveropplysninger(
                 listOf(1.februar til 16.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a1 {
@@ -877,10 +859,11 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT, a2 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, 1.desember(2017), null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, 1.desember(2017), null),
+                    ),
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -893,8 +876,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
                 OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
                     a2,
                     true,
-                    "forklaring"
-                )
+                    "forklaring",
+                ),
             )
             håndterYtelser(1.vedtaksperiode)
             assertOrgnummereMedRelevanteArbeidsforholdFraGodkjenningsbehov(1.vedtaksperiode, listOf(a1)) {
@@ -936,7 +919,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(16.mars til 31.mars),
-                refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList())
+                refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
             )
         }
         a1 {
@@ -966,7 +949,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
     }
 
     @Test
-    fun `arbeidsgiver går fra å være ghost mens første arbeidsgiver står til godkjenning -- Ghost svarer på etterspurte arbeidsgiveropplysninger`()  {
+    fun `arbeidsgiver går fra å være ghost mens første arbeidsgiver står til godkjenning -- Ghost svarer på etterspurte arbeidsgiveropplysninger`() {
         utbetalPeriodeMedGhost(tilGodkjenning = true)
 
         nyPeriode(16.mars til 31.mars, a1) // Forlengelse på a1
@@ -993,7 +976,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(16.mars til 31.mars),
                 refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a1 {
@@ -1022,12 +1005,17 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertEquals(75, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[1.januar].økonomi.inspektør.totalGrad)
+            assertEquals(
+                75,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)[1.januar]
+                    .økonomi.inspektør.totalGrad,
+            )
             håndterOverstyrArbeidsforhold(1.januar, OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring"))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         }
@@ -1040,7 +1028,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
@@ -1052,8 +1040,12 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         }
     }
 
-    private fun assertOrgnummereMedRelevanteArbeidsforholdFraGodkjenningsbehov(vedtaksperiodeId: UUID, expected: List<String>, block: () -> Unit) {
-        val actual= enesteGodkjenningsbehovSomFølgeAv({vedtaksperiodeId}, block).event.orgnummereMedRelevanteArbeidsforhold.toList()
+    private fun assertOrgnummereMedRelevanteArbeidsforholdFraGodkjenningsbehov(
+        vedtaksperiodeId: UUID,
+        expected: List<String>,
+        block: () -> Unit,
+    ) {
+        val actual = enesteGodkjenningsbehovSomFølgeAv({ vedtaksperiodeId }, block).event.orgnummereMedRelevanteArbeidsforhold.toList()
         assertEquals(expected, actual)
     }
 }

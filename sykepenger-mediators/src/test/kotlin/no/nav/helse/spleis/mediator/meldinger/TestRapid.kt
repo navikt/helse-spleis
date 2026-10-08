@@ -10,7 +10,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.SentMessage
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.finn
@@ -20,12 +19,16 @@ import no.nav.helse.spleis.utboks.TestUtsenderObservatør
 import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.junit.jupiter.api.fail
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
-internal class TestRapid(private val utstender: TestUtsender = TestUtsender()) : RapidsConnection() {
+internal class TestRapid(
+    private val utstender: TestUtsender = TestUtsender(),
+) : RapidsConnection() {
     private companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        private val objectMapper =
+            jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         private val log = LoggerFactory.getLogger(TestRapid::class.java)
     }
@@ -35,15 +38,17 @@ internal class TestRapid(private val utstender: TestUtsender = TestUtsender()) :
     private val observers = mutableListOf<TestRapidObserver>()
 
     init {
-        utstender.nyObservatør(object: TestUtsenderObservatør {
-            override fun okMelding(melding: UtgåendeMelding) {
-                if (melding.mottaker == UtgåendeMelding.Mottaker.SUBSUMSJON) return
-                messages.add(melding.key to melding.json.toString())
-            }
-        })
+        utstender.nyObservatør(
+            object : TestUtsenderObservatør {
+                override fun okMelding(melding: UtgåendeMelding) {
+                    if (melding.mottaker == UtgåendeMelding.Mottaker.SUBSUMSJON) return
+                    messages.add(melding.key to melding.json.toString())
+                }
+            },
+        )
     }
 
-    internal fun <T> observer(observer: T) where T: TestRapidObserver, T: TestUtsenderObservatør {
+    internal fun <T> observer(observer: T) where T : TestRapidObserver, T : TestUtsenderObservatør {
         observers.add(observer)
         utstender.nyObservatør(observer)
     }
@@ -64,7 +69,10 @@ internal class TestRapid(private val utstender: TestUtsender = TestUtsender()) :
         observers.forEach { it.onMessagePublish(message) }
     }
 
-    override fun publish(key: String, message: String) {
+    override fun publish(
+        key: String,
+        message: String,
+    ) {
         messages.add(key to message)
         observers.forEach { it.onMessagePublish(message) }
     }
@@ -79,77 +87,85 @@ internal class TestRapid(private val utstender: TestUtsender = TestUtsender()) :
                 index = index,
                 message = it,
                 partition = 0,
-                offset = 0L
+                offset = 0L,
             )
         } to emptyList()
     }
 
-    override fun rapidName(): String {
-        return "Testrapid"
-    }
+    override fun rapidName(): String = "Testrapid"
 
     override fun start() {}
+
     override fun stop() {}
 
-    class RapidInspektør(private val messages: List<Pair<String?, String>>) {
+    class RapidInspektør(
+        private val messages: List<Pair<String?, String>>,
+    ) {
         private val jsonmeldinger = mutableMapOf<Int, JsonNode>()
         private val vedtaksperiodeIder
-            get() = mutableSetOf<UUID>().apply {
-                events("vedtaksperiode_endret") {
-                    this.add(UUID.fromString(it.path("vedtaksperiodeId").asText()))
+            get() =
+                mutableSetOf<UUID>().apply {
+                    events("vedtaksperiode_endret") {
+                        this.add(UUID.fromString(it.path("vedtaksperiodeId").asText()))
+                    }
                 }
-            }
 
         private val vedtaksperiodeIderPerOrganisasjonsnummer
-            get() = mutableMapOf<String, List<UUID>>().apply {
-                events("vedtaksperiode_endret") {
-                    if (it.path("yrkesaktivitetstype").asText() == "ARBEIDSTAKER") {
-                        this.compute(it.path("organisasjonsnummer").asText()) { _, eksisterende ->
-                            (eksisterende ?: emptyList()) + UUID.fromString(it.path("vedtaksperiodeId").asText())
+            get() =
+                mutableMapOf<String, List<UUID>>().apply {
+                    events("vedtaksperiode_endret") {
+                        if (it.path("yrkesaktivitetstype").asText() == "ARBEIDSTAKER") {
+                            this.compute(it.path("organisasjonsnummer").asText()) { _, eksisterende ->
+                                (eksisterende ?: emptyList()) + UUID.fromString(it.path("vedtaksperiodeId").asText())
+                            }
                         }
                     }
                 }
-            }
-
 
         private val forkastedeVedtaksperiodeIder
-            get() = mutableMapOf<UUID, String>().apply {
-                events("vedtaksperiode_forkastet") {
-                    val id = UUID.fromString(it.path("vedtaksperiodeId").asText())
-                    this[id] = it.path("tilstand").asText()
+            get() =
+                mutableMapOf<UUID, String>().apply {
+                    events("vedtaksperiode_forkastet") {
+                        val id = UUID.fromString(it.path("vedtaksperiodeId").asText())
+                        this[id] = it.path("tilstand").asText()
+                    }
                 }
-            }
 
         private val tilstander
-            get() = mutableMapOf<UUID, MutableList<String>>().apply {
-                events("vedtaksperiode_endret") {
-                    val id = UUID.fromString(it.path("vedtaksperiodeId").asText())
-                    this.getOrPut(id) { mutableListOf() }.add(it.path("gjeldendeTilstand").asText())
+            get() =
+                mutableMapOf<UUID, MutableList<String>>().apply {
+                    events("vedtaksperiode_endret") {
+                        val id = UUID.fromString(it.path("vedtaksperiodeId").asText())
+                        this.getOrPut(id) { mutableListOf() }.add(it.path("gjeldendeTilstand").asText())
+                    }
+                }
+
+        private val utbetalinger =
+            mutableSetOf<UUID>().apply {
+                events("utbetaling_endret") {
+                    add(UUID.fromString(it.path("utbetalingId").asText()))
                 }
             }
-
-        private val utbetalinger = mutableSetOf<UUID>().apply {
-            events("utbetaling_endret") {
-                add(UUID.fromString(it.path("utbetalingId").asText()))
-            }
-        }
 
         private val utbetalingtilstander
-            get() = mutableMapOf<UUID, MutableList<String>>().apply {
-                events("utbetaling_endret") {
-                    val id = UUID.fromString(it.path("utbetalingId").asText())
-                    this.getOrPut(id) { mutableListOf(it.path("forrigeStatus").asText()) }
-                        .add(it.path("gjeldendeStatus").asText())
+            get() =
+                mutableMapOf<UUID, MutableList<String>>().apply {
+                    events("utbetaling_endret") {
+                        val id = UUID.fromString(it.path("utbetalingId").asText())
+                        this
+                            .getOrPut(id) { mutableListOf(it.path("forrigeStatus").asText()) }
+                            .add(it.path("gjeldendeStatus").asText())
+                    }
                 }
-            }
 
         private val utbetalingtyper
-            get() = mutableMapOf<UUID, String>().apply {
-                events("utbetaling_endret") {
-                    val id = UUID.fromString(it.path("utbetalingId").asText())
-                    this[id] = it.path("type").asText()
+            get() =
+                mutableMapOf<UUID, String>().apply {
+                    events("utbetaling_endret") {
+                        val id = UUID.fromString(it.path("utbetalingId").asText())
+                        this[id] = it.path("type").asText()
+                    }
                 }
-            }
 
         private val varsler
             get() = meldinger("aktivitetslogg_ny_aktivitet").varsler
@@ -160,16 +176,26 @@ internal class TestRapid(private val utstender: TestUtsender = TestUtsender()) :
         private val tilstanderUtenForkastede
             get() = tilstander.filter { it.key !in forkastedeVedtaksperiodeIder }
 
-        private fun alleBehovsmeldingerSomInneholder(behovstype: Behov.Behovstype, filter: (behovsmelding: JsonNode) -> Boolean = { true }) = mutableListOf<JsonNode>().apply {
-            events("behov") { behovsmelding ->
-                val etterspurteBehov = behovsmelding.path("@behov").map { it.asText() }
-                if (behovstype.utgåendeNavn in etterspurteBehov && filter(behovsmelding)) this.add(behovsmelding)
-            }
-        }.toList()
+        private fun alleBehovsmeldingerSomInneholder(
+            behovstype: Behov.Behovstype,
+            filter: (behovsmelding: JsonNode) -> Boolean = { true },
+        ) = mutableListOf<JsonNode>()
+            .apply {
+                events("behov") { behovsmelding ->
+                    val etterspurteBehov = behovsmelding.path("@behov").map { it.asText() }
+                    if (behovstype.utgåendeNavn in etterspurteBehov && filter(behovsmelding)) this.add(behovsmelding)
+                }
+            }.toList()
 
-        private fun sisteBehovsmeldingSomInneholder(behovstype: Behov.Behovstype, filter: (behovsmelding: JsonNode) -> Boolean = { true }) = alleBehovsmeldingerSomInneholder(behovstype, filter).lastOrNull() ?: fail("Finner ingen behovsmeldinger som inneholder ${behovstype.utgåendeNavn}")
+        private fun sisteBehovsmeldingSomInneholder(
+            behovstype: Behov.Behovstype,
+            filter: (behovsmelding: JsonNode) -> Boolean = { true },
+        ) = alleBehovsmeldingerSomInneholder(behovstype, filter).lastOrNull() ?: fail("Finner ingen behovsmeldinger som inneholder ${behovstype.utgåendeNavn}")
 
-        private fun events(name: String, onEach: (JsonNode) -> Unit) = messages.forEachIndexed { indeks, _ ->
+        private fun events(
+            name: String,
+            onEach: (JsonNode) -> Unit,
+        ) = messages.forEachIndexed { indeks, _ ->
             val message = melding(indeks)
             if (name == message.path("@event_name").asText()) onEach(message)
         }
@@ -177,16 +203,25 @@ internal class TestRapid(private val utstender: TestUtsender = TestUtsender()) :
         val vedtaksperiodeteller get() = vedtaksperiodeIder.size
 
         fun melding(indeks: Int) = jsonmeldinger.getOrPut(indeks) { objectMapper.readTree(messages[indeks].second) }
+
         fun antall() = messages.size
+
         fun indeksFor(melding: JsonNode) = jsonmeldinger.entries.firstOrNull { (_, other) -> other == melding }?.key ?: -1
 
         fun siste(name: String) = meldinger(name).last()
 
-        fun meldinger(name: String) = messages.mapIndexed { indeks, _ -> melding(indeks) }
-            .filter { name == it.path("@event_name").asText() }
+        fun meldinger(name: String) =
+            messages
+                .mapIndexed { indeks, _ -> melding(indeks) }
+                .filter { name == it.path("@event_name").asText() }
 
         fun vedtaksperiodeId(indeks: Int) = vedtaksperiodeIder.elementAt(indeks)
-        fun vedtaksperiodeId(indeks: Int, organisasjonsummer: String) = vedtaksperiodeIderPerOrganisasjonsnummer.getValue(organisasjonsummer).elementAt(indeks)
+
+        fun vedtaksperiodeId(
+            indeks: Int,
+            organisasjonsummer: String,
+        ) = vedtaksperiodeIderPerOrganisasjonsnummer.getValue(organisasjonsummer).elementAt(indeks)
+
         fun sisteVedtaksperiodeIdFor(organisasjonsummer: String) = vedtaksperiodeIderPerOrganisasjonsnummer.getValue(organisasjonsummer).last()
 
         fun utbetalingtilstander(utbetalingIndeks: Int) =
@@ -202,27 +237,36 @@ internal class TestRapid(private val utstender: TestUtsender = TestUtsender()) :
         fun utbetalingId(utbetalingIndeks: Int) = utbetalinger.elementAt(utbetalingIndeks)
 
         fun tilstander(vedtaksperiodeId: UUID) = tilstander[vedtaksperiodeId]?.toList() ?: emptyList()
+
         fun tilstanderUtenForkastede(vedtaksperiodeId: UUID) = tilstanderUtenForkastede[vedtaksperiodeId]?.toList() ?: emptyList()
+
         fun forkastedeTilstander(vedtaksperiodeId: UUID) = forkastedeTilstander[vedtaksperiodeId]?.toList() ?: emptyList()
 
-        fun harEtterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Behov.Behovstype) =
-            alleBehovsmeldingerSomInneholder(behovtype) { behovsmelding ->
-                behovsmelding.path("vedtaksperiodeId").asText() == vedtaksperiodeId(vedtaksperiodeIndeks).toString()
-            }.isNotEmpty()
+        fun harEtterspurteBehov(
+            vedtaksperiodeIndeks: Int,
+            behovtype: Behov.Behovstype,
+        ) = alleBehovsmeldingerSomInneholder(behovtype) { behovsmelding ->
+            behovsmelding.path("vedtaksperiodeId").asText() == vedtaksperiodeId(vedtaksperiodeIndeks).toString()
+        }.isNotEmpty()
 
-        fun etterspurteBehov(vedtaksperiodeIndeks: Int, behovtype: Behov.Behovstype) =
-            sisteBehovsmeldingSomInneholder(behovtype) { behovsmelding ->
-                behovsmelding.path("vedtaksperiodeId").asText() == vedtaksperiodeId(vedtaksperiodeIndeks).toString()
-            }
+        fun etterspurteBehov(
+            vedtaksperiodeIndeks: Int,
+            behovtype: Behov.Behovstype,
+        ) = sisteBehovsmeldingSomInneholder(behovtype) { behovsmelding ->
+            behovsmelding.path("vedtaksperiodeId").asText() == vedtaksperiodeId(vedtaksperiodeIndeks).toString()
+        }
 
-        fun etterspurteBehov(behovtype: Behov.Behovstype) =
-            sisteBehovsmeldingSomInneholder(behovtype)
+        fun etterspurteBehov(behovtype: Behov.Behovstype) = sisteBehovsmeldingSomInneholder(behovtype)
 
-        fun alleEtterspurteBehov(behovtype: Behov.Behovstype) =
-            alleBehovsmeldingerSomInneholder(behovtype)
+        fun alleEtterspurteBehov(behovtype: Behov.Behovstype) = alleBehovsmeldingerSomInneholder(behovtype)
 
-        fun varsel(vedtaksperiodeId: UUID, varselkode: Varselkode) = varsler.finn(vedtaksperiodeId, varselkode)
+        fun varsel(
+            vedtaksperiodeId: UUID,
+            varselkode: Varselkode,
+        ) = varsler.finn(vedtaksperiodeId, varselkode)
+
         fun varsler() = varsler
+
         fun varsler(vedtaksperiodeId: UUID) = varsler.finn(vedtaksperiodeId)
     }
 

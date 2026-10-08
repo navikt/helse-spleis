@@ -1,54 +1,18 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.august
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
+import no.nav.helse.*
+import no.nav.helse.dsl.*
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.Companion.fraInntektsmelding
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mai
-import no.nav.helse.mars
 import no.nav.helse.person.Behandlinger.Behandling.Tilstand.AvsluttetUtenVedtak
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AO_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.enesteGodkjenningsbehovSomFølgeAv
 import no.nav.helse.sykdomstidslinje.Dag
@@ -56,27 +20,24 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.inspectors.inspektør
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest() {
-
     @Test
-    fun `arbeidsgiver opplyser om egenmeldinger og bruker opplyser om ferie`() = a1 {
-        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+    fun `arbeidsgiver opplyser om egenmeldinger og bruker opplyser om ferie`() =
+        a1 {
+            håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
 
-        nullstillTilstandsendringer()
-        håndterSøknad(Sykdom(10.januar, 28.januar, 100.prosent), Ferie(10.januar, 28.januar))
-        håndterSelvbestemtArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
+            nullstillTilstandsendringer()
+            håndterSøknad(Sykdom(10.januar, 28.januar, 100.prosent), Ferie(10.januar, 28.januar))
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
 
-        assertEquals("UUUGG UUUUUGG UUUUFFF", inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).toShortString())
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-    }
+            assertEquals("UUUGG UUUUUGG UUUUFFF", inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).toShortString())
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        }
 
     @Test
     fun `omgjøre kort periode etter mottatt im - med eldre utbetalt periode`() {
@@ -85,7 +46,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
             nyPeriode(10.august til 20.august)
             håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(1.august til 16.august),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
             assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -103,156 +64,166 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `AI fjerner gammel IM - inntektsmelding på kort periode gjør at en nyere kort periode skal utbetales`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar))
-        håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(9.februar, 20.februar))
-        håndterSøknad(Sykdom(9.februar, 20.februar, 100.prosent))
-        nullstillTilstandsendringer()
-        håndterSelvbestemtArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertFalse((21.januar til 25.januar).all {
-            inspektør.sykdomstidslinje[it] is Dag.UkjentDag
-        })
-        assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
-    }
+    fun `AI fjerner gammel IM - inntektsmelding på kort periode gjør at en nyere kort periode skal utbetales`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar))
+            håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(9.februar, 20.februar))
+            håndterSøknad(Sykdom(9.februar, 20.februar, 100.prosent))
+            nullstillTilstandsendringer()
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertFalse(
+                (21.januar til 25.januar).all {
+                    inspektør.sykdomstidslinje[it] is Dag.UkjentDag
+                },
+            )
+            assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
+        }
 
     @Test
-    fun `AI fjerner gammel IM - revurderer eldre skjæringstidspunkt`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        nyttVedtak(mars)
-        nullstillTilstandsendringer()
-        håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
-    }
+    fun `AI fjerner gammel IM - revurderer eldre skjæringstidspunkt`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+            nyttVedtak(mars)
+            nullstillTilstandsendringer()
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
+        }
 
     @Test
-    fun `AI fjerner gammel IM - revurderer eldre skjæringstidspunkt selv ved flere mindre perioder`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+    fun `AI fjerner gammel IM - revurderer eldre skjæringstidspunkt selv ved flere mindre perioder`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar))
-        håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar))
+            håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
 
-        nyttVedtak(mars)
+            nyttVedtak(mars)
 
-        nullstillTilstandsendringer()
-        håndterKorrigerteArbeidsgiveropplysninger(
-            listOf(10.januar til 25.januar),
-            beregnetInntekt = INNTEKT
-        )
+            nullstillTilstandsendringer()
+            håndterKorrigerteArbeidsgiveropplysninger(
+                listOf(10.januar til 25.januar),
+                beregnetInntekt = INNTEKT,
+            )
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertVarsel(Varselkode.RV_IM_24, 3.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_IM_4, 3.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `AI fjerner gammel IM - gjenopptar ikke behandling dersom det er nyere periode som er utbetalt`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        nyttVedtak(mars)
-        håndterKorrigerteArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT
-        )
-
-        håndterSykmelding(Sykmeldingsperiode(1.mai, 15.mai))
-        håndterSykmelding(Sykmeldingsperiode(16.mai, 28.mai))
-        håndterSøknad(Sykdom(1.mai, 15.mai, 100.prosent))
-        håndterSøknad(Sykdom(16.mai, 28.mai, 100.prosent))
-
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
-        assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
-    }
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertVarsel(Varselkode.RV_IM_24, 3.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_4, 3.vedtaksperiode.filter())
+        }
 
     @Test
-    fun `revurderer ikke avsluttet periode dersom perioden fortsatt er innenfor agp etter IM`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+    fun `AI fjerner gammel IM - gjenopptar ikke behandling dersom det er nyere periode som er utbetalt`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+            nyttVedtak(mars)
+            håndterKorrigerteArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+            )
 
-        nullstillTilstandsendringer()
-        håndterSelvbestemtArbeidsgiveropplysninger(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT)
-        assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
+            håndterSykmelding(Sykmeldingsperiode(1.mai, 15.mai))
+            håndterSykmelding(Sykmeldingsperiode(16.mai, 28.mai))
+            håndterSøknad(Sykdom(1.mai, 15.mai, 100.prosent))
+            håndterSøknad(Sykdom(16.mai, 28.mai, 100.prosent))
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-    }
-
-    @Test
-    fun `avvist revurdering uten tidligere utbetaling kan forkastes`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
-        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
-
-        håndterSelvbestemtArbeidsgiveropplysninger(
-            listOf(10.januar til 25.januar),
-            beregnetInntekt = INNTEKT
-        )
-        assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
-
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-
-        nullstillTilstandsendringer()
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, godkjent = false)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
-    }
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
+            assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
+        }
 
     @Test
-    fun `infotrygd har utbetalt perioden - vi har kun arbeidsgiverperiode`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+    fun `revurderer ikke avsluttet periode dersom perioden fortsatt er innenfor agp etter IM`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
-        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+            nullstillTilstandsendringer()
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT)
+            assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
 
-        håndterSelvbestemtArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT
-        )
-        assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(
-            ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 27.januar)
-        )
-        håndterYtelser(1.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
-    }
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        }
 
     @Test
-    fun `infotrygd har utbetalt perioden - vi har ingenting`() = a1 {
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
-        håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-        assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(
-            PersonUtbetalingsperiode(a1, 1.januar, 27.januar)
-        )
-        håndterYtelser(1.vedtaksperiode)
+    fun `avvist revurdering uten tidligere utbetaling kan forkastes`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
-        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-    }
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
+            håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(10.januar til 25.januar),
+                beregnetInntekt = INNTEKT,
+            )
+            assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
+
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+
+            nullstillTilstandsendringer()
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode, godkjent = false)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+        }
+
+    @Test
+    fun `infotrygd har utbetalt perioden - vi har kun arbeidsgiverperiode`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
+            håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+            )
+            assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 27.januar),
+            )
+            håndterYtelser(1.vedtaksperiode)
+            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
+        }
+
+    @Test
+    fun `infotrygd har utbetalt perioden - vi har ingenting`() =
+        a1 {
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+            håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                PersonUtbetalingsperiode(a1, 1.januar, 27.januar),
+            )
+            håndterYtelser(1.vedtaksperiode)
+
+            assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
+            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
 
     @Test
     fun `infotrygd har utbetalt perioden - vi har ingenting - flere ag`() {
@@ -267,7 +238,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
             håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
             håndterSelvbestemtArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
             assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -275,7 +246,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         nullstillTilstandsendringer()
         a2 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                PersonUtbetalingsperiode(a2, 1.januar, 27.januar)
+                PersonUtbetalingsperiode(a2, 1.januar, 27.januar),
             )
             håndterYtelser(1.vedtaksperiode)
         }
@@ -289,365 +260,382 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `tildele utbetaling etter reberegning`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+    fun `tildele utbetaling etter reberegning`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
-        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
+            håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
 
-        håndterSelvbestemtArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT
-        )
-        assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+            )
+            assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Feriedag)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Feriedag)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
 
-        val vedtaksperiode1Utbetalinger = inspektør.utbetalinger(1.vedtaksperiode)
-        val vedtaksperiode2Utbetalinger = inspektør.utbetalinger(2.vedtaksperiode)
-        assertEquals(2, vedtaksperiode1Utbetalinger.size)
-        assertEquals(0, vedtaksperiode2Utbetalinger.size)
+            val vedtaksperiode1Utbetalinger = inspektør.utbetalinger(1.vedtaksperiode)
+            val vedtaksperiode2Utbetalinger = inspektør.utbetalinger(2.vedtaksperiode)
+            assertEquals(2, vedtaksperiode1Utbetalinger.size)
+            assertEquals(0, vedtaksperiode2Utbetalinger.size)
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-    }
-
-    @Test
-    fun `avvist omgjøring uten tidligere utbetaling forkaster nyere forlengelser`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
-        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(28.januar, 27.februar))
-        håndterSøknad(Sykdom(28.januar, 27.februar, 100.prosent))
-
-        håndterArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        nullstillTilstandsendringer()
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
-
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-    }
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        }
 
     @Test
-    fun `AI fjerner gammel IM - avvist omgjøring uten tidligere utbetaling forkaster ikke nyere perioder`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+    fun `avvist omgjøring uten tidligere utbetaling forkaster nyere forlengelser`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
-        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
+            håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(31.januar, 27.februar))
-        håndterSøknad(Sykdom(31.januar, 27.februar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(28.januar, 27.februar))
+            håndterSøknad(Sykdom(28.januar, 27.februar, 100.prosent))
 
-        håndterSelvbestemtArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT,
-            vedtaksperiodeId = 1.vedtaksperiode
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
 
-        nullstillTilstandsendringer()
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
+            nullstillTilstandsendringer()
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
 
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `AI fjerner gammel IM - avvist omgjøring uten tidligere utbetaling gjenopptar nyere perioder som har inntekt`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
-        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(31.januar, 27.februar))
-        håndterSøknad(Sykdom(31.januar, 27.februar, 100.prosent))
-
-        håndterSelvbestemtArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT,
-            vedtaksperiodeId = 1.vedtaksperiode
-        )
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        håndterArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT
-        )
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        nullstillTilstandsendringer()
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
-
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-        assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
-    }
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+        }
 
     @Test
-    fun `inntektsmelding gjør om kort periode til arbeidsdager`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar))
-        håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
+    fun `AI fjerner gammel IM - avvist omgjøring uten tidligere utbetaling forkaster ikke nyere perioder`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 3.februar))
-        håndterSøknad(Sykdom(21.januar, 3.februar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
+            håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
 
-        nullstillTilstandsendringer()
+            håndterSykmelding(Sykmeldingsperiode(31.januar, 27.februar))
+            håndterSøknad(Sykdom(31.januar, 27.februar, 100.prosent))
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
 
-        håndterArbeidsgiveropplysninger(
-            listOf(10.januar til 20.januar, 28.januar til 1.februar),
-            beregnetInntekt = INNTEKT
-        )
+            nullstillTilstandsendringer()
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-
-        assertTrue(inspektør.sykdomstidslinje[21.januar] is Dag.FriskHelgedag)
-        assertTrue(inspektør.sykdomstidslinje[27.januar] is Dag.FriskHelgedag)
-
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-
-        nullstillTilstandsendringer()
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVVENTER_SIMULERING)
-    }
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+        }
 
     @Test
-    fun `AI fjerner gammel IM - støtter omgjøring om det er utbetalt en senere periode på nyere skjæringstidspunkt`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar))
-        håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
+    fun `AI fjerner gammel IM - avvist omgjøring uten tidligere utbetaling gjenopptar nyere perioder som har inntekt`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 2.februar))
-        håndterSøknad(Sykdom(21.januar, 2.februar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
+            håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
 
-        nyttVedtak(mai)
-        nullstillTilstandsendringer()
+            håndterSykmelding(Sykmeldingsperiode(31.januar, 27.februar))
+            håndterSøknad(Sykdom(31.januar, 27.februar, 100.prosent))
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
 
-        håndterKorrigerteArbeidsgiveropplysninger(
-            listOf(10.januar til 20.januar, 28.januar til 1.februar),
-            beregnetInntekt = INNTEKT
-        )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertVarsel(Varselkode.RV_IM_24, 3.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_IM_4, 3.vedtaksperiode.filter())
-    }
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+            )
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
 
-    @Test
-    fun `inntektsmelding gjør at kort periode faller utenfor agp - før vilkårsprøving`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+            nullstillTilstandsendringer()
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
-        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(28.januar, 31.januar))
-        håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
-
-        nullstillTilstandsendringer()
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-
-        håndterArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
-
-        assertEquals(listOf(
-            10.januar til 25.januar
-        ), inspektør.venteperiode(3.vedtaksperiode))
-    }
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+            assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
+        }
 
     @Test
-    fun `AI fjerner gammel IM - inntektsmelding gjør at kort periode faller utenfor agp - etter vilkårsprøving`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+    fun `inntektsmelding gjør om kort periode til arbeidsdager`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar))
+            håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
-        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 3.februar))
+            håndterSøknad(Sykdom(21.januar, 3.februar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(28.januar, 31.januar))
-        håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
-        håndterArbeidsgiveropplysninger(listOf(12.januar til 27.januar), beregnetInntekt = INNTEKT)
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode)
-        håndterSimulering(3.vedtaksperiode)
+            nullstillTilstandsendringer()
 
-        nullstillTilstandsendringer()
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        håndterKorrigerteArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
+            håndterArbeidsgiveropplysninger(
+                listOf(10.januar til 20.januar, 28.januar til 1.februar),
+                beregnetInntekt = INNTEKT,
+            )
 
-        assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-        assertVarsler(emptyList(), 2.vedtaksperiode.filter())
-        assertVarsler(listOf(RV_IM_4, RV_IM_24), 3.vedtaksperiode.filter())
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-    }
+            assertTrue(inspektør.sykdomstidslinje[21.januar] is Dag.FriskHelgedag)
+            assertTrue(inspektør.sykdomstidslinje[27.januar] is Dag.FriskHelgedag)
 
-    @Test
-    fun `revurderer ikke avsluttet periode dersom perioden fortsatt er innenfor agp etter IM selv ved flere mindre`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar))
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
 
-        håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent))
+            nullstillTilstandsendringer()
 
-        nullstillTilstandsendringer()
-        håndterSelvbestemtArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
-        assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-    }
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_SIMULERING)
+        }
 
     @Test
-    fun `AI fjerner gammel IM - avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+    fun `AI fjerner gammel IM - støtter omgjøring om det er utbetalt en senere periode på nyere skjæringstidspunkt`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar))
+            håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(23.januar, 25.januar))
-        håndterSøknad(Sykdom(23.januar, 25.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 2.februar))
+            håndterSøknad(Sykdom(21.januar, 2.februar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(29.januar, 29.januar))
-        håndterSøknad(Sykdom(29.januar, 29.januar, 100.prosent))
+            nyttVedtak(mai)
+            nullstillTilstandsendringer()
 
-        nullstillTilstandsendringer()
-        håndterSelvbestemtArbeidsgiveropplysninger(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
-    }
+            håndterKorrigerteArbeidsgiveropplysninger(
+                listOf(10.januar til 20.januar, 28.januar til 1.februar),
+                beregnetInntekt = INNTEKT,
+            )
 
-    @Test
-    fun `AI fjerner gammel IM - avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige 2`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar))
-        håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(29.januar, 29.januar))
-        håndterSøknad(Sykdom(29.januar, 29.januar, 100.prosent))
-
-        nullstillTilstandsendringer()
-        håndterSelvbestemtArbeidsgiveropplysninger(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT)
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
-    }
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertVarsel(Varselkode.RV_IM_24, 3.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_4, 3.vedtaksperiode.filter())
+        }
 
     @Test
-    fun `gjenopptar behandling på neste periode dersom inntektsmelding treffer avsluttet periode`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
-        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
-        håndterArbeidsgiveropplysninger(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertEquals(listOf(5.januar til 20.januar), inspektør.venteperiode(2.vedtaksperiode))
-    }
+    fun `inntektsmelding gjør at kort periode faller utenfor agp - før vilkårsprøving`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
+            håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(28.januar, 31.januar))
+            håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
+
+            nullstillTilstandsendringer()
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+            håndterArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
+
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+
+            assertEquals(
+                listOf(
+                    10.januar til 25.januar,
+                ),
+                inspektør.venteperiode(3.vedtaksperiode),
+            )
+        }
 
     @Test
-    fun `AI fjerner gammel IM - revurderer ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+    fun `AI fjerner gammel IM - inntektsmelding gjør at kort periode faller utenfor agp - etter vilkårsprøving`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar))
-        håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
+            håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(30.januar, 31.januar))
-        håndterSøknad(Sykdom(30.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(28.januar, 31.januar))
+            håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(12.januar til 27.januar), beregnetInntekt = INNTEKT)
+            håndterVilkårsgrunnlag(3.vedtaksperiode)
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
 
-        nullstillTilstandsendringer()
-        håndterArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
-        håndterKorrigerteArbeidsgiveropplysninger(
-            listOf(10.januar til 25.januar),
-            beregnetInntekt = INNTEKT
-        )
+            nullstillTilstandsendringer()
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
-        assertVarsel(Varselkode.RV_IM_4, 3.vedtaksperiode.filter())
-    }
+            håndterKorrigerteArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
+
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            assertVarsler(emptyList(), 2.vedtaksperiode.filter())
+            assertVarsler(listOf(RV_IM_4, RV_IM_24), 3.vedtaksperiode.filter())
+
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        }
 
     @Test
-    fun `AI fjerner gammel IM - omgjører ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype - omvendt`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+    fun `revurderer ikke avsluttet periode dersom perioden fortsatt er innenfor agp etter IM selv ved flere mindre`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar))
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar))
-        håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
+            håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(30.januar, 31.januar))
-        håndterSøknad(Sykdom(30.januar, 31.januar, 100.prosent))
+            nullstillTilstandsendringer()
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
+            assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
 
-        nullstillTilstandsendringer()
-        håndterArbeidsgiveropplysninger(
-            listOf(10.januar til 25.januar),
-            beregnetInntekt = INNTEKT
-        )
-        håndterKorrigerteArbeidsgiveropplysninger(
-            listOf(10.januar til 25.januar),
-            beregnetInntekt = INNTEKT
-        )
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        }
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
-        assertVarsel(Varselkode.RV_IM_4, 3.vedtaksperiode.filter())
-    }
+    @Test
+    fun `AI fjerner gammel IM - avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(23.januar, 25.januar))
+            håndterSøknad(Sykdom(23.januar, 25.januar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(29.januar, 29.januar))
+            håndterSøknad(Sykdom(29.januar, 29.januar, 100.prosent))
+
+            nullstillTilstandsendringer()
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT)
+
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+
+    @Test
+    fun `AI fjerner gammel IM - avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige 2`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar))
+            håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(29.januar, 29.januar))
+            håndterSøknad(Sykdom(29.januar, 29.januar, 100.prosent))
+
+            nullstillTilstandsendringer()
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT)
+
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+
+    @Test
+    fun `gjenopptar behandling på neste periode dersom inntektsmelding treffer avsluttet periode`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
+            håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertEquals(listOf(5.januar til 20.januar), inspektør.venteperiode(2.vedtaksperiode))
+        }
+
+    @Test
+    fun `AI fjerner gammel IM - revurderer ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar))
+            håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(30.januar, 31.januar))
+            håndterSøknad(Sykdom(30.januar, 31.januar, 100.prosent))
+
+            nullstillTilstandsendringer()
+            håndterArbeidsgiveropplysninger(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
+            håndterKorrigerteArbeidsgiveropplysninger(
+                listOf(10.januar til 25.januar),
+                beregnetInntekt = INNTEKT,
+            )
+
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertVarsel(Varselkode.RV_IM_4, 3.vedtaksperiode.filter())
+        }
+
+    @Test
+    fun `AI fjerner gammel IM - omgjører ved mottatt inntektsmelding - påfølgende periode med im går i vanlig løype - omvendt`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
+            håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar))
+            håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
+
+            håndterSykmelding(Sykmeldingsperiode(30.januar, 31.januar))
+            håndterSøknad(Sykdom(30.januar, 31.januar, 100.prosent))
+
+            nullstillTilstandsendringer()
+            håndterArbeidsgiveropplysninger(
+                listOf(10.januar til 25.januar),
+                beregnetInntekt = INNTEKT,
+            )
+            håndterKorrigerteArbeidsgiveropplysninger(
+                listOf(10.januar til 25.januar),
+                beregnetInntekt = INNTEKT,
+            )
+
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertVarsel(Varselkode.RV_IM_4, 3.vedtaksperiode.filter())
+        }
 
     @Test
     fun `inntektsmelding ag1 - ag1 må vente på inntekt for ag2`() {
@@ -672,7 +660,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
         }
 
@@ -709,7 +697,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
         }
 
@@ -746,7 +734,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
         }
 
@@ -763,7 +751,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(3.januar til 18.januar),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
         }
         a1 {
@@ -805,7 +793,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         a1 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
         }
 
@@ -822,7 +810,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
         }
         a1 {
@@ -837,9 +825,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            val godkjennignsbehov = enesteGodkjenningsbehovSomFølgeAv({1.vedtaksperiode}) {
-                håndterSimulering(1.vedtaksperiode)
-            }
+            val godkjennignsbehov =
+                enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
+                    håndterSimulering(1.vedtaksperiode)
+                }
             assertEquals("FLERE_ARBEIDSGIVERE", godkjennignsbehov.event.inntektskilde)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         }
@@ -928,17 +917,17 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
                 listOf(
                     7.juni(2022) til 7.juni(2022),
                     9.juni(2022) til 10.juni(2022),
-                    17.juni(2022) til 29.juni(2022)
+                    17.juni(2022) til 29.juni(2022),
                 ),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
         }
         a2 {
             håndterArbeidsgiveropplysninger(
                 listOf(
-                    17.juni(2022) til 2.juli(2022)
+                    17.juni(2022) til 2.juli(2022),
                 ),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
         }
 
@@ -983,10 +972,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
                 listOf(
                     7.juni(2022) til 7.juni(2022),
                     9.juni(2022) til 10.juni(2022),
-                    17.juni(2022) til 29.juni(2022)
+                    17.juni(2022) til 29.juni(2022),
                 ),
                 beregnetInntekt = INNTEKT,
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
         }
         a2 { håndterArbeidsgiveropplysninger(listOf(17.juni(2022) til 2.juli(2022)), beregnetInntekt = INNTEKT) }
@@ -1012,64 +1001,66 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `infotrygd har plutselig utbetalt`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar))
-        håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+    fun `infotrygd har plutselig utbetalt`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar))
+            håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-        assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
-        nullstillTilstandsendringer()
-        val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 20.januar))
-        håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
-        håndterYtelser(1.vedtaksperiode)
+            nullstillTilstandsendringer()
+            val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 20.januar))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(*utbetalinger.toTypedArray())
+            håndterYtelser(1.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `omgjøring med ghost`() = a1 {
-        val beregnetInntektA1 = 31000.månedlig
-
-        håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar))
-        håndterSøknad(Sykdom(10.januar, 25.januar, 100.prosent))
-        håndterSelvbestemtArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = beregnetInntektA1
-        )
-        assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
-        håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
-        assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
-
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].let {
-            assertEquals(1080.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
-            assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
-            assertEquals(beregnetInntektA1, it.økonomi.inspektør.aktuellDagsinntekt)
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         }
 
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_AVSLUTTET_UTEN_UTBETALING,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
-        )
-    }
+    @Test
+    fun `omgjøring med ghost`() =
+        a1 {
+            val beregnetInntektA1 = 31000.månedlig
+
+            håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar))
+            håndterSøknad(Sykdom(10.januar, 25.januar, 100.prosent))
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = beregnetInntektA1,
+            )
+            assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
+            håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
+            assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].let {
+                assertEquals(1080.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+                assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
+                assertEquals(beregnetInntektA1, it.økonomi.inspektør.aktuellDagsinntekt)
+            }
+
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+            )
+        }
 
     @Test
     fun `revurdere etter at én arbeidsgiver har blitt til to`() {
@@ -1081,7 +1072,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = INNTEKT,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
         }
         a1 { håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2) }
@@ -1108,8 +1099,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
         a1 {
             håndterOverstyrTidslinje(
                 listOf(
-                    ManuellOverskrivingDag(27.februar, Dagtype.Feriedag)
-                )
+                    ManuellOverskrivingDag(27.februar, Dagtype.Feriedag),
+                ),
             )
         }
 
@@ -1132,144 +1123,151 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractDslTest()
     }
 
     @Test
-    fun `forkaster vedtaksperioder i revurdering som kun består av AUU`() = a1 {
-        håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar))
-        håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
+    fun `forkaster vedtaksperioder i revurdering som kun består av AUU`() =
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar))
+            håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar))
-        håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar))
+            håndterSøknad(Sykdom(21.januar, 25.januar, 100.prosent))
 
-        håndterSelvbestemtArbeidsgiveropplysninger(listOf(2.januar til 17.januar), beregnetInntekt = INNTEKT)
-        assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            håndterSelvbestemtArbeidsgiveropplysninger(listOf(2.januar til 17.januar), beregnetInntekt = INNTEKT)
+            assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-        nullstillTilstandsendringer()
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
+            nullstillTilstandsendringer()
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
 
-        assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `AI fjerner gammel IM - Skal ikke forkaste vedtaksperioder med overlappende utbetaling som treffes av søknad som forkastes på direkten`() = a1 {
-        håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
-        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
-
-        håndterArbeidsgiveropplysninger(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-
-        nullstillTilstandsendringer()
-
-        assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(5.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-
-        val arbeidsgiverperioder = listOf(2.januar til 17.januar)
-        håndterKorrigerteArbeidsgiveropplysninger(
-            arbeidsgiverperioder,
-            beregnetInntekt = INNTEKT * 1.2
-        )
-        assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 5.januar, listOf(5.januar til 20.januar))
-        assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 5.januar, listOf(5.januar til 20.januar))
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-
-        nullstillTilstandsendringer()
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-
-        assertEquals(1.januar til 20.januar, inspektør.periode(1.vedtaksperiode))
-        assertEquals(21.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_SØ_13, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `allerede utbetalt i Infotrygd uten utbetaling etterpå`() = a1 {
-        nyPeriode(2.januar til 17.januar)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 17.januar))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `AI fjerner gammel IM - omgjøring med funksjonell feil, som blir varsel, i inntektsmelding fra Altinn eller LPS`() = a1 {
-        håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
-        nyttVedtak(18.januar til 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar))
-        nullstillTilstandsendringer()
-        val im = håndterKorrigerteArbeidsgiveropplysninger(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
-        )
-
-        assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
-        assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertTrue(im !in observatør.inntektsmeldingIkkeHåndtert)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
-            assertEquals(3, it.size)
-            assertEquals(AvsluttetUtenVedtak, it[0].tilstand)
-            assertEquals(AvsluttetUtenVedtak, it[1].tilstand)
-            assertEquals(AvsluttetUtenVedtak, it[2].tilstand)
-            assertEquals(im, it[2].kilde.meldingsreferanseId.id)
+            assertFunksjonellFeil(RV_SØ_13, 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
         }
-        assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
-        assertVarsel(Varselkode.RV_IM_8, 2.vedtaksperiode.filter())
-    }
 
     @Test
-    fun `omgjøring med funksjonell feil i inntektsmelding fra portalen`() = a1 {
-        håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
-        nyttVedtak(18.januar til 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar))
-        nullstillTilstandsendringer()
-        val im = a1 {
+    fun `AI fjerner gammel IM - Skal ikke forkaste vedtaksperioder med overlappende utbetaling som treffes av søknad som forkastes på direkten`() =
+        a1 {
+            håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
+            håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
+
+            håndterArbeidsgiveropplysninger(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            nullstillTilstandsendringer()
+
+            assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(5.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+
+            val arbeidsgiverperioder = listOf(2.januar til 17.januar)
             håndterKorrigerteArbeidsgiveropplysninger(
-                2.vedtaksperiode,
-                *fraInntektsmelding(
-                    beregnetInntekt = INNTEKT,
-                    refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
-                    arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                    begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre",
-                    opphørAvNaturalytelser = emptyList(),
-                    harFlereArbeidsforhold = false,
-                    refusjonskravGyldigFra = null
-                ).toTypedArray()
+                arbeidsgiverperioder,
+                beregnetInntekt = INNTEKT * 1.2,
             )
-        }
-        assertVarsler(listOf(RV_IM_4, RV_IM_24, RV_IM_8), 2.vedtaksperiode.filter())
-        assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertInntektshistorikkForDato(INNTEKT, 2.januar, inspektør)
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 5.januar, listOf(5.januar til 20.januar))
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 5.januar, listOf(5.januar til 20.januar))
 
-        assertTrue(im in observatør.inntektsmeldingHåndtert.map { it.first })
-        assertFalse(im in observatør.inntektsmeldingIkkeHåndtert)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
-            assertEquals(3, it.size)
-            assertTrue(it.all { behalding -> behalding.tilstand == AvsluttetUtenVedtak })
-            assertEquals(im, it[2].kilde.meldingsreferanseId.id)
+            nullstillTilstandsendringer()
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
+
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING)
+            assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+
+            assertEquals(1.januar til 20.januar, inspektør.periode(1.vedtaksperiode))
+            assertEquals(21.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertVarsel(Varselkode.RV_IV_7, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_SØ_13, 1.vedtaksperiode.filter())
         }
-    }
+
+    @Test
+    fun `allerede utbetalt i Infotrygd uten utbetaling etterpå`() =
+        a1 {
+            nyPeriode(2.januar til 17.januar)
+            håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 17.januar))
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+        }
+
+    @Test
+    fun `AI fjerner gammel IM - omgjøring med funksjonell feil, som blir varsel, i inntektsmelding fra Altinn eller LPS`() =
+        a1 {
+            håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
+            nyttVedtak(18.januar til 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar))
+            nullstillTilstandsendringer()
+            val im =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    listOf(1.januar til 16.januar),
+                    beregnetInntekt = INNTEKT,
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre",
+                )
+
+            assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertTrue(im !in observatør.inntektsmeldingIkkeHåndtert)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
+                assertEquals(3, it.size)
+                assertEquals(AvsluttetUtenVedtak, it[0].tilstand)
+                assertEquals(AvsluttetUtenVedtak, it[1].tilstand)
+                assertEquals(AvsluttetUtenVedtak, it[2].tilstand)
+                assertEquals(im, it[2].kilde.meldingsreferanseId.id)
+            }
+            assertVarsel(Varselkode.RV_IM_24, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_IM_8, 2.vedtaksperiode.filter())
+        }
+
+    @Test
+    fun `omgjøring med funksjonell feil i inntektsmelding fra portalen`() =
+        a1 {
+            håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
+            nyttVedtak(18.januar til 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar))
+            nullstillTilstandsendringer()
+            val im =
+                a1 {
+                    håndterKorrigerteArbeidsgiveropplysninger(
+                        2.vedtaksperiode,
+                        *fraInntektsmelding(
+                            beregnetInntekt = INNTEKT,
+                            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
+                            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                            begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre",
+                            opphørAvNaturalytelser = emptyList(),
+                            harFlereArbeidsforhold = false,
+                            refusjonskravGyldigFra = null,
+                        ).toTypedArray(),
+                    )
+                }
+            assertVarsler(listOf(RV_IM_4, RV_IM_24, RV_IM_8), 2.vedtaksperiode.filter())
+            assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertInntektshistorikkForDato(INNTEKT, 2.januar, inspektør)
+
+            assertTrue(im in observatør.inntektsmeldingHåndtert.map { it.first })
+            assertFalse(im in observatør.inntektsmeldingIkkeHåndtert)
+
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
+                assertEquals(3, it.size)
+                assertTrue(it.all { behalding -> behalding.tilstand == AvsluttetUtenVedtak })
+                assertEquals(im, it[2].kilde.meldingsreferanseId.id)
+            }
+        }
 }

@@ -16,25 +16,14 @@ import no.nav.helse.mars
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertInstanceOf
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
-
     @Test
     fun `AI fjerner gammel IM - Inntektsmelding opplyser om endret arbeidsgiverperiode - AUU periode inneholder utbetalingsdag`() {
         a1 {
@@ -45,7 +34,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
 
             nyPeriode(22.januar til 31.januar, a1)
             håndterArbeidsgiveropplysninger(
-                arbeidsgiverperioder = listOf(1.januar til 16.januar)
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
             )
 
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -53,7 +42,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
 
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -86,7 +75,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             nyPeriode(10.mars til 31.mars, a1)
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = emptyList(),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -124,7 +113,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             håndterSøknad(31.januar til 5.februar)
             // perioden 4. til 9.januar er paddet arbeidsdager; perioden 23.januar til 30.januar er "implisitte arbeidsdager" (ukjentdager på sykdomtsidslinjen)
             håndterSelvbestemtArbeidsgiveropplysninger(
-                listOf(1.januar til 3.januar, 10.januar til 22.januar)
+                listOf(1.januar til 3.januar, 10.januar til 22.januar),
             )
             assertVarsel(Varselkode.RV_AO_3, 2.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -156,7 +145,6 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertEquals(31.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-
         }
     }
 
@@ -166,7 +154,12 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
 
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar)))
-            assertEquals(januar, testperson.person.infotrygdhistorikk.betaltePerioder().single())
+            assertEquals(
+                januar,
+                testperson.person.infotrygdhistorikk
+                    .betaltePerioder()
+                    .single(),
+            )
             val førsteVedtaksperiode = inspektør.vedtaksperioder(1.vedtaksperiode)
             assertEquals(februar, førsteVedtaksperiode.periode)
 
@@ -185,7 +178,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             // Personen vært frisk 1. & 2.Mars, så er nytt skjæringstidspunkt, men samme arbeidsgiverperiode
             håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
                 arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
-                førsteFraværsdag = 5.mars
+                førsteFraværsdag = 5.mars,
             )
 
             // Når søknaden kommer replayes Inntektsmelding og nå puttes plutselig info fra Inntektsmlding på
@@ -211,7 +204,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.februar til 16.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -224,7 +217,6 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
-
         }
     }
 
@@ -240,7 +232,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.februar til 16.februar),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))

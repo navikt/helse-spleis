@@ -1,16 +1,11 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.assertForventetFeil
-import no.nav.helse.august
-import no.nav.helse.desember
+import no.nav.helse.*
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.hendelser.til
-import no.nav.helse.i
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.juli
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -18,7 +13,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
-
     @Test
     fun `unødvendig revurdering av periode 2 fordi periode 1 ikke påvirker maksdatotellingen for periode 2`() {
         a1 {
@@ -26,8 +20,10 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
             nyttVedtak(januar.i(2018))
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
-                ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2016), 31.desember(2016)))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                listOf(
+                    ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2016), 31.desember(2016)),
+                ),
             )
             assertForventetFeil(
                 nå = {
@@ -37,7 +33,7 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
                 ønsket = {
                     assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING)
                     assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
-                }
+                },
             )
         }
     }
@@ -47,8 +43,10 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar.i(2018))
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
-                ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2016), 31.desember(2016)))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                listOf(
+                    ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2016), 31.desember(2016)),
+                ),
             )
             assertForventetFeil(
                 nå = {
@@ -56,7 +54,7 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
                 },
                 ønsket = {
                     assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
-                }
+                },
             )
         }
     }
@@ -67,8 +65,10 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar.i(2015)) // Bare for å få inn personen
 
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
-                ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 11.desember(2017)))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                listOf(
+                    ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 11.desember(2017)),
+                ),
             )
             nyttVedtak(januar)
 
@@ -79,8 +79,10 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
             assertEquals(0, inspektør.utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
 
             // Fjerner infotrygdutbetalinger for 2.-11.desember, gjør at siste dager på 2.vedtaksperiode blir utbetalt allikevel, og utbetalingsgapet til 3.vedtaksperiode blir ikke lenger over 26 uker
-            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
-                ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 1.desember(2017)))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                listOf(
+                    ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 1.desember(2017)),
+                ),
             )
 
             håndterYtelser(2.vedtaksperiode)
@@ -94,5 +96,4 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
             assertVarsler(3.vedtaksperiode, Varselkode.RV_UT_23)
         }
     }
-
 }

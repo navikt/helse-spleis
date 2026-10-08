@@ -4,15 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import java.time.LocalDateTime
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
+import java.time.LocalDateTime
 
 internal class PåminnelserRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("påminnelse")
     override val riverName = "Påminnelse"
@@ -30,11 +30,12 @@ internal class PåminnelserRiver(
         message.interestedIn("flagg")
     }
 
-    override fun createMessage(packet: JsonMessage) = PåminnelseMessage(
-        packet,
-        Meldingsporing(
-            id = packet.meldingsreferanseId(),
-            fødselsnummer = packet["fødselsnummer"].asText()
+    override fun createMessage(packet: JsonMessage) =
+        PåminnelseMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
         )
-    )
 }

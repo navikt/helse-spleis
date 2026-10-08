@@ -1,8 +1,5 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnslagInnDto
@@ -14,15 +11,7 @@ import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-2 ledd 1 - selvstendig næringsdrivende`
 import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
-import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.Vurdering
-import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.*
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -30,9 +19,13 @@ import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.Companion.harUlikeGrunnbeløp
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
-internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
-
+internal class VilkårsgrunnlagHistorikk private constructor(
+    private val historikk: MutableList<Innslag>,
+) {
     internal constructor() : this(mutableListOf())
 
     internal fun historikk() = historikk.toList()
@@ -45,27 +38,31 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         historikk.add(0, nytt)
     }
 
-    internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: Set<LocalDate>) {
+    internal fun oppdaterHistorikk(
+        aktivitetslogg: IAktivitetslogg,
+        sykefraværstilfeller: Set<LocalDate>,
+    ) {
         val nyttInnslag = sisteInnlag()?.oppdaterHistorikk(aktivitetslogg, sykefraværstilfeller) ?: return
         historikk.add(0, nyttInnslag)
     }
 
-    internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
-        sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)
+    internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
     internal class Innslag private constructor(
         internal val id: UUID,
         private val opprettet: LocalDateTime,
-        internal val vilkårsgrunnlag: Map<LocalDate, VilkårsgrunnlagElement>
+        internal val vilkårsgrunnlag: Map<LocalDate, VilkårsgrunnlagElement>,
     ) {
         internal constructor(vilkårsgrunnlag: Map<LocalDate, VilkårsgrunnlagElement>) : this(UUID.randomUUID(), LocalDateTime.now(), vilkårsgrunnlag)
 
         internal constructor(other: Innslag?, nyttElement: VilkårsgrunnlagElement) : this((other?.vilkårsgrunnlag ?: emptyMap()) + mapOf(nyttElement.skjæringstidspunkt to nyttElement))
 
-        internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
-            vilkårsgrunnlag[skjæringstidspunkt]
+        internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag[skjæringstidspunkt]
 
-        internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: Set<LocalDate>): Innslag? {
+        internal fun oppdaterHistorikk(
+            aktivitetslogg: IAktivitetslogg,
+            sykefraværstilfeller: Set<LocalDate>,
+        ): Innslag? {
             val gyldigeVilkårsgrunnlag = beholdAktiveSkjæringstidspunkter(sykefraværstilfeller)
             val diff = this.vilkårsgrunnlag.size - gyldigeVilkårsgrunnlag.size
             if (diff == 0) return null
@@ -73,35 +70,39 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return Innslag(gyldigeVilkårsgrunnlag)
         }
 
-        private fun beholdAktiveSkjæringstidspunkter(sykefraværstilfeller: Set<LocalDate>): Map<LocalDate, VilkårsgrunnlagElement> {
-            return vilkårsgrunnlag.filter { (dato, _) -> dato in sykefraværstilfeller }
-        }
+        private fun beholdAktiveSkjæringstidspunkter(sykefraværstilfeller: Set<LocalDate>): Map<LocalDate, VilkårsgrunnlagElement> = vilkårsgrunnlag.filter { (dato, _) -> dato in sykefraværstilfeller }
 
         internal companion object {
             fun gjenopprett(
                 id: UUID,
                 opprettet: LocalDateTime,
-                elementer: Map<LocalDate, VilkårsgrunnlagElement>
+                elementer: Map<LocalDate, VilkårsgrunnlagElement>,
             ): Innslag = Innslag(id, opprettet, elementer.toMutableMap())
 
-            fun gjenopprett(dto: VilkårsgrunnlagInnslagInnDto, grunnlagsdata: MutableMap<UUID, VilkårsgrunnlagElement>): Innslag {
-                return Innslag(
+            fun gjenopprett(
+                dto: VilkårsgrunnlagInnslagInnDto,
+                grunnlagsdata: MutableMap<UUID, VilkårsgrunnlagElement>,
+            ): Innslag =
+                Innslag(
                     id = dto.id,
                     opprettet = dto.opprettet,
-                    vilkårsgrunnlag = dto.vilkårsgrunnlag.associate {
-                        it.skjæringstidspunkt to grunnlagsdata.getOrPut(it.vilkårsgrunnlagId) {
-                            VilkårsgrunnlagElement.gjenopprett(it)
-                        }
-                    }.toMutableMap()
+                    vilkårsgrunnlag =
+                        dto.vilkårsgrunnlag
+                            .associate {
+                                it.skjæringstidspunkt to
+                                    grunnlagsdata.getOrPut(it.vilkårsgrunnlagId) {
+                                        VilkårsgrunnlagElement.gjenopprett(it)
+                                    }
+                            }.toMutableMap(),
                 )
-            }
         }
 
-        internal fun dto() = VilkårsgrunnlagInnslagUtDto(
-            id = this.id,
-            opprettet = this.opprettet,
-            vilkårsgrunnlag = this.vilkårsgrunnlag.map { it.value.dto() }
-        )
+        internal fun dto() =
+            VilkårsgrunnlagInnslagUtDto(
+                id = this.id,
+                opprettet = this.opprettet,
+                vilkårsgrunnlag = this.vilkårsgrunnlag.map { it.value.dto() },
+            )
     }
 
     internal sealed class VilkårsgrunnlagElement(
@@ -110,23 +111,29 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         val inntektsgrunnlag: Inntektsgrunnlag,
         val opptjeningsvurderingId: UUID,
     ) : Aktivitetskontekst {
-        internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) = true
+        internal open fun valider(
+            aktivitetslogg: IAktivitetslogg,
+            organisasjonsnummer: String,
+        ) = true
 
         internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = inntektsgrunnlag.erArbeidsgiverRelevant(organisasjonsnummer)
+
         internal fun inneholderInntekterFor(yrkesaktivitet: Yrkesaktivitet) = inntektsgrunnlag.inneholderInntekterFor(yrkesaktivitet)
 
-        final override fun toSpesifikkKontekst() = SpesifikkKontekst(
-            kontekstType = "vilkårsgrunnlag",
-            kontekstMap = mapOf(
-                "vilkårsgrunnlagId" to vilkårsgrunnlagId.toString(),
-                "skjæringstidspunkt" to skjæringstidspunkt.toString(),
-                "vilkårsgrunnlagtype" to vilkårsgrunnlagtype()
+        final override fun toSpesifikkKontekst() =
+            SpesifikkKontekst(
+                kontekstType = "vilkårsgrunnlag",
+                kontekstMap =
+                    mapOf(
+                        "vilkårsgrunnlagId" to vilkårsgrunnlagId.toString(),
+                        "skjæringstidspunkt" to skjæringstidspunkt.toString(),
+                        "vilkårsgrunnlagtype" to vilkårsgrunnlagtype(),
+                    ),
             )
-        )
 
         internal fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
-            subsumsjonslogg: Subsumsjonslogg
+            subsumsjonslogg: Subsumsjonslogg,
         ): Grunnlagsdata? {
             if (this !is Grunnlagsdata) return null
             return medOverstyrArbeidsforhold(hendelse, subsumsjonslogg)
@@ -147,7 +154,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun håndterArbeidstakerFaktaavklartInntekt(
             organisasjonsnummer: String,
             førsteFraværsdag: LocalDate,
-            arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt
+            arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
         ): Grunnlagsdata? {
             if (this !is Grunnlagsdata) return null
             return when (val utfall = inntektsgrunnlag.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, førsteFraværsdag, arbeidstakerFaktaavklartInntekt)) {
@@ -163,18 +170,22 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 is Inntektsgrunnlag.Utfall.Endret -> {
                     val nyttGrunnlag = medNyttInntektsgrunnlag(utfall.nyttInntektsgrunnlag)
                     val arbeidstakerOpptjening = nyttGrunnlag.opptjening as ArbeidstakerOpptjening
-                    val endredeArbeidsgivere = utfall.arbeidsgivereMedEndretBeløp.map { orgnr ->
-                        EndretArbeidsgiver(
-                            organisasjonsnummer = orgnr,
-                            startdato = arbeidstakerOpptjening.startdatoFor(orgnr)
-                        )
-                    }
+                    val endredeArbeidsgivere =
+                        utfall.arbeidsgivereMedEndretBeløp.map { orgnr ->
+                            EndretArbeidsgiver(
+                                organisasjonsnummer = orgnr,
+                                startdato = arbeidstakerOpptjening.startdatoFor(orgnr),
+                            )
+                        }
                     nyttGrunnlag to endredeArbeidsgivere
                 }
             }
         }
-        
-        internal fun håndterEndretVurdering(hendelse: EndretVurderingPåSkjæringstidspunkt, aktivitetslogg: IAktivitetslogg): Grunnlagsdata? {
+
+        internal fun håndterEndretVurdering(
+            hendelse: EndretVurderingPåSkjæringstidspunkt,
+            aktivitetslogg: IAktivitetslogg,
+        ): Grunnlagsdata? {
             if (this !is Grunnlagsdata) return null.also { aktivitetslogg.info("Kan ikke endre på Infotrygdvilkårsgrunnlag") }
             return when (val endretVurdering = hendelse.endretVurdering) {
                 is Vurdering.Forsikringsvurdering -> medEndretForsikringsvurdering(endretVurdering, aktivitetslogg)
@@ -192,9 +203,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal companion object {
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
-                val skjæringstidspunkter = elementer
-                    .map { it.skjæringstidspunkt }
-                    .sorted()
+                val skjæringstidspunkter =
+                    elementer
+                        .map { it.skjæringstidspunkt }
+                        .sorted()
                 return skjæringstidspunkter
                     .mapIndexed { index, skjæringstidspunkt ->
                         val sisteDag = skjæringstidspunkter.elementAtOrNull(index + 1)?.forrigeDag ?: LocalDate.MAX
@@ -202,16 +214,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                     }
             }
 
-            internal fun List<VilkårsgrunnlagElement>.harUlikeGrunnbeløp(): Boolean {
-                return map { it.inntektsgrunnlag }.harUlikeGrunnbeløp()
-            }
+            internal fun List<VilkårsgrunnlagElement>.harUlikeGrunnbeløp(): Boolean = map { it.inntektsgrunnlag }.harUlikeGrunnbeløp()
 
-            internal fun gjenopprett(dto: VilkårsgrunnlagInnDto): VilkårsgrunnlagElement {
-                return when (dto) {
+            internal fun gjenopprett(dto: VilkårsgrunnlagInnDto): VilkårsgrunnlagElement =
+                when (dto) {
                     is VilkårsgrunnlagInnDto.Infotrygd -> InfotrygdVilkårsgrunnlag.gjenopprett(dto)
                     is VilkårsgrunnlagInnDto.Spleis -> Grunnlagsdata.gjenopprett(dto)
                 }
-            }
         }
 
         internal abstract fun dto(): VilkårsgrunnlagUtDto
@@ -227,7 +236,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         val forsikringsvurderingId: UUID?,
         opptjeningsvurderingId: UUID,
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjeningsvurderingId) {
-
         internal fun validerFørstegangsvurderingArbeidstaker(aktivitetslogg: IAktivitetslogg) {
             if (opptjening != null) inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
         }
@@ -237,27 +245,39 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             subsumsjonslogg.logg(`§ 8-2 ledd 1 - selvstendig næringsdrivende`(skjæringstidspunkt, true))
         }
 
-        override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String): Boolean {
+        override fun valider(
+            aktivitetslogg: IAktivitetslogg,
+            organisasjonsnummer: String,
+        ): Boolean {
             inntektsgrunnlag.vurderArbeidsgivere(aktivitetslogg, opptjening, organisasjonsnummer)
             return !aktivitetslogg.harFunksjonelleFeil()
         }
 
         override fun vilkårsgrunnlagtype() = "Spleis"
 
-        internal fun medOverstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg) = kopierMed(
+        internal fun medOverstyrArbeidsforhold(
+            hendelse: OverstyrArbeidsforhold,
+            subsumsjonslogg: Subsumsjonslogg,
+        ) = kopierMed(
             nyttInntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
             nyOpptjening = hendelse.overstyr(opptjening!!).also { subsumsjonslogg.logg(it.subsumsjon) },
-            nyOpptjeningsvurderingId = UUID.randomUUID()
+            nyOpptjeningsvurderingId = UUID.randomUUID(),
         )
 
         internal fun medNyttInntektsgrunnlag(nyttInntektsgrunnlag: Inntektsgrunnlag) = kopierMed(nyttInntektsgrunnlag = nyttInntektsgrunnlag)
-        
-        internal fun medEndretForsikringsvurdering(forsikringsvurdering: Vurdering.Forsikringsvurdering, aktivitetslogg: IAktivitetslogg): Grunnlagsdata? {
+
+        internal fun medEndretForsikringsvurdering(
+            forsikringsvurdering: Vurdering.Forsikringsvurdering,
+            aktivitetslogg: IAktivitetslogg,
+        ): Grunnlagsdata? {
             if (forsikringsvurderingId == forsikringsvurdering.id) return null.also { aktivitetslogg.info("Forsikringsvurderingen er allerede lagt til grunn") }
             return kopierMed(nyForsikringsvurderingId = forsikringsvurdering.id)
         }
-        
-        internal fun medEndretOpptjeningsvurdering(opptjeningsvurdering: Vurdering.Opptjeningsvurdering, aktivitetslogg: IAktivitetslogg): Grunnlagsdata? {
+
+        internal fun medEndretOpptjeningsvurdering(
+            opptjeningsvurdering: Vurdering.Opptjeningsvurdering,
+            aktivitetslogg: IAktivitetslogg,
+        ): Grunnlagsdata? {
             if (opptjeningsvurderingId == opptjeningsvurdering.id) return null.also { aktivitetslogg.info("Opptjeningsvurderingen er allerede lagt til grunn") }
             return kopierMed(nyOpptjeningsvurderingId = opptjeningsvurdering.id)
         }
@@ -267,7 +287,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             nyOpptjening: ArbeidstakerOpptjening? = null,
             nyttSkjæringstidspunkt: LocalDate? = null,
             nyOpptjeningsvurderingId: UUID? = null,
-            nyForsikringsvurderingId: UUID? = null
+            nyForsikringsvurderingId: UUID? = null,
         ): Grunnlagsdata {
             require(listOfNotNull(nyttInntektsgrunnlag, nyOpptjening, nyttSkjæringstidspunkt, nyOpptjeningsvurderingId, nyForsikringsvurderingId).isNotEmpty()) {
                 "Må endre minst et felt for at det skal gi mening å lage et nytt grunnlag!"
@@ -284,82 +304,89 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         }
 
-        override fun dto() = VilkårsgrunnlagUtDto.Spleis(
-            vilkårsgrunnlagId = vilkårsgrunnlagId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            inntektsgrunnlag = inntektsgrunnlag.dto(),
-            opptjening = this.opptjening?.dto(),
-            medlemskapstatus = when (medlemskapstatus) {
-                Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapsvurderingDto.Ja
-                Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapsvurderingDto.Nei
-                Medlemskapsvurdering.Medlemskapstatus.VetIkke -> MedlemskapsvurderingDto.VetIkke
-                Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> MedlemskapsvurderingDto.UavklartMedBrukerspørsmål
-            },
-            meldingsreferanseId = meldingsreferanseId?.dto(),
-            forsikringsvurderingId = forsikringsvurderingId,
-            opptjeningsvurderingId = opptjeningsvurderingId,
-        )
+        override fun dto() =
+            VilkårsgrunnlagUtDto.Spleis(
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                inntektsgrunnlag = inntektsgrunnlag.dto(),
+                opptjening = this.opptjening?.dto(),
+                medlemskapstatus =
+                    when (medlemskapstatus) {
+                        Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapsvurderingDto.Ja
+                        Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapsvurderingDto.Nei
+                        Medlemskapsvurdering.Medlemskapstatus.VetIkke -> MedlemskapsvurderingDto.VetIkke
+                        Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> MedlemskapsvurderingDto.UavklartMedBrukerspørsmål
+                    },
+                meldingsreferanseId = meldingsreferanseId?.dto(),
+                forsikringsvurderingId = forsikringsvurderingId,
+                opptjeningsvurderingId = opptjeningsvurderingId,
+            )
 
         internal companion object {
-            fun gjenopprett(dto: VilkårsgrunnlagInnDto.Spleis): Grunnlagsdata {
-                return Grunnlagsdata(
+            fun gjenopprett(dto: VilkårsgrunnlagInnDto.Spleis): Grunnlagsdata =
+                Grunnlagsdata(
                     skjæringstidspunkt = dto.skjæringstidspunkt,
                     inntektsgrunnlag = Inntektsgrunnlag.gjenopprett(dto.skjæringstidspunkt, dto.inntektsgrunnlag),
                     opptjening = dto.opptjening?.let { ArbeidstakerOpptjening.gjenopprett(dto.skjæringstidspunkt, it) },
                     vilkårsgrunnlagId = dto.vilkårsgrunnlagId,
-                    medlemskapstatus = when (dto.medlemskapstatus) {
-                        MedlemskapsvurderingDto.Ja -> Medlemskapsvurdering.Medlemskapstatus.Ja
-                        MedlemskapsvurderingDto.Nei -> Medlemskapsvurdering.Medlemskapstatus.Nei
-                        MedlemskapsvurderingDto.UavklartMedBrukerspørsmål -> Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål
-                        MedlemskapsvurderingDto.VetIkke -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
-                    },
+                    medlemskapstatus =
+                        when (dto.medlemskapstatus) {
+                            MedlemskapsvurderingDto.Ja -> Medlemskapsvurdering.Medlemskapstatus.Ja
+                            MedlemskapsvurderingDto.Nei -> Medlemskapsvurdering.Medlemskapstatus.Nei
+                            MedlemskapsvurderingDto.UavklartMedBrukerspørsmål -> Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål
+                            MedlemskapsvurderingDto.VetIkke -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
+                        },
                     meldingsreferanseId = dto.meldingsreferanseId?.let { MeldingsreferanseId.gjenopprett(it) },
                     forsikringsvurderingId = dto.forsikringsvurderingId,
                     opptjeningsvurderingId = dto.opptjeningsvurderingId,
                 )
-            }
         }
     }
 
     internal class InfotrygdVilkårsgrunnlag(
         skjæringstidspunkt: LocalDate,
         inntektsgrunnlag: Inntektsgrunnlag,
-        vilkårsgrunnlagId: UUID ,
+        vilkårsgrunnlagId: UUID,
         opptjeningsvurderingId: UUID,
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjeningsvurderingId) {
-
         override fun vilkårsgrunnlagtype() = "Infotrygd"
 
-        override fun dto() = VilkårsgrunnlagUtDto.Infotrygd(
-            vilkårsgrunnlagId = vilkårsgrunnlagId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            inntektsgrunnlag = inntektsgrunnlag.dto(),
-            opptjeningsvurderingId = opptjeningsvurderingId
-        )
+        override fun dto() =
+            VilkårsgrunnlagUtDto.Infotrygd(
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                inntektsgrunnlag = inntektsgrunnlag.dto(),
+                opptjeningsvurderingId = opptjeningsvurderingId,
+            )
 
         internal companion object {
-            fun gjenopprett(dto: VilkårsgrunnlagInnDto.Infotrygd): InfotrygdVilkårsgrunnlag {
-                return InfotrygdVilkårsgrunnlag(
+            fun gjenopprett(dto: VilkårsgrunnlagInnDto.Infotrygd): InfotrygdVilkårsgrunnlag =
+                InfotrygdVilkårsgrunnlag(
                     skjæringstidspunkt = dto.skjæringstidspunkt,
                     inntektsgrunnlag = Inntektsgrunnlag.gjenopprett(dto.skjæringstidspunkt, dto.inntektsgrunnlag),
                     vilkårsgrunnlagId = dto.vilkårsgrunnlagId,
                     opptjeningsvurderingId = dto.opptjeningsvurderingId,
                 )
-            }
         }
     }
 
     internal companion object {
-        internal fun gjenopprett(dto: VilkårsgrunnlaghistorikkInnDto, grunnlagsdata: MutableMap<UUID, VilkårsgrunnlagElement>): VilkårsgrunnlagHistorikk {
-            return VilkårsgrunnlagHistorikk(
-                historikk = dto.historikk.map { Innslag.gjenopprett(it, grunnlagsdata) }.toMutableList()
+        internal fun gjenopprett(
+            dto: VilkårsgrunnlaghistorikkInnDto,
+            grunnlagsdata: MutableMap<UUID, VilkårsgrunnlagElement>,
+        ): VilkårsgrunnlagHistorikk =
+            VilkårsgrunnlagHistorikk(
+                historikk = dto.historikk.map { Innslag.gjenopprett(it, grunnlagsdata) }.toMutableList(),
             )
-        }
     }
 
-    fun dto() = VilkårsgrunnlaghistorikkUtDto(
-        historikk = this.historikk.map { it.dto() }
-    )
+    fun dto() =
+        VilkårsgrunnlaghistorikkUtDto(
+            historikk = this.historikk.map { it.dto() },
+        )
 }
 
-internal data class EndretArbeidsgiver(val organisasjonsnummer: String, val startdato: LocalDate?)
+internal data class EndretArbeidsgiver(
+    val organisasjonsnummer: String,
+    val startdato: LocalDate?,
+)

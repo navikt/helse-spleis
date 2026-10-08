@@ -1,33 +1,14 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.den
+import no.nav.helse.*
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
-import no.nav.helse.februar
-import no.nav.helse.fredag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.lørdag
-import no.nav.helse.mars
-import no.nav.helse.onsdag
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
-import no.nav.helse.søndag
-import no.nav.helse.til
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -54,7 +35,7 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
     /*
         Hvis vi har en kort periode som har endt opp i AVSLUTTET_UTEN_UTBETALING vil alle etterkommende perioder
         bli stuck med å vente på den korte perioden. Da vil de aldri komme seg videre og til slutt time ut
-    */
+     */
 
     @Test
     fun `kort periode blokkerer neste periode i ny arbeidsgiverperiode`() {
@@ -89,7 +70,7 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -135,7 +116,7 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
                 TIL_UTBETALING,
-                AVSLUTTET
+                AVSLUTTET,
             )
         }
     }
@@ -158,20 +139,23 @@ internal class AvsluttetUtenUtbetalingE2ETest : AbstractDslTest() {
             // og dermed ble også skjæringstidspunktet forskjøvet til 8. januar
             håndterArbeidsgiveropplysninger(
                 listOf(
-                    1.januar til 3.januar, //3
+                    1.januar til 3.januar, // 3
                     4.januar til 5.januar, // 2
                     // 6. og 7. januar er helg
-                    8.januar til 12.januar,// 5
-                    13.januar til 18.januar // 6
-                )
+                    8.januar til 12.januar, // 5
+                    13.januar til 18.januar, // 6
+                ),
             )
             assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
             assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
-            assertEquals(listOf(
-                1.januar til 5.januar,
-                8.januar til 18.januar
-            ), inspektør.venteperiode(4.vedtaksperiode))
+            assertEquals(
+                listOf(
+                    1.januar til 5.januar,
+                    8.januar til 18.januar,
+                ),
+                inspektør.venteperiode(4.vedtaksperiode),
+            )
         }
     }
 }

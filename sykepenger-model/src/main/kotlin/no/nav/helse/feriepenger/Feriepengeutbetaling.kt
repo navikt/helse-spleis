@@ -1,9 +1,5 @@
 package no.nav.helse.feriepenger
 
-import java.time.LocalDateTime
-import java.time.Month
-import java.time.Year
-import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
@@ -19,6 +15,10 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.genererUtbetalingsreferanse
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.Year
+import java.util.UUID
 
 internal class Feriepengeutbetaling private constructor(
     private val feriepengegrunnlag: Feriepengeutbetalinggrunnlag,
@@ -40,17 +40,20 @@ internal class Feriepengeutbetaling private constructor(
     val tom = maiMåned.atEndOfMonth()
 
     companion object {
-        internal fun gjenopprett(dto: FeriepengeInnDto): Feriepengeutbetaling {
-            return Feriepengeutbetaling(
-                feriepengegrunnlag = Feriepengeutbetalinggrunnlag(
-                    opptjeningsår = dto.feriepengeberegner.opptjeningsår,
-                    utbetalteDager = dto.feriepengeberegner.utbetalteDager.map {
-                        Feriepengeutbetalinggrunnlag.UtbetaltDag.gjenopprett(it)
-                    },
-                    feriepengedager = dto.feriepengeberegner.feriepengedager.map {
-                        Feriepengeutbetalinggrunnlag.UtbetaltDag.gjenopprett(it)
-                    }
-                ),
+        internal fun gjenopprett(dto: FeriepengeInnDto): Feriepengeutbetaling =
+            Feriepengeutbetaling(
+                feriepengegrunnlag =
+                    Feriepengeutbetalinggrunnlag(
+                        opptjeningsår = dto.feriepengeberegner.opptjeningsår,
+                        utbetalteDager =
+                            dto.feriepengeberegner.utbetalteDager.map {
+                                Feriepengeutbetalinggrunnlag.UtbetaltDag.gjenopprett(it)
+                            },
+                        feriepengedager =
+                            dto.feriepengeberegner.feriepengedager.map {
+                                Feriepengeutbetalinggrunnlag.UtbetaltDag.gjenopprett(it)
+                            },
+                    ),
                 infotrygdFeriepengebeløpPerson = dto.infotrygdFeriepengebeløpPerson,
                 infotrygdFeriepengebeløpArbeidsgiver = dto.infotrygdFeriepengebeløpArbeidsgiver,
                 spleisFeriepengebeløpArbeidsgiver = dto.spleisFeriepengebeløpArbeidsgiver,
@@ -59,22 +62,28 @@ internal class Feriepengeutbetaling private constructor(
                 personoppdrag = Feriepengeoppdrag.gjenopprett(dto.personoppdrag),
                 utbetalingId = dto.utbetalingId,
                 sendTilOppdrag = dto.sendTilOppdrag,
-                sendPersonoppdragTilOS = dto.sendPersonoppdragTilOS
+                sendPersonoppdragTilOS = dto.sendPersonoppdragTilOS,
             )
-        }
     }
 
-    fun håndter(eventBus: EventBus, utbetalingHendelse: FeriepengeutbetalingHendelse, aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) {
+    fun håndter(
+        eventBus: EventBus,
+        utbetalingHendelse: FeriepengeutbetalingHendelse,
+        aktivitetslogg: IAktivitetslogg,
+        organisasjonsnummer: String,
+    ) {
         if (utbetalingHendelse.utbetalingId != this.utbetalingId || utbetalingHendelse.fagsystemId !in setOf(oppdrag.fagsystemId, personoppdrag.fagsystemId)) return
 
         aktivitetslogg.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger")
         when (utbetalingHendelse.status) {
             Oppdragstatus.OVERFØRT,
-            Oppdragstatus.AKSEPTERT -> {
+            Oppdragstatus.AKSEPTERT,
+            -> {
             } // all is good
             Oppdragstatus.AKSEPTERT_MED_FEIL -> aktivitetslogg.info("Utbetalingen ble gjennomført, men med advarsel")
             Oppdragstatus.AVVIST,
-            Oppdragstatus.FEIL -> aktivitetslogg.info("Utbetaling feilet med status ${utbetalingHendelse.status}. Feilmelding fra Oppdragsystemet: ${utbetalingHendelse.melding}")
+            Oppdragstatus.FEIL,
+            -> aktivitetslogg.info("Utbetaling feilet med status ${utbetalingHendelse.status}. Feilmelding fra Oppdragsystemet: ${utbetalingHendelse.melding}")
         }
         val utbetaltOk = !aktivitetslogg.harFunksjonelleFeil()
         lagreInformasjon(utbetalingHendelse, aktivitetslogg, utbetaltOk)
@@ -89,21 +98,28 @@ internal class Feriepengeutbetaling private constructor(
                 fom = fom,
                 tom = tom,
                 arbeidsgiverOppdrag = EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(oppdrag),
-                personOppdrag = EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(personoppdrag)
-            )
+                personOppdrag = EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(personoppdrag),
+            ),
         )
     }
 
-    private fun lagreInformasjon(hendelse: FeriepengeutbetalingHendelse, aktivitetslogg: IAktivitetslogg, gikkBra: Boolean) {
+    private fun lagreInformasjon(
+        hendelse: FeriepengeutbetalingHendelse,
+        aktivitetslogg: IAktivitetslogg,
+        gikkBra: Boolean,
+    ) {
         overføringstidspunkt = hendelse.overføringstidspunkt
         avstemmingsnøkkel = hendelse.avstemmingsnøkkel
         aktivitetslogg.info("Data for feriepenger fra Oppdrag/UR: tidspunkt: $overføringstidspunkt, avstemmingsnøkkel $avstemmingsnøkkel og utbetalt ok: ${if (gikkBra) "ja" else "nei"}")
     }
 
-    override fun toSpesifikkKontekst() =
-        SpesifikkKontekst("Feriepengeutbetaling", mapOf("utbetalingId" to "$utbetalingId"))
+    override fun toSpesifikkKontekst() = SpesifikkKontekst("Feriepengeutbetaling", mapOf("utbetalingId" to "$utbetalingId"))
 
-    internal fun overfør(aktivitetslogg: IAktivitetslogg, eventBus: EventBus, arbeidstaker: Arbeidstaker) {
+    internal fun overfør(
+        aktivitetslogg: IAktivitetslogg,
+        eventBus: EventBus,
+        arbeidstaker: Arbeidstaker,
+    ) {
         val aktivitetsloggMedUtbetalingkontekst = aktivitetslogg.kontekst(this)
         if (sendTilOppdrag) oppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, eventBus, arbeidstaker, utbetalingId)
         if (sendPersonoppdragTilOS) personoppdrag.overfør(aktivitetsloggMedUtbetalingkontekst, eventBus, arbeidstaker, utbetalingId)
@@ -116,27 +132,35 @@ internal class Feriepengeutbetaling private constructor(
         private val orgnummer: String,
         private val feriepengeberegner: Feriepengeberegner,
         private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
-        private val tidligereFeriepengeutbetalinger: List<Feriepengeutbetaling>
+        private val tidligereFeriepengeutbetalinger: List<Feriepengeutbetaling>,
     ) {
-        private fun oppdrag(mottaker: String, fagområde: Feriepengerfagområde, klassekode: Feriepengerklassekode, forrigeOppdrag: Feriepengeoppdrag?, beløp: Int): Feriepengeoppdrag {
+        private fun oppdrag(
+            mottaker: String,
+            fagområde: Feriepengerfagområde,
+            klassekode: Feriepengerklassekode,
+            forrigeOppdrag: Feriepengeoppdrag?,
+            beløp: Int,
+        ): Feriepengeoppdrag {
             if (forrigeOppdrag == null) {
                 val maiMåned = utbetalingshistorikkForFeriepenger.opptjeningsår.plusYears(1).atMonth(Month.MAY)
-                val linje = if (beløp == 0)
-                    null
-                else
-                    Feriepengeutbetalingslinje(
-                        fom = maiMåned.atDay(1),
-                        tom = maiMåned.atEndOfMonth(),
-                        beløp = beløp,
-                        klassekode = klassekode,
-                    )
+                val linje =
+                    if (beløp == 0) {
+                        null
+                    } else {
+                        Feriepengeutbetalingslinje(
+                            fom = maiMåned.atDay(1),
+                            tom = maiMåned.atEndOfMonth(),
+                            beløp = beløp,
+                            klassekode = klassekode,
+                        )
+                    }
                 return Feriepengeoppdrag(
                     mottaker = mottaker,
                     fagområde = fagområde,
                     fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID()),
                     endringskode = Feriepengerendringskode.NY,
                     linje = linje,
-                    tidsstempel = LocalDateTime.now()
+                    tidsstempel = LocalDateTime.now(),
                 )
             }
 
@@ -159,7 +183,7 @@ internal class Feriepengeutbetaling private constructor(
                     Arbeidsgiver: $orgnummer
                     Infotrygd har utbetalt $infotrygdHarUtbetaltTilArbeidsgiver
                     Spleis har beregnet at Infotrygd skulle ha utbetalt ${feriepengeberegningsresultat.arbeidsgiver.hvaViHarBeregnetAtInfotrygdHarUtbetalt}
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
 
@@ -168,13 +192,14 @@ internal class Feriepengeutbetaling private constructor(
                     .lastOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendTilOppdrag }
                     ?.oppdrag
 
-            val arbeidsgiveroppdrag = oppdrag(
-                mottaker = orgnummer,
-                fagområde = Feriepengerfagområde.SykepengerRefusjon,
-                klassekode = Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
-                forrigeOppdrag = forrigeSendteArbeidsgiverOppdrag,
-                beløp = feriepengeberegningsresultat.arbeidsgiver.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd
-            )
+            val arbeidsgiveroppdrag =
+                oppdrag(
+                    mottaker = orgnummer,
+                    fagområde = Feriepengerfagområde.SykepengerRefusjon,
+                    klassekode = Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
+                    forrigeOppdrag = forrigeSendteArbeidsgiverOppdrag,
+                    beløp = feriepengeberegningsresultat.arbeidsgiver.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd,
+                )
 
             if (feriepengeberegningsresultat.arbeidsgiver.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd != 0 && orgnummer == "0") aktivitetslogg.info("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\".")
 
@@ -189,7 +214,7 @@ internal class Feriepengeutbetaling private constructor(
                     Arbeidsgiver: $orgnummer
                     Infotrygd har utbetalt $infotrygdHarUtbetaltTilPerson
                     Vi har beregnet at Infotrygd skulle ha utbetalt ${feriepengeberegningsresultat.person.hvaViHarBeregnetAtInfotrygdHarUtbetalt}
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
 
@@ -198,28 +223,37 @@ internal class Feriepengeutbetaling private constructor(
                     .lastOrNull { it.gjelderForÅr(utbetalingshistorikkForFeriepenger.opptjeningsår) && it.sendPersonoppdragTilOS }
                     ?.personoppdrag
 
-            val personoppdrag = oppdrag(
-                mottaker = personidentifikator.toString(),
-                fagområde = Feriepengerfagområde.Sykepenger,
-                klassekode = Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
-                forrigeOppdrag = forrigeSendtePersonOppdrag,
-                beløp = feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd
-            )
+            val personoppdrag =
+                oppdrag(
+                    mottaker = personidentifikator.toString(),
+                    fagområde = Feriepengerfagområde.Sykepenger,
+                    klassekode = Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
+                    forrigeOppdrag = forrigeSendtePersonOppdrag,
+                    beløp = feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd,
+                )
 
             val sendPersonoppdrag = personoppdrag.skalSendeOppdrag
 
-            if (feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd < -499 || feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd > 100) aktivitetslogg.info(
-                """
-                ${if (feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd < 0) "Differanse mellom det Infotrygd har utbetalt og det spleis har beregnet at Infotrygd skulle betale" else "Utbetalt for lite i Infotrygd"} for person & orgnr-kombo:
-                Arbeidsgiver: $orgnummer
-                Diff: ${feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd}
-                Hva vi har beregnet at Infotrygd har utbetalt til person for denne AG: ${feriepengeberegningsresultat.person.hvaViHarBeregnetAtInfotrygdHarUtbetalt}
-                Infotrygd sin personandel: ${feriepengeberegningsresultat.person.infotrygdFeriepengebeløp}
-                """.trimIndent()
-            )
+            if (feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd < -499 || feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd > 100) {
+                aktivitetslogg.info(
+                    """
+                    ${if (feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd < 0) "Differanse mellom det Infotrygd har utbetalt og det spleis har beregnet at Infotrygd skulle betale" else "Utbetalt for lite i Infotrygd"} for person & orgnr-kombo:
+                    Arbeidsgiver: $orgnummer
+                    Diff: ${feriepengeberegningsresultat.person.differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd}
+                    Hva vi har beregnet at Infotrygd har utbetalt til person for denne AG: ${feriepengeberegningsresultat.person.hvaViHarBeregnetAtInfotrygdHarUtbetalt}
+                    Infotrygd sin personandel: ${feriepengeberegningsresultat.person.infotrygdFeriepengebeløp}
+                    """.trimIndent(),
+                )
+            }
 
-            val arbeidsgiveroppdragdetaljer = EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(arbeidsgiveroppdrag).toString()
-            val personoppdragdetaljer = EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer.mapOppdrag(personoppdrag).toString()
+            val arbeidsgiveroppdragdetaljer =
+                EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer
+                    .mapOppdrag(arbeidsgiveroppdrag)
+                    .toString()
+            val personoppdragdetaljer =
+                EventSubscription.FeriepengerUtbetaltEvent.FeriepengeoppdragEventDetaljer
+                    .mapOppdrag(personoppdrag)
+                    .toString()
 
             aktivitetslogg.info(
                 """
@@ -243,7 +277,7 @@ internal class Feriepengeutbetaling private constructor(
                 
                 - PERSONOPPDRAG:
                 ${oppdragoppsummering(false, sendPersonoppdrag, forrigeSendtePersonOppdrag, personoppdrag, personoppdragdetaljer)}
-                """
+                """,
             )
 
             return Feriepengeutbetaling(
@@ -260,41 +294,56 @@ internal class Feriepengeutbetaling private constructor(
             )
         }
 
-        private fun oppdragoppsummering(arbeidsgiver: Boolean, sendOppdrag: Boolean, forrigeSendteOppdrag: Feriepengeoppdrag?, oppdrag: Feriepengeoppdrag, oppdragdetaljer: String): String {
+        private fun oppdragoppsummering(
+            arbeidsgiver: Boolean,
+            sendOppdrag: Boolean,
+            forrigeSendteOppdrag: Feriepengeoppdrag?,
+            oppdrag: Feriepengeoppdrag,
+            oppdragdetaljer: String,
+        ): String {
             val nettobeløp = oppdrag.totalbeløp - (forrigeSendteOppdrag?.totalbeløp ?: 0)
-            val label = if (nettobeløp < 0)
-                "(kreve tilbake fra ${if (arbeidsgiver) "arbeidsgiver" else "person"})"
-            else if (nettobeløp == 0)
-                "(ingen endring)"
-            else
-                "(betale mer til ${if (arbeidsgiver) "arbeidsgiver" else "person"})"
+            val label =
+                if (nettobeløp < 0) {
+                    "(kreve tilbake fra ${if (arbeidsgiver) "arbeidsgiver" else "person"})"
+                } else if (nettobeløp == 0) {
+                    "(ingen endring)"
+                } else {
+                    "(betale mer til ${if (arbeidsgiver) "arbeidsgiver" else "person"})"
+                }
 
             return """Skal sende ${if (arbeidsgiver) "arbeidsgiveroppdrag" else "personoppdrag"} til OS: $sendOppdrag
                 Differanse fra forrige sendte ${if (arbeidsgiver) "arbeidsgiveroppdrag" else "personoppdrag"}: $nettobeløp $label
                 ${if (arbeidsgiver) "Arbeidsgiveroppdrag" else "Personoppdrag"}: $oppdragdetaljer"""
         }
 
-        private fun oppsummering(infotrygdHarUtbetalt: List<Int>, hvaViHarBeregnetAtInfotrygdHarUtbetaltForDenneAktuelleArbeidsgiver: Int, infotrygdFeriepengebeløp: Double, spleisFeriepengebeløp: Double, totaltFeriepengebeløp: Double, differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTil: Int): String {
-            return """Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): $infotrygdHarUtbetalt (NB! Dette brukes ikke i beregning, bare til logging)
+        private fun oppsummering(
+            infotrygdHarUtbetalt: List<Int>,
+            hvaViHarBeregnetAtInfotrygdHarUtbetaltForDenneAktuelleArbeidsgiver: Int,
+            infotrygdFeriepengebeløp: Double,
+            spleisFeriepengebeløp: Double,
+            totaltFeriepengebeløp: Double,
+            differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTil: Int,
+        ): String =
+            """Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): $infotrygdHarUtbetalt (NB! Dette brukes ikke i beregning, bare til logging)
                 Vår beregning av hva Infotrygd ville utbetalt i en verden uten Spleis: $hvaViHarBeregnetAtInfotrygdHarUtbetaltForDenneAktuelleArbeidsgiver
                 Men siden Spleis finnes:
                     Infotrygd skal betale:                      ${infotrygdFeriepengebeløp.finere}
                     Spleis skal betale:                         ${spleisFeriepengebeløp.finere}
                     Totalt feriepengebeløp:                     ${totaltFeriepengebeløp.finere}
                     Infotrygd-utbetalingen må korrigeres med:   ${differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTil.finere}"""
-        }
     }
 
-    internal fun dto() = FeriepengeUtDto(
-        feriepengeberegner = feriepengegrunnlag.dto(),
-        infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
-        infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
-        spleisFeriepengebeløpPerson = spleisFeriepengebeløpPerson,
-        spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
-        oppdrag = this.oppdrag.dto(),
-        personoppdrag = this.personoppdrag.dto(),
-        utbetalingId = this.utbetalingId,
-        sendTilOppdrag = this.sendTilOppdrag,
-        sendPersonoppdragTilOS = this.sendPersonoppdragTilOS
-    )
+    internal fun dto() =
+        FeriepengeUtDto(
+            feriepengeberegner = feriepengegrunnlag.dto(),
+            infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
+            infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
+            spleisFeriepengebeløpPerson = spleisFeriepengebeløpPerson,
+            spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
+            oppdrag = this.oppdrag.dto(),
+            personoppdrag = this.personoppdrag.dto(),
+            utbetalingId = this.utbetalingId,
+            sendTilOppdrag = this.sendTilOppdrag,
+            sendPersonoppdragTilOS = this.sendPersonoppdragTilOS,
+        )
 }

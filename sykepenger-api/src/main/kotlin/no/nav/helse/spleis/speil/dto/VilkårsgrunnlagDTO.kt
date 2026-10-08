@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.speil.dto
 
+import no.nav.helse.spleis.speil.builders.SykepengegrunnlagsgrenseDTO
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
-import no.nav.helse.spleis.speil.builders.SykepengegrunnlagsgrenseDTO
+import java.util.*
 
 interface Vilkårsgrunnlag {
     val skjæringstidspunkt: LocalDate
@@ -38,45 +38,49 @@ data class InfotrygdVilkårsgrunnlag(
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>,
     override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
-    override val opptjeningsvurderingId: UUID
+    override val opptjeningsvurderingId: UUID,
 ) : Vilkårsgrunnlag
 
 data class Arbeidsgiverinntekt(
     val organisasjonsnummer: String,
     val omregnetÅrsinntekt: Inntekt,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsattDTO? = null,
-    val deaktivert: Boolean
+    val deaktivert: Boolean,
 )
 
 data class Arbeidsgiverrefusjon(
     val arbeidsgiver: String,
-    val refusjonsopplysninger: List<Refusjonselement>
+    val refusjonsopplysninger: List<Refusjonselement>,
 )
 
 data class Refusjonselement(
     val fom: LocalDate,
     val tom: LocalDate?,
     val beløp: Double,
-    val meldingsreferanseId: UUID
+    val meldingsreferanseId: UUID,
 )
 
 enum class Inntektkilde {
-    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert
+    Saksbehandler,
+    Inntektsmelding,
+    Infotrygd,
+    AOrdningen,
+    IkkeRapportert,
 }
 
 data class SkjønnsmessigFastsattDTO(
     val årlig: Double,
-    val månedlig: Double
+    val månedlig: Double,
 )
 
 data class Inntekt(
     val kilde: Inntektkilde,
     val beløp: Double,
     val månedsbeløp: Double,
-    val inntekterFraAOrdningen: List<InntekterFraAOrdningen>? = null //kun gyldig for A-ordningen
+    val inntekterFraAOrdningen: List<InntekterFraAOrdningen>? = null, // kun gyldig for A-ordningen
 )
 
 data class InntekterFraAOrdningen(
     val måned: YearMonth,
-    val sum: Double
+    val sum: Double,
 )

@@ -1,10 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -15,15 +11,24 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
-
     @Test
     fun `skal ikke få varsel når utbetaling flyttes fra arbeidsgiver til person`() {
         a1 {
             nyttVedtak(januar)
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.januar, null, Inntekt.INGEN)))))
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(-15741, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.inspektør.nettoBeløp)
-            assertEquals(15741, inspektør.sisteUtbetaling().personOppdrag.inspektør.nettoBeløp)
+            assertEquals(
+                -15741,
+                inspektør
+                    .sisteUtbetaling()
+                    .arbeidsgiverOppdrag.inspektør.nettoBeløp,
+            )
+            assertEquals(
+                15741,
+                inspektør
+                    .sisteUtbetaling()
+                    .personOppdrag.inspektør.nettoBeløp,
+            )
         }
     }
 
@@ -33,8 +38,18 @@ internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
             nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()))
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.januar, null, INNTEKT)))))
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(15741, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.inspektør.nettoBeløp)
-            assertEquals(-15741, inspektør.sisteUtbetaling().personOppdrag.inspektør.nettoBeløp)
+            assertEquals(
+                15741,
+                inspektør
+                    .sisteUtbetaling()
+                    .arbeidsgiverOppdrag.inspektør.nettoBeløp,
+            )
+            assertEquals(
+                -15741,
+                inspektør
+                    .sisteUtbetaling()
+                    .personOppdrag.inspektør.nettoBeløp,
+            )
             assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
         }
     }
@@ -46,8 +61,18 @@ internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
 
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 0.8, emptyList())))
             håndterYtelser(1.vedtaksperiode)
-            assertEquals(-3146, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.inspektør.nettoBeløp)
-            assertEquals(0, inspektør.sisteUtbetaling().personOppdrag.inspektør.nettoBeløp)
+            assertEquals(
+                -3146,
+                inspektør
+                    .sisteUtbetaling()
+                    .arbeidsgiverOppdrag.inspektør.nettoBeløp,
+            )
+            assertEquals(
+                0,
+                inspektør
+                    .sisteUtbetaling()
+                    .personOppdrag.inspektør.nettoBeløp,
+            )
             assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
         }
     }

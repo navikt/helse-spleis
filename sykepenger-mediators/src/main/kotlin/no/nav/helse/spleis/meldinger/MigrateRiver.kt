@@ -7,7 +7,10 @@ import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 
-internal class MigrateRiver(rapidsConnection: RapidsConnection, messageMediator: IMessageMediator) : HendelseRiver(rapidsConnection, messageMediator) {
+internal class MigrateRiver(
+    rapidsConnection: RapidsConnection,
+    messageMediator: IMessageMediator,
+) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("json_migrate")
     override val riverName = "JSON Migrate"
 
@@ -16,12 +19,14 @@ internal class MigrateRiver(rapidsConnection: RapidsConnection, messageMediator:
         message.require("fødselsnummer", ::requireLong)
     }
 
-    override fun createMessage(packet: JsonMessage) = MigrateMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        MigrateMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 
     private fun requireLong(node: JsonNode) {
         require(node.asLong() > 0)

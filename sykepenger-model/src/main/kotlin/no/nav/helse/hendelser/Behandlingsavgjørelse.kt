@@ -5,6 +5,7 @@ import java.util.UUID
 
 sealed interface Behandlingsavgjørelse : Hendelse {
     fun saksbehandler(): Saksbehandler
+
     val vedtaksperiodeId: UUID
     val behandlingId: UUID
     val utbetalingId: UUID
@@ -14,8 +15,9 @@ sealed interface Behandlingsavgjørelse : Hendelse {
 }
 
 val Behandlingsavgjørelse.vurdering
-    get() = saksbehandler().vurdering(
-        godkjent = godkjent,
-        avgjørelsestidspunkt = avgjørelsestidspunkt,
-        automatisert = automatisert
-    )
+    get() =
+        saksbehandler().vurdering(
+            godkjent = godkjent,
+            avgjørelsestidspunkt = avgjørelsestidspunkt,
+            automatisert = automatisert,
+        )

@@ -1,10 +1,10 @@
 package no.nav.helse.spleis.testhelpers
 
-import java.util.UUID
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.VedtaksperiodeEndretEvent
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import org.junit.jupiter.api.fail
+import java.util.UUID
 
 internal class TestObservatør : EventSubscription {
     lateinit var sisteVedtaksperiode: UUID
@@ -14,14 +14,18 @@ internal class TestObservatør : EventSubscription {
     private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
     private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
     private val ventendeReplays = mutableListOf<Pair<String, UUID>>()
-    fun hendelseider(vedtaksperiodeId: UUID) =
-        vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
 
-    fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
+    fun hendelseider(vedtaksperiodeId: UUID) = vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
 
-    fun ventendeReplays() = ventendeReplays.toList().also {
-        ventendeReplays.clear()
-    }
+    fun vedtaksperiode(
+        orgnummer: String,
+        indeks: Int,
+    ) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
+
+    fun ventendeReplays() =
+        ventendeReplays.toList().also {
+            ventendeReplays.clear()
+        }
 
     override fun nyBehandling(event: EventSubscription.BehandlingOpprettetEvent) {
         sisteVedtaksperiode = event.vedtaksperiodeId

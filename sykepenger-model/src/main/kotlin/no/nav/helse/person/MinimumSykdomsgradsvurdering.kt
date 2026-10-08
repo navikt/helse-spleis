@@ -9,7 +9,9 @@ import no.nav.helse.hendelser.Periode.Companion.utenPerioder
  * Perioder saksbehandler har vurdert dithet at bruker har tapt nok arbeidstid til å ha rett på sykepenger,
  * tross < 20% tapt inntekt
  */
-internal class MinimumSykdomsgradsvurdering(private val perioderMedMinimumSykdomsgradVurdertOK: MutableSet<Periode> = mutableSetOf()) {
+internal class MinimumSykdomsgradsvurdering(
+    private val perioderMedMinimumSykdomsgradVurdertOK: MutableSet<Periode> = mutableSetOf(),
+) {
     val perioder: Set<Periode> get() = perioderMedMinimumSykdomsgradVurdertOK.toSet()
 
     internal fun leggTil(nyePerioder: Set<Periode>) {
@@ -24,15 +26,18 @@ internal class MinimumSykdomsgradsvurdering(private val perioderMedMinimumSykdom
         perioderMedMinimumSykdomsgradVurdertOK.addAll(ny)
     }
 
-    internal fun dto() = MinimumSykdomsgradVurderingUtDto(
-        perioder = perioderMedMinimumSykdomsgradVurdertOK.map {
-            it.dto()
-        }
-    )
+    internal fun dto() =
+        MinimumSykdomsgradVurderingUtDto(
+            perioder =
+                perioderMedMinimumSykdomsgradVurdertOK.map {
+                    it.dto()
+                },
+        )
 
     internal companion object {
-        fun gjenopprett(dto: MinimumSykdomsgradVurderingInnDto) = MinimumSykdomsgradsvurdering(
-            perioderMedMinimumSykdomsgradVurdertOK = dto.perioder.map { Periode.gjenopprett(it) }.toMutableSet()
-        )
+        fun gjenopprett(dto: MinimumSykdomsgradVurderingInnDto) =
+            MinimumSykdomsgradsvurdering(
+                perioderMedMinimumSykdomsgradVurdertOK = dto.perioder.map { Periode.gjenopprett(it) }.toMutableSet(),
+            )
     }
 }

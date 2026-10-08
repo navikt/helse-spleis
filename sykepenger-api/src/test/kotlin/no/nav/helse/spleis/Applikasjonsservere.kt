@@ -2,34 +2,23 @@ package no.nav.helse.spleis
 
 import com.auth0.jwk.JwkProviderBuilder
 import com.github.navikt.tbd_libs.signed_jwt_issuer_test.Issuer
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
-import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.client.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.mockk
-import java.net.ServerSocket
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.testdatabase.TestDataSource
 import org.junit.jupiter.api.Assertions
+import java.net.ServerSocket
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 private class SuspendableIssuer {
     val issuer = Issuer("Microsoft AD", "spleis_azure_ad_app_id")
@@ -60,7 +49,7 @@ internal class Applikasjonsservere {
         AzureAdAppConfig(
             clientId = "spleis_azure_ad_app_id",
             issuer = suspendableIssuer.issuer.navn,
-            jwkProvider = JwkProviderBuilder(suspendableIssuer.issuer.jwksUri().toURL()).build()
+            jwkProvider = JwkProviderBuilder(suspendableIssuer.issuer.jwksUri().toURL()).build(),
         )
     private val appserver by lazy { Applikasjonserver(azureConfig, suspendableIssuer.issuer) }
 
@@ -72,7 +61,7 @@ internal class Applikasjonsservere {
 
     fun kjørTest(
         testdata: (TestDataSource) -> Unit,
-        testblokk: suspend BlackboxTestContext.() -> Unit
+        testblokk: suspend BlackboxTestContext.() -> Unit,
     ) {
         appserver.kjørTest(testdata, testblokk)
     }
@@ -81,14 +70,14 @@ internal class Applikasjonsservere {
         runBlocking(Dispatchers.IO) {
             listOf(
                 async { appserver.stopp() },
-                async { suspendableIssuer.stop() }
+                async { suspendableIssuer.stop() },
             ).awaitAll()
         }
     }
 
     internal class Applikasjonserver(
         azureConfig: AzureAdAppConfig,
-        issuer: Issuer
+        issuer: Issuer,
     ) {
         private val randomPort = ServerSocket(0).use { it.localPort }
         private lateinit var testDataSource: TestDataSource
@@ -100,7 +89,7 @@ internal class Applikasjonsservere {
                 spekematClient = spekematClient,
                 dataSourceProvider = { testDataSource.ds },
                 meterRegistry = registry,
-                port = randomPort
+                port = randomPort,
             )
         private val client = lagHttpklient(randomPort)
         private val testContext = BlackboxTestContext(client, issuer)
@@ -109,7 +98,7 @@ internal class Applikasjonsservere {
 
         fun kjørTest(
             testdata: (TestDataSource) -> Unit = {},
-            testblokk: suspend BlackboxTestContext.() -> Unit
+            testblokk: suspend BlackboxTestContext.() -> Unit,
         ) {
             testDataSource = databaseContainer.nyTilkobling()
             startOpp(testdata)
@@ -123,7 +112,7 @@ internal class Applikasjonsservere {
                 // starter opp ting, i parallell
                 listOf(
                     launch { testdata(testDataSource) },
-                    launch { if (!startetOpp) app.start(wait = false) }
+                    launch { if (!startetOpp) app.start(wait = false) },
                 ).joinAll()
             }
             startetOpp = true
@@ -149,13 +138,13 @@ internal class Applikasjonsservere {
 
     internal class BlackboxTestContext(
         val client: HttpClient,
-        val issuer: Issuer
+        val issuer: Issuer,
     ) {
         suspend fun post(
             path: String,
             body: String,
             forventetStatusCode: HttpStatusCode,
-            accessToken: String?
+            accessToken: String?,
         ) = client
             .post(path) {
                 contentType(ContentType.Application.Json)
@@ -168,7 +157,7 @@ internal class Applikasjonsservere {
         fun String.httpGet(
             expectedStatus: HttpStatusCode = HttpStatusCode.OK,
             headers: Map<String, String> = emptyMap(),
-            testBlock: String.() -> Unit = {}
+            testBlock: String.() -> Unit = {},
         ) {
             val token = issuer.accessToken()
 
@@ -188,7 +177,7 @@ internal class Applikasjonsservere {
         fun String.httpPost(
             expectedStatus: HttpStatusCode = HttpStatusCode.OK,
             postBody: Map<String, String> = emptyMap(),
-            testBlock: String.() -> Unit = {}
+            testBlock: String.() -> Unit = {},
         ) {
             val token = issuer.accessToken()
 

@@ -7,17 +7,25 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 
-internal class IdentOpphørtMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
-
+internal class IdentOpphørtMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : HendelseMessage(packet) {
     private val nyttFødselsnummer = packet["nye_identer.fødselsnummer"].asText()
     private val gamleIdenter = packet["gamle_identer"].map { Personidentifikator(it.path("ident").asText()) }.toSet()
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         mediator.behandle(
-            Personidentifikator(nyttFødselsnummer), this, IdentOpphørt(
-            meldingsreferanseId = meldingsporing.id
-        ), gamleIdenter, context
+            Personidentifikator(nyttFødselsnummer),
+            this,
+            IdentOpphørt(
+                meldingsreferanseId = meldingsporing.id,
+            ),
+            gamleIdenter,
+            context,
         )
     }
-
 }

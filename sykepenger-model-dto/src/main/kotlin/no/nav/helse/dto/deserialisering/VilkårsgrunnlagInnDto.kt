@@ -1,9 +1,9 @@
 package no.nav.helse.dto.deserialisering
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.MeldingsreferanseDto
+import java.time.LocalDate
+import java.util.UUID
 
 sealed class VilkårsgrunnlagInnDto {
     abstract val vilkårsgrunnlagId: UUID

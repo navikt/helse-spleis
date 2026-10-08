@@ -10,7 +10,7 @@ import no.nav.helse.spleis.speil.dto.PersonDTO
 internal fun mapTilPerson(
     person: PersonDTO,
     fnr: String,
-    hendelser: List<HendelseDTO>
+    hendelser: List<HendelseDTO>,
 ) = ApiPerson(
     fodselsnummer = fnr,
     arbeidsgivere =
@@ -22,7 +22,7 @@ internal fun mapTilPerson(
                         ApiGenerasjon(
                             id = generasjon.id,
                             perioder = generasjon.perioder.map { periode -> mapTidslinjeperiode(periode, hendelser) },
-                            kildeTilGenerasjon = generasjon.kildeTilGenerasjon
+                            kildeTilGenerasjon = generasjon.kildeTilGenerasjon,
                         )
                     },
                 ghostPerioder =
@@ -33,11 +33,11 @@ internal fun mapTilPerson(
                             tom = periode.tom,
                             skjaeringstidspunkt = periode.skjæringstidspunkt,
                             vilkarsgrunnlagId = periode.vilkårsgrunnlagId,
-                            deaktivert = periode.deaktivert
+                            deaktivert = periode.deaktivert,
                         )
-                    }
+                    },
             )
         },
     dodsdato = person.dødsdato,
-    vilkarsgrunnlag = person.vilkårsgrunnlag.map { (id, vilkårsgrunnlag) -> mapVilkårsgrunnlag(id, vilkårsgrunnlag) }
+    vilkarsgrunnlag = person.vilkårsgrunnlag.map { (id, vilkårsgrunnlag) -> mapVilkårsgrunnlag(id, vilkårsgrunnlag) },
 )

@@ -12,36 +12,42 @@ import org.slf4j.LoggerFactory
 
 internal class UtboksRetryRiver(
     rapidsConnection: RapidsConnection,
-    private val utboksDao: UtboksDao
+    private val utboksDao: UtboksDao,
 ) : River.PacketListener {
-
     init {
-        River(rapidsConnection).apply {
-            precondition { it.requireAny("@event_name", listOf("minutt", "spleis_utboks_retry")) }
-            validate {
-                it.interestedIn("personidentifikatorer")
-            }
-
-        }.register(this)
+        River(rapidsConnection)
+            .apply {
+                precondition { it.requireAny("@event_name", listOf("minutt", "spleis_utboks_retry")) }
+                validate {
+                    it.interestedIn("personidentifikatorer")
+                }
+            }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext, metadata: MessageMetadata, meterRegistry: MeterRegistry) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+        metadata: MessageMetadata,
+        meterRegistry: MeterRegistry,
+    ) {
         try {
             val fraMelding = packet["personidentifikatorer"].map { Personidentifikator(it.asText()) }.toSet()
 
-            val personerMedUsendteMeldinger = when (fraMelding.isNotEmpty()) {
-                true -> fraMelding
-                else -> utboksDao.personerMedUsendteMeldinger()
-            }
+            val personerMedUsendteMeldinger =
+                when (fraMelding.isNotEmpty()) {
+                    true -> fraMelding
+                    else -> utboksDao.personerMedUsendteMeldinger()
+                }
 
             sikkerlogg.info("Sender ut personpåminnelse for ${personerMedUsendteMeldinger.size} personer som har usendte meldinger i utboksen.")
 
             personerMedUsendteMeldinger.forEach { personidentifikator ->
-                val personpåminnelse = UtgåendeMelding.nyRapidmelding(
-                    personidentifikator = personidentifikator,
-                    eventName = "person_påminnelse",
-                    innhold = emptyMap()
-                )
+                val personpåminnelse =
+                    UtgåendeMelding.nyRapidmelding(
+                        personidentifikator = personidentifikator,
+                        eventName = "person_påminnelse",
+                        innhold = emptyMap(),
+                    )
                 sikkerlogg.info("Sender personpåminnelse for ${personidentifikator}\n\t${personpåminnelse.json}")
                 context.fireAndForget(personpåminnelse)
             }

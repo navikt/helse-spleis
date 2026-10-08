@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 internal class V342RenameAvventersøknadForTidligereEllerOverlappendePeriode : JsonMigration(342) {
     override val description = "Renamer tilstand AVVENTER_SØKNAD_FOR_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODE til AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { vedtaksperiode ->
                 migrerVedtaksperiode(vedtaksperiode)

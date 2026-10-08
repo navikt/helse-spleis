@@ -1,9 +1,5 @@
 package no.nav.helse.spleis.speil
 
-import java.time.LocalDate
-import java.time.LocalDate.EPOCH
-import java.time.Year
-import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.Toggle
 import no.nav.helse.april
@@ -77,9 +73,12 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDate.EPOCH
+import java.time.Year
+import java.util.UUID
 
 internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
-
     @Test
     fun `mapper annullerte utbetalinger på beregnede annullerte perioder`() {
         nyttVedtak(1.januar, 31.januar)
@@ -233,21 +232,22 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     }
 
     @Test
-    fun `utbetalt jordbruker periode`() = Toggle.Jordbruker.enable {
-        håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
-        håndterVilkårsgrunnlag()
-        håndterYtelser()
-        håndterSimulering()
-        håndterUtbetalingsgodkjenning()
-        håndterUtbetalt()
+    fun `utbetalt jordbruker periode`() =
+        Toggle.Jordbruker.enable {
+            håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
+            håndterVilkårsgrunnlag()
+            håndterYtelser()
+            håndterSimulering()
+            håndterUtbetalingsgodkjenning()
+            håndterUtbetalt()
 
-        generasjoner(organisasjonsnummer = selvstendig) {
-            assertEquals(1, size)
-            0.generasjon {
-                beregnetPeriode(0) medTilstand Utbetalt
+            generasjoner(organisasjonsnummer = selvstendig) {
+                assertEquals(1, size)
+                0.generasjon {
+                    beregnetPeriode(0) medTilstand Utbetalt
+                }
             }
         }
-    }
 
     @Test
     fun `utbetalt selvstendig periode avventer vilkårsprøving`() {
@@ -333,11 +333,12 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     fun `Selvstendig har pensjonsgivende inntekt også på uberegnet periode`() {
         håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
 
-        val forventetPensjonsgivendeInntekt = listOf(
-            PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
-            PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
-            PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730)))
-        )
+        val forventetPensjonsgivendeInntekt =
+            listOf(
+                PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
+                PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
+                PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
+            )
 
         generasjoner(organisasjonsnummer = selvstendig) {
             assertEquals(1, size)
@@ -351,35 +352,46 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
     @Test
     fun `Selvstendig med ny liknet pensjonsgivende inntekt underveis`() {
-        fun pgi(år: Int, næringsinntekt: Int) = PensjonsgivendeInntekt(
-            inntektsår = Year.of(år), næringsinntekt = næringsinntekt.årlig,
+        fun pgi(
+            år: Int,
+            næringsinntekt: Int,
+        ) = PensjonsgivendeInntekt(
+            inntektsår = Year.of(år),
+            næringsinntekt = næringsinntekt.årlig,
             lønnsinntekt = INGEN,
             lønnsinntektBarePensjonsdel = INGEN,
             næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN,
-            erFerdigLignet = true
+            erFerdigLignet = true,
         )
 
-        håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar,
-            pensjonsgivendeInntekter = listOf(pgi(2014, 300000), pgi(2015, 300000), pgi(2016, 300000)))
+        håndterSøknadSelvstendig(
+            1.januar til 31.januar,
+            1.januar til 16.januar,
+            pensjonsgivendeInntekter = listOf(pgi(2014, 300000), pgi(2015, 300000), pgi(2016, 300000)),
+        )
         håndterVilkårsgrunnlag()
         håndterYtelser()
         håndterSimulering()
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
 
-        håndterSøknadSelvstendig(1.februar til 15.februar,1.januar til 16.januar,
-            pensjonsgivendeInntekter = listOf(pgi(2015, 300000), pgi(2016, 300000), pgi(2017, 600000)))
+        håndterSøknadSelvstendig(
+            1.februar til 15.februar,
+            1.januar til 16.januar,
+            pensjonsgivendeInntekter = listOf(pgi(2015, 300000), pgi(2016, 300000), pgi(2017, 600000)),
+        )
 
         håndterYtelser()
         håndterSimulering()
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
 
-        val opprinnelig = listOf(
-            PensjonsgivendeInntektDto(årstall=Year.of(2014), beløp=InntektDto(årlig=Årlig(beløp=300000.0), månedligDouble=MånedligDouble(beløp=25000.0), dagligDouble=DagligDouble(beløp=1153.8461538461538), dagligInt=DagligInt(beløp=1153))),
-            PensjonsgivendeInntektDto(årstall=Year.of(2015), beløp=InntektDto(årlig=Årlig(beløp=300000.0), månedligDouble=MånedligDouble(beløp=25000.0), dagligDouble=DagligDouble(beløp=1153.8461538461538), dagligInt=DagligInt(beløp=1153))),
-            PensjonsgivendeInntektDto(årstall=Year.of(2016), beløp=InntektDto(årlig=Årlig(beløp=300000.0), månedligDouble=MånedligDouble(beløp=25000.0), dagligDouble=DagligDouble(beløp=1153.8461538461538), dagligInt=DagligInt(beløp=1153))),
-        )
+        val opprinnelig =
+            listOf(
+                PensjonsgivendeInntektDto(årstall = Year.of(2014), beløp = InntektDto(årlig = Årlig(beløp = 300000.0), månedligDouble = MånedligDouble(beløp = 25000.0), dagligDouble = DagligDouble(beløp = 1153.8461538461538), dagligInt = DagligInt(beløp = 1153))),
+                PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 300000.0), månedligDouble = MånedligDouble(beløp = 25000.0), dagligDouble = DagligDouble(beløp = 1153.8461538461538), dagligInt = DagligInt(beløp = 1153))),
+                PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 300000.0), månedligDouble = MånedligDouble(beløp = 25000.0), dagligDouble = DagligDouble(beløp = 1153.8461538461538), dagligInt = DagligInt(beløp = 1153))),
+            )
 
         generasjoner(organisasjonsnummer = selvstendig) {
             assertEquals(1, size)
@@ -396,18 +408,18 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         }
     }
 
-
     @Test
     fun `Selvstendig næringsdrivende med inntekt under 6G mappes riktig`() {
         håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar)
         håndterVilkårsgrunnlag()
         håndterYtelser()
 
-        val forventetPensjonsgivendeInntekt = listOf(
-            PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
-            PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
-            PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730)))
-        )
+        val forventetPensjonsgivendeInntekt =
+            listOf(
+                PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
+                PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
+                PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
+            )
 
         generasjoner(organisasjonsnummer = selvstendig) {
             assertEquals(1, size)
@@ -429,20 +441,22 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterSøknadSelvstendig(
             1.januar til 31.januar,
             1.januar til 16.januar,
-            pensjonsgivendeInntekter = listOf(
-                PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
-            )
+            pensjonsgivendeInntekter =
+                listOf(
+                    PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                ),
         )
         håndterVilkårsgrunnlag()
         håndterYtelser()
 
-        val forventetPensjonsgivendeInntekt = listOf(
-            PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846))),
-            PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846))),
-            PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846)))
-        )
+        val forventetPensjonsgivendeInntekt =
+            listOf(
+                PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846))),
+                PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846))),
+                PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846))),
+            )
 
         generasjoner(organisasjonsnummer = selvstendig) {
             assertEquals(1, size)
@@ -501,10 +515,12 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
         val skjønnsfastsettelse = UUID.randomUUID()
         håndterSkjønnsmessigFastsettelse(
-            1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig),
-            OverstyrtArbeidsgiveropplysning(a2, INNTEKT - 500.daglig),
-        ), skjønnsfastsettelse
+            1.januar,
+            listOf(
+                OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig),
+                OverstyrtArbeidsgiveropplysning(a2, INNTEKT - 500.daglig),
+            ),
+            skjønnsfastsettelse,
         )
         håndterYtelserTilUtbetalt()
         håndterYtelserTilUtbetalt()
@@ -622,15 +638,15 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterUtbetalt()
         // 21 & 22.August utbetalingsdager
 
-        håndterSelvbestemteArbeidsgiveropplysninger(listOf(7.august til 22.august), vedtaksperiode= 1)
+        håndterSelvbestemteArbeidsgiveropplysninger(listOf(7.august til 22.august), vedtaksperiode = 1)
         håndterYtelserTilUtbetalt()
         // 21 & 22.August agp -- denne blir ikke en generasjon
 
         håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(24.juli, Dagtype.Egenmeldingsdag),
-                ManuellOverskrivingDag(25.juli, Dagtype.Egenmeldingsdag)
-            )
+                ManuellOverskrivingDag(25.juli, Dagtype.Egenmeldingsdag),
+            ),
         )
 
         håndterYtelserTilGodkjenning()
@@ -825,7 +841,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT),
-            arbeidsforhold = listOf(a1 to EPOCH, a2 to 1.desember(2017))
+            arbeidsforhold = listOf(a1 to EPOCH, a2 to 1.desember(2017)),
         )
         håndterYtelserTilGodkjenning()
 
@@ -1327,8 +1343,22 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         generasjoner {
             0.generasjon {
                 assertEquals(1, size)
-                assertEquals(0, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.arbeidsgiverbeløp)
-                assertEquals(2161, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.personbeløp)
+                assertEquals(
+                    0,
+                    this.perioder
+                        .first()
+                        .sammenslåttTidslinje[16]
+                        .utbetalingsinfo!!
+                        .arbeidsgiverbeløp,
+                )
+                assertEquals(
+                    2161,
+                    this.perioder
+                        .first()
+                        .sammenslåttTidslinje[16]
+                        .utbetalingsinfo!!
+                        .personbeløp,
+                )
                 assertEquals(0, beregnetPeriode(0).utbetaling.arbeidsgiverNettoBeløp)
                 assertEquals(23771, beregnetPeriode(0).utbetaling.personNettoBeløp)
             }
@@ -1446,7 +1476,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-
         generasjoner {
             assertEquals(3, size)
             0.generasjon {
@@ -1470,8 +1499,16 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     fun `revurdering av tidligere skjæringstidspunkt - opphører refusjon som treffer flere perioder`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT,
-            listOf(Triple(1.januar, null, INGEN)))))
+        håndterOverstyrArbeidsgiveropplysninger(
+            1.januar,
+            listOf(
+                OverstyrtArbeidsgiveropplysning(
+                    a1,
+                    INNTEKT,
+                    listOf(Triple(1.januar, null, INGEN)),
+                ),
+            ),
+        )
         håndterYtelserTilUtbetalt()
         håndterYtelserTilUtbetalt()
 
@@ -1588,7 +1625,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt
             }
         }
-
     }
 
     @Test
@@ -2134,7 +2170,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         nyttVedtak(1.mars, 31.mars, orgnummer = a1)
         tilGodkjenning(1.januar, 31.januar, a1, vedtaksperiode = 2)
 
-
         generasjoner {
             assertEquals(2, size)
             0.generasjon {
@@ -2151,7 +2186,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
         håndterYtelserTilGodkjenning()
-
 
         generasjoner {
             assertEquals(2, size)
@@ -2227,7 +2261,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterSøknad(5.januar til 19.januar, orgnummer = a1)
         nyttVedtak(1.mars, 31.mars, orgnummer = a1, vedtaksperiode = 2)
 
-
         generasjoner {
             assertEquals(1, size)
             0.generasjon {
@@ -2237,9 +2270,12 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             }
         }
 
-        håndterOverstyrTidslinje((1.januar til 4.januar).map {
-            ManuellOverskrivingDag(it, Dagtype.Sykedag, 100)
-        }, orgnummer = a1)
+        håndterOverstyrTidslinje(
+            (1.januar til 4.januar).map {
+                ManuellOverskrivingDag(it, Dagtype.Sykedag, 100)
+            },
+            orgnummer = a1,
+        )
         håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1, vedtaksperiode = 1)
         håndterVilkårsgrunnlagTilUtbetalt()
 
@@ -2264,7 +2300,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     fun `out of order som er innenfor agp så utbetales`() {
         nyttVedtak(1.mars, 31.mars, orgnummer = a1)
         håndterSøknad(1.januar til 15.januar, orgnummer = a1)
-
 
         generasjoner {
             assertEquals(2, size)
@@ -2315,7 +2350,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         håndterYtelser()
         håndterUtbetalingsgodkjenning()
         forlengVedtak(1.april, 10.april, orgnummer = a1)
-
 
         generasjoner {
             assertEquals(2, size)
@@ -2423,7 +2457,10 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         }
     }
 
-    private fun BeregnetPeriode.assertAldersvilkår(expectedOppfylt: Boolean, expectedAlderSisteSykedag: Int) {
+    private fun BeregnetPeriode.assertAldersvilkår(
+        expectedOppfylt: Boolean,
+        expectedAlderSisteSykedag: Int,
+    ) {
         assertEquals(expectedOppfylt, periodevilkår.alder.oppfylt)
         assertEquals(expectedAlderSisteSykedag, periodevilkår.alder.alderSisteSykedag)
     }
@@ -2433,7 +2470,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         expectedGjenståendeSykedager: Int,
         expectedMaksdato: LocalDate,
         expectedSkjæringstidspunkt: LocalDate,
-        expectedOppfylt: Boolean
+        expectedOppfylt: Boolean,
     ) {
         assertEquals(expectedForbrukteSykedager, periodevilkår.sykepengedager.forbrukteSykedager)
         assertEquals(expectedGjenståendeSykedager, periodevilkår.sykepengedager.gjenståendeDager)
@@ -2445,7 +2482,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     private class Arbeidsgivergenerasjoner(
         private val orgnummer: String,
         private val vilkårsgrunnlag: Map<UUID, no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag>,
-        private val generasjoner: List<SpeilGenerasjonDTO>
+        private val generasjoner: List<SpeilGenerasjonDTO>,
     ) {
         val size = generasjoner.size
 
@@ -2472,7 +2509,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             return periode
         }
 
-
         infix fun <T : SpeilTidslinjeperiode> T.medAntallDager(antall: Int): T {
             assertEquals(antall, sammenslåttTidslinje.size)
             return this
@@ -2487,9 +2523,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             return this
         }
 
-        fun BeregnetPeriode.vilkårsgrunnlag(): no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag {
-            return requireNotNull(vilkårsgrunnlag[this.vilkårsgrunnlagId]) { "Forventet å finne vilkårsgrunnlag for periode" }
-        }
+        fun BeregnetPeriode.vilkårsgrunnlag(): no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag = requireNotNull(vilkårsgrunnlag[this.vilkårsgrunnlagId]) { "Forventet å finne vilkårsgrunnlag for periode" }
 
         infix fun <T : SpeilTidslinjeperiode> T.forkastet(forkastet: Boolean): T {
             assertEquals(forkastet, this.erForkastet)
@@ -2548,7 +2582,10 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         }
     }
 
-    private fun generasjoner(organisasjonsnummer: String = a1, block: Arbeidsgivergenerasjoner.() -> Unit = {}) {
+    private fun generasjoner(
+        organisasjonsnummer: String = a1,
+        block: Arbeidsgivergenerasjoner.() -> Unit = {},
+    ) {
         val d = speilApi()
         Arbeidsgivergenerasjoner(organisasjonsnummer, d.vilkårsgrunnlag, d.arbeidsgivere.singleOrNull { it.organisasjonsnummer == organisasjonsnummer }?.generasjoner ?: emptyList()).apply(block)
     }

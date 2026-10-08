@@ -1,14 +1,17 @@
 package no.nav.helse.spleis.mediator.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import java.util.UUID
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class AnnullerUtbetalingerRiverRiverTest : RiverTest() {
-    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+    override fun river(
+        rapidsConnection: RapidsConnection,
+        mediator: IMessageMediator,
+    ) {
         AnnullerUtbetalingerRiver(rapidsConnection, mediator)
     }
 
@@ -23,7 +26,9 @@ internal class AnnullerUtbetalingerRiverRiverTest : RiverTest() {
     }
 
     @Language("JSON")
-    private val json = """{
+    private val json =
+        """
+        {
     "@id": "${UUID.randomUUID()}",
     "@opprettet": "2020-01-24T11:25:00",
     "@event_name": "annullering",
@@ -38,19 +43,20 @@ internal class AnnullerUtbetalingerRiverRiverTest : RiverTest() {
     },
     "begrunnelser": ["Annet"]
 }
-""".trimIndent()
+        """.trimIndent()
 
     @Language("JSON")
-    private val badJson = """
-    {
-        "@id": "${UUID.randomUUID()}",
-        "@opprettet": "2020-01-24T11:25:00",
-        "@event_name": "KansellerUtbetaling",
-        "fødselsnummer": "08127411111",
-        "organisasjonsnummer": "orgnummer",
-        "fagsystemId": "ABCD1234",
-        "saksbehandler": "Ola Nordmann",
-        "saksbehandlerEpost": "tbd@nav.no"
-    }
-""".trimIndent()
+    private val badJson =
+        """
+        {
+            "@id": "${UUID.randomUUID()}",
+            "@opprettet": "2020-01-24T11:25:00",
+            "@event_name": "KansellerUtbetaling",
+            "fødselsnummer": "08127411111",
+            "organisasjonsnummer": "orgnummer",
+            "fagsystemId": "ABCD1234",
+            "saksbehandler": "Ola Nordmann",
+            "saksbehandlerEpost": "tbd@nav.no"
+        }
+        """.trimIndent()
 }

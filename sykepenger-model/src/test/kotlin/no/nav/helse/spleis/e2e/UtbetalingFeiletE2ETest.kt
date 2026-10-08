@@ -1,13 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.forlengelseTilGodkjenning
-import no.nav.helse.dsl.nyPeriode
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -17,20 +10,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
@@ -40,7 +20,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingFeiletE2ETest : AbstractDslTest() {
-
     @Test
     fun `revurdering feilet med ett oppdrag status avvist som bygger på tidligere`() {
         a1 {
@@ -134,18 +113,36 @@ internal class UtbetalingFeiletE2ETest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList()),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt(Oppdragstatus.AKSEPTERT, inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId())
-            håndterUtbetalt(Oppdragstatus.AVVIST, inspektør.utbetaling(0).personOppdrag.inspektør.fagsystemId())
+            håndterUtbetalt(
+                Oppdragstatus.AKSEPTERT,
+                inspektør
+                    .utbetaling(0)
+                    .arbeidsgiverOppdrag.inspektør
+                    .fagsystemId(),
+            )
+            håndterUtbetalt(
+                Oppdragstatus.AVVIST,
+                inspektør
+                    .utbetaling(0)
+                    .personOppdrag.inspektør
+                    .fagsystemId(),
+            )
             nullstillTilstandsendringer()
 
             håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
-            håndterUtbetalt(Oppdragstatus.AKSEPTERT, inspektør.utbetaling(0).personOppdrag.inspektør.fagsystemId())
+            håndterUtbetalt(
+                Oppdragstatus.AKSEPTERT,
+                inspektør
+                    .utbetaling(0)
+                    .personOppdrag.inspektør
+                    .fagsystemId(),
+            )
 
             assertEquals(1, inspektør.antallUtbetalinger)
             assertEquals(UTBETALT, inspektør.utbetaling(0).tilstand)
@@ -162,18 +159,36 @@ internal class UtbetalingFeiletE2ETest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList()),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt(Oppdragstatus.AVVIST, inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId())
-            håndterUtbetalt(Oppdragstatus.AKSEPTERT, inspektør.utbetaling(0).personOppdrag.inspektør.fagsystemId())
+            håndterUtbetalt(
+                Oppdragstatus.AVVIST,
+                inspektør
+                    .utbetaling(0)
+                    .arbeidsgiverOppdrag.inspektør
+                    .fagsystemId(),
+            )
+            håndterUtbetalt(
+                Oppdragstatus.AKSEPTERT,
+                inspektør
+                    .utbetaling(0)
+                    .personOppdrag.inspektør
+                    .fagsystemId(),
+            )
             nullstillTilstandsendringer()
 
             håndterPåminnelse(1.vedtaksperiode, TIL_UTBETALING)
-            håndterUtbetalt(Oppdragstatus.AKSEPTERT, inspektør.utbetaling(0).arbeidsgiverOppdrag.inspektør.fagsystemId())
+            håndterUtbetalt(
+                Oppdragstatus.AKSEPTERT,
+                inspektør
+                    .utbetaling(0)
+                    .arbeidsgiverOppdrag.inspektør
+                    .fagsystemId(),
+            )
 
             assertEquals(1, inspektør.antallUtbetalinger)
             assertEquals(UTBETALT, inspektør.utbetaling(0).tilstand)
@@ -189,7 +204,7 @@ internal class UtbetalingFeiletE2ETest : AbstractDslTest() {
             nyPeriode(mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 2.vedtaksperiode,
             )
 
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING)

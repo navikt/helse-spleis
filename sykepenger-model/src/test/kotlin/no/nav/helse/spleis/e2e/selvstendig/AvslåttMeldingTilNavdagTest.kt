@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.selvstendig
 
-import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.selvstendig
@@ -17,9 +16,9 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class AvslåttMeldingTilNavdagTest : AbstractDslTest() {
-
     @Test
     fun `overstyring til avslått melding til Navdag`() {
         selvstendig {
@@ -43,7 +42,7 @@ internal class AvslåttMeldingTilNavdagTest : AbstractDslTest() {
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
             with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
                 assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag), begrunnelse(1.januar))
-                assertEquals(listOf(1. januar), avvistedatoer)
+                assertEquals(listOf(1.januar), avvistedatoer)
             }
 
             assertGjenoppbygget(dto())
@@ -75,7 +74,7 @@ internal class AvslåttMeldingTilNavdagTest : AbstractDslTest() {
             assertEquals(Avslagstidslinje(1.januar.somPeriode() to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Saksbehandler")), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagstidslinje)
             with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
                 assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag), begrunnelse(1.januar))
-                assertEquals(listOf(1. januar), avvistedatoer)
+                assertEquals(listOf(1.januar), avvistedatoer)
             }
 
             håndterOverstyrTidslinje((1.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.MeldingTilNavdag) })

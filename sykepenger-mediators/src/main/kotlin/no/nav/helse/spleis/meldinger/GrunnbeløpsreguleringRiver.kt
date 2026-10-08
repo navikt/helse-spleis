@@ -8,7 +8,7 @@ import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 
 internal class GrunnbeløpsreguleringRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("grunnbeløpsregulering")
 
@@ -18,10 +18,12 @@ internal class GrunnbeløpsreguleringRiver(
         message.requireKey("fødselsnummer", "skjæringstidspunkt")
     }
 
-    override fun createMessage(packet: JsonMessage) = GrunnbeløpsreguleringMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        GrunnbeløpsreguleringMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }

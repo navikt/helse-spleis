@@ -1,18 +1,10 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
+import no.nav.helse.dsl.*
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør.Companion.assertUgyldigSituasjon
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.UTBETALT
@@ -21,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
-
     @Test
     fun `mottak av vedtak fattet fungerer på samme måte som godkjenningsbehov med tommel opp`() {
         a1 {
@@ -115,7 +106,13 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
-            val behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().id
+            val behandlingId =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .id
             val utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode)
 
             assertThrows<IllegalStateException> {
@@ -133,7 +130,13 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
             assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING)
 
-            val behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().id
+            val behandlingId =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .id
             val utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode)
             assertThrows<IllegalStateException> {
                 håndterKanIkkeBehandlesHer(1.vedtaksperiode, behandlingId = behandlingId, utbetalingId = utbetalingId)
@@ -149,7 +152,13 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             tilGodkjenning(januar)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
             assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            val behandlingId = inspektør.vedtaksperioder(1.vedtaksperiode).behandlinger.behandlinger().last().id
+            val behandlingId =
+                inspektør
+                    .vedtaksperioder(1.vedtaksperiode)
+                    .behandlinger
+                    .behandlinger()
+                    .last()
+                    .id
             val utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode)
             assertEquals(IKKE_GODKJENT, inspektør.utbetaling(0).tilstand)
 

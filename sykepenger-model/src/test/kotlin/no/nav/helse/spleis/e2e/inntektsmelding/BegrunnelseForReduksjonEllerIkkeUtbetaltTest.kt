@@ -12,18 +12,13 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() {
-
     @Test
     fun `AI fjerner gammel IM - En miks av inntektsmeldinger med og uten begrunnelseForReduksjonEllerIkkeUtbetalt`() {
         a1 {
@@ -86,7 +81,7 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
                 },
                 ønsket = {
                     assertEquals(listOf(11.januar til 16.januar), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
-                }
+                },
             )
         }
     }
@@ -99,10 +94,29 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
-            assertEquals(25.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer().last().sykdomstidslinje.inspektør.førsteIkkeUkjenteDag)
+            assertEquals(
+                25.januar,
+                inspektør
+                    .vedtaksperioder(2.vedtaksperiode)
+                    .inspektør.behandlinger
+                    .last()
+                    .endringer()
+                    .last()
+                    .sykdomstidslinje.inspektør.førsteIkkeUkjenteDag,
+            )
             (25.januar til 31.januar).let { periode ->
                 assertEquals(periode, inspektør.periode(2.vedtaksperiode))
-                assertEquals(periode, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer().last().sykdomstidslinje.periode())
+                assertEquals(
+                    periode,
+                    inspektør
+                        .vedtaksperioder(2.vedtaksperiode)
+                        .inspektør.behandlinger
+                        .last()
+                        .endringer()
+                        .last()
+                        .sykdomstidslinje
+                        .periode(),
+                )
             }
             assertVarsel(Varselkode.RV_IM_8, 2.vedtaksperiode.filter())
         }

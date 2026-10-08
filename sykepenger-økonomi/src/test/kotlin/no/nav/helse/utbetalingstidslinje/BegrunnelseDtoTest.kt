@@ -21,9 +21,9 @@ internal class BegrunnelseDtoTest {
             Begrunnelse.MinimumSykdomsgrad.skalAvvises(
                 Utbetalingsdag.ArbeidsgiverperiodedagNav(
                     1.januar,
-                    økonomi
-                )
-            )
+                    økonomi,
+                ),
+            ),
         )
         Assertions.assertFalse(Begrunnelse.MinimumSykdomsgrad.skalAvvises(Utbetalingsdag.NavHelgDag(1.januar, økonomi)))
     }

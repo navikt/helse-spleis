@@ -1,11 +1,6 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
-import java.util.*
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -14,18 +9,16 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.oktober
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
-import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.*
 
-internal class GosysoppgaveTest: AbstractDslTest() {
-
+internal class GosysoppgaveTest : AbstractDslTest() {
     @Test
     fun `Forlengelse av AUU blir oppgave i Infotrygdkø`() {
         a1 {
@@ -86,10 +79,11 @@ internal class GosysoppgaveTest: AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT, a2 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, ansattFom = 1.oktober(2017), type = ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, ansattFom = 1.oktober(2017), type = FRILANSER),
-                )
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(a1, ansattFom = 1.oktober(2017), type = ORDINÆRT),
+                        Vilkårsgrunnlag.Arbeidsforhold(a2, ansattFom = 1.oktober(2017), type = FRILANSER),
+                    ),
             )
             håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
             assertVarsler(1.vedtaksperiode, RV_VV_1, RV_IV_3)
@@ -102,6 +96,8 @@ internal class GosysoppgaveTest: AbstractDslTest() {
     }
 
     private fun opprettesOppgaveISpeilkø(vedtaksperiodeId: UUID) = observatør.forkastet(vedtaksperiodeId).speilrelatert
+
     private fun assertOppgaveISpeilkø(vedtaksperiodeId: UUID) = assertTrue(opprettesOppgaveISpeilkø(vedtaksperiodeId))
+
     private fun assertOppgaveIInfotrygdkø(vedtaksperiodeId: UUID) = assertFalse(opprettesOppgaveISpeilkø(vedtaksperiodeId))
 }

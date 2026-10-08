@@ -3,15 +3,18 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import no.nav.helse.serde.migration.JsonMigration.Companion.dato
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 internal class V331ArbeidsgiverperiodeFerdigAvklartBoolean : JsonMigration(331) {
     override val description = "Boolean for ferdig avklart AGP"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val erAGPRelevant = arbeidsgiver.path("yrkesaktivitetstype").asText() == "ARBEIDSTAKER"
             arbeidsgiver.path("vedtaksperioder").forEach { vedtaksperiode ->
@@ -23,7 +26,10 @@ internal class V331ArbeidsgiverperiodeFerdigAvklartBoolean : JsonMigration(331) 
         }
     }
 
-    private fun migrerVedtaksperiode(vedtaksperiode: JsonNode, erAGPRelevant: Boolean) {
+    private fun migrerVedtaksperiode(
+        vedtaksperiode: JsonNode,
+        erAGPRelevant: Boolean,
+    ) {
         vedtaksperiode.path("behandlinger").forEach { behandling ->
             val behandlingstilstand = behandling.path("tilstand").asText()
             behandling.path("endringer").forEach { endring ->
@@ -38,10 +44,14 @@ internal class V331ArbeidsgiverperiodeFerdigAvklartBoolean : JsonMigration(331) 
         }
     }
 
-    private fun erFerdigAvklart(tilstand: String, agp: ArrayNode): Boolean {
-        return when (tilstand) {
+    private fun erFerdigAvklart(
+        tilstand: String,
+        agp: ArrayNode,
+    ): Boolean =
+        when (tilstand) {
             "UBEREGNET",
-            "TIL_INFOTRYGD" -> agp.fraInfotrygd || agp.antallDager() == 16
+            "TIL_INFOTRYGD",
+            -> agp.fraInfotrygd || agp.antallDager() == 16
 
             "AVSLUTTET_UTEN_VEDTAK" -> false
 
@@ -56,31 +66,32 @@ internal class V331ArbeidsgiverperiodeFerdigAvklartBoolean : JsonMigration(331) 
             "ANNULLERT_PERIODE",
             "UBEREGNET_ANNULLERING",
             "BEREGNET_ANNULLERING",
-            "OVERFØRT_ANNULLERING" -> true
+            "OVERFØRT_ANNULLERING",
+            -> true
 
             else -> error("Ukjent tilstand: $tilstand")
         }
-    }
 
-    private fun ArrayNode.antallDager(): Int {
-        return sumOf {
+    private fun ArrayNode.antallDager(): Int =
+        sumOf {
             val fom = it.path("fom").dato
             val tom = it.path("tom").dato
             ChronoUnit.DAYS.between(fom, tom).toInt() + 1
         }
-    }
 }
 
 private val ArrayNode.utenInfotrygd get() = if (fraInfotrygd) this.arrayNode() else this
 
-private val ArrayNode.fraInfotrygd get() = this.count() == 1
-    && this[0].path("fom").dato == LocalDate.EPOCH
-    && this[0].path("tom").dato == LocalDate.EPOCH
+private val ArrayNode.fraInfotrygd get() =
+    this.count() == 1 &&
+        this[0].path("fom").dato == LocalDate.EPOCH &&
+        this[0].path("tom").dato == LocalDate.EPOCH
 
-private val JsonNode.dato get() = when {
-    isTextual -> asText().dato
-    isArray -> LocalDate.of(this[0].asInt(), this[1].asInt(), this[2].asInt())
-    else -> error("Ukjent datoformat: $this")
-}
+private val JsonNode.dato get() =
+    when {
+        isTextual -> asText().dato
+        isArray -> LocalDate.of(this[0].asInt(), this[1].asInt(), this[2].asInt())
+        else -> error("Ukjent datoformat: $this")
+    }
 
 private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

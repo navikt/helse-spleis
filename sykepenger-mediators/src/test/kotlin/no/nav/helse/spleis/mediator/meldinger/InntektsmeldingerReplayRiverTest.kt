@@ -7,7 +7,10 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingerReplayRiverTest : RiverTest() {
-    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+    override fun river(
+        rapidsConnection: RapidsConnection,
+        mediator: IMessageMediator,
+    ) {
         InntektsmeldingerReplayRiver(rapidsConnection, mediator)
     }
 

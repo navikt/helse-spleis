@@ -8,7 +8,6 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 
 internal class InntekterFraSkattLagtTilGrunnKontraktTest : AbstractEndToEndMediatorTest() {
-
     @Test
     fun `skatteinntekter lagt til grunn`() {
         @Language("JSON")
@@ -33,5 +32,3 @@ internal class InntekterFraSkattLagtTilGrunnKontraktTest : AbstractEndToEndMedia
         testRapid.assertUtgåendeMelding(forventet)
     }
 }
-
-

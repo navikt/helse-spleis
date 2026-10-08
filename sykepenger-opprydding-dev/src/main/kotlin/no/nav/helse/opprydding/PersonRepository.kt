@@ -3,11 +3,13 @@ package no.nav.helse.opprydding
 import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
 import com.github.navikt.tbd_libs.sql_dsl.transaction
+import org.intellij.lang.annotations.Language
 import java.sql.Connection
 import javax.sql.DataSource
-import org.intellij.lang.annotations.Language
 
-internal class PersonRepository(private val dataSource: DataSource) {
+internal class PersonRepository(
+    private val dataSource: DataSource,
+) {
     internal fun slett(fødselsnummer: String) {
         dataSource.connection {
             transaction {

@@ -57,68 +57,74 @@ import no.nav.helse.person.tilstandsmaskin.Vedtaksperiodetilstand
 
 internal fun List<Vedtaksperiode>.harAvklartArbeidstakerinntekt(): Boolean {
     val første = firstOrNull() ?: return false
-    check(all { it.yrkesaktivitet === første.yrkesaktivitet && it.skjæringstidspunkt == første.skjæringstidspunkt}) { "Hva holder du på med?" }
+    check(all { it.yrkesaktivitet === første.yrkesaktivitet && it.skjæringstidspunkt == første.skjæringstidspunkt }) { "Hva holder du på med?" }
     return any { it.tilstand.harAvklartArbeidstakerinntekt() }
 }
 
-private fun Vedtaksperiodetilstand.harAvklartArbeidstakerinntekt(): Boolean = when (this) {
-    // Om vi ikke har kommet oss "forbi" AvventerInntektsmelding
-    // så indikrerer tilstanden at vi _ikke_ har avklart inntekt
-    ArbeidstakerStart,
-    AvventerInfotrygdHistorikk,
-    AvventerInntektsmelding,
-    AvventerAvsluttetUtenUtbetaling,
-    AvsluttetUtenUtbetaling -> false
+private fun Vedtaksperiodetilstand.harAvklartArbeidstakerinntekt(): Boolean =
+    when (this) {
+        // Om vi ikke har kommet oss "forbi" AvventerInntektsmelding
+        // så indikrerer tilstanden at vi _ikke_ har avklart inntekt
+        ArbeidstakerStart,
+        AvventerInfotrygdHistorikk,
+        AvventerInntektsmelding,
+        AvventerAvsluttetUtenUtbetaling,
+        AvsluttetUtenUtbetaling,
+        -> false
 
-    // Det kan være en situasjon hvor "halen" på sykerfraværet er annullert/forkastet
-    // Da kan ikke denne forkastede perioden i seg selv svare ut om vi har avklart inntekt
-    TilInfotrygd -> false
+        // Det kan være en situasjon hvor "halen" på sykerfraværet er annullert/forkastet
+        // Da kan ikke denne forkastede perioden i seg selv svare ut om vi har avklart inntekt
+        TilInfotrygd -> false
 
-    // Om perioden har kommet seg "forbi" AvventerInntektsmelding så indikrerer tilstanden at vi _har_ avklart inntekt
-    Avsluttet,
-    AvventerAnnullering,
-    AvventerAnnulleringTilUtbetaling,
-    AvventerBlokkerendePeriode,
-    AvventerGodkjenning,
-    AvventerGodkjenningRevurdering,
-    AvventerHistorikk,
-    AvventerHistorikkRevurdering,
-    AvventerInntektsopplysningerForAnnenArbeidsgiver,
-    AvventerRefusjonsopplysningerAnnenPeriode,
-    AvventerRevurdering,
-    AvventerRevurderingTilUtbetaling,
-    AvventerSimulering,
-    AvventerSimuleringRevurdering,
-    AvventerSøknadForOverlappendePeriode,
-    AvventerVilkårsprøving,
-    AvventerVilkårsprøvingRevurdering,
-    TilAnnullering,
-    TilUtbetaling -> true
+        // Om perioden har kommet seg "forbi" AvventerInntektsmelding så indikrerer tilstanden at vi _har_ avklart inntekt
+        Avsluttet,
+        AvventerAnnullering,
+        AvventerAnnulleringTilUtbetaling,
+        AvventerBlokkerendePeriode,
+        AvventerGodkjenning,
+        AvventerGodkjenningRevurdering,
+        AvventerHistorikk,
+        AvventerHistorikkRevurdering,
+        AvventerInntektsopplysningerForAnnenArbeidsgiver,
+        AvventerRefusjonsopplysningerAnnenPeriode,
+        AvventerRevurdering,
+        AvventerRevurderingTilUtbetaling,
+        AvventerSimulering,
+        AvventerSimuleringRevurdering,
+        AvventerSøknadForOverlappendePeriode,
+        AvventerVilkårsprøving,
+        AvventerVilkårsprøvingRevurdering,
+        TilAnnullering,
+        TilUtbetaling,
+        -> true
 
-    // Arbeidsledig
-    ArbeidsledigAvventerBlokkerendePeriode,
-    ArbeidsledigAvventerInfotrygdHistorikk,
-    ArbeidsledigStart -> error("Disse tilstandende hører til Arbeidsledig!! Hva er det du holder på med??")
+        // Arbeidsledig
+        ArbeidsledigAvventerBlokkerendePeriode,
+        ArbeidsledigAvventerInfotrygdHistorikk,
+        ArbeidsledigStart,
+        -> error("Disse tilstandende hører til Arbeidsledig!! Hva er det du holder på med??")
 
-    // Frilans
-    FrilansAvventerBlokkerendePeriode,
-    FrilansAvventerInfotrygdHistorikk,
-    FrilansStart -> error("Disse tilstandende hører til Frilans!! Hva er det du holder på med??")
+        // Frilans
+        FrilansAvventerBlokkerendePeriode,
+        FrilansAvventerInfotrygdHistorikk,
+        FrilansStart,
+        -> error("Disse tilstandende hører til Frilans!! Hva er det du holder på med??")
 
-    // Selvstendig
-    SelvstendigAvsluttet,
-    SelvstendigAvventerBlokkerendePeriode,
-    SelvstendigAvventerGodkjenning,
-    SelvstendigAvventerGodkjenningRevurdering,
-    SelvstendigAvventerHistorikk,
-    SelvstendigAvventerHistorikkRevurdering,
-    SelvstendigAvventerInfotrygdHistorikk,
-    SelvstendigAvventerRevurdering,
-    SelvstendigAvventerRevurderingTilUtbetaling,
-    SelvstendigAvventerSimulering,
-    SelvstendigAvventerSimuleringRevurdering,
-    SelvstendigAvventerVilkårsprøving,
-    SelvstendigAvventerVilkårsprøvingRevurdering,
-    SelvstendigStart,
-    SelvstendigTilUtbetaling -> error("Disse tilstandende hører til Selvstendig!! Hva er det du holder på med??")
-}
+        // Selvstendig
+        SelvstendigAvsluttet,
+        SelvstendigAvventerBlokkerendePeriode,
+        SelvstendigAvventerGodkjenning,
+        SelvstendigAvventerGodkjenningRevurdering,
+        SelvstendigAvventerHistorikk,
+        SelvstendigAvventerHistorikkRevurdering,
+        SelvstendigAvventerInfotrygdHistorikk,
+        SelvstendigAvventerRevurdering,
+        SelvstendigAvventerRevurderingTilUtbetaling,
+        SelvstendigAvventerSimulering,
+        SelvstendigAvventerSimuleringRevurdering,
+        SelvstendigAvventerVilkårsprøving,
+        SelvstendigAvventerVilkårsprøvingRevurdering,
+        SelvstendigStart,
+        SelvstendigTilUtbetaling,
+        -> error("Disse tilstandende hører til Selvstendig!! Hva er det du holder på med??")
+    }

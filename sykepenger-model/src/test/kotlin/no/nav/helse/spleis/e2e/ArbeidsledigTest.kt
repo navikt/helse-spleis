@@ -5,14 +5,11 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.arbeidsledig
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.tilstandsmaskin.TilstandType.ARBEIDSLEDIG_START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsledigTest : AbstractDslTest() {
-
     @Test
     fun `håndterer at sykmelding kommer som arbeidsledig, mens søknaden kommer på arbeidsgiver`() {
         arbeidsledig {

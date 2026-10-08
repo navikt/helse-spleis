@@ -1,15 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import java.util.UUID
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.a3
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
@@ -28,28 +19,19 @@ import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.assertBeløpsti
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.saksbehandler
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
-import no.nav.helse.utbetalingslinjer.Endringskode.NY
-import no.nav.helse.utbetalingslinjer.Endringskode.UEND
+import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.inspectors.inspektør
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertSame
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
-
     @Test
     fun `endre inntekt når faktaavklart inntekt er 0 kr`() {
         a1 {
@@ -62,7 +44,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_SV_1, 1.vedtaksperiode.filter())
             håndterOverstyrArbeidsgiveropplysninger(
                 1.januar,
-                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, emptyList()))
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, emptyList())),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
@@ -78,7 +60,9 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
                 assertEquals(INNTEKT, utbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
                 assertEquals(INGEN, utbetalingsdag.økonomi.inspektør.arbeidsgiverbeløp)
             }
-            inspektør.utbetalingstidslinjer(1.vedtaksperiode).subset(17.januar til 31.januar)
+            inspektør
+                .utbetalingstidslinjer(1.vedtaksperiode)
+                .subset(17.januar til 31.januar)
                 .filterNot { it.dato.erHelg() }
                 .forEach { utbetalingsdag ->
                     assertEquals(1431.daglig, utbetalingsdag.økonomi.inspektør.personbeløp)
@@ -92,13 +76,16 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             nyttVedtak(januar)
             forlengVedtak(februar)
             håndterOverstyrArbeidsgiveropplysninger(
-                1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    a1, INNTEKT, listOf(
-                    Triple(1.januar, null, INNTEKT / 2),
-                )
-                )
-            )
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        INNTEKT,
+                        listOf(
+                            Triple(1.januar, null, INNTEKT / 2),
+                        ),
+                    ),
+                ),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
@@ -117,14 +104,17 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             nyttVedtak(januar)
             forlengVedtak(februar)
             håndterOverstyrArbeidsgiveropplysninger(
-                1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    a1, INNTEKT, listOf(
-                    Triple(1.januar, 31.januar, INNTEKT),
-                    Triple(1.februar, null, INNTEKT / 2)
-                )
-                )
-            )
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        INNTEKT,
+                        listOf(
+                            Triple(1.januar, 31.januar, INNTEKT),
+                            Triple(1.februar, null, INNTEKT / 2),
+                        ),
+                    ),
+                ),
             )
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
@@ -138,13 +128,17 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             val nyInntekt = INNTEKT * 2
             val overstyringId = UUID.randomUUID()
             håndterOverstyrArbeidsgiveropplysninger(
-                1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    a1, nyInntekt, listOf(
-                    Triple(1.januar, null, nyInntekt)
-                )
-                )
-            ), meldingsreferanseId = overstyringId
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        nyInntekt,
+                        listOf(
+                            Triple(1.januar, null, nyInntekt),
+                        ),
+                    ),
+                ),
+                meldingsreferanseId = overstyringId,
             )
             håndterYtelser(1.vedtaksperiode)
             val førsteUtbetaling = inspektør.utbetaling(0)
@@ -160,7 +154,12 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT, nyInntekt, forventetKorrigertInntekt = nyInntekt)
             }
-            assertEquals(1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
+            assertEquals(
+                1,
+                inspektør
+                    .vilkårsgrunnlag(1.vedtaksperiode)!!
+                    .inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size,
+            )
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, nyInntekt, overstyringId.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
 
             assertTilstander(
@@ -168,7 +167,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING
+                AVVENTER_SIMULERING_REVURDERING,
             )
         }
     }
@@ -181,13 +180,17 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             val nyIMInntekt = INNTEKT * 3
             val overstyringId = UUID.randomUUID()
             håndterOverstyrArbeidsgiveropplysninger(
-                1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    a1, nySaksbehandlerInntekt, listOf(
-                    Triple(1.januar, null, nySaksbehandlerInntekt)
-                )
-                )
-            ), meldingsreferanseId = overstyringId
+                1.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        a1,
+                        nySaksbehandlerInntekt,
+                        listOf(
+                            Triple(1.januar, null, nySaksbehandlerInntekt),
+                        ),
+                    ),
+                ),
+                meldingsreferanseId = overstyringId,
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -197,7 +200,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
 
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                beregnetInntekt = nyIMInntekt
+                beregnetInntekt = nyIMInntekt,
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -218,10 +221,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             val overstyringId = UUID.randomUUID()
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
-                arbeidsgiveropplysninger = listOf(
-                    OverstyrtArbeidsgiveropplysning(a1, nyInntekt, listOf(Triple(1.januar, null, nyInntekt)))
-                ),
-                meldingsreferanseId = overstyringId
+                arbeidsgiveropplysninger =
+                    listOf(
+                        OverstyrtArbeidsgiveropplysning(a1, nyInntekt, listOf(Triple(1.januar, null, nyInntekt))),
+                    ),
+                meldingsreferanseId = overstyringId,
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -230,10 +234,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             val overstyring2Id = UUID.randomUUID()
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
-                arbeidsgiveropplysninger = listOf(
-                    OverstyrtArbeidsgiveropplysning(a1, nyInntekt, listOf(Triple(1.januar, null, nyInntekt)))
-                ),
-                meldingsreferanseId = overstyring2Id
+                arbeidsgiveropplysninger =
+                    listOf(
+                        OverstyrtArbeidsgiveropplysning(a1, nyInntekt, listOf(Triple(1.januar, null, nyInntekt))),
+                    ),
+                meldingsreferanseId = overstyring2Id,
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             val førsteUtbetaling = inspektør.utbetaling(0)
@@ -249,7 +254,12 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT, nyInntekt, forventetKorrigertInntekt = nyInntekt)
             }
-            assertEquals(1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
+            assertEquals(
+                1,
+                inspektør
+                    .vilkårsgrunnlag(1.vedtaksperiode)!!
+                    .inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size,
+            )
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, nyInntekt, overstyringId.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
 
             assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
@@ -267,7 +277,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.mars, null, INNTEKT / 2)))),
-                meldingsreferanseId = overstyringId
+                meldingsreferanseId = overstyringId,
             )
             håndterYtelser(3.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 3.vedtaksperiode.filter())
@@ -291,7 +301,12 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             }
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
-            assertEquals(1, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
+            assertEquals(
+                1,
+                inspektør
+                    .vilkårsgrunnlag(1.vedtaksperiode)!!
+                    .inspektør.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size,
+            )
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
@@ -316,7 +331,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
-                arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, nyInntekt, emptyList()))
+                arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, nyInntekt, emptyList())),
             )
             assertEquals(antallHistorikkInnslagFør, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
@@ -335,9 +350,10 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
                 håndterOverstyrArbeidsgiveropplysninger(
                     skjæringstidspunkt = 1.januar,
                     meldingsreferanseId = UUID.randomUUID(),
-                    arbeidsgiveropplysninger = listOf(
-                        OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2, refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT / 2)))
-                    )
+                    arbeidsgiveropplysninger =
+                        listOf(
+                            OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2, refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT / 2))),
+                        ),
                 )
             }
 
@@ -371,28 +387,34 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             meldingsreferanseId = overstyringId,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = inntektPerArbeidsgiver,
-                    refusjonsopplysninger = listOf(
-                        Triple(1.januar, 20.januar, inntektPerArbeidsgiver),
-                        Triple(21.januar, null, INGEN),
-                    )
-                ), OverstyrtArbeidsgiveropplysning(
-                orgnummer = a2,
-                inntekt = inntektPerArbeidsgiver * 1.25,
-                refusjonsopplysninger = listOf(
-                    Triple(1.januar, null, inntektPerArbeidsgiver * 1.25)
-                )
-            ), OverstyrtArbeidsgiveropplysning(
-                orgnummer = a3,
-                inntekt = inntektPerArbeidsgiver * 1.5,
-                refusjonsopplysninger = listOf(
-                    Triple(1.januar, null, inntektPerArbeidsgiver)
-                )
-            )
-            )
+            arbeidsgiveropplysninger =
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = inntektPerArbeidsgiver,
+                        refusjonsopplysninger =
+                            listOf(
+                                Triple(1.januar, 20.januar, inntektPerArbeidsgiver),
+                                Triple(21.januar, null, INGEN),
+                            ),
+                    ),
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a2,
+                        inntekt = inntektPerArbeidsgiver * 1.25,
+                        refusjonsopplysninger =
+                            listOf(
+                                Triple(1.januar, null, inntektPerArbeidsgiver * 1.25),
+                            ),
+                    ),
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a3,
+                        inntekt = inntektPerArbeidsgiver * 1.5,
+                        refusjonsopplysninger =
+                            listOf(
+                                Triple(1.januar, null, inntektPerArbeidsgiver),
+                            ),
+                    ),
+                ),
         )
 
         // a1
@@ -410,7 +432,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertBeløpstidslinje(
                 ARBEIDSGIVER.beløpstidslinje(1.januar til 20.januar, inntektPerArbeidsgiver) + SAKSBEHANDLER.beløpstidslinje(21.januar til 31.januar, INGEN),
                 inspektør.refusjon(1.vedtaksperiode),
-                ignoreMeldingsreferanseId = true
+                ignoreMeldingsreferanseId = true,
             )
         }
 
@@ -441,19 +463,22 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             meldingsreferanseId = overstyringId,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = inntektPerArbeidsgiver,
-                    refusjonsopplysninger = listOf(
-                        Triple(1.januar, null, inntektPerArbeidsgiver),
-                    )
-                ), OverstyrtArbeidsgiveropplysning(
-                orgnummer = a2,
-                inntekt = inntektPerArbeidsgiver,
-                refusjonsopplysninger = listOf(Triple(1.januar, null, inntektPerArbeidsgiver))
-            )
-            )
+            arbeidsgiveropplysninger =
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = inntektPerArbeidsgiver,
+                        refusjonsopplysninger =
+                            listOf(
+                                Triple(1.januar, null, inntektPerArbeidsgiver),
+                            ),
+                    ),
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a2,
+                        inntekt = inntektPerArbeidsgiver,
+                        refusjonsopplysninger = listOf(Triple(1.januar, null, inntektPerArbeidsgiver)),
+                    ),
+                ),
         )
 
         a1 { assertSisteTilstand(1.vedtaksperiode, AVSLUTTET) }
@@ -489,22 +514,26 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             meldingsreferanseId = overstyringId,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = inntektPerArbeidsgiver,
-                    refusjonsopplysninger = listOf(
-                        Triple(1.januar, null, inntektPerArbeidsgiver),
-                    )
-                ), OverstyrtArbeidsgiveropplysning(
-                orgnummer = a2,
-                inntekt = inntektPerArbeidsgiver * 1.5,
-                refusjonsopplysninger = listOf(
-                    Triple(1.januar, 20.januar, inntektPerArbeidsgiver),
-                    Triple(21.januar, null, inntektPerArbeidsgiver * 1.5)
-                )
-            )
-            )
+            arbeidsgiveropplysninger =
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = inntektPerArbeidsgiver,
+                        refusjonsopplysninger =
+                            listOf(
+                                Triple(1.januar, null, inntektPerArbeidsgiver),
+                            ),
+                    ),
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a2,
+                        inntekt = inntektPerArbeidsgiver * 1.5,
+                        refusjonsopplysninger =
+                            listOf(
+                                Triple(1.januar, 20.januar, inntektPerArbeidsgiver),
+                                Triple(21.januar, null, inntektPerArbeidsgiver * 1.5),
+                            ),
+                    ),
+                ),
         )
 
         a1 {
@@ -525,7 +554,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertBeløpstidslinje(
                 ARBEIDSGIVER.beløpstidslinje(1.januar til 20.januar, inntektPerArbeidsgiver) + SAKSBEHANDLER.beløpstidslinje(21.januar til 31.januar, inntektPerArbeidsgiver * 1.5),
                 inspektør.refusjon(1.vedtaksperiode),
-                ignoreMeldingsreferanseId = true
+                ignoreMeldingsreferanseId = true,
             )
         }
 
@@ -548,22 +577,26 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             meldingsreferanseId = overstyringId,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = inntektPerArbeidsgiver * 1.5,
-                    refusjonsopplysninger = listOf(
-                        Triple(1.januar, null, inntektPerArbeidsgiver),
-                    )
-                ), OverstyrtArbeidsgiveropplysning(
-                orgnummer = a2,
-                inntekt = inntektPerArbeidsgiver,
-                refusjonsopplysninger = listOf(
-                    Triple(1.januar, 31.januar, inntektPerArbeidsgiver),
-                    Triple(1.februar, null, inntektPerArbeidsgiver / 2)
-                )
-            )
-            )
+            arbeidsgiveropplysninger =
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = inntektPerArbeidsgiver * 1.5,
+                        refusjonsopplysninger =
+                            listOf(
+                                Triple(1.januar, null, inntektPerArbeidsgiver),
+                            ),
+                    ),
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a2,
+                        inntekt = inntektPerArbeidsgiver,
+                        refusjonsopplysninger =
+                            listOf(
+                                Triple(1.januar, 31.januar, inntektPerArbeidsgiver),
+                                Triple(1.februar, null, inntektPerArbeidsgiver / 2),
+                            ),
+                    ),
+                ),
         )
 
         a1 {
@@ -600,22 +633,26 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
 
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = inntekt * 1.5,
-                    refusjonsopplysninger = listOf(
-                        Triple(1.januar, null, inntekt),
-                    )
-                ), OverstyrtArbeidsgiveropplysning(
-                orgnummer = a2,
-                inntekt = inntekt,
-                refusjonsopplysninger = listOf(
-                    Triple(1.januar, 20.januar, inntekt),
-                    Triple(21.januar, null, INGEN)
-                )
-            )
-            )
+            arbeidsgiveropplysninger =
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = inntekt * 1.5,
+                        refusjonsopplysninger =
+                            listOf(
+                                Triple(1.januar, null, inntekt),
+                            ),
+                    ),
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a2,
+                        inntekt = inntekt,
+                        refusjonsopplysninger =
+                            listOf(
+                                Triple(1.januar, 20.januar, inntekt),
+                                Triple(21.januar, null, INGEN),
+                            ),
+                    ),
+                ),
         )
 
         a1 { håndterYtelser(1.vedtaksperiode) }
@@ -690,21 +727,25 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
 
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
-                arbeidsgiveropplysninger = listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        orgnummer = a1,
-                        inntekt = nyInntekt,
-                        refusjonsopplysninger = listOf(
-                            Triple(1.januar, null, nyInntekt)
-                        )
-                    ), OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a2,
-                    inntekt = nyInntekt,
-                    refusjonsopplysninger = listOf(
-                        Triple(1.januar, null, nyInntekt)
-                    )
-                )
-                )
+                arbeidsgiveropplysninger =
+                    listOf(
+                        OverstyrtArbeidsgiveropplysning(
+                            orgnummer = a1,
+                            inntekt = nyInntekt,
+                            refusjonsopplysninger =
+                                listOf(
+                                    Triple(1.januar, null, nyInntekt),
+                                ),
+                        ),
+                        OverstyrtArbeidsgiveropplysning(
+                            orgnummer = a2,
+                            inntekt = nyInntekt,
+                            refusjonsopplysninger =
+                                listOf(
+                                    Triple(1.januar, null, nyInntekt),
+                                ),
+                        ),
+                    ),
             )
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
@@ -734,16 +775,18 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             meldingsreferanseId = overstyringId,
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a2,
-                    inntekt = inntektPerArbeidsgiver * 1.5,
-                    refusjonsopplysninger = listOf(
-                        Triple(1.januar, 20.januar, inntektPerArbeidsgiver),
-                        Triple(21.januar, null, inntektPerArbeidsgiver * 1.5)
-                    )
-                )
-            )
+            arbeidsgiveropplysninger =
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a2,
+                        inntekt = inntektPerArbeidsgiver * 1.5,
+                        refusjonsopplysninger =
+                            listOf(
+                                Triple(1.januar, 20.januar, inntektPerArbeidsgiver),
+                                Triple(21.januar, null, inntektPerArbeidsgiver * 1.5),
+                            ),
+                    ),
+                ),
         )
 
         a1 {
@@ -761,7 +804,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertBeløpstidslinje(
                 ARBEIDSGIVER.beløpstidslinje(1.januar til 20.januar, inntektPerArbeidsgiver) + SAKSBEHANDLER.beløpstidslinje(21.januar til 31.januar, inntektPerArbeidsgiver * 1.5),
                 inspektør.refusjon(1.vedtaksperiode),
-                ignoreMeldingsreferanseId = true
+                ignoreMeldingsreferanseId = true,
             )
         }
     }
@@ -772,18 +815,19 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             meldingsreferanseId = UUID.randomUUID(),
-            arbeidsgiveropplysninger = listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a1,
-                    inntekt = INNTEKT * 1.5,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT * 1.5))
+            arbeidsgiveropplysninger =
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a1,
+                        inntekt = INNTEKT * 1.5,
+                        refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT * 1.5)),
+                    ),
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = a2,
+                        inntekt = INNTEKT * 1.5,
+                        refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT * 1.5)),
+                    ),
                 ),
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = a2,
-                    inntekt = INNTEKT * 1.5,
-                    refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT * 1.5))
-                )
-            )
         )
         a1 {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
@@ -793,7 +837,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
 
             håndterKorrigerteArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT
+                beregnetInntekt = INNTEKT,
             )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
 
@@ -817,10 +861,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterUtbetalt()
 
             nyPeriode(5.februar til 28.februar)
-            val im2 = håndterArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar),
-                beregnetInntekt = INNTEKT
-            )
+            val im2 =
+                håndterArbeidsgiveropplysninger(
+                    listOf(1.januar til 16.januar),
+                    beregnetInntekt = INNTEKT,
+                )
             // korrigerende AGP setter i gang en revurdering av januar som må kjøres ferdig først
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -837,9 +882,10 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 5.februar,
                 meldingsreferanseId = overstyringId,
-                arbeidsgiveropplysninger = listOf(
-                    OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(5.februar, null, INNTEKT)))
-                )
+                arbeidsgiveropplysninger =
+                    listOf(
+                        OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(5.februar, null, INNTEKT))),
+                    ),
             )
 
             assertBeløpstidslinje(Beløpstidslinje.fra(5.februar til 28.februar, INNTEKT, im2.arbeidsgiver), inspektør.refusjon(2.vedtaksperiode))

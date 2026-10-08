@@ -9,7 +9,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.mockk.every
 import io.mockk.mockk
-import kotlin.test.assertTrue
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
+import kotlin.test.assertTrue
 
 internal class PersonApiTest : AbstractSpleisApiTest() {
     @Test
@@ -40,7 +40,7 @@ internal class PersonApiTest : AbstractSpleisApiTest() {
             val body =
                 hentPerson(
                     body = """{"fødselsnummer":"$fødselsnummer"}""",
-                    forventetStatus = HttpStatusCode.OK
+                    forventetStatus = HttpStatusCode.OK,
                 )
             val person = objectMapper.readTree(body)
             assertEquals(fødselsnummer, person["fodselsnummer"].asText())
@@ -69,14 +69,14 @@ internal class PersonApiTest : AbstractSpleisApiTest() {
             JSONAssert.assertEquals(
                 forventetPayload,
                 restBody.utenVariableVerdier(UNG_PERSON_FNR),
-                STRICT
+                STRICT,
             )
         }
     }
 
     private suspend fun TestContext.hentPerson(
         body: String,
-        forventetStatus: HttpStatusCode
+        forventetStatus: HttpStatusCode,
     ): String {
         val response =
             client.post("/api/person") {

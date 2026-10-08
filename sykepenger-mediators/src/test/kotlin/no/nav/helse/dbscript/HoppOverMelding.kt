@@ -2,7 +2,7 @@ package no.nav.helse.dbscript
 
 import java.util.UUID
 
-internal object HoppOverMelding: DbScript() {
+internal object HoppOverMelding : DbScript() {
     override val beskrivelse = "Hopper over en melding på rapiden som Spleis typisk feiler på"
 
     override fun start(connectionInfo: ConnectionInfo) {
@@ -21,15 +21,17 @@ internal object HoppOverMelding: DbScript() {
         val beskrivelse = Input.ventPåBeskrivelse()
         println()
 
-
         databaseTransaksjon(connectionInfo) {
-            check(1 == prepareStatement("UPDATE melding SET behandlet_tidspunkt=now() WHERE fnr=? AND melding_id=? AND behandlet_tidspunkt IS NULL").use { stmt ->
-                stmt.setLong(1, fødselsnummer.toLong())
-                stmt.setString(2, meldingId)
-                stmt.executeUpdate()
-            }) { "forventet å oppdatere nøyaktig én rad ved å hoppe over en melding" }
+            check(
+                1 ==
+                    prepareStatement("UPDATE melding SET behandlet_tidspunkt=now() WHERE fnr=? AND melding_id=? AND behandlet_tidspunkt IS NULL").use { stmt ->
+                        stmt.setLong(1, fødselsnummer.toLong())
+                        stmt.setString(2, meldingId)
+                        stmt.executeUpdate()
+                    },
+            ) { "forventet å oppdatere nøyaktig én rad ved å hoppe over en melding" }
         }
         println(" - Endringene dine er live ✅")
-        gaal("Meldingen med meldingId '$meldingId' har fått 'behandlet_tidspunkt' satt til now() slik at Spleis hopper over meldingen og kan prosessere andre meldinger som står i kø. ${beskrivelse}")
+        gaal("Meldingen med meldingId '$meldingId' har fått 'behandlet_tidspunkt' satt til now() slik at Spleis hopper over meldingen og kan prosessere andre meldinger som står i kø. $beskrivelse")
     }
 }

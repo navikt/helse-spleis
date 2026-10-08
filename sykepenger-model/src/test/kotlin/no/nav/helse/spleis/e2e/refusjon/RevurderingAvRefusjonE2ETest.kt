@@ -1,10 +1,6 @@
 package no.nav.helse.spleis.e2e.refusjon
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.inspectors.SubsumsjonInspektør
@@ -15,7 +11,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RevurderingAvRefusjonE2ETest : AbstractDslTest() {
-
     @Test
     fun `endring av refusjonsopplysninger skal ikke vilkårsprøve opptjening`() {
         a1 {
@@ -25,7 +20,7 @@ internal class RevurderingAvRefusjonE2ETest : AbstractDslTest() {
                     versjon = 12.juni(2020),
                     ledd = Ledd.LEDD_1,
                     punktum = null,
-                    bokstav = null
+                    bokstav = null,
                 )
             }
 
@@ -33,15 +28,17 @@ internal class RevurderingAvRefusjonE2ETest : AbstractDslTest() {
             assertSubsumsjoner { assertEquals(1, antallSubsumsjoner(this)) }
             håndterOverstyrArbeidsgiveropplysninger(
                 skjæringstidspunkt = 1.januar,
-                overstyringer = listOf(
-                    OverstyrtArbeidsgiveropplysning(
-                        orgnummer = a1,
-                        inntekt = INNTEKT,
-                        refusjonsopplysninger = listOf(
-                            Triple(25.januar, null, INGEN)
-                        )
-                    )
-                )
+                overstyringer =
+                    listOf(
+                        OverstyrtArbeidsgiveropplysning(
+                            orgnummer = a1,
+                            inntekt = INNTEKT,
+                            refusjonsopplysninger =
+                                listOf(
+                                    Triple(25.januar, null, INGEN),
+                                ),
+                        ),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             assertSubsumsjoner { assertEquals(1, antallSubsumsjoner(this)) }

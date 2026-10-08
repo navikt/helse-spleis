@@ -1,43 +1,15 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.april
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.a3
-import no.nav.helse.dsl.forlengVedtak
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
+import no.nav.helse.*
+import no.nav.helse.dsl.*
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Sykedag
-import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.juni
-import no.nav.helse.mai
-import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING_TIL_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -48,7 +20,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class RevurderingFlereAGV2E2ETest : AbstractDslTest() {
-
     @Test
     fun `revurdere første periode - flere ag - ag 1`() {
         listOf(a1, a2).nyeVedtak(januar)
@@ -376,10 +347,10 @@ internal class RevurderingFlereAGV2E2ETest : AbstractDslTest() {
     @Test
     fun `revurdering på tidligere skjæringstidspunkt for ag 1 mens senere periode for ag 1 er til utbetaling`() {
         /* Rekkefølge ting burde skje i:
-        * 1. a1 v2 utbetales, a1 v1 avventer revurdering, a2 v1 avventer andre arbeidsgivere
-        * 2. a1 v2 utbetalt, a1 v1 revurderes, a2 v1 avventer andre arbeidsgivere
-        * 3. a1 v1 revurdert, a1 v2 revurderes, a2 v1 avventer andre arbeidsgivere
-        * */
+         * 1. a1 v2 utbetales, a1 v1 avventer revurdering, a2 v1 avventer andre arbeidsgivere
+         * 2. a1 v2 utbetalt, a1 v1 revurderes, a2 v1 avventer andre arbeidsgivere
+         * 3. a1 v1 revurdert, a1 v2 revurderes, a2 v1 avventer andre arbeidsgivere
+         * */
         a1 { nyttVedtak(januar) }
         a1 {
             nyPeriode(mars)
@@ -573,15 +544,15 @@ internal class RevurderingFlereAGV2E2ETest : AbstractDslTest() {
             håndterOverstyrTidslinje(
                 listOf(
                     ManuellOverskrivingDag(17.januar, Feriedag),
-                    ManuellOverskrivingDag(18.januar, Feriedag)
-                )
+                    ManuellOverskrivingDag(18.januar, Feriedag),
+                ),
             )
             håndterYtelser(1.vedtaksperiode)
 
             håndterOverstyrTidslinje(
                 listOf(
-                    ManuellOverskrivingDag(18.januar, Sykedag, 100)
-                )
+                    ManuellOverskrivingDag(18.januar, Sykedag, 100),
+                ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -600,7 +571,12 @@ internal class RevurderingFlereAGV2E2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
                 assertEquals(3, utbetalinger.size)
-                assertEquals(100, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[18.januar].økonomi.inspektør.totalGrad)
+                assertEquals(
+                    100,
+                    inspektør
+                        .utbetalingstidslinjer(1.vedtaksperiode)[18.januar]
+                        .økonomi.inspektør.totalGrad,
+                )
             }
             inspektør.utbetalinger(2.vedtaksperiode).also { utbetalinger ->
                 assertEquals(1, utbetalinger.size)
@@ -638,7 +614,7 @@ internal class RevurderingFlereAGV2E2ETest : AbstractDslTest() {
         nullstillTilstandsendringer()
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(
-                ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar)
+                ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(RV_UT_23, Varselkode.RV_IT_3), 1.vedtaksperiode.filter())

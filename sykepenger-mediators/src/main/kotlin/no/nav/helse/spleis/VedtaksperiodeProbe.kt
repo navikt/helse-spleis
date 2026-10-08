@@ -5,7 +5,6 @@ import no.nav.helse.person.EventSubscription
 import org.slf4j.LoggerFactory
 
 object VedtaksperiodeProbe : EventSubscription {
-
     private val log = LoggerFactory.getLogger(VedtaksperiodeProbe::class.java)
 
     override fun vedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent) {
@@ -13,7 +12,7 @@ object VedtaksperiodeProbe : EventSubscription {
             "vedtaksperiode endret {}, {}, {}",
             keyValue("vedtaksperiodeId", event.vedtaksperiodeId),
             keyValue("tilstand", event.gjeldendeTilstand.name),
-            keyValue("forrigeTilstand", event.forrigeTilstand.name)
+            keyValue("forrigeTilstand", event.forrigeTilstand.name),
         )
     }
 
@@ -23,7 +22,7 @@ object VedtaksperiodeProbe : EventSubscription {
             keyValue("utbetalingId", event.utbetalingId),
             keyValue("korrelasjonsId", event.korrelasjonsId),
             keyValue("status", event.gjeldendeStatus),
-            keyValue("forrigeStatus", event.forrigeStatus)
+            keyValue("forrigeStatus", event.forrigeStatus),
         )
     }
 
@@ -35,7 +34,7 @@ object VedtaksperiodeProbe : EventSubscription {
             keyValue("event.vedtaksperiodeId", event.vedtaksperiodeId),
             keyValue("tilstand", event.tilstand.name),
             keyValue("tilstandsendringstidspunkt", event.tilstandsendringstidspunkt.toString()),
-            keyValue("nestePåminnelsestidspunkt", event.nestePåminnelsestidspunkt.toString())
+            keyValue("nestePåminnelsestidspunkt", event.nestePåminnelsestidspunkt.toString()),
         )
     }
 }

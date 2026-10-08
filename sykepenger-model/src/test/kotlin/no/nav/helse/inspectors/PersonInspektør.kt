@@ -1,11 +1,13 @@
 package no.nav.helse.inspectors
 
-import java.util.UUID
 import no.nav.helse.person.Person
+import java.util.*
 
 internal val Person.inspektør get() = PersonInspektør(this)
 
-internal class PersonInspektør(person: Person) {
+internal class PersonInspektør(
+    person: Person,
+) {
     internal val arbeidsgiverteller get() = arbeidsgivere.size
     internal val vilkårsgrunnlagHistorikk = person.vilkårsgrunnlagHistorikk.inspektør
     private val infotrygdhistorikk = person.infotrygdhistorikk
@@ -19,23 +21,29 @@ internal class PersonInspektør(person: Person) {
     internal val utbetaltIInfotrygd get() = infotrygdhistorikk.betaltePerioder()
 
     internal fun vedtaksperioder() = arbeidsgivere.mapValues { it.value.vedtaksperioder().toList() }
-    internal fun vedtaksperiode(vedtaksperiodeId: UUID) = arbeidsgivere.firstNotNullOf { (_, arbeidsgiver) ->
-        arbeidsgiver.vedtaksperioder().firstOrNull { vedtaksperiode ->
-            vedtaksperiode.id == vedtaksperiodeId
-        }
-    }
 
-    internal fun forkastetVedtaksperiode(vedtaksperiodeId: UUID) = arbeidsgivere.firstNotNullOf { (_, arbeidsgiver) ->
-        arbeidsgiver.forkastede().firstOrNull { forkastet ->
-            forkastet.vedtaksperiode.id == vedtaksperiodeId
+    internal fun vedtaksperiode(vedtaksperiodeId: UUID) =
+        arbeidsgivere.firstNotNullOf { (_, arbeidsgiver) ->
+            arbeidsgiver.vedtaksperioder().firstOrNull { vedtaksperiode ->
+                vedtaksperiode.id == vedtaksperiodeId
+            }
         }
-    }
 
-    internal fun sisteVedtaksperiodeTilstander() = arbeidsgivere
-        .flatMap { (_, arbeidsgiver) -> arbeidsgiver.vedtaksperioder().map { it.id to it.tilstand.type } }
-        .toMap()
+    internal fun forkastetVedtaksperiode(vedtaksperiodeId: UUID) =
+        arbeidsgivere.firstNotNullOf { (_, arbeidsgiver) ->
+            arbeidsgiver.forkastede().firstOrNull { forkastet ->
+                forkastet.vedtaksperiode.id == vedtaksperiodeId
+            }
+        }
+
+    internal fun sisteVedtaksperiodeTilstander() =
+        arbeidsgivere
+            .flatMap { (_, arbeidsgiver) -> arbeidsgiver.vedtaksperioder().map { it.id to it.tilstand.type } }
+            .toMap()
 
     internal fun arbeidsgivere() = arbeidsgivere.keys.toList()
+
     internal fun arbeidsgiver(orgnummer: String) = arbeidsgivere[orgnummer]
+
     internal fun harArbeidsgiver(organisasjonsnummer: String) = organisasjonsnummer in arbeidsgivere.keys
 }

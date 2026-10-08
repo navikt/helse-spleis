@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SykmeldingHendelseTest : AbstractDslTest() {
-
     @Test
     fun `Sykmelding skaper Arbeidsgiver og Sykmeldingsperiode`() {
         a1 {

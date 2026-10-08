@@ -12,29 +12,36 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 
-internal class OverstyrTidslinjeMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : HendelseMessage(packet) {
-
+internal class OverstyrTidslinjeMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : HendelseMessage(packet) {
     private val behandlingsporing = packet.yrkesaktivitetssporing
-    private val dager = packet["dager"].flatMap { dag ->
-        val fom = dag.path("dato").asLocalDate()
-        val tom = dag.path("tom").asOptionalLocalDate()?.takeUnless { it < fom } ?: fom
-        val periode = fom til tom
-        periode.map { dato ->
-            ManuellOverskrivingDag(
-                dato = dato,
-                type = dag["type"].asText().dagtype,
-                grad = dag.get("grad")?.intValue()
-            )
+    private val dager =
+        packet["dager"].flatMap { dag ->
+            val fom = dag.path("dato").asLocalDate()
+            val tom = dag.path("tom").asOptionalLocalDate()?.takeUnless { it < fom } ?: fom
+            val periode = fom til tom
+            periode.map { dato ->
+                ManuellOverskrivingDag(
+                    dato = dato,
+                    type = dag["type"].asText().dagtype,
+                    grad = dag.get("grad")?.intValue(),
+                )
+            }
         }
-    }
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) =
-        mediator.behandle(
-            this, OverstyrTidslinje(
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) = mediator.behandle(
+        this,
+        OverstyrTidslinje(
             meldingsreferanseId = meldingsporing.id,
             behandlingsporing = behandlingsporing,
             dager = dager,
-            opprettet = opprettet
-        ), context
-        )
+            opprettet = opprettet,
+        ),
+        context,
+    )
 }

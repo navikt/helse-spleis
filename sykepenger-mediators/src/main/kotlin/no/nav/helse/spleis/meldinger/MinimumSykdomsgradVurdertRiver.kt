@@ -10,7 +10,7 @@ import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 
 internal class MinimumSykdomsgradVurdertRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("minimum_sykdomsgrad_vurdert")
     override val riverName = "minimum_sykdomsgrad_vurdert"
@@ -27,11 +27,12 @@ internal class MinimumSykdomsgradVurdertRiver(
         }
     }
 
-    override fun createMessage(packet: JsonMessage) = MinimumSykdomsgradVurdertMessage(
-        packet, Meldingsporing(
-        id = packet.meldingsreferanseId(),
-        fødselsnummer = packet["fødselsnummer"].asText()
-    )
-    )
+    override fun createMessage(packet: JsonMessage) =
+        MinimumSykdomsgradVurdertMessage(
+            packet,
+            Meldingsporing(
+                id = packet.meldingsreferanseId(),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+            ),
+        )
 }
-

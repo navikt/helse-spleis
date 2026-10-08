@@ -1,26 +1,29 @@
 package no.nav.helse.person.inntekt
 
-import java.time.LocalDate
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.serialisering.InntektshistorikkUtDto
 import no.nav.helse.person.inntekt.Inntektsmeldinginntekt.Companion.finnInntektsmeldingForSkjæringstidspunkt
+import java.time.LocalDate
 
-internal class Inntektshistorikk private constructor(private val historikk: MutableList<Inntektsmeldinginntekt>) {
-
+internal class Inntektshistorikk private constructor(
+    private val historikk: MutableList<Inntektsmeldinginntekt>,
+) {
     internal constructor() : this(mutableListOf())
 
     internal fun historikk() = historikk.toList()
 
     internal companion object {
-        internal fun gjenopprett(dto: InntektshistorikkInnDto) = Inntektshistorikk(
-            historikk = dto.historikk.map {
-                Inntektsmeldinginntekt.gjenopprett(it)
-            }.toMutableList()
-        )
+        internal fun gjenopprett(dto: InntektshistorikkInnDto) =
+            Inntektshistorikk(
+                historikk =
+                    dto.historikk
+                        .map {
+                            Inntektsmeldinginntekt.gjenopprett(it)
+                        }.toMutableList(),
+            )
     }
 
-    internal fun leggTil(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt)=
-        leggTil(Inntektsmeldinginntekt(id = arbeidstakerFaktaavklartInntekt.id, inntektsdata = arbeidstakerFaktaavklartInntekt.inntektsdata))
+    internal fun leggTil(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt) = leggTil(Inntektsmeldinginntekt(id = arbeidstakerFaktaavklartInntekt.id, inntektsdata = arbeidstakerFaktaavklartInntekt.inntektsdata))
 
     private fun leggTil(inntekt: Inntektsmeldinginntekt): Boolean {
         check(inntekt.kilde == Inntektsmeldinginntekt.Kilde.Arbeidsgiver) { "Hei! Slutt opp med det der!! Kilden må være Arbeidsgiver" }
@@ -29,10 +32,13 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         return true
     }
 
-    internal fun avklarInntektsgrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
-        historikk.finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt, førsteFraværsdag)
+    internal fun avklarInntektsgrunnlag(
+        skjæringstidspunkt: LocalDate,
+        førsteFraværsdag: LocalDate?,
+    ) = historikk.finnInntektsmeldingForSkjæringstidspunkt(skjæringstidspunkt, førsteFraværsdag)
 
-    internal fun dto() = InntektshistorikkUtDto(
-        historikk = historikk.map { it.dto() }
-    )
+    internal fun dto() =
+        InntektshistorikkUtDto(
+            historikk = historikk.map { it.dto() },
+        )
 }

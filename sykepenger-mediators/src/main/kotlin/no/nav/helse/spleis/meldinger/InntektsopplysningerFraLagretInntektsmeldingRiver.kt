@@ -8,27 +8,28 @@ import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntekts
 
 internal class InntektsopplysningerFraLagretInntektsmeldingRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
     override val eventNames = setOf("inntektsopplysninger_fra_lagret_inntektsmelding")
 
     override val riverName = "InntektsopplysningerFraLagretInntektsmelding"
-
 
     init {
         river.precondition { packet -> packet.requireValue("yrkesaktivitetstype", "ARBEIDSTAKER") }
     }
 
     override fun validate(message: JsonMessage) {
-        message.requireKey( "vedtaksperiodeId", "organisasjonsnummer", "fødselsnummer", "inntektsmeldingMeldingsreferanseId")
+        message.requireKey("vedtaksperiodeId", "organisasjonsnummer", "fødselsnummer", "inntektsmeldingMeldingsreferanseId")
         message.interestedIn("inntektsmeldingOrganisasjonsnummer")
     }
 
-    override fun createMessage(packet: JsonMessage) = InntektsopplysningerFraLagretInntektsmeldingMessage(
-        packet = packet,
-        meldingsporing = Meldingsporing(
-            id = packet.meldingsreferanseId(),
-            fødselsnummer = packet["fødselsnummer"].asText()
+    override fun createMessage(packet: JsonMessage) =
+        InntektsopplysningerFraLagretInntektsmeldingMessage(
+            packet = packet,
+            meldingsporing =
+                Meldingsporing(
+                    id = packet.meldingsreferanseId(),
+                    fødselsnummer = packet["fødselsnummer"].asText(),
+                ),
         )
-    )
 }

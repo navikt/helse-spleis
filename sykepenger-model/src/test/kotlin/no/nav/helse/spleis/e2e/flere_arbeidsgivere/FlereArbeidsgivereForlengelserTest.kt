@@ -18,13 +18,11 @@ import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereForlengelserTest : AbstractDslTest() {
-
     @Test
     fun `Tillater forlengelse av flere arbeidsgivere`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         a1 {
             håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
-
         }
         a2 {
             håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
@@ -40,10 +38,8 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractDslTest() {
                 arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-
         }
         a2 {
-
             håndterArbeidsgiveropplysninger(
                 arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
                 vedtaksperiodeId = 1.vedtaksperiode,
@@ -55,7 +51,6 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
-
         }
         a2 {
             håndterYtelser(1.vedtaksperiode)
@@ -64,7 +59,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractDslTest() {
             håndterUtbetalt()
         }
 
-        //Forlengelsen starter her
+        // Forlengelsen starter her
         val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
         a1 {
             håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive))
@@ -77,8 +72,8 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractDslTest() {
                 Søknad.Søknadsperiode.Sykdom(
                     forlengelseperiode.start,
                     forlengelseperiode.endInclusive,
-                    100.prosent
-                )
+                    100.prosent,
+                ),
             )
         }
         a2 {
@@ -86,18 +81,16 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractDslTest() {
                 Søknad.Søknadsperiode.Sykdom(
                     forlengelseperiode.start,
                     forlengelseperiode.endInclusive,
-                    100.prosent
-                )
+                    100.prosent,
+                ),
             )
         }
 
         a1 {
             assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
-
         }
         a2 {
             assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE)
-
         }
         a1 {
             håndterYtelser(2.vedtaksperiode)
@@ -175,7 +168,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractDslTest() {
 
         assertSame(
             inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode(a1)),
-            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode(a2))
+            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode(a2)),
         )
     }
 

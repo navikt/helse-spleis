@@ -10,18 +10,20 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class FeriepengegrunnlagstidslinjeTest {
-
     @Test
     fun `filtering av kilde`() {
-        val tidslinje = Feriepengegrunnlagstidslinje.Builder().apply {
-            leggTilUtbetaling(1.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, 1234)
-            leggTilUtbetaling(1.januar, a1, Mottaker.PERSON, Kilde.INFOTRYGD, 766)
+        val tidslinje =
+            Feriepengegrunnlagstidslinje
+                .Builder()
+                .apply {
+                    leggTilUtbetaling(1.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, 1234)
+                    leggTilUtbetaling(1.januar, a1, Mottaker.PERSON, Kilde.INFOTRYGD, 766)
 
-            leggTilUtbetaling(1.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.SPLEIS, 983)
-            leggTilUtbetaling(1.januar, a1, Mottaker.PERSON, Kilde.SPLEIS, 123)
+                    leggTilUtbetaling(1.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.SPLEIS, 983)
+                    leggTilUtbetaling(1.januar, a1, Mottaker.PERSON, Kilde.SPLEIS, 123)
 
-            leggTilUtbetaling(2.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, 1234)
-        }.build()
+                    leggTilUtbetaling(2.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, 1234)
+                }.build()
 
         tidslinje.kun(Kilde.INFOTRYGD).also { filtrert ->
             val grunnlag = filtrert.grunnlagFor(a1, 1.0)
@@ -40,15 +42,18 @@ class FeriepengegrunnlagstidslinjeTest {
 
     @Test
     fun `filtering av orgnr`() {
-        val tidslinje = Feriepengegrunnlagstidslinje.Builder().apply {
-            leggTilUtbetaling(1.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, 1234)
-            leggTilUtbetaling(1.januar, a2, Mottaker.PERSON, Kilde.INFOTRYGD, 766)
+        val tidslinje =
+            Feriepengegrunnlagstidslinje
+                .Builder()
+                .apply {
+                    leggTilUtbetaling(1.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, 1234)
+                    leggTilUtbetaling(1.januar, a2, Mottaker.PERSON, Kilde.INFOTRYGD, 766)
 
-            leggTilUtbetaling(1.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.SPLEIS, 983)
-            leggTilUtbetaling(1.januar, a1, Mottaker.PERSON, Kilde.SPLEIS, 123)
+                    leggTilUtbetaling(1.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.SPLEIS, 983)
+                    leggTilUtbetaling(1.januar, a1, Mottaker.PERSON, Kilde.SPLEIS, 123)
 
-            leggTilUtbetaling(2.januar, a2, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, 1234)
-        }.build()
+                    leggTilUtbetaling(2.januar, a2, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, 1234)
+                }.build()
 
         tidslinje.grunnlagFor(a1, 1.0).also { grunnlag ->
             assertEquals(1, grunnlag.dager.size)
@@ -67,27 +72,34 @@ class FeriepengegrunnlagstidslinjeTest {
     fun `tidslinjen kan kun bestå av en unik dato`() {
         assertThrows<IllegalArgumentException> {
             Feriepengegrunnlagstidslinje(
-                dager = listOf(
-                    Feriepengegrunnlagsdag(1.januar, emptyList()),
-                    Feriepengegrunnlagsdag(1.januar, emptyList())
-                )
+                dager =
+                    listOf(
+                        Feriepengegrunnlagsdag(1.januar, emptyList()),
+                        Feriepengegrunnlagsdag(1.januar, emptyList()),
+                    ),
             )
         }
     }
 
     @Test
     fun `legger sammen tidslinjer basert på dato`() {
-        val tidslinje1 = Feriepengegrunnlagstidslinje.Builder().apply {
-            leggTilUtbetaling(1.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, 1234)
-            leggTilUtbetaling(1.januar, a1, Mottaker.PERSON, Kilde.INFOTRYGD, 766)
-            leggTilUtbetaling(2.januar, a1, Mottaker.PERSON, Kilde.INFOTRYGD, 766)
-        }.build()
+        val tidslinje1 =
+            Feriepengegrunnlagstidslinje
+                .Builder()
+                .apply {
+                    leggTilUtbetaling(1.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, 1234)
+                    leggTilUtbetaling(1.januar, a1, Mottaker.PERSON, Kilde.INFOTRYGD, 766)
+                    leggTilUtbetaling(2.januar, a1, Mottaker.PERSON, Kilde.INFOTRYGD, 766)
+                }.build()
 
-        val tidslinje2 = Feriepengegrunnlagstidslinje.Builder().apply {
-            leggTilUtbetaling(1.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.SPLEIS, 2000)
-            leggTilUtbetaling(2.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.SPLEIS, 2000)
-            leggTilUtbetaling(3.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.SPLEIS, 2000)
-        }.build()
+        val tidslinje2 =
+            Feriepengegrunnlagstidslinje
+                .Builder()
+                .apply {
+                    leggTilUtbetaling(1.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.SPLEIS, 2000)
+                    leggTilUtbetaling(2.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.SPLEIS, 2000)
+                    leggTilUtbetaling(3.januar, a1, Mottaker.ARBEIDSGIVER, Kilde.SPLEIS, 2000)
+                }.build()
 
         val resultat = tidslinje1 + tidslinje2
 

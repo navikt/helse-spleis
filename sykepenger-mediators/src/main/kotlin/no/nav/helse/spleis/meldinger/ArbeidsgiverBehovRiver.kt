@@ -8,9 +8,8 @@ import no.nav.helse.spleis.IMessageMediator
 
 internal abstract class ArbeidsgiverBehovRiver(
     rapidsConnection: RapidsConnection,
-    messageMediator: IMessageMediator
+    messageMediator: IMessageMediator,
 ) : BehovRiver(rapidsConnection, messageMediator) {
-
     init {
         river.validate(::validateBehov)
     }
@@ -20,20 +19,31 @@ internal abstract class ArbeidsgiverBehovRiver(
         packet.interestedIn("yrkesaktivitetstype")
     }
 
-    protected fun JsonMessage.interestedInArray(key: String, elementsValidation: (JsonMessage.() -> Unit)? = null) {
+    protected fun JsonMessage.interestedInArray(
+        key: String,
+        elementsValidation: (JsonMessage.() -> Unit)? = null,
+    ) {
         interestedIn(key) {
             requireArray(key, elementsValidation)
         }
     }
 
-    protected fun JsonMessage.requireArrayEllerObjectMedArray(key: String, arraynavn: String, elementsValidation: (JsonMessage.() -> Unit)? = null) {
+    protected fun JsonMessage.requireArrayEllerObjectMedArray(
+        key: String,
+        arraynavn: String,
+        elementsValidation: (JsonMessage.() -> Unit)? = null,
+    ) {
         require(key) {
             if (it is ArrayNode) requireArray(key, elementsValidation)
             if (it is ObjectNode) requireArray("$key.$arraynavn", elementsValidation)
         }
     }
 
-    protected fun JsonMessage.interestedInArrayEllerObjectMedArray(key: String, arraynavn: String, elementsValidation: (JsonMessage.() -> Unit)? = null) {
+    protected fun JsonMessage.interestedInArrayEllerObjectMedArray(
+        key: String,
+        arraynavn: String,
+        elementsValidation: (JsonMessage.() -> Unit)? = null,
+    ) {
         interestedIn(key) {
             requireArrayEllerObjectMedArray(key, arraynavn, elementsValidation)
         }

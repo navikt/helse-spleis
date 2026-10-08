@@ -1,17 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.Arbeidstakerkilde
-import no.nav.helse.dsl.Behovsoppsamler
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.a3
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -20,9 +10,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.enesteGodkjenningsbehovSomFølgeAv
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -36,6 +24,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import java.util.*
 
 internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
     @Test
@@ -47,10 +37,11 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, 1.desember(2017), null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, 1.desember(2017), null),
+                    ),
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -77,10 +68,11 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, 1.desember(2017), null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, 1.desember(2017), null),
+                    ),
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -124,11 +116,12 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT, a2 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, LocalDate.EPOCH, null),
-                    Triple(a3, 1.desember(2017), null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, LocalDate.EPOCH, null),
+                        Triple(a3, 1.desember(2017), null),
+                    ),
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -184,11 +177,12 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                skatteinntekter = listOf(
-                    a1 to INNTEKT,
-                    a2 to INNTEKT,
-                    a3 to 4000.årlig
-                )
+                skatteinntekter =
+                    listOf(
+                        a1 to INNTEKT,
+                        a2 to INNTEKT,
+                        a3 to 4000.årlig,
+                    ),
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -221,14 +215,16 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                skatteinntekter = listOf(
-                    a1 to INNTEKT,
-                    a3 to INNTEKT
-                ),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, 30.november(2017)),
-                    Triple(a3, LocalDate.EPOCH, null)
-                )
+                skatteinntekter =
+                    listOf(
+                        a1 to INNTEKT,
+                        a3 to INNTEKT,
+                    ),
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, 30.november(2017)),
+                        Triple(a3, LocalDate.EPOCH, null),
+                    ),
             )
             assertVarsler(listOf(Varselkode.RV_VV_1, RV_VV_2), 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -249,7 +245,7 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                skatteinntekter = listOf(a1 to INNTEKT, a2 to 1000.månedlig)
+                skatteinntekter = listOf(a1 to INNTEKT, a2 to 1000.månedlig),
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -268,14 +264,15 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(
                 listOf(1.januar til 16.januar),
                 beregnetInntekt = 3800.månedlig,
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                skatteinntekter = listOf(
-                    a1 to 3800.månedlig,
-                    a2 to 300.månedlig
-                )
+                skatteinntekter =
+                    listOf(
+                        a1 to 3800.månedlig,
+                        a2 to 300.månedlig,
+                    ),
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -299,10 +296,11 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a2 to 1000.månedlig),
-                arbeidsforhold = listOf(
-                    Triple(a1, 31.desember(2017), null),
-                    Triple(a2, LocalDate.EPOCH, 5.januar),
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, 31.desember(2017), null),
+                        Triple(a2, LocalDate.EPOCH, 5.januar),
+                    ),
             )
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -328,8 +326,12 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
         }
     }
 
-    private fun assertOrgnummereMedRelevanteArbeidsforholdFraGodkjenningsbehov(vedtaksperiodeId: UUID, expected: List<String>, block: () -> Unit) {
-        val actual= enesteGodkjenningsbehovSomFølgeAv({vedtaksperiodeId}, block).event.orgnummereMedRelevanteArbeidsforhold.toList()
+    private fun assertOrgnummereMedRelevanteArbeidsforholdFraGodkjenningsbehov(
+        vedtaksperiodeId: UUID,
+        expected: List<String>,
+        block: () -> Unit,
+    ) {
+        val actual = enesteGodkjenningsbehovSomFølgeAv({ vedtaksperiodeId }, block).event.orgnummereMedRelevanteArbeidsforhold.toList()
         assertEquals(expected, actual)
     }
 }

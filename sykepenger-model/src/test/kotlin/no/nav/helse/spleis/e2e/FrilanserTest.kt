@@ -1,11 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate.EPOCH
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.frilans
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -17,22 +12,14 @@ import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.FRILANS_START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.START
-import no.nav.helse.person.tilstandsmaskin.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
+import java.time.LocalDate.EPOCH
 
 internal class FrilanserTest : AbstractDslTest() {
-
     @Test
     fun `frilanssøknad gir error`() {
         frilans {
@@ -66,10 +53,11 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), 31.oktober(2017), Arbeidsforholdtype.FRILANSER),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.FRILANSER)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), 31.oktober(2017), Arbeidsforholdtype.FRILANSER),
+                        Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.FRILANSER),
+                    ),
             )
             assertVarsler(listOf(Varselkode.RV_VV_1, Varselkode.RV_IV_3), 1.vedtaksperiode.filter())
             assertTilstander(
@@ -79,7 +67,7 @@ internal class FrilanserTest : AbstractDslTest() {
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
             )
         }
     }
@@ -99,7 +87,7 @@ internal class FrilanserTest : AbstractDslTest() {
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
             )
         }
     }
@@ -113,9 +101,10 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT, a2 to 1000.månedlig),
-                arbeidsforhold = listOf(
-                    Triple(a1, EPOCH, null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, EPOCH, null),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -134,15 +123,16 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterSøknad(mars)
             håndterArbeidsgiveropplysninger(
                 listOf(1.mars til 16.mars),
-                beregnetInntekt = 10000.månedlig
+                beregnetInntekt = 10000.månedlig,
             )
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to 10000.månedlig, a2 to 100.månedlig),
-                arbeidsforhold = listOf(
-                    Triple(a1, EPOCH, null),
-                    Triple(a2, EPOCH, 1.februar)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, EPOCH, null),
+                        Triple(a2, EPOCH, 1.februar),
+                    ),
             )
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())

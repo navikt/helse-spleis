@@ -8,13 +8,23 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal data object AvventerHistorikkRevurdering : Vedtaksperiodetilstand {
     override val type = TilstandType.AVVENTER_HISTORIKK_REVURDERING
-    override fun entering(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, aktivitetslogg: IAktivitetslogg) {
+
+    override fun entering(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
         checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne revurdering" }
         aktivitetslogg.info("Forespør sykdoms- og inntektshistorikk")
         vedtaksperiode.trengerYtelser(aktivitetslogg, eventBus)
     }
 
-    override fun håndterPåminnelse(vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg): Revurderingseventyr? {
+    override fun håndterPåminnelse(
+        vedtaksperiode: Vedtaksperiode,
+        eventBus: EventBus,
+        påminnelse: Påminnelse,
+        aktivitetslogg: IAktivitetslogg,
+    ): Revurderingseventyr? {
         vedtaksperiode.trengerYtelser(aktivitetslogg, eventBus)
         return null
     }

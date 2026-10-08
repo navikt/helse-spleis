@@ -1,9 +1,9 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import java.time.LocalDateTime
+import java.util.UUID
 
 class AnnullerUtbetaling(
     meldingsreferanseId: MeldingsreferanseId,
@@ -13,15 +13,16 @@ class AnnullerUtbetaling(
     saksbehandlerEpost: String,
     internal val opprettet: LocalDateTime,
     internal val årsaker: List<String>,
-    internal val begrunnelse: String
+    internal val begrunnelse: String,
 ) : Hendelse {
-    override val metadata = HendelseMetadata(
-        meldingsreferanseId = meldingsreferanseId,
-        avsender = SAKSBEHANDLER,
-        innsendt = opprettet,
-        registrert = LocalDateTime.now(),
-        automatiskBehandling = erAutomatisk()
-    )
+    override val metadata =
+        HendelseMetadata(
+            meldingsreferanseId = meldingsreferanseId,
+            avsender = SAKSBEHANDLER,
+            innsendt = opprettet,
+            registrert = LocalDateTime.now(),
+            automatiskBehandling = erAutomatisk(),
+        )
 
     val vurdering: Utbetaling.Vurdering = Utbetaling.Vurdering(true, saksbehandlerIdent, saksbehandlerEpost, opprettet, false)
 

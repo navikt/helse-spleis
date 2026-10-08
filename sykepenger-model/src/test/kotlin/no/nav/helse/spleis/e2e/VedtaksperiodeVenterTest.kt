@@ -1,11 +1,8 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -18,23 +15,15 @@ import no.nav.helse.person.Venteårsak.Companion.INFOTRYGDHISTORIKK
 import no.nav.helse.person.Venteårsak.Companion.INNTEKTSMELDING
 import no.nav.helse.person.Venteårsak.Companion.SØKNAD
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
-import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.somOrganisasjonsnummer
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class VedtaksperiodeVenterTest : AbstractDslTest() {
-
     @Test
     fun `Venteårsak når vi venter på å få gjennomført vilkårsprøving`() {
         a1 {
@@ -50,7 +39,11 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
     fun `Korrigerte søknader kommer i vedtaksperiode_venter`() {
         a1 {
             tilGodkjenning(januar, 100.prosent)
-            val søknadId1 = observatør.behandlingOpprettetEventer.single().søknadIder.single()
+            val søknadId1 =
+                observatør.behandlingOpprettetEventer
+                    .single()
+                    .søknadIder
+                    .single()
             val behandlingId = observatør.behandlingOpprettetEventer.single().behandlingId
             val søknadId2 = UUID.randomUUID()
             val søknadId3 = UUID.randomUUID()
@@ -151,8 +144,8 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                 listOf(
                     1.vedtaksperiode to INFOTRYGDHISTORIKK,
                     1.vedtaksperiode to INNTEKTSMELDING,
-                    1.vedtaksperiode to INNTEKTSMELDING
-                )
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                ),
             )
             val søknadIdMars = UUID.randomUUID()
             nyPeriode(mars, søknadId = søknadIdMars)
@@ -164,8 +157,8 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                     1.vedtaksperiode to INNTEKTSMELDING,
                     2.vedtaksperiode to INNTEKTSMELDING,
                     1.vedtaksperiode to INNTEKTSMELDING,
-                    2.vedtaksperiode to INNTEKTSMELDING
-                )
+                    2.vedtaksperiode to INNTEKTSMELDING,
+                ),
             )
 
             val inntektsmeldingIdMars = håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars))
@@ -179,54 +172,66 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                     1.vedtaksperiode to INNTEKTSMELDING,
                     2.vedtaksperiode to INNTEKTSMELDING,
                     1.vedtaksperiode to INNTEKTSMELDING,
-                    2.vedtaksperiode to INNTEKTSMELDING
-                )
+                    2.vedtaksperiode to INNTEKTSMELDING,
+                ),
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             val venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(90)
-            val forventetVedtaksperiode1 = EventSubscription.VedtaksperiodeVenterEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = inspektør(1.vedtaksperiode).behandlinger.last().id,
-                skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
-                hendelser = setOf(søknadIdJanuar),
-                ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
-                venterTil = venterTil,
-                venterPå = EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
+            val forventetVedtaksperiode1 =
+                EventSubscription.VedtaksperiodeVenterEvent(
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                    venteårsak = EventSubscription.VedtaksperiodeVenterEvent.Venteårsak(
-                        hva = "INNTEKTSMELDING",
-                        hvorfor = null
-                    )
-                )
-            )
-            val forventetVedtaksperiode2 = EventSubscription.VedtaksperiodeVenterEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 2.vedtaksperiode,
-                behandlingId = inspektør(2.vedtaksperiode).behandlinger.last().id,
-                skjæringstidspunkt = inspektør(2.vedtaksperiode).skjæringstidspunkt,
-                hendelser = setOf(søknadIdMars, inntektsmeldingIdMars),
-                ventetSiden = inspektør(2.vedtaksperiode).oppdatert,
-                venterTil = venterTil,
-                venterPå = EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = inspektør(1.vedtaksperiode).behandlinger.last().id,
                     skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
-                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                    venteårsak = EventSubscription.VedtaksperiodeVenterEvent.Venteårsak(
-                        hva = "INNTEKTSMELDING",
-                        hvorfor = null
-                    )
+                    hendelser = setOf(søknadIdJanuar),
+                    ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
+                    venterTil = venterTil,
+                    venterPå =
+                        EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
+                            vedtaksperiodeId = 1.vedtaksperiode,
+                            skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
+                            yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                            venteårsak =
+                                EventSubscription.VedtaksperiodeVenterEvent.Venteårsak(
+                                    hva = "INNTEKTSMELDING",
+                                    hvorfor = null,
+                                ),
+                        ),
                 )
+            val forventetVedtaksperiode2 =
+                EventSubscription.VedtaksperiodeVenterEvent(
+                    yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                    vedtaksperiodeId = 2.vedtaksperiode,
+                    behandlingId = inspektør(2.vedtaksperiode).behandlinger.last().id,
+                    skjæringstidspunkt = inspektør(2.vedtaksperiode).skjæringstidspunkt,
+                    hendelser = setOf(søknadIdMars, inntektsmeldingIdMars),
+                    ventetSiden = inspektør(2.vedtaksperiode).oppdatert,
+                    venterTil = venterTil,
+                    venterPå =
+                        EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
+                            vedtaksperiodeId = 1.vedtaksperiode,
+                            skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
+                            yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                            venteårsak =
+                                EventSubscription.VedtaksperiodeVenterEvent.Venteårsak(
+                                    hva = "INNTEKTSMELDING",
+                                    hvorfor = null,
+                                ),
+                        ),
+                )
+            assertEquals(
+                forventetVedtaksperiode1,
+                observatør.vedtaksperiodeVenter.last {
+                    it.vedtaksperiodeId == 1.vedtaksperiode
+                },
             )
-            assertEquals(forventetVedtaksperiode1, observatør.vedtaksperiodeVenter.last {
-                it.vedtaksperiodeId == 1.vedtaksperiode
-            })
-            assertEquals(forventetVedtaksperiode2, observatør.vedtaksperiodeVenter.last {
-                it.vedtaksperiodeId == 2.vedtaksperiode
-            })
+            assertEquals(
+                forventetVedtaksperiode2,
+                observatør.vedtaksperiodeVenter.last {
+                    it.vedtaksperiodeId == 2.vedtaksperiode
+                },
+            )
         }
     }
 
@@ -242,8 +247,8 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                 listOf(
                     1.vedtaksperiode to INFOTRYGDHISTORIKK,
                     1.vedtaksperiode to INNTEKTSMELDING,
-                    1.vedtaksperiode to INNTEKTSMELDING
-                )
+                    1.vedtaksperiode to INNTEKTSMELDING,
+                ),
             )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             val inntektsmeldingId = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
@@ -253,28 +258,31 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
                     1.vedtaksperiode to INFOTRYGDHISTORIKK,
                     1.vedtaksperiode to INNTEKTSMELDING,
                     1.vedtaksperiode to INNTEKTSMELDING,
-                    1.vedtaksperiode to SØKNAD
-                )
+                    1.vedtaksperiode to SØKNAD,
+                ),
             )
 
-            val forventet = EventSubscription.VedtaksperiodeVenterEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = inspektør(1.vedtaksperiode).behandlinger.last().id,
-                skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
-                hendelser = setOf(søknadId, inntektsmeldingId),
-                ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
-                venterTil = inspektør(1.vedtaksperiode).oppdatert.plusMonths(3),
-                venterPå = EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
+            val forventet =
+                EventSubscription.VedtaksperiodeVenterEvent(
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2),
-                    venteårsak = EventSubscription.VedtaksperiodeVenterEvent.Venteårsak(
-                        hva = "SØKNAD",
-                        hvorfor = null
-                    )
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = inspektør(1.vedtaksperiode).behandlinger.last().id,
+                    skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
+                    hendelser = setOf(søknadId, inntektsmeldingId),
+                    ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
+                    venterTil = inspektør(1.vedtaksperiode).oppdatert.plusMonths(3),
+                    venterPå =
+                        EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
+                            vedtaksperiodeId = 1.vedtaksperiode,
+                            skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
+                            yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2),
+                            venteårsak =
+                                EventSubscription.VedtaksperiodeVenterEvent.Venteårsak(
+                                    hva = "SØKNAD",
+                                    hvorfor = null,
+                                ),
+                        ),
                 )
-            )
             assertEquals(forventet, observatør.vedtaksperiodeVenter.last())
         }
     }
@@ -285,24 +293,27 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             nyPeriode(januar, søknadId = søknadId)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            val forventet = EventSubscription.VedtaksperiodeVenterEvent(
-                yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                vedtaksperiodeId = 1.vedtaksperiode,
-                behandlingId = inspektør(1.vedtaksperiode).behandlinger.last().id,
-                skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
-                hendelser = setOf(søknadId),
-                ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
-                venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(90),
-                venterPå = EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
-                    vedtaksperiodeId = 1.vedtaksperiode,
-                    skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
+            val forventet =
+                EventSubscription.VedtaksperiodeVenterEvent(
                     yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
-                    venteårsak = EventSubscription.VedtaksperiodeVenterEvent.Venteårsak(
-                        hva = "INNTEKTSMELDING",
-                        hvorfor = null
-                    )
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    behandlingId = inspektør(1.vedtaksperiode).behandlinger.last().id,
+                    skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
+                    hendelser = setOf(søknadId),
+                    ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
+                    venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(90),
+                    venterPå =
+                        EventSubscription.VedtaksperiodeVenterEvent.VenterPå(
+                            vedtaksperiodeId = 1.vedtaksperiode,
+                            skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
+                            yrkesaktivitetssporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1),
+                            venteårsak =
+                                EventSubscription.VedtaksperiodeVenterEvent.Venteårsak(
+                                    hva = "INNTEKTSMELDING",
+                                    hvorfor = null,
+                                ),
+                        ),
                 )
-            )
             assertEquals(forventet, observatør.vedtaksperiodeVenter.last())
         }
     }
@@ -344,14 +355,23 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
     }
 
     internal companion object {
-        internal fun TestObservatør.assertVenter(venterVedtaksperiodeId: UUID, venterPåVedtaksperiodeId: UUID = venterVedtaksperiodeId, venterPåOrgnr: String? = null, venterPåHva: Venteårsak) {
+        internal fun TestObservatør.assertVenter(
+            venterVedtaksperiodeId: UUID,
+            venterPåVedtaksperiodeId: UUID = venterVedtaksperiodeId,
+            venterPåOrgnr: String? = null,
+            venterPåHva: Venteårsak,
+        ) {
             vedtaksperiodeVenter.last { it.vedtaksperiodeId == venterVedtaksperiodeId }.venterPå.assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva)
             if (venterVedtaksperiodeId == venterPåVedtaksperiodeId) return
             // Om periode A venter på en annen periode B så burde også B vente på B (vente på seg selv)
             vedtaksperiodeVenter.last { it.vedtaksperiodeId == venterPåVedtaksperiodeId }.venterPå.assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva)
         }
 
-        private fun EventSubscription.VedtaksperiodeVenterEvent.VenterPå.assertVenterPå(venterPåVedtaksperiodeId: UUID, venterPåOrgnr: String?, venterPåHva: Venteårsak) {
+        private fun EventSubscription.VedtaksperiodeVenterEvent.VenterPå.assertVenterPå(
+            venterPåVedtaksperiodeId: UUID,
+            venterPåOrgnr: String?,
+            venterPåHva: Venteårsak,
+        ) {
             venterPåOrgnr?.let { assertEquals(it, this.yrkesaktivitetssporing.somOrganisasjonsnummer) }
             assertEquals(venterPåVedtaksperiodeId, this.vedtaksperiodeId)
             assertEquals(venterPåHva.event(), this.venteårsak)

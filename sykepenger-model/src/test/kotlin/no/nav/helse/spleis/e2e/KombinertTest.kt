@@ -1,10 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.selvstendig
+import no.nav.helse.dsl.*
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.til
@@ -15,7 +11,6 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import org.junit.jupiter.api.Test
 
 internal class KombinertTest : AbstractDslTest() {
-
     @Test
     fun `en selvstendigsøknad er en forlengelse av en arbeidstakersøknad`() {
         a1 {
@@ -64,7 +59,6 @@ internal class KombinertTest : AbstractDslTest() {
 
     @Test
     fun `selvstendig løper videre til vilkårsprøving selv om vi har en arbeidstaker-periode som ikke har refusjonsopplysninger`() {
-
         selvstendig {
             håndterFørstegangssøknadSelvstendig(14.januar til 31.januar)
         }
@@ -73,10 +67,11 @@ internal class KombinertTest : AbstractDslTest() {
             håndterSøknad(1.januar til 14.januar)
             håndterSøknad(15.januar til 20.januar)
             håndterSøknad(25.januar til 31.januar)
-            håndterArbeidsgiveropplysningerForForkastetPeriode(2.vedtaksperiode,
+            håndterArbeidsgiveropplysningerForForkastetPeriode(
+                2.vedtaksperiode,
                 Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
                 Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
-                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null)
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
             )
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)

@@ -12,10 +12,6 @@ import io.ktor.server.auth.jwt.JWTPrincipal
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.mockk
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
-import javax.sql.DataSource
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.EventBus
@@ -30,6 +26,10 @@ import no.nav.helse.testdatabase.TestDataSource
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.intellij.lang.annotations.Language
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import javax.sql.DataSource
 
 /**
  * Felles testoppsett for api-ene i sykepenger-api: starter opp applikasjonsmodulen mot en
@@ -39,7 +39,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
     protected fun spleisApiTestApplication(
         spekematClient: SpekematClient = mockk<SpekematClient>(),
         testdata: (TestDataSource) -> Unit = { },
-        testblokk: suspend TestContext.() -> Unit
+        testblokk: suspend TestContext.() -> Unit,
     ) {
         val testDataSource = databaseContainer.nyTilkobling()
         testdata(testDataSource)
@@ -49,7 +49,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
     private fun lagTestapplikasjon(
         spekematClient: SpekematClient,
         testDataSource: TestDataSource,
-        testblokk: suspend TestContext.() -> Unit
+        testblokk: suspend TestContext.() -> Unit,
     ) {
         val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         naisfulTestApp(
@@ -67,12 +67,12 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
                 lagApplikasjonsmodul(
                     spekematClient = spekematClient,
                     dataSourceProvider = { dataSource },
-                    meterRegistry = meterRegistry
+                    meterRegistry = meterRegistry,
                 )
             },
             objectMapper = objectMapper,
             meterRegistry = meterRegistry,
-            testblokk = testblokk
+            testblokk = testblokk,
         )
     }
 
@@ -108,9 +108,9 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
                     arbeidsgiverperioder = listOf(FOM til FOM.plusDays(15)),
                     vedtaksperiodeId = vedtaksperiodeId,
                     beregnetInntekt = 31000.månedlig,
-                    id = INNTEKTSMELDING_ID
+                    id = INNTEKTSMELDING_ID,
                 ),
-                Aktivitetslogg()
+                Aktivitetslogg(),
             )
             person.håndterYtelser(eventBus, ytelser(), Aktivitetslogg())
             person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag(), Aktivitetslogg())
@@ -133,7 +133,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
                 fødselsnummer = UNG_PERSON_FNR,
                 meldingsReferanse = SYKMELDING_ID,
                 fom = FOM,
-                tom = TOM
+                tom = TOM,
             )
             lagreSøknadNav(
                 dataSource = testDataSource.ds,
@@ -141,21 +141,21 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
                 meldingsReferanse = SØKNAD_ID,
                 fom = FOM,
                 tom = TOM,
-                sendtNav = TOM.plusDays(1).atStartOfDay()
+                sendtNav = TOM.plusDays(1).atStartOfDay(),
             )
             lagreInntektsmelding(
                 dataSource = testDataSource.ds,
                 fødselsnummer = UNG_PERSON_FNR,
                 meldingsReferanse = INNTEKTSMELDING_ID,
                 beregnetInntekt = INNTEKT,
-                førsteFraværsdag = FOM
+                førsteFraværsdag = FOM,
             )
         }
 
     protected fun lagrePerson(
         dataSource: DataSource,
         fødselsnummer: String,
-        person: Person
+        person: Person,
     ) {
         val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
         dataSource.connection {
@@ -190,7 +190,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
         fødselsnummer: String,
         meldingsReferanse: UUID,
         meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.NAV_NO_INNTEKTSMELDING,
-        data: String = "{}"
+        data: String = "{}",
     ) {
         dataSource.connection {
             @Language("PostgreSQL")
@@ -209,7 +209,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
         fødselsnummer: String,
         meldingsReferanse: UUID,
         beregnetInntekt: Inntekt,
-        førsteFraværsdag: LocalDate
+        førsteFraværsdag: LocalDate,
     ) {
         lagreHendelse(
             dataSource = dataSource,
@@ -225,7 +225,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
                     "foersteFravaersdag": "$førsteFraværsdag",
                     "@id": "$meldingsReferanse"
                 }
-                """.trimIndent()
+                """.trimIndent(),
         )
     }
 
@@ -234,7 +234,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
         fødselsnummer: String,
         meldingsReferanse: UUID,
         fom: LocalDate,
-        tom: LocalDate
+        tom: LocalDate,
     ) {
         lagreHendelse(
             dataSource = dataSource,
@@ -249,7 +249,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
                     "fom": "$fom",
                     "tom": "$tom"
                 }
-                """.trimIndent()
+                """.trimIndent(),
         )
     }
 
@@ -259,7 +259,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
         meldingsReferanse: UUID,
         fom: LocalDate,
         tom: LocalDate,
-        sendtNav: LocalDateTime
+        sendtNav: LocalDateTime,
     ) {
         lagreHendelse(
             dataSource = dataSource,
@@ -275,7 +275,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
                     "tom": "$tom",
                     "sendtNav": "$sendtNav"
                 }
-                """.trimIndent()
+                """.trimIndent(),
         )
     }
 }

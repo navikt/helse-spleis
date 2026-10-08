@@ -8,8 +8,17 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
 
-internal class NySelvstendigSøknadMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing, private val builder: NySøknadBuilder = NySøknadBuilder()) : SøknadMessage(packet, builder.selvstendig()) {
-    override fun _behandle(mediator: IHendelseMediator, personopplysninger: Personopplysninger, packet: JsonMessage, context: BehandlingContext) {
+internal class NySelvstendigSøknadMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+    private val builder: NySøknadBuilder = NySøknadBuilder(),
+) : SøknadMessage(packet, builder.selvstendig()) {
+    override fun _behandle(
+        mediator: IHendelseMediator,
+        personopplysninger: Personopplysninger,
+        packet: JsonMessage,
+        context: BehandlingContext,
+    ) {
         builder.fremtidigSøknad(packet["fremtidig_søknad"].asBoolean())
         mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
     }

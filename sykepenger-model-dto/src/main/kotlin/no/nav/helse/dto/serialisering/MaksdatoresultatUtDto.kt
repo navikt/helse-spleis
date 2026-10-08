@@ -1,8 +1,8 @@
 package no.nav.helse.dto.serialisering
 
-import java.time.LocalDate
 import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.PeriodeDto
+import java.time.LocalDate
 
 data class MaksdatoresultatUtDto(
     val vurdertTilOgMed: LocalDate,
@@ -13,5 +13,5 @@ data class MaksdatoresultatUtDto(
     val oppholdsdager: List<PeriodeDto>,
     val avslåtteDager: List<PeriodeDto>,
     val maksdato: LocalDate,
-    val gjenståendeDager: Int
+    val gjenståendeDager: Int,
 )

@@ -15,7 +15,10 @@ internal class OverstyrArbeidsforholdRiverTest : RiverTest() {
     // ren mapping-test, rører ikke databasen, så det er trygt med et fast fødselsnummer
     private val UNG_PERSON_FNR_2018 = "12029240045"
 
-    override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
+    override fun river(
+        rapidsConnection: RapidsConnection,
+        mediator: IMessageMediator,
+    ) {
         OverstyrArbeidsforholdRiver(rapidsConnection, mediator)
     }
 
@@ -25,26 +28,27 @@ internal class OverstyrArbeidsforholdRiverTest : RiverTest() {
     fun `kan mappe melding om overstyring av arbeidsforhold til modell uten feil`() {
         assertNoErrors(
             testMessageFactory.lagOverstyrArbeidsforhold(
-                1.januar, listOf(
-                ArbeidsforholdOverstyrt(
-                    ORGNUMMER,
-                    false,
-                    "Dette arbeidsforholdet gjelder"
+                1.januar,
+                listOf(
+                    ArbeidsforholdOverstyrt(
+                        ORGNUMMER,
+                        false,
+                        "Dette arbeidsforholdet gjelder",
+                    ),
+                    ArbeidsforholdOverstyrt(
+                        "987654322",
+                        true,
+                        "Dette arbeidsforholdet gjelder ikke",
+                    ),
                 ),
-                ArbeidsforholdOverstyrt(
-                    "987654322",
-                    true,
-                    "Dette arbeidsforholdet gjelder ikke"
-                ),
-            )
-            )
+            ),
         )
     }
 
     @Test
     fun `skal feile ved tom liste av overstyrte arbeidsforhold`() {
         assertErrors(
-            testMessageFactory.lagOverstyrArbeidsforhold(1.januar, emptyList())
+            testMessageFactory.lagOverstyrArbeidsforhold(1.januar, emptyList()),
         )
     }
 
@@ -52,11 +56,11 @@ internal class OverstyrArbeidsforholdRiverTest : RiverTest() {
     fun `feiler ved manglende forklaring`() {
         assertErrors(
             testMessageFactory.lagOverstyrArbeidsforhold(
-                1.januar, listOf(
-                ArbeidsforholdOverstyrt(ORGNUMMER, false, null),
-            )
-            )
+                1.januar,
+                listOf(
+                    ArbeidsforholdOverstyrt(ORGNUMMER, false, null),
+                ),
+            ),
         )
-
     }
 }

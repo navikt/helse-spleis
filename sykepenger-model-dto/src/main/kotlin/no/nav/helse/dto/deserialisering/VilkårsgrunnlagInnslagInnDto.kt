@@ -6,5 +6,5 @@ import java.util.UUID
 data class VilkårsgrunnlagInnslagInnDto(
     val id: UUID,
     val opprettet: LocalDateTime,
-    val vilkårsgrunnlag: List<VilkårsgrunnlagInnDto>
+    val vilkårsgrunnlag: List<VilkårsgrunnlagInnDto>,
 )
